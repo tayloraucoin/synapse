@@ -609,6 +609,10 @@ export {
 } from "./composed/control/curated-icon-grid";
 export { DateField, type DateFieldProps } from "./composed/control/date-field";
 export {
+  EmojiPicker,
+  type EmojiPickerProps,
+} from "./composed/control/emoji-picker";
+export {
   EllipsesMenu,
   type EllipsesMenuItem,
   type EllipsesMenuProps,

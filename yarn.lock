@@ -4951,6 +4951,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"emojibase-data@npm:^17.0.0":
+  version: 17.0.0
+  resolution: "emojibase-data@npm:17.0.0"
+  peerDependencies:
+    emojibase: "*"
+  checksum: 10c0/c1373438ac52e943a7953ce2315c0da4e29a6552a0ee9ae18a22dbf824a6b428d25655c55e2e48c69900358052408496807cdf7af12a43a0a1b39fb369cbf4a0
+  languageName: node
+  linkType: hard
+
 "enhanced-resolve@npm:^5.24.1":
   version: 5.24.5
   resolution: "enhanced-resolve@npm:5.24.5"
@@ -8276,6 +8285,7 @@ __metadata:
     "@syn/config": "workspace:*"
     drizzle-kit: "npm:0.31.10"
     drizzle-orm: "npm:0.45.2"
+    emojibase-data: "npm:^17.0.0"
     eslint: "npm:^9.39.1"
     prettier: "npm:^3.7.4"
     turbo: "npm:^2.9.12"
