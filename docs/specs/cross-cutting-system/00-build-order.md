@@ -29,6 +29,9 @@ The shell first, because every later screen renders inside it; the install offer
 ### Phase 3 — Does not gate launch
 - [ ] **SYS-4** · Keyboard and focus: global shortcuts, `?`, list and canvas navigation, form submit keys — M · (USE-2, USE-5, SYS-3)
 
+### The front door (no build-order gate; gated on Taylor's approval of the handoff)
+- [ ] **SYS-6** · The landing page: `/` for a visitor who is not signed in — the hero's live example day, three pillars with the product as the picture, the trust line once, `Create an account` — M · (nothing not yet Complete; SYS-3 soft, for the footer's legal links) · **do not build before `docs/ux/landing-page-ux.md` is approved**
+
 ## Ordering constraints (alphabetical order hides these)
 
 - **SYS-1 precedes every screen in every epic that renders inside the shell** (SET-4 onward, USE-2 onward, REV-2 onward). SET-2 (auth) and SET-3 (assets) do not need it. Building the library before the shell means a screen with no back and no tab bar to verify against.
@@ -48,6 +51,7 @@ The shell first, because every later screen renders inside it; the install offer
 | SYS-3 | SYS-1, SET-8 |
 | SYS-4 | USE-2, USE-5, SYS-3 |
 | SYS-5 | REV-2, SET-9 |
+| SYS-6 | — (INF-7's `page.tsx` and the built composites; Taylor's approval of the handoff; SYS-3 soft) |
 
 ## Ticket-authoring batches (distinct from build phases)
 
@@ -57,7 +61,7 @@ The shell first, because every later screen renders inside it; the install offer
 | 2 | SYS-2, SYS-3 | Two settings-adjacent system behaviours |
 | 3 | SYS-4, SYS-5 | Desktop and platform affordances |
 
-All five were authored in one pass on 2026-09-05 (see `../README.md` § Authoring note and `DEVIATIONS.md`).
+All five were authored in one pass on 2026-09-05 (see `../README.md` § Authoring note and `DEVIATIONS.md`). SYS-6 was authored separately the same day, by Vesper and Cantor with Hearth, Compass, Sage, and Mason, under Taylor's one-page scope lift (see `DEVIATIONS.md`).
 
 ## Locked references (do not re-litigate)
 

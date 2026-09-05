@@ -19,6 +19,7 @@ Never edited. See [`ux/README.md`](ux/README.md) for what each covers; in short:
 | [`branding-guide.md`](ux/branding-guide.md) | The brand on one page — colour, type, space, motion, voice, the never list. **Derived from §9/§10 and `preset.css`; not authoritative.** |
 | [`synapse_ui_component_needs_and_handoff.md`](ux/synapse_ui_component_needs_and_handoff.md) | The v1 component handoff. Superseded by v2; kept for archaeology. |
 | [`synapse_ui_component_needs_and_handoff_v2.md`](ux/synapse_ui_component_needs_and_handoff_v2.md) | **Component contracts.** §3.5 fixes the type unions, §6.2 the token file. |
+| [`landing-page-ux.md`](ux/landing-page-ux.md) | The landing page at `/` for a signed-out visitor: design handoff, copy deck, seat reviews, decision log. The one marketing page. |
 
 ## `product/` — what Synapse is for, and why anyone would use it
 

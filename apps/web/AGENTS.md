@@ -21,10 +21,15 @@ rather than reaching for a remembered API.
 library, categories, templates, the week build, the two execution tabs, the Day
 and Week Review, history, settings, and PWA notifications.
 
+**One marketing page, and only one:** the landing at `/` for a visitor who is
+not signed in (SYS-6; design in `docs/ux/landing-page-ux.md`). Lifted into
+scope by Taylor on 2026-09-05 for exactly this page. No second marketing page,
+no blog, no pricing page, no `apps/marketing`.
+
 **Not in scope, and not to be scaffolded:** AI or a coach (§7.7 is a note, not
-a feature), billing, a marketing surface, anything social, Google Calendar
-import (Phase 2), offline writes (Phase 2), the Schedule tab's Phase-2
-refinements.
+a feature), billing, any marketing surface beyond the one page above, anything
+social, Google Calendar import (Phase 2), offline writes (Phase 2), the
+Schedule tab's Phase-2 refinements.
 
 ---
 

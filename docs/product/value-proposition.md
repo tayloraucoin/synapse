@@ -297,7 +297,7 @@ So the team cannot grade its own homework after launch. Each is behavioural, not
 |---|---|---|
 | Ratify this document's non-ruled sections (§1–§3, §5, §7–§9) | Taylor | `[NEEDS DECISION]` |
 | What sustains the product past Phase 1 (§8) | Taylor, with outside counsel and Hearth | `[NEEDS DECISION]` |
-| The landing page and share copy, written from §7 | Cantor (voice), reviewed by Hearth against §6 and Sage against §5.5 | Not started |
+| The landing page and share copy, written from §7 | Cantor (voice), reviewed by Hearth against §6 and Sage against §5.5 | Landing page drafted and reviewed — `docs/ux/landing-page-ux.md`, awaiting Taylor's approval; share copy is ST-11's as written |
 | Research instrument for the *job language* signature | Envoy, audited by Sage for demand characteristics | Not started |
 | Mature `docs/ux/branding-guide.md`'s §1–§2 from derived to settled using §6 here | Hearth → Taylor | Pending ratification of this document |
 | Category steps, the app mark, the working name | Vesper / Taylor | Open (branding guide §13) |
