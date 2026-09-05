@@ -350,6 +350,118 @@
     "./app-header": {
       "types": "./src/composed/navigation/app-header/index.ts",
       "default": "./src/composed/navigation/app-header/index.ts"
+    },
+    "./day-complete-action": {
+      "types": "./src/composed/control/day-complete-action/index.ts",
+      "default": "./src/composed/control/day-complete-action/index.ts"
+    },
+    "./decision-panel": {
+      "types": "./src/composed/control/decision-panel/index.ts",
+      "default": "./src/composed/control/decision-panel/index.ts"
+    },
+    "./overflow-cut-list": {
+      "types": "./src/composed/control/overflow-cut-list/index.ts",
+      "default": "./src/composed/control/overflow-cut-list/index.ts"
+    },
+    "./reflection-block": {
+      "types": "./src/composed/control/reflection-block/index.ts",
+      "default": "./src/composed/control/reflection-block/index.ts"
+    },
+    "./timer-control": {
+      "types": "./src/composed/control/timer-control/index.ts",
+      "default": "./src/composed/control/timer-control/index.ts"
+    },
+    "./big-number": {
+      "types": "./src/composed/display/big-number/index.ts",
+      "default": "./src/composed/display/big-number/index.ts"
+    },
+    "./category-bar": {
+      "types": "./src/composed/display/category-bar/index.ts",
+      "default": "./src/composed/display/category-bar/index.ts"
+    },
+    "./day-header": {
+      "types": "./src/composed/display/day-header/index.ts",
+      "default": "./src/composed/display/day-header/index.ts"
+    },
+    "./day-outcome-row": {
+      "types": "./src/composed/display/day-outcome-row/index.ts",
+      "default": "./src/composed/display/day-outcome-row/index.ts"
+    },
+    "./day-part-header": {
+      "types": "./src/composed/display/day-part-header/index.ts",
+      "default": "./src/composed/display/day-part-header/index.ts"
+    },
+    "./decided-line": {
+      "types": "./src/composed/display/decided-line/index.ts",
+      "default": "./src/composed/display/decided-line/index.ts"
+    },
+    "./expander-section": {
+      "types": "./src/composed/display/expander-section/index.ts",
+      "default": "./src/composed/display/expander-section/index.ts"
+    },
+    "./habit-strip": {
+      "types": "./src/composed/display/habit-strip/index.ts",
+      "default": "./src/composed/display/habit-strip/index.ts"
+    },
+    "./item-row": {
+      "types": "./src/composed/display/item-row/index.ts",
+      "default": "./src/composed/display/item-row/index.ts"
+    },
+    "./multitask-group": {
+      "types": "./src/composed/display/multitask-group/index.ts",
+      "default": "./src/composed/display/multitask-group/index.ts"
+    },
+    "./now-line": {
+      "types": "./src/composed/display/now-line/index.ts",
+      "default": "./src/composed/display/now-line/index.ts"
+    },
+    "./preflight-note": {
+      "types": "./src/composed/display/preflight-note/index.ts",
+      "default": "./src/composed/display/preflight-note/index.ts"
+    },
+    "./review-region": {
+      "types": "./src/composed/display/review-region/index.ts",
+      "default": "./src/composed/display/review-region/index.ts"
+    },
+    "./schedule-axis": {
+      "types": "./src/composed/display/schedule-axis/index.ts",
+      "default": "./src/composed/display/schedule-axis/index.ts"
+    },
+    "./schedule-block": {
+      "types": "./src/composed/display/schedule-block/index.ts",
+      "default": "./src/composed/display/schedule-block/index.ts"
+    },
+    "./schedule-overlays": {
+      "types": "./src/composed/display/schedule-overlays/index.ts",
+      "default": "./src/composed/display/schedule-overlays/index.ts"
+    },
+    "./session-row": {
+      "types": "./src/composed/display/session-row/index.ts",
+      "default": "./src/composed/display/session-row/index.ts"
+    },
+    "./state-word": {
+      "types": "./src/composed/display/state-word/index.ts",
+      "default": "./src/composed/display/state-word/index.ts"
+    },
+    "./template-usage-row": {
+      "types": "./src/composed/display/template-usage-row/index.ts",
+      "default": "./src/composed/display/template-usage-row/index.ts"
+    },
+    "./timer-display": {
+      "types": "./src/composed/display/timer-display/index.ts",
+      "default": "./src/composed/display/timer-display/index.ts"
+    },
+    "./shortcuts-dialog": {
+      "types": "./src/composed/feedback/shortcuts-dialog/index.ts",
+      "default": "./src/composed/feedback/shortcuts-dialog/index.ts"
+    },
+    "./action-row-sheet": {
+      "types": "./src/composed/layout/action-row-sheet/index.ts",
+      "default": "./src/composed/layout/action-row-sheet/index.ts"
+    },
+    "./error-page": {
+      "types": "./src/composed/layout/error-page/index.ts",
+      "default": "./src/composed/layout/error-page/index.ts"
     }
   },
   "scripts": {

@@ -315,6 +315,116 @@ export {
 
 /* ---- composed: display ---- */
 export {
+  BigNumber,
+  FactLine,
+  FormulaSentence,
+  type BigNumberProps,
+  type FactLineProps,
+  type FormulaSentenceProps,
+  type FormulaTerm,
+} from "./composed/display/big-number";
+export {
+  CategoryBar,
+  type CategoryBarProps,
+  type CategorySegment,
+} from "./composed/display/category-bar";
+export {
+  DAY_HEADER_COPY,
+  DayHeader,
+  type DayHeaderProps,
+} from "./composed/display/day-header";
+export {
+  DayOutcomeRow,
+  ShiftRow,
+  WeekRow,
+  type DayOutcomeRowProps,
+  type ShiftRowProps,
+  type WeekRowProps,
+} from "./composed/display/day-outcome-row";
+export {
+  DayPartHeader,
+  type DayPart,
+  type DayPartHeaderProps,
+} from "./composed/display/day-part-header";
+export {
+  DecidedLine,
+  type DecidedLineProps,
+} from "./composed/display/decided-line";
+export {
+  ExpanderSection,
+  type ExpanderSectionProps,
+} from "./composed/display/expander-section";
+export {
+  HabitStrip,
+  StripSquare,
+  type HabitStripProps,
+  type StripSize,
+  type StripSquareProps,
+} from "./composed/display/habit-strip";
+export {
+  ITEM_ROW_COPY,
+  ItemRow,
+  isDoneState,
+  isFadedState,
+  itemRowVariants,
+  stateWordFor,
+  type ItemRowClasses,
+  type ItemRowProps,
+  type ItemRowVariant,
+  type ItemRowVariantProps,
+} from "./composed/display/item-row";
+export {
+  MultitaskGroup,
+  type MultitaskGroupProps,
+} from "./composed/display/multitask-group";
+export { NowLine, type NowLineProps } from "./composed/display/now-line";
+export {
+  PreflightNote,
+  type PreflightNoteProps,
+} from "./composed/display/preflight-note";
+export {
+  ReviewRegion,
+  type ReviewRegionProps,
+} from "./composed/display/review-region";
+export {
+  ScheduleAxis,
+  type ScheduleAxisProps,
+} from "./composed/display/schedule-axis";
+export {
+  ScheduleBlock,
+  scheduleBlockVariants,
+  type ScheduleBlockProps,
+  type ScheduleBlockSize,
+  type ScheduleBlockVariants,
+} from "./composed/display/schedule-block";
+export {
+  GhostBlock,
+  ShiftBand,
+  WindowSpan,
+  type GhostBlockProps,
+  type ShiftBandProps,
+  type WindowSpanProps,
+} from "./composed/display/schedule-overlays";
+export {
+  SessionRow,
+  type SessionRowProps,
+} from "./composed/display/session-row";
+export {
+  STATE_WORDS,
+  STATE_WORDS_WITH_DOT,
+  STATE_WORDS_WITH_TEXT,
+  StateWord,
+  type StateWordProps,
+} from "./composed/display/state-word";
+export {
+  TemplateUsageRow,
+  type TemplateUsageRowProps,
+} from "./composed/display/template-usage-row";
+export {
+  TimerDisplay,
+  type TimerDisplayProps,
+} from "./composed/display/timer-display";
+export {
   ARCHIVED_SECTION_COPY,
   ArchivedSection,
   type ArchivedSectionProps,
@@ -359,7 +469,17 @@ export {
 } from "./composed/display/trust-line";
 
 /* ---- composed: layout & navigation ---- */
+export {
+  ActionRowSheet,
+  type ActionRow,
+  type ActionRowSheetProps,
+} from "./composed/layout/action-row-sheet";
 export { AuthFrame, type AuthFrameProps } from "./composed/layout/auth-frame";
+export {
+  ERROR_PAGE_COPY,
+  ErrorPage,
+  type ErrorPageProps,
+} from "./composed/layout/error-page";
 export {
   ResponsiveSheet,
   type ResponsiveSheetClasses,
@@ -426,6 +546,11 @@ export {
   type UpdateLineProps,
 } from "./composed/feedback/status-line";
 export {
+  ShortcutsDialog,
+  type Shortcut,
+  type ShortcutsDialogProps,
+} from "./composed/feedback/shortcuts-dialog";
+export {
   ThreeOptionDialog,
   type ThreeOptionDialogOption,
   type ThreeOptionDialogProps,
@@ -436,6 +561,34 @@ export {
 } from "./composed/feedback/typed-confirm-dialog";
 
 /* ---- composed: control ---- */
+export {
+  DECISION_PANEL_COPY,
+  DecisionPanel,
+  TRADED_UP_PHRASE,
+  TRADED_UP_REASON_KEY,
+  WEIGHT_PHRASE,
+  type Decision,
+  type DecisionPanelProps,
+  type DecisionVerdict,
+} from "./composed/control/decision-panel";
+export {
+  DayCompleteAction,
+  type DayCompleteActionProps,
+} from "./composed/control/day-complete-action";
+export {
+  OverflowCutList,
+  type OverflowCutListProps,
+  type OverflowItem,
+} from "./composed/control/overflow-cut-list";
+export {
+  ReflectionBlock,
+  type ReflectionAxis,
+  type ReflectionBlockProps,
+} from "./composed/control/reflection-block";
+export {
+  TimerControl,
+  type TimerControlProps,
+} from "./composed/control/timer-control";
 export {
   ChipPicker,
   type ChipPickerOption,
