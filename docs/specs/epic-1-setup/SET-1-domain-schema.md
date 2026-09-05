@@ -4,7 +4,7 @@
 **Slice type:** Schema and contract — no UI, no procedure beyond what the seed needs. One-way door: the migration is reviewed by a human and applied once. The risk class is *a column shape every later ticket inherits wrong*.
 **Vigil:** none — but **Mason migration review is mandatory** before the SQL is handed over.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05) — migration authored and journalled; **not applied to any tier.** Taylor runs `db:migrate`.
 
 > **Mason — migration review.** This slice proposes the complete official-spec §3 schema as thirteen tables and one `ALTER` on `users`. Read the emitted SQL against the column list below before Taylor applies it. Six calls are stated with their reasoning and logged in `TECHNICAL-DECISIONS.md` already: no `week_plans`; no `habits.is_wake_anchor`; no `shifts.cut_item_ids`; denormalised `user_id` everywhere; the pending-pair on `users`; snapshots on `days` and `day_items`. Counter-propose there, not in the ticket.
 

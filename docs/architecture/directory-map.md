@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 736 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-05 · 761 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -375,9 +375,12 @@ packages/
     src/
       brand.ts
       contact.ts
+      default-reasons.ts
       index.ts
       limits.ts  # Epic 1 §9's bounds, shared by the zod schema and the input's maxLength
       motion.ts
+      notification-catalogue.ts
+      starter-habits.ts
       storage-keys.ts
       timezones.ts
       user-images.ts
@@ -387,8 +390,8 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <1 migration .sql files, 0000–0000 — append-only, human-reviewed before a hosted migrate>
-      meta/ <2 drizzle snapshot files + _journal.json>
+      <2 migration .sql files, 0000–0001 — append-only, human-reviewed before a hosted migrate>
+      meta/ <3 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
@@ -398,20 +401,46 @@ packages/
       local-dev/
         ensure-local-user-from-supabase-auth.ts
       schema/
+        day/
+          day-items.ts  # the record. Snapshots title/icon/unit/axes/preflight; original_scheduled_start is trigger-immutable
+          index.ts
+          misses.ts
+          shifts.ts
+          timer-sessions.ts
+        library/
+          categories.ts
+          habits.ts
+          index.ts
+          reasons.ts
         notification/
           index.ts
+          notification-prefs.ts
           web-push-subscriptions.ts
+        plan/
+          days.ts
+          index.ts
+          template-slots.ts
+          templates.ts
         rls/
           helpers.ts
           standard-policies.ts  # three factories, all owner-private. No admin-read exists
+        system/
+          data-exports.ts
+          feedback-messages.ts
+          index.ts
         user/
           index.ts
+          user-avatars.ts
           users.ts
         auth.ts
+        enum-values.ts  # checks every pgEnum against its @syn/types union at compile time — wrap every new enum
         enums.ts
         index.ts
       seed/
         index.ts
+        seed-library.ts
+        seed-reasons.ts
+        seed-template.ts
       build-database-env-for-next-config.ts
       client.ts
       connection-env.ts  # tier resolution; defaults to local so nothing reaches production by omission

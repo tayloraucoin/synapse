@@ -79,6 +79,8 @@ const ANNOTATIONS = {
   "packages/db/src/rls.ts": "THE RLS bridge. Every user-scoped query goes through it; the singleton db bypasses policies",
   "packages/db/src/connection-env.ts": "tier resolution; defaults to local so nothing reaches production by omission",
   "packages/db/src/schema/rls/standard-policies.ts": "three factories, all owner-private. No admin-read exists",
+  "packages/db/src/schema/enum-values.ts": "checks every pgEnum against its @syn/types union at compile time — wrap every new enum",
+  "packages/db/src/schema/day/day-items.ts": "the record. Snapshots title/icon/unit/axes/preflight; original_scheduled_start is trigger-immutable",
   "packages/db/supabase/setup/02_apply_triggers_rls.sql": "data-driven: a new table gets updated_at and RLS automatically",
   "packages/db/SETUP.md": "who owns auth.users, the tier rules, and the never-migrate-a-hosted-tier rule",
   "packages/db/SCHEMA_REFERENCE.md": "generated from src/schema by db:schema-reference \u2014 never hand-edited",

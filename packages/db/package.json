@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
+    "@syn/constants": "*",
     "@syn/types": "*",
     "@syn/utils": "*",
     "drizzle-orm": "0.45.2",

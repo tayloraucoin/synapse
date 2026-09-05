@@ -20,8 +20,11 @@ export const CATEGORY_NAME_MAX = 24;
 /** Reason label; unique per user — *You already have this reason.* */
 export const REASON_LABEL_MAX = 40;
 
-/** Preflight note on a habit, and the optional note on a miss. */
+/** Preflight note on a habit (`habits.default_notes_preflight`). */
 export const PREFLIGHT_NOTE_MAX = 280;
+
+/** The optional note on a miss — Epic 3 DR-03 (`misses.note`). */
+export const MISS_NOTE_MAX = 280;
 
 /** One reflection axis label, e.g. "focus". */
 export const REFLECTION_AXIS_MAX = 24;
@@ -40,8 +43,19 @@ export const DURATION_MAX = 480;
 export const PRIORITY_MIN = 1;
 export const PRIORITY_MAX = 7;
 
-/** Template weekly target — 0 means untargeted. */
+/**
+ * Template weekly target. The form's stepper runs 0–7 (Epic 1 §9) where 0 is
+ * *none*; the stored column is null for *none* and otherwise 1–7 (SET-1's
+ * `CHECK`), so `WEEKLY_TARGET_MIN` is the lowest value that is ever written.
+ */
+export const WEEKLY_TARGET_MIN = 1;
 export const WEEKLY_TARGET_MAX = 7;
+
+/**
+ * The earliest a template slot may start, in minutes before the anchor —
+ * Epic 1 TP-02 ("up to two hours before"). Stored as `offset_start_min >= -120`.
+ */
+export const TEMPLATE_OFFSET_MIN = -120;
 
 /** Shift amount, in minutes — official spec §5.6. */
 export const SHIFT_MIN = 5;

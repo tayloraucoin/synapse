@@ -60,6 +60,34 @@ end;
 $$;
 
 -- ----------------------------------------------------------------------------
+-- day_items_original_start_immutable()
+-- official spec §3.7: `original_scheduled_start` "never changes after
+-- materialisation" — it is where the ghost renders, and it is the half of the
+-- plan-vs-actual distinction that a late start or a shift must not be able to
+-- erase. `scheduled_start` is the one that moves.
+--
+-- Why a trigger and not a service rule: the same reasoning as handle_new_user.
+-- "Never changes" is a promise the RECORD makes, and four write paths (the
+-- materialiser, the shift, a late start, TP-04 re-materialisation) all update
+-- this table. A rule enforced in four services is a rule until someone adds a
+-- fifth; the database is where it holds regardless.
+--
+-- Setting it from NULL is allowed: that is materialisation writing it once.
+-- ----------------------------------------------------------------------------
+create or replace function public.day_items_original_start_immutable()
+returns trigger
+language plpgsql
+as $$
+begin
+  if old.original_scheduled_start is not null
+     and new.original_scheduled_start is distinct from old.original_scheduled_start then
+    raise exception 'original_scheduled_start is immutable';
+  end if;
+  return new;
+end;
+$$;
+
+-- ----------------------------------------------------------------------------
 -- handle_user_email_sync()
 -- The insert trigger above fires once. Without this companion the shadow row's
 -- email would stay frozen at whatever the person signed up with while

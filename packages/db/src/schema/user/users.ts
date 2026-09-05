@@ -8,10 +8,23 @@
  * removes everything a person has.
  *
  * WHAT IS NOT HERE. Official spec §3.1 also lists `notification_prefs` and
- * `avatar`; both are satellite tables the feature epics define, because both
- * are lists rather than scalars. `wake_anchor_habit_id` is here as a bare uuid
- * with NO foreign key — `habits` does not exist yet, and the feature tech
- * spec's first migration adds `REFERENCES habits(id) ON DELETE SET NULL`.
+ * `avatar`; both are satellite tables (`notification_prefs`, `user_avatars`),
+ * because both are lists rather than scalars.
+ *
+ * THE WAKE ANCHOR HAS ONE HOME (SET-1). `wake_anchor_habit_id` gained its
+ * foreign key here, as INF-5 promised. Official §3.3 also lists
+ * `habits.is_wake_anchor` "at most one per user"; that column does not exist,
+ * because "at most one" is a fact about the person and this column enforces it
+ * structurally. `HabitSummaryView.isWakeAnchor` is derived in the view mapper.
+ *
+ * THE PENDING PAIR (SET-1). A time-zone switch and a day-close change take
+ * effect FROM TOMORROW (cross-cutting §7.3, §7.5), so writing them straight to
+ * `timezone` / `day_close_time` would reclassify "now" the moment they were
+ * saved — change the close from 03:00 to 05:00 at 04:00 and today's date flips
+ * backwards. The four `pending_*` columns hold the new value and the date it
+ * starts; `services/user/preferences.ts` applies and clears the pair on read,
+ * and the scheduler's per-user pass does the same so the switch happens even
+ * if the app is never opened.
  *
  * POLICIES. Select and update are the owner's alone. Insert and delete are
  * denied to the authenticated role outright: the trigger inserts, and deletion
@@ -19,6 +32,9 @@
  */
 import { relations, sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
+  check,
+  date,
   index,
   pgEnum,
   pgPolicy,
@@ -32,8 +48,15 @@ import {
 import { authenticatedRole } from "drizzle-orm/supabase";
 
 import { authUsers } from "../auth";
+import { categories } from "../library/categories";
+import { habits } from "../library/habits";
+import { reasons } from "../library/reasons";
+import { notificationPrefs } from "../notification/notification-prefs";
 import { webPushSubscriptions } from "../notification/web-push-subscriptions";
+import { days } from "../plan/days";
+import { templates } from "../plan/templates";
 import { denyAuthenticated, isOwner } from "../rls/helpers";
+import { userAvatars } from "./user-avatars";
 
 /**
  * The Appearance setting (Epic 1 ST-09). One table uses it, so it lives here
@@ -73,6 +96,18 @@ export const users = pgTable(
     firstRunCompletedAt: timestamp("first_run_completed_at", {
       withTimezone: true,
     }),
+    // The pending pair — see the header. `*_from` is the day key the new value
+    // takes effect on; a reader applies it once the person's current day key is
+    // at or past that date, then clears both.
+    pendingDayCloseTime: time("pending_day_close_time"),
+    pendingDayCloseTimeFrom: date("pending_day_close_time_from"),
+    pendingTimezone: text("pending_timezone"),
+    pendingTimezoneFrom: date("pending_timezone_from"),
+    // "*Not now* is remembered" (official spec §8.3, Epic 1 §8.7) — the app
+    // never re-prompts for notification permission on its own after this.
+    reminderPromptAnsweredAt: timestamp("reminder_prompt_answered_at", {
+      withTimezone: true,
+    }),
     // The review reminder's time (§8.2 N4). Default 21:00.
     reviewReminderTime: time("review_reminder_time").notNull().default("21:00"),
     theme: themePreferenceEnum("theme").notNull().default("system"),
@@ -80,12 +115,39 @@ export const users = pgTable(
     // §7.3) — not the viewer's device zone. Defaults from the device at first
     // run; 'UTC' is only the value before that happens.
     timezone: text("timezone").notNull().default("UTC"),
-    // No FK yet: `habits` does not exist. The feature tech spec's first
-    // migration adds REFERENCES habits(id) ON DELETE SET NULL.
-    wakeAnchorHabitId: uuid("wake_anchor_habit_id"),
+    // When the day usually starts (Epic 1 FR-01, ST-08). The default
+    // `anchor_time` for a new template, and nothing else — it is not a day
+    // boundary and it is not an alarm.
+    usualWakeTime: time("usual_wake_time").notNull().default("07:00"),
+    // N6's day and time. Mon = 0, so 6 is Sunday — official spec §8.2's default.
+    weekBuildReminderTime: time("week_build_reminder_time")
+      .notNull()
+      .default("18:00"),
+    weekBuildReminderWeekday: smallint("week_build_reminder_weekday")
+      .notNull()
+      .default(6),
+
+    // At most one per person, enforced by there being one column (SET-1).
+    // `set null` because archiving or deleting the habit must not orphan the
+    // reference — the person simply has no anchor until they pick another.
+    //
+    // The `: AnyPgColumn` annotation is required, not decorative: this column
+    // closes a foreign-key cycle (users → habits → categories → users), and
+    // without an explicit return type TypeScript cannot infer any of the three
+    // table types and reports all of them as `any` (TS7022). Annotating this
+    // one back-edge breaks the cycle for all three.
+    wakeAnchorHabitId: uuid("wake_anchor_habit_id").references(
+      (): AnyPgColumn => habits.id,
+      { onDelete: "set null" },
+    ),
   },
   (table) => [
     index("users_email_idx").on(table.email),
+    index("users_wake_anchor_habit_id_idx").on(table.wakeAnchorHabitId),
+    check(
+      "users_week_build_reminder_weekday_check",
+      sql`${table.weekBuildReminderWeekday} BETWEEN 0 AND 6`,
+    ),
     pgPolicy("users_select", {
       for: "select",
       to: authenticatedRole,
@@ -110,6 +172,13 @@ export const users = pgTable(
   ],
 );
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
+  avatar: one(userAvatars),
+  categories: many(categories),
+  days: many(days),
+  habits: many(habits),
+  notificationPrefs: many(notificationPrefs),
+  reasons: many(reasons),
+  templates: many(templates),
   webPushSubscriptions: many(webPushSubscriptions),
 }));

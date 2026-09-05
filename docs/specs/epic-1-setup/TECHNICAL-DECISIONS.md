@@ -82,3 +82,15 @@ One section per architectural choice that had real alternatives. Written when th
 **Decision:** A. B makes *Preparing your export…* last up to a quarter of an hour for a few hundred kilobytes. C has no "ready, {size}" state and no 24-hour link, both of which the document names; it also runs the whole-account read on every download.
 **Consequences:** Buys the documented states with one mutation and one scheduled expiry job. Costs a function invocation that does real work (seconds, not minutes) and a hard dependency on the account staying small enough to zip in memory. Forecloses nothing — B is the fallback when the revisit trigger fires, and the row shape already supports it.
 **Revisit trigger:** an export that takes over 30 seconds or exceeds 50 MB.
+
+## 2026-09-05 · SET-1 · Enum/union parity is enforced by the type system, not by review
+
+**Context (as it was then):** SET-1's non-negotiable is "enum spelling is `@syn/types`'" — a value the database stores and a value a component chooses must be the same string. Fourteen new `pgEnum`s were being written against fourteen unions in `packages/types/src/domain/domain.ts`, by hand, in one sitting. A single character's drift produces a database that stores `task_apointment` and a UI that can never match it, and nothing fails until a row exists.
+
+**Options weighed:** A — write carefully and catch it in the migration review (what the ticket assumed). B — a runtime assertion in a test or a startup check. C — a compile-time identity function, `enumValues<Union>()(tuple)`, that constrains the tuple to the union's members and requires the tuple to cover the union.
+
+**Decision:** C, in `packages/db/src/schema/enum-values.ts`. Constraints are only real when tooling enforces them, and the cheapest enforcement point that works here is the type system — above lint, above review, and available with no new dependency and no runtime cost (the function returns its argument). B was ruled out on the track's own terms: there are no tests during slices, and a startup assertion fails after deployment rather than before commit. A is the option that has already failed everywhere it has been tried, because the reviewer reading fourteen enums is the same person who just wrote them.
+
+**Consequences:** Buys a red `check-types` for both failure modes, verified by inducing each: a typo fails at the declaration with the correct spelling in the message; an omission puts a `MISSING_ENUM_VALUE` sentinel in the column's type and fails at the first insert of a real value. Costs one 30-line file and a wrapper call on each `pgEnum`, which is visible noise in the schema. It also means a union in `@syn/types` and its enum are now genuinely coupled: removing a member from a union is a compile error in `@syn/db` until the enum follows, which is the point. Forecloses nothing — deleting the wrapper leaves fourteen ordinary `pgEnum` calls.
+
+**Revisit trigger:** an enum that deliberately holds a value the union must not (none is foreseen — the two are the same vocabulary by definition).

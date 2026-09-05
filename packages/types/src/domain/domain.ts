@@ -4,7 +4,7 @@
  *
  * Fixed by the v2 component handoff §3.5 (`types/domain.ts`), which every §5
  * component entry references. Copied as written; the only additions are the
- * three schema unions at the bottom, which the handoff does not fix because no
+ * schema unions below the divider, which the handoff does not fix because no
  * component renders them.
  *
  * Spelling rule (handoff §3.2 R8): a union that names a stored column value
@@ -99,3 +99,25 @@ export type WeekPlanStatus = "unplanned" | "planned";
 
 /** Miss.resolved_by — §3.8. */
 export type MissResolvedBy = "day_review" | "shift";
+
+/** Day.woke_at_source — Epic 2 DH-02: set by the wake anchor, or by hand. */
+export type WokeAtSource = "anchor" | "manual";
+
+/**
+ * NotificationPref.kind — the nine rows of official spec §8.2, N1…N9 in order.
+ * The catalogue itself (defaults, phase) is `NOTIFICATION_CATALOGUE` in
+ * `@syn/constants`; the titles and bodies are USE-8's payload builder.
+ */
+export type NotificationKind =
+  | "item_start"
+  | "window_open"
+  | "window_closing"
+  | "review_reminder"
+  | "pending_review"
+  | "week_build"
+  | "week_ready"
+  | "timer_running"
+  | "calendar_item";
+
+/** DataExport.status — official spec §7.6, Epic 1 ST-10. */
+export type ExportStatus = "preparing" | "ready" | "expired" | "failed";

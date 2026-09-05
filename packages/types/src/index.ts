@@ -20,15 +20,18 @@ export type {
   CategoryKey,
   CompletionState,
   DayCloseReason,
+  ExportStatus,
   IconValue,
   ItemOrigin,
   ItemType,
   MissResolvedBy,
   MissTier,
+  NotificationKind,
   Scheduling,
   TimeMode,
   TimerSessionSource,
   WeekPlanStatus,
+  WokeAtSource,
 } from "./domain/domain";
 
 export type {
