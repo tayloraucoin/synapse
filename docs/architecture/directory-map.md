@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 761 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-05 · 775 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -27,16 +27,38 @@ apps/
       _components/
         pwa-mode-sync.tsx
         service-worker-registration.tsx
+      (auth-pending)/
+        reset/
+          _components/
+            reset-form.tsx
+          layout.tsx
+          page.tsx
+        verify/
+          _components/
+            verify-panel.tsx
+          layout.tsx
+          page.tsx
+        layout.tsx
       (auth)/
+        _components/
+          auth-divider.tsx
+          copy.ts
+          form-message.tsx
         forgot/
+          _components/
+            forgot-form.tsx
           page.tsx
         invite/
           page.tsx
         reset/
           page.tsx
         signin/
+          _components/
+            sign-in-form.tsx
           page.tsx
         signup/
+          _components/
+            sign-up-form.tsx
           page.tsx
         verify/
           page.tsx
@@ -309,6 +331,7 @@ docs/
     README.md
     spec-system-guide.md
   ux/
+    branding-guide.md
     epic1_setup_ux_architecture.md
     epic2_in_use_ux_architecture.md
     epic3_review_ux_architecture.md

@@ -20,7 +20,7 @@ The schema, then the library a template is built from, then the template a week 
 - [x] **SET-1** · Domain schema: every §3 table in one migration, seeds, constants — L · (none; INF-5 Complete) · **Mason migration review; a human runs `db:migrate`** — reviewed 2026-09-05; `0001_famous_titania.sql` awaits Taylor
 
 ### Phase 1 — Identity and assets (parallel with Phase 0)
-- [ ] **SET-2** · Auth: AU-01…05, the invite line, sign-out and session flows — L · (none; INF-6/7/8 Complete)
+- [x] **SET-2** · Auth: AU-01…05, the invite line, sign-out and session flows — L · (none; INF-6/7/8 Complete) — built 2026-09-05; **Vigil's six failure paths unrun until a Supabase project exists**
 - [ ] **SET-3** · Icon and avatar pipeline: bucket policies, signed uploads, the streaming read route — M · (SET-1)
 
 ### Phase 2 — The library

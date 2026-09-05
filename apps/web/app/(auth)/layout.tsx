@@ -8,6 +8,18 @@ import { homeRoute } from "@/lib/routes";
  *
  * A signed-in person never sees these screens (Epic 1 AU-01: "already signed
  * in: never shown"), so the gate here is the inverse of the shell's.
+ *
+ * WHICH SCREENS ARE NOT HERE. `/verify` and `/reset` live in `(auth-pending)`,
+ * because both are auth screens a person may hold a session on: a recovery
+ * link signs someone in and then needs the reset form, and an unverified
+ * session is what `/verify` exists to resolve. Under this gate both would
+ * bounce to `/` — the reset form would be unreachable and `/verify` would
+ * ping-pong with the entry tree. Same frame, different gate.
+ *
+ * THIS WRAPPER DOES NOT SET THE COLUMN. `AuthFrame` owns `max-w-sm`, the gap,
+ * and the padding; setting them here as well nested one column inside another
+ * and doubled the horizontal padding. What is left is the landmark and the
+ * vertical centring, which are the frame's job to sit inside, not to know.
  */
 export default async function AuthLayout({
   children,
@@ -22,7 +34,7 @@ export default async function AuthLayout({
   return (
     <main
       id="main"
-      className="mx-auto flex min-h-screen-safe w-full max-w-sm flex-col justify-center gap-(--space-5) p-(--space-4)"
+      className="flex min-h-screen-safe w-full flex-col justify-center"
     >
       {children}
     </main>

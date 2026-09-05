@@ -4,7 +4,7 @@
 **Slice type:** Five forms over Supabase Auth flows that already have their server rails. The risk class is *a person locked out or let in wrong*: an unverified session that reaches the shell, a `next` that becomes an open redirect, an error string that reveals which of email or password was wrong.
 **Vigil:** review by inducing the failure paths — wrong password · unverified email · rate limit · expired reset link · offline mid-submit · an OAuth return for a brand-new Google identity. QA states which of those six it exercised.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05) — built and mechanically verified; **the six Vigil failure paths are unrun** (no Supabase project is wired to this repository). See `DEVIATIONS.md`.
 
 > **Vigil — failure-path review.** The happy path is Supabase's. What this slice owns is every sentence a person reads when it is not the happy path, and every redirect. Verify AC 4–9 by inducing, not by reading.
 
