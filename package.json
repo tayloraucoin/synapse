@@ -1,27 +1,46 @@
 {
-  "name": "synapse-monorepo",
+  "name": "synapse",
   "private": true,
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
+    "lint:boundaries": "eslint . --max-warnings 0",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "check-types": "turbo run check-types",
+    "web:dev": "turbo run dev --filter=web",
+    "web:dev:local": "turbo run dev:local --filter=web",
+    "web:build": "turbo run build --filter=web",
+    "web:start": "turbo run start --filter=web",
+    "web:lint": "turbo run lint --filter=web",
+    "web:typecheck": "turbo run check-types --filter=web",
+    "ui:lint": "turbo run lint --filter=@syn/ui",
+    "ui:typecheck": "turbo run check-types --filter=@syn/ui",
+    "ui:storybook": "turbo run storybook --filter=@syn/ui",
+    "ui:build-storybook": "turbo run build-storybook --filter=@syn/ui",
+    "db:generate": "turbo run db:generate --filter=@syn/db",
+    "db:migrate": "turbo run db:migrate --filter=@syn/db",
+    "db:push": "turbo run db:push --filter=@syn/db",
+    "db:setup": "turbo run db:setup --filter=@syn/db",
+    "db:reset": "turbo run db:reset --filter=@syn/db",
+    "db:seed": "turbo run db:seed --filter=@syn/db",
+    "db:seed-users": "turbo run db:seed-users --filter=@syn/db",
+    "db:schema-reference": "turbo run db:schema-reference --filter=@syn/db"
   },
   "devDependencies": {
-    "prettier": "3.9.6",
-    "turbo": "^2.10.12",
-    "typescript": "7.0.2"
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@syn/config": "workspace:*",
+    "drizzle-kit": "0.31.10",
+    "drizzle-orm": "0.45.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.4",
+    "turbo": "^2.9.12",
+    "typescript": "5.9.2"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
-  "devEngines": {
-    "packageManager": {
-      "name": "yarn",
-      "version": "4.13.0"
-    }
-  },
+  "packageManager": "yarn@4.13.0",
   "workspaces": [
     "apps/*",
     "packages/*"

@@ -1,21 +1,131 @@
 {
-  "$schema": "https://turborepo.dev/schema.json",
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    "**/.env.*local",
+    "**/.env"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "SYN_LOG_DEBUG",
+    "NEXT_PUBLIC_SYN_LOG_DEBUG",
+    "DATABASE_ENVIRONMENT",
+    "DATABASE_URL",
+    "MIGRATE_DATABASE_URL",
+    "LOCAL_DATABASE_URL",
+    "LOCAL_DIRECT_DATABASE_URL",
+    "SUPABASE_STAGING_TRANSACTION_POOLER_CONNECTION_URL",
+    "SUPABASE_STAGING_SESSION_POOLER_CONNECTION_URL",
+    "SUPABASE_LIVE_TRANSACTION_POOLER_CONNECTION_URL",
+    "SUPABASE_LIVE_SESSION_POOLER_CONNECTION_URL",
+    "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
+    "VAPID_PRIVATE_KEY",
+    "VAPID_SUBJECT",
+    "CRON_SECRET",
+    "SKIP_ENV_VALIDATION",
+    "NEXT_PUBLIC_SITE_URL",
+    "NEXT_PUBLIC_SITE_URL_LOCAL",
+    "NEXT_PUBLIC_SITE_URL_STAGING",
+    "GOOGLE_OAUTH_CLIENT_ID",
+    "GOOGLE_OAUTH_CLIENT_SECRET",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_URL_STAGING",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY_STAGING",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_STAGING",
+    "SUPABASE_SECRET_KEY",
+    "SUPABASE_SECRET_KEY_STAGING",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY_STAGING",
+    "NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN"
+  ],
   "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ]
     },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "dev:local": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": [
+        "^build"
+      ],
+      "cache": false
+    },
+    "lint": {
+      "dependsOn": [
+        "^lint"
+      ]
+    },
+    "lint:boundaries": {
+      "cache": false,
+      "dependsOn": [
+        "lint"
+      ]
+    },
+    "check-types": {
+      "dependsOn": [
+        "^check-types"
+      ]
+    },
+    "storybook": {
+      "cache": false,
+      "persistent": true
+    },
+    "build-storybook": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "storybook-static/**"
+      ]
+    },
+    "test": {
+      "cache": false,
+      "outputs": [
+        "coverage/**"
+      ]
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:push": {
+      "cache": false
+    },
+    "db:seed": {
+      "cache": false
+    },
+    "db:setup": {
+      "cache": false
+    },
+    "db:reset": {
+      "cache": false
+    },
+    "db:seed-users": {
+      "cache": false
+    },
+    "db:schema-reference": {
+      "cache": false
     }
   }
 }

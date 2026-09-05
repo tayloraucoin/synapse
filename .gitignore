@@ -4,6 +4,8 @@
 node_modules
 .pnp
 .pnp.js
+package-lock.json
+.yarn/install-state.gz
 
 # Local env files
 .env
@@ -26,7 +28,30 @@ coverage
 out/
 build
 dist
+*.tsbuildinfo
 
+# Emojibase data staged from a pinned devDependency by a script.
+# Generated, never hand-edited, never committed.
+apps/web/public/emoji/
+
+# Yarn (Berry — keep patches/plugins/releases tracked)
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Cursor (local-only; shared agent guidance lives in AGENTS.md)
+.cursor/
+
+# Claude Code (local-only; CLAUDE.md pointers are tracked)
+# (`.claude/*` rather than `.claude/` so the negation below can take effect —
+# git cannot re-include a file whose parent directory is itself excluded.)
+.claude/*
+# Exception: shared permission/sandbox rules are tracked so every worktree
+# inherits them on checkout. Machine-local churn stays in settings.local.json.
+!.claude/settings.json
+CLAUDE.local.md
 
 # Debug
 npm-debug.log*

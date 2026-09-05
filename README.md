@@ -1,159 +1,80 @@
-# Turborepo starter
+# Synapse
 
-This Turborepo starter is maintained by the Turborepo core team.
+Yarn 4 + Turborepo monorepo for Synapse — a habit-tracking PWA built on the promise that **only you can see your data, not the people who built this**. Web now, Expo later.
 
-## Using this example
+**For AI agents:** [`AGENTS.md`](AGENTS.md) is the canonical instruction spine — start there. (`CLAUDE.md` is a pointer to it.)
 
-Run the following command:
+> **Foundation in progress.** The repository is being built out ticket by ticket from [`docs/specs/infrastructure/`](docs/specs/infrastructure/). Rows below marked *(INF-n)* do not exist yet; the ticket named is the one that lands them. Current state: INF-1 — the monorepo shape, the toolchain pins, the import-boundary lint, and one placeholder page.
 
-```sh
-npx create-turbo@latest
-```
+## Essential docs
 
-## What's inside?
+| Doc | Purpose |
+| --- | --- |
+| [`AGENTS.md`](AGENTS.md) | Agent spine — precedence, guardrails, workflow |
+| [`docs/specs/infrastructure/README.md`](docs/specs/infrastructure/README.md) | **The foundation track** — process contract, precedence, locked scope, non-negotiables |
+| [`docs/specs/infrastructure/00-build-order.md`](docs/specs/infrastructure/00-build-order.md) | Ordered build queue and critical path |
+| [`docs/ux/habit_tracker_official_ux_spec_v1.md`](docs/ux/habit_tracker_official_ux_spec_v1.md) | Product behaviour source of truth (§0.3 rulings are signed) |
+| [`docs/ux/`](docs/ux/) | Epic and cross-cutting UX architecture, component handoff |
+| `docs/architecture/codebase-conventions.md` | The placement/naming/package-graph contract *(INF-11)* |
+| `docs/architecture/tech-stack.md` | Canonical stack choices + pinned versions *(INF-11)* |
+| `docs/developer-guides/` | Database setup, migrations, RLS, authentication *(INF-11)* |
 
-This Turborepo includes the following packages/apps:
+## Repository layout
 
-### Apps and Packages
+### Apps (`apps/`)
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `@next/eslint-plugin-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+| App | Status | Role |
+| --- | --- | --- |
+| `web` | Active | The Synapse PWA — the only product surface in Phase 1 |
+| `mobile` | Seam only | README placeholder — Expo in Phase 1.5 |
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Packages (`packages/`)
 
-### Utilities
+Shared libraries use the `@syn/*` scope.
 
-This Turborepo has some additional tools already setup for you:
+| Package | Role |
+| --- | --- |
+| `@syn/config` | ESLint, Prettier, Tailwind preset, TSConfig bases (subpath exports) |
+| `@syn/types`, `@syn/constants`, `@syn/utils`, `@syn/validators`, `@syn/observability` | Platform-pure capability layers *(INF-2)* |
+| `@syn/ui` | Shared web components (Radix + Tailwind, Storybook-first) *(INF-3, INF-4)* |
+| `@syn/db` | Drizzle schema, client, migrations, RLS *(INF-5)* |
+| `@syn/auth` | Supabase Auth helpers *(INF-6)* |
+| `@syn/api`, `@syn/hooks` | tRPC routers + services, shared headless hooks *(INF-8)* |
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+Phase 1 has no AI package, no billing, no marketing site.
 
-### Build
+## Prerequisites
 
-To build all apps and packages, run the following command:
+- **Node 22** — use `.nvmrc` (`nvm use` or equivalent)
+- **Yarn 4.13.0** — `corepack enable`, then `yarn install`
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+`yarn install` refuses to run if the `packageManager` field and your global Yarn disagree. The fix is `corepack enable`, not a global Yarn install.
 
-```sh
-cd my-turborepo
-turbo build
-```
+## Commands
 
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-yarn exec turbo build
-yarn exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+From the repo root:
 
 ```sh
-turbo build --filter=docs
+yarn install
+yarn dev              # all workspaces in dev mode
+yarn web:dev          # the web app on :3000
+yarn build            # build all workspaces
+yarn lint             # code-quality lint, per package
+yarn lint:boundaries  # import-boundary lint, from the root
+yarn check-types      # tsc --noEmit, per package
+yarn format           # prettier --write
 ```
 
-Without global `turbo`:
+Verify the way CI does, in this order:
 
 ```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-yarn exec turbo build --filter=docs
+yarn lint && yarn lint:boundaries && yarn check-types && yarn build
 ```
 
-### Develop
+Database commands (`yarn db:generate`, `db:migrate`, `db:push`, `db:setup`, `db:reset`, `db:seed`, `db:seed-users`, `db:schema-reference`) are wired at the root and target `@syn/db` *(INF-5)*. Storybook (`yarn ui:storybook`) targets `@syn/ui` *(INF-3)*.
 
-To develop all apps and packages, run the following command:
+## Package alias
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+Workspace packages are referenced as `@syn/<name>` and resolved by Yarn workspaces — never by relative path across a package boundary. The import graph is layered and acyclic, enforced by `yarn lint:boundaries`:
 
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-yarn exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-yarn exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-yarn exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-yarn exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+`config` → `constants` / `types` / `observability` → `utils` → `validators` → `db` → `auth` → `api` → `hooks` → `ui` → `apps`
