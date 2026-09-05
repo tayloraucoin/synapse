@@ -22,7 +22,7 @@ Everything a feature epic needs to run end to end (a signed-in page that reads a
 ### Phase 1 — Platform-pure packages and the vocabulary
 - [x] **INF-2** · Leaf packages: `types`, `constants`, `utils`, `validators`, `observability` — M · (INF-1)
 - [x] **INF-3** · Design tokens, theme, typography primitive, Storybook — L · (INF-2) · Vesper review
-- [ ] **INF-4** · shadcn primitives: install, re-slot, story — L · (INF-3) · Vesper review
+- [x] **INF-4** · shadcn primitives: install, re-slot, story — L · (INF-3) · Vesper review
 
 ### Phase 2 — Data and identity
 - [ ] **INF-5** · `@syn/db`: Drizzle, connection tiers, RLS bridge, shadow users, setup SQL — L · (INF-2) · Mason migration review; human runs `db:migrate`

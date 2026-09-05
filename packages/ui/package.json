@@ -26,13 +26,137 @@
       "types": "./src/lib/cn.ts",
       "default": "./src/lib/cn.ts"
     },
-    "./text": {
-      "types": "./src/primitives/typography/text/index.ts",
-      "default": "./src/primitives/typography/text/index.ts"
-    },
     "./theme-control": {
       "types": "./src/composed/control/theme-control/index.ts",
       "default": "./src/composed/control/theme-control/index.ts"
+    },
+    "./button": {
+      "types": "./src/primitives/control/button/index.ts",
+      "default": "./src/primitives/control/button/index.ts"
+    },
+    "./checkbox": {
+      "types": "./src/primitives/control/checkbox/index.ts",
+      "default": "./src/primitives/control/checkbox/index.ts"
+    },
+    "./input": {
+      "types": "./src/primitives/control/input/index.ts",
+      "default": "./src/primitives/control/input/index.ts"
+    },
+    "./input-group": {
+      "types": "./src/primitives/control/input-group/index.ts",
+      "default": "./src/primitives/control/input-group/index.ts"
+    },
+    "./native-select": {
+      "types": "./src/primitives/control/native-select/index.ts",
+      "default": "./src/primitives/control/native-select/index.ts"
+    },
+    "./radio-group": {
+      "types": "./src/primitives/control/radio-group/index.ts",
+      "default": "./src/primitives/control/radio-group/index.ts"
+    },
+    "./select": {
+      "types": "./src/primitives/control/select/index.ts",
+      "default": "./src/primitives/control/select/index.ts"
+    },
+    "./switch": {
+      "types": "./src/primitives/control/switch/index.ts",
+      "default": "./src/primitives/control/switch/index.ts"
+    },
+    "./tabs": {
+      "types": "./src/primitives/control/tabs/index.ts",
+      "default": "./src/primitives/control/tabs/index.ts"
+    },
+    "./textarea": {
+      "types": "./src/primitives/control/textarea/index.ts",
+      "default": "./src/primitives/control/textarea/index.ts"
+    },
+    "./toggle-group": {
+      "types": "./src/primitives/control/toggle-group/index.ts",
+      "default": "./src/primitives/control/toggle-group/index.ts"
+    },
+    "./avatar": {
+      "types": "./src/primitives/display/avatar/index.ts",
+      "default": "./src/primitives/display/avatar/index.ts"
+    },
+    "./badge": {
+      "types": "./src/primitives/display/badge/index.ts",
+      "default": "./src/primitives/display/badge/index.ts"
+    },
+    "./empty": {
+      "types": "./src/primitives/display/empty/index.ts",
+      "default": "./src/primitives/display/empty/index.ts"
+    },
+    "./helper-text": {
+      "types": "./src/primitives/display/helper-text/index.ts",
+      "default": "./src/primitives/display/helper-text/index.ts"
+    },
+    "./kbd": {
+      "types": "./src/primitives/display/kbd/index.ts",
+      "default": "./src/primitives/display/kbd/index.ts"
+    },
+    "./label": {
+      "types": "./src/primitives/display/label/index.ts",
+      "default": "./src/primitives/display/label/index.ts"
+    },
+    "./skeleton": {
+      "types": "./src/primitives/display/skeleton/index.ts",
+      "default": "./src/primitives/display/skeleton/index.ts"
+    },
+    "./alert-dialog": {
+      "types": "./src/primitives/feedback/alert-dialog/index.ts",
+      "default": "./src/primitives/feedback/alert-dialog/index.ts"
+    },
+    "./dialog": {
+      "types": "./src/primitives/feedback/dialog/index.ts",
+      "default": "./src/primitives/feedback/dialog/index.ts"
+    },
+    "./dropdown-menu": {
+      "types": "./src/primitives/feedback/dropdown-menu/index.ts",
+      "default": "./src/primitives/feedback/dropdown-menu/index.ts"
+    },
+    "./popover": {
+      "types": "./src/primitives/feedback/popover/index.ts",
+      "default": "./src/primitives/feedback/popover/index.ts"
+    },
+    "./spinner": {
+      "types": "./src/primitives/feedback/spinner/index.ts",
+      "default": "./src/primitives/feedback/spinner/index.ts"
+    },
+    "./toaster": {
+      "types": "./src/primitives/feedback/toaster/index.ts",
+      "default": "./src/primitives/feedback/toaster/index.ts"
+    },
+    "./tooltip": {
+      "types": "./src/primitives/feedback/tooltip/index.ts",
+      "default": "./src/primitives/feedback/tooltip/index.ts"
+    },
+    "./collapsible": {
+      "types": "./src/primitives/layout/collapsible/index.ts",
+      "default": "./src/primitives/layout/collapsible/index.ts"
+    },
+    "./drawer": {
+      "types": "./src/primitives/layout/drawer/index.ts",
+      "default": "./src/primitives/layout/drawer/index.ts"
+    },
+    "./separator": {
+      "types": "./src/primitives/layout/separator/index.ts",
+      "default": "./src/primitives/layout/separator/index.ts"
+    },
+    "./sheet": {
+      "types": "./src/primitives/layout/sheet/index.ts",
+      "default": "./src/primitives/layout/sheet/index.ts"
+    },
+    "./bottom-nav": {
+      "types": "./src/primitives/navigation/bottom-nav/index.ts",
+      "default": "./src/primitives/navigation/bottom-nav/index.ts"
+    },
+    "./sidebar": {
+      "types": "./src/primitives/navigation/sidebar/index.ts",
+      "default": "./src/primitives/navigation/sidebar/index.ts"
+    },
+    "./text": {
+      "types": "./src/primitives/typography/text/index.ts",
+      "default": "./src/primitives/typography/text/index.ts"
     },
     "./styles/globals.css": "./src/styles/globals.css"
   },
@@ -48,9 +172,14 @@
     "@syn/utils": "*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "frimousse": "^0.3.0",
+    "lucide-react": "^1.41.0",
     "next-themes": "^0.4.6",
+    "radix-ui": "^1.6.7",
+    "sonner": "^2.0.8",
     "tailwind-merge": "^3.6.0",
-    "tw-animate-css": "^1.4.0"
+    "tw-animate-css": "^1.4.0",
+    "vaul": "^1.1.2"
   },
   "peerDependencies": {
     "next": ">=16",

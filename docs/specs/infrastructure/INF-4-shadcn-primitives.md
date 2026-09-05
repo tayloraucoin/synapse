@@ -4,7 +4,7 @@
 **Slice type:** Vocabulary install — mechanical but wide. The failure class is a primitive that keeps the CLI's default look (a generic dashboard) or lands in a flat `components/ui/` folder instead of CC's kind-first tree.
 **Vesper review:** the Overview story of every primitive in both themes; the four constrained primitives (`button`, `input`, `badge`, `sonner`) against v2 handoff §2.5.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04) — Vesper review pending
 
 > **Vesper — visual review.** Every primitive gets one look in each theme before closing. Name the ones checked. The known traps: a `button` with an accent fill; an `input` whose error state turns red; a `badge` used as a count; a `skeleton` that shimmers; a `switch` track in accent.
 

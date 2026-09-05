@@ -7,7 +7,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | INF-1 | Monorepo re-base onto CC's shape | — | Complete | 2026-09-04 |
 | INF-2 | Leaf packages | INF-1 | Complete | 2026-09-04 |
 | INF-3 | Design tokens, theme, typography, Storybook | INF-2 | Complete (Vesper review pending) | 2026-09-04 |
-| INF-4 | shadcn primitives | INF-3 | Not started | |
+| INF-4 | shadcn primitives | INF-3 | Complete (Vesper review pending) | 2026-09-04 |
 | INF-5 | `@syn/db` | INF-2 | Not started | |
 | INF-6 | `@syn/auth` | INF-5 | Not started | |
 | INF-7 | `apps/web` scaffold | INF-3, INF-5, INF-6 | Not started | |
@@ -21,7 +21,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] INF-1
 - [x] INF-2
 - [x] INF-3
-- [ ] INF-4
+- [x] INF-4
 - [ ] INF-5
 - [ ] INF-6
 - [ ] INF-7

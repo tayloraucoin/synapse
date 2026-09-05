@@ -1,0 +1,24 @@
+import type { Meta, StoryObj } from "@storybook/react";
+
+import { Textarea } from "./textarea";
+
+const meta: Meta<typeof Textarea> = {
+  title: "Primitives/Control/Textarea",
+  component: Textarea,
+  parameters: { layout: "fullscreen" },
+};
+
+export default meta;
+type Story = StoryObj<typeof Textarea>;
+
+export const Overview: Story = {
+  tags: ["!autodocs"],
+  render: () => (
+    <div className="flex max-w-sm flex-col gap-(--space-5) p-(--space-6)">
+      <Textarea label="Note" helperText="Optional." placeholder="" />
+      <Textarea label="Note" autoGrow defaultValue="Grows with what is typed." />
+      <Textarea label="What was it?" error="Say what it was, in a few words." />
+      <Textarea label="Note" disabled defaultValue="Read only." />
+    </div>
+  ),
+};
