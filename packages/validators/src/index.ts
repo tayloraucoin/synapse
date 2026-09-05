@@ -46,3 +46,8 @@ export {
   webPushSubscribeInput,
   type WebPushSubscribeInput,
 } from "./push";
+
+export {
+  updatePreferencesInput,
+  type UpdatePreferencesInput,
+} from "./user";

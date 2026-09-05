@@ -12,21 +12,31 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.10.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.49.1",
+    "@syn/api": "*",
     "@syn/auth": "*",
     "@syn/db": "*",
+    "@syn/hooks": "*",
     "@syn/observability": "*",
     "@syn/types": "*",
     "@syn/ui": "*",
     "@syn/utils": "*",
     "@t3-oss/env-nextjs": "^0.13.8",
+    "@tanstack/react-query": "^5.90.5",
+    "@trpc/client": "^11.4.3",
+    "@trpc/react-query": "^11.4.3",
+    "@trpc/server": "^11.4.3",
     "next": "16.3.4",
     "next-themes": "^0.4.6",
     "nuqs": "^2.7.2",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "zod": "^3.24.2"
+    "react-hook-form": "^7.66.0",
+    "superjson": "^2.2.2",
+    "zod": "^3.24.2",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@next/env": "16.3.4",

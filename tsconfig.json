@@ -23,6 +23,12 @@
       "path": "./packages/auth"
     },
     {
+      "path": "./packages/api"
+    },
+    {
+      "path": "./packages/hooks"
+    },
+    {
       "path": "./packages/ui"
     },
     {

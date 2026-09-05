@@ -4,6 +4,8 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { ThemeProvider, Toaster } from "@syn/ui";
 
+import { TrpcProvider } from "@/lib/trpc/provider";
+
 import "./globals.css";
 
 /**
@@ -70,8 +72,7 @@ export default function RootLayout({
       <body className="bg-paper text-ink min-h-screen-safe">
         <ThemeProvider>
           <NuqsAdapter>
-            {/* TrpcProvider wraps here — INF-8. */}
-            {children}
+            <TrpcProvider>{children}</TrpcProvider>
           </NuqsAdapter>
           <Toaster />
         </ThemeProvider>

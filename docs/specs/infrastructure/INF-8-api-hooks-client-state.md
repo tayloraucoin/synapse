@@ -3,7 +3,7 @@
 **Epic:** INF — Infrastructure · **Phase 3** · Size: M
 **Slice type:** The typed contract and its rails — the failure classes are a procedure that reads through the singleton `db` (RLS bypassed), a hook in `@syn/hooks` that touches the DOM or the tRPC client instance, and server data copied into a client store.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04)
 
 ---
 

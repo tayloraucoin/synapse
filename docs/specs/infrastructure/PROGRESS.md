@@ -11,7 +11,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | INF-5 | `@syn/db` | INF-2 | Complete (staging migrate pending Taylor) | 2026-09-04 |
 | INF-6 | `@syn/auth` | INF-5 | Complete (dashboard setup pending Taylor) | 2026-09-04 |
 | INF-7 | `apps/web` scaffold | INF-3, INF-5, INF-6 | Complete | 2026-09-04 |
-| INF-8 | `@syn/api`, `@syn/hooks`, client wiring | INF-7 | Not started | |
+| INF-8 | `@syn/api`, `@syn/hooks`, client wiring | INF-7 | Complete | 2026-09-04 |
 | INF-9 | PWA and push | INF-8 | Not started | |
 | INF-10 | Environments, CI, Vercel, agent permissions | INF-8 | Not started | |
 | INF-11 | Documentation and agent spine | INF-10 | Not started | |
@@ -25,7 +25,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] INF-5
 - [x] INF-6
 - [x] INF-7
-- [ ] INF-8
+- [x] INF-8
 - [ ] INF-9
 - [ ] INF-10
 - [ ] INF-11
