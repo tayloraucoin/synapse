@@ -133,7 +133,7 @@ export function ImageCropper({
         onPointerCancel={onPointerUp}
         className={cn(
           "relative size-64 touch-none overflow-hidden rounded-(--radius)",
-          "bg-neutral-100 dark:bg-neutral-800",
+          "bg-surface",
         )}
       >
         {url === null ? null : (

@@ -17,7 +17,7 @@ export const listRowSurfaceVariants = cva(
   {
     variants: {
       interactive: {
-        true: "cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        true: "cursor-pointer hover:bg-surface",
         false: "",
       },
       muted: {

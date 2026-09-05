@@ -47,7 +47,7 @@ export function InlineQuestionRow({
       aria-label={label}
       className={cn(
         "flex flex-wrap items-center gap-(--space-3)",
-        "bg-neutral-100 px-(--space-4) py-(--space-3) dark:bg-neutral-800",
+        "bg-surface px-(--space-4) py-(--space-3)",
         className,
       )}
     >

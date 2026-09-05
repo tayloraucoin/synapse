@@ -17,7 +17,7 @@ export const itemRowVariants = cva(
   {
     variants: {
       interactive: {
-        true: "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        true: "hover:bg-surface",
         false: "",
       },
       faded: { true: "opacity-55", false: "" },

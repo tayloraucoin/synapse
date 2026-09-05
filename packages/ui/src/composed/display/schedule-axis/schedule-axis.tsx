@@ -117,9 +117,9 @@ export function ScheduleAxis({
                 className={cn(
                   "h-full border-t",
                   isHour
-                    ? "border-neutral-300 dark:border-neutral-600"
+                    ? "border-edge"
                     : isHalf || pxPerHour === 96
-                      ? "border-neutral-200 dark:border-neutral-700"
+                      ? "border-hairline"
                       : "border-transparent",
                 )}
               />

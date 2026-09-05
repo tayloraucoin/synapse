@@ -55,7 +55,7 @@ export function StatusLine({
       aria-live="polite"
       className={cn(
         "flex min-h-10 items-center gap-(--space-3)",
-        "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200",
+        "bg-surface text-text-body",
         "px-(--space-4) py-(--space-2)",
         placement === "shell" ? "w-full" : "rounded-(--radius)",
         className,

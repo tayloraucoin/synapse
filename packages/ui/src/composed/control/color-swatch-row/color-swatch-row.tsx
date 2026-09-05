@@ -103,7 +103,7 @@ export function ColorSwatchRow({
                 className={cn(
                   "block size-8 rounded-full",
                   option === "none"
-                    ? "border-neutral-300 border-2 border-dashed dark:border-neutral-600"
+                    ? "border-edge border-2 border-dashed"
                     : SWATCH[option as CategoryKey],
                   selected && "ring-ink ring-2 ring-offset-2 ring-offset-(--paper)",
                 )}

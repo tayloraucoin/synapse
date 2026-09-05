@@ -209,7 +209,16 @@ export function ResponsiveSheet({
       <DrawerContent
         className={cn(
           "flex flex-col gap-0 p-0",
-          size === "tall" ? "max-h-[90dvh]" : "max-h-[60dvh]",
+          /*
+           * The data-variant prefix is required, not cosmetic: `DrawerContent`
+           * sets `data-[vaul-drawer-direction=bottom]:max-h-[80vh]`, and a
+           * plain `max-h-*` is a different key to tailwind-merge — it survives
+           * the merge and then loses on specificity, so `size` would do
+           * nothing at all. Matching the prefix makes the override win.
+           */
+          size === "tall"
+            ? "data-[vaul-drawer-direction=bottom]:max-h-[90dvh]"
+            : "data-[vaul-drawer-direction=bottom]:max-h-[60dvh]",
           className,
           classes?.content,
         )}

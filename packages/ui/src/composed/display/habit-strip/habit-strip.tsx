@@ -35,11 +35,11 @@ const BOX: Record<StripSize, string> = {
 const SQUARE: Record<StripState, string> = {
   done: "bg-ink",
   "done-moved": "bg-ink",
-  "not-counted": "border border-neutral-400",
-  half: "border border-neutral-400 bg-gradient-to-r from-(--ink) from-50% to-transparent to-50%",
-  "didnt-do": "border border-neutral-400",
+  "not-counted": "border border-edge",
+  half: "border border-edge bg-gradient-to-r from-(--ink) from-50% to-transparent to-50%",
+  "didnt-do": "border border-edge",
   "not-assigned": "",
-  pending: "border border-dashed border-neutral-400",
+  pending: "border border-dashed border-edge",
 };
 
 /** Words for the label, so the strip reads out loud correctly. */
@@ -86,10 +86,19 @@ export function StripSquare({
         />
       ) : null}
       {state === "didnt-do" ? (
+        /*
+         * A rotated 1px rule, not a gradient: an arbitrary-value gradient with
+         * `calc()` stops needs its operators escaped (`calc(50%_-_0.5px)`) and
+         * silently renders nothing when they are not — which is how this square
+         * first shipped looking identical to `not-counted`. 141% is √2, so the
+         * line reaches both corners.
+         */
         <span
           aria-hidden="true"
-          className="absolute inset-0 bg-[linear-gradient(to_top_right,transparent_calc(50%-0.5px),var(--syn-neutral-400)_calc(50%-0.5px),var(--syn-neutral-400)_calc(50%+0.5px),transparent_calc(50%+0.5px))]"
-        />
+          className="absolute inset-0 flex items-center justify-center overflow-hidden"
+        >
+          <span className="block h-px w-[141%] -rotate-45 bg-neutral-400" />
+        </span>
       ) : null}
     </span>
   );
@@ -136,7 +145,7 @@ export function HabitStrip({
         "flex w-full min-h-(--row-min) items-center gap-(--space-3) px-(--space-4) py-(--space-2) text-left",
         layout === "stacked" && "flex-col items-start gap-(--space-2)",
         "transition-colors duration-(--dur-state) ease-(--ease-settle)",
-        "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        "hover:bg-surface",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none",
         className,
       )}

@@ -98,8 +98,8 @@ export function ReasonChips({
                   "text-(length:--fs-caption)",
                   "transition-colors duration-(--dur-state) ease-(--ease-settle)",
                   selected
-                    ? "border-ink text-ink bg-neutral-100 dark:bg-neutral-800"
-                    : "text-text-body border-transparent bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700",
+                    ? "border-ink text-ink bg-surface"
+                    : "text-text-body border-transparent bg-surface hover:bg-fill-muted",
                 )}
               >
                 {chip.label}

@@ -115,7 +115,7 @@ export function ItemIcon({
 
   return (
     <span aria-hidden="true" className={cn(box, calendar && "text-text-muted")}>
-      <span className="block size-1.5 rounded-full bg-neutral-300 dark:bg-neutral-600" />
+      <span className="block size-1.5 rounded-full bg-edge" />
     </span>
   );
 }

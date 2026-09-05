@@ -92,7 +92,7 @@ export function EmojiPicker({
                 type="button"
                 className={cn(
                   "flex size-(--target) items-center justify-center rounded-(--radius) text-[1.25rem]",
-                  "data-[active]:bg-neutral-100 dark:data-[active]:bg-neutral-800",
+                  "data-[active]:bg-surface",
                 )}
                 {...props}
               >

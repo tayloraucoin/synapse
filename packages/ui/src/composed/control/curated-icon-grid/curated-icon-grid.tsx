@@ -104,7 +104,7 @@ export function CuratedIconGrid({
                         "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                         selected
                           ? "border-ink border-2"
-                          : "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+                          : "hover:bg-surface",
                       )}
                     >
                       <input

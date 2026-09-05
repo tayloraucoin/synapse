@@ -94,10 +94,9 @@ export function ThemeControl({
                 value={option}
                 checked={isSelected}
                 onChange={() => setTheme(option)}
-                className={cn(
-                  "size-5 shrink-0 accent-(--syn-neutral-800)",
-                  "dark:accent-(--syn-neutral-100)",
-                )}
+                // `--primary` is neutral-800 light / neutral-100 dark, which
+                // is exactly the pair this needs — so no `dark:` variant.
+                className="size-5 shrink-0 accent-(--primary)"
               />
               <span className="flex flex-col">
                 <Text as="span" variant="body">

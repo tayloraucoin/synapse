@@ -77,7 +77,7 @@ export function StarterSetChooser({
                     : "border-s-transparent",
                   item.added
                     ? "opacity-55"
-                    : "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+                    : "hover:bg-surface",
                 )}
               >
                 <span className="flex min-w-0 flex-1 flex-col">

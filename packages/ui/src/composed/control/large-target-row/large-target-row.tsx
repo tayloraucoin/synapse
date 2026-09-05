@@ -65,7 +65,7 @@ export function LargeTargetRow({
                 "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                 selected
                   ? "bg-primary text-primary-foreground border border-transparent"
-                  : "border-hairline text-ink border hover:bg-neutral-100 dark:hover:bg-neutral-800",
+                  : "border-hairline text-ink border hover:bg-surface",
                 disabled && "pointer-events-none opacity-40",
               )}
             >

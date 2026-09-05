@@ -84,7 +84,7 @@ export function WeekdayChips({
                 "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                 isOn
                   ? "bg-primary text-primary-foreground border border-transparent"
-                  : "border-neutral-300 text-ink border hover:bg-neutral-100 dark:border-neutral-600 dark:hover:bg-neutral-800",
+                  : "border-edge text-ink border hover:bg-surface",
                 disabled && "pointer-events-none opacity-40",
               )}
             >

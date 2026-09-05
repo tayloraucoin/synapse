@@ -21,9 +21,9 @@ export const stepper17CellVariants = cva(
   {
     variants: {
       state: {
-        unselected: "border-neutral-300 text-ink border hover:bg-neutral-100 dark:border-neutral-600 dark:hover:bg-neutral-800",
+        unselected: "border-edge text-ink border hover:bg-surface",
         selected: "bg-primary text-primary-foreground border border-transparent",
-        resting: "border-ink text-ink border border-dashed hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        resting: "border-ink text-ink border border-dashed hover:bg-surface",
       },
       invalid: {
         true: "",

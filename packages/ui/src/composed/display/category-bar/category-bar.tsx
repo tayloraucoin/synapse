@@ -70,7 +70,7 @@ export function CategoryBar({ segments, className }: CategoryBarProps) {
             style={{ flexGrow: segment.minutes }}
             className={cn(
               segment.key === null
-                ? "bg-neutral-300 dark:bg-neutral-600"
+                ? "bg-edge"
                 : SEGMENT[segment.key],
             )}
           />
@@ -88,7 +88,7 @@ export function CategoryBar({ segments, className }: CategoryBarProps) {
               className={cn(
                 "size-2 shrink-0 rounded-full",
                 segment.key === null
-                  ? "bg-neutral-300 dark:bg-neutral-600"
+                  ? "bg-edge"
                   : SEGMENT[segment.key],
               )}
             />

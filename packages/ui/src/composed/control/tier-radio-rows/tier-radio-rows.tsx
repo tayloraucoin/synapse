@@ -99,7 +99,7 @@ export function TierRadioRows({
                   "focus-within:ring-2 focus-within:ring-ring focus-within:ring-inset",
                   selected
                     ? "border-s-ink"
-                    : "border-s-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800",
+                    : "border-s-transparent hover:bg-surface",
                   locked && "cursor-default",
                 )}
               >

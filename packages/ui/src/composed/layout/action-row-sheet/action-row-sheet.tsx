@@ -71,7 +71,7 @@ export function ActionRowSheet({
               className={cn(
                 "flex min-h-(--row-min) w-full items-center px-(--space-2) text-left",
                 "transition-colors duration-(--dur-state) ease-(--ease-settle)",
-                "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+                "hover:bg-surface",
                 "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none",
               )}
             >

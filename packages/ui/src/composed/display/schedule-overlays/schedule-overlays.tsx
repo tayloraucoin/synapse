@@ -37,8 +37,7 @@ export function WindowSpan({ topPx, heightPx, className }: WindowSpanProps) {
       style={{ top: `${topPx}px`, height: `${heightPx}px` }}
       className={cn(
         "pointer-events-none absolute inset-x-0 rounded-(--radius)",
-        "border border-dashed border-neutral-300 bg-neutral-50",
-        "dark:border-neutral-600 dark:bg-neutral-900",
+        "border border-dashed border-edge bg-paper",
         className,
       )}
     />
@@ -68,7 +67,7 @@ export function GhostBlock({
       style={{ top: `${topPx}px`, height: `${heightPx}px` }}
       className={cn(
         "absolute inset-x-0 overflow-hidden rounded-(--radius) px-(--space-2) text-left",
-        "border border-neutral-300 dark:border-neutral-600",
+        "border border-edge",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
         className,
       )}

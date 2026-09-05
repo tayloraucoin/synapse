@@ -49,7 +49,7 @@ export function NowLine({
       <span
         className={cn(
           "block h-px w-full",
-          closed ? "bg-neutral-300 dark:bg-neutral-600" : "bg-accent-mark",
+          closed ? "bg-edge" : "bg-accent-mark",
         )}
       />
       <span

@@ -87,7 +87,7 @@ export function ChipPicker({
           <span
             className={cn(
               "inline-flex h-6 items-center rounded-(--radius) px-(--space-2)",
-              "bg-neutral-100 text-text-body text-(length:--fs-caption) dark:bg-neutral-800",
+              "bg-surface text-text-body text-(length:--fs-caption)",
             )}
           >
             {noneLabel}
@@ -109,7 +109,7 @@ export function ChipPicker({
                 className="sr-only"
               />
               {option.colorKey === undefined ? (
-                <span className="inline-flex h-6 items-center rounded-(--radius) bg-neutral-100 px-(--space-2) text-(length:--fs-caption) dark:bg-neutral-800">
+                <span className="inline-flex h-6 items-center rounded-(--radius) bg-surface px-(--space-2) text-(length:--fs-caption)">
                   {option.label}
                 </span>
               ) : (

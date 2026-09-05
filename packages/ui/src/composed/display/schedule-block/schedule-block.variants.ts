@@ -18,13 +18,13 @@ export const scheduleBlockVariants = cva(
     variants: {
       tone: {
         upcoming:
-          "border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800",
+          "border border-hairline bg-surface",
         passed:
-          "border border-neutral-200 bg-neutral-100 opacity-55 dark:border-neutral-700 dark:bg-neutral-800",
-        active: "border-[1.5px] border-accent-500 bg-neutral-100 dark:bg-neutral-800",
-        done: "border border-neutral-200 bg-neutral-200 dark:border-neutral-700 dark:bg-neutral-700",
+          "border border-hairline bg-surface opacity-55",
+        active: "border-[1.5px] border-accent-500 bg-surface",
+        done: "border border-hairline bg-fill-muted",
         moved:
-          "border-[1.5px] border-violet-500 bg-neutral-100 dark:bg-neutral-800",
+          "border-[1.5px] border-violet-500 bg-surface",
       },
       size: {
         full: "px-(--space-2) py-(--space-1)",

@@ -20,7 +20,7 @@ export function PreflightNote({ children, className }: PreflightNoteProps) {
   return (
     <blockquote
       className={cn(
-        "flex flex-col gap-(--space-1) border-s-2 border-neutral-300 ps-(--space-3) dark:border-neutral-600",
+        "flex flex-col gap-(--space-1) border-s-2 border-edge ps-(--space-3)",
         className,
       )}
     >

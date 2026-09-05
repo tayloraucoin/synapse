@@ -88,6 +88,35 @@
   --shadow-overlay: 0 8px 24px rgba(21, 20, 18, 0.12);
   --chip-bg-step: 100; --chip-fg-step: 700;   /* category chip pairing, light */
 
+  /*
+   * ---- SEMANTIC, added by the composed layer ----
+   *
+   * `@syn/ui/AGENTS.md`: "No `dark:` colours. Tones map to semantic tokens
+   * that already flip." Three pairings the handoff's §6.2 states in prose but
+   * never named, so every component that needed one was reaching for a
+   * `dark:` variant instead:
+   *
+   *   --edge        control outlines: neutral-300 / neutral-600
+   *   --fill-muted  filled-but-quiet surfaces: neutral-200 / neutral-700
+   *   --chip-*      the eight category chip pairings, resolved
+   *
+   * The chip pairs exist because `--chip-bg-step` above cannot work: Tailwind
+   * needs a whole class name at build time, and a variable holding the string
+   * "100" produces no utility. These name the resolved colour instead, so
+   * `bg-chip-leaf` is one class that is already correct in both themes.
+   */
+  --edge: var(--syn-neutral-300);
+  --fill-muted: var(--syn-neutral-200);
+
+  --chip-leaf-bg:  var(--syn-cat-leaf-100);  --chip-leaf-fg:  var(--syn-cat-leaf-700);
+  --chip-sky-bg:   var(--syn-cat-sky-100);   --chip-sky-fg:   var(--syn-cat-sky-700);
+  --chip-clay-bg:  var(--syn-cat-clay-100);  --chip-clay-fg:  var(--syn-cat-clay-700);
+  --chip-rose-bg:  var(--syn-cat-rose-100);  --chip-rose-fg:  var(--syn-cat-rose-700);
+  --chip-amber-bg: var(--syn-cat-amber-100); --chip-amber-fg: var(--syn-cat-amber-700);
+  --chip-slate-bg: var(--syn-cat-slate-100); --chip-slate-fg: var(--syn-cat-slate-700);
+  --chip-plum-bg:  var(--syn-cat-plum-100);  --chip-plum-fg:  var(--syn-cat-plum-700);
+  --chip-moss-bg:  var(--syn-cat-moss-100);  --chip-moss-fg:  var(--syn-cat-moss-700);
+
   /* ---- TYPOGRAPHY ---- */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-newsreader), Georgia, serif;
@@ -169,6 +198,18 @@
   --violet-band-text: var(--syn-violet-200);
   --chip-bg-step: 800; --chip-fg-step: 200;
 
+  --edge: var(--syn-neutral-600);
+  --fill-muted: var(--syn-neutral-700);
+
+  --chip-leaf-bg:  var(--syn-cat-leaf-800);  --chip-leaf-fg:  var(--syn-cat-leaf-200);
+  --chip-sky-bg:   var(--syn-cat-sky-800);   --chip-sky-fg:   var(--syn-cat-sky-200);
+  --chip-clay-bg:  var(--syn-cat-clay-800);  --chip-clay-fg:  var(--syn-cat-clay-200);
+  --chip-rose-bg:  var(--syn-cat-rose-800);  --chip-rose-fg:  var(--syn-cat-rose-200);
+  --chip-amber-bg: var(--syn-cat-amber-800); --chip-amber-fg: var(--syn-cat-amber-200);
+  --chip-slate-bg: var(--syn-cat-slate-800); --chip-slate-fg: var(--syn-cat-slate-200);
+  --chip-plum-bg:  var(--syn-cat-plum-800);  --chip-plum-fg:  var(--syn-cat-plum-200);
+  --chip-moss-bg:  var(--syn-cat-moss-800);  --chip-moss-fg:  var(--syn-cat-moss-200);
+
   --background: var(--syn-neutral-900);
   --foreground: var(--syn-neutral-100);
   --card: var(--syn-neutral-800);
@@ -235,6 +276,16 @@
   --color-ink: var(--ink);
   --color-surface: var(--surface);
   --color-hairline: var(--hairline);
+  --color-edge: var(--edge);
+  --color-fill-muted: var(--fill-muted);
+  --color-chip-leaf-bg: var(--chip-leaf-bg);   --color-chip-leaf-fg: var(--chip-leaf-fg);
+  --color-chip-sky-bg: var(--chip-sky-bg);     --color-chip-sky-fg: var(--chip-sky-fg);
+  --color-chip-clay-bg: var(--chip-clay-bg);   --color-chip-clay-fg: var(--chip-clay-fg);
+  --color-chip-rose-bg: var(--chip-rose-bg);   --color-chip-rose-fg: var(--chip-rose-fg);
+  --color-chip-amber-bg: var(--chip-amber-bg); --color-chip-amber-fg: var(--chip-amber-fg);
+  --color-chip-slate-bg: var(--chip-slate-bg); --color-chip-slate-fg: var(--chip-slate-fg);
+  --color-chip-plum-bg: var(--chip-plum-bg);   --color-chip-plum-fg: var(--chip-plum-fg);
+  --color-chip-moss-bg: var(--chip-moss-bg);   --color-chip-moss-fg: var(--chip-moss-fg);
   --color-text-body: var(--text-body);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);

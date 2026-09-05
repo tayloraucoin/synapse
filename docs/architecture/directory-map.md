@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 410 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-05 · 676 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -47,6 +47,12 @@ apps/
             page.tsx
         layout.tsx
       (shell)/
+        _components/
+          app-shell.tsx
+          nav-items.ts
+          rail.tsx
+          status-line-slot.tsx
+          tab-bar.tsx
         day/
           [date]/
             item/
@@ -149,6 +155,16 @@ apps/
         resolve-tier-env.ts
       forms/
         use-synapse-form.ts
+      hooks/
+        use-dismissed.ts
+        use-elapsed.ts
+        use-icon-upload.ts
+        use-leave-guard.ts
+        use-local-draft.ts
+        use-online.ts
+        use-remembered-toggle.ts
+      image/
+        reencode.ts
       pwa/
         install-detection.ts
         push-subscribe.ts
@@ -293,6 +309,7 @@ packages/
       limits.ts  # Epic 1 §9's bounds, shared by the zod schema and the input's maxLength
       motion.ts
       storage-keys.ts
+      timezones.ts
       user-images.ts
     .gitignore
     eslint.config.mjs
@@ -390,12 +407,345 @@ packages/
         palette.stories.tsx
         tokens.ts
       composed/
+        __fixtures__/
+          view-models.ts
         control/
+          chip-picker/
+            chip-picker.stories.tsx
+            chip-picker.tsx
+            index.ts
+          color-swatch-row/
+            color-swatch-row.stories.tsx
+            color-swatch-row.tsx
+            index.ts
+          count-stepper/
+            count-stepper.stories.tsx
+            count-stepper.tsx
+            index.ts
+          curated-icon-grid/
+            curated-icon-grid.stories.tsx
+            curated-icon-grid.tsx
+            index.ts
+          date-field/
+            date-field.stories.tsx
+            date-field.tsx
+            index.ts
+          day-complete-action/
+            day-complete-action.stories.tsx
+            day-complete-action.tsx
+            index.ts
+          decision-panel/
+            copy.ts
+            decision-panel.stories.tsx
+            decision-panel.tsx
+            index.ts
+          ellipses-menu/
+            ellipses-menu.stories.tsx
+            ellipses-menu.tsx
+            index.ts
+          emoji-picker/
+            emoji-picker.stories.tsx
+            emoji-picker.tsx
+            index.ts
+          image-cropper/
+            image-cropper.stories.tsx
+            image-cropper.tsx
+            index.ts
+          large-target-row/
+            index.ts
+            large-target-row.stories.tsx
+            large-target-row.tsx
+          minutes-stepper/
+            copy.ts
+            index.ts
+            minutes-stepper.stories.tsx
+            minutes-stepper.tsx
+          notification-row/
+            index.ts
+            notification-row.stories.tsx
+            notification-row.tsx
+          number-unit-input/
+            index.ts
+            number-unit-input.stories.tsx
+            number-unit-input.tsx
+          oauth-button/
+            index.ts
+            oauth-button.stories.tsx
+            oauth-button.tsx
+          overflow-cut-list/
+            index.ts
+            overflow-cut-list.stories.tsx
+            overflow-cut-list.tsx
+          picker-list/
+            copy.ts
+            index.ts
+            picker-list.stories.tsx
+            picker-list.tsx
+          quick-chip-row/
+            index.ts
+            quick-chip-row.stories.tsx
+            quick-chip-row.tsx
+          range-input/
+            index.ts
+            range-input.stories.tsx
+            range-input.tsx
+          reason-chips/
+            index.ts
+            reason-chips.stories.tsx
+            reason-chips.tsx
+          reflection-block/
+            index.ts
+            reflection-block.stories.tsx
+            reflection-block.tsx
+          search-field/
+            index.ts
+            search-field.stories.tsx
+            search-field.tsx
+          segmented-control/
+            index.ts
+            segmented-control.stories.tsx
+            segmented-control.tsx
+          starter-set-chooser/
+            index.ts
+            starter-set-chooser.stories.tsx
+            starter-set-chooser.tsx
+          stepper-17/
+            index.ts
+            stepper-17.stories.tsx
+            stepper-17.tsx
+            stepper-17.variants.ts
+          text-disclosure-button/
+            index.ts
+            text-disclosure-button.stories.tsx
+            text-disclosure-button.tsx
           theme-control/
             copy.ts
             index.ts
             theme-control.stories.tsx
             theme-control.tsx
+          tier-radio-rows/
+            copy.ts
+            index.ts
+            tier-radio-rows.stories.tsx
+            tier-radio-rows.tsx
+          time-field/
+            index.ts
+            time-field.stories.tsx
+            time-field.tsx
+          timer-control/
+            index.ts
+            timer-control.stories.tsx
+            timer-control.tsx
+          timezone-select/
+            index.ts
+            timezone-select.stories.tsx
+            timezone-select.tsx
+          weekday-chips/
+            index.ts
+            weekday-chips.stories.tsx
+            weekday-chips.tsx
+        display/
+          archived-section/
+            archived-section.stories.tsx
+            archived-section.tsx
+            copy.ts
+            index.ts
+          big-number/
+            big-number.stories.tsx
+            big-number.tsx
+            index.ts
+          category-bar/
+            category-bar.stories.tsx
+            category-bar.tsx
+            index.ts
+          category-chip/
+            category-chip.stories.tsx
+            category-chip.tsx
+            index.ts
+          day-header/
+            copy.ts
+            day-header.stories.tsx
+            day-header.tsx
+            index.ts
+          day-outcome-row/
+            day-outcome-row.stories.tsx
+            day-outcome-row.tsx
+            index.ts
+          day-part-header/
+            day-part-header.stories.tsx
+            day-part-header.tsx
+            index.ts
+          decided-line/
+            decided-line.stories.tsx
+            decided-line.tsx
+            index.ts
+          expander-section/
+            expander-section.stories.tsx
+            expander-section.tsx
+            index.ts
+          group-heading/
+            group-heading.stories.tsx
+            group-heading.tsx
+            index.ts
+          habit-strip/
+            habit-strip.stories.tsx
+            habit-strip.tsx
+            index.ts
+          item-icon/
+            curated-glyphs.ts
+            index.ts
+            item-icon.stories.tsx
+            item-icon.tsx
+          item-row/
+            copy.ts
+            index.ts
+            item-row.stories.tsx
+            item-row.tsx
+            item-row.variants.ts
+          list-row/
+            index.ts
+            list-row.stories.tsx
+            list-row.tsx
+            list-row.variants.ts
+          multitask-group/
+            index.ts
+            multitask-group.stories.tsx
+            multitask-group.tsx
+          now-line/
+            index.ts
+            now-line.stories.tsx
+            now-line.tsx
+          preflight-note/
+            index.ts
+            preflight-note.stories.tsx
+            preflight-note.tsx
+          review-region/
+            index.ts
+            review-region.stories.tsx
+            review-region.tsx
+          schedule-axis/
+            index.ts
+            schedule-axis.stories.tsx
+            schedule-axis.tsx
+          schedule-block/
+            index.ts
+            schedule-block.stories.tsx
+            schedule-block.tsx
+            schedule-block.variants.ts
+          schedule-overlays/
+            index.ts
+            schedule-overlays.stories.tsx
+            schedule-overlays.tsx
+          session-row/
+            index.ts
+            session-row.stories.tsx
+            session-row.tsx
+          settings-row/
+            index.ts
+            settings-row.stories.tsx
+            settings-row.tsx
+          state-word/
+            copy.ts
+            index.ts
+            state-word.stories.tsx
+            state-word.tsx
+          tag/
+            index.ts
+            tag.stories.tsx
+            tag.tsx
+          template-usage-row/
+            index.ts
+            template-usage-row.stories.tsx
+            template-usage-row.tsx
+          time-text/
+            index.ts
+            time-text.stories.tsx
+            time-text.tsx
+          timer-display/
+            index.ts
+            timer-display.stories.tsx
+            timer-display.tsx
+          trust-line/
+            copy.ts
+            index.ts
+            trust-line.stories.tsx
+            trust-line.tsx
+        feedback/
+          discard-dialog/
+            copy.ts
+            discard-dialog.stories.tsx
+            discard-dialog.tsx
+            index.ts
+          empty-state/
+            empty-state.stories.tsx
+            empty-state.tsx
+            index.ts
+          inline-question-row/
+            index.ts
+            inline-question-row.stories.tsx
+            inline-question-row.tsx
+          loading-text/
+            index.ts
+            loading-text.stories.tsx
+            loading-text.tsx
+          region-retry/
+            index.ts
+            region-retry.stories.tsx
+            region-retry.tsx
+          save-status/
+            copy.ts
+            index.ts
+            save-status.stories.tsx
+            save-status.tsx
+          shortcuts-dialog/
+            index.ts
+            shortcuts-dialog.stories.tsx
+            shortcuts-dialog.tsx
+          skeleton-row/
+            index.ts
+            skeleton-row.stories.tsx
+            skeleton-row.tsx
+          status-line/
+            copy.ts
+            index.ts
+            presets.tsx
+            status-line.stories.tsx
+            status-line.tsx
+          three-option-dialog/
+            index.ts
+            three-option-dialog.stories.tsx
+            three-option-dialog.tsx
+          typed-confirm-dialog/
+            index.ts
+            typed-confirm-dialog.stories.tsx
+            typed-confirm-dialog.tsx
+        layout/
+          action-row-sheet/
+            action-row-sheet.stories.tsx
+            action-row-sheet.tsx
+            index.ts
+          auth-frame/
+            auth-frame.stories.tsx
+            auth-frame.tsx
+            index.ts
+          error-page/
+            copy.ts
+            error-page.stories.tsx
+            error-page.tsx
+            index.ts
+          responsive-sheet/
+            index.ts
+            responsive-sheet.stories.tsx
+            responsive-sheet.tsx
+          screen-frame/
+            index.ts
+            screen-frame.stories.tsx
+            screen-frame.tsx
+        navigation/
+          app-header/
+            app-header.stories.tsx
+            app-header.tsx
+            index.ts
       hooks/
         use-mobile.ts
         use-prefers-reduced-motion.ts
@@ -587,6 +937,7 @@ packages/
     tsconfig.json
 scripts/
   check-doc-links.mjs
+  copy-emoji-data.mjs
   generate-directory-map.mjs
   local-dev-origins.mjs
   print-local-urls.mjs

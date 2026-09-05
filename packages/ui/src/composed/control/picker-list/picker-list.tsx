@@ -148,7 +148,7 @@ export function PickerList({
       className={cn(
         "flex min-h-12 cursor-pointer items-center gap-(--space-3) px-(--space-3)",
         "transition-colors duration-(--dur-state) ease-(--ease-settle)",
-        activeId === id && "bg-neutral-100 dark:bg-neutral-800",
+        activeId === id && "bg-surface",
         selected && "font-medium",
         disabled && "pointer-events-none opacity-40",
       )}
@@ -246,7 +246,7 @@ export function PickerList({
           className={cn(
             "text-ink flex min-h-12 items-center px-(--space-3)",
             "text-(length:--fs-body) font-medium",
-            "hover:bg-neutral-100 dark:hover:bg-neutral-800",
+            "hover:bg-surface",
             "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset focus-visible:outline-none",
           )}
         >

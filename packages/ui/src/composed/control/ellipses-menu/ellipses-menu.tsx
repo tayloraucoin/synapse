@@ -67,7 +67,7 @@ export function EllipsesMenu({
           "inline-flex size-(--target) shrink-0 items-center justify-center",
           "rounded-(--radius) text-text-secondary outline-none",
           "transition-colors duration-(--dur-state) ease-(--ease-settle)",
-          "hover:bg-neutral-100 hover:text-ink dark:hover:bg-neutral-800",
+          "hover:bg-surface hover:text-ink",
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "disabled:pointer-events-none disabled:opacity-40",
           className,
