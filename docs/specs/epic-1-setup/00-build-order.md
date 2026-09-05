@@ -21,7 +21,7 @@ The schema, then the library a template is built from, then the template a week 
 
 ### Phase 1 — Identity and assets (parallel with Phase 0)
 - [x] **SET-2** · Auth: AU-01…05, the invite line, sign-out and session flows — L · (none; INF-6/7/8 Complete) — built 2026-09-05; **Vigil's six failure paths unrun until a Supabase project exists**
-- [ ] **SET-3** · Icon and avatar pipeline: bucket policies, signed uploads, the streaming read route — M · (SET-1)
+- [x] **SET-3** · Icon and avatar pipeline: bucket policies, signed uploads, the streaming read route — M · (SET-1) — built 2026-09-05; **the three Vigil probes need Supabase Storage**
 
 ### Phase 2 — The library
 - [ ] **SET-4** · Categories and the habit library: API, CT-01/02, LB-01/02/03 — L · (SET-1, SET-3, SYS-1) · Vesper review of the icon chooser

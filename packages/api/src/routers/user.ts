@@ -1,7 +1,13 @@
 import { TRPCError } from "@trpc/server";
 
-import { updatePreferencesInput } from "@syn/validators";
+import { setAvatarInput, updatePreferencesInput } from "@syn/validators";
 
+import {
+  isOwnedAssetPath,
+  readAvatar,
+  removeAvatar,
+  setAvatar,
+} from "../services/user/avatar";
 import {
   readPreferences,
   updatePreferences,
@@ -43,4 +49,36 @@ export const userRouter = router({
       }
       return row;
     }),
+
+  /** The account photo's stored path, or null. ST-01 and the header read it. */
+  avatar: protectedProcedure.query(async ({ ctx }) =>
+    readAvatar(ctx.rls, ctx.authContext.userId),
+  ),
+
+  /**
+   * Point the account at an uploaded photo (official spec §9.8).
+   *
+   * The path is re-checked against the caller even though it was minted for
+   * them: it came back through a browser, and BAD_REQUEST here is the
+   * difference between "the server names every path" being a claim and being
+   * true. RLS would stop the row write regardless; this stops a path that
+   * would then be unreadable from ever being stored.
+   */
+  setAvatar: protectedProcedure
+    .input(setAvatarInput)
+    .mutation(async ({ ctx, input }) => {
+      if (!isOwnedAssetPath(input.path, ctx.authContext.userId)) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "That image path is not yours.",
+        });
+      }
+      return setAvatar(ctx.rls, ctx.authContext.userId, input);
+    }),
+
+  /** Remove the photo and its bytes; the initials fallback returns. */
+  removeAvatar: protectedProcedure.mutation(async ({ ctx }) => {
+    await removeAvatar(ctx.rls, ctx.authContext.userId);
+    return { removed: true };
+  }),
 });

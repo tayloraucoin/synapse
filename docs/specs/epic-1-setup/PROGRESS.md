@@ -6,7 +6,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 |---|---|---|---|---|
 | SET-1 | Domain schema: every §3 table in one migration, seeds, constants | — | Complete | 2026-09-05 |
 | SET-2 | Auth: AU-01…05, the invite line, sign-out and session flows | — | Complete (Vigil paths pending a Supabase project) | 2026-09-05 |
-| SET-3 | Icon and avatar pipeline | SET-1 | Not started | — |
+| SET-3 | Icon and avatar pipeline | SET-1 | Complete (Vigil probes pending Supabase Storage) | 2026-09-05 |
 | SET-4 | Categories and the habit library | SET-1, SET-3, SYS-1 | Not started | — |
 | SET-5 | Templates | SET-4 | Not started | — |
 | SET-6 | Week build and materialisation | SET-5, USE-1 | Not started | — |
@@ -19,7 +19,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 
 - [x] SET-1
 - [x] SET-2
-- [ ] SET-3
+- [x] SET-3
 - [ ] SET-4
 - [ ] SET-5
 - [ ] SET-6

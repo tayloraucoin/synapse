@@ -94,3 +94,15 @@ One section per architectural choice that had real alternatives. Written when th
 **Consequences:** Buys a red `check-types` for both failure modes, verified by inducing each: a typo fails at the declaration with the correct spelling in the message; an omission puts a `MISSING_ENUM_VALUE` sentinel in the column's type and fails at the first insert of a real value. Costs one 30-line file and a wrapper call on each `pgEnum`, which is visible noise in the schema. It also means a union in `@syn/types` and its enum are now genuinely coupled: removing a member from a union is a compile error in `@syn/db` until the enum follows, which is the point. Forecloses nothing — deleting the wrapper leaves fourteen ordinary `pgEnum` calls.
 
 **Revisit trigger:** an enum that deliberately holds a value the union must not (none is foreseen — the two are the same vocabulary by definition).
+
+## 2026-09-05 · SET-3 · Storage object policies are `RESTRICTIVE` denials, not permissive ones
+
+**Context (as it was then):** Neither storage rail uses the Supabase storage client with a person's JWT — uploads go to a server-minted signed URL, reads go through a session-gated route using the service role. So no JWT-context object access should ever succeed, and SET-3's ruling was to write that down as policy "so a future JWT path fails closed".
+
+**Options weighed:** A — no policies at all, relying on RLS being enabled on `storage.objects` with nothing granting. B — permissive `USING (false)` policies, one per bucket per operation, as the ticket's advisory note describes. C — the same set declared `AS RESTRICTIVE`.
+
+**Decision:** C. A works today and documents nothing, so the next person to touch storage has to re-derive the intent. B reads like a guard and is not one: permissive policies are **OR'd**, so a policy that grants nothing also prevents nothing — the first permissive grant added beside it wins, silently, which is the exact failure the guard was written to prevent. Restrictive policies are **AND'd**, so they hold no matter what is added later. Each is scoped `bucket_id <> '<name>'` so a policy named for a bucket governs that bucket and leaves any future one alone.
+
+**Consequences:** Buys a denial that survives a later permissive grant, and a file that states the access model rather than merely happening to enforce it. Costs twelve policies where four would nominally do, and one real constraint to remember: **if a Phase-2 ticket ever needs browser-side storage access, these must be narrowed deliberately** — it cannot be granted around them, which is the point, but it does mean the failure will present as "my correct-looking grant does nothing". The comment in the SQL says so.
+
+**Revisit trigger:** a surface that genuinely needs the browser to talk to storage directly — a resumable upload for large files is the plausible one, and it would narrow the `insert` policy for one bucket rather than dropping the set.

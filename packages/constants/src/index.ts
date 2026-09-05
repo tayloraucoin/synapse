@@ -57,6 +57,18 @@ export {
   type NotificationCatalogueEntry,
 } from "./notification-catalogue";
 export { STARTER_HABITS, type StarterHabit } from "./starter-habits";
+export {
+  ASSET_BUCKET_BY_KIND,
+  ASSET_FILE_NAME_PATTERN,
+  READABLE_ASSET_BUCKETS,
+  buildAssetPath,
+  isSafeAssetFileName,
+  parseAssetPath,
+  toStorageKey,
+  type AssetBucket,
+  type AssetKind,
+  type ParsedAssetPath,
+} from "./storage-buckets";
 export { STORAGE_KEYS } from "./storage-keys";
 export {
   TIMEZONE_REGIONS,

@@ -63,6 +63,23 @@ export function authConfirmRoute(): string {
   return "/auth/confirm";
 }
 
+/* --------------------------------------------------------------- assets -- */
+
+/**
+ * The session-gated read route for one stored image (SET-3).
+ *
+ * `storedPath` is the bucket-qualified path a row holds —
+ * `icons/{user_id}/{uuid}.jpg` — so the URL is the path with one prefix. The
+ * result is only ever resolvable by the owner's session; there is no public
+ * URL for an icon or an avatar.
+ *
+ * Callers use `iconImageUrl` / `avatarImageUrl` in `lib/assets/icon-url.ts`
+ * rather than this directly, so the null cases stay in one place.
+ */
+export function assetRoute(storedPath: string): string {
+  return `/api/assets/${storedPath}`;
+}
+
 /* ---------------------------------------------------------------- setup -- */
 
 /** FR-01…05. `step` is 1–5; the page 404s on anything else. */

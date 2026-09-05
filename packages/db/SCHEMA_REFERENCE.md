@@ -87,11 +87,19 @@ Colocation rule (drizzle-orm-conventions §3): an enum used by one table lives i
  * system rather than by review.
  *
  * `pgEnum` takes a tuple of literals; `@syn/types` has the union. Wrapping the
- * tuple in `enumValues<Union>()` makes two mistakes compile errors: a value
- * that is not in the union (a typo), and a union member that is missing from
- * the tuple (an omission — the return type collapses to a labelled tuple that
- * `pgEnum` refuses). The generated SQL is unchanged; the call is an identity at
- * runtime.
+ * tuple in `enumValues<Union>()` makes both mistakes fail the type-check. Both
+ * were verified by inducing them:
+ *
+ * - A TYPO fails at the declaration, with the fix in the message:
+ *   `Type '"task_apointment"' is not assignable to type 'ItemType'. Did you
+ *   mean '"task_appointment"'?`
+ * - An OMISSION fails at the first consumer rather than here: the return type
+ *   becomes the sentinel tuple `["MISSING_ENUM_VALUE", <the missing member>]`,
+ *   which `pgEnum` accepts, so the sentinel surfaces in the column's type and
+ *   every insert of a real value stops compiling. Less direct, still a red
+ *   build — and the sentinel's name is in the error, so the cause is legible.
+ *
+ * The generated SQL is unchanged; the call is an identity at runtime.
  *
  *   export const itemTypeEnum = pgEnum(
  *     "item_type",
@@ -2306,7 +2314,7 @@ RLS is **enabled on every `public` table** by the same loop, deny-by-default. Po
 
 ## 7. SUPABASE STORAGE BUCKETS
 
-All three are **private**. Objects are served through signed URLs; a public bucket would be a URL anyone could guess their way into.
+All three are **private**; a public bucket would be a URL anyone who has seen it could fetch forever. Declared, with their object policies, in `supabase/setup/03_storage_buckets.sql`.
 
 | Bucket | Purpose | Public | Path convention | Limits |
 |---|---|---|---|---|
@@ -2314,7 +2322,13 @@ All three are **private**. Objects are served through signed URLs; a public buck
 | `icons` | Custom habit icons (§3.3, §9.9) | No | `icons/{user_id}/{uuid}.{ext}` | ≤5 MB; jpeg/png/webp |
 | `exports` | Data-export bundles (§7.6) | No | `exports/{user_id}/{request_id}.zip` | ≤100 MB; json/zip |
 
-The first path segment is the owner id, which is what the storage RLS policies match on.
+**A stored path is bucket-qualified** — `icons/{user_id}/{uuid}.jpg` is what `habits.icon` and `user_avatars.storage_path` hold, so one string fully identifies an object. Supabase's own key is the same path without the bucket segment; `@syn/constants` owns that grammar (`buildAssetPath`, `parseAssetPath`, `toStorageKey`) and is the only place the two forms are converted.
+
+**The owner segment is what authorization matches on.** The server builds every path from the session's user id — a client never names one.
+
+**How objects move (SET-3).** Writes go to a signed upload URL minted by `asset.createUploadUrl` at a server-chosen path. Reads of icons and avatars go through the session-gated route `/api/assets/{bucket}/{user_id}/{file}`, which checks the session, compares the owner segment, and streams with the service role — a foreign path answers **404, never 403**, so a probe learns nothing. Exports are the exception: a 24-hour signed URL, because the download opens in the system browser with no session cookie.
+
+**Object policies deny everything to `authenticated`, and they are `RESTRICTIVE`.** Neither rail uses the storage client with a person's JWT, so there is nothing legitimate to permit. Restrictive rather than permissive matters: permissive policies are OR'd, so a permissive "deny" would be silently overridden by the first grant someone adds later; restrictive policies are AND'd and hold regardless. The service role bypasses RLS, which is why both rails still work.
 
 ---
 

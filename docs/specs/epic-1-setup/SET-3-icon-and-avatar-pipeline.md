@@ -4,7 +4,7 @@
 **Slice type:** A storage mechanism with one write rail and one read rail. No screen. The risk class is *a private bucket that is not*: an object path a stranger can read, an upload URL minted for the wrong prefix.
 **Vigil:** review by probing — read another person's icon path with your own session; upload to a path outside your prefix with a minted URL; read a path with no session. QA states the three probes and their responses.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05) — both rails built and the object policies authored; **the three Vigil probes are unrun** (no Supabase Storage on any wired tier). See `DEVIATIONS.md`.
 
 > **Mason — one placement call is routed to you and answered inline:** reads go through a streaming route handler rather than signed read URLs. Counter-propose in `TECHNICAL-DECISIONS.md` if the cache or cost story is wrong.
 

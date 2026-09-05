@@ -27,6 +27,16 @@ export {
 } from "./auth-credentials";
 
 export {
+  assetKindSchema,
+  createUploadUrlInput,
+  imageContentTypeSchema,
+  setAvatarInput,
+  type AssetKindInput,
+  type CreateUploadUrlInput,
+  type SetAvatarInput,
+} from "./asset";
+
+export {
   dateKeySchema,
   weekKeySchema,
   type DateKey,
