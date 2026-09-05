@@ -312,3 +312,249 @@ export {
   type TextTone,
   type TextVariant,
 } from "./primitives/typography/text";
+
+/* ---- composed: display ---- */
+export {
+  ARCHIVED_SECTION_COPY,
+  ArchivedSection,
+  type ArchivedSectionProps,
+} from "./composed/display/archived-section";
+export {
+  CategoryChip,
+  type CategoryChipProps,
+} from "./composed/display/category-chip";
+export {
+  GroupHeading,
+  type GroupHeadingProps,
+} from "./composed/display/group-heading";
+export {
+  CURATED_GLYPHS,
+  ItemIcon,
+  getCuratedGlyph,
+  type CuratedGlyph,
+  type ItemIconProps,
+  type ItemIconSize,
+} from "./composed/display/item-icon";
+export {
+  ListRow,
+  listRowSurfaceVariants,
+  type ListRowClasses,
+  type ListRowProps,
+  type ListRowSurfaceVariants,
+} from "./composed/display/list-row";
+export {
+  SettingsRow,
+  type SettingsRowProps,
+} from "./composed/display/settings-row";
+export { Tag, type TagProps, type TagTone } from "./composed/display/tag";
+export {
+  TimeText,
+  type TimeTextMode,
+  type TimeTextProps,
+} from "./composed/display/time-text";
+export {
+  TRUST_LINE_COPY,
+  TrustLine,
+  type TrustLineProps,
+} from "./composed/display/trust-line";
+
+/* ---- composed: layout & navigation ---- */
+export { AuthFrame, type AuthFrameProps } from "./composed/layout/auth-frame";
+export {
+  ResponsiveSheet,
+  type ResponsiveSheetClasses,
+  type ResponsiveSheetProps,
+} from "./composed/layout/responsive-sheet";
+export {
+  ScreenFrame,
+  type ScreenFrameProps,
+} from "./composed/layout/screen-frame";
+export {
+  AppHeader,
+  type AppHeaderClasses,
+  type AppHeaderProps,
+} from "./composed/navigation/app-header";
+
+/* ---- composed: feedback ---- */
+export {
+  DISCARD_DIALOG_COPY,
+  DiscardDialog,
+  type DiscardDialogProps,
+} from "./composed/feedback/discard-dialog";
+export {
+  EmptyState,
+  type EmptyStateAction,
+  type EmptyStateProps,
+} from "./composed/feedback/empty-state";
+export {
+  InlineQuestionRow,
+  type InlineQuestionAction,
+  type InlineQuestionRowProps,
+} from "./composed/feedback/inline-question-row";
+export {
+  LoadingText,
+  type LoadingTextProps,
+} from "./composed/feedback/loading-text";
+export {
+  RegionRetry,
+  type RegionRetryProps,
+} from "./composed/feedback/region-retry";
+export {
+  SAVE_STATUS_COPY,
+  SaveStatusText,
+  type SaveStatusTextProps,
+} from "./composed/feedback/save-status";
+export {
+  SkeletonBlock,
+  SkeletonRow,
+  type SkeletonBlockProps,
+  type SkeletonRowProps,
+} from "./composed/feedback/skeleton-row";
+export {
+  InstallLine,
+  PermissionLine,
+  STATUS_LINE_COPY,
+  StatusLine,
+  TimezoneLine,
+  UpdateLine,
+  timezoneMismatchText,
+  type InstallLineProps,
+  type PermissionLineProps,
+  type StatusLineCopyEntry,
+  type StatusLineProps,
+  type TimezoneLineProps,
+  type UpdateLineProps,
+} from "./composed/feedback/status-line";
+export {
+  ThreeOptionDialog,
+  type ThreeOptionDialogOption,
+  type ThreeOptionDialogProps,
+} from "./composed/feedback/three-option-dialog";
+export {
+  TypedConfirmDialog,
+  type TypedConfirmDialogProps,
+} from "./composed/feedback/typed-confirm-dialog";
+
+/* ---- composed: control ---- */
+export {
+  ChipPicker,
+  type ChipPickerOption,
+  type ChipPickerProps,
+} from "./composed/control/chip-picker";
+export {
+  ColorSwatchRow,
+  type ColorSwatchRowProps,
+  type ColorSwatchValue,
+} from "./composed/control/color-swatch-row";
+export {
+  CountStepper,
+  type CountStepperProps,
+} from "./composed/control/count-stepper";
+export {
+  CuratedIconGrid,
+  type CuratedIconGridProps,
+} from "./composed/control/curated-icon-grid";
+export { DateField, type DateFieldProps } from "./composed/control/date-field";
+export {
+  EllipsesMenu,
+  type EllipsesMenuItem,
+  type EllipsesMenuProps,
+} from "./composed/control/ellipses-menu";
+export {
+  ImageCropper,
+  type ImageCropperProps,
+} from "./composed/control/image-cropper";
+export {
+  LargeTargetRow,
+  type LargeTargetOption,
+  type LargeTargetRowProps,
+} from "./composed/control/large-target-row";
+export {
+  MINUTES_STEPPER_COPY,
+  MinutesStepper,
+  type MinutesStepperProps,
+} from "./composed/control/minutes-stepper";
+export {
+  NotificationRow,
+  type NotificationRowProps,
+  type NotificationRowValue,
+} from "./composed/control/notification-row";
+export {
+  NumberUnitInput,
+  type NumberUnitChip,
+  type NumberUnitInputProps,
+} from "./composed/control/number-unit-input";
+export {
+  OAuthButton,
+  type OAuthButtonProps,
+} from "./composed/control/oauth-button";
+export {
+  PICKER_LIST_COPY,
+  PickerList,
+  type PickerListGroup,
+  type PickerListItem,
+  type PickerListProps,
+} from "./composed/control/picker-list";
+export {
+  QuickChipRow,
+  type QuickChip,
+  type QuickChipRowProps,
+} from "./composed/control/quick-chip-row";
+export {
+  RangeInput,
+  type RangeInputProps,
+  type RangeValue,
+} from "./composed/control/range-input";
+export {
+  OTHER_REASON_KEY,
+  ReasonChips,
+  type ReasonChipsProps,
+} from "./composed/control/reason-chips";
+export {
+  SearchField,
+  type SearchFieldClasses,
+  type SearchFieldProps,
+} from "./composed/control/search-field";
+export {
+  SegmentedControl,
+  type SegmentedControlClasses,
+  type SegmentedControlOption,
+  type SegmentedControlProps,
+} from "./composed/control/segmented-control";
+export {
+  StarterSetChooser,
+  type StarterSetChooserProps,
+  type StarterSetItem,
+} from "./composed/control/starter-set-chooser";
+export {
+  Stepper17,
+  stepper17CellVariants,
+  type Stepper17Classes,
+  type Stepper17Props,
+  type Stepper17Value,
+} from "./composed/control/stepper-17";
+export {
+  TextDisclosureButton,
+  type TextDisclosureButtonClasses,
+  type TextDisclosureButtonProps,
+} from "./composed/control/text-disclosure-button";
+export {
+  TIERS_WITH_REASONS,
+  TIER_RADIO_ROWS_COPY,
+  TIER_ROWS,
+  TierRadioRows,
+  type TierCopy,
+  type TierRadioRowsProps,
+} from "./composed/control/tier-radio-rows";
+export { TimeField, type TimeFieldProps } from "./composed/control/time-field";
+export {
+  TimezoneSelect,
+  type TimezoneRegion,
+  type TimezoneSelectProps,
+  type TimezoneZone,
+} from "./composed/control/timezone-select";
+export {
+  WeekdayChips,
+  type Weekday,
+  type WeekdayChipsProps,
+} from "./composed/control/weekday-chips";

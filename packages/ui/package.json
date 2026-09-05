@@ -158,7 +158,199 @@
       "types": "./src/primitives/typography/text/index.ts",
       "default": "./src/primitives/typography/text/index.ts"
     },
-    "./styles/globals.css": "./src/styles/globals.css"
+    "./styles/globals.css": "./src/styles/globals.css",
+    "./chip-picker": {
+      "types": "./src/composed/control/chip-picker/index.ts",
+      "default": "./src/composed/control/chip-picker/index.ts"
+    },
+    "./color-swatch-row": {
+      "types": "./src/composed/control/color-swatch-row/index.ts",
+      "default": "./src/composed/control/color-swatch-row/index.ts"
+    },
+    "./count-stepper": {
+      "types": "./src/composed/control/count-stepper/index.ts",
+      "default": "./src/composed/control/count-stepper/index.ts"
+    },
+    "./curated-icon-grid": {
+      "types": "./src/composed/control/curated-icon-grid/index.ts",
+      "default": "./src/composed/control/curated-icon-grid/index.ts"
+    },
+    "./date-field": {
+      "types": "./src/composed/control/date-field/index.ts",
+      "default": "./src/composed/control/date-field/index.ts"
+    },
+    "./ellipses-menu": {
+      "types": "./src/composed/control/ellipses-menu/index.ts",
+      "default": "./src/composed/control/ellipses-menu/index.ts"
+    },
+    "./image-cropper": {
+      "types": "./src/composed/control/image-cropper/index.ts",
+      "default": "./src/composed/control/image-cropper/index.ts"
+    },
+    "./large-target-row": {
+      "types": "./src/composed/control/large-target-row/index.ts",
+      "default": "./src/composed/control/large-target-row/index.ts"
+    },
+    "./minutes-stepper": {
+      "types": "./src/composed/control/minutes-stepper/index.ts",
+      "default": "./src/composed/control/minutes-stepper/index.ts"
+    },
+    "./notification-row": {
+      "types": "./src/composed/control/notification-row/index.ts",
+      "default": "./src/composed/control/notification-row/index.ts"
+    },
+    "./number-unit-input": {
+      "types": "./src/composed/control/number-unit-input/index.ts",
+      "default": "./src/composed/control/number-unit-input/index.ts"
+    },
+    "./oauth-button": {
+      "types": "./src/composed/control/oauth-button/index.ts",
+      "default": "./src/composed/control/oauth-button/index.ts"
+    },
+    "./picker-list": {
+      "types": "./src/composed/control/picker-list/index.ts",
+      "default": "./src/composed/control/picker-list/index.ts"
+    },
+    "./quick-chip-row": {
+      "types": "./src/composed/control/quick-chip-row/index.ts",
+      "default": "./src/composed/control/quick-chip-row/index.ts"
+    },
+    "./range-input": {
+      "types": "./src/composed/control/range-input/index.ts",
+      "default": "./src/composed/control/range-input/index.ts"
+    },
+    "./reason-chips": {
+      "types": "./src/composed/control/reason-chips/index.ts",
+      "default": "./src/composed/control/reason-chips/index.ts"
+    },
+    "./search-field": {
+      "types": "./src/composed/control/search-field/index.ts",
+      "default": "./src/composed/control/search-field/index.ts"
+    },
+    "./segmented-control": {
+      "types": "./src/composed/control/segmented-control/index.ts",
+      "default": "./src/composed/control/segmented-control/index.ts"
+    },
+    "./starter-set-chooser": {
+      "types": "./src/composed/control/starter-set-chooser/index.ts",
+      "default": "./src/composed/control/starter-set-chooser/index.ts"
+    },
+    "./stepper-17": {
+      "types": "./src/composed/control/stepper-17/index.ts",
+      "default": "./src/composed/control/stepper-17/index.ts"
+    },
+    "./text-disclosure-button": {
+      "types": "./src/composed/control/text-disclosure-button/index.ts",
+      "default": "./src/composed/control/text-disclosure-button/index.ts"
+    },
+    "./tier-radio-rows": {
+      "types": "./src/composed/control/tier-radio-rows/index.ts",
+      "default": "./src/composed/control/tier-radio-rows/index.ts"
+    },
+    "./time-field": {
+      "types": "./src/composed/control/time-field/index.ts",
+      "default": "./src/composed/control/time-field/index.ts"
+    },
+    "./timezone-select": {
+      "types": "./src/composed/control/timezone-select/index.ts",
+      "default": "./src/composed/control/timezone-select/index.ts"
+    },
+    "./weekday-chips": {
+      "types": "./src/composed/control/weekday-chips/index.ts",
+      "default": "./src/composed/control/weekday-chips/index.ts"
+    },
+    "./archived-section": {
+      "types": "./src/composed/display/archived-section/index.ts",
+      "default": "./src/composed/display/archived-section/index.ts"
+    },
+    "./category-chip": {
+      "types": "./src/composed/display/category-chip/index.ts",
+      "default": "./src/composed/display/category-chip/index.ts"
+    },
+    "./group-heading": {
+      "types": "./src/composed/display/group-heading/index.ts",
+      "default": "./src/composed/display/group-heading/index.ts"
+    },
+    "./item-icon": {
+      "types": "./src/composed/display/item-icon/index.ts",
+      "default": "./src/composed/display/item-icon/index.ts"
+    },
+    "./list-row": {
+      "types": "./src/composed/display/list-row/index.ts",
+      "default": "./src/composed/display/list-row/index.ts"
+    },
+    "./settings-row": {
+      "types": "./src/composed/display/settings-row/index.ts",
+      "default": "./src/composed/display/settings-row/index.ts"
+    },
+    "./tag": {
+      "types": "./src/composed/display/tag/index.ts",
+      "default": "./src/composed/display/tag/index.ts"
+    },
+    "./time-text": {
+      "types": "./src/composed/display/time-text/index.ts",
+      "default": "./src/composed/display/time-text/index.ts"
+    },
+    "./trust-line": {
+      "types": "./src/composed/display/trust-line/index.ts",
+      "default": "./src/composed/display/trust-line/index.ts"
+    },
+    "./discard-dialog": {
+      "types": "./src/composed/feedback/discard-dialog/index.ts",
+      "default": "./src/composed/feedback/discard-dialog/index.ts"
+    },
+    "./empty-state": {
+      "types": "./src/composed/feedback/empty-state/index.ts",
+      "default": "./src/composed/feedback/empty-state/index.ts"
+    },
+    "./inline-question-row": {
+      "types": "./src/composed/feedback/inline-question-row/index.ts",
+      "default": "./src/composed/feedback/inline-question-row/index.ts"
+    },
+    "./loading-text": {
+      "types": "./src/composed/feedback/loading-text/index.ts",
+      "default": "./src/composed/feedback/loading-text/index.ts"
+    },
+    "./region-retry": {
+      "types": "./src/composed/feedback/region-retry/index.ts",
+      "default": "./src/composed/feedback/region-retry/index.ts"
+    },
+    "./save-status": {
+      "types": "./src/composed/feedback/save-status/index.ts",
+      "default": "./src/composed/feedback/save-status/index.ts"
+    },
+    "./skeleton-row": {
+      "types": "./src/composed/feedback/skeleton-row/index.ts",
+      "default": "./src/composed/feedback/skeleton-row/index.ts"
+    },
+    "./status-line": {
+      "types": "./src/composed/feedback/status-line/index.ts",
+      "default": "./src/composed/feedback/status-line/index.ts"
+    },
+    "./three-option-dialog": {
+      "types": "./src/composed/feedback/three-option-dialog/index.ts",
+      "default": "./src/composed/feedback/three-option-dialog/index.ts"
+    },
+    "./typed-confirm-dialog": {
+      "types": "./src/composed/feedback/typed-confirm-dialog/index.ts",
+      "default": "./src/composed/feedback/typed-confirm-dialog/index.ts"
+    },
+    "./auth-frame": {
+      "types": "./src/composed/layout/auth-frame/index.ts",
+      "default": "./src/composed/layout/auth-frame/index.ts"
+    },
+    "./responsive-sheet": {
+      "types": "./src/composed/layout/responsive-sheet/index.ts",
+      "default": "./src/composed/layout/responsive-sheet/index.ts"
+    },
+    "./screen-frame": {
+      "types": "./src/composed/layout/screen-frame/index.ts",
+      "default": "./src/composed/layout/screen-frame/index.ts"
+    },
+    "./app-header": {
+      "types": "./src/composed/navigation/app-header/index.ts",
+      "default": "./src/composed/navigation/app-header/index.ts"
+    }
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
