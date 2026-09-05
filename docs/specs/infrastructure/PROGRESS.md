@@ -14,7 +14,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | INF-8 | `@syn/api`, `@syn/hooks`, client wiring | INF-7 | Complete | 2026-09-04 |
 | INF-9 | PWA and push | INF-8 | Complete (device tests pending staging) | 2026-09-04 |
 | INF-10 | Environments, CI, Vercel, agent permissions | INF-8 | Complete (dashboards pending Taylor) | 2026-09-04 |
-| INF-11 | Documentation and agent spine | INF-10 | Not started | |
+| INF-11 | Documentation and agent spine | INF-10 | Complete | 2026-09-04 |
 
 ## Checklist
 
@@ -28,4 +28,4 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] INF-8
 - [x] INF-9
 - [x] INF-10
-- [ ] INF-11
+- [x] INF-11

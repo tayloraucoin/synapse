@@ -4,7 +4,7 @@ Yarn 4 + Turborepo monorepo for Synapse — a habit-tracking PWA built on the pr
 
 **For AI agents:** [`AGENTS.md`](AGENTS.md) is the canonical instruction spine — start there. (`CLAUDE.md` is a pointer to it.)
 
-> **Foundation in progress.** The repository is being built out ticket by ticket from [`docs/specs/infrastructure/`](docs/specs/infrastructure/). Rows below marked *(INF-n)* do not exist yet; the ticket named is the one that lands them. Current state: INF-1 — the monorepo shape, the toolchain pins, the import-boundary lint, and one placeholder page.
+> **Foundation complete, product not started.** All eleven tickets in [`docs/specs/infrastructure/`](docs/specs/infrastructure/) are done: the monorepo, the packages, the design system, the database, auth, the app scaffold, the typed API, the PWA plumbing, delivery, and the docs. Every route exists as a placeholder that names its screen. The feature epics — Setup, In Use, Review — build on top.
 
 ## Essential docs
 
@@ -15,9 +15,10 @@ Yarn 4 + Turborepo monorepo for Synapse — a habit-tracking PWA built on the pr
 | [`docs/specs/infrastructure/00-build-order.md`](docs/specs/infrastructure/00-build-order.md) | Ordered build queue and critical path |
 | [`docs/ux/habit_tracker_official_ux_spec_v1.md`](docs/ux/habit_tracker_official_ux_spec_v1.md) | Product behaviour source of truth (§0.3 rulings are signed) |
 | [`docs/ux/`](docs/ux/) | Epic and cross-cutting UX architecture, component handoff |
-| `docs/architecture/codebase-conventions.md` | The placement/naming/package-graph contract *(INF-11)* |
-| `docs/architecture/tech-stack.md` | Canonical stack choices + pinned versions *(INF-11)* |
-| `docs/developer-guides/` | Database setup, migrations, RLS, authentication *(INF-11)* |
+| [`docs/README.md`](docs/README.md) | The documentation index — one line per document |
+| [`docs/architecture/codebase-conventions.md`](docs/architecture/codebase-conventions.md) | The placement/naming/package-graph contract (locked) |
+| [`docs/architecture/tech-stack.md`](docs/architecture/tech-stack.md) | Canonical stack choices + pinned versions |
+| [`docs/developer-guides/environments.md`](docs/developer-guides/environments.md) | Tiers, and the setup checklists for Supabase, Vercel, GitHub, and local |
 
 ## Repository layout
 
@@ -35,11 +36,11 @@ Shared libraries use the `@syn/*` scope.
 | Package | Role |
 | --- | --- |
 | `@syn/config` | ESLint, Prettier, Tailwind preset, TSConfig bases (subpath exports) |
-| `@syn/types`, `@syn/constants`, `@syn/utils`, `@syn/validators`, `@syn/observability` | Platform-pure capability layers *(INF-2)* |
-| `@syn/ui` | Shared web components (Radix + Tailwind, Storybook-first) *(INF-3, INF-4)* |
-| `@syn/db` | Drizzle schema, client, migrations, RLS *(INF-5)* |
-| `@syn/auth` | Supabase Auth helpers *(INF-6)* |
-| `@syn/api`, `@syn/hooks` | tRPC routers + services, shared headless hooks *(INF-8)* |
+| `@syn/types`, `@syn/constants`, `@syn/utils`, `@syn/validators`, `@syn/observability` | Platform-pure capability layers |
+| `@syn/ui` | Shared web components (Radix + Tailwind, Storybook-first) — the one web-only package |
+| `@syn/db` | Drizzle schema, client, migrations, the RLS bridge |
+| `@syn/auth` | Supabase Auth clients, session refresh, the AuthContext bridge |
+| `@syn/api`, `@syn/hooks` | tRPC routers + services, and platform-pure headless hooks |
 
 Phase 1 has no AI package, no billing, no marketing site.
 
@@ -71,7 +72,9 @@ Verify the way CI does, in this order:
 yarn lint && yarn lint:boundaries && yarn check-types && yarn build
 ```
 
-Database commands (`yarn db:generate`, `db:migrate`, `db:push`, `db:setup`, `db:reset`, `db:seed`, `db:seed-users`, `db:schema-reference`) are wired at the root and target `@syn/db` *(INF-5)*. Storybook (`yarn ui:storybook`) targets `@syn/ui` *(INF-3)*.
+Database commands are wired at the root and target `@syn/db` — see [`packages/db/SETUP.md`](packages/db/SETUP.md). **An agent never runs one against a hosted tier**; it authors the SQL and a human applies it.
+
+Storybook (`yarn ui:storybook`) is the design system's workshop. Docs upkeep is `yarn directory-map` and `yarn docs:check-links`.
 
 ## Package alias
 

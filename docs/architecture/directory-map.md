@@ -1,0 +1,608 @@
+# Directory map
+
+**Generated.** Run `yarn directory-map` after adding, moving, or removing
+files. Never hand-edit the tree below — edit the `ANNOTATIONS` map in
+[`../../scripts/generate-directory-map.mjs`](../../scripts/generate-directory-map.mjs)
+and regenerate.
+
+Notes on the right explain what a load-bearing file is for. A path with no note
+is ordinary.
+
+<!-- BEGIN:generated-tree -->
+
+_Generated 2026-09-05 · 410 files (noise collapsed) · `yarn directory-map` to refresh._
+
+```
+.claude/
+  settings.json  # tracked so every worktree inherits it; denies destructive database commands
+.github/
+  workflows/
+    ci.yml  # lint → boundaries → types → build, with no secrets
+  PULL_REQUEST_TEMPLATE.md
+apps/
+  mobile/
+    README.md  # a deliberate empty seam. Do not scaffold
+  web/
+    app/
+      _components/
+        pwa-mode-sync.tsx
+        service-worker-registration.tsx
+      (auth)/
+        forgot/
+          page.tsx
+        invite/
+          page.tsx
+        reset/
+          page.tsx
+        signin/
+          page.tsx
+        signup/
+          page.tsx
+        verify/
+          page.tsx
+        layout.tsx
+      (setup)/
+        setup/
+          [step]/
+            page.tsx
+        layout.tsx
+      (shell)/
+        day/
+          [date]/
+            item/
+              [id]/
+                page.tsx
+            schedule/
+              page.tsx
+            page.tsx
+        review/
+          day/
+            [date]/
+              page.tsx
+          history/
+            page.tsx
+          week/
+            [week]/
+              habit/
+                [id]/
+                  page.tsx
+              page.tsx
+          page.tsx
+        settings/
+          about/
+            page.tsx
+          account/
+            page.tsx
+          appearance/
+            page.tsx
+          categories/
+            page.tsx
+          data/
+            page.tsx
+          day/
+            page.tsx
+          habits/
+            [id]/
+              page.tsx
+            page.tsx
+          notifications/
+            page.tsx
+          reasons/
+            page.tsx
+          share/
+            page.tsx
+          templates/
+            [id]/
+              page.tsx
+            page.tsx
+          week/
+            [week]/
+              page.tsx
+            page.tsx
+          page.tsx
+        today/
+          schedule/
+            page.tsx
+          page.tsx
+        layout.tsx  # THE auth gate
+      api/
+        jobs/
+          scheduler/
+            route.ts
+        pwa/
+          push/
+            subscribe/
+              route.ts
+            unsubscribe/
+              route.ts
+        trpc/
+          [trpc]/
+            route.ts
+      auth/
+        callback/
+          route.ts
+        confirm/
+          route.ts
+      logout/
+        route.ts
+      error.tsx
+      favicon.ico
+      globals.css
+      layout.tsx
+      manifest.ts
+      not-found.tsx
+      page.tsx
+    lib/
+      auth/
+        auth-redirect-response.ts
+        get-request-context.ts
+        get-request-user.ts
+        require-verified-email.ts
+      clients/
+        supabase/
+          client.ts
+      entry/
+        launch-count.ts
+        resolve-entry-for-request.ts
+        resolve-entry.ts  # the cross-cutting §4.2 decision tree, as a pure function
+      env/
+        resolve-tier-env.ts
+      forms/
+        use-synapse-form.ts
+      pwa/
+        install-detection.ts
+        push-subscribe.ts
+        use-install-prompt.ts
+      stores/
+        .gitkeep
+        README.md  # the client-state rule, and why there is no Zustand store yet
+      trpc/
+        client.ts
+        provider.tsx
+        server.ts
+      routes.ts  # every path in the app. A hardcoded string elsewhere is a defect
+    public/
+      icons/
+        <5 app-mark PNGs — generated placeholder, official spec §9.8>
+      sw.js  # push only. No caching — Phase 1 has no offline contract
+    .gitignore
+    AGENTS.md
+    CLAUDE.md
+    env.ts  # the only process.env reader in the app
+    eslint.config.mjs
+    next.config.ts  # collapses the tier vars into canonical names the browser can inline
+    package.json
+    postcss.config.mjs
+    proxy.ts  # session refresh only — Next 16's name for middleware
+    tsconfig.json
+    vercel.json
+docs/
+  ai-guides/
+    brand-tokens.md
+    classnames.md
+    component-guidelines.md
+    copy-conventions.md
+    db-and-rls-authoring.md
+    README.md
+    trpc-foundation-patterns.md
+    typography-guidelines.md
+  architecture/
+    codebase-conventions.md
+    directory-map.md
+    drizzle-orm-conventions.md
+    tech-stack.md
+  developer-guides/
+    authentication.md
+    database-setup.md
+    environments.md
+    migrations.md
+    rls.md
+  roles/
+    product-design/
+      vesper-ux-ui-designer-role-prompt.md
+    role-authoring-guide.md
+  specs/
+    infrastructure/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md  # append-only. Never edit a spec to match what shipped
+      INF-1-monorepo-rebase.md
+      INF-10-environments-ci-deploy.md
+      INF-11-docs-and-agent-spine.md
+      INF-2-leaf-packages.md
+      INF-3-design-tokens-theme-storybook.md
+      INF-4-shadcn-primitives.md
+      INF-5-database-package.md
+      INF-6-auth-package.md
+      INF-7-web-app-scaffold.md
+      INF-8-api-hooks-client-state.md
+      INF-9-pwa-push.md
+      PROGRESS.md  # the only authoritative answer to "is this Complete"
+      README.md
+      TECHNICAL-DECISIONS.md
+    spec-system-guide.md
+  ux/
+    epic1_setup_ux_architecture.md
+    epic2_in_use_ux_architecture.md
+    epic3_review_ux_architecture.md
+    habit_tracker_official_ux_spec_v1.md
+    README.md
+    synapse_navigation_and_system_ux_architecture.md
+    synapse_ui_component_needs_and_handoff_v2.md
+    synapse_ui_component_needs_and_handoff.md
+  README.md
+packages/
+  api/
+    src/
+      routers/
+        user.ts
+      services/
+        jobs/
+          run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
+        notifications/
+          fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
+          web-push.ts
+        user/
+          preferences.ts
+      context.ts
+      index.ts
+      root.ts
+      trpc.ts  # two procedure tiers, the error formatter, and the RLS rule in its header
+    .gitignore
+    eslint.config.mjs
+    package.json
+    tsconfig.json
+  auth/
+    src/
+      admin.ts
+      auth-errors.ts
+      client.ts
+      context.ts  # one person role, guest. service_role is for the scheduler
+      cookies.ts
+      env.ts
+      index.ts
+      middleware.ts  # updateSession — the only place sessions refresh; protection lives in layouts
+      server.ts
+      session.ts
+    .gitignore
+    eslint.config.mjs
+    package.json
+    tsconfig.json
+  config/
+    eslint/
+      base.js
+      boundaries.js  # the import matrix. Diverges from CC's copy — see TECHNICAL-DECISIONS
+      next.js
+      react-internal.js
+      spacing.js
+    prettier/
+      index.js
+    tailwind/
+      preset.css  # every design token, and the ONE place a hex may appear
+    tsconfig/
+      base.json
+      nextjs.json
+      react-library.json
+    package.json
+  constants/
+    src/
+      brand.ts
+      contact.ts
+      index.ts
+      limits.ts  # Epic 1 §9's bounds, shared by the zod schema and the input's maxLength
+      motion.ts
+      storage-keys.ts
+      user-images.ts
+    .gitignore
+    eslint.config.mjs
+    package.json
+    tsconfig.json
+  db/
+    migrations/
+      <1 migration .sql files, 0000–0000 — append-only, human-reviewed before a hosted migrate>
+      meta/ <2 drizzle snapshot files + _journal.json>
+    scripts/
+      generate-schema-reference.mjs
+      reset-local-db.ts
+      run-setup-sql.ts
+      seed-users.ts
+    src/
+      local-dev/
+        ensure-local-user-from-supabase-auth.ts
+      schema/
+        notification/
+          index.ts
+          web-push-subscriptions.ts
+        rls/
+          helpers.ts
+          standard-policies.ts  # three factories, all owner-private. No admin-read exists
+        user/
+          index.ts
+          users.ts
+        auth.ts
+        enums.ts
+        index.ts
+      seed/
+        index.ts
+      build-database-env-for-next-config.ts
+      client.ts
+      connection-env.ts  # tier resolution; defaults to local so nothing reaches production by omission
+      index.ts
+      migrate-client.ts
+      rls.ts  # THE RLS bridge. Every user-scoped query goes through it; the singleton db bypasses policies
+    supabase/
+      setup/
+        01_init_functions.sql
+        02_apply_triggers_rls.sql  # data-driven: a new table gets updated_at and RLS automatically
+        03_storage_buckets.sql
+    .env.example
+    .gitignore
+    AGENTS.md
+    CLAUDE.md
+    drizzle.config.ts
+    eslint.config.mjs
+    package.json
+    SCHEMA_REFERENCE.md  # generated from src/schema by db:schema-reference — never hand-edited
+    SETUP.md  # who owns auth.users, the tier rules, and the never-migrate-a-hosted-tier rule
+    tsconfig.json
+  hooks/
+    src/
+      index.ts
+      use-zod-form.ts
+    .gitignore
+    eslint.config.mjs
+    package.json
+    tsconfig.json
+  observability/
+    src/
+      describe-error.ts
+      index.ts
+      is-dev.ts
+      logging.ts
+    .gitignore
+    eslint.config.mjs
+    package.json
+    tsconfig.json
+  types/
+    src/
+      domain/
+        domain.ts  # schema-shaped unions, snake_case, fixed by v2 handoff §3.5
+        ui-state.ts  # presentational unions, kebab-case; derived per render, never stored
+        view.ts  # what a component receives — never a DB row
+      auth-context.ts
+      index.ts
+    .gitignore
+    eslint.config.mjs
+    package.json
+    tsconfig.json
+  ui/
+    .storybook/
+      fonts.css
+      main.ts
+      next-link-mock.tsx
+      preview.ts
+    src/
+      _shadcn/  # the CLI's landing zone. Never ships code — only .gitkeep
+        .gitkeep
+      branding/
+        index.ts
+        palette.stories.tsx
+        tokens.ts
+      composed/
+        control/
+          theme-control/
+            copy.ts
+            index.ts
+            theme-control.stories.tsx
+            theme-control.tsx
+      hooks/
+        use-mobile.ts
+        use-prefers-reduced-motion.ts
+        use-theme.ts
+      lib/
+        cn.ts
+        use-media-query.ts
+      primitives/
+        control/
+          button/
+            button.stories.tsx
+            button.tsx
+            button.variants.ts
+            index.ts
+          checkbox/
+            checkbox-field.tsx
+            checkbox.stories.tsx
+            checkbox.tsx
+            index.ts
+          input/
+            index.ts
+            input.stories.tsx
+            input.tsx
+            input.variants.ts
+          input-group/
+            index.ts
+            input-group.stories.tsx
+            input-group.tsx
+            input-group.variants.ts
+          native-select/
+            index.ts
+            native-select.stories.tsx
+            native-select.tsx
+          radio-group/
+            index.ts
+            radio-group.stories.tsx
+            radio-group.tsx
+          select/
+            index.ts
+            select.stories.tsx
+            select.tsx
+          switch/
+            index.ts
+            switch.stories.tsx
+            switch.tsx
+          tabs/
+            index.ts
+            tabs.stories.tsx
+            tabs.tsx
+            tabs.variants.ts
+          textarea/
+            index.ts
+            textarea.stories.tsx
+            textarea.tsx
+          toggle-group/
+            index.ts
+            toggle-group.stories.tsx
+            toggle-group.tsx
+            toggle-group.variants.ts
+        display/
+          avatar/
+            avatar.stories.tsx
+            avatar.tsx
+            index.ts
+          badge/
+            badge.stories.tsx
+            badge.tsx
+            badge.variants.ts
+            index.ts
+          empty/
+            empty.stories.tsx
+            empty.tsx
+            empty.variants.ts
+            index.ts
+          helper-text/
+            helper-text.stories.tsx
+            helper-text.tsx
+            index.ts
+          kbd/
+            index.ts
+            kbd.stories.tsx
+            kbd.tsx
+          label/
+            index.ts
+            label.stories.tsx
+            label.tsx
+          skeleton/
+            index.ts
+            skeleton.stories.tsx
+            skeleton.tsx
+        feedback/
+          alert-dialog/
+            alert-dialog.stories.tsx
+            alert-dialog.tsx
+            index.ts
+          dialog/
+            dialog.stories.tsx
+            dialog.tsx
+            index.ts
+          dropdown-menu/
+            dropdown-menu.stories.tsx
+            dropdown-menu.tsx
+            index.ts
+          popover/
+            index.ts
+            popover.stories.tsx
+            popover.tsx
+          spinner/
+            index.ts
+            spinner.stories.tsx
+            spinner.tsx
+          toaster/
+            index.ts
+            toaster.stories.tsx
+            toaster.tsx
+          tooltip/
+            index.ts
+            tooltip.stories.tsx
+            tooltip.tsx
+        layout/
+          collapsible/
+            collapsible.stories.tsx
+            collapsible.tsx
+            index.ts
+          drawer/
+            drawer.stories.tsx
+            drawer.tsx
+            index.ts
+          separator/
+            index.ts
+            separator.stories.tsx
+            separator.tsx
+          sheet/
+            index.ts
+            sheet.stories.tsx
+            sheet.tsx
+        navigation/
+          bottom-nav/
+            bottom-nav.stories.tsx
+            bottom-nav.tsx
+            bottom-nav.variants.ts
+            index.ts
+          sidebar/
+            index.ts
+            sidebar.stories.tsx
+            sidebar.tsx
+            sidebar.variants.ts
+        typography/
+          text/
+            index.ts
+            text.stories.tsx
+            text.tsx
+            text.variants.ts
+      providers/
+        theme-provider.tsx
+      styles/
+        globals.css
+      index.ts  # enumerated exports; no "./*" wildcard
+    .gitignore
+    AGENTS.md
+    CLAUDE.md
+    components.json  # shadcn CLI config; writes to src/_shadcn, which the re-slot empties
+    eslint.config.mjs
+    package.json
+    tsconfig.json
+  utils/
+    src/
+      errors.ts
+      index.ts
+      number.ts
+      path.ts
+      string.ts
+      time.ts  # every formatter takes an explicit timeZone — the day's, not the viewer's
+    .gitignore
+    eslint.config.mjs
+    package.json
+    tsconfig.json
+  validators/
+    src/
+      auth-credentials.ts
+      index.ts
+      keys.ts
+      preferences.ts
+      push.ts
+      user.ts
+    .gitignore
+    eslint.config.mjs
+    package.json
+    tsconfig.json
+scripts/
+  check-doc-links.mjs
+  generate-directory-map.mjs
+  local-dev-origins.mjs
+  print-local-urls.mjs
+.env.example
+.gitignore
+.nvmrc
+.yarnrc.yml
+AGENTS.md  # the canonical agent instruction spine — shared guidance is edited only here
+CLAUDE.md  # one line: @AGENTS.md. Never add content
+eslint.config.mjs  # root config, import boundaries only; code quality runs per package
+package.json
+prettier.config.mjs
+README.md
+tsconfig.json  # project references only; no files of its own
+turbo.json  # task graph + globalEnv — an undeclared env var fails the turbo lint, so add it here
+yarn.lock
+```
+
+<!-- END:generated-tree -->

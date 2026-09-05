@@ -8,6 +8,8 @@
     "lint:boundaries": "eslint . --max-warnings 0",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
+    "directory-map": "node scripts/generate-directory-map.mjs",
+    "docs:check-links": "node scripts/check-doc-links.mjs",
     "web:dev": "turbo run dev --filter=web",
     "web:dev:local": "node scripts/print-local-urls.mjs 3000 && turbo run dev:local --filter=web",
     "web:build": "turbo run build --filter=web",

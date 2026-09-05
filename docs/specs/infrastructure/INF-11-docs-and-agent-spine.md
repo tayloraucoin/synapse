@@ -3,7 +3,7 @@
 **Epic:** INF — Infrastructure · **Phase 4** · Size: M
 **Slice type:** The management layer — CC's premise that documentation *is* the management. The failure class is a doc that describes CC instead of Synapse, or a rule stated in two places.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04)
 
 ---
 

@@ -35,7 +35,7 @@ Everything a feature epic needs to run end to end (a signed-in page that reads a
 
 ### Phase 4 — Environments, delivery, spine
 - [x] **INF-10** · Environments, CI, Vercel, agent permissions — M · (INF-8)
-- [ ] **INF-11** · Documentation and agent spine — M · (INF-10)
+- [x] **INF-11** · Documentation and agent spine — M · (INF-10)
 
 ## Ordering constraints (alphabetical order hides these)
 
