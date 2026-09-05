@@ -17,3 +17,17 @@ export {
   updatePreferences,
   type UserPreferencesRow,
 } from "./services/user/preferences";
+export {
+  isVapidConfigured,
+  sendWebPush,
+  WebPushGoneError,
+  type WebPushPayload,
+  type WebPushSubscriptionData,
+} from "./services/notifications/web-push";
+export { sendToUser, type FanOutResult } from "./services/notifications/fan-out";
+export {
+  runScheduledJobs,
+  SCHEDULED_JOBS,
+  type ScheduledJob,
+  type ScheduledJobResult,
+} from "./services/jobs/run-scheduled-jobs";

@@ -3,7 +3,7 @@
 **Epic:** INF — Infrastructure · **Phase 3** · Size: M
 **Slice type:** Platform plumbing — the failure classes are a service worker that caches (Phase 1 has no offline contract), a push payload carrying user content, and a scheduler route callable without its secret.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04) — device-level AC1/AC3/AC4 pending a deployed tier
 
 ---
 

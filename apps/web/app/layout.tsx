@@ -4,6 +4,8 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { ThemeProvider, Toaster } from "@syn/ui";
 
+import { PwaModeSync } from "@/app/_components/pwa-mode-sync";
+import { ServiceWorkerRegistration } from "@/app/_components/service-worker-registration";
 import { TrpcProvider } from "@/lib/trpc/provider";
 
 import "./globals.css";
@@ -37,6 +39,14 @@ export const metadata: Metadata = {
     capable: true,
     title: "Synapse",
     statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    // iOS ignores the manifest and reads this one.
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
 
@@ -76,7 +86,8 @@ export default function RootLayout({
           </NuqsAdapter>
           <Toaster />
         </ThemeProvider>
-        {/* ServiceWorkerRegistration mounts here — INF-9. */}
+        <ServiceWorkerRegistration />
+        <PwaModeSync />
       </body>
     </html>
   );
