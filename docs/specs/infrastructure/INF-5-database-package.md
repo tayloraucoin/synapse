@@ -5,7 +5,7 @@
 **Mason review:** the two design calls routed below (`users` columns; `web_push_subscriptions` placement). Recommended designs are stated; counter-propose in `TECHNICAL-DECISIONS.md`.
 **Vigil:** review by *inducing* the tier failures — run `db:reset` with `DATABASE_ENVIRONMENT=staging` and confirm it refuses; run a user-scoped query through the singleton `db` and confirm RLS denies it under `SET LOCAL role authenticated`.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04) — code and migration done and verified locally; **staging `db:migrate` + `db:setup` pending Taylor**
 
 > **Mason — migration review.** This ticket generates migration `0000` and hand-edits it (the `CREATE SCHEMA IF NOT EXISTS "auth"` guard CC documents). A human reviews the SQL and runs `yarn db:migrate` against staging; the agent never runs `db:migrate`, `db:push`, or `db:reset` against a hosted tier. Two calls are yours: (1) the `users` shadow columns for Phase 1 (recommended below); (2) whether `web_push_subscriptions` lands here or in INF-9 (recommended: here, because it is the only table INF-9 needs and INF-9 should not generate a migration).
 

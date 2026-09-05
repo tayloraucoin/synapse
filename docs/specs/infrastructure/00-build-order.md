@@ -25,7 +25,7 @@ Everything a feature epic needs to run end to end (a signed-in page that reads a
 - [x] **INF-4** · shadcn primitives: install, re-slot, story — L · (INF-3) · Vesper review
 
 ### Phase 2 — Data and identity
-- [ ] **INF-5** · `@syn/db`: Drizzle, connection tiers, RLS bridge, shadow users, setup SQL — L · (INF-2) · Mason migration review; human runs `db:migrate`
+- [x] **INF-5** · `@syn/db`: Drizzle, connection tiers, RLS bridge, shadow users, setup SQL — L · (INF-2) · Mason migration review; human runs `db:migrate`
 - [ ] **INF-6** · `@syn/auth`: Supabase Auth factories, session refresh, callbacks — L · (INF-5)
 
 ### Phase 3 — The web app and its rails
