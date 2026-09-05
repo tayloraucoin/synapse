@@ -34,7 +34,7 @@ Everything a feature epic needs to run end to end (a signed-in page that reads a
 - [x] **INF-9** · PWA: manifest, service worker, install, push subscription, scheduler — M · (INF-8)
 
 ### Phase 4 — Environments, delivery, spine
-- [ ] **INF-10** · Environments, CI, Vercel, agent permissions — M · (INF-8)
+- [x] **INF-10** · Environments, CI, Vercel, agent permissions — M · (INF-8)
 - [ ] **INF-11** · Documentation and agent spine — M · (INF-10)
 
 ## Ordering constraints (alphabetical order hides these)

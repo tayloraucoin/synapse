@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: lint · boundaries · types · build
+    runs-on: ubuntu-latest
+    env:
+      # Vercel Remote Cache — set TURBO_TOKEN (secret) and TURBO_TEAM (variable) in GitHub repo settings.
+      # https://turborepo.com/docs/guides/ci-vendors/github-actions#remote-caching-with-vercel-remote-cache
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint (code quality)
+        run: yarn lint
+
+      - name: Lint (import boundaries)
+        run: yarn lint:boundaries
+
+      - name: Typecheck
+        run: yarn check-types
+
+      # SKIP_ENV_VALIDATION because CI has no secrets and must not need any:
+      # the build compiles against types, and @syn/db's client is a lazy proxy
+      # that never opens a connection at build time. A CI that needed a
+      # database would be a CI that cannot run on a fork's pull request.
+      - name: Build
+        run: yarn build
+        env:
+          SKIP_ENV_VALIDATION: "true"

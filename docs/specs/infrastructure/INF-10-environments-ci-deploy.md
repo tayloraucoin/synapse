@@ -4,7 +4,7 @@
 **Slice type:** Delivery and guardrails — the failure classes are a production build with staging credentials, a preview deploy pointed at the production database, and an agent with the power to run `db:reset` against a hosted tier.
 **Vigil:** review by inducing — open a PR and confirm CI fails on a deliberate boundaries violation and on a type error; deploy a preview and confirm its Supabase project ref is the staging one.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04) — files landed and locally verified; **the GitHub, Vercel, and Supabase dashboard steps are Taylor's** (checklists in `docs/developer-guides/environments.md`)
 
 ---
 

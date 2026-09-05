@@ -1,0 +1,76 @@
+{
+  "$comment": "Repo-scoped Claude Code rules. TRACKED IN GIT so every worktree inherits them on checkout. Machine-wide baseline lives in ~/.claude/settings.json.",
+  "$comment-database": "The database rules encode the track's non-negotiable: an agent authors SQL and stops. db:reset and any drop are denied outright; every hosted write asks. db:reset also refuses non-local tiers in its own script (packages/db/scripts/reset-local-db.ts) — two independent guards, because this one is a config file someone can edit.",
+  "$comment-network": "curl/wget are allowed because sandbox.network below is the real boundary — the OS-level proxy restricts them to allowedDomains. URL-shaped allow patterns like Bash(curl http://x/ *) are fragile and bypassed by flag order, redirects, or protocol; domain enforcement belongs in the sandbox.",
+
+  "permissions": {
+    "allow": [
+      "Bash(yarn *)",
+      "Bash(npx tsx *)",
+      "Bash(npx eslint *)",
+      "Bash(npx prettier *)",
+      "Bash(npx tsc *)",
+      "Bash(npx shadcn *)",
+      "Bash(corepack *)",
+      "Bash(tsc *)",
+      "Bash(eslint *)",
+      "Bash(prettier *)",
+      "Bash(turbo *)",
+      "Bash(curl *)",
+      "Bash(wget *)"
+    ],
+
+    "deny": [
+      "Bash(*db:reset*)",
+      "Bash(*db:drop*)",
+      "Bash(*supabase db reset*)",
+      "Bash(*drizzle-kit drop*)",
+      "Bash(*DROP SCHEMA*)",
+      "Bash(*DROP DATABASE*)"
+    ],
+
+    "ask": [
+      "Bash(*db:migrate*)",
+      "Bash(*db:push*)",
+      "Bash(*db:seed*)",
+      "Bash(*db:setup*)",
+      "Bash(*drizzle-kit migrate*)",
+      "Bash(*drizzle-kit push*)"
+    ]
+  },
+
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": true,
+    "network": {
+      "$comment": "No api.anthropic.com: Phase 1 has no AI package and nothing in this repository calls a model. Add it when that changes, not before.",
+      "allowedDomains": [
+        "localhost",
+        "127.0.0.1",
+        "[::1]",
+        "registry.npmjs.org",
+        "registry.yarnpkg.com",
+        "repo.yarnpkg.com",
+        "github.com",
+        "codeload.github.com",
+        "objects.githubusercontent.com",
+        "raw.githubusercontent.com",
+        "api.github.com",
+        "*.supabase.co",
+        "*.supabase.com",
+        "*.vercel.app",
+        "fonts.googleapis.com",
+        "fonts.gstatic.com"
+      ]
+    },
+    "filesystem": {
+      "allowWrite": [
+        "~/.cache/yarn",
+        "~/Library/Caches/Yarn",
+        "~/.yarn",
+        "~/.npm"
+      ]
+    }
+  }
+}
