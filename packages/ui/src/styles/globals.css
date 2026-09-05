@@ -1,0 +1,88 @@
+/**
+ * @syn/ui global styles — resets, the focus ring, and the safe-area utilities.
+ *
+ * Everything with a colour in it references a token from
+ * `@syn/config/tailwind/preset.css`, which is imported below and is the only
+ * file in the repository permitted to contain a hex value.
+ *
+ * Nothing decorative lives here. Conscious Connections' globals carry grain,
+ * glow, ornament, and shimmer classes for a marketing register Synapse does
+ * not have; none of them are carried.
+ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark, .dark *));
+@import "@syn/config/tailwind/preset.css";
+@source "../**/*.{ts,tsx}";
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    /* Tabular by default, everywhere — official spec §9.4. A column of times
+       that does not align is the defect this prevents; prose opts out with
+       `.tabular-off`, never the reverse. */
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Official spec §5.9: 2px accent ring at 2px offset, in both themes. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .max-h-screen-safe {
+    max-height: 100vh;
+    max-height: 100dvh;
+  }
+
+  /** Opt out of tabular figures for prose — reflection notes, body copy. */
+  .tabular-off {
+    font-variant-numeric: normal;
+  }
+}
+
+/*
+ * The duration tokens already collapse under reduced motion (preset.css), but
+ * a component may hard-code a Tailwind duration; this is the floor.
+ * Official spec §9.6: under reduced motion, sheets crossfade, the checkbox
+ * mark appears without drawing, and everything else is already still.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

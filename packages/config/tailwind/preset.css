@@ -1,8 +1,278 @@
 /**
- * Synapse design tokens — filled by INF-3.
+ * Synapse design tokens — official UX spec §9.3–§9.7, in CC's Tailwind v4 idiom.
  *
- * One fact, one home: every token in the system is defined in this file and
- * consumed by name. The brand is the official UX spec §9, expressed as the
- * token map in the v2 component handoff §6.2. Conscious Connections' brand
- * tokens are never copied here.
+ * This is `packages/config/tailwind/preset.css`, the file the v2 component
+ * handoff §6.2 writes as `ui/styles/tokens.css` (README § Handoff path remap).
+ * It is the ONE place a hex value is permitted in this repository. Every
+ * component references a token name; a hex outside this file is a defect.
+ *
+ * Three layers: raw scales (--syn-*) → semantic (--paper, --ink, …) → shadcn
+ * bridge (--background, …), with `.dark` overriding the semantic and bridge
+ * layers and `@theme inline` exposing them to Tailwind's utilities.
+ *
+ * Consumers: `packages/ui/src/styles/globals.css` imports this after
+ * `@import "tailwindcss"`, and `apps/web/app/globals.css` imports both. The
+ * `@custom-variant dark` declaration lives in `globals.css`, next to the
+ * Tailwind import it depends on (CC's placement).
  */
+
+:root {
+  /* ---- RAW: neutral (warm ink and paper) ---- */
+  --syn-neutral-50:  #FAFAF8;
+  --syn-neutral-100: #F3F2EE;
+  --syn-neutral-200: #E7E5DF;
+  --syn-neutral-300: #D2CFC7;
+  --syn-neutral-400: #A6A299;
+  --syn-neutral-500: #78746C;
+  --syn-neutral-600: #57534C;
+  --syn-neutral-700: #3B3834;
+  --syn-neutral-800: #25231F;
+  --syn-neutral-900: #151412;
+
+  /* ---- RAW: accent (verdigris) ---- */
+  --syn-accent-100: #E4F1EE; --syn-accent-200: #C3E1DB; --syn-accent-300: #94C8BE; --syn-accent-400: #5FAA9C;
+  --syn-accent-500: #2F8F80; --syn-accent-600: #24736A; --syn-accent-700: #1C5A53; --syn-accent-800: #14423D;
+
+  /* ---- RAW: violet (off-schedule) ---- */
+  --syn-violet-100: #EFEAF8; --syn-violet-200: #DCD2F0; --syn-violet-300: #BFAEE1; --syn-violet-400: #9E88CE;
+  --syn-violet-500: #7C63B8; --syn-violet-600: #644D9A; --syn-violet-700: #4D3B78; --syn-violet-800: #372A57;
+
+  /* ---- RAW: destructive (one surface: Delete account) ---- */
+  --syn-destructive-500: #B4463C;
+
+  /* ---- RAW: category hues (100 / 500 / 700 per spec; 200 / 800 are PROPOSED — see §11 Q2) ---- */
+  --syn-cat-leaf-100:  #E6F0E4; --syn-cat-leaf-500:  #4F8A5B; --syn-cat-leaf-700:  #2F5A38;
+  --syn-cat-sky-100:   #E4EDF6; --syn-cat-sky-500:   #4B7FB3; --syn-cat-sky-700:   #2C5478;
+  --syn-cat-clay-100:  #F6E8E2; --syn-cat-clay-500:  #C0714F; --syn-cat-clay-700:  #7E4530;
+  --syn-cat-rose-100:  #F7E6EA; --syn-cat-rose-500:  #B85C74; --syn-cat-rose-700:  #7B3A4B;
+  --syn-cat-amber-100: #F8EFDD; --syn-cat-amber-500: #C2923A; --syn-cat-amber-700: #7C5B1F;
+  --syn-cat-slate-100: #E8EAEE; --syn-cat-slate-500: #6B7689; --syn-cat-slate-700: #434B5A;
+  --syn-cat-plum-100:  #F0E7F1; --syn-cat-plum-500:  #8E5A93; --syn-cat-plum-700:  #5C3860;
+  --syn-cat-moss-100:  #EDEFE0; --syn-cat-moss-500:  #7E8B3F; --syn-cat-moss-700:  #4F5826;
+  /* [PROPOSED — needs sign-off] dark-theme chip pairings derived, not authored: 800 = 500 mixed 60% into neutral-900; 200 = 100 mixed 25% into 500. */
+  --syn-cat-leaf-800:  color-mix(in oklch, var(--syn-cat-leaf-500)  40%, var(--syn-neutral-900));
+  --syn-cat-leaf-200:  color-mix(in oklch, var(--syn-cat-leaf-100)  75%, var(--syn-cat-leaf-500));
+  --syn-cat-sky-800:   color-mix(in oklch, var(--syn-cat-sky-500)   40%, var(--syn-neutral-900));
+  --syn-cat-sky-200:   color-mix(in oklch, var(--syn-cat-sky-100)   75%, var(--syn-cat-sky-500));
+  --syn-cat-clay-800:  color-mix(in oklch, var(--syn-cat-clay-500)  40%, var(--syn-neutral-900));
+  --syn-cat-clay-200:  color-mix(in oklch, var(--syn-cat-clay-100)  75%, var(--syn-cat-clay-500));
+  --syn-cat-rose-800:  color-mix(in oklch, var(--syn-cat-rose-500)  40%, var(--syn-neutral-900));
+  --syn-cat-rose-200:  color-mix(in oklch, var(--syn-cat-rose-100)  75%, var(--syn-cat-rose-500));
+  --syn-cat-amber-800: color-mix(in oklch, var(--syn-cat-amber-500) 40%, var(--syn-neutral-900));
+  --syn-cat-amber-200: color-mix(in oklch, var(--syn-cat-amber-100) 75%, var(--syn-cat-amber-500));
+  --syn-cat-slate-800: color-mix(in oklch, var(--syn-cat-slate-500) 40%, var(--syn-neutral-900));
+  --syn-cat-slate-200: color-mix(in oklch, var(--syn-cat-slate-100) 75%, var(--syn-cat-slate-500));
+  --syn-cat-plum-800:  color-mix(in oklch, var(--syn-cat-plum-500)  40%, var(--syn-neutral-900));
+  --syn-cat-plum-200:  color-mix(in oklch, var(--syn-cat-plum-100)  75%, var(--syn-cat-plum-500));
+  --syn-cat-moss-800:  color-mix(in oklch, var(--syn-cat-moss-500)  40%, var(--syn-neutral-900));
+  --syn-cat-moss-200:  color-mix(in oklch, var(--syn-cat-moss-100)  75%, var(--syn-cat-moss-500));
+
+  /* ---- SEMANTIC (light) — the names this document uses ---- */
+  --paper: var(--syn-neutral-50);
+  --ink: var(--syn-neutral-800);
+  --surface: var(--syn-neutral-100);          /* sheets, skeleton */
+  --hairline: var(--syn-neutral-200);
+  --text-body: var(--syn-neutral-600);
+  --text-secondary: var(--syn-neutral-500);
+  --text-muted: var(--syn-neutral-400);       /* large text only */
+  --text-disabled: var(--syn-neutral-300);
+  --accent: var(--syn-accent-500);            /* now line, markers, ring — never text */
+  --accent-text: var(--syn-accent-600);
+  --accent-hover-surface: var(--syn-accent-100);
+  --violet: var(--syn-violet-500);            /* borders */
+  --violet-text: var(--syn-violet-600);
+  --violet-band: var(--syn-violet-100);
+  --violet-band-text: var(--syn-violet-700);
+  --destructive: var(--syn-destructive-500);
+  --scrim: rgba(21, 20, 18, 0.4);
+  --shadow-overlay: 0 8px 24px rgba(21, 20, 18, 0.12);
+  --chip-bg-step: 100; --chip-fg-step: 700;   /* category chip pairing, light */
+
+  /* ---- TYPOGRAPHY ---- */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --fs-caption: 0.75rem;   --lh-caption: 1.2;
+  --fs-secondary: 0.875rem; --lh-secondary: 1.4;
+  --fs-body: 1rem;         --lh-body: 1.5;
+  --fs-row-title: 1.125rem; --lh-row-title: 1.4;
+  --fs-heading: 1.375rem;  --lh-heading: 1.3;
+  --fs-review-headline: 1.75rem; --fs-review-headline-wide: 2.25rem; --lh-review-headline: 1.2;
+  --fs-timer: 2rem;
+  --measure: 64ch;
+
+  /* ---- SPACING (4px base; only these steps) ---- */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --row-min: 56px; --target: 44px;
+  --content-text: 720px; --content-canvas: 960px;
+  --header-h: 56px; --tabbar-h: 56px; --rail-w: 220px; --sheet-w: 420px;
+
+  /* ---- RADII ---- */
+  --radius: 6px; --radius-sheet: 10px; --radius-full: 9999px;
+
+  /* ---- MOTION ---- */
+  --ease-settle: cubic-bezier(0.2, 0, 0, 1);
+  --dur-state: 120ms; --dur-sheet: 200ms;
+
+  /* ---- shadcn bridge (light) — official spec §9.7 map ---- */
+  --background: var(--syn-neutral-50);
+  --foreground: var(--syn-neutral-800);
+  --card: var(--syn-neutral-50);
+  --card-foreground: var(--syn-neutral-800);
+  --popover: var(--syn-neutral-100);
+  --popover-foreground: var(--syn-neutral-800);
+  --primary: var(--syn-neutral-800);          /* ink, not accent */
+  --primary-foreground: var(--syn-neutral-50);
+  --secondary: var(--syn-neutral-100);
+  --secondary-foreground: var(--syn-neutral-800);
+  --muted: var(--syn-neutral-100);
+  --muted-foreground: var(--syn-neutral-500);
+  /*
+   * NOTE — this REDECLARES the semantic `--accent` above (accent-500) as the
+   * pale hover surface. The bridge wins, so `var(--accent)` anywhere resolves
+   * to accent-100, not the marker teal. For the now line, the now/soon dot and
+   * the active-timer border, use the `accent-mark` utility (mapped to
+   * accent-500 in `@theme inline` below) or `--syn-accent-500` directly.
+   * Kept as handoff §6.2 wrote it; flagged for Vesper.
+   */
+  --accent: var(--syn-accent-100);            /* hover surfaces only */
+  --accent-foreground: var(--syn-accent-700);
+  --destructive: var(--syn-destructive-500);
+  --destructive-foreground: var(--syn-neutral-50);
+  --border: var(--syn-neutral-200);
+  --input: var(--syn-neutral-300);
+  --ring: var(--syn-accent-500);
+  --sidebar: var(--syn-neutral-50);
+  --sidebar-foreground: var(--syn-neutral-800);
+  --sidebar-primary: var(--syn-neutral-800);
+  --sidebar-primary-foreground: var(--syn-neutral-50);
+  --sidebar-accent: var(--syn-neutral-100);
+  --sidebar-accent-foreground: var(--syn-neutral-800);
+  --sidebar-border: var(--syn-neutral-200);
+  --sidebar-ring: var(--syn-accent-500);
+  --sidebar-width: var(--rail-w);
+}
+
+.dark {
+  --paper: var(--syn-neutral-900);
+  --ink: var(--syn-neutral-100);
+  --surface: var(--syn-neutral-800);
+  --hairline: color-mix(in srgb, var(--syn-neutral-400) 40%, transparent);
+  --text-body: var(--syn-neutral-200);
+  --text-secondary: var(--syn-neutral-300);
+  --text-muted: var(--syn-neutral-400);
+  --text-disabled: var(--syn-neutral-500);
+  --accent-text: var(--syn-accent-300);
+  --accent-hover-surface: var(--syn-accent-800);
+  --violet-text: var(--syn-violet-300);
+  --violet-band: var(--syn-violet-800);
+  --violet-band-text: var(--syn-violet-200);
+  --chip-bg-step: 800; --chip-fg-step: 200;
+
+  --background: var(--syn-neutral-900);
+  --foreground: var(--syn-neutral-100);
+  --card: var(--syn-neutral-800);
+  --card-foreground: var(--syn-neutral-100);
+  --popover: var(--syn-neutral-700);
+  --popover-foreground: var(--syn-neutral-100);
+  --primary: var(--syn-neutral-100);
+  --primary-foreground: var(--syn-neutral-900);
+  --secondary: var(--syn-neutral-700);
+  --secondary-foreground: var(--syn-neutral-100);
+  --muted: var(--syn-neutral-700);
+  --muted-foreground: var(--syn-neutral-300);
+  --accent: var(--syn-accent-800);
+  --accent-foreground: var(--syn-accent-200);
+  --border: var(--syn-neutral-600);
+  --input: var(--syn-neutral-600);
+  --ring: var(--syn-accent-400);
+  --sidebar: var(--syn-neutral-900);
+  --sidebar-foreground: var(--syn-neutral-100);
+  --sidebar-primary: var(--syn-neutral-100);
+  --sidebar-primary-foreground: var(--syn-neutral-900);
+  --sidebar-accent: var(--syn-neutral-800);
+  --sidebar-accent-foreground: var(--syn-neutral-100);
+  --sidebar-border: var(--syn-neutral-600);
+  --sidebar-ring: var(--syn-accent-400);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-state: 0ms; --dur-sheet: 0ms; }
+}
+
+@theme inline {
+  /* bridge → Tailwind colour utilities (bg-background, text-muted-foreground, …) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* semantic names → utilities (bg-paper, text-ink, border-hairline, text-accent-text, …) */
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-surface: var(--surface);
+  --color-hairline: var(--hairline);
+  --color-text-body: var(--text-body);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+  --color-accent-text: var(--accent-text);
+  --color-accent-mark: var(--syn-accent-500);
+  --color-violet-mark: var(--syn-violet-500);
+  --color-violet-text: var(--violet-text);
+  --color-violet-band: var(--violet-band);
+  --color-violet-band-text: var(--violet-band-text);
+
+  /* raw scales → utilities (bg-neutral-100, border-accent-500, bg-cat-leaf-500, …) */
+  --color-neutral-50: var(--syn-neutral-50);   --color-neutral-100: var(--syn-neutral-100);
+  --color-neutral-200: var(--syn-neutral-200); --color-neutral-300: var(--syn-neutral-300);
+  --color-neutral-400: var(--syn-neutral-400); --color-neutral-500: var(--syn-neutral-500);
+  --color-neutral-600: var(--syn-neutral-600); --color-neutral-700: var(--syn-neutral-700);
+  --color-neutral-800: var(--syn-neutral-800); --color-neutral-900: var(--syn-neutral-900);
+  --color-accent-100: var(--syn-accent-100); --color-accent-200: var(--syn-accent-200);
+  --color-accent-300: var(--syn-accent-300); --color-accent-400: var(--syn-accent-400);
+  --color-accent-500: var(--syn-accent-500); --color-accent-600: var(--syn-accent-600);
+  --color-accent-700: var(--syn-accent-700); --color-accent-800: var(--syn-accent-800);
+  --color-violet-100: var(--syn-violet-100); --color-violet-200: var(--syn-violet-200);
+  --color-violet-300: var(--syn-violet-300); --color-violet-400: var(--syn-violet-400);
+  --color-violet-500: var(--syn-violet-500); --color-violet-600: var(--syn-violet-600);
+  --color-violet-700: var(--syn-violet-700); --color-violet-800: var(--syn-violet-800);
+  --color-cat-leaf-100: var(--syn-cat-leaf-100);   --color-cat-leaf-200: var(--syn-cat-leaf-200);   --color-cat-leaf-500: var(--syn-cat-leaf-500);   --color-cat-leaf-700: var(--syn-cat-leaf-700);   --color-cat-leaf-800: var(--syn-cat-leaf-800);
+  --color-cat-sky-100: var(--syn-cat-sky-100);     --color-cat-sky-200: var(--syn-cat-sky-200);     --color-cat-sky-500: var(--syn-cat-sky-500);     --color-cat-sky-700: var(--syn-cat-sky-700);     --color-cat-sky-800: var(--syn-cat-sky-800);
+  --color-cat-clay-100: var(--syn-cat-clay-100);   --color-cat-clay-200: var(--syn-cat-clay-200);   --color-cat-clay-500: var(--syn-cat-clay-500);   --color-cat-clay-700: var(--syn-cat-clay-700);   --color-cat-clay-800: var(--syn-cat-clay-800);
+  --color-cat-rose-100: var(--syn-cat-rose-100);   --color-cat-rose-200: var(--syn-cat-rose-200);   --color-cat-rose-500: var(--syn-cat-rose-500);   --color-cat-rose-700: var(--syn-cat-rose-700);   --color-cat-rose-800: var(--syn-cat-rose-800);
+  --color-cat-amber-100: var(--syn-cat-amber-100); --color-cat-amber-200: var(--syn-cat-amber-200); --color-cat-amber-500: var(--syn-cat-amber-500); --color-cat-amber-700: var(--syn-cat-amber-700); --color-cat-amber-800: var(--syn-cat-amber-800);
+  --color-cat-slate-100: var(--syn-cat-slate-100); --color-cat-slate-200: var(--syn-cat-slate-200); --color-cat-slate-500: var(--syn-cat-slate-500); --color-cat-slate-700: var(--syn-cat-slate-700); --color-cat-slate-800: var(--syn-cat-slate-800);
+  --color-cat-plum-100: var(--syn-cat-plum-100);   --color-cat-plum-200: var(--syn-cat-plum-200);   --color-cat-plum-500: var(--syn-cat-plum-500);   --color-cat-plum-700: var(--syn-cat-plum-700);   --color-cat-plum-800: var(--syn-cat-plum-800);
+  --color-cat-moss-100: var(--syn-cat-moss-100);   --color-cat-moss-200: var(--syn-cat-moss-200);   --color-cat-moss-500: var(--syn-cat-moss-500);   --color-cat-moss-700: var(--syn-cat-moss-700);   --color-cat-moss-800: var(--syn-cat-moss-800);
+
+  /* type, radius, motion → utilities */
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --radius-sm: var(--radius); --radius-md: var(--radius); --radius-lg: var(--radius); --radius-xl: var(--radius-sheet);
+  --ease-settle: var(--ease-settle);
+  --breakpoint-wide: 768px;                    /* the one break: `wide:` variant */
+}

@@ -1,0 +1,11 @@
+/**
+ * Stories only. The app self-hosts both families through `next/font/google`
+ * (INF-7); Storybook has no Next runtime, so it loads them from Google's CDN
+ * and fills the same two CSS variables the token file reads.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Newsreader:opsz,wght@6..72,200..800&display=swap");
+
+:root {
+  --font-geist-sans: "Geist";
+  --font-newsreader: "Newsreader";
+}

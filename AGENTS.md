@@ -105,6 +105,7 @@ There is no `@syn/ai` package in Phase 1, and none is anticipated.
 - **TypeScript:** **5.9.2**, pinned exactly at the root. Not TypeScript 7 — see `TECHNICAL-DECISIONS.md`.
 - **Drizzle:** `drizzle-orm 0.45.2` and `drizzle-kit 0.31.10`, pinned exactly at the root. Never bump without a logged decision.
 - **Next.js 16 session refresh:** `apps/*/proxy.ts` calls `@syn/auth` `updateSession`. **Not `middleware.ts`.**
+- **Next.js 16 is not the Next.js you remember.** APIs, conventions, and file structure differ from most training data — `middleware.ts` is gone, `next/config` is gone, params and `cookies()`/`headers()` are async, and the caching defaults changed. Read the relevant guide under `node_modules/next/dist/docs/` before writing app code, and heed deprecation notices. Next's own generator would write this warning into `apps/web/AGENTS.md` on every `next dev`; that generator is disabled (`agentRules: false` in `apps/web/next.config.ts`) so the spine has one home, and this bullet is the warning it would have written.
 
 ## Import boundaries
 

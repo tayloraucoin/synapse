@@ -4,7 +4,7 @@
 **Slice type:** Design-system foundation — the token file, the theme runtime, the one typography primitive, and the workshop. The failure class is a wrong token value or a brand leak from CC that every component then inherits.
 **Vesper review:** the rendered token sheet in Storybook against the official spec §9.3 tables, both themes; the `Text` scale against §9.4; the theme control's three states.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04) — Vesper review pending
 
 > **Vesper — visual review.** Before closing: open Storybook, toggle the toolbar theme, and check (1) the palette story shows every neutral/accent/violet step and the eight category hues at 100/500/700 with the spec's hex; (2) the `Text` overview shows seven variants at the §9.4 sizes with tabular numerals on; (3) nothing gold, crimson, parchment, or Cormorant survives from CC. State which theme(s) were checked.
 
