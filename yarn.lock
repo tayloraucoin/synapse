@@ -2938,6 +2938,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@standard-schema/spec@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@standard-schema/spec@npm:1.1.0"
+  checksum: 10c0/d90f55acde4b2deb983529c87e8025fa693de1a5e8b49ecc6eb84d1fd96328add0e03d7d551442156c7432fd78165b2c26ff561b970a9a881f046abb78d6a526
+  languageName: node
+  linkType: hard
+
 "@storybook/addon-actions@npm:8.6.18":
   version: 8.6.18
   resolution: "@storybook/addon-actions@npm:8.6.18"
@@ -3508,6 +3515,50 @@ __metadata:
     zod: "npm:^3.24.2"
   languageName: unknown
   linkType: soft
+
+"@t3-oss/env-core@npm:0.13.11":
+  version: 0.13.11
+  resolution: "@t3-oss/env-core@npm:0.13.11"
+  peerDependencies:
+    arktype: ^2.1.0
+    typescript: ">=5.0.0"
+    valibot: ^1.0.0-beta.7 || ^1.0.0
+    zod: ^3.24.0 || ^4.0.0
+  peerDependenciesMeta:
+    arktype:
+      optional: true
+    typescript:
+      optional: true
+    valibot:
+      optional: true
+    zod:
+      optional: true
+  checksum: 10c0/acb1d5c8f184f0004612b0ed1ef965f3fd014b945b3192057f1500ba760ded8d4c988e6cfed3c63070ccde3b8f7dc27f90044d29474325c5025e44fd3c607441
+  languageName: node
+  linkType: hard
+
+"@t3-oss/env-nextjs@npm:^0.13.8":
+  version: 0.13.11
+  resolution: "@t3-oss/env-nextjs@npm:0.13.11"
+  dependencies:
+    "@t3-oss/env-core": "npm:0.13.11"
+  peerDependencies:
+    arktype: ^2.1.0
+    typescript: ">=5.0.0"
+    valibot: ^1.0.0-beta.7 || ^1.0.0
+    zod: ^3.24.0 || ^4.0.0
+  peerDependenciesMeta:
+    arktype:
+      optional: true
+    typescript:
+      optional: true
+    valibot:
+      optional: true
+    zod:
+      optional: true
+  checksum: 10c0/50bb7791d6eba701fcd32fd0e73d00ea4f0cab039d2f984651d48402ea77451ec6510511dccc9a83a0849754321969864dfb626067741d0477d6940ca4b6cbb1
+  languageName: node
+  linkType: hard
 
 "@tailwindcss/node@npm:4.3.3":
   version: 4.3.3
@@ -6750,6 +6801,33 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nuqs@npm:^2.7.2":
+  version: 2.10.1
+  resolution: "nuqs@npm:2.10.1"
+  dependencies:
+    "@standard-schema/spec": "npm:1.1.0"
+  peerDependencies:
+    "@remix-run/react": ">=2"
+    "@tanstack/react-router": ^1
+    next: ">=14.2.0"
+    react: ">=18.2.0 || ^19.0.0-0"
+    react-router: ^5 || ^6 || ^7 || ^8
+    react-router-dom: ^5 || ^6 || ^7
+  peerDependenciesMeta:
+    "@remix-run/react":
+      optional: true
+    "@tanstack/react-router":
+      optional: true
+    next:
+      optional: true
+    react-router:
+      optional: true
+    react-router-dom:
+      optional: true
+  checksum: 10c0/e1f59c87b9d59daedeb9bf39c00c7e7d6d614ea53d441a139b3be279bd10b6215941b02f3ac7e7ff6bcdf1532cda797745781b451c0ae1cf849a064d52d32bfa
+  languageName: node
+  linkType: hard
+
 "object-assign@npm:^4.1.1":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
@@ -8401,6 +8479,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web@workspace:apps/web"
   dependencies:
+    "@next/env": "npm:16.3.4"
     "@supabase/ssr": "npm:^0.10.2"
     "@supabase/supabase-js": "npm:^2.49.1"
     "@syn/auth": "npm:*"
@@ -8410,6 +8489,7 @@ __metadata:
     "@syn/types": "npm:*"
     "@syn/ui": "npm:*"
     "@syn/utils": "npm:*"
+    "@t3-oss/env-nextjs": "npm:^0.13.8"
     "@tailwindcss/postcss": "npm:^4"
     "@types/node": "npm:^22"
     "@types/react": "npm:^19"
@@ -8417,10 +8497,12 @@ __metadata:
     eslint: "npm:^9.39.1"
     next: "npm:16.3.4"
     next-themes: "npm:^0.4.6"
+    nuqs: "npm:^2.7.2"
     react: "npm:19.2.8"
     react-dom: "npm:19.2.8"
     tailwindcss: "npm:^4"
     typescript: "npm:5.9.2"
+    zod: "npm:^3.24.2"
   languageName: unknown
   linkType: soft
 

@@ -9,7 +9,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "web:dev": "turbo run dev --filter=web",
-    "web:dev:local": "turbo run dev:local --filter=web",
+    "web:dev:local": "node scripts/print-local-urls.mjs 3000 && turbo run dev:local --filter=web",
     "web:build": "turbo run build --filter=web",
     "web:start": "turbo run start --filter=web",
     "web:lint": "turbo run lint --filter=web",

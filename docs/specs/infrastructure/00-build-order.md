@@ -29,7 +29,7 @@ Everything a feature epic needs to run end to end (a signed-in page that reads a
 - [x] **INF-6** · `@syn/auth`: Supabase Auth factories, session refresh, callbacks — L · (INF-5)
 
 ### Phase 3 — The web app and its rails
-- [ ] **INF-7** · `apps/web` scaffold: env tiers, next.config, proxy, root layout, route skeleton, route builders, entry — L · (INF-3, INF-5, INF-6)
+- [x] **INF-7** · `apps/web` scaffold: env tiers, next.config, proxy, root layout, route skeleton, route builders, entry — L · (INF-3, INF-5, INF-6)
 - [ ] **INF-8** · `@syn/api`, `@syn/hooks`, client wiring, client-state conventions — M · (INF-7)
 - [ ] **INF-9** · PWA: manifest, service worker, install, push subscription, scheduler — M · (INF-8)
 

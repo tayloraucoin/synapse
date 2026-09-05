@@ -27,6 +27,13 @@ export {
 } from "./auth-credentials";
 
 export {
+  dateKeySchema,
+  weekKeySchema,
+  type DateKey,
+  type WeekKey,
+} from "./keys";
+
+export {
   clockTimeSchema,
   themePreferenceSchema,
   timezoneSchema,

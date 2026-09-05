@@ -3,7 +3,7 @@
 **Epic:** INF — Infrastructure · **Phase 3** · Size: L
 **Slice type:** App composition — the failure classes are a `process.env` read outside `env.ts`, a client component reading a non-literal env name, a route group that inherits the wrong layout, and a hardcoded path.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04)
 
 ---
 

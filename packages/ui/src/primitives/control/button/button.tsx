@@ -15,7 +15,8 @@
  * - `size="icon"` requires an `aria-label`. Icons never appear without a text
  *   label except the checkbox and the timer glyph (§9.9).
  * - `busy` shows a spinner and disables the button, and the label does NOT
- *   change. The copy rule is that a button's label matches the toast it
+ *   change. It has no spinner under `asChild` (see the comment in the body);
+ *   a link that is "busy" is a link that should have been a button. The copy rule is that a button's label matches the toast it
  *   produces ("Finish review" → "Review finished"); swapping it to "Saving…"
  *   mid-press breaks that pairing and moves the text under the reader's eye.
  */
@@ -57,8 +58,20 @@ function Button({
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
     >
-      {busy && !asChild ? <Spinner /> : null}
-      {children}
+      {/*
+       * Under `asChild`, Slot requires exactly ONE element child — a `null`
+       * sibling still counts as a child and throws "Slot failed to slot onto
+       * its children". So the spinner branch collapses entirely rather than
+       * rendering null beside the child.
+       */}
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {busy ? <Spinner /> : null}
+          {children}
+        </>
+      )}
     </Comp>
   );
 }
