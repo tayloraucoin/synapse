@@ -26,8 +26,11 @@ export {
   withTrailingGap,
 } from "./string";
 export {
+  clockFromMinutes,
+  clockToMinutes,
   formatCalendarDay,
   formatClock,
+  formatClockFromMinutes,
   formatElapsed,
   formatWindow,
   minutesFromDayStart,

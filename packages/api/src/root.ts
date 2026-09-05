@@ -2,6 +2,7 @@ import { assetRouter } from "./routers/asset";
 import { categoryRouter } from "./routers/category";
 import { habitRouter } from "./routers/habit";
 import { shellRouter } from "./routers/shell";
+import { templateRouter } from "./routers/template";
 import { userRouter } from "./routers/user";
 import { createCallerFactory, router } from "./trpc";
 
@@ -18,6 +19,7 @@ export const appRouter = router({
   category: categoryRouter,
   habit: habitRouter,
   shell: shellRouter,
+  template: templateRouter,
   user: userRouter,
 });
 

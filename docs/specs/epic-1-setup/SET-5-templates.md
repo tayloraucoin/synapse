@@ -4,7 +4,7 @@
 **Slice type:** A canvas that autosaves plus its child sheet, over a domain with one invariant that must never be violated (two slots at one start must be a multitask group). The risk class is *a silent stack*: the invariant enforced only in the sheet and bypassed by a reorder, a duplicate, or a second device.
 **Vigil:** none. **Mason review:** the collision rule's server enforcement (AC 8–9).
 
-**Status:** Not started
+**Status:** Complete (2026-09-05) — the API, TP-01, the TP-02 canvas, TP-03 and the same-start invariant; **the browser-observable criteria are unrun** (the screens are behind the auth gate and no Supabase project is wired). The invariant itself was probed directly. See `DEVIATIONS.md`.
 
 > **Mason — invariant review.** The same-start rule is enforced in the service on every slot write and reported back on every template read as `collisions`. Confirm no write path (add, update, move, duplicate, the habit picker's "New habit" return) can leave two ungrouped slots on one start without the editor showing the inline question.
 

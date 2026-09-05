@@ -13,6 +13,13 @@
  * When `onOpen` is absent the header renders as a heading rather than a
  * button: plan mode on a template day has nothing to open, and a dead button
  * is worse than a title.
+ *
+ * `as` EXISTS FOR SURFACES THAT ALREADY HAVE THEIR `h1` (SYS-6). A screen's day
+ * header is that screen's one `h1`, which is the default. The landing page
+ * shows a planned day as a figure inside a page whose `h1` is its own sentence,
+ * so it passes `as="p"`. The alternative was a second header composed from two
+ * `Text`s — the parallel-component-with-a-small-difference that official spec
+ * §9.7 rules out.
  */
 "use client";
 
@@ -24,6 +31,11 @@ import { Text } from "../../../primitives/typography/text";
 import { DAY_HEADER_COPY } from "./copy";
 
 export interface DayHeaderProps {
+  /**
+   * The element the header is. Default `"h1"` — a screen's day header is that
+   * screen's one heading. `"h2"` or `"p"` for a surface that already has one.
+   */
+  as?: "h1" | "h2" | "p";
   /** "Friday 4 Sept" */
   dateLabel: string;
   templateName: string | null;
@@ -39,6 +51,7 @@ export interface DayHeaderProps {
 }
 
 export function DayHeader({
+  as: Wrapper = "h1",
   dateLabel,
   templateName,
   wokeAtLabel = null,
@@ -78,19 +91,18 @@ export function DayHeader({
   );
 
   /*
-   * The h1 WRAPS the button rather than sitting inside it: a heading is not
-   * phrasing content and cannot legally live in a button, but a button can
+   * The heading WRAPS the button rather than sitting inside it: a heading is
+   * not phrasing content and cannot legally live in a button, but a button can
    * live in a heading. That order keeps the screen's one h1 (cross-cutting
-   * §3.4) and still makes the whole two-line block the tap target.
+   * §3.4) and still makes the whole two-line block the tap target. A `p`
+   * wrapper is legal for the same reason — a button is phrasing content.
    */
   if (onOpen === undefined) {
-    return (
-      <h1 className={shell}>{content}</h1>
-    );
+    return <Wrapper className={shell}>{content}</Wrapper>;
   }
 
   return (
-    <h1 className="contents">
+    <Wrapper className="contents">
       <button
         type="button"
         onClick={onOpen}
@@ -104,6 +116,6 @@ export function DayHeader({
       >
         {content}
       </button>
-    </h1>
+    </Wrapper>
   );
 }

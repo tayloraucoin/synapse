@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 835 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-05 · 855 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -25,6 +25,12 @@ apps/
   web/
     app/
       _components/
+        landing/
+          example-day.ts
+          example-list.tsx
+          index.ts
+          landing-page.tsx
+          review-figure.tsx
         pwa-mode-sync.tsx
         service-worker-registration.tsx
       (auth-pending)/
@@ -128,6 +134,9 @@ apps/
           share/
             page.tsx
           templates/
+            _components/
+              template-list-header.tsx
+              template-list.tsx
             [id]/
               page.tsx
             page.tsx
@@ -193,6 +202,16 @@ apps/
         copy.ts
         index.ts
         starter-set-chooser.tsx
+      template-editor/
+        copy.ts
+        index.ts
+        slot-row.tsx
+        slot-sheet.tsx
+        template-editor-screen.tsx
+        template-editor.tsx
+        use-template-editor.ts
+    content/
+      landing.ts
     lib/
       assets/
         icon-url.ts
@@ -400,6 +419,7 @@ packages/
         category.ts
         habit.ts
         shell.ts
+        template.ts
         user.ts
       services/
         asset/
@@ -419,6 +439,10 @@ packages/
         notifications/
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
           web-push.ts
+        plan/
+          save-slot.ts
+          templates.ts
+          to-view.ts
         shell/
           status.ts
         user/
@@ -1129,6 +1153,7 @@ packages/
       keys.ts
       preferences.ts
       push.ts
+      template.ts
       user.ts
     .gitignore
     eslint.config.mjs

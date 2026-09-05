@@ -86,6 +86,23 @@ export {
 } from "./push";
 
 export {
+  listTemplatesInput,
+  moveSlotInput,
+  restoreSlotInput,
+  schedulingSchema,
+  slotFormSchema,
+  slotIdInput,
+  templateIdInput,
+  templateLeaveSchema,
+  templatePatchSchema,
+  timeModeSchema,
+  weekdaySchema,
+  type RestoreSlotInput,
+  type SlotFormInput,
+  type TemplatePatchInput,
+} from "./template";
+
+export {
   updatePreferencesInput,
   type UpdatePreferencesInput,
 } from "./user";

@@ -20,6 +20,8 @@ export type UserPreferencesRow = {
   timezone: string;
   dayCloseTime: string;
   reviewReminderTime: string;
+  /** FR-01 / ST-08. The default `anchor_time` for a new template (SET-5). */
+  usualWakeTime: string;
   theme: "system" | "light" | "dark";
   firstRunStep: number | null;
   firstRunCompletedAt: Date | null;
@@ -32,6 +34,7 @@ const PREFERENCE_COLUMNS = {
   timezone: users.timezone,
   dayCloseTime: users.dayCloseTime,
   reviewReminderTime: users.reviewReminderTime,
+  usualWakeTime: users.usualWakeTime,
   theme: users.theme,
   firstRunStep: users.firstRunStep,
   firstRunCompletedAt: users.firstRunCompletedAt,

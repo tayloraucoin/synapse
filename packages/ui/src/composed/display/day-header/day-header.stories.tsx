@@ -42,3 +42,18 @@ export const PlanMode: Story = {
 export const NotTappable: Story = {
   args: { templateName: "Weekday morning", onOpen: undefined },
 };
+
+/**
+ * `as="p"` for a surface that already has its `h1` — the landing page shows a
+ * planned day as a figure (SYS-6). The type scale does not change; only the
+ * element does, because the level is document structure.
+ */
+export const AsParagraph: Story = {
+  args: {
+    dateLabel: "Tuesday",
+    templateName: "Weekday",
+    mode: "plan",
+    as: "p",
+    onOpen: undefined,
+  },
+};

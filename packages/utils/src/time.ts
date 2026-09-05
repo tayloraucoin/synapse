@@ -40,6 +40,52 @@ export function formatClock(
 }
 
 /**
+ * A wall clock built from minutes, with no zone — "7:20".
+ *
+ * A TEMPLATE HAS NO TIME ZONE, and that is the point of it: slots hold offsets
+ * from an anchor so the same template can be applied at 06:00 or 08:00, on any
+ * day, in any zone. The zone enters at materialisation (SET-6), when an offset
+ * becomes an instant. So the editor's clock arithmetic is plain minutes, and
+ * `formatClock` — which needs a `Date` and a zone — is the wrong tool for it.
+ *
+ * Minutes wrap at a day: an offset past midnight shows the next day's clock
+ * with no marker, which is what Epic 1 TP-02 asks for (it gives none).
+ * Negative minutes wrap the same way, so an item two hours before a 07:00
+ * anchor reads 5:00 rather than -120.
+ */
+export function formatClockFromMinutes(
+  minutes: number,
+  locale: string = DEFAULT_LOCALE,
+): string {
+  const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
+  const wrapped = ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+  const hour = Math.floor(wrapped / MINUTES_PER_HOUR);
+  const minute = wrapped % MINUTES_PER_HOUR;
+
+  // A fixed reference date, so the formatter renders a clock and nothing else.
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(2000, 0, 1, hour, minute)));
+}
+
+/** "HH:mm" → minutes since midnight. The inverse is `clockFromMinutes`. */
+export function clockToMinutes(clock: string): number {
+  const [hour = "0", minute = "0"] = clock.split(":");
+  return Number(hour) * MINUTES_PER_HOUR + Number(minute);
+}
+
+/** Minutes since midnight → "HH:mm", the value a `TimeField` holds. */
+export function clockFromMinutes(minutes: number): string {
+  const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
+  const wrapped = ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+  const hour = Math.floor(wrapped / MINUTES_PER_HOUR);
+  const minute = wrapped % MINUTES_PER_HOUR;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+/**
  * A window, as the row's time text reads it — "1:00–4:00" (official spec §5.2,
  * Epic 2 LS-01).
  *

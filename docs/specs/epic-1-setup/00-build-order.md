@@ -27,7 +27,7 @@ The schema, then the library a template is built from, then the template a week 
 - [x] **SET-4** · Categories and the habit library: API, CT-01/02, LB-01/02/03 — L · (SET-1, SET-3, SYS-1) · Vesper review of the icon chooser — built 2026-09-05; **Vesper's review needs a reachable signed-in shell**
 
 ### Phase 3 — Templates and the week
-- [ ] **SET-5** · Templates: API, TP-01/02/03, the multitask rule — L · (SET-4)
+- [x] **SET-5** · Templates: API, TP-01/02/03, the multitask rule — L · (SET-4) — built 2026-09-05; **the invariant was probed directly; the screens need a reachable session**
 - [ ] **SET-6** · Week build and materialisation: WK-01/02/03, TP-04, the apply flow — L · (SET-5, USE-1) · **Mason review of the materialiser**
 
 ### Phase 4 — Sequences and settings
