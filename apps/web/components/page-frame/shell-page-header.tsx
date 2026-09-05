@@ -26,12 +26,18 @@ import { settingsRoute } from "@/lib/routes";
  */
 export function ShellPageHeader({
   title,
+  subtitle,
+  action,
   /** Where back goes when there is no in-app history to pop. */
   backFallback,
   showBack = false,
   dateContext,
 }: {
   title: React.ReactNode;
+  /** A count or a context line. Never the screen's name. */
+  subtitle?: React.ReactNode;
+  /** The screen's one header action — *Add*, *New*. */
+  action?: { label: string; onClick: () => void; busy?: boolean };
   backFallback?: string;
   showBack?: boolean;
   /**
@@ -48,6 +54,8 @@ export function ShellPageHeader({
   return (
     <AppHeader
       title={title}
+      subtitle={subtitle}
+      action={action}
       onBack={showBack ? goBack : undefined}
       dateContext={
         dateContext === undefined

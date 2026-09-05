@@ -1,4 +1,6 @@
 import { assetRouter } from "./routers/asset";
+import { categoryRouter } from "./routers/category";
+import { habitRouter } from "./routers/habit";
 import { shellRouter } from "./routers/shell";
 import { userRouter } from "./routers/user";
 import { createCallerFactory, router } from "./trpc";
@@ -8,11 +10,13 @@ import { createCallerFactory, router } from "./trpc";
  * `AppRouter` is a type, so the future Expo client gets the same contract
  * without a second schema to keep in step.
  *
- * Three routers today. Habits, categories, templates, days, items, review, and
- * the scheduler are the feature epics' tech spec, mounted here as they land.
+ * Templates, days, items, review, and the scheduler are the remaining feature
+ * epics' tech spec, mounted here as they land.
  */
 export const appRouter = router({
   asset: assetRouter,
+  category: categoryRouter,
+  habit: habitRouter,
   shell: shellRouter,
   user: userRouter,
 });

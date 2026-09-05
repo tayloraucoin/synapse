@@ -1,21 +1,20 @@
-import { Text } from "@syn/ui";
+import { PageFrame } from "@/components/page-frame";
+import { settingsRoute } from "@/lib/routes";
 
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { LibraryHeader } from "./_components/library-header";
+import { Library } from "./_components/library";
 
 /**
- * Placeholder — LB-01 Habit library. 
+ * LB-01 Habit library.
  *
- * Replaced by the Epic 1 track.
- * The screen's one `h1` is the header's title (cross-cutting §11).
+ * The screen's one `h1` is the header's title (cross-cutting §11). The header
+ * is its own client leaf because its *Add* action opens the sheet, which is
+ * URL state, and a Server Component cannot hold a callback.
  */
 export default function SettingsHabitsPage() {
   return (
-    <PageFrame
-      header={<ShellPageHeader title={"LB-01 Habit library"} showBack />}
-    >
-      <Text as="p" tone="secondary">
-        Every habit, task, appointment, and deep-work block.
-      </Text>
+    <PageFrame header={<LibraryHeader backFallback={settingsRoute()} />}>
+      <Library />
     </PageFrame>
   );
 }

@@ -37,6 +37,34 @@ export {
 } from "./asset";
 
 export {
+  CATEGORY_NAME_TAKEN,
+  categoryIdInput,
+  categoryNameSchema,
+  createCategoryInput,
+  updateCategoryInput,
+  type CreateCategoryInput,
+  type UpdateCategoryInput,
+} from "./category";
+
+export {
+  categoryKeySchema,
+  createFromStarterSetInput,
+  createHabitInput,
+  habitFormSchema,
+  habitIdInput,
+  habitTypeSchema,
+  iconValueSchema,
+  listHabitsInput,
+  slotsOutsideRangeInput,
+  updateHabitInput,
+  type CreateFromStarterSetInput,
+  type HabitFormInput,
+  type HabitTypeInput,
+  type IconValueInput,
+  type UpdateHabitInput,
+} from "./habit";
+
+export {
   dateKeySchema,
   weekKeySchema,
   type DateKey,

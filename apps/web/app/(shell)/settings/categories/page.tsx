@@ -1,21 +1,19 @@
-import { Text } from "@syn/ui";
+import { PageFrame } from "@/components/page-frame";
 
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { CategoryList } from "./_components/category-list";
+import { CategoryListHeader } from "./_components/category-list-header";
 
 /**
- * Placeholder — CT-01 Categories. 
+ * CT-01 Categories.
  *
- * Replaced by the Epic 1 track.
- * The screen's one `h1` is the header's title (cross-cutting §11).
+ * "Used for time-distribution reporting only, never for any mechanic"
+ * (official spec §3.2) — which is why this screen is small and why deleting
+ * from it is safe.
  */
 export default function SettingsCategoriesPage() {
   return (
-    <PageFrame
-      header={<ShellPageHeader title={"CT-01 Categories"} showBack />}
-    >
-      <Text as="p" tone="secondary">
-        For time reporting only — never a mechanic.
-      </Text>
+    <PageFrame header={<CategoryListHeader />}>
+      <CategoryList />
     </PageFrame>
   );
 }

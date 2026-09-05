@@ -4,7 +4,7 @@
 **Slice type:** The first CRUD domain — two routers, two list screens, two form sheets, one detail view, and the icon chooser. The risk class is *a sheet that forks*: LB-02 is opened from five places (LB-01, FR-02, TP-03, WK-03, ST-08) and if it is built for one, the other four rebuild it.
 **Vigil:** none. **Vesper review:** the icon chooser (three tabs, crop) and the wake-anchor replacement line — state how each reads on compact.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05) — the API, both list screens, both sheets, the detail view and the icon chooser; **the browser-observable criteria and Vesper's review are unrun** (no Supabase project, so the signed-in shell cannot be reached). See `DEVIATIONS.md`.
 
 > **Vesper — review.** LB-02 is the densest form in setup and the one place a real judgement (importance) is asked. Review the field order, the *More* disclosure's default state in edit mode, and that the three icon tabs read as one control. Reply in `DEVIATIONS.md` if a component contract had to bend.
 

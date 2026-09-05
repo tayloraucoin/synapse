@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 803 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-05 · 835 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -102,13 +102,23 @@ apps/
           appearance/
             page.tsx
           categories/
+            _components/
+              category-list-header.tsx
+              category-list.tsx
             page.tsx
           data/
             page.tsx
           day/
             page.tsx
           habits/
+            _components/
+              copy.ts
+              library-header.tsx
+              library.tsx
             [id]/
+              _components/
+                habit-detail-header.tsx
+                habit-detail.tsx
               page.tsx
             page.tsx
           notifications/
@@ -163,12 +173,26 @@ apps/
       not-found.tsx
       page.tsx
     components/
+      category-sheet/
+        category-sheet.tsx
+        copy.ts
+        index.ts
+      habit-sheet/
+        copy.ts
+        habit-sheet.tsx
+        icon-chooser.tsx
+        index.ts
+        use-habit-sheet.ts
       page-frame/
         index.ts
         page-frame.tsx
         sheet-host.tsx
         shell-page-header.tsx
         shell-status-line.tsx
+      starter-set/
+        copy.ts
+        index.ts
+        starter-set-chooser.tsx
     lib/
       assets/
         icon-url.ts
@@ -287,6 +311,7 @@ docs/
       SYS-3-about-feedback-errors-and-session.md
       SYS-4-keyboard-and-focus.md
       SYS-5-pwa-install-and-update.md
+      SYS-6-landing-page.md
       TECHNICAL-DECISIONS.md
     epic-1-setup/
       _templates/
@@ -361,6 +386,7 @@ docs/
     epic2_in_use_ux_architecture.md
     epic3_review_ux_architecture.md
     habit_tracker_official_ux_spec_v1.md
+    landing-page-ux.md
     README.md
     synapse_navigation_and_system_ux_architecture.md
     synapse_ui_component_needs_and_handoff_v2.md
@@ -371,6 +397,8 @@ packages/
     src/
       routers/
         asset.ts
+        category.ts
+        habit.ts
         shell.ts
         user.ts
       services/
@@ -379,6 +407,15 @@ packages/
           storage.ts
         jobs/
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
+        library/
+          archive-habit.ts
+          get-habit.ts
+          habit-usage.ts
+          list-habits.ts
+          save-category.ts
+          save-habit.ts
+          starter-set.ts
+          to-view.ts
         notifications/
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
           web-push.ts
@@ -1086,6 +1123,8 @@ packages/
     src/
       asset.ts
       auth-credentials.ts
+      category.ts
+      habit.ts
       index.ts
       keys.ts
       preferences.ts

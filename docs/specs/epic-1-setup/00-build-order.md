@@ -24,7 +24,7 @@ The schema, then the library a template is built from, then the template a week 
 - [x] **SET-3** · Icon and avatar pipeline: bucket policies, signed uploads, the streaming read route — M · (SET-1) — built 2026-09-05; **the three Vigil probes need Supabase Storage**
 
 ### Phase 2 — The library
-- [ ] **SET-4** · Categories and the habit library: API, CT-01/02, LB-01/02/03 — L · (SET-1, SET-3, SYS-1) · Vesper review of the icon chooser
+- [x] **SET-4** · Categories and the habit library: API, CT-01/02, LB-01/02/03 — L · (SET-1, SET-3, SYS-1) · Vesper review of the icon chooser — built 2026-09-05; **Vesper's review needs a reachable signed-in shell**
 
 ### Phase 3 — Templates and the week
 - [ ] **SET-5** · Templates: API, TP-01/02/03, the multitask rule — L · (SET-4)
