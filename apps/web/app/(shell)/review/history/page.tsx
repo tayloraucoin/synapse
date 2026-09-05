@@ -1,18 +1,21 @@
-import { Heading, Text } from "@syn/ui";
+import { Text } from "@syn/ui";
+
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 
 /**
  * Placeholder — HS-01 History. 
  *
- * Replaced by the Epic 3 track. The `Heading` is here from day one so every
- * page has exactly one `h1` (cross-cutting §11) before any content exists.
+ * Replaced by the Epic 3 track.
+ * The screen's one `h1` is the header's title (cross-cutting §11).
  */
 export default function ReviewHistoryPage() {
   return (
-    <>
-      <Heading>HS-01 History</Heading>
+    <PageFrame
+      header={<ShellPageHeader title={"HS-01 History"} />}
+    >
       <Text as="p" tone="secondary">
         Past weeks and days.
       </Text>
-    </>
+    </PageFrame>
   );
 }

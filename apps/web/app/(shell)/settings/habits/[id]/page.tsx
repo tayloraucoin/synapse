@@ -1,4 +1,6 @@
-import { Heading, Text } from "@syn/ui";
+import { Text } from "@syn/ui";
+
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 
 /** Placeholder — LB-02 Habit sheet (create / edit). */
 export default async function SettingsHabitPage({
@@ -8,9 +10,10 @@ export default async function SettingsHabitPage({
 }) {
   const { id } = await params;
   return (
-    <>
-      <Heading>LB-02 Habit sheet</Heading>
+    <PageFrame
+      header={<ShellPageHeader title={"LB-02 Habit sheet"} showBack />}
+    >
       <Text as="p" tone="secondary">{id}</Text>
-    </>
+    </PageFrame>
   );
 }

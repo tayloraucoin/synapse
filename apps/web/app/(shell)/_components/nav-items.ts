@@ -29,3 +29,22 @@ export const NAV_ITEMS: readonly NavItem[] = [
 
 /** The Review dot's visually-hidden text — nav & system §11. */
 export const REVIEW_DOT_LABEL = "items waiting";
+
+/**
+ * Which tab owns a path.
+ *
+ * ACTIVE IS A PREFIX RULE, not equality: `/day/2026-09-04` and `/today` are
+ * both the List, and a person who navigated to yesterday should still see
+ * where they are. `/settings/habits` is Settings for the same reason.
+ *
+ * One implementation, three readers — `TabBar`, `Rail`, and `PageFrame`'s
+ * scroll memory. Three copies of a prefix rule is three chances for the
+ * navigation, the highlight and the remembered scroll to disagree about which
+ * tab a route belongs to.
+ */
+export function tabForPath(pathname: string): NavTab {
+  if (pathname.startsWith("/settings")) return "settings";
+  if (pathname.startsWith("/review")) return "review";
+  if (pathname.endsWith("/schedule")) return "schedule";
+  return "list";
+}

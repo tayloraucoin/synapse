@@ -4,7 +4,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 
 | Ticket | Title | Depends on | Status | Date |
 |---|---|---|---|---|
-| SYS-1 | The shell: chrome, `PageFrame`, `shell.status`, status-line sources, sheets as history, back, tab memory, record and plan headers | SET-1 | Not started | — |
+| SYS-1 | The shell: chrome, `PageFrame`, `shell.status`, status-line sources, sheets as history, back, tab memory, record and plan headers | SET-1 | Complete (Vesper review pending a Supabase project) | 2026-09-05 |
 | SYS-2 | Time: the device-zone check, SY-06, the deferred switches applied | USE-1, SET-8 | Not started | — |
 | SYS-3 | About & feedback, error pages, session expired: SY-01, SY-04, SY-05, legal pages | SYS-1, SET-8 | Not started | — |
 | SYS-4 | Keyboard and focus | USE-2, USE-5, SYS-3 | Not started | — |
@@ -12,7 +12,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 
 ## Checklist
 
-- [ ] SYS-1
+- [x] SYS-1
 - [ ] SYS-2
 - [ ] SYS-3
 - [ ] SYS-5

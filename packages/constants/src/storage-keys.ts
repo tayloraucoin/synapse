@@ -10,6 +10,12 @@ export const STORAGE_KEYS = {
   THEME: "syn:theme",
   /** Per-surface dismissals — the install line, the once-a-day late offer. */
   DISMISSED_PREFIX: "syn:dismissed:",
+  /**
+   * Each tab's scroll position, kept for the session (cross-cutting §4.3:
+   * "each peer keeps its scroll position … for the session"). Concatenated
+   * with the tab name — `syn:scroll:list`.
+   */
+  SCROLL_PREFIX: "syn:scroll:",
   /** Unsent form-sheet drafts, keyed by the record being edited. */
   DRAFT_PREFIX: "syn:draft:",
   /** Set when the install status line is dismissed; it never returns (§5.1). */

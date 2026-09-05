@@ -537,6 +537,7 @@ export {
   StatusLine,
   TimezoneLine,
   UpdateLine,
+  pendingReviewText,
   timezoneMismatchText,
   type InstallLineProps,
   type PermissionLineProps,

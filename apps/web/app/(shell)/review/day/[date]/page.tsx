@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 
-import { Heading, Text } from "@syn/ui";
+import { Text } from "@syn/ui";
 import { dateKeySchema } from "@syn/validators";
+
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 
 /** Placeholder — DR-01 Day Review. */
 export default async function ReviewDayPage({
@@ -13,11 +15,12 @@ export default async function ReviewDayPage({
   if (!dateKeySchema.safeParse(date).success) notFound();
 
   return (
-    <>
-      <Heading>DR-01 Day Review — {date}</Heading>
+    <PageFrame
+      header={<ShellPageHeader title={<>DR-01 Day Review — {date}</>} />}
+    >
       <Text as="p" tone="secondary">
         Close the day honestly, once. Three taps per item, maximum.
       </Text>
-    </>
+    </PageFrame>
   );
 }

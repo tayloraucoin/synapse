@@ -1,4 +1,6 @@
-import { Heading, Text } from "@syn/ui";
+import { Text } from "@syn/ui";
+
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 
 /**
  * Placeholder — SY-01 About & feedback. 
@@ -8,11 +10,12 @@ import { Heading, Text } from "@syn/ui";
  */
 export default function SettingsAboutPage() {
   return (
-    <>
-      <Heading>SY-01 About & feedback</Heading>
+    <PageFrame
+      header={<ShellPageHeader title={"SY-01 About & feedback"} showBack />}
+    >
       <Text as="p" tone="secondary">
         Version, feedback, keyboard shortcuts, legal.
       </Text>
-    </>
+    </PageFrame>
   );
 }

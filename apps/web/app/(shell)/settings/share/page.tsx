@@ -1,18 +1,21 @@
-import { Heading, Text } from "@syn/ui";
+import { Text } from "@syn/ui";
+
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 
 /**
  * Placeholder — ST-11 Share the app. 
  *
- * Replaced by the Epic 1 track. The `Heading` is here from day one so every
- * page has exactly one `h1` (cross-cutting §11) before any content exists.
+ * Replaced by the Epic 1 track.
+ * The screen's one `h1` is the header's title (cross-cutting §11).
  */
 export default function SettingsSharePage() {
   return (
-    <>
-      <Heading>ST-11 Share the app</Heading>
+    <PageFrame
+      header={<ShellPageHeader title={"ST-11 Share the app"} showBack />}
+    >
       <Text as="p" tone="secondary">
         The invite link.
       </Text>
-    </>
+    </PageFrame>
   );
 }

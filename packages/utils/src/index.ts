@@ -9,6 +9,11 @@
  * For side-effectful dev logging, use @syn/observability instead.
  */
 
+export {
+  daysBefore,
+  resolveDayKey,
+  weekdayForDayKey,
+} from "./day";
 export { AppError, isAppError } from "./errors";
 export { clamp, roundToStep } from "./number";
 export { sanitizeNextPath } from "./path";

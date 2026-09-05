@@ -4,7 +4,7 @@
 **Slice type:** The frame every later screen renders inside — navigation, header order, one status line, URL-state sheets. The risk class is *a shell that argues*: two status lines at once, a header that flashes empty, a sheet that back cannot close, a tab bar that is tappable under a scrim, a second entry tree.
 **Vigil:** none. **Vesper review:** the compact tab bar under a sheet's scrim; the header's back/title/avatar on both breakpoints; the status line's placement under the header.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05) — chrome mounted, `PageFrame` and `shell.status` built, 26 pages converted; **Vesper's chrome review and the browser-observable criteria are unrun** (no Supabase project, so the signed-in shell cannot be reached). See `DEVIATIONS.md`.
 
 > **Vesper — chrome review.** Walk List → Settings → Habits → back → back on a phone and on a laptop. Back must pop exactly one thing each time. The status line must sit under the header, full width, and never stack.
 

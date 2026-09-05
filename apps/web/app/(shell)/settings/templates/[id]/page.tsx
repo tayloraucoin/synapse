@@ -1,4 +1,6 @@
-import { Heading, Text } from "@syn/ui";
+import { Text } from "@syn/ui";
+
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 
 /** Placeholder — TP-02 Template editor. */
 export default async function SettingsTemplatePage({
@@ -8,9 +10,10 @@ export default async function SettingsTemplatePage({
 }) {
   const { id } = await params;
   return (
-    <>
-      <Heading>TP-02 Template editor</Heading>
+    <PageFrame
+      header={<ShellPageHeader title={"TP-02 Template editor"} showBack />}
+    >
       <Text as="p" tone="secondary">{id}</Text>
-    </>
+    </PageFrame>
   );
 }

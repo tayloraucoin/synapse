@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 
-import { Heading, Text } from "@syn/ui";
+import { Text } from "@syn/ui";
 import { weekKeySchema } from "@syn/validators";
+
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 
 /** Placeholder — WK-01 Week build, for a specific week. */
 export default async function SettingsWeekPage({
@@ -13,9 +15,10 @@ export default async function SettingsWeekPage({
   if (!weekKeySchema.safeParse(week).success) notFound();
 
   return (
-    <>
-      <Heading>WK-01 Week build — {week}</Heading>
+    <PageFrame
+      header={<ShellPageHeader title={<>WK-01 Week build — {week}</>} showBack />}
+    >
       <Text as="p" tone="secondary">Seven days, one template each.</Text>
-    </>
+    </PageFrame>
   );
 }

@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 789 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-05 · 803 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -69,6 +69,8 @@ apps/
           app-shell.tsx
           nav-items.ts
           rail.tsx
+          shell-context.tsx
+          shell-providers.tsx
           status-line-slot.tsx
           tab-bar.tsx
         day/
@@ -160,6 +162,13 @@ apps/
       manifest.ts
       not-found.tsx
       page.tsx
+    components/
+      page-frame/
+        index.ts
+        page-frame.tsx
+        sheet-host.tsx
+        shell-page-header.tsx
+        shell-status-line.tsx
     lib/
       assets/
         icon-url.ts
@@ -180,6 +189,7 @@ apps/
       forms/
         use-synapse-form.ts
       hooks/
+        use-back.ts
         use-dismissed.ts
         use-elapsed.ts
         use-icon-upload.ts
@@ -187,6 +197,8 @@ apps/
         use-local-draft.ts
         use-online.ts
         use-remembered-toggle.ts
+        use-scroll-memory.ts
+        use-sheet.ts
       image/
         reencode.ts
       pwa/
@@ -359,6 +371,7 @@ packages/
     src/
       routers/
         asset.ts
+        shell.ts
         user.ts
       services/
         asset/
@@ -369,6 +382,8 @@ packages/
         notifications/
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
           web-push.ts
+        shell/
+          status.ts
         user/
           avatar.ts
           preferences.ts
@@ -1054,6 +1069,9 @@ packages/
     tsconfig.json
   utils/
     src/
+      day/
+        day-key.ts
+        index.ts
       errors.ts
       index.ts
       number.ts

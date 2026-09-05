@@ -1,5 +1,6 @@
-import { Heading, Text, ThemeControl } from "@syn/ui";
+import { Text, ThemeControl } from "@syn/ui";
 
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 import { getServerApi } from "@/lib/trpc/server";
 
 /**
@@ -19,15 +20,15 @@ export default async function SettingsAppearancePage() {
   const me = await api.user.me();
 
   return (
-    <div className="flex flex-col gap-(--space-5) p-(--space-4)">
-      <Heading>ST-09 Appearance</Heading>
+    <PageFrame header={<ShellPageHeader title="ST-09 Appearance" showBack />}>
+      <div className="flex flex-col gap-(--space-5)">
+        <ThemeControl />
 
-      <ThemeControl />
-
-      <Text as="p" variant="caption" tone="muted">
-        Signed in as {me.displayName ?? me.email ?? me.id} · stored theme:{" "}
-        {me.theme} · zone: {me.timezone}
-      </Text>
-    </div>
+        <Text as="p" variant="caption" tone="secondary">
+          Signed in as {me.displayName ?? me.email ?? me.id} · stored theme:{" "}
+          {me.theme} · zone: {me.timezone}
+        </Text>
+      </div>
+    </PageFrame>
   );
 }

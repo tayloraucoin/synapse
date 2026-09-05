@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 
-import { Heading, Text } from "@syn/ui";
+import { Text } from "@syn/ui";
 import { weekKeySchema } from "@syn/validators";
+
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 
 /** Placeholder — WR-02 Habit strip detail. */
 export default async function ReviewWeekHabitPage({
@@ -13,11 +15,12 @@ export default async function ReviewWeekHabitPage({
   if (!weekKeySchema.safeParse(week).success) notFound();
 
   return (
-    <>
-      <Heading>WR-02 Habit strip detail</Heading>
+    <PageFrame
+      header={<ShellPageHeader title={"WR-02 Habit strip detail"} />}
+    >
       <Text as="p" tone="secondary">
         {week} · {id}
       </Text>
-    </>
+    </PageFrame>
   );
 }

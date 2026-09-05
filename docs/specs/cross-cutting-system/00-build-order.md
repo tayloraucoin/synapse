@@ -17,7 +17,7 @@ The shell first, because every later screen renders inside it; the install offer
 ## Build-order checklist
 
 ### Phase 0 — The shell (before any epic screen)
-- [ ] **SYS-1** · The shell: chrome mounted, `PageFrame`, `shell.status`, the status-line sources, sheets as history, back, tab memory, record and plan headers, the copy sign-offs — L · (SET-1)
+- [x] **SYS-1** · The shell: chrome mounted, `PageFrame`, `shell.status`, the status-line sources, sheets as history, back, tab memory, record and plan headers, the copy sign-offs — L · (SET-1) — built 2026-09-05; **Vesper's chrome review needs a reachable signed-in shell**
 
 ### Phase 1 — Time and system states (after the day model and settings)
 - [ ] **SYS-2** · Time: the device-zone check, SY-06, the deferred zone and day-close switches applied to future days — M · (USE-1, SET-8)

@@ -21,15 +21,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
-import { NAV_ITEMS, REVIEW_DOT_LABEL, type NavTab } from "./nav-items";
+import { dispatchScrollToNow } from "@/lib/hooks/use-scroll-memory";
 
-/** Which tab owns a path — the List tab owns every day route. */
-function tabForPath(pathname: string): NavTab {
-  if (pathname.startsWith("/settings")) return "settings";
-  if (pathname.startsWith("/review")) return "review";
-  if (pathname.endsWith("/schedule")) return "schedule";
-  return "list";
-}
+import { NAV_ITEMS, REVIEW_DOT_LABEL, tabForPath } from "./nav-items";
 
 export interface TabBarProps {
   reviewHasPending: boolean;
@@ -53,7 +47,23 @@ export function TabBar({ reviewHasPending, dimmed = false }: TabBarProps) {
             dot={item.tab === "review" && reviewHasPending}
             dotLabel={REVIEW_DOT_LABEL}
           >
-            <Link href={item.href}>{item.label}</Link>
+            {/*
+             * Re-tapping the tab you are already on scrolls to now rather than
+             * navigating (Epic 2 SH-00). Navigating would rebuild the page and
+             * throw away the scroll position the person is standing in — and
+             * on a day route it would also move them off the day they were
+             * looking at, which is not what tapping "List" means.
+             */}
+            <Link
+              href={item.href}
+              onClick={(event) => {
+                if (item.tab !== active) return;
+                event.preventDefault();
+                dispatchScrollToNow();
+              }}
+            >
+              {item.label}
+            </Link>
           </BottomNavItem>
         ))}
       </BottomNavList>
