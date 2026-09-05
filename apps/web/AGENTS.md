@@ -67,7 +67,7 @@ is a defect.**
 
 | Route | Builder | Screen |
 |---|---|---|
-| `/` | `homeRoute()` | resolves per §4.2 — never renders |
+| `/` | `homeRoute()` | signed out: the landing page (SYS-6). Signed in: resolves per §4.2 — never renders |
 | `/signin` | `signInRoute(next?)` | AU-01 |
 | `/signup` | `signUpRoute()` | AU-02 |
 | `/verify` | `verifyRoute(next?)` | AU-03 |

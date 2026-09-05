@@ -26,7 +26,7 @@ apps/
     app/
       _components/
         landing/
-          example-day.ts
+          example-day.ts  # the landing's example day, its day-part arithmetic, and its state derivation — no React
           example-list.tsx
           index.ts
           landing-page.tsx
@@ -180,7 +180,7 @@ apps/
       layout.tsx
       manifest.ts
       not-found.tsx
-      page.tsx
+      page.tsx  # the landing page when signed out; the §4.2 entry tree when signed in
     components/
       category-sheet/
         category-sheet.tsx
@@ -211,7 +211,7 @@ apps/
         template-editor.tsx
         use-template-editor.ts
     content/
-      landing.ts
+      landing.ts  # the landing page's copy deck (SYS-6). Surface prose lives here, never inline
     lib/
       assets/
         icon-url.ts

@@ -30,7 +30,7 @@ The shell first, because every later screen renders inside it; the install offer
 - [ ] **SYS-4** · Keyboard and focus: global shortcuts, `?`, list and canvas navigation, form submit keys — M · (USE-2, USE-5, SYS-3)
 
 ### The front door (no build-order gate; gated on Taylor's approval of the handoff)
-- [ ] **SYS-6** · The landing page: `/` for a visitor who is not signed in — the hero's live example day, three pillars with the product as the picture, the trust line once, `Create an account` — M · (nothing not yet Complete; SYS-3 soft, for the footer's legal links) · **do not build before `docs/ux/landing-page-ux.md` is approved**
+- [x] **SYS-6** · The landing page: `/` for a visitor who is not signed in — the hero's live example day, three pillars with the product as the picture, the trust line once, `Create an account` — M · (nothing not yet Complete; SYS-3 soft, for the footer's legal links) — built 2026-09-05; **SYS-3 still owes the footer's two legal links**
 
 ## Ordering constraints (alphabetical order hides these)
 

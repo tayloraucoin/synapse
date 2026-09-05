@@ -4,7 +4,7 @@
 **Slice type:** One public page composed from built composites, with two small client leaves that read the device clock and hold local interaction state. The risk class is *a false picture or a false frame*: a hydration mismatch that flashes a wrong day, a `dark:` colour that breaks a theme, a second `h1`, a string that drifts from the deck, a number rendered without its sentence.
 **Vigil:** a pre-launch sweep after the build — official §11, the copy law (§10, value proposition §5.5 and §7.5), the never-lists, and the human-hand tell inventory; the three-clock check; both themes at first paint; the signed-in redirect.
 
-**Status:** Not started — **awaiting Taylor's approval of the design handoff before any build.**
+**Status:** Complete (2026-09-05) — approved by Taylor and built. Two `@syn/ui` accessibility fixes and one routed finding are logged in `DEVIATIONS.md`.
 
 > **Design handoff (the behaviour section of this ticket):** [`docs/ux/landing-page-ux.md`](../../ux/landing-page-ux.md). Every layout, state, string, and ruling is there; this ticket adds placement, the acceptance criteria, and the kickoff. Where this ticket and the handoff disagree, the handoff wins and this ticket is fixed.
 

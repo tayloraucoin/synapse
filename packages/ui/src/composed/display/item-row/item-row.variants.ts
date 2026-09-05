@@ -10,7 +10,17 @@ import { cva, type VariantProps } from "class-variance-authority";
  */
 export const itemRowVariants = cva(
   [
-    "relative flex w-full min-h-(--row-min) items-center gap-(--space-2) text-left",
+    /*
+     * `min-w-0` is load-bearing at 200% text (official spec §11). The row body
+     * is a flex item beside the checkbox column, whose 56px is a rem-based
+     * `size-14` and so becomes 112px when a person doubles their text size.
+     * A flex item defaults to `min-width: auto`, which is its min-content —
+     * and the title inside is `truncate`, i.e. `white-space: nowrap`, so its
+     * min-content is the whole title. The row then refuses to shrink and the
+     * page scrolls sideways. `min-w-0` lets the title clip as it was always
+     * meant to. Found on the landing page (SYS-6); the List has the same shape.
+     */
+    "relative flex w-full min-w-0 min-h-(--row-min) items-center gap-(--space-2) text-left",
     "pe-(--space-4) py-(--space-2)",
     "transition-colors duration-(--dur-state) ease-(--ease-settle)",
   ],

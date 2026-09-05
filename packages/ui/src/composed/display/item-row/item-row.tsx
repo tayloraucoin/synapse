@@ -200,7 +200,22 @@ export function ItemRow({
                 : ITEM_ROW_COPY.markDone(item.title)
             }
             onCheckedChange={() => onToggleDone?.(item)}
-            className="size-5"
+            /*
+             * 20px visual, 44px target (official spec §9.7, §11). The 56px
+             * column around this is layout, not a target — it has no handler,
+             * so without the pseudo-element the only tappable area was the
+             * 20px box itself, which is the smallest target in the product on
+             * the control a person touches most. The transparent `before`
+             * belongs to the button, so a press anywhere in it is a press on
+             * the checkbox, and at 44px it still leaves 6px clear of the row
+             * body on either side. Found on the landing page (SYS-6).
+             *
+             * Sized by `--target` rather than an inset, so it is exactly the
+             * 44px the floor asks for and stays 44px when a person doubles
+             * their text size — the column around it grows, the target does
+             * not need to.
+             */
+            className="relative size-5 before:absolute before:top-1/2 before:left-1/2 before:size-(--target) before:-translate-x-1/2 before:-translate-y-1/2 before:content-['']"
           />
         </span>
       ) : (
