@@ -16,8 +16,15 @@ Never edited. See [`ux/README.md`](ux/README.md) for what each covers; in short:
 | [`epic2_in_use_ux_architecture.md`](ux/epic2_in_use_ux_architecture.md) | In use: the List, the Schedule, sheets, shift, trim. |
 | [`epic3_review_ux_architecture.md`](ux/epic3_review_ux_architecture.md) | Review: the Day Review, the Week Review, history. |
 | [`synapse_navigation_and_system_ux_architecture.md`](ux/synapse_navigation_and_system_ux_architecture.md) | Cross-cutting: navigation, breakpoints, routes, PWA, offline, time, record integrity, the SY screens. |
+| [`branding-guide.md`](ux/branding-guide.md) | The brand on one page — colour, type, space, motion, voice, the never list. **Derived from §9/§10 and `preset.css`; not authoritative.** |
 | [`synapse_ui_component_needs_and_handoff.md`](ux/synapse_ui_component_needs_and_handoff.md) | The v1 component handoff. Superseded by v2; kept for archaeology. |
 | [`synapse_ui_component_needs_and_handoff_v2.md`](ux/synapse_ui_component_needs_and_handoff_v2.md) | **Component contracts.** §3.5 fixes the type unions, §6.2 the token file. |
+
+## `product/` — what Synapse is for, and why anyone would use it
+
+| Document | What |
+|---|---|
+| [`value-proposition.md`](product/value-proposition.md) | The job, the value exchange, the benefits ladder, differentiation by refusal, what the product can honestly change (graded), how the brand carries it, messaging architecture, fit signatures. Compass, with Sage and Hearth. Draft for ratification. |
 
 ## `architecture/` — how the code is organised
 

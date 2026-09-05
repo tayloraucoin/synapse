@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 775 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-05 · 789 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -50,8 +50,6 @@ apps/
           page.tsx
         invite/
           page.tsx
-        reset/
-          page.tsx
         signin/
           _components/
             sign-in-form.tsx
@@ -59,8 +57,6 @@ apps/
         signup/
           _components/
             sign-up-form.tsx
-          page.tsx
-        verify/
           page.tsx
         layout.tsx
       (setup)/
@@ -134,6 +130,10 @@ apps/
           page.tsx
         layout.tsx  # THE auth gate
       api/
+        assets/
+          [bucket]/
+            [...path]/
+              route.ts
         jobs/
           scheduler/
             route.ts
@@ -161,6 +161,8 @@ apps/
       not-found.tsx
       page.tsx
     lib/
+      assets/
+        icon-url.ts
       auth/
         auth-redirect-response.ts
         get-request-context.ts
@@ -235,6 +237,8 @@ docs/
     environments.md
     migrations.md
     rls.md
+  product/
+    value-proposition.md
   roles/
     engineering/
       Forge—staff-engineer-role-prompt.md
@@ -242,12 +246,21 @@ docs/
       Mason—cto-principle-dev-role-prompt.md
       Vigil—qa-role-prompt.md
       Warden—security-privacy-engineer-role-prompt.md
+    marketing-growth/
+      Cantor_copywriter-role-prompt.md
+      Cantor_ext_human-hand-mode.md
+      Hearth_brand-strategist-role-prompt.md
     operations-strategy/
+      Crucible_devils-advocate-role-prompt.md
+      Pilot_business-advisor-role-prompt.md
       Reeve—project-manager-role-prompt.md
     product-design/
+      Compass_product-strategist-role-prompt.md
       Envoy_user-researcher-role-prompt.md
       Tribune_customer-advocate-role-prompt.md
       vesper-ux-ui-designer-role-prompt.md
+    science-clinical/
+      Sage_behavioral-scientist-role-prompt.md
     role-authoring-guide.md
   specs/
     cross-cutting-system/
@@ -345,14 +358,19 @@ packages/
   api/
     src/
       routers/
+        asset.ts
         user.ts
       services/
+        asset/
+          create-upload-url.ts
+          storage.ts
         jobs/
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
         notifications/
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
           web-push.ts
         user/
+          avatar.ts
           preferences.ts
       context.ts
       index.ts
@@ -404,6 +422,7 @@ packages/
       motion.ts
       notification-catalogue.ts
       starter-habits.ts
+      storage-buckets.ts
       storage-keys.ts
       timezones.ts
       user-images.ts
@@ -1047,6 +1066,7 @@ packages/
     tsconfig.json
   validators/
     src/
+      asset.ts
       auth-credentials.ts
       index.ts
       keys.ts
