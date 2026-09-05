@@ -4,7 +4,7 @@
 **Slice type:** Identity rail — the failure classes are a server client imported into a client bundle (cookie APIs leak), a service-role key reaching the browser, or a tier mismatch that signs a user into the wrong Supabase project.
 **Vigil:** review by inducing the misuse — attempt to import `@syn/auth/server` from a `"use client"` file and confirm the build fails; set `DATABASE_ENVIRONMENT=production` locally with only staging vars and confirm `requireSupabasePublicCredentials` throws rather than falling through.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04) — code done and locally verified; **Supabase dashboard setup + AC4–AC7 pending Taylor**
 
 ---
 

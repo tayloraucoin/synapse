@@ -3309,6 +3309,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@supabase/ssr@npm:^0.10.2":
+  version: 0.10.3
+  resolution: "@supabase/ssr@npm:0.10.3"
+  dependencies:
+    cookie: "npm:^1.0.2"
+  peerDependencies:
+    "@supabase/supabase-js": ^2.105.3
+  checksum: 10c0/c143197c4dc6d90b917ac992a9e1bc077e586a4cd78c2da9b31c390a760bed2bc224a8ea2852aaf234a104c86c6839e2e4dc0c47f6d274d933e91d9455b48def
+  languageName: node
+  linkType: hard
+
 "@supabase/storage-js@npm:2.115.0":
   version: 2.115.0
   resolution: "@supabase/storage-js@npm:2.115.0"
@@ -3346,6 +3357,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@syn/auth@npm:*, @syn/auth@workspace:packages/auth":
+  version: 0.0.0-use.local
+  resolution: "@syn/auth@workspace:packages/auth"
+  dependencies:
+    "@supabase/ssr": "npm:^0.10.2"
+    "@supabase/supabase-js": "npm:^2.49.1"
+    "@syn/config": "npm:*"
+    "@syn/db": "npm:*"
+    "@syn/types": "npm:*"
+    "@syn/utils": "npm:*"
+    "@types/node": "npm:^22.7.5"
+    eslint: "npm:^9.39.1"
+    next: "npm:16.3.4"
+    typescript: "npm:5.9.2"
+  peerDependencies:
+    next: ">=16.0.0"
+  languageName: unknown
+  linkType: soft
+
 "@syn/config@npm:*, @syn/config@workspace:*, @syn/config@workspace:packages/config":
   version: 0.0.0-use.local
   resolution: "@syn/config@workspace:packages/config"
@@ -3376,7 +3406,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@syn/db@workspace:packages/db":
+"@syn/db@npm:*, @syn/db@workspace:packages/db":
   version: 0.0.0-use.local
   resolution: "@syn/db@workspace:packages/db"
   dependencies:
@@ -3395,7 +3425,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@syn/observability@workspace:packages/observability":
+"@syn/observability@npm:*, @syn/observability@workspace:packages/observability":
   version: 0.0.0-use.local
   resolution: "@syn/observability@workspace:packages/observability"
   dependencies:
@@ -4370,6 +4400,13 @@ __metadata:
   version: 2.0.0
   resolution: "convert-source-map@npm:2.0.0"
   checksum: 10c0/8f2f7a27a1a011cc6cc88cc4da2d7d0cfa5ee0369508baae3d98c260bb3ac520691464e5bbe4ae7cdf09860c1d69ecc6f70c63c6e7c7f7e3f18ec08484dc7d9b
+  languageName: node
+  linkType: hard
+
+"cookie@npm:^1.0.2":
+  version: 1.1.1
+  resolution: "cookie@npm:1.1.1"
+  checksum: 10c0/79c4ddc0fcad9c4f045f826f42edf54bcc921a29586a4558b0898277fa89fb47be95bc384c2253f493af7b29500c830da28341274527328f18eba9f58afa112c
   languageName: node
   linkType: hard
 
@@ -8364,8 +8401,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "web@workspace:apps/web"
   dependencies:
+    "@supabase/ssr": "npm:^0.10.2"
+    "@supabase/supabase-js": "npm:^2.49.1"
+    "@syn/auth": "npm:*"
     "@syn/config": "npm:*"
+    "@syn/db": "npm:*"
+    "@syn/observability": "npm:*"
+    "@syn/types": "npm:*"
     "@syn/ui": "npm:*"
+    "@syn/utils": "npm:*"
     "@tailwindcss/postcss": "npm:^4"
     "@types/node": "npm:^22"
     "@types/react": "npm:^19"
