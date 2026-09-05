@@ -20,7 +20,7 @@ Everything a feature epic needs to run end to end (a signed-in page that reads a
 - [x] **INF-1** · Monorepo re-base onto CC's shape — L · (none) · Mason review of the version pins
 
 ### Phase 1 — Platform-pure packages and the vocabulary
-- [ ] **INF-2** · Leaf packages: `types`, `constants`, `utils`, `validators`, `observability` — M · (INF-1)
+- [x] **INF-2** · Leaf packages: `types`, `constants`, `utils`, `validators`, `observability` — M · (INF-1)
 - [ ] **INF-3** · Design tokens, theme, typography primitive, Storybook — L · (INF-2) · Vesper review
 - [ ] **INF-4** · shadcn primitives: install, re-slot, story — L · (INF-3) · Vesper review
 

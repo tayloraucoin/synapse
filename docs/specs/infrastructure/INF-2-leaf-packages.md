@@ -3,7 +3,7 @@
 **Epic:** INF — Infrastructure · **Phase 1** · Size: M
 **Slice type:** Package skeletons and the platform-purity rule — the failure class is a web-only import sneaking into a package the future Expo app must consume unchanged.
 
-**Status:** Not started
+**Status:** Complete (2026-09-04)
 
 ---
 

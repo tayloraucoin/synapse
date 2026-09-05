@@ -1297,6 +1297,37 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@syn/constants@npm:*, @syn/constants@workspace:packages/constants":
+  version: 0.0.0-use.local
+  resolution: "@syn/constants@workspace:packages/constants"
+  dependencies:
+    "@syn/config": "npm:*"
+    eslint: "npm:^9.39.1"
+    typescript: "npm:5.9.2"
+  languageName: unknown
+  linkType: soft
+
+"@syn/observability@workspace:packages/observability":
+  version: 0.0.0-use.local
+  resolution: "@syn/observability@workspace:packages/observability"
+  dependencies:
+    "@syn/config": "npm:*"
+    "@types/node": "npm:^22.7.5"
+    eslint: "npm:^9.39.1"
+    typescript: "npm:5.9.2"
+  languageName: unknown
+  linkType: soft
+
+"@syn/types@workspace:packages/types":
+  version: 0.0.0-use.local
+  resolution: "@syn/types@workspace:packages/types"
+  dependencies:
+    "@syn/config": "npm:*"
+    eslint: "npm:^9.39.1"
+    typescript: "npm:5.9.2"
+  languageName: unknown
+  linkType: soft
+
 "@syn/ui@workspace:packages/ui":
   version: 0.0.0-use.local
   resolution: "@syn/ui@workspace:packages/ui"
@@ -1304,6 +1335,28 @@ __metadata:
     "@syn/config": "npm:*"
     eslint: "npm:^9.39.1"
     typescript: "npm:5.9.2"
+  languageName: unknown
+  linkType: soft
+
+"@syn/utils@workspace:packages/utils":
+  version: 0.0.0-use.local
+  resolution: "@syn/utils@workspace:packages/utils"
+  dependencies:
+    "@syn/config": "npm:*"
+    eslint: "npm:^9.39.1"
+    typescript: "npm:5.9.2"
+  languageName: unknown
+  linkType: soft
+
+"@syn/validators@workspace:packages/validators":
+  version: 0.0.0-use.local
+  resolution: "@syn/validators@workspace:packages/validators"
+  dependencies:
+    "@syn/config": "npm:*"
+    "@syn/constants": "npm:*"
+    eslint: "npm:^9.39.1"
+    typescript: "npm:5.9.2"
+    zod: "npm:^3.24.2"
   languageName: unknown
   linkType: soft
 
@@ -1536,7 +1589,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22":
+"@types/node@npm:^22, @types/node@npm:^22.7.5":
   version: 22.20.1
   resolution: "@types/node@npm:22.20.1"
   dependencies:
@@ -5239,5 +5292,12 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10c0/dceb44c28578b31641e13695d200d34ec4ab3966a5729814d5445b194933c096b7ced71494ce53a0e8820685d1d010df8b2422e5bf2cdea7e469d97ffbea306f
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.24.2":
+  version: 3.25.76
+  resolution: "zod@npm:3.25.76"
+  checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c
   languageName: node
   linkType: hard

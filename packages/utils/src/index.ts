@@ -1,0 +1,31 @@
+/**
+ * @syn/utils — pure, framework-free helper functions grouped by domain file.
+ *
+ * Purity rule (conventions §4.10):
+ * - Deterministic input → output only. No React, DB, I/O, env reads, or side effects.
+ * - Group by domain (time.ts, string.ts, …). misc.ts / helpers.ts are banned.
+ * - Domain-coupled logic belongs in its domain package (@syn/api), not here.
+ *
+ * For side-effectful dev logging, use @syn/observability instead.
+ */
+
+export { AppError, isAppError } from "./errors";
+export { clamp, roundToStep } from "./number";
+export { sanitizeNextPath } from "./path";
+export {
+  firstNonEmpty,
+  getInitials,
+  normalizeEmailInput,
+  pluralize,
+  truncate,
+  withTrailingGap,
+} from "./string";
+export {
+  formatCalendarDay,
+  formatClock,
+  formatElapsed,
+  formatWindow,
+  minutesFromDayStart,
+  toDateKey,
+  type CalendarDayStyle,
+} from "./time";

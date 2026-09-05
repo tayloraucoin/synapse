@@ -5,7 +5,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | Ticket | Title | Depends on | Status | Date |
 |---|---|---|---|---|
 | INF-1 | Monorepo re-base onto CC's shape | — | Complete | 2026-09-04 |
-| INF-2 | Leaf packages | INF-1 | Not started | |
+| INF-2 | Leaf packages | INF-1 | Complete | 2026-09-04 |
 | INF-3 | Design tokens, theme, typography, Storybook | INF-2 | Not started | |
 | INF-4 | shadcn primitives | INF-3 | Not started | |
 | INF-5 | `@syn/db` | INF-2 | Not started | |
@@ -19,7 +19,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 ## Checklist
 
 - [x] INF-1
-- [ ] INF-2
+- [x] INF-2
 - [ ] INF-3
 - [ ] INF-4
 - [ ] INF-5

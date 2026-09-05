@@ -1,4 +1,12 @@
 {
   "files": [],
-  "references": [{ "path": "./apps/web" }, { "path": "./packages/ui" }]
+  "references": [
+    { "path": "./packages/types" },
+    { "path": "./packages/constants" },
+    { "path": "./packages/observability" },
+    { "path": "./packages/utils" },
+    { "path": "./packages/validators" },
+    { "path": "./packages/ui" },
+    { "path": "./apps/web" }
+  ]
 }
