@@ -56,12 +56,19 @@ Index: [`ai-guides/README.md`](ai-guides/README.md).
 
 | Document | What |
 |---|---|
+| [`README.md`](specs/README.md) | **Start here for feature work.** The four tracks, the global build order across them, the placement rules every feature ticket obeys, and the cross-track dependencies. |
 | [`spec-system-guide.md`](specs/spec-system-guide.md) | How a ticket is written and worked. |
-| [`infrastructure/`](specs/infrastructure/) | The foundation track: [README](specs/infrastructure/README.md) · [build order](specs/infrastructure/00-build-order.md) · [PROGRESS](specs/infrastructure/PROGRESS.md) · [DEVIATIONS](specs/infrastructure/DEVIATIONS.md) · [TECHNICAL-DECISIONS](specs/infrastructure/TECHNICAL-DECISIONS.md). |
+| [`infrastructure/`](specs/infrastructure/) | The foundation track — **Complete**: [README](specs/infrastructure/README.md) · [build order](specs/infrastructure/00-build-order.md) · [PROGRESS](specs/infrastructure/PROGRESS.md) · [DEVIATIONS](specs/infrastructure/DEVIATIONS.md) · [TECHNICAL-DECISIONS](specs/infrastructure/TECHNICAL-DECISIONS.md). |
+| [`epic-1-setup/`](specs/epic-1-setup/) | `SET-1…10` — the domain schema, auth, library, templates, week build, first run, settings: [README](specs/epic-1-setup/README.md) · [build order](specs/epic-1-setup/00-build-order.md) · [PROGRESS](specs/epic-1-setup/PROGRESS.md). |
+| [`epic-2-in-use/`](specs/epic-2-in-use/) | `USE-1…8` — the day model, the List, the sheets and timers, the Schedule, shift, trim, notifications: [README](specs/epic-2-in-use/README.md) · [build order](specs/epic-2-in-use/00-build-order.md) · [PROGRESS](specs/epic-2-in-use/PROGRESS.md). |
+| [`epic-3-review/`](specs/epic-3-review/) | `REV-1…4` — the resolver, the Day Review, history, the Week Review: [README](specs/epic-3-review/README.md) · [build order](specs/epic-3-review/00-build-order.md) · [PROGRESS](specs/epic-3-review/PROGRESS.md). |
+| [`cross-cutting-system/`](specs/cross-cutting-system/) | `SYS-1…5` — the shell, time zones, About & feedback, keyboard, PWA install and update: [README](specs/cross-cutting-system/README.md) · [build order](specs/cross-cutting-system/00-build-order.md) · [PROGRESS](specs/cross-cutting-system/PROGRESS.md). |
 
 ## `roles/` — who is reading
 
 | Document | What |
 |---|---|
 | [`role-authoring-guide.md`](roles/role-authoring-guide.md) | How a role prompt is written. |
-| [`product-design/vesper-ux-ui-designer-role-prompt.md`](roles/product-design/vesper-ux-ui-designer-role-prompt.md) | Vesper — UX/UI design. Other roles arrive when commissioned. |
+| [`product-design/Vesper-ux-ui-designer-role-prompt.md`](roles/product-design/Vesper-ux-ui-designer-role-prompt.md) | Vesper — UX/UI design. |
+| [`engineering/Mason—cto-principle-dev-role-prompt.md`](roles/engineering/Mason—cto-principle-dev-role-prompt.md) | Mason — architecture, placement, the data contract. |
+| [`operations-strategy/Reeve—project-manager-role-prompt.md`](roles/operations-strategy/Reeve—project-manager-role-prompt.md) | Reeve — tickets, sequencing, the logs. |

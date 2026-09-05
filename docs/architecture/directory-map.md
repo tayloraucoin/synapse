@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 676 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-05 · 736 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -214,10 +214,79 @@ docs/
     migrations.md
     rls.md
   roles/
+    engineering/
+      Forge—staff-engineer-role-prompt.md
+      Loom—ai-systems-architect-role-prompt.md
+      Mason—cto-principle-dev-role-prompt.md
+      Vigil—qa-role-prompt.md
+      Warden—security-privacy-engineer-role-prompt.md
+    operations-strategy/
+      Reeve—project-manager-role-prompt.md
     product-design/
+      Envoy_user-researcher-role-prompt.md
+      Tribune_customer-advocate-role-prompt.md
       vesper-ux-ui-designer-role-prompt.md
     role-authoring-guide.md
   specs/
+    cross-cutting-system/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      SYS-1-shell.md
+      SYS-2-time-zones-and-deferred-switches.md
+      SYS-3-about-feedback-errors-and-session.md
+      SYS-4-keyboard-and-focus.md
+      SYS-5-pwa-install-and-update.md
+      TECHNICAL-DECISIONS.md
+    epic-1-setup/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      SET-1-domain-schema.md
+      SET-10-your-data-export-and-delete.md
+      SET-2-auth-screens.md
+      SET-3-icon-and-avatar-pipeline.md
+      SET-4-categories-and-habit-library.md
+      SET-5-templates.md
+      SET-6-week-build-and-materialisation.md
+      SET-7-first-run.md
+      SET-8-settings-core.md
+      SET-9-reasons-and-notification-preferences.md
+      TECHNICAL-DECISIONS.md
+    epic-2-in-use/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      TECHNICAL-DECISIONS.md
+      USE-1-day-model.md
+      USE-2-plain-list.md
+      USE-3-item-sheet-day-header-and-timers.md
+      USE-4-manual-time-and-one-off-from-the-day.md
+      USE-5-schedule.md
+      USE-6-shift-my-day.md
+      USE-7-capacity-trim.md
+      USE-8-notifications.md
+    epic-3-review/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      REV-1-resolver-and-the-number.md
+      REV-2-review-tab-and-day-review.md
+      REV-3-traded-up-reflections-edit-mode-and-history.md
+      REV-4-week-review.md
+      TECHNICAL-DECISIONS.md
     infrastructure/
       _templates/
         slice-spec.md
@@ -237,6 +306,7 @@ docs/
       PROGRESS.md  # the only authoritative answer to "is this Complete"
       README.md
       TECHNICAL-DECISIONS.md
+    README.md
     spec-system-guide.md
   ux/
     epic1_setup_ux_architecture.md

@@ -1,0 +1,84 @@
+# Epic 1 — Setup — Technical Decisions (append-only)
+
+One section per architectural choice that had real alternatives. Written when the decision is made. Format:
+
+```
+## YYYY-MM-DD · <ticket-id> · <the decision, as a statement>
+**Context (as it was then):** …
+**Options weighed:** A … B … C …
+**Decision:** …
+**Consequences:** what this buys, what it costs, what it forecloses.
+**Revisit trigger:** the condition under which this should be reopened.
+```
+
+## 2026-09-05 · SET-1 · The whole official-spec §3 schema lands in one migration, owned by Epic 1
+
+**Context (as it was then):** INF-5 shipped `users` and `web_push_subscriptions` only and left every domain table to "the feature epics' tech spec". Three epics each need a subset; Epic 2 renders `day_items` that Epic 1's week build creates; Epic 3 reads `misses` that Epic 2's shift writes.
+**Options weighed:** A — one migration carrying all of §3, in the first feature ticket. B — one migration per epic, each `ALTER`ing the last (Epic 1 adds `days`/`day_items` without timer or miss columns; Epic 2 adds them). C — a separate "domain" track holding only the schema.
+**Decision:** A, as SET-1. Official §0.3 R4 says the schema is shaped for every phase from day one; B produces three one-way doors where one will do and a `day_items` shape that changes under Epic 2's feet. C adds a fifth folder for one ticket and the founder asked for four.
+**Consequences:** Buys one migration to review and one `SCHEMA_REFERENCE.md` every later ticket cites. Costs a large first ticket (L) and columns that sit empty until Epic 2 and 3 arrive. Forecloses nothing — a later column is a normal migration with a deviation line.
+**Revisit trigger:** a Phase-2 need (calendar import, offline sync) that wants a column §3 did not anticipate.
+
+## 2026-09-05 · SET-1 · `week_plans` is derived, not stored
+
+**Context (as it was then):** Official §3.6 lists `WeekPlan { week_start_date, status, days[] }`. Every consumer (WK-01, N6, RV-00's "this week") can compute status from the week's `days`: planned if any day has a template or a one-off, else unplanned.
+**Options weighed:** A — create the table as written. B — derive status; no table. C — create the table with status as a generated column.
+**Decision:** B. A row whose only content is derivable is a second home for one fact, and the first bug is a week that says *planned* after its last template was removed. `WeekPlanStatus` stays in `@syn/types` as the derived value's type.
+**Consequences:** Buys one fewer table and one fewer write on every week-build change. Costs a small aggregate query where a flag read would have been. Forecloses nothing — if a week ever needs its own attribute (a note, a theme), a `weeks` table is a normal migration.
+**Revisit trigger:** the first attribute of a week that is not derivable from its days.
+
+## 2026-09-05 · SET-1 · The wake anchor lives on `users.wake_anchor_habit_id` only
+
+**Context (as it was then):** Official §3.1 has `users.wake_anchor_habit_id`; §3.3 has `habits.is_wake_anchor` "at most one per user". INF-5 already shipped the user column as a bare uuid awaiting its foreign key.
+**Options weighed:** A — both columns, kept in sync by the service. B — the user column alone; `isWakeAnchor` derived at read time. C — the habit column alone with a partial unique index.
+**Decision:** B. "At most one" is a fact about the person, not the habit; the user column enforces it structurally, and LB-02's "This replaces {other} as your wake-up habit" is a single-column update. `HabitSummaryView.isWakeAnchor` is `habit.id === user.wakeAnchorHabitId` in the view mapper.
+**Consequences:** Buys one write on anchor change and no sync bug. Costs a join (or a second read) in the library list. Forecloses nothing.
+**Revisit trigger:** none foreseen.
+
+## 2026-09-05 · SET-1 · Every user-data table carries a denormalised `user_id`
+
+**Context (as it was then):** `template_slots`, `day_items`, `timer_sessions`, and `misses` could derive their owner through a parent (`templates.user_id`, `days.user_id`). `ownerPrivateCrudPolicies` takes an owner column on the table itself.
+**Options weighed:** A — owner via subquery in the policy (`EXISTS (SELECT 1 FROM days WHERE …)`). B — a denormalised `user_id` on every table, set by the service, matched by the policy directly.
+**Decision:** B. A policy that subqueries another RLS-guarded table re-evaluates that table's policy on every row and is the shape `db-and-rls-authoring.md` warns will silently break under Realtime later. A direct column keeps every policy the same three lines and every table greppable for its owner.
+**Consequences:** Buys uniform policies and a cheap index per table. Costs one column and one invariant per child table: the service writes the parent's `user_id`, never the caller's claim. Forecloses nothing.
+**Revisit trigger:** none — this is the convention for the life of the schema.
+
+## 2026-09-05 · SET-1 · Deferred settings use a pending-pair on `users`, applied at the next day boundary
+
+**Context (as it was then):** Cross-cutting §7.3 and §7.5 say a time-zone switch and a day-close change take effect *from tomorrow*, so nothing on the current day jumps. A plain column update would reclassify "now" the moment it is saved — change the close from 03:00 to 05:00 at 04:00 and today's date flips backwards.
+**Options weighed:** A — write immediately; accept the edge. B — `pending_timezone` + `pending_timezone_from` and `pending_day_close_time` + `pending_day_close_time_from` on `users`; every reader applies a pending value once the person's current day key is ≥ the `from` date. C — a settings-history table.
+**Decision:** B. A is a real defect on a promise the document makes in words. C is a table for two fields. The read service (`services/user/preferences.ts`) applies and clears the pending pair on read; the scheduler's per-user pass does the same, so the switch happens even if the app is not opened.
+**Consequences:** Buys the documented behaviour and a `days.timezone` / `days.day_close_time` snapshot that keeps past days honest. Costs four nullable columns and one "apply pending" step in two places. Forecloses nothing.
+**Revisit trigger:** a third deferred setting, at which point C is the right shape.
+
+## 2026-09-05 · SET-3 · Icon and avatar reads go through a session-gated streaming route, not signed read URLs
+
+**Context (as it was then):** `IconValue.image` carries a storage path; `ItemIcon` and `Avatar` want a URL. The buckets are private. Every list of habits, every day, and the header render icons.
+**Options weighed:** A — sign a read URL per path on every render (a batch procedure the client calls with the visible paths). B — a route handler `GET /api/assets/{bucket}/{userId}/{file}` that checks the session, checks the prefix, downloads with the admin client, and streams with a private cache header. C — a public bucket with unguessable names.
+**Decision:** B. A path becomes an `<img src>` with no round trip, the browser caches per session for a day, and a URL is worthless without a cookie. A costs a signing call per list render and produces URLs that expire mid-session. C is a URL anyone who has seen it can fetch forever, which is not "only you can see your data".
+**Consequences:** Buys zero-latency icon rendering and one place the storage read rule lives. Costs a server hop per uncached image and a second use of the admin client (both call sites are commented). Forecloses nothing — exports still use signed URLs because they open in the system browser without a cookie.
+**Revisit trigger:** icon traffic that measurably loads the function, at which point a CDN in front of the route is the next step, not signed URLs.
+
+## 2026-09-05 · SET-6 · One materialiser with one "untouched" predicate serves every write path
+
+**Context (as it was then):** Four surfaces write a day's items from a template — apply, change the anchor, remove the template, re-apply after an edit (TP-04) — and each has a keep rule in the UX documents. Cross-cutting §8 says records are annotated, never rewritten.
+**Options weighed:** A — one reconciling service keyed on `template_slot_id`, with a single exported predicate for "may be rewritten", used by all four callers and by SET-4's re-snapshot rule. B — four services, each with its own keep logic. C — delete-and-reinsert on every apply, guarded by "no touched items on the day".
+**Decision:** A. B is the same rule in four places, which is the definition of drift. C throws away ids that notifications and deep links already point at, and a day with one done item becomes un-reapplyable.
+**Consequences:** Buys one place to reason about the record's integrity and a predicate every later ticket reuses. Costs a reconciliation step (read, diff, update/insert/delete) instead of a bulk insert, and one nullable column (`template_name_snapshot`) so a touched item can still say where it came from after its template is removed. The anchor change is the one path that writes to touched rows, and only their two scheduled-time columns.
+**Revisit trigger:** a second kind of source for items (calendar import) that needs its own reconciliation key.
+
+## 2026-09-05 · SET-8 · `users.theme` is the cross-device theme source; next-themes is the per-device cache
+
+**Context (as it was then):** INF-3 shipped next-themes with `localStorage` under `syn:theme`; INF-5 shipped `users.theme`. Two homes, unreconciled. Official spec §4.6 lists Appearance as a setting.
+**Options weighed:** A — next-themes only; the column stays unused. B — the column is authoritative; a small client leaf applies it once per session and the control writes both. C — the column only, with the theme rendered server-side from the row (no flash-of-wrong-theme script).
+**Decision:** B. A means a person who chose Dark on their phone gets Light on their laptop, which is a setting that does not sync — worse than no setting. C throws away next-themes' pre-hydration script and reintroduces the flash it exists to prevent.
+**Consequences:** Buys a preference that follows the person. Costs one reconciliation leaf and the rule that the control writes both. Forecloses nothing.
+**Revisit trigger:** a second per-device preference that should sync, at which point the leaf becomes a general "apply account preferences" step.
+
+## 2026-09-05 · SET-10 · The export is built synchronously inside the mutation and served by a 24-hour signed URL
+
+**Context (as it was then):** Official spec §7.6 describes an Edge Function and a download link; ST-10 describes preparing → ready with the size, and links that last 24 hours. A personal record is small.
+**Options weighed:** A — build the zip inside `user.requestExport`, upload, mark ready. B — enqueue a job; the scheduler builds it within 15 minutes. C — stream the zip straight from a route handler with no storage.
+**Decision:** A. B makes *Preparing your export…* last up to a quarter of an hour for a few hundred kilobytes. C has no "ready, {size}" state and no 24-hour link, both of which the document names; it also runs the whole-account read on every download.
+**Consequences:** Buys the documented states with one mutation and one scheduled expiry job. Costs a function invocation that does real work (seconds, not minutes) and a hard dependency on the account staying small enough to zip in memory. Forecloses nothing — B is the fallback when the revisit trigger fires, and the row shape already supports it.
+**Revisit trigger:** an export that takes over 30 seconds or exceeds 50 MB.

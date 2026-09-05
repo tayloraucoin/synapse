@@ -5,8 +5,8 @@
 ## Start here (turn one)
 
 1. **What this is:** a Yarn 4 + Turborepo monorepo — the Synapse habit-tracker PWA (`apps/web`), an Expo seam (`apps/mobile`, README only), and `@syn/*` capability packages. The conventions are Conscious Connections', copied and re-scoped — never imported.
-2. **Read before coding, in order:** this file → `docs/specs/infrastructure/README.md` → your ticket spec → the UX source it cites in `docs/ux/`.
-3. **Specs live in `docs/specs/`:** the current queue is `docs/specs/infrastructure/`. Process + kickoff contract: [`docs/specs/infrastructure/README.md`](docs/specs/infrastructure/README.md).
+2. **Read before coding, in order:** this file → [`docs/specs/README.md`](docs/specs/README.md) (the four tracks, the global build order, the placement rules) → your track's `README.md` → your ticket spec → the UX source it cites in `docs/ux/`.
+3. **Specs live in `docs/specs/`:** the foundation track (`infrastructure/`) is Complete; the current queue is the four feature tracks — `epic-1-setup/`, `epic-2-in-use/`, `epic-3-review/`, `cross-cutting-system/` — sequenced in [`docs/specs/README.md`](docs/specs/README.md). Each track's `README.md` carries its kickoff contract.
 4. **Orient in the docs tree** via [`docs/README.md`](docs/README.md) (one line per document) and [`docs/architecture/directory-map.md`](docs/architecture/directory-map.md) (the generated tree, with a note on every load-bearing file).
 5. **Verify work** the way CI does: `yarn lint && yarn lint:boundaries && yarn check-types && yarn build` (see Commands). There is **no test suite** — do not write tests during slices.
 6. **Done means:** acceptance criteria met · verify commands pass · the spec's `Status:` line flipped · `PROGRESS.md` ticked · one `DEVIATIONS.md` line per divergence.
