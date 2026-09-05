@@ -62,7 +62,7 @@ Full index: `docs/README.md` — *lands in INF-11*.
 | `docs/ux/epic2_in_use_ux_architecture.md` | In-Use epic screens | On disk |
 | `docs/ux/epic3_review_ux_architecture.md` | Review epic screens | On disk |
 | `docs/ux/synapse_navigation_and_system_ux_architecture.md` | Cross-cutting navigation and system surfaces | On disk |
-| `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` | Component contracts; §6.2 is the token map | **Missing — required by INF-11** |
+| `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` | Component contracts; §3.5 fixes the type unions, §6.2 is the token map | On disk |
 | `docs/specs/infrastructure/` | This track's tickets + `PROGRESS` / `DEVIATIONS` / `TECHNICAL-DECISIONS` logs | On disk |
 | `docs/architecture/codebase-conventions.md` | Architecture & placement (locked contract) | Lands in INF-11 |
 | `docs/architecture/tech-stack.md` | Canonical stack choices + pinned versions | Lands in INF-11 |

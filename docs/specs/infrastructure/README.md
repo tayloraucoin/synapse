@@ -139,4 +139,4 @@ The handoff's §10 D1 ("single app") is closed by this track; its §11 Q1 is ans
 ## Canonical paths & known-stale warnings
 
 - The `create-turbo` scaffold created `apps/docs` and `packages/{eslint-config,typescript-config,ui}` under the `@repo/*` scope with TypeScript 7, Node ≥24, ESLint 10. **All of that is replaced by INF-1.** Nothing from the scaffold except `apps/web`'s existence is kept.
-- `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` is referenced throughout but is **not on disk** — the re-scaffold dropped `docs/`. Taylor has the delivered file; INF-11's acceptance requires it to be present. Until then, tickets that cite it (INF-3, INF-4) read the v1 handoff plus this README's path remap and the official spec §9.7 for the variable map, and log a DEVIATIONS line naming what they could not verify.
+- `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` was missing when this track was written; Taylor restored it on 2026-09-04, before INF-3. It is on disk and authoritative. INF-2's type unions were transcribed from the official spec before it landed and were rewritten to its §3.5 the same day — see `DEVIATIONS.md`.

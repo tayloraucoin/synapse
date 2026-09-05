@@ -20,7 +20,6 @@ export type {
   CategoryKey,
   CompletionState,
   DayCloseReason,
-  IconKind,
   IconValue,
   ItemOrigin,
   ItemType,

@@ -2,12 +2,15 @@
  * Schema-shaped unions — the vocabulary the database, the API, and the future
  * Expo app all spell the same way.
  *
- * Spelling rule (v2 handoff §3.2 R8): a union that names a stored column value
+ * Fixed by the v2 component handoff §3.5 (`types/domain.ts`), which every §5
+ * component entry references. Copied as written; the only additions are the
+ * three schema unions at the bottom, which the handoff does not fix because no
+ * component renders them.
+ *
+ * Spelling rule (handoff §3.2 R8): a union that names a stored column value
  * keeps the schema's spelling (snake_case). Presentational unions are
  * kebab-case and live in `ui-state.ts`. The two never mix, so a value read from
  * a row is never silently comparable to a value chosen by a component.
- *
- * Source: official UX spec §3 (data model v2).
  */
 
 /** Habit.type — official spec §3.3. */
@@ -52,11 +55,8 @@ export type MissTier = "circumstance" | "scoping" | "chose_not_to";
 export type ItemOrigin =
   | "template"
   | "one_off"
-  | "carried_from"
+  | "carried"
   | "calendar_import";
-
-/** TimerSession.source — §3.7. */
-export type TimerSessionSource = "timer" | "manual";
 
 /**
  * Category.color_key — the eight category hues of official spec §9.3. Never the
@@ -72,21 +72,26 @@ export type CategoryKey =
   | "plum"
   | "moss";
 
-/** Habit.icon.kind — §3.3. */
-export type IconKind = "emoji" | "curated" | "custom";
-
 /**
- * Habit.icon — §3.3. `value` is the emoji character, the curated glyph name, or
- * the storage path of an uploaded image, according to `kind`. `colorKey` tints
- * curated glyphs (§9.9) and is absent for emoji and custom images.
+ * Habit.icon — §3.3, shaped by handoff §3.5 as a discriminated union so a
+ * caller cannot read `colorKey` off an emoji. `image` carries the storage path;
+ * the URL is resolved by the caller, never by `@syn/ui`.
  */
-export interface IconValue {
-  kind: IconKind;
-  value: string;
-  colorKey?: CategoryKey;
-}
+export type IconValue =
+  | { kind: "emoji"; value: string }
+  | { kind: "curated"; value: string; colorKey: CategoryKey | null }
+  | { kind: "image"; value: string };
 
-/** Day.close_reason — §3.6. */
+/** TimerSession.source — §3.7. */
+export type TimerSessionSource = "timer" | "manual";
+
+/*
+ * Below: schema unions the handoff does not fix, because no component in §5
+ * renders them. They are here rather than in `@syn/db` because the API and the
+ * scheduler both spell them, and neither should reach for a Drizzle enum.
+ */
+
+/** Day.close_reason — official spec §3.6. */
 export type DayCloseReason = "manual" | "auto";
 
 /** WeekPlan.status — §3.6. */

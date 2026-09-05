@@ -1,19 +1,16 @@
 /**
  * Presentational unions — what a surface renders, not what a row stores.
+ * Derived per render, never stored.
  *
- * Spelling rule (v2 handoff §3.2 R8): presentational unions are kebab-case, so
- * a value chosen by a component can never be mistaken for a value read from a
+ * Fixed by the v2 component handoff §3.5 (`types/ui-state.ts`), which every §5
+ * component entry references. Copied as written.
+ *
+ * Spelling rule (handoff §3.2 R8): presentational unions are kebab-case, so a
+ * value chosen by a component can never be mistaken for a value read from a
  * column. Schema-shaped unions live in `domain.ts`.
- *
- * Sources: official UX spec §5.9 (the state matrix), Epic 2 §2/§6, Epic 3
- * §DR-02/§WR-01, cross-cutting §2.1/§4.2/§5.4/§6.2/§8.2, Epic 1 §10.
  */
 
-/**
- * The item card's rendered state — official spec §5.9, both tabs, one card.
- * Derived at read time from `completion_state`, `assignment_state`, the clock,
- * and `done_at`; never stored.
- */
+/** Official spec §5.9 row/block matrix + Epic 2 §2 additions. */
 export type ItemState =
   | "upcoming"
   | "soon"
@@ -24,17 +21,14 @@ export type ItemState =
   | "passed"
   | "done"
   | "done-off-schedule"
-  | "not-today"
+  | "deferred"
   | "carried"
   | "not-assigned"
   | "cut-by-shift"
   | "missed"
   | "pending-review";
 
-/**
- * Where a row sits inside a multitask group's bracket — official spec §9.7
- * (`ItemRow` props). `none` is the ordinary single row.
- */
+/** Where a row sits inside a multitask group's bracket — official spec §9.7. */
 export type MultitaskPosition = "none" | "first" | "middle" | "last";
 
 /**
@@ -47,92 +41,72 @@ export type StateWordKind =
   | "open"
   | "closing"
   | "moved"
-  | "carried"
+  | "from"
   | "not-today"
-  | "add-quantity"
-  | "undo";
+  | "add-unit"
+  | "updated"
+  | "pending"
+  | "archived";
 
-/**
- * How a day renders — cross-cutting §8.2. `today` is the live day; `record` is
- * a past day (no now line, no Day Complete, edits are stamped); `plan` is a
- * future day (no checkboxes, one door back to the week build).
- */
-export type DayMode = "today" | "record" | "plan";
+/** Cross-cutting §8.2 — the live day, a past day as a record, a future day as a plan. */
+export type DayMode = "live" | "record" | "plan";
 
-/**
- * The one breakpoint — cross-cutting §2.1. Compact under 768px, wide at 768px
- * and above. Container placement, rail vs. tab bar, and canvas widths change;
- * copy, order, states, and actions do not.
- */
+/** One break at 768px — cross-cutting §2.1. */
 export type Layout = "compact" | "wide";
 
-/**
- * The canvas autosave indicator — Epic 1 §10. Canvases autosave per change and
- * show *Saving… / Saved / Not saved — retrying*; form sheets save on the
- * primary and never show this.
- */
-export type SaveStatus = "idle" | "saving" | "saved" | "retrying";
+/** The canvas autosave indicator — Epic 1 §10. */
+export type SaveStatus = "idle" | "saving" | "saved" | "retrying" | "failed";
 
-/**
- * Which Day Review the person is in — Epic 3 DR-01. `review` closes the day,
- * `pending` decides items an auto-close left behind, `edit` revises a day
- * already reviewed.
- */
-export type ReviewMode = "review" | "pending" | "edit";
+/** Which Day Review the person is in — Epic 3 DR-01. */
+export type ReviewMode = "live" | "pending" | "edit";
 
-/**
- * An undone item's panel state in the Day Review — Epic 3 DR-02. `pending`
- * renders identically to `undecided`; the day is closed, so the second line
- * adds the word.
- */
-export type DecisionState = "undecided" | "deciding" | "decided" | "pending";
+/** An undone item's panel state in the Day Review — Epic 3 DR-02, DR-05. */
+export type DecisionState =
+  | "undecided"
+  | "deciding"
+  | "decided"
+  | "pending"
+  | "resolved-by-shift"
+  | "changed";
 
-/**
- * One square in the Week Review's seven-day habit strip — Epic 3 WR-01 §6.
- * Every square carries an accessible label; the glyph is never the only
- * carrier of the distinction.
- */
+/** One square in the Week Review's seven-day habit strip — Epic 3 WR-01 §6. */
 export type StripState =
   | "done"
   | "done-moved"
   | "not-counted"
-  | "planned-wrong"
+  | "half"
   | "didnt-do"
   | "not-assigned"
   | "pending";
 
-/**
- * The item timer — official spec §5.4. Stop does not mark done, and done does
- * not require a timer; each run is its own `timer_session`.
- */
-export type TimerStatus = "idle" | "running" | "paused" | "stopped";
+/** The item timer — official spec §5.4. */
+export type TimerStatus = "idle" | "running" | "paused";
 
-/**
- * Which status line is showing under the header — cross-cutting §5.4, §6.2,
- * §7.3, §10 (SY-02, SY-06, SY-07), Epic 2 §3.6, Epic 3 RV-00. One slot, one
- * line at a time.
- */
+/** Which status line is showing under the header. One slot, one line at a time. */
 export type StatusLineVariant =
   | "offline"
   | "syncing"
-  | "sync-failed"
-  | "update-available"
-  | "timezone-mismatch"
-  | "install-available"
+  | "sync-issues"
+  | "setup"
   | "pending-review"
   | "late-offer"
-  | "resume-setup";
+  | "update"
+  | "timezone"
+  | "install"
+  | "permission";
 
 /**
  * Notification permission as the interface reasons about it — official spec
- * §8.3. `unsupported` is iOS-before-install and any browser without push; the
- * app states it plainly and never re-prompts after `denied`.
+ * §8.3. `not-installed` is iOS before the app is added to the home screen,
+ * where push does not exist yet; the app says so plainly and never re-prompts
+ * after `denied`.
  */
 export type PermissionState =
-  | "default"
   | "granted"
   | "denied"
-  | "unsupported";
+  | "not-asked"
+  | "unsupported"
+  | "not-installed";
 
 /** The three steps of the shift sheet — official spec §5.6, Epic 2 SF-01. */
-export type ShiftStep = "amount" | "reason" | "fit";
+export type ShiftStep = 1 | 2 | 3;
