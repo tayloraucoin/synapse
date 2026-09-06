@@ -6,7 +6,7 @@ import { setNotificationPrefInput } from "@syn/validators";
 import {
   listNotificationPrefs,
   setNotificationPref,
-} from "../services/notification/list-prefs";
+} from "../services/notifications/list-prefs";
 import { protectedProcedure, router } from "../trpc";
 
 /**

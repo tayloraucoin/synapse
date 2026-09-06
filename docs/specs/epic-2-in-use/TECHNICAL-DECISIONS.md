@@ -92,3 +92,31 @@ Starting is idempotent for the same reason: two devices starting one item must p
 **Consequences:** A tick re-renders only what subscribes to that item id, so a thirty-row list costs one row per second rather than thirty. The cost is a window between a server change and the next refetch where the store is stale — bounded by the query invalidation the mutations already trigger, and always resolved in the direction of the server.
 
 **Revisit trigger:** offline timing. Phase 2 has offline writes; a timer started with no connection has no session row to be authoritative, and the answer would be a local queue that becomes a session on reconnect — not a store that decides for itself.
+
+---
+
+## USE-8 — exactly-once is a database constraint, not a job that is careful
+
+**Context:** The scheduler runs every fifteen minutes over a fifteen-minute window. Ticks fire late, overlap, retry after a timeout, and occasionally run twice. Official spec §8.1 promises each notification is "delivered once".
+
+**Options:**
+
+- **A. A `sent_at` column on the thing being notified about** — `day_items.notified_at`. One column, no new table.
+- **B. Careful jobs**: check before sending, narrow the window, trust the cron.
+- **C. A `notification_deliveries` ledger with a unique key on `(user, kind, target, minute)`, inserted before the send.**
+
+**Decision:** C. A does not survive contact with the second kind: N4 is about a day, N6 is about a WEEK, which has no row to hang a column on, and N4 can legitimately fire twice for one day once *Later* defers it. B is the version that works in testing and fails at 3am on the night the cron double-fires — nothing in it makes a second send impossible, only unlikely.
+
+The insert IS the claim. A job sends only when its `ON CONFLICT DO NOTHING` returned a row, so two overlapping scans race the constraint rather than racing each other, and the loser sends nothing without needing to know it lost.
+
+**Three details that carry weight:**
+
+- **`NULLS NOT DISTINCT`.** Postgres treats NULLs as distinct in a unique key by default. Every N6 row has a null `target_id`, so without this the Sunday reminder would be the one kind with no protection at all — the failure would be invisible until somebody was told twice about the same week.
+- **A row is written even with no subscription.** Otherwise installing the app on Friday would replay every past-due minute of the week that evening, as the first scan found them all unsent.
+- **Too late is recorded and dropped.** §8.1 says "at the time assigned"; a 7:00 reminder arriving at 7:40 is noise about something the list already shows as passed. The `skipped` row is what answers "why was I not told".
+
+**A pref that is off writes nothing at all** — not a skipped row. That is not a delivery which did not happen; it is a notification the person declined to have, and a ledger of things somebody switched off would be a log of their preferences rather than bookkeeping about messages.
+
+**Consequences:** The table grows by roughly one row per notification per person. It is service-role only and nobody reads their own; it can be pruned on any schedule without affecting correctness, since a pruned row for a past minute can never come due again.
+
+**Revisit trigger:** a notification that should repeat within one minute, or a kind whose target is neither a row nor a key. Both would need the key widened, and widening it is the moment to check that every existing kind still collides where it should.

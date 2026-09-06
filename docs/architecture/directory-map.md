@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 974 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 981 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -195,6 +195,8 @@ apps/
             route.ts
         pwa/
           push/
+            snooze/
+              route.ts
             subscribe/
               route.ts
             unsubscribe/
@@ -232,6 +234,7 @@ apps/
         day-section.tsx
         index.ts
         use-day-list.ts
+        use-landing.ts
       habit-sheet/
         copy.ts
         habit-sheet.tsx
@@ -533,6 +536,7 @@ packages/
           week-view.ts
         jobs/
           auto-close-days.ts
+          notify.ts
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
         library/
           archive-habit.ts
@@ -549,7 +553,10 @@ packages/
         notification/
           list-prefs.ts
         notifications/
+          build-payload.ts
+          deliver.ts
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
+          list-prefs.ts
           web-push.ts
         plan/
           most-used-template.ts
@@ -632,8 +639,8 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <3 migration .sql files, 0000–0002 — append-only, human-reviewed before a hosted migrate>
-      meta/ <4 drizzle snapshot files + _journal.json>
+      <4 migration .sql files, 0000–0003 — append-only, human-reviewed before a hosted migrate>
+      meta/ <5 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
@@ -656,6 +663,7 @@ packages/
           reasons.ts
         notification/
           index.ts
+          notification-deliveries.ts
           notification-prefs.ts
           web-push-subscriptions.ts
         plan/

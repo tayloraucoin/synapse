@@ -49,11 +49,17 @@ export function ItemSheet({
   open,
   itemId,
   dayKey,
+  autoStart = false,
   onOpenChange,
 }: {
   open: boolean;
   itemId: string | null;
   dayKey: string;
+  /**
+   * USE-8's `?action=start`: a notification's *Start* button lands here with
+   * the timer already meant to be running.
+   */
+  autoStart?: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const sheet = useItemSheet(open ? itemId : null, dayKey);
@@ -67,6 +73,22 @@ export function ItemSheet({
     setQuantity(item.quantityValue);
     setNote(item.notesReflection ?? "");
   }, [item]);
+
+  /**
+   * *Start* from a notification, once.
+   *
+   * It checks that nothing is already running: a person who tapped *Start* and
+   * then opened the app a minute later must not restart a timer that is
+   * already going, and `timer.start` is idempotent anyway — this just avoids
+   * the round trip.
+   */
+  const started = React.useRef(false);
+  React.useEffect(() => {
+    if (!autoStart || item === null || started.current) return;
+    if (item.runningSince !== null) return;
+    started.current = true;
+    sheet.onStart();
+  }, [autoStart, item, sheet]);
 
   /** Closing flushes what blur has not. */
   function close(): void {

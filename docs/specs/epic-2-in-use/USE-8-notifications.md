@@ -4,7 +4,7 @@
 **Slice type:** Scheduled work with a privacy contract and exactly-once delivery, plus deep links that must land in the right state. The risk class is *trust-breaking*: a payload that says something the person did not write, a reminder after a day was closed, a double send, a landing that opens the wrong day.
 **Vigil:** **full review** — read every payload builder against official §8.1 and §8.5 (nothing about a miss, a streak, a percentage, or absence); induce a double scan (run the route twice within a minute); induce a send after *Day Complete*; tap every landing signed in and signed out; a grouped push. QA states each.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05)
 
 > **Vigil — payload and delivery review.** The catalogue is the whole vocabulary. If a sentence reaches a lock screen that is not one of the four Phase-1 rows' titles and bodies, this ticket failed.
 

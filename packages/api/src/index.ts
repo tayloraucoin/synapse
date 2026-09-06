@@ -25,6 +25,11 @@ export {
   type WebPushSubscriptionData,
 } from "./services/notifications/web-push";
 export { sendToUser, type FanOutResult } from "./services/notifications/fan-out";
+/**
+ * N4's *Later*. Exported because its one caller is a route handler serving the
+ * service worker, which has no tRPC client — see `api/pwa/push/snooze`.
+ */
+export { snoozeDelivery } from "./services/notifications/deliver";
 export {
   runScheduledJobs,
   SCHEDULED_JOBS,

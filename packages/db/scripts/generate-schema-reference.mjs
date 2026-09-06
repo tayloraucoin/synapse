@@ -167,7 +167,7 @@ function buildEntityOverview(tables) {
 
 **Group 4 — Day.** The record, and the part of the schema that is deliberately append-and-annotate. \`day_items\` snapshots \`title\`, \`icon\`, \`quantity_unit\`, \`reflection_axes\` and \`notes_preflight\` at materialisation; \`original_scheduled_start\` is immutable once set, enforced by a trigger. \`timer_sessions\` record time (a manual entry is marked as one), \`misses\` record how one undone item was attributed, \`shifts\` record a whole-day move.
 
-**Group 5 — Notifications.** \`web_push_subscriptions\` holds one row per browser that agreed to reminders (endpoint + p256dh + auth, plus platform and revocation); the scheduler reads it. \`notification_prefs\` holds one row per kind the person has an opinion about — a missing row means the §8.2 default.
+**Group 5 — Notifications.** \`web_push_subscriptions\` holds one row per browser that agreed to reminders (endpoint + p256dh + auth, plus platform and revocation); the scheduler reads it. \`notification_prefs\` holds one row per kind the person has an opinion about — a missing row means the §8.2 default. \`notification_deliveries\` is the exactly-once ledger: one row per \`(user, kind, target, minute)\`, written before a push is sent and unique \`NULLS NOT DISTINCT\`, so an overlapping or repeated cron scan loses to the constraint rather than to a job's own care. Service-role only — nobody reads their own delivery log.
 
 **Group 6 — System.** \`data_exports\` tracks a request to export everything (preparing → ready → expired, with the object path and a 24-hour expiry). \`feedback_messages\` is the About message: insert-only for its author, no authenticated read, and it holds only the message plus the two optional context fields the switch controls.
 
@@ -179,7 +179,7 @@ function buildRelationshipSummary() {
 
 **The one central entity.** \`users\`. Synapse is single-player: there is no couple, no team, no shared row. **Every table hangs directly off this one** and carries its own denormalised \`user_id\`, so every policy is the same three lines and every table is greppable for its owner — no policy ever subqueries another RLS-guarded table.
 
-**One-to-many from \`users\`.** \`categories\`, \`habits\`, \`reasons\`, \`templates\`, \`template_slots\`, \`days\`, \`day_items\`, \`timer_sessions\`, \`shifts\`, \`misses\`, \`notification_prefs\`, \`web_push_subscriptions\`, \`data_exports\`, \`feedback_messages\`. **One-to-one:** \`user_avatars\`.
+**One-to-many from \`users\`.** \`categories\`, \`habits\`, \`reasons\`, \`templates\`, \`template_slots\`, \`days\`, \`day_items\`, \`timer_sessions\`, \`shifts\`, \`misses\`, \`notification_prefs\`, \`notification_deliveries\`, \`web_push_subscriptions\`, \`data_exports\`, \`feedback_messages\`. **One-to-one:** \`user_avatars\`.
 
 **The ownership chains** (each child also carries \`user_id\` directly): \`categories\` → \`habits\` → \`template_slots\` → \`day_items\`; \`templates\` → \`template_slots\` and \`templates\` → \`days\` → \`day_items\` → { \`timer_sessions\`, \`misses\` }; \`days\` → \`shifts\` → \`misses\`.
 
@@ -378,7 +378,7 @@ RLS is **enabled on every \`public\` table** by the same loop, deny-by-default. 
 - **Owner-private CRUD:** every table but the two below — \`user_avatars\`, \`categories\`, \`habits\`, \`reasons\`, \`templates\`, \`template_slots\`, \`days\`, \`day_items\`, \`timer_sessions\`, \`shifts\`, \`misses\`, \`web_push_subscriptions\`, \`notification_prefs\`, \`data_exports\`.
 - **Owner read/update, trigger insert, cascade delete:** \`users\` — the row is created by \`handle_new_user()\` and removed by cascade from \`auth.admin.deleteUser\`, so authenticated insert and delete are denied outright.
 - **Insert-only for the author:** \`feedback_messages\` — the one table that is not owner-private. A person can send a message and cannot read anyone's, including their own; the builder reads it out of band through the service role. The trust line stays true because the row holds only the message and the two context fields the switch controls.
-- **Service-role only:** reserved for system bookkeeping (\`serviceRoleOnlyPolicies\`). Nothing uses it yet.
+- **Service-role only:** system bookkeeping (\`serviceRoleOnlyPolicies\`) — \`notification_deliveries\`. Every row is about a message the scheduler sent rather than about the person's day, and nobody reads their own delivery log.
 - **Read-only catalogue:** reserved for tables the product ships rather than a person writes (\`catalogReadPolicies\`). Nothing uses it yet.
 
 **Every table carries its own \`user_id\`, denormalised.** \`template_slots\`, \`day_items\`, \`timer_sessions\` and \`misses\` could each derive an owner through a parent, and none of them does: a policy that subqueries another RLS-guarded table re-evaluates that table's policy per row, and is the shape that silently breaks under Realtime later. A direct column keeps every policy three lines and every table greppable for its owner. The invariant the services owe in return: write the PARENT's \`user_id\`, never the caller's claim.

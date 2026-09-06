@@ -25,6 +25,7 @@ import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { DAY_LIST_COPY as COPY } from "./copy";
 import { DaySection } from "./day-section";
+import { useLanding, useScrollToItem } from "./use-landing";
 import { useDayList } from "./use-day-list";
 
 type DayView = RouterOutputs["day"]["get"];
@@ -58,6 +59,40 @@ export function DayList({
 
   const [sheet, setSheet] = React.useState<"day-plan" | "one-off" | null>(null);
   const [openItemId, setOpenItemId] = React.useState<string | null>(null);
+
+  /*
+   * A notification landing — USE-8's PN-01.
+   *
+   * `?sheet=item&id=…` opens the sheet, `?focus=…` only scrolls, and
+   * `?action=done` marks the row done here with its undo rather than opening
+   * anything. The params are read once and stripped from the address.
+   */
+  const landing = useLanding();
+  const doneFired = React.useRef(false);
+
+  React.useEffect(() => {
+    if (landing.action !== "done" || landing.actionItemId === null) return;
+    if (doneFired.current) return;
+
+    // The item must be in the cache before the optimistic patch can find it.
+    const item = day.parts
+      .flatMap((part) => part.items)
+      .find((candidate) => candidate.id === landing.actionItemId);
+    if (!item) return;
+
+    doneFired.current = true;
+    list.toggleDone(item);
+  }, [landing, day, list]);
+
+  useScrollToItem(landing.focusId, !list.isError);
+
+  React.useEffect(() => {
+    // `?sheet=item&id=…` opens the sheet; `?focus=` deliberately does not.
+    if (landing.action === "done") return;
+    if (landing.focusId !== null && landing.actionItemId !== null) {
+      setOpenItemId(landing.actionItemId);
+    }
+  }, [landing]);
 
   const isEmpty =
     day.parts.length === 0 &&
@@ -194,6 +229,10 @@ export function DayList({
         open={openItemId !== null}
         itemId={openItemId}
         dayKey={dateKey}
+        // Only when the landing asked for it, and only for that item.
+        autoStart={
+          landing.action === "start" && landing.actionItemId === openItemId
+        }
         onOpenChange={(next) => {
           if (!next) setOpenItemId(null);
         }}

@@ -128,6 +128,7 @@ export {
 } from "./preferences";
 
 export {
+  snoozeInput,
   webPushSubscribeInput,
   type WebPushSubscribeInput,
 } from "./push";

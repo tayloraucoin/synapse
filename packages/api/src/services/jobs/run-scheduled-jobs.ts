@@ -1,6 +1,12 @@
 import { createLogger } from "@syn/observability";
 
 import { autoCloseDaysJob } from "./auto-close-days";
+import {
+  notifyItemStartJob,
+  notifyPendingReviewJob,
+  notifyReviewReminderJob,
+  notifyWeekBuildJob,
+} from "./notify";
 
 const log = createLogger("jobs/scheduler");
 
@@ -33,7 +39,19 @@ export type ScheduledJob = {
   run: () => Promise<number>;
 };
 
-export const SCHEDULED_JOBS: readonly ScheduledJob[] = [autoCloseDaysJob];
+/**
+ * The order matters in one place: auto-close runs FIRST, so a day that ended
+ * overnight is closed before the notification jobs decide what to send about
+ * it. N5 asks about yesterday's auto-closed day, and it must not miss it
+ * because the close had not happened yet in the same scan.
+ */
+export const SCHEDULED_JOBS: readonly ScheduledJob[] = [
+  autoCloseDaysJob,
+  notifyItemStartJob,
+  notifyReviewReminderJob,
+  notifyPendingReviewJob,
+  notifyWeekBuildJob,
+];
 
 export async function runScheduledJobs(): Promise<ScheduledJobResult[]> {
   const results: ScheduledJobResult[] = [];

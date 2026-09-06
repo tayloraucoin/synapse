@@ -108,19 +108,27 @@ function Row({
   onOpen: (item: DayItemView) => void;
 }) {
   return (
-    <ItemRow
-      item={item}
-      variant={planMode ? "read-only" : "default"}
-      timeZone={timeZone}
-      onToggleDone={planMode ? undefined : onToggleDone}
-      // A plan-mode row opens read-only; the sheet decides what it offers.
-      onOpen={onOpen}
-      undo={
-        hasUndo(item.id)
-          ? { label: COPY.undo, onUndo: () => onUndo(item) }
-          : undefined
-      }
-    />
+    /*
+     * The wrapper carries the id and the focus target a notification landing
+     * scrolls to (USE-8, PN-01). `tabIndex={-1}` lets focus reach it without
+     * adding a stop to the tab order — a screen-reader user who taps a
+     * reminder lands on the item it was about, not at the top of the list.
+     */
+    <div data-item-id={item.id} tabIndex={-1} className="outline-none">
+      <ItemRow
+        item={item}
+        variant={planMode ? "read-only" : "default"}
+        timeZone={timeZone}
+        onToggleDone={planMode ? undefined : onToggleDone}
+        // A plan-mode row opens read-only; the sheet decides what it offers.
+        onOpen={onOpen}
+        undo={
+          hasUndo(item.id)
+            ? { label: COPY.undo, onUndo: () => onUndo(item) }
+            : undefined
+        }
+      />
+    </div>
   );
 }
 

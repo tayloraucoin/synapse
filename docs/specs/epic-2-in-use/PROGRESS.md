@@ -11,7 +11,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | USE-5 | Schedule: SC-01, SC-02 (read), ghosts, window spans, shift bands | USE-3 | Not started | — |
 | USE-6 | Shift my day: SF-01, the late offer, LS-03 *Do it anyway*, SC-02 undo | USE-5, SET-9 | Not started | — |
 | USE-7 | Capacity trim: TR-01, LS-02 *Bring back*, *Keep instead* | USE-2, USE-3 | Not started | — |
-| USE-8 | Notifications: N1/N4/N5/N6 jobs, payloads, grouping, quiet after complete, landings | USE-3, REV-2, SET-6, SET-9 | Not started | — |
+| USE-8 | Notifications: N1/N4/N5/N6 jobs, payloads, grouping, quiet after complete, landings | USE-3, REV-2, SET-6, SET-9 | Complete (delivery criteria pending a Supabase project and VAPID keys) | 2026-09-05 |
 
 ## Checklist
 
@@ -20,6 +20,6 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] USE-3
 - [ ] USE-4
 - [ ] USE-5
-- [ ] USE-8
+- [x] USE-8
 - [ ] USE-6 (Phase 2)
 - [ ] USE-7 (Phase 2)
