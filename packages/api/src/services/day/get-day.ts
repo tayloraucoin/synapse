@@ -5,6 +5,7 @@ import {
   dayItems,
   days,
   habits,
+  misses,
   reasons,
   shifts,
   templates,
@@ -87,6 +88,16 @@ export type DayView = {
    * `habit_id`, which an archived habit keeps.
    */
   wakeAnchorItemId: string | null;
+  /**
+   * Which shift cut each cut item — USE-5's SC-02 reads it to list what one
+   * shift took.
+   *
+   * A MAP RATHER THAN A FIELD ON THE ITEM. Being cut by a particular shift is
+   * a fact about the relationship between two rows, not a property of the
+   * item; `DayItemView` is rendered in six places that have no interest in it,
+   * and widening it would send a shift id to every one of them.
+   */
+  cutByShiftIds: Record<string, string>;
 };
 
 const PART_ORDER: DayPart[] = ["morning", "afternoon", "evening", "anytime"];
@@ -349,6 +360,34 @@ export async function getDay(
 
     const spans = dayPartSpans(anchors, lastScheduled);
 
+    /*
+     * Which shift took each cut item. `misses.shift_id` is the link (SET-1's
+     * ruling: a cut item is a `day_items` row plus a `misses` row pointing at
+     * the shift, never an array column on the shift), so SC-02 can list what
+     * one shift cut without the shift storing a list that could go stale.
+     */
+    const cutIds = views
+      .filter((entry) => entry.view.state === "cut-by-shift")
+      .map((entry) => entry.view.id);
+
+    const cutLinks =
+      cutIds.length === 0
+        ? []
+        : await tx
+            .select({ dayItemId: misses.dayItemId, shiftId: misses.shiftId })
+            .from(misses)
+            .where(
+              and(
+                eq(misses.userId, userId),
+                inArray(misses.dayItemId, cutIds),
+              ),
+            );
+
+    const cutByShiftIds: Record<string, string> = {};
+    for (const link of cutLinks) {
+      if (link.shiftId !== null) cutByShiftIds[link.dayItemId] = link.shiftId;
+    }
+
     return {
       dateKey,
       mode,
@@ -392,6 +431,7 @@ export async function getDay(
         (entry) => entry.view.state === "pending-review",
       ),
       zoneLabel: zoneLabelFor(zone, context.deviceZone ?? null),
+      cutByShiftIds,
       wakeAnchorItemId:
         anchorHabitId === null
           ? null
@@ -426,8 +466,9 @@ function emptyDay(
     hasUndone: false,
     hasPending: false,
     zoneLabel: zoneLabelFor(context.timeZone, context.deviceZone ?? null),
-    // A day with no items has no anchor row to mark done.
+    // A day with no items has no anchor row to mark done, and nothing to cut.
     wakeAnchorItemId: null,
+    cutByShiftIds: {},
   };
 }
 

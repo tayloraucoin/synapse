@@ -1,18 +1,22 @@
 import { notFound, redirect } from "next/navigation";
 
-import { Text } from "@syn/ui";
-import { formatCalendarDay } from "@syn/utils";
 import { dateKeySchema } from "@syn/validators";
 
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { PageFrame } from "@/components/page-frame";
+import { DayListHeader } from "@/components/day-list";
+import { ScheduleCanvas } from "@/components/schedule-canvas";
 import { getServerApi } from "@/lib/trpc/server";
 import { todayScheduleRoute } from "@/lib/routes";
 
 /**
- * Placeholder — SC-01 Schedule, for a past or future day.
+ * SC-01 for a past or future day.
  *
- * Today redirects to `/today/schedule`, for the same reason the List does: one
- * canonical URL per screen.
+ * TODAY REDIRECTS TO `/today/schedule`, the same rule the List follows: one
+ * canonical URL per screen, so the tab bar has one address to compare against
+ * and back never walks through a duplicate.
+ *
+ * A past day keeps its ghosts and bands and loses the now line; a future day
+ * is a plan, and its blocks are not buttons.
  */
 export default async function DaySchedulePage({
   params,
@@ -22,39 +26,19 @@ export default async function DaySchedulePage({
   const { date } = await params;
   if (!dateKeySchema.safeParse(date).success) notFound();
 
-  const status = await readStatus();
-  if (status?.todayKey === date) redirect(todayScheduleRoute());
+  const api = await getServerApi();
+  const { todayKey } = await api.day.today();
+  if (todayKey === date) redirect(todayScheduleRoute());
+
+  const day = await api.day.get({ date });
 
   return (
     <PageFrame
       dayKey={date}
-      header={
-        <ShellPageHeader
-          title="SC-01 Schedule"
-          dateContext={{
-            label: formatCalendarDay(
-              new Date(`${date}T12:00:00Z`),
-              "UTC",
-              "long",
-            ),
-            todayHref: todayScheduleRoute(),
-          }}
-        />
-      }
+      contentWidth="canvas"
+      header={<DayListHeader day={day} />}
     >
-      <Text as="p" tone="secondary">
-        No now line on a day that is not today.
-      </Text>
+      <ScheduleCanvas dateKey={date} initial={day} />
     </PageFrame>
   );
-}
-
-/** The chrome is never load-bearing — a failure just skips the redirect. */
-async function readStatus() {
-  try {
-    const api = await getServerApi();
-    return await api.shell.status();
-  } catch {
-    return null;
-  }
 }

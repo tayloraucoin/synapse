@@ -27,7 +27,7 @@ The day model, the list that renders it, the sheet that acts on it, the reminder
 - [x] **USE-4** · Manual time, sessions, pause/resume, and a one-off from the day: IT-02, G1, G3 — M · (USE-3) — built 2026-09-06; **sessions on one item never overlap, and back-to-back is not overlap**
 
 ### Phase 3 — The Schedule
-- [ ] **USE-5** · Schedule: SC-01, SC-02 (read), ghosts, window spans, shift bands — L · (USE-3) · Vesper review of block density
+- [x] **USE-5** · Schedule: SC-01, SC-02 (read), ghosts, window spans, shift bands — L · (USE-3) · Vesper review of block density — built 2026-09-06; **the layout is pure and probed; a ghost is drawn from `original_scheduled_start` and nothing else**
 
 ### Phase 4 — Notifications (launch-blocking)
 - [x] **USE-8** · Notifications: N1/N4/N5/N6 jobs, payloads, grouping, quiet after complete, landings PN-01/04/05/06 — L · (USE-3, REV-2, SET-6, SET-9) · **Vigil: payload privacy** — built 2026-09-05; **exactly-once is a unique constraint, not a job's care; every sentence is one of §8.2's four rows**

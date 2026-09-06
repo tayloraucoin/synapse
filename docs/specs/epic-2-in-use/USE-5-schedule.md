@@ -4,7 +4,7 @@
 **Slice type:** A time canvas — the same day as the List, laid out against an axis. The risk class is *a canvas that argues*: a block a person can drag, a zoom, a now line that animates, a block so short it loses its title with nothing to say what it is.
 **Vigil:** none. **Vesper review:** block density at 64 and 96 px/hour on compact; the three block sizes; the ghost's read at 0.55.
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 > **Vesper — density review.** Open a full day (twelve items, two windows, one multitask pair, one late start) on a phone. Every block must be openable and readable, or the size rule below is wrong.
 

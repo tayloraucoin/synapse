@@ -142,3 +142,28 @@ C keeps the delete a real delete, so the id is free and the restore can reuse it
 **Consequences:** `removeOneOff` returns a bundle rather than a row, and the undo payload is larger. The bundle is typed against the schema (`$inferSelect`) rather than as loose records, so a column added later travels with the undo automatically instead of being dropped by a hand-written shape.
 
 **Revisit trigger:** a fourth thing that cascades from `day_items`. The bundle would need it, and nothing in the type system says so — a new cascade is the moment to re-read this.
+
+---
+
+## USE-5 — the layout is a pure function, and the canvas only draws it
+
+**Context:** The Schedule places blocks, spans, ghosts, bands and a now line against a time axis, in the day own zone, at two pixel densities, with an axis whose bounds depend on everything it contains.
+
+**Options:**
+
+- **A. Compute positions in the component**, where the data already is.
+- **B. A layout function returning pixels.**
+- **C. A layout function in MINUTES, converted to pixels at one place inside it.**
+
+**Decision:** C, in `layout.ts`, with no clock of its own — `now` is a parameter. The reason is that this arithmetic cannot be checked by looking at it: an off-by-one in the zone conversion, a ghost placed from the wrong column, or an axis that fails to stretch around a ghost all produce a picture that looks plausible and is wrong. Pure means runnable, and 25 cases were run.
+
+Minutes rather than pixels because mixing the two units is precisely how a block ends up an hour out on a DST day. There is one `topOf` helper, and the axis, the blocks, the ghosts, the bands and the now line all pass through it — so they agree by construction rather than by five careful call sites.
+
+**Two rules the function encodes that the canvas must not second-guess:**
+
+- **A ghost comes from `original_scheduled_start` and nothing else.** Never from a template, a duration, or a neighbouring block. The column exists so the picture cannot be reconstructed wrongly, and the immutability trigger on it is what makes it worth trusting.
+- **The fade comes from the derived state, never from a canvas rule.** A block above the now line is faded because its state says `passed` — the same reason its row in the List is faded. A rule that dimmed everything above a line would disagree with the List the moment a window was still open.
+
+**Consequences:** The canvas is layout-free and mostly a `map`. The cost is one more file and a shape to keep in step with the composites props; the benefit is that the part which could be silently wrong is the part that can be run without a browser.
+
+**Revisit trigger:** drag, zoom, or any interaction that changes a position. All three are forbidden in Phase 1 and all three would make the layout a function of interaction state rather than of the day, which is a different design.

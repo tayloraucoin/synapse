@@ -1,21 +1,27 @@
-import { Text } from "@syn/ui";
-
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { PageFrame } from "@/components/page-frame";
+import { DayListHeader } from "@/components/day-list";
+import { ScheduleCanvas } from "@/components/schedule-canvas";
+import { getServerApi } from "@/lib/trpc/server";
 
 /**
- * Placeholder — SC-01 Schedule. 
+ * SC-01 — today, against an axis.
  *
- * Replaced by the Epic 2 track.
- * The screen's one `h1` is the header's title (cross-cutting §11).
+ * THE SAME HEADER AS THE LIST, from the same query. The two tabs are two views
+ * of one day, and a header assembled separately here would be a second place
+ * the woke time and the shift total could be computed differently.
  */
-export default function TodaySchedulePage() {
+export default async function TodaySchedulePage() {
+  const api = await getServerApi();
+  const { todayKey } = await api.day.today();
+  const day = await api.day.get({ date: todayKey });
+
   return (
     <PageFrame
-      header={<ShellPageHeader title={"SC-01 Schedule"} />}
+      dayKey={todayKey}
+      contentWidth="canvas"
+      header={<DayListHeader day={day} />}
     >
-      <Text as="p" tone="secondary">
-        The day against the plan.
-      </Text>
+      <ScheduleCanvas dateKey={todayKey} initial={day} />
     </PageFrame>
   );
 }

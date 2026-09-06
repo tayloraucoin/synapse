@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 983 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 988 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -272,6 +272,12 @@ apps/
         index.ts
         review-day.tsx
         use-review-day.ts
+      schedule-canvas/
+        copy.ts
+        index.ts
+        layout.ts
+        schedule-canvas.tsx
+        shift-sheet.tsx
       starter-set/
         copy.ts
         index.ts
