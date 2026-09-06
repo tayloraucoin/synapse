@@ -18,8 +18,6 @@ export const STORAGE_KEYS = {
   SCROLL_PREFIX: "syn:scroll:",
   /** Unsent form-sheet drafts, keyed by the record being edited. */
   DRAFT_PREFIX: "syn:draft:",
-  /** Set when the install status line is dismissed; it never returns (§5.1). */
-  INSTALL_DISMISSED_UNTIL: "syn:install-dismissed-until",
   /**
    * The address AU-03 is waiting on, so *Check your email* can name it and
    * *Resend the link* can send to it. `sessionStorage`, never the URL: an

@@ -6,9 +6,23 @@
  * invalidate it and no story for what happens when two devices disagree.
  * Offline is a Phase 2 ticket that arrives with its own rules.
  *
- * Handles exactly two events: `push` shows the notification, and
- * `notificationclick` focuses an open tab or opens the deep link.
+ * Handles exactly three events: `push` shows the notification,
+ * `notificationclick` focuses an open tab or opens the deep link, and `message`
+ * answers the update line's *Reload*.
  */
+
+/*
+ * SY-02. The page raises *A new version is ready.* and, ONLY when the person
+ * taps *Reload*, posts this message. There is no `skipWaiting()` at install
+ * time on purpose: activating a new worker under someone mid-task swaps the
+ * app out from under them, which is exactly what "never reload without a tap"
+ * forbids. The page reloads itself on `controllerchange`.
+ */
+self.addEventListener("message", function (event) {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
 
 self.addEventListener("push", function (event) {
   if (!event.data) return;

@@ -24,7 +24,7 @@ The shell first, because every later screen renders inside it; the install offer
 - [x] **SYS-3** · About & feedback, the error pages, session expired: SY-01, SY-04, SY-05, the legal pages — M · (SYS-1, SET-8)
 
 ### Phase 2 — Platform
-- [ ] **SYS-5** · PWA: the install offer and sheet SY-07, the update line SY-02, standalone resume — M · (REV-2, SET-9)
+- [x] **SYS-5** · PWA: the install offer and sheet SY-07, the update line SY-02, standalone resume — M · (REV-2, SET-9)
 
 ### Phase 3 — Does not gate launch
 - [ ] **SYS-4** · Keyboard and focus: global shortcuts, `?`, list and canvas navigation, form submit keys — M · (USE-2, USE-5, SYS-3)

@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 1020 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 1024 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -283,6 +283,9 @@ apps/
         index.ts
         reminder-prompt.tsx
         use-reminder-prompt.ts
+      resume-guard/
+        index.ts
+        resume-guard.tsx
       review-day/
         copy.ts
         decision-column.tsx
@@ -372,7 +375,9 @@ apps/
         install-detection.ts
         permission-state.ts
         push-subscribe.ts
+        update-ready.ts
         use-install-prompt.ts
+        use-installable.ts
       stores/
         .gitkeep
         README.md  # the client-state rule, and why there is no Zustand store yet

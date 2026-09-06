@@ -4,7 +4,7 @@
 **Slice type:** Three platform behaviours over INF-9's service worker and manifest. The risk class is *a nag or a lost minute*: an install offer at first run, an update that reloads under a running timer, a resume that re-runs the entry tree mid-task.
 **Vigil:** none. Induce: the offer before and after the third reviewed day; the update line with a waiting worker and a running timer; a background of 61 minutes.
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 ---
 

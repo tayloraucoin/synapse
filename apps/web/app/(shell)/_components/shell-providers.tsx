@@ -2,6 +2,7 @@
 
 import * as React from "react";
 
+import { ResumeGuard } from "@/components/resume-guard";
 import {
   SessionExpiredDialog,
   SessionWatcher,
@@ -51,6 +52,11 @@ export function ShellProviders({
        */}
       <SessionWatcher />
       <SessionExpiredDialog />
+      {/*
+       * SYS-5. Renders nothing; re-runs the entry tree when the INSTALLED app
+       * comes back after more than an hour away.
+       */}
+      <ResumeGuard />
       <ShellChrome user={user} reviewHasPending={reviewHasPending}>
         {children}
       </ShellChrome>

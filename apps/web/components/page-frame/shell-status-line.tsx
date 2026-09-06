@@ -6,9 +6,21 @@ import * as React from "react";
 import { pendingReviewText } from "@syn/ui";
 
 import { StatusLineSlot } from "@/app/(shell)/_components/status-line-slot";
+import { PlatformStepsSheet } from "@/components/platform-steps-sheet";
 import { ZoneSwitchDialog } from "@/components/zone-switch-dialog";
 import { useDeviceZone } from "@/lib/hooks/use-device-zone";
 import { useDismissed } from "@/lib/hooks/use-dismissed";
+import {
+  isInstallOfferEligible,
+  useDeferredInstallPrompt,
+  useInstallable,
+} from "@/lib/pwa/use-installable";
+import {
+  readUpdateReady,
+  reloadForUpdate,
+  serverUpdateReady,
+  subscribeUpdateReady,
+} from "@/lib/pwa/update-ready";
 import { trpc } from "@/lib/trpc/client";
 import { reviewDayRoute, setupRoute } from "@/lib/routes";
 
@@ -18,10 +30,10 @@ import { reviewDayRoute, setupRoute } from "@/lib/routes";
  * `StatusLineSlot` is the pure resolver — it decides WHICH line wins. This is
  * the thin layer that tells it what is true, and it exists so the resolver
  * stays storyable and the sources stay replaceable: `lateOffer`,
- * `updateReady`, `timezoneMismatch`, `installOffer` and `permissionOffer` are
- * constants today and become real in USE-6, SYS-5 and SET-9. The props are
- * wired now so those tickets change one line each rather than this file's
- * shape.
+ * `lateOffer` and `permissionOffer` are constants today and become real in
+ * USE-6 and SET-9. The props were wired ahead of their tickets so each one
+ * changed a line rather than this file's shape — which is what SYS-2 and SYS-5
+ * then did.
  *
  * A FAILED QUERY IS NO LINE, NOT AN ERROR. The chrome is never load-bearing:
  * if `shell.status` is unavailable the page still renders, without a dot and
@@ -47,6 +59,14 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
   const deviceZone = useDeviceZone();
   const [zoneDialogOpen, setZoneDialogOpen] = React.useState(false);
   const [zoneSwitched, setZoneSwitched] = React.useState(false);
+  const [installStepsOpen, setInstallStepsOpen] = React.useState(false);
+  const installable = useInstallable();
+  const deferredPrompt = useDeferredInstallPrompt();
+  const updateReady = React.useSyncExternalStore(
+    subscribeUpdateReady,
+    readUpdateReady,
+    serverUpdateReady,
+  );
   const { data } = trpc.shell.status.useQuery(undefined, {
     // The chrome must never take the page down with it.
     retry: false,
@@ -75,6 +95,44 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
    * Null before hydration, and null in an embed where `Intl` will not answer —
    * both mean "no claim", and no claim is no line.
    */
+  /*
+   * SY-07's eligibility (SYS-5), every condition of it in one place:
+   *
+   *  - THREE REVIEWED DAYS. Not a visit count and not a timer — three days a
+   *    person actually closed out is the evidence that this is a thing they
+   *    use, and it is the only honest basis for asking for a home-screen slot.
+   *  - FIRST RUN COMPLETE. The ticket's AC 7 requires this and the reason is
+   *    the same one: someone still being set up has not decided anything yet.
+   *  - INSTALLABLE AND NOT ALREADY INSTALLED, from `install-detection.ts` —
+   *    no new UA sniffing anywhere in this file.
+   *
+   * The dismissal is the slot's own `useDismissed("install", "forever")`. It
+   * never returns, which is why there is no condition for it here.
+   */
+  const installOffer = isInstallOfferEligible({
+    installable,
+    reviewedDayCount: data.reviewedDayCount,
+    setupIncomplete: data.setupIncomplete,
+  });
+
+  /*
+   * *How* — the browser's own dialog where there is one, the steps sheet
+   * everywhere else (SYS-5's ruling). On Android Chrome the captured prompt IS
+   * the install flow, and showing numbered instructions beside a button that
+   * would just do it would be the app explaining what it could perform.
+   */
+  function howToInstall(): void {
+    if (deferredPrompt !== null) {
+      void deferredPrompt.prompt().catch(() => {
+        // The browser refused or the person dismissed it; the steps are the
+        // fallback rather than a dead end.
+        setInstallStepsOpen(true);
+      });
+      return;
+    }
+    setInstallStepsOpen(true);
+  }
+
   const timezoneMismatch =
     deviceZone !== null &&
     deviceZone !== data.timezone &&
@@ -105,13 +163,21 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
             }
       }
       lateOffer={false}
-      updateReady={false}
+      updateReady={updateReady}
+      onReload={reloadForUpdate}
       timezoneMismatch={timezoneMismatch}
       onSwitchZone={() => {
         setZoneDialogOpen(true);
       }}
-      installOffer={false}
+      installOffer={installOffer}
+      onHowToInstall={howToInstall}
       permissionOffer={false}
+    />
+
+    <PlatformStepsSheet
+      open={installStepsOpen}
+      kind="install"
+      onOpenChange={setInstallStepsOpen}
     />
 
     {timezoneMismatch === undefined ? null : (
