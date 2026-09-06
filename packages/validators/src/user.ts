@@ -28,6 +28,17 @@ export const updatePreferencesInput = z
     /** When the review reminder fires (§8.2 N4). */
     reviewReminderTime: clockTimeSchema.optional(),
     theme: themePreferenceSchema.optional(),
+    /** FR-01 and ST-08. The default `anchor_time` for a new template. */
+    usualWakeTime: clockTimeSchema.optional(),
+    /**
+     * Which first-run step to resume at, or null once the sequence is done.
+     *
+     * It lives here rather than on a `firstRun` router because it is an account
+     * scalar and this service already writes account scalars. FR-01…05 write it
+     * on every Continue, Skip, back and *Finish later*, so a reload or a second
+     * device resumes where the person actually stopped.
+     */
+    firstRunStep: z.number().int().min(1).max(5).nullable().optional(),
   })
   .refine(
     (value) => Object.values(value).some((field) => field !== undefined),

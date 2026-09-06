@@ -10,7 +10,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | SET-4 | Categories and the habit library | SET-1, SET-3, SYS-1 | Complete (Vesper review pending a Supabase project) | 2026-09-05 |
 | SET-5 | Templates | SET-4 | Complete (screen criteria pending a Supabase project) | 2026-09-05 |
 | SET-6 | Week build and materialisation | SET-5, USE-1 | Complete (screen and DST criteria pending a Supabase project) | 2026-09-05 |
-| SET-7 | First run | SET-4, SET-5, SET-6 | Not started | — |
+| SET-7 | First run | SET-4, SET-5, SET-6 | Complete (screen criteria pending a Supabase project) | 2026-09-05 |
 | SET-8 | Settings core | SET-3, SYS-1 | Not started | — |
 | SET-9 | Reasons and notification preferences | SET-5, SET-6, SET-8 | Not started | — |
 | SET-10 | Your data: export and delete account | SET-8 | Not started | — |
@@ -23,7 +23,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] SET-4
 - [x] SET-5
 - [x] SET-6
-- [ ] SET-7
+- [x] SET-7
 - [ ] SET-8
 - [ ] SET-9
 - [ ] SET-10

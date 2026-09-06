@@ -88,6 +88,7 @@ export {
 } from "./push";
 
 export {
+  discardTemplateInput,
   listTemplatesInput,
   moveSlotInput,
   restoreSlotInput,

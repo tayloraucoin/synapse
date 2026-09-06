@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
+  discardTemplateInput,
   listTemplatesInput,
   moveSlotInput,
   restoreSlotInput,
@@ -80,9 +81,11 @@ export const templateRouter = router({
     }),
 
   discardIfEmpty: protectedProcedure
-    .input(templateIdInput)
+    .input(discardTemplateInput)
     .mutation(async ({ ctx, input }) =>
-      discardIfEmpty(ctx.rls, ctx.authContext.userId, input.id),
+      discardIfEmpty(ctx.rls, ctx.authContext.userId, input.id, {
+        requireUnnamed: input.requireUnnamed,
+      }),
     ),
 
   archive: protectedProcedure

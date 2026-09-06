@@ -14,6 +14,9 @@ export const WEEK_COPY = {
   today: "Today",
   copyLastWeek: "Copy last week",
   templatesLink: "Templates",
+  /** WK-01's empty-templates state — Epic 1 §5 and FR-04, verbatim. */
+  noTemplatesYet: "No templates yet.",
+  buildOne: "Build one",
   /** The targets line: "Morning 2 of 3". */
   targetLine: (name: string, used: number, target: number) =>
     `${name} ${used} of ${target}`,

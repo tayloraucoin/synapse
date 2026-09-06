@@ -34,7 +34,30 @@ type DayPlanView = RouterOutputs["week"]["get"]["days"][number];
  * one-offs are not (cross-cutting §8.1). Locking the row here would also lock
  * the one thing a person is still allowed to do with yesterday.
  */
-export function WeekCanvas({ weekKey }: { weekKey: string }) {
+export function WeekCanvas({
+  weekKey,
+  embedded = false,
+  onBuildTemplate,
+}: {
+  weekKey: string;
+  /**
+   * What *Build one* does when the account has no templates at all (Epic 1
+   * FR-04 / WK-01's empty-templates state).
+   *
+   * The caller supplies it because the two callers must not do the same thing:
+   * the settings screen navigates to the editor, while first run has to stay
+   * inside the sequence — a wizard that navigates away at step 4 has lost the
+   * person. Omitted, the state is not offered at all.
+   */
+  onBuildTemplate?: () => void;
+  /**
+   * SET-7's: first run renders the week inside the step frame, so the canvas
+   * drops its own padding and its *Templates* link. The seven rows, the
+   * targets line and the day sheet are all unchanged — "WK-01 in full" is the
+   * document's phrase, and a link out of a sequence is chrome, not content.
+   */
+  embedded?: boolean;
+}) {
   const router = useRouter();
   const online = useOnline();
   const utils = trpc.useUtils();
@@ -43,14 +66,20 @@ export function WeekCanvas({ weekKey }: { weekKey: string }) {
   const [copyOpen, setCopyOpen] = React.useState(false);
 
   const week = trpc.week.get.useQuery({ week: weekKey });
+  const templates = trpc.template.list.useQuery({ includeArchived: false });
   const copy = trpc.week.copyLastWeek.useMutation();
 
   const days = week.data?.days ?? [];
   const targets = week.data?.targets ?? [];
   const plannedCount = days.filter((day) => day.templateId !== null).length;
 
+  // Only once the list has actually loaded: offering *Build one* against an
+  // undefined query would flash the empty state at someone who has templates.
+  const noTemplates =
+    templates.isSuccess && (templates.data?.length ?? 0) === 0;
+
   return (
-    <ScreenFrame width="canvas" padded={false}>
+    <ScreenFrame width="canvas" padded={false} className={embedded ? "px-0" : undefined}>
       <div className="flex flex-col gap-(--space-4)">
         {!online ? <StatusLine variant="offline" placement="inline" /> : null}
 
@@ -79,6 +108,17 @@ export function WeekCanvas({ weekKey }: { weekKey: string }) {
           <Text as="p" variant="body" tone="secondary">
             {COPY.unplannedLead}
           </Text>
+        ) : null}
+
+        {noTemplates && onBuildTemplate !== undefined ? (
+          <div className="flex flex-wrap items-center gap-(--space-3)">
+            <Text as="p" variant="body" tone="secondary">
+              {COPY.noTemplatesYet}
+            </Text>
+            <Button variant="secondary" onClick={onBuildTemplate}>
+              {COPY.buildOne}
+            </Button>
+          </div>
         ) : null}
 
         {week.isLoading ? (
@@ -127,12 +167,14 @@ export function WeekCanvas({ weekKey }: { weekKey: string }) {
               {COPY.copyLastWeek}
             </Button>
           ) : null}
-          <Button
-            variant="ghost"
-            onClick={() => router.push(settingsTemplatesRoute())}
-          >
-            {COPY.templatesLink}
-          </Button>
+          {embedded ? null : (
+            <Button
+              variant="ghost"
+              onClick={() => router.push(settingsTemplatesRoute())}
+            >
+              {COPY.templatesLink}
+            </Button>
+          )}
         </div>
       </div>
 

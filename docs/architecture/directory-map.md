@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 887 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 897 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -66,6 +66,16 @@ apps/
           page.tsx
         layout.tsx
       (setup)/
+        _components/
+          copy.ts
+          setup-template-id.ts
+          step-1-day.tsx
+          step-2-habits.tsx
+          step-3-template.tsx
+          step-4-week.tsx
+          step-5-ready.tsx
+          step-frame.tsx
+          target-week.ts
         setup/
           [step]/
             page.tsx
@@ -474,6 +484,7 @@ packages/
           status.ts
         user/
           avatar.ts
+          complete-first-run.ts
           preferences.ts
       context.ts
       index.ts

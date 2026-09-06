@@ -140,6 +140,15 @@ export const slotFormSchema = z
 export type SlotFormInput = z.infer<typeof slotFormSchema>;
 
 export const templateIdInput = z.object({ id: z.string().uuid() });
+
+/**
+ * TP-02 discards only an UNNAMED slotless draft; FR-03 discards its prefilled
+ * *Morning* too, because the sequence typed that name, not the person.
+ */
+export const discardTemplateInput = z.object({
+  id: z.string().uuid(),
+  requireUnnamed: z.boolean().optional(),
+});
 export const slotIdInput = z.object({ id: z.string().uuid() });
 
 export const listTemplatesInput = z

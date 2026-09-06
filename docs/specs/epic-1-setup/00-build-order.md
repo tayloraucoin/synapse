@@ -31,7 +31,7 @@ The schema, then the library a template is built from, then the template a week 
 - [x] **SET-6** · Week build and materialisation: WK-01/02/03, TP-04, the apply flow — L · (SET-5, USE-1) · **Mason review of the materialiser** — built 2026-09-05; **one untouched predicate, four callers; the rendered SQL caught a syntax error the type system could not**
 
 ### Phase 4 — Sequences and settings
-- [ ] **SET-7** · First run: FR-01…05, resume, the setup status line — M · (SET-4, SET-5, SET-6)
+- [x] **SET-7** · First run: FR-01…05, resume, the setup status line — M · (SET-4, SET-5, SET-6) — built 2026-09-05; **no first-run form: the habit sheet, the editor and the week canvas are imported whole**
 - [ ] **SET-8** · Settings core: ST-00, ST-01 (+AU-06), ST-08, ST-09, ST-11 — M · (SET-3, SYS-1)
 - [ ] **SET-9** · Reasons and notification preferences: ST-06/06a, ST-07, the permission sheet — M · (SET-5, SET-6, SET-8)
 - [ ] **SET-10** · Your data: export and delete account, ST-10/10a — M · (SET-8) · **Vigil: destructive path**

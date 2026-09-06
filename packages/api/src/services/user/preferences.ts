@@ -79,6 +79,15 @@ export async function updatePreferences(
       ? { reviewReminderTime: input.reviewReminderTime }
       : {}),
     ...(input.theme !== undefined ? { theme: input.theme } : {}),
+    ...(input.usualWakeTime !== undefined
+      ? { usualWakeTime: input.usualWakeTime }
+      : {}),
+    // `null` is a real value here — it is how the sequence records "no step
+    // owed" — so the guard is against `undefined` alone, as everywhere above.
+    ...(input.firstRunStep !== undefined
+      ? { firstRunStep: input.firstRunStep }
+      : {}),
+    updatedAt: new Date(),
   };
 
   const rows = await rls.execute((tx) =>

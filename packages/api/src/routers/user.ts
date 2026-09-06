@@ -8,6 +8,7 @@ import {
   removeAvatar,
   setAvatar,
 } from "../services/user/avatar";
+import { completeFirstRun } from "../services/user/complete-first-run";
 import {
   readPreferences,
   updatePreferences,
@@ -49,6 +50,13 @@ export const userRouter = router({
       }
       return row;
     }),
+
+  /**
+   * FR-05's *Open today*. Idempotent, so a double submit is not an error.
+   */
+  completeFirstRun: protectedProcedure.mutation(async ({ ctx }) =>
+    completeFirstRun(ctx.rls, ctx.authContext.userId),
+  ),
 
   /** The account photo's stored path, or null. ST-01 and the header read it. */
   avatar: protectedProcedure.query(async ({ ctx }) =>

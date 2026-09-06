@@ -231,17 +231,30 @@ export async function updateTemplate(
 }
 
 /**
- * A draft nobody named and nothing was put in is not a template.
+ * Delete a template nobody has put anything in.
  *
- * Create mode writes the row on open so slots have somewhere to go, which
- * means backing straight out would otherwise leave a nameless empty row in the
- * list forever. One with slots is kept — the person did work.
+ * TWO CALLERS MEAN TWO DIFFERENT THINGS BY "EMPTY", so the rule is a
+ * parameter rather than an assumption:
+ *
+ * - **TP-02** (`requireUnnamed: true`) writes the row on open so slots have
+ *   somewhere to go, so backing straight out would leave a nameless empty row
+ *   in the list forever. A NAMED one is kept even with no slots: naming it was
+ *   the person saying they meant it.
+ * - **FR-03** (`requireUnnamed: false`) prefills the name *Morning* itself, so
+ *   nobody typed it. Keeping a slotless *Morning* after *Skip for now* would
+ *   put a template in TP-01 that the person explicitly declined to build.
+ *
+ * Either way a template WITH SLOTS survives: that is work, and this function
+ * never deletes work.
  */
 export async function discardIfEmpty(
   rls: RlsClient,
   userId: string,
   id: string,
+  options: { requireUnnamed?: boolean } = {},
 ): Promise<{ discarded: boolean }> {
+  const requireUnnamed = options.requireUnnamed ?? true;
+
   return rls.execute(async (tx) => {
     const [row] = await tx
       .select({ name: templates.name })
@@ -249,7 +262,8 @@ export async function discardIfEmpty(
       .where(and(eq(templates.id, id), eq(templates.userId, userId)))
       .limit(1);
 
-    if (!row || row.name.trim() !== "") return { discarded: false };
+    if (!row) return { discarded: false };
+    if (requireUnnamed && row.name.trim() !== "") return { discarded: false };
 
     const [slots] = await tx
       .select({ value: count() })

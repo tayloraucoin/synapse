@@ -126,3 +126,25 @@ The narrowed `SQL` return type is part of the decision. Drizzle types `and()` as
 **Consequences:** Every column the untouched predicate gains, the touched predicate gains in the same edit. The count WK-02 shows before the choice is produced by the same SQL the choice runs. The cost is that "touched" has no independent definition to read — someone wanting to know what it means has to negate six conditions in their head — which the comment on it states directly.
 
 **Revisit trigger:** a caller that needs a PARTIAL notion of touched, such as "started but not done". That is a third predicate, not a variation on these two, and it should be written as one rather than by loosening either of these.
+
+---
+
+## SET-7 — first-run progress lives on the account, not in the browser
+
+**Context:** The sequence has five steps and a *Finish later* exit. Something has to remember where a person stopped so the entry tree can send them back.
+
+**Options:**
+
+- **A. `sessionStorage` or `localStorage`.** No round trip, no schema, instant.
+- **B. The URL alone** — resuming means bookmarking a step.
+- **C. `users.first_run_step`, written on every transition.**
+
+**Decision:** C, which INF-5 anticipated with the column and INF-7 with `resolveEntry`. A loses the sequence the first time someone switches from a laptop to a phone, which is precisely the moment a half-finished setup is most likely to be abandoned; it also cannot be read by the entry tree, which runs on the server. B asks a person mid-onboarding to manage their own bookmarks.
+
+The cost is a write on every Continue, Skip, back and *Finish later*. That write is awaited before navigating, so closing the tab on the next frame still resumes correctly — but a FAILED write navigates anyway. Trapping someone in a wizard because a bookkeeping update failed is a worse outcome than resuming them one step early, and the step they land on is one they have already seen.
+
+The single exception is FR-03 template id, which is `sessionStorage`. It is not progress: it exists so stepping back and forward does not leave a trail of empty *Morning* templates, and losing it costs one extra template the person can archive. The ticket permits this exception by name.
+
+**Consequences:** Resume works across devices and cold opens. `first_run_step` and `first_run_completed_at` are written together on FR-05 so an account can never be both finished and owing a step. Every step transition is one mutation, which is visible in the network tab and is the thing to look at first if resume ever misbehaves.
+
+**Revisit trigger:** an offline-capable first run. Phase 2 has offline writes; if the sequence ever has to work on a plane, the step would need a local queue and this decision becomes "the account is the source of truth, the browser is a cache".

@@ -4,7 +4,7 @@
 **Slice type:** A five-step sequence composed from three Complete surfaces (the habit sheet, the template editor, the week build) inside its own frame. The risk class is *a fork*: a first-run-only variant of a form that later diverges from the settings version.
 **Vigil:** none. **Vesper review:** the frame on compact (progress label, back, *Finish later*, primary last) and FR-05's three body variants.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05)
 
 ---
 
