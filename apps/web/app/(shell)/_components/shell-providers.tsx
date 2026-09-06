@@ -5,6 +5,7 @@ import * as React from "react";
 import { AppShell } from "./app-shell";
 import { ShellStateProvider, useShell } from "./shell-context";
 import { ThemeSync } from "./theme-sync";
+import { TimerTitle } from "./timer-title";
 
 /**
  * The client half of the signed-in frame.
@@ -36,6 +37,8 @@ export function ShellProviders({
        * and the only place that is true of.
        */}
       <ThemeSync />
+      {/* Also renders nothing; keeps the tab title telling a running timer. */}
+      <TimerTitle />
       <ShellChrome user={user} reviewHasPending={reviewHasPending}>
         {children}
       </ShellChrome>

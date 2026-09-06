@@ -7,6 +7,7 @@ import { notificationRouter } from "./routers/notification";
 import { reasonRouter } from "./routers/reason";
 import { shellRouter } from "./routers/shell";
 import { templateRouter } from "./routers/template";
+import { timerRouter } from "./routers/timer";
 import { userRouter } from "./routers/user";
 import { weekRouter } from "./routers/week";
 import { createCallerFactory, router } from "./trpc";
@@ -29,6 +30,7 @@ export const appRouter = router({
   reason: reasonRouter,
   shell: shellRouter,
   template: templateRouter,
+  timer: timerRouter,
   user: userRouter,
   week: weekRouter,
 });

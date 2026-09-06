@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
 
 import { addDays } from "@syn/utils";
-import { getDayInput } from "@syn/validators";
+import { getDayInput, setWakeTimeInput } from "@syn/validators";
 
 import { getDay } from "../services/day/get-day";
+import { setWakeTime } from "../services/day/item-fields";
 import { resolveTodayFor } from "../services/day/today";
 import { protectedProcedure, router } from "../trpc";
 
@@ -47,4 +48,16 @@ export const dayRouter = router({
         deviceZone: input.deviceZone ?? null,
       });
     }),
+
+  /**
+   * DH-02 — when the day really started.
+   *
+   * A hand-set wake time outranks the anchor habit: `woke_at_source = manual`
+   * is what stops un-ticking a checkbox from erasing a time somebody typed.
+   */
+  setWakeTime: protectedProcedure
+    .input(setWakeTimeInput)
+    .mutation(async ({ ctx, input }) =>
+      setWakeTime(ctx.rls, ctx.authContext.userId, input),
+    ),
 });

@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-/** LS-01's two writes. */
+import { NOTE_MAX, REFLECTION_AXIS_MAX } from "@syn/constants";
+
+import { dateKeySchema } from "./keys";
+
+/** LS-01's two writes, and IT-01's five. */
 
 export const itemIdInput = z.object({ id: z.string().uuid() });
 
@@ -23,3 +27,39 @@ export const setDoneInput = z.object({
 });
 
 export type SetDoneInput = z.infer<typeof setDoneInput>;
+
+/** *Not today* / *Back in the list*. No reason is asked (Epic 2 §4). */
+export const deferItemInput = z.object({
+  id: z.string().uuid(),
+  deferred: z.boolean(),
+});
+
+/**
+ * The quantity tail. Null clears it — a person who typed a number and then
+ * emptied the field meant to remove it, not to store zero.
+ */
+export const setQuantityInput = z.object({
+  id: z.string().uuid(),
+  value: z.number().nonnegative().max(100_000).nullable(),
+});
+
+export const setNoteInput = z.object({
+  id: z.string().uuid(),
+  note: z.string().max(NOTE_MAX).nullable(),
+});
+
+/** One reflection axis, 1–7 — the same scale as importance (§6.6). */
+export const rateItemInput = z.object({
+  id: z.string().uuid(),
+  axis: z.string().min(1).max(REFLECTION_AXIS_MAX),
+  value: z.number().int().min(1).max(7).nullable(),
+});
+
+/**
+ * DH-02. `wokeAt` null is *Clear*, which returns the day to its planned
+ * anchor rather than to nothing.
+ */
+export const setWakeTimeInput = z.object({
+  date: dateKeySchema,
+  wokeAt: z.coerce.date().nullable(),
+});

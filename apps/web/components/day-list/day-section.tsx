@@ -34,6 +34,7 @@ export function DaySection({
   hasUndo,
   onToggleDone,
   onUndo,
+  onOpen,
 }: {
   part: DayPart;
   span: { startLabel: string; endLabel: string } | null;
@@ -43,6 +44,8 @@ export function DaySection({
   hasUndo: (id: string) => boolean;
   onToggleDone: (item: DayItemView) => void;
   onUndo: (item: DayItemView) => void;
+  /** USE-3: opens the item sheet. */
+  onOpen: (item: DayItemView) => void;
 }) {
   const ordered = React.useMemo(() => sortForDisplay(items), [items]);
   const planMode = mode === "plan";
@@ -63,6 +66,7 @@ export function DaySection({
                   hasUndo={hasUndo}
                   onToggleDone={onToggleDone}
                   onUndo={onUndo}
+                  onOpen={onOpen}
                 />
               ))}
             </MultitaskGroup>
@@ -76,6 +80,7 @@ export function DaySection({
                 hasUndo={hasUndo}
                 onToggleDone={onToggleDone}
                 onUndo={onUndo}
+                onOpen={onOpen}
               />
             ))
           ),
@@ -92,6 +97,7 @@ function Row({
   hasUndo,
   onToggleDone,
   onUndo,
+  onOpen,
 }: {
   item: DayItemView;
   planMode: boolean;
@@ -99,15 +105,16 @@ function Row({
   hasUndo: (id: string) => boolean;
   onToggleDone: (item: DayItemView) => void;
   onUndo: (item: DayItemView) => void;
+  onOpen: (item: DayItemView) => void;
 }) {
   return (
     <ItemRow
       item={item}
       variant={planMode ? "read-only" : "default"}
       timeZone={timeZone}
-      // `onOpen` stays undefined until USE-3, which `ItemRow` renders as a
-      // non-interactive body rather than a dead button.
       onToggleDone={planMode ? undefined : onToggleDone}
+      // A plan-mode row opens read-only; the sheet decides what it offers.
+      onOpen={onOpen}
       undo={
         hasUndo(item.id)
           ? { label: COPY.undo, onUndo: () => onUndo(item) }

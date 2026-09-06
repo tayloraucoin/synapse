@@ -4,7 +4,7 @@
 **Slice type:** The one sheet that holds everything about an item, the four-row day sheet, and a timer that must survive a closed sheet, a reload, and a second device. The risk class is *a lost minute*: a session that never ended, an elapsed time that drifts, two timers running where one may, a late start that did not leave a ghost.
 **Vigil:** review the timer by inducing — start, close the sheet, reload the tab, check the row; start on device A, open device B; start a second timer on another item; mark done with a timer running; let the day auto-close with a timer running. QA states which of the five it exercised.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05)
 
 > **Vigil — timer review.** A timer is a promise about time. Verify every path in the list above against the `timer_sessions` rows, not the screen.
 

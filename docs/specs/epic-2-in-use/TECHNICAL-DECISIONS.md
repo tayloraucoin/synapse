@@ -70,3 +70,25 @@ Identity is the part that is easy to miss. `useDerivedItems` returns the SAME it
 **Consequences:** A tick that moves nothing costs one comparison per row and no render. Probed over nine ticks against a three-row day: five rebuilt, four returned the identical object, and rows in untouched parts kept identity across every rebuild. The cost is that the reassembly addresses items by index across three collections in a fixed order, so the flatten and the rebuild must walk them in the same order — they are adjacent in the file for that reason.
 
 **Revisit trigger:** a row field that changes on the tick without changing `state` — a live countdown, say. That would break the identity shortcut, and the answer would be to isolate the ticking field in its own component rather than to widen what the tick rebuilds.
+
+---
+
+## USE-3 — the session row is the truth and the store is a display
+
+**Context:** A timer has to tick at 1 Hz in four places, survive a closed sheet, a reload, and a second device, and end correctly when the day auto-closes. Those are two different jobs: publishing a number quickly, and knowing whether a timer exists at all.
+
+**Options:**
+
+- **A. The store owns the timer.** Fast, and wrong on the second device, on reload, and whenever the auto-close pass ends a session the browser never heard about.
+- **B. The query owns everything, polled.** Correct and unusable: a number that moves once per refetch does not read as a timer.
+- **C. The session row is authoritative for EXISTENCE; the store is authoritative for DISPLAY, and is re-seeded from the server on every refetch.**
+
+**Decision:** C, which is what the ticket rules and what the store README anticipated when it named this the first Zustand store the product would earn. The split is the whole design: `timer_sessions` answers "is something running and how much is logged", and the store answers "what digits do I draw this second".
+
+`seed` REPLACES the map rather than merging it, and that is the load-bearing detail. A timer ended on another device, or closed by the auto-close pass, is simply absent from the next read model — merging would leave it counting up here forever against something nobody is doing, which is the exact failure this arrangement exists to prevent.
+
+Starting is idempotent for the same reason: two devices starting one item must produce one session, so the service returns the open one rather than opening a second.
+
+**Consequences:** A tick re-renders only what subscribes to that item id, so a thirty-row list costs one row per second rather than thirty. The cost is a window between a server change and the next refetch where the store is stale — bounded by the query invalidation the mutations already trigger, and always resolved in the direction of the server.
+
+**Revisit trigger:** offline timing. Phase 2 has offline writes; a timer started with no connection has no session row to be authoritative, and the answer would be a local queue that becomes a session on reconnect — not a store that decides for itself.

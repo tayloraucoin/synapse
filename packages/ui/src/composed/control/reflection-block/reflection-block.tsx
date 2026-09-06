@@ -27,7 +27,16 @@ export interface ReflectionAxis {
 }
 
 export interface ReflectionBlockProps {
-  item: DayItemView;
+  /**
+   * Only the icon and the title are read, so only those are asked for.
+   *
+   * It took a whole `DayItemView` until USE-3, whose item sheet reads a
+   * DIFFERENT view of the same row — richer in the fields this needs and a
+   * different shape in the ones it does not. Widening the caller to satisfy a
+   * type nothing here uses would have meant a cast at the one call site, which
+   * is the type system being talked out of its job.
+   */
+  item: Pick<DayItemView, "icon" | "title">;
   axes: readonly ReflectionAxis[];
   note: string;
   onRate: (axis: string, value: Stepper17Value) => void;

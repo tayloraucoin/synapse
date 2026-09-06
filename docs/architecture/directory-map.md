@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 941 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 954 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -90,6 +90,7 @@ apps/
           status-line-slot.tsx
           tab-bar.tsx
           theme-sync.tsx
+          timer-title.tsx
         day/
           [date]/
             item/
@@ -218,6 +219,10 @@ apps/
         category-sheet.tsx
         copy.ts
         index.ts
+      day-header-sheet/
+        day-header-sheet.tsx
+        index.ts
+        wake-time-sheet.tsx
       day-list/
         copy.ts
         day-list-header.tsx
@@ -231,6 +236,11 @@ apps/
         icon-chooser.tsx
         index.ts
         use-habit-sheet.ts
+      item-sheet/
+        copy.ts
+        index.ts
+        item-sheet.tsx
+        use-item-sheet.ts
       one-off-sheet/
         index.ts
         one-off-sheet.tsx
@@ -314,6 +324,7 @@ apps/
       stores/
         .gitkeep
         README.md  # the client-state rule, and why there is no Zustand store yet
+        use-timer-store.ts
       trpc/
         client.ts
         provider.tsx
@@ -487,6 +498,7 @@ packages/
         reason.ts
         shell.ts
         template.ts
+        timer.ts
         user.ts
         week.ts
       services/
@@ -499,9 +511,12 @@ packages/
           close-day.ts
           copy-week.ts
           get-day.ts
+          get-item.ts
+          item-fields.ts
           materialize-day.ts
           one-off.ts
           set-done.ts
+          timer.ts
           today.ts
           untouched.ts
           week-view.ts

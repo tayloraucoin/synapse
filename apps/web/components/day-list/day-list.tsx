@@ -17,6 +17,7 @@ import { UNDO_LONG_MS } from "@syn/constants";
 import { formatClock } from "@syn/utils";
 
 import { DaySheet } from "@/components/week-build";
+import { ItemSheet } from "@/components/item-sheet";
 import { OneOffSheet } from "@/components/one-off-sheet";
 import { usePullToRefresh } from "@/lib/hooks/use-pull-to-refresh";
 import { reviewDayRoute } from "@/lib/routes";
@@ -56,6 +57,7 @@ export function DayList({
   const refreshing = usePullToRefresh(list.refresh);
 
   const [sheet, setSheet] = React.useState<"day-plan" | "one-off" | null>(null);
+  const [openItemId, setOpenItemId] = React.useState<string | null>(null);
 
   const isEmpty =
     day.parts.length === 0 &&
@@ -110,6 +112,7 @@ export function DayList({
           hasUndo={list.hasUndo}
           onToggleDone={list.toggleDone}
           onUndo={list.undoRow}
+          onOpen={(item) => setOpenItemId(item.id)}
         />
       ))}
 
@@ -181,6 +184,15 @@ export function DayList({
         sheet={sheet}
         onClose={() => setSheet(null)}
         onSaved={() => void list.refresh()}
+      />
+
+      <ItemSheet
+        open={openItemId !== null}
+        itemId={openItemId}
+        dayKey={dateKey}
+        onOpenChange={(next) => {
+          if (!next) setOpenItemId(null);
+        }}
       />
     </ScreenFrame>
   );

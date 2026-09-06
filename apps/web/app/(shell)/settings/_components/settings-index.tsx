@@ -29,6 +29,7 @@ import {
   settingsWeekRoute,
 } from "@/lib/routes";
 import { useOnline } from "@/lib/hooks/use-online";
+import { useRunningTimer } from "@/lib/stores/use-timer-store";
 import { trpc } from "@/lib/trpc/client";
 
 import { SETTINGS_COPY as COPY } from "./copy";
@@ -191,6 +192,24 @@ export function SignOutDialog({
   onOpenChange: (open: boolean) => void;
 }) {
   const formRef = React.useRef<HTMLFormElement>(null);
+  const running = useRunningTimer();
+  const stop = trpc.timer.stop.useMutation();
+
+  /**
+   * A RUNNING TIMER IS FLUSHED BEFORE THE SESSION ENDS (USE-3).
+   *
+   * Signing out with an open session would leave it open until the auto-close
+   * pass found it hours later, and the record would say someone spent the rest
+   * of the evening on a thing they walked away from. The sign-out proceeds
+   * either way: a failed stop is a minute lost, and refusing to sign someone
+   * out because of it would be far worse.
+   */
+  async function confirm(): Promise<void> {
+    if (running !== null) {
+      await stop.mutateAsync({ id: running.itemId }).catch(() => undefined);
+    }
+    formRef.current?.requestSubmit();
+  }
 
   return (
     <>
@@ -198,12 +217,11 @@ export function SignOutDialog({
         open={open}
         onOpenChange={onOpenChange}
         title={COPY.signOutTitle}
-        // Phase 1 has no timers to flush; USE-3 makes the offline sentence
-        // literally true and adds the flush behind it.
         description={online ? COPY.signOutBody : COPY.signOutOfflineBody}
         confirmLabel={COPY.signOut}
         cancelLabel={COPY.staySignedIn}
-        onConfirm={() => formRef.current?.requestSubmit()}
+        busy={stop.isPending}
+        onConfirm={() => void confirm()}
         onCancel={() => onOpenChange(false)}
       />
       <form ref={formRef} action={logoutRoute()} method="post" hidden />

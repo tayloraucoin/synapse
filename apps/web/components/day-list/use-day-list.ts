@@ -9,6 +9,7 @@ import { deriveItemState } from "@syn/utils";
 
 import { useNow } from "@/lib/hooks/use-now";
 import { useUndoWindow } from "@/lib/hooks/use-undo-window";
+import { useTimerStore } from "@/lib/stores/use-timer-store";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { DAY_LIST_COPY as COPY } from "./copy";
@@ -98,6 +99,33 @@ export function useDayList(dateKey: string, initial: DayView) {
     () => reassemble(raw, derived),
     [raw, derived],
   );
+
+  /**
+   * Re-seed the timer store from the server's answer on every refetch.
+   *
+   * THE SESSION ROW IS THE TRUTH, and this is where the store learns it. A
+   * timer stopped on another device, or closed by the auto-close pass, is
+   * absent from the read model — and because `seed` REPLACES the map rather
+   * than merging, it stops here too rather than counting up forever against
+   * something nobody is doing.
+   *
+   * `timerElapsedSec` is the seed value the server computed; the store turns
+   * it into a number that moves.
+   */
+  const seedTimers = useTimerStore((state) => state.seed);
+
+  React.useEffect(() => {
+    const active = flat
+      .filter((item) => item.state === "active" && item.timerElapsedSec !== null)
+      .map((item) => ({
+        itemId: item.id,
+        // The server gave elapsed seconds, so the start is that far back.
+        startedAt: new Date(Date.now() - (item.timerElapsedSec ?? 0) * 1000),
+        accumulatedSec: 0,
+      }));
+
+    seedTimers(active);
+  }, [flat, seedTimers]);
 
   /** Patch one item in the cached day, re-deriving its state. */
   const patchItem = React.useCallback(

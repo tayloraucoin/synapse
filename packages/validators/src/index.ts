@@ -19,8 +19,13 @@ export {
 } from "./account";
 
 export {
+  deferItemInput,
   itemIdInput,
+  rateItemInput,
   setDoneInput,
+  setNoteInput,
+  setQuantityInput,
+  setWakeTimeInput,
   type SetDoneInput,
 } from "./item";
 
