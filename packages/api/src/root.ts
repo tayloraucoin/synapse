@@ -5,6 +5,7 @@ import { habitRouter } from "./routers/habit";
 import { itemRouter } from "./routers/item";
 import { notificationRouter } from "./routers/notification";
 import { reasonRouter } from "./routers/reason";
+import { reviewRouter } from "./routers/review";
 import { shellRouter } from "./routers/shell";
 import { templateRouter } from "./routers/template";
 import { timerRouter } from "./routers/timer";
@@ -28,6 +29,7 @@ export const appRouter = router({
   item: itemRouter,
   notification: notificationRouter,
   reason: reasonRouter,
+  review: reviewRouter,
   shell: shellRouter,
   template: templateRouter,
   timer: timerRouter,

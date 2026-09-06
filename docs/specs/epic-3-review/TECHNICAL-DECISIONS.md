@@ -34,3 +34,28 @@ One section per architectural choice that had real alternatives. Written when th
 **Decision:** B. A makes "discard" a second write that can fail, and stamps the day edited for a change the person then discarded. C loses a tired person's three decisions when the tab dies before *Finish review*, which is the case the pending state exists to protect. The modes differ because the documents say they differ; the code follows.
 **Consequences:** Buys the documented behaviour in both modes. Costs two code paths in one hook (`decide` vs `batch.set`) and a `saveChanges` procedure that applies a list. Forecloses nothing.
 **Revisit trigger:** offline queuing (Phase 2), when live mode also needs a local batch.
+
+---
+
+## REV-1 — the resolver returns its own sentence
+
+**Context:** One percent appears on the Day Review, the Week Review, the history list and RV-00. Official spec §0.3 R6 requires it to appear only alongside the terms that produced it. Something has to build those terms.
+
+**Options:**
+
+- **A. Return the number; each surface builds its own sentence** from the rows it already has.
+- **B. Return the number and a formatted string.**
+- **C. Return the number and the TERMS — counts and weights, unformatted.**
+
+**Decision:** C. A is four reconstructions of one arithmetic, and the first one to drift would put a sentence under a number that contradicts it — on the screen where the product asks to be believed. B moves copy into `@syn/utils`, which cannot know the register and would have to be edited from a package that renders nothing.
+
+Terms are the middle: counts and weights are facts about the computation, and `FormulaSentence` already knows how to say them. Both sides filter zero-count terms, which is redundant on purpose — the API sentence and the screen sentence are then identical by construction rather than by agreement.
+
+**The two rules that make the number defensible**, both encoded here rather than at any call site:
+
+- **Excluded leaves the denominator; it is not credited zero.** Something that genuinely could not happen did not fail to happen. Crediting it zero would make a fever look like a choice, and it is the single most tempting simplification in this file.
+- **Half is 0.5 and the rounding happens once, at the end.** Rounding per item turns 2.5 of 3 into 100 percent or 67 percent depending on which way each half falls. Neither is 83.
+
+**Consequences:** Nothing is stored (§3.11), so a reviewed day whose items are later undone from the List shows the new number, with `review_edited_at` recording that the record was touched. Every call recomputes; the cost is a query and a pass over tens of items, and the benefit is that this number cannot be stale. 41 cases run as a pure function, including the specification worked example.
+
+**Revisit trigger:** a fifth weight. The terms list is four entries because the resolver has four outcomes; a new tier would add one, and the sentence order in `TERM_LABELS` is where it would go.

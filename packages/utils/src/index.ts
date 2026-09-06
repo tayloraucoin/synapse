@@ -65,3 +65,19 @@ export {
   toDateKey,
   type CalendarDayStyle,
 } from "./time";
+
+/* ---- the resolver — official spec §7.3, §7.4 ---- */
+export {
+  bandOf,
+  computeAdherence,
+  creditFor,
+  type AdherenceResult,
+  type BandResult,
+  type FormulaTermOut,
+  type ItemVerdict,
+  type PriorityBand,
+  type ScoredItem,
+  type ScoredMiss,
+  type TradedUp,
+} from "./review/adherence";
+export { stripStateFor, type StripSquare } from "./review/strip";

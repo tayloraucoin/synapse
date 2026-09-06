@@ -4,7 +4,7 @@
 **Slice type:** Contract — pure arithmetic over rows, plus two read models. No screen. The risk class is *a number that lies*: a trimmed item counted, a pending item scored, a traded-up verdict frozen, a half rounded wrong, a band that hides a missed 7.
 **Vigil:** none. **Mason review:** the resolver cases (AC 1–10) — run, not read.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05)
 
 > **Mason — arithmetic review.** Official §7.3 is nine lines of pseudocode and Epic 3 §5 is a nine-row table. Every row gets a case below. Paste the outputs in the closing note.
 

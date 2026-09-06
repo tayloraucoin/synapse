@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 954 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 963 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -496,6 +496,7 @@ packages/
         item.ts
         notification.ts
         reason.ts
+        review.ts
         shell.ts
         template.ts
         timer.ts
@@ -545,6 +546,12 @@ packages/
           save-slot.ts
           templates.ts
           to-view.ts
+        review/
+          decision-state.ts
+          get-review-day.ts
+          get-review-history.ts
+          get-review-week.ts
+          to-scored.ts
         shell/
           settings-counts.ts
           status.ts
@@ -1244,6 +1251,9 @@ packages/
         priority.ts
         wall-clock.ts
         week.ts
+      review/
+        adherence.ts
+        strip.ts
       errors.ts
       index.ts
       number.ts
@@ -1269,6 +1279,7 @@ packages/
       preferences.ts
       push.ts
       reason.ts
+      review.ts
       template.ts
       user.ts
       week.ts
