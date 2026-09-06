@@ -194,6 +194,25 @@ export function toDateKey(date: Date, timeZone: string): string {
 }
 
 /**
+ * The city half of an IANA zone id — the word the header's zone label names
+ * (cross-cutting §7.3, *times in Vancouver*).
+ *
+ * IT IS THE LAST SEGMENT, UNDERSCORES AS SPACES, and deliberately nothing more:
+ * `America/Vancouver` → *Vancouver*, `America/Argentina/Buenos_Aires` →
+ * *Buenos Aires*, `UTC` → *UTC*. A prettier map of ids to place names would be
+ * a second copy of `TIMEZONE_REGIONS` that goes stale the first time the tz
+ * database adds a city, and a label that read *Pacific Time* would be wrong for
+ * the person who is in Vancouver rather than Los Angeles.
+ *
+ * A zone with no segment worth showing falls back to the id itself, because a
+ * raw `Etc/GMT+8` in the header is honest and an empty caption is not.
+ */
+export function zoneCityLabel(iana: string): string {
+  const city = iana.split("/").at(-1)?.replace(/_/g, " ") ?? "";
+  return city.length > 0 ? city : iana;
+}
+
+/**
  * Minutes from the day's start to a moment — what the Schedule axis and the day
  * parts (§6.4) are laid out on. `dayStart` is `HH:mm` in the same zone
  * (`woke_at`, or the day's `anchor_time` until it is set). A moment before the

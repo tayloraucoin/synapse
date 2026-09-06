@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 988 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 993 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -298,6 +298,10 @@ apps/
         week-canvas.tsx
         week-header.tsx
         week-keys.ts
+      zone-switch-dialog/
+        copy.ts
+        index.ts
+        zone-switch-dialog.tsx
     content/
       landing.ts  # the landing page's copy deck (SYS-6). Surface prose lives here, never inline
     lib/
@@ -321,6 +325,7 @@ apps/
         use-synapse-form.ts
       hooks/
         use-back.ts
+        use-device-zone.ts
         use-dismissed.ts
         use-elapsed.ts
         use-icon-upload.ts
@@ -582,6 +587,7 @@ packages/
           settings-counts.ts
           status.ts
         user/
+          apply-pending-settings.ts
           avatar.ts
           complete-first-run.ts
           preferences.ts

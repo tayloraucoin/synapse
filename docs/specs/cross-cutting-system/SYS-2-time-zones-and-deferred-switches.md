@@ -4,7 +4,7 @@
 **Slice type:** One status line, one dialog, one hook, and one service hook into the pending-pair application. The risk class is *a day that jumps*: a mid-day zone change moving today's times, a future day materialised under the old zone, a device zone read in two places.
 **Vigil:** none. **Mason review:** the future-day re-materialisation on switch (AC 6–7).
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 ---
 

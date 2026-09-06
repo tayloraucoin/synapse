@@ -11,6 +11,8 @@ export const DAY_LIST_COPY = {
   undo: "Undo",
   noTemplate: "No template",
   wokeAt: (clock: string) => `Woke ${clock}`,
+  /** Cross-cutting §7.3, shown only while the day's zone differs (SYS-2). */
+  zoneLabel: (city: string) => `times in ${city}`,
   shifted: (minutes: number) => `Shifted +${minutes} min`,
   notUntil: (weekday: string) => `Not until ${weekday}`,
 

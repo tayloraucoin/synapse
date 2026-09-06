@@ -3,9 +3,15 @@
 import * as React from "react";
 
 import { DayHeader } from "@syn/ui";
-import { formatCalendarDay, formatClock, weekdayForDayKey } from "@syn/utils";
+import {
+  formatCalendarDay,
+  formatClock,
+  weekdayForDayKey,
+  zoneCityLabel,
+} from "@syn/utils";
 
 import { DayHeaderSheet } from "@/components/day-header-sheet";
+import { useDeviceZone } from "@/lib/hooks/use-device-zone";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { DAY_LIST_COPY as COPY } from "./copy";
@@ -26,10 +32,26 @@ type DayView = RouterOutputs["day"]["get"];
  *
  * A PLAN DAY DOES NOT OPEN. DH-01's rows are about a day being lived — a wake
  * time, a shift, a trim — and none of them mean anything about next Thursday.
+ *
+ * THE ZONE LABEL IS COMPUTED HERE, from `useDeviceZone()` (SYS-2). It compares
+ * the device with THIS DAY'S snapshot rather than with the stored zone, so a
+ * past day lived in London still reads *times in London* after the person is
+ * home — the label is about the record, not about travelling. `day.zoneLabel`
+ * is the server's answer to the same question for a caller that knows the
+ * device zone; the browser does not tell the server, so the client computes it
+ * from the one hook and falls back to the server's when it has one.
  */
 export function DayListHeader({ day }: { day: DayView }) {
   const [sheetOpen, setSheetOpen] = React.useState(false);
+  const deviceZone = useDeviceZone();
   const utils = trpc.useUtils();
+
+  const zoneLabel =
+    deviceZone === null
+      ? day.zoneLabel
+      : deviceZone === day.timezone
+        ? null
+        : COPY.zoneLabel(zoneCityLabel(day.timezone));
 
   return (
     <>
@@ -46,7 +68,7 @@ export function DayListHeader({ day }: { day: DayView }) {
             : COPY.wokeAt(formatClock(day.wokeAt, day.timezone))
         }
         shiftedMin={day.shiftedMin > 0 ? day.shiftedMin : null}
-        zoneLabel={day.zoneLabel}
+        zoneLabel={zoneLabel}
         notUntilWeekday={
           day.mode === "plan" ? weekdayForDayKey(day.dateKey) : null
         }

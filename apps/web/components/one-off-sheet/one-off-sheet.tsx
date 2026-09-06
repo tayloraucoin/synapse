@@ -18,7 +18,12 @@ import {
   TimeField,
   type Stepper17Value,
 } from "@syn/ui";
-import { DURATION_MAX, DURATION_MIN, HABIT_TITLE_MAX } from "@syn/constants";
+import {
+  DURATION_MAX,
+  DURATION_MIN,
+  HABIT_TITLE_MAX,
+  detectTimezone,
+} from "@syn/constants";
 import type { HabitSummaryView } from "@syn/types";
 import { dateKeyIn } from "@syn/utils";
 
@@ -389,7 +394,8 @@ function clockIn(at: Date, timeZone: string): string {
  * a picker back to the present.
  */
 function defaultStartClock(date: string, timeZone: string | null): string {
-  const zone = timeZone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // One device-zone reader in the codebase (SYS-2): `detectTimezone`.
+  const zone = timeZone ?? detectTimezone();
   const now = new Date();
   if (dateKeyIn(now, zone) !== date) return "09:00";
 

@@ -21,6 +21,7 @@ import {
   dayStartInstant,
   deriveItemState,
   weekdayForDayKey,
+  zoneCityLabel,
   type DayPart,
 } from "@syn/utils";
 
@@ -492,8 +493,7 @@ function zoneLabelFor(
   deviceZone: string | null,
 ): string | null {
   if (deviceZone === null || deviceZone === dayZone) return null;
-  const city = dayZone.split("/").at(-1)?.replace(/_/g, " ") ?? dayZone;
-  return `times in ${city}`;
+  return `times in ${zoneCityLabel(dayZone)}`;
 }
 
 function shortWeekday(dateKey: string | undefined): string | null {

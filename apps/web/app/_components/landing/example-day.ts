@@ -28,6 +28,7 @@ import type {
   MissTier,
   ReasonView,
 } from "@syn/types";
+import { detectTimezone } from "@syn/constants";
 import type { DayPart, FormulaTerm } from "@syn/ui";
 import { minutesFromDayStart } from "@syn/utils";
 
@@ -346,13 +347,17 @@ export function readNow(): Date {
   return new Date(Date.now());
 }
 
-/** The device's zone, or UTC where the browser will not say. */
+/**
+ * The device's zone, or UTC where the browser will not say.
+ *
+ * SYS-2 made `detectTimezone` the codebase's ONE function that asks `Intl` what
+ * zone the device is in, and it already falls back to `"UTC"` — which is
+ * `STATIC_TIME_ZONE` — so this is now a name rather than a second
+ * implementation. The signed-in app reaches the same value through
+ * `useDeviceZone()`; this page is not in the shell and has no hook to use.
+ */
 export function deviceTimeZone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || STATIC_TIME_ZONE;
-  } catch {
-    return STATIC_TIME_ZONE;
-  }
+  return detectTimezone();
 }
 
 /** Minutes from the day's start, for the now line's `atMin`. */
