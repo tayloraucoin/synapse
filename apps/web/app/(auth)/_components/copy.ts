@@ -34,6 +34,11 @@ export const AUTH_COPY = {
     offline: "You're offline — sign-in needs a connection.",
     /** AU-05's exit line, shown here after a successful reset. */
     passwordChanged: "Password changed. Sign in with the new one.",
+    /**
+     * ST-10a's exit line (Epic 1 §7). Past tense and no apology: the person
+     * asked for this, typed a word to confirm it, and it happened.
+     */
+    accountDeleted: "Your account was deleted.",
     /** AU-05's expired-link line, shown here when a link fails at /auth/confirm. */
     linkExpired: "That link has expired. Request a new one.",
     /**
@@ -118,4 +123,6 @@ export const AUTH_NOTICE = {
   invite: "invite",
   passwordChanged: "password-changed",
   expired: "expired",
+  /** ST-10a's exit. The account is already gone by the time this is read. */
+  accountDeleted: "account-deleted",
 } as const;

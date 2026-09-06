@@ -13,7 +13,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | SET-7 | First run | SET-4, SET-5, SET-6 | Complete (screen criteria pending a Supabase project) | 2026-09-05 |
 | SET-8 | Settings core | SET-3, SYS-1 | Complete (screen criteria pending a Supabase project) | 2026-09-05 |
 | SET-9 | Reasons and notification preferences | SET-5, SET-6, SET-8 | Complete (screen and permission criteria pending a Supabase project) | 2026-09-05 |
-| SET-10 | Your data: export and delete account | SET-8 | Not started | — |
+| SET-10 | Your data: export and delete account | SET-8 | Complete (Vigil review of the five destructive paths pending a Supabase project) | 2026-09-06 |
 
 ## Checklist
 
@@ -26,4 +26,4 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] SET-7
 - [x] SET-8
 - [x] SET-9
-- [ ] SET-10
+- [x] SET-10

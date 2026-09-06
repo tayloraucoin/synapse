@@ -1,6 +1,7 @@
 import { createLogger } from "@syn/observability";
 
 import { autoCloseDaysJob } from "./auto-close-days";
+import { expireExportsJob } from "./expire-exports";
 import {
   notifyItemStartJob,
   notifyPendingReviewJob,
@@ -44,6 +45,9 @@ export type ScheduledJob = {
  * overnight is closed before the notification jobs decide what to send about
  * it. N5 asks about yesterday's auto-closed day, and it must not miss it
  * because the close had not happened yet in the same scan.
+ *
+ * `expire_exports` (SET-10) is last and order-independent — it touches nothing
+ * the others read.
  */
 export const SCHEDULED_JOBS: readonly ScheduledJob[] = [
   autoCloseDaysJob,
@@ -51,6 +55,7 @@ export const SCHEDULED_JOBS: readonly ScheduledJob[] = [
   notifyReviewReminderJob,
   notifyPendingReviewJob,
   notifyWeekBuildJob,
+  expireExportsJob,
 ];
 
 export async function runScheduledJobs(): Promise<ScheduledJobResult[]> {

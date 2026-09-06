@@ -42,7 +42,7 @@ export {
   type PrioritySortable,
 } from "./day";
 export { AppError, isAppError } from "./errors";
-export { clamp, roundToStep } from "./number";
+export { clamp, formatBytes, roundToStep } from "./number";
 export { sanitizeNextPath } from "./path";
 export {
   firstNonEmpty,

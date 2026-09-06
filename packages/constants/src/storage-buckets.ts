@@ -40,6 +40,29 @@ export const READABLE_ASSET_BUCKETS: ReadonlyArray<AssetBucket> = [
 ];
 
 /**
+ * The export bucket, named separately from `AssetBucket` on purpose.
+ *
+ * An export is not an asset: nothing in the database points at it, the read
+ * route will not serve it (`READABLE_ASSET_BUCKETS` above), and its only door
+ * is a signed URL that expires. Giving it an `AssetBucket` would make
+ * `parseAssetPath` accept `exports/...`, which is exactly the mistake that
+ * would put a person's whole record behind the same session-cookie route as
+ * their avatar — and the system browser that opens the download carries no
+ * cookie anyway.
+ */
+export const EXPORTS_BUCKET = "exports";
+
+/** The bucket-relative key. `storage_path` stores it bucket-qualified. */
+export function exportStorageKey(userId: string, exportId: string): string {
+  return `${userId}/${exportId}.zip`;
+}
+
+/** `exports/{user_id}/{export_id}.zip` — the form `storage_path` holds. */
+export function exportStoragePath(userId: string, exportId: string): string {
+  return `${EXPORTS_BUCKET}/${exportStorageKey(userId, exportId)}`;
+}
+
+/**
  * A stored object's file name. Conservative on purpose: this string is
  * concatenated into a storage path and into a URL, so anything that could
  * climb out of the owner's prefix (`..`, a slash, a leading dot) must not

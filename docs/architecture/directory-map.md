@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 993 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 1000 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -137,6 +137,10 @@ apps/
               category-list.tsx
             page.tsx
           data/
+            _components/
+              copy.ts
+              delete-section.tsx
+              export-section.tsx
             page.tsx
           day/
             _components/
@@ -549,6 +553,7 @@ packages/
           week-view.ts
         jobs/
           auto-close-days.ts
+          expire-exports.ts
           notify.ts
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
         library/
@@ -589,8 +594,11 @@ packages/
         user/
           apply-pending-settings.ts
           avatar.ts
+          build-export.ts
           complete-first-run.ts
+          delete-account.ts
           preferences.ts
+          request-export.ts
       context.ts
       index.ts
       root.ts

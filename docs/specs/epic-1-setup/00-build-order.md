@@ -34,7 +34,7 @@ The schema, then the library a template is built from, then the template a week 
 - [x] **SET-7** · First run: FR-01…05, resume, the setup status line — M · (SET-4, SET-5, SET-6) — built 2026-09-05; **no first-run form: the habit sheet, the editor and the week canvas are imported whole**
 - [x] **SET-8** · Settings core: ST-00, ST-01 (+AU-06), ST-08, ST-09, ST-11 — M · (SET-3, SYS-1) — built 2026-09-05; **day close and zone write only the pending pair, dated on the server in the person's current zone**
 - [x] **SET-9** · Reasons and notification preferences: ST-06/06a, ST-07, the permission sheet — M · (SET-5, SET-6, SET-8) — built 2026-09-05; **the ask fires on one predicate of four conditions, and both answers close it forever**
-- [ ] **SET-10** · Your data: export and delete account, ST-10/10a — M · (SET-8) · **Vigil: destructive path**
+- [x] **SET-10** · Your data: export and delete account, ST-10/10a — M · (SET-8) · **Vigil: destructive path**
 
 ## Ordering constraints (alphabetical order hides these)
 

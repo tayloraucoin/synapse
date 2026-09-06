@@ -18,9 +18,9 @@ import { ZONE_SWITCH_COPY as COPY } from "./copy";
  * That is the whole reason the dialog can promise *Today stays on {stored}*
  * without the client having to be trusted about what "tomorrow" means.
  *
- * NOT DESTRUCTIVE. `variant="destructive"` in this app is Delete account and
- * nothing else — and a zone switch is reversible by switching back, deferred
- * until tomorrow, and moves nothing that has happened.
+ * NOT DESTRUCTIVE. The destructive treatment in this app is Delete account and
+ * nothing else (official spec §9.3) — and a zone switch is reversible by
+ * switching back, deferred until tomorrow, and moves nothing that has happened.
  *
  * AN UNLISTED ZONE STILL WORKS. `timezoneSchema` accepts anything the runtime's
  * `Intl.supportedValuesOf("timeZone")` knows, not just the ids in

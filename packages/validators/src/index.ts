@@ -10,11 +10,16 @@
  */
 
 export {
+  DELETE_CONFIRMATION_WORD,
   accountFormSchema,
   dayTimeFormSchema,
+  deleteAccountInput,
+  exportDownloadInput,
   passwordChangeSchema,
   type AccountFormInput,
   type DayTimeFormInput,
+  type DeleteAccountInput,
+  type ExportDownloadInput,
   type PasswordChangeInput,
 } from "./account";
 

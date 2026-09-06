@@ -60,8 +60,11 @@ export { STARTER_HABITS, type StarterHabit } from "./starter-habits";
 export {
   ASSET_BUCKET_BY_KIND,
   ASSET_FILE_NAME_PATTERN,
+  EXPORTS_BUCKET,
   READABLE_ASSET_BUCKETS,
   buildAssetPath,
+  exportStorageKey,
+  exportStoragePath,
   isSafeAssetFileName,
   parseAssetPath,
   toStorageKey,

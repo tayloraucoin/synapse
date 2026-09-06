@@ -4,7 +4,7 @@
 **Slice type:** The trust surface — one export pipeline and the product's only destructive action. The risk class is *trust-breaking*: an export that leaves something out, a download link that outlives its promise, a delete that leaves a row behind, or a delete that fires on the wrong account.
 **Vigil:** **full review by inducing** — delete with a running export; delete with an avatar and icons in storage; export an account with every table populated (use the smoke account after Epic 2/3 fixtures if available, else SQL-insert one row per table); a download link after 24 h (clock-shift the `expires_at`); a delete attempted with the word typed wrong. QA states the five paths and whether each was run.
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 > **Vigil — destructive-path review.** ST-10a is the one place the destructive colour is permitted and the one place a person can lose everything. Verify the typed confirmation gate, the session end, the cascade, the storage cleanup, and that nothing about the deletion is logged with the person's data. **Mason:** the zip library choice is routed to you (advisory below); counter-propose in `TECHNICAL-DECISIONS.md`.
 

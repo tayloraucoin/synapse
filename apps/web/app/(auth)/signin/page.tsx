@@ -1,8 +1,6 @@
-import { sanitizeNextPath } from "@syn/utils";
 import { AuthFrame } from "@syn/ui";
-
+import { sanitizeNextPath } from "@syn/utils";
 import { AUTH_COPY, AUTH_NOTICE } from "@/app/(auth)/_components/copy";
-
 import { SignInForm } from "./_components/sign-in-form";
 
 /**
@@ -33,11 +31,13 @@ export default async function SignInPage({
   const message =
     notice === AUTH_NOTICE.passwordChanged
       ? AUTH_COPY.signIn.passwordChanged
-      : authFlag === "link_expired"
-        ? AUTH_COPY.signIn.linkExpired
-        : authFlag === "error" || authFlag === "missing_code"
-          ? AUTH_COPY.signIn.oauthFailed
-          : null;
+      : notice === AUTH_NOTICE.accountDeleted
+        ? AUTH_COPY.signIn.accountDeleted
+        : authFlag === "link_expired"
+          ? AUTH_COPY.signIn.linkExpired
+          : authFlag === "error" || authFlag === "missing_code"
+            ? AUTH_COPY.signIn.oauthFailed
+            : null;
 
   return (
     <AuthFrame heading={AUTH_COPY.signIn.heading} trustLine>

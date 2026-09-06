@@ -66,3 +66,42 @@ export const dayTimeFormSchema = z.object({
 });
 
 export type DayTimeFormInput = z.infer<typeof dayTimeFormSchema>;
+
+/** The word ST-10a asks for, in one place so the two gates cannot drift. */
+export const DELETE_CONFIRMATION_WORD = "delete";
+
+/**
+ * ST-10a's typed gate, CHECKED AGAIN ON THE SERVER.
+ *
+ * The dialog already disables its confirm until the word matches, and that is
+ * not the check that matters: a disabled button is a courtesy to the person,
+ * not a control over the request. This schema is what actually stands between
+ * a stray mutation call and an account, which is why the literal is required
+ * rather than merely non-empty.
+ *
+ * CASE-INSENSITIVE, MATCHING THE COMPOSITE. `TypedConfirmDialog` compares
+ * trimmed and lowercased — the gesture is deliberate intent, not exact
+ * keystrokes — so a server that demanded lowercase would reject a confirmation
+ * the screen had just accepted.
+ *
+ * THERE IS NO ID. The procedure deletes the caller, and an id parameter is how
+ * one account ends up deleting another.
+ */
+export const deleteAccountInput = z.object({
+  confirmation: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .refine((value) => value === DELETE_CONFIRMATION_WORD, {
+      message: "Type delete to confirm.",
+    }),
+});
+
+export type DeleteAccountInput = z.infer<typeof deleteAccountInput>;
+
+/** Which export to mint a link for. The row is re-checked against the caller. */
+export const exportDownloadInput = z.object({
+  id: z.string().uuid(),
+});
+
+export type ExportDownloadInput = z.infer<typeof exportDownloadInput>;
