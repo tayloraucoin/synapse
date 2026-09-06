@@ -3476,6 +3476,7 @@ __metadata:
     "@syn/config": "npm:*"
     "@syn/constants": "npm:*"
     "@syn/types": "npm:*"
+    "@syn/utils": "npm:*"
     "@syn/validators": "npm:*"
     "@tanstack/react-query": "npm:^5.90.5"
     "@trpc/react-query": "npm:^11.4.3"

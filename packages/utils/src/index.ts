@@ -10,9 +10,36 @@
  */
 
 export {
+  DAY_PART_HOURS,
+  SOON_MINUTES,
+  addDays,
+  clockMinutes,
+  closingThresholdMin,
+  compareForTrim,
+  dateKeyIn,
+  dayModeFor,
+  dayPartBoundaries,
+  dayPartOf,
+  dayPartSpans,
+  dayStartInstant,
+  dayWindow,
   daysBefore,
+  deriveItemState,
+  instantToWallClockMinutes,
+  isOffSchedule,
+  isSameOrBefore,
+  mondayOf,
   resolveDayKey,
+  wallClockToInstant,
+  weekDates,
+  weekKeyOf,
   weekdayForDayKey,
+  weekdayIndex,
+  zoneOffsetMinutes,
+  type DayPart,
+  type DayPartAnchors,
+  type ItemStateInput,
+  type PrioritySortable,
 } from "./day";
 export { AppError, isAppError } from "./errors";
 export { clamp, roundToStep } from "./number";

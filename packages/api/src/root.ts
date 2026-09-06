@@ -1,5 +1,6 @@
 import { assetRouter } from "./routers/asset";
 import { categoryRouter } from "./routers/category";
+import { dayRouter } from "./routers/day";
 import { habitRouter } from "./routers/habit";
 import { shellRouter } from "./routers/shell";
 import { templateRouter } from "./routers/template";
@@ -17,6 +18,7 @@ import { createCallerFactory, router } from "./trpc";
 export const appRouter = router({
   asset: assetRouter,
   category: categoryRouter,
+  day: dayRouter,
   habit: habitRouter,
   shell: shellRouter,
   template: templateRouter,

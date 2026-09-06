@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 855 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 869 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -238,6 +238,7 @@ apps/
         use-icon-upload.ts
         use-leave-guard.ts
         use-local-draft.ts
+        use-now.ts
         use-online.ts
         use-remembered-toggle.ts
         use-scroll-memory.ts
@@ -417,6 +418,7 @@ packages/
       routers/
         asset.ts
         category.ts
+        day.ts
         habit.ts
         shell.ts
         template.ts
@@ -425,7 +427,12 @@ packages/
         asset/
           create-upload-url.ts
           storage.ts
+        day/
+          close-day.ts
+          get-day.ts
+          today.ts
         jobs/
+          auto-close-days.ts
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
         library/
           archive-habit.ts
@@ -583,6 +590,7 @@ packages/
   hooks/
     src/
       index.ts
+      use-derived-items.ts
       use-zod-form.ts
     .gitignore
     eslint.config.mjs
@@ -1131,8 +1139,14 @@ packages/
   utils/
     src/
       day/
+        boundaries.ts
         day-key.ts
+        day-parts.ts
         index.ts
+        item-state.ts
+        priority.ts
+        wall-clock.ts
+        week.ts
       errors.ts
       index.ts
       number.ts
@@ -1148,6 +1162,7 @@ packages/
       asset.ts
       auth-credentials.ts
       category.ts
+      day.ts
       habit.ts
       index.ts
       keys.ts

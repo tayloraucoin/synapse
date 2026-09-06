@@ -64,6 +64,8 @@ export {
   type UpdateHabitInput,
 } from "./habit";
 
+export { getDayInput, type GetDayInput } from "./day";
+
 export {
   dateKeySchema,
   weekKeySchema,

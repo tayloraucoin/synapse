@@ -17,7 +17,7 @@ The day model, the list that renders it, the sheet that acts on it, the reminder
 ## Build-order checklist
 
 ### Phase 0 — The contract
-- [ ] **USE-1** · The day model: boundaries, today, state derivation, day parts, auto-close, the day read model — L · (SET-1) · **Mason review of the time arithmetic**
+- [x] **USE-1** · The day model: boundaries, today, state derivation, day parts, auto-close, the day read model — L · (SET-1) · **Mason review of the time arithmetic**
 
 ### Phase 1 — The List
 - [ ] **USE-2** · Plain List: LS-00/01/02/03, done and undo, the wake anchor, record and plan modes — L · (USE-1, SET-6, SYS-1)

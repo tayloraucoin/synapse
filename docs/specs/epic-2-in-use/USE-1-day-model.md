@@ -4,7 +4,7 @@
 **Slice type:** Contract — pure time arithmetic plus one read model and one scheduled job. No screen. The risk class is *the wrong day*: an item that belongs to yesterday shown today, a state that flips a minute early, a DST night that duplicates or loses an hour, a zone change that moves a record.
 **Vigil:** none. **Mason review:** the time arithmetic (AC 1–8) and the auto-close pass (AC 12–14).
 
-**Status:** Not started
+**Status:** Complete (2026-09-05) — the arithmetic, the read model, and the auto-close job. The DST and state cases were **proved by running them** (49 cases); the read model and the job need a database. Two of the ticket's own acceptance criteria were wrong and are corrected in `DEVIATIONS.md`.
 
 > **Mason — arithmetic review.** Every function here is called by the materialiser (SET-6), the List (USE-2), the timer (USE-3), the resolver (REV-1), and the scheduler (USE-8). Review the DST cases against cross-cutting §7.2 by running them, not by reading them. There is no date library; `Intl` is the tool and the ticket says how.
 
