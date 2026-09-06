@@ -8,6 +8,7 @@ import {
   dayDateInput,
   oneOffFormSchema,
   removeOneOffInput,
+  restorePayloadInput,
   weekInput,
 } from "@syn/validators";
 
@@ -24,6 +25,7 @@ import {
   readDayTemplateId,
   removeOneOff,
   removeTemplateFromDay,
+  restoreOneOff,
   saveOneOff,
 } from "../services/day/one-off";
 import { resolveTodayFor } from "../services/day/today";
@@ -134,7 +136,11 @@ export const weekRouter = router({
       }
     }),
 
-  /** Returns the removed row so the caller's undo toast can restore it. */
+  /**
+   * Returns the removed item WITH its sessions and any miss, so the undo toast
+   * can put back what was actually there. Those cascade from `day_items`, so
+   * they cannot be read after the delete — the service captures them first.
+   */
   removeOneOff: protectedProcedure
     .input(removeOneOffInput)
     .mutation(async ({ ctx, input }) => {
@@ -148,6 +154,17 @@ export const weekRouter = router({
       }
       return removed;
     }),
+
+  /** The five-second undo — the same id, so every reference survives it. */
+  restoreOneOff: protectedProcedure
+    .input(restorePayloadInput)
+    .mutation(async ({ ctx, input }) =>
+      restoreOneOff(
+        ctx.rls,
+        ctx.authContext.userId,
+        input.payload as Parameters<typeof restoreOneOff>[2],
+      ),
+    ),
 
   copyLastWeek: protectedProcedure
     .input(copyWeekInput)

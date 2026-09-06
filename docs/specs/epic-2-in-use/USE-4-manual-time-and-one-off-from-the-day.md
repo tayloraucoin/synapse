@@ -4,7 +4,7 @@
 **Slice type:** Four additions to the item sheet over the timer engine and the one-off sheet. The risk class is *a session that lies*: overlapping sessions on one item, a manual edit that loses the `source`, a removed one-off with no undo.
 **Vigil:** none; USE-3's timer review covers the engine. Induce the overlap error and the remove-undo.
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 ---
 

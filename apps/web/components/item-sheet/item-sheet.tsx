@@ -5,6 +5,7 @@ import * as React from "react";
 import {
   Button,
   CategoryChip,
+  ConfirmDialog,
   HelperText,
   ItemIcon,
   NumberUnitInput,
@@ -12,18 +13,24 @@ import {
   ResponsiveSheet,
   SessionRow,
   SkeletonRow,
+  StateWord,
   Text,
   TimerControl,
   TimerDisplay,
   ReflectionBlock,
+  toastUndo,
   type Stepper17Value,
 } from "@syn/ui";
-import type { CategoryKey, IconValue } from "@syn/types";
+import { UNDO_SHORT_MS } from "@syn/constants";
+import type { CategoryKey, IconValue, TimerStatus } from "@syn/types";
 import { formatCalendarDay, formatClock } from "@syn/utils";
 
+import { OneOffSheet } from "@/components/one-off-sheet";
 import { SheetHost } from "@/components/page-frame";
+import { trpc } from "@/lib/trpc/client";
 
 import { ITEM_COPY as COPY } from "./copy";
+import { ManualTimeSheet } from "./manual-time-sheet";
 import { useItemSheet, type ItemDetail } from "./use-item-sheet";
 
 /**
@@ -63,10 +70,16 @@ export function ItemSheet({
   onOpenChange: (open: boolean) => void;
 }) {
   const sheet = useItemSheet(open ? itemId : null, dayKey);
+  const utils = trpc.useUtils();
   const { item } = sheet;
 
   const [quantity, setQuantity] = React.useState<number | null>(null);
   const [note, setNote] = React.useState("");
+  const [manual, setManual] = React.useState<{
+    session: ItemDetail["sessions"][number] | null;
+  } | null>(null);
+  const [editOneOff, setEditOneOff] = React.useState(false);
+  const [removeOpen, setRemoveOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (item === null) return;
@@ -111,19 +124,38 @@ export function ItemSheet({
         title={item?.title ?? ""}
         size="tall"
         initialFocus="title"
-        header={item === null ? undefined : <IdentityRow item={item} />}
+        header={
+          item === null ? undefined : (
+            <IdentityRow
+              item={item}
+              onEditOneOff={() => setEditOneOff(true)}
+            />
+          )
+        }
         footer={
           item === null ? null : (
             <div className="flex items-center justify-between gap-(--space-2)">
-              {recordMode || done ? (
-                <span />
-              ) : (
-                <Button variant="ghost" onClick={sheet.onToggleDeferred}>
-                  {item.deferredAt === null
-                    ? COPY.notTodayAction
-                    : COPY.backInTheList}
-                </Button>
-              )}
+              <div className="flex items-center gap-(--space-2)">
+                {/*
+                 * *Remove* is a one-off's alone (cross-cutting §9.3 G1). A
+                 * template-derived item is not deleted from a day — the
+                 * template put it there, and the way to change that is to
+                 * change the template or remove it from the day.
+                 */}
+                {item.origin === "one_off" ? (
+                  <Button variant="ghost" onClick={() => setRemoveOpen(true)}>
+                    {COPY.removeOneOff}
+                  </Button>
+                ) : null}
+
+                {recordMode || done ? null : (
+                  <Button variant="ghost" onClick={sheet.onToggleDeferred}>
+                    {item.deferredAt === null
+                      ? COPY.notTodayAction
+                      : COPY.backInTheList}
+                  </Button>
+                )}
+              </div>
               <Button
                 variant={done ? "secondary" : "default"}
                 busy={sheet.busy}
@@ -159,17 +191,25 @@ export function ItemSheet({
             <section className="flex flex-col gap-(--space-3)">
               <TimerDisplay
                 elapsedSec={sheet.elapsedSec ?? item.loggedSec}
-                status={sheet.running ? "running" : "idle"}
+                status={timerStatus(sheet.running, sheet.paused)}
               />
               <TimerControl
-                status={sheet.running ? "running" : "idle"}
+                status={timerStatus(sheet.running, sheet.paused)}
                 onStart={sheet.onStart}
                 onStop={sheet.onStop}
-                // USE-4 enables pause and resume; until then the control shows
-                // two buttons rather than a third that does nothing.
-                pauseEnabled={false}
+                onPause={sheet.onPause}
+                onResume={sheet.onResume}
+                pauseEnabled
                 busy={sheet.busy}
               />
+
+              <Button
+                variant="ghost"
+                className="self-start"
+                onClick={() => setManual({ session: null })}
+              >
+                {COPY.addTimeByHand}
+              </Button>
 
               {item.sessions.length === 0 ? null : (
                 <ul className="flex flex-col">
@@ -191,9 +231,7 @@ export function ItemSheet({
                           session.endedAt,
                         )}
                         source={session.source}
-                        // USE-4 wires editing; the affordance is inert here
-                        // rather than absent, because `SessionRow` requires it.
-                        onEdit={() => undefined}
+                        onEdit={() => setManual({ session })}
                       />
                     ))}
                 </ul>
@@ -233,12 +271,146 @@ export function ItemSheet({
           </div>
         )}
       </ResponsiveSheet>
+
+      <ManualTimeSheet
+        open={manual !== null}
+        item={item}
+        session={manual?.session ?? null}
+        onOpenChange={(next) => {
+          if (!next) setManual(null);
+        }}
+        onSaved={() => undefined}
+      />
+
+      {/* G1's *Edit* — WK-03 in edit mode, stacked over this sheet. */}
+      {item === null ? null : (
+        <OneOffSheet
+          open={editOneOff}
+          date={item.dayKey}
+          itemId={item.id}
+          onOpenChange={setEditOneOff}
+          onSaved={() => void utils.item.get.invalidate({ id: item.id })}
+        />
+      )}
+
+      {item === null ? null : (
+        <RemoveOneOffDialog
+          open={removeOpen}
+          item={item}
+          onOpenChange={setRemoveOpen}
+          onRemoved={() => onOpenChange(false)}
+        />
+      )}
     </SheetHost>
   );
 }
 
-/** Icon, title, chip, type word — and the date in record mode. */
-function IdentityRow({ item }: { item: ItemDetail }) {
+/** `TimerControl`'s three states, from the two facts that produce them. */
+function timerStatus(running: boolean, paused: boolean): TimerStatus {
+  if (running) return "running";
+  return paused ? "paused" : "idle";
+}
+
+/**
+ * G1's *Remove*, with the two bodies §9.3 and §8.2 specify.
+ *
+ * ON A REVIEWED DAY THE DIALOG NAMES WHAT THE ITEM WAS. Removing something
+ * from a record changes a number that has already been shown, so the question
+ * says what is being taken out rather than asking in the abstract.
+ */
+function RemoveOneOffDialog({
+  open,
+  item,
+  onOpenChange,
+  onRemoved,
+}: {
+  open: boolean;
+  item: ItemDetail;
+  onOpenChange: (open: boolean) => void;
+  onRemoved: () => void;
+}) {
+  const utils = trpc.useUtils();
+  const remove = trpc.week.removeOneOff.useMutation();
+  const restore = trpc.week.restoreOneOff.useMutation();
+
+  const reviewed = item.mode === "record";
+
+  async function refresh(): Promise<void> {
+    await utils.day.get.invalidate({ date: item.dayKey });
+    await utils.review.day.invalidate({ date: item.dayKey });
+  }
+
+  return (
+    <ConfirmDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={
+        reviewed
+          ? COPY.removeReviewedTitle(
+              item.title,
+              formatCalendarDay(
+                new Date(`${item.dayKey}T12:00:00Z`),
+                "UTC",
+                "long",
+              ),
+              outcomeOf(item),
+            )
+          : COPY.removeTitle(item.title)
+      }
+      confirmLabel={COPY.removeOneOff}
+      cancelLabel={COPY.keep}
+      busy={remove.isPending}
+      onConfirm={() => {
+        void remove.mutateAsync({ id: item.id }).then(async (payload) => {
+          await refresh();
+          onOpenChange(false);
+          onRemoved();
+
+          toastUndo({
+            text: COPY.removed(item.title),
+            durationMs: UNDO_SHORT_MS,
+            onUndo: () => {
+              void restore.mutateAsync({ payload }).then(refresh);
+            },
+          });
+        });
+      }}
+      onCancel={() => onOpenChange(false)}
+    />
+  );
+}
+
+/** "done 7:24" · "carried" · "missed" — what the item was, for §8.2's body. */
+function outcomeOf(item: ItemDetail): string {
+  if (item.doneAt !== null) {
+    return COPY.doneAt(formatClock(item.doneAt, item.timezone));
+  }
+  if (item.state === "carried") return "carried";
+  return "missed";
+}
+
+/**
+ * Icon, title, chip, type word — the date in record mode, and USE-4's three
+ * additions.
+ *
+ * *EDIT* AND *FROM {template}* ARE THE SAME SLOT. A one-off can be changed
+ * from here; a template-derived item cannot, and the line says where it came
+ * from instead — so the absence of the action is explained rather than simply
+ * missing (cross-cutting §9.3 G1).
+ *
+ * *ARCHIVED* SITS BESIDE THE TYPE WORD (§8.3). The item renders from its own
+ * snapshot and behaves normally; the word is there so somebody who goes
+ * looking for the habit and cannot find it knows why.
+ */
+function IdentityRow({
+  item,
+  onEditOneOff,
+}: {
+  item: ItemDetail;
+  onEditOneOff: () => void;
+}) {
+  const isOneOff = item.origin === "one_off";
+
   return (
     <div className="flex flex-col gap-(--space-1)">
       <div className="flex items-center gap-(--space-3)">
@@ -255,7 +427,26 @@ function IdentityRow({ item }: { item: ItemDetail }) {
         <Text as="span" variant="caption" tone="secondary">
           {typeWord(item.type)}
         </Text>
+        {item.habitArchived ? <StateWord kind="archived" /> : null}
+
+        {isOneOff ? (
+          <Button
+            variant="ghost"
+            className="ml-auto"
+            onClick={onEditOneOff}
+          >
+            {COPY.editOneOff}
+          </Button>
+        ) : null}
       </div>
+
+      {isOneOff ? null : (
+        <Text as="span" variant="caption" tone="secondary">
+          {item.templateNameSnapshot === null
+            ? COPY.fromATemplate
+            : COPY.fromTemplate(item.templateNameSnapshot)}
+        </Text>
+      )}
 
       {item.mode === "record" ? (
         <Text as="span" variant="caption" tone="secondary">

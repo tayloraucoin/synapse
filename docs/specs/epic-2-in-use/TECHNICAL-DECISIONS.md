@@ -120,3 +120,25 @@ The insert IS the claim. A job sends only when its `ON CONFLICT DO NOTHING` retu
 **Consequences:** The table grows by roughly one row per notification per person. It is service-role only and nobody reads their own; it can be pruned on any schedule without affecting correctness, since a pruned row for a past minute can never come due again.
 
 **Revisit trigger:** a notification that should repeat within one minute, or a kind whose target is neither a row nor a key. Both would need the key widened, and widening it is the moment to check that every existing kind still collides where it should.
+
+---
+
+## USE-4 — an undo restores what was there, not something that looks like it
+
+**Context:** *Remove* on a one-off offers five seconds of undo. `timer_sessions` and `misses` both cascade from `day_items`, so a delete takes them silently.
+
+**Options:**
+
+- **A. Soft-delete the item** — a `removed_at` column, undone by clearing it. Nothing cascades because nothing is deleted.
+- **B. Restore the row and accept the loss** of its sessions.
+- **C. Capture the dependents before the delete and re-insert them with the item.**
+
+**Decision:** C. A puts a nullable column on the hottest table in the product and adds `removed_at IS NULL` to every query that reads a day — one forgotten predicate and a removed item reappears in a list, a count, or a review. The cost is paid forever by code that has nothing to do with undo.
+
+B is the tempting one, and it is quietly wrong. The item comes back looking correct while the time somebody spent on it is gone — a record that is missing something without saying so, which is the one failure this product cannot have. AC7 names it directly.
+
+C keeps the delete a real delete, so the id is free and the restore can reuse it. That matters beyond tidiness: a notification deep link, an open sheet, and tomorrow `carried_from_item_id` all point at that id, and a new one would leave every one of them pointing at nothing.
+
+**Consequences:** `removeOneOff` returns a bundle rather than a row, and the undo payload is larger. The bundle is typed against the schema (`$inferSelect`) rather than as loose records, so a column added later travels with the undo automatically instead of being dropped by a hand-written shape.
+
+**Revisit trigger:** a fourth thing that cascades from `day_items`. The bundle would need it, and nothing in the type system says so — a new cascade is the moment to re-read this.

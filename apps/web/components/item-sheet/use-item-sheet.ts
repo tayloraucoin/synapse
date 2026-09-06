@@ -49,6 +49,8 @@ export function useItemSheet(itemId: string | null, dayKey: string) {
 
   const start = trpc.timer.start.useMutation();
   const stop = trpc.timer.stop.useMutation();
+  const pause = trpc.timer.pause.useMutation();
+  const resume = trpc.timer.resume.useMutation();
   const setDone = trpc.item.setDone.useMutation();
   const defer = trpc.item.defer.useMutation();
   const setQuantity = trpc.item.setQuantity.useMutation();
@@ -132,6 +134,45 @@ export function useItemSheet(itemId: string | null, dayKey: string) {
     );
   }, [item, stop, startLocal, stopLocal, refresh]);
 
+  /**
+   * Pause ends the open session and holds the display; resume opens a new one.
+   *
+   * The store stops ticking for this id on a pause, so the row's elapsed holds
+   * at what was logged — the number stays visible and stops moving, which is
+   * what "paused" looks like.
+   */
+  const onPause = React.useCallback(() => {
+    if (item === null) return;
+    setError(null);
+    stopLocal(item.id);
+    pause.mutate(
+      { id: item.id },
+      {
+        onError: () => setError(COPY.saveError),
+        onSettled: () => void refresh(),
+      },
+    );
+  }, [item, pause, stopLocal, refresh]);
+
+  const onResume = React.useCallback(() => {
+    if (item === null) return;
+    setError(null);
+    startLocal(item.id, new Date(), item.loggedSec);
+    resume.mutate(
+      { id: item.id },
+      {
+        onSuccess: (result) => {
+          startLocal(item.id, result.startedAt, item.loggedSec);
+        },
+        onError: () => {
+          stopLocal(item.id);
+          setError(COPY.saveError);
+        },
+        onSettled: () => void refresh(),
+      },
+    );
+  }, [item, resume, startLocal, stopLocal, refresh]);
+
   const onToggleDone = React.useCallback(() => {
     if (item === null) return;
     setError(null);
@@ -210,15 +251,34 @@ export function useItemSheet(itemId: string | null, dayKey: string) {
     [item, rate, refresh],
   );
 
+  /**
+   * `paused` is a session-shaped fact, not a flag: there is time logged, no
+   * open session, and the item is still `active`. Only a pause produces that
+   * combination — a stop returns the item to `upcoming`.
+   */
+  const paused =
+    item !== null &&
+    item.runningSince === null &&
+    item.state === "active" &&
+    item.loggedSec > 0;
+
   return {
     item,
     elapsedSec,
     error,
     /** The store's answer, not the query's — it ticks. */
     running: elapsedSec !== null,
-    busy: start.isPending || stop.isPending || setDone.isPending,
+    paused,
+    busy:
+      start.isPending ||
+      stop.isPending ||
+      pause.isPending ||
+      resume.isPending ||
+      setDone.isPending,
     onStart,
     onStop,
+    onPause,
+    onResume,
     onToggleDone,
     onToggleDeferred,
     onSaveQuantity,

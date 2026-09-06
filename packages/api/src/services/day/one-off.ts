@@ -4,6 +4,8 @@ import {
   dayItems,
   days,
   habits,
+  misses,
+  timerSessions,
   users,
   type RlsClient,
 } from "@syn/db";
@@ -255,12 +257,50 @@ export async function saveOneOff(
 }
 
 /** Returns the removed row so the undo toast can put it back. */
+/**
+ * Everything a removal took, typed against the schema rather than as loose
+ * records — so a column added later travels with the undo automatically
+ * instead of being silently dropped by a hand-written shape.
+ */
+export type RemovedOneOff = {
+  item: typeof dayItems.$inferSelect;
+  /** Captured before the delete, because they cascade away with it. */
+  sessions: (typeof timerSessions.$inferSelect)[];
+  miss: typeof misses.$inferSelect | null;
+};
+
+/**
+ * Remove a one-off, keeping everything needed to put it back.
+ *
+ * `timer_sessions` AND `misses` CASCADE FROM `day_items`, so deleting the row
+ * takes them with it and no later insert can bring them back. They are read
+ * FIRST and returned alongside the item — which is why this returns a bundle
+ * rather than a row. Without that, the five-second undo would restore an item
+ * that had lost the time somebody spent on it, silently, and the record would
+ * be quietly wrong in exactly the way the product promises it never is.
+ */
 export async function removeOneOff(
   rls: RlsClient,
   userId: string,
   itemId: string,
-): Promise<Record<string, unknown> | null> {
+): Promise<RemovedOneOff | null> {
   return rls.execute(async (tx) => {
+    const sessions = await tx
+      .select()
+      .from(timerSessions)
+      .where(
+        and(
+          eq(timerSessions.dayItemId, itemId),
+          eq(timerSessions.userId, userId),
+        ),
+      );
+
+    const missRows = await tx
+      .select()
+      .from(misses)
+      .where(and(eq(misses.dayItemId, itemId), eq(misses.userId, userId)))
+      .limit(1);
+
     const rows = await tx
       .delete(dayItems)
       .where(
@@ -271,7 +311,62 @@ export async function removeOneOff(
         ),
       )
       .returning();
-    return rows[0] ?? null;
+
+    const item = rows[0];
+    if (!item) return null;
+
+    return { item, sessions, miss: missRows[0] ?? null };
+  });
+}
+
+/**
+ * Put a removed one-off back, whole — the five-second undo (§9.3 G1).
+ *
+ * WITH ITS ORIGINAL ID. Anything pointing at the row survives the round trip:
+ * a notification deep link, an open sheet, a `carried_from_item_id` on
+ * tomorrow. Re-inserting under a new id would leave every one of those
+ * pointing at nothing, which is a worse outcome than the removal it undoes —
+ * and it is only possible because the delete was a real delete rather than a
+ * flag, so the id is free.
+ *
+ * THE SESSIONS AND THE MISS COME BACK TOO. They cascaded away with the item,
+ * so `removeOneOff` captured them; restoring the item alone would give back
+ * something that had quietly lost the time spent on it. The item goes first —
+ * the others reference it.
+ */
+export async function restoreOneOff(
+  rls: RlsClient,
+  userId: string,
+  payload: RemovedOneOff,
+): Promise<{ id: string } | null> {
+  return rls.execute(async (tx) => {
+    const rows = await tx
+      .insert(dayItems)
+      // `userId` is re-asserted rather than trusted from the payload: the row
+      // came back through a browser, and RLS would refuse a foreign one anyway
+      // — this makes the refusal unnecessary rather than merely certain.
+      .values({ ...payload.item, userId })
+      .onConflictDoNothing()
+      .returning({ id: dayItems.id });
+
+    const row = rows[0];
+    if (!row) return null;
+
+    if (payload.sessions.length > 0) {
+      await tx
+        .insert(timerSessions)
+        .values(payload.sessions.map((session) => ({ ...session, userId })))
+        .onConflictDoNothing();
+    }
+
+    if (payload.miss !== null) {
+      await tx
+        .insert(misses)
+        .values({ ...payload.miss, userId })
+        .onConflictDoNothing();
+    }
+
+    return row;
   });
 }
 

@@ -134,6 +134,13 @@ export {
 } from "./push";
 
 export {
+  manualSessionInput,
+  restorePayloadInput,
+  sessionIdInput,
+  updateSessionInput,
+} from "./timer";
+
+export {
   discardTemplateInput,
   listTemplatesInput,
   moveSlotInput,

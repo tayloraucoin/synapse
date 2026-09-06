@@ -40,6 +40,8 @@ export type ItemDetailView = {
   dayKey: string;
   mode: DayMode;
   timezone: string;
+  /** The day's own close time — IT-02 bounds its fields to that window. */
+  dayCloseTime: string;
   habitId: string | null;
   title: string;
   icon: unknown;
@@ -62,6 +64,18 @@ export type ItemDetailView = {
   reflectionAxes: string[];
   reflectionRatings: Record<string, number>;
   multitaskId: string | null;
+  /**
+   * The habit this came from is archived (cross-cutting §8.3). The item still
+   * renders from its own snapshot; this is what puts *archived* beside the
+   * type word so the absence of it in the library is explained rather than
+   * puzzling.
+   */
+  habitArchived: boolean;
+  /**
+   * *From {template}* — USE-4's line on a template-derived item, which
+   * explains why *Edit* and *Remove* are absent. Null on a one-off.
+   */
+  templateNameSnapshot: string | null;
   sessions: SessionView[];
   /** Seconds across every ENDED session — the store adds the running one. */
   loggedSec: number;
@@ -102,10 +116,13 @@ export async function getItem(
         reflectionAxes: dayItems.reflectionAxes,
         reflectionRatings: dayItems.reflectionRatings,
         multitaskId: dayItems.multitaskId,
+        templateNameSnapshot: dayItems.templateNameSnapshot,
+        habitArchivedAt: habits.archivedAt,
         categoryName: categories.name,
         categoryKey: categories.colorKey,
         dayDate: days.date,
         dayTimezone: days.timezone,
+        dayCloseTime: days.dayCloseTime,
         dayClosedAt: days.closedAt,
       })
       .from(dayItems)
@@ -172,6 +189,7 @@ export async function getItem(
       dayKey,
       mode,
       timezone: row.dayTimezone,
+      dayCloseTime: row.dayCloseTime,
       habitId: row.habitId,
       title: row.title,
       icon: row.icon,
@@ -198,6 +216,8 @@ export async function getItem(
       reflectionAxes: row.reflectionAxes,
       reflectionRatings: row.reflectionRatings,
       multitaskId: row.multitaskId,
+      habitArchived: row.habitArchivedAt !== null,
+      templateNameSnapshot: row.templateNameSnapshot,
       sessions: sessionRows,
       loggedSec,
       runningSince: running?.startedAt ?? null,

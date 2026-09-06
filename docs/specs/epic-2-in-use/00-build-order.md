@@ -24,7 +24,7 @@ The day model, the list that renders it, the sheet that acts on it, the reminder
 
 ### Phase 2 — The sheets and the timer
 - [x] **USE-3** · Item sheet and day header: IT-01, DH-01, DH-02, the timer engine and the tick store — L · (USE-2, SET-9) · Vigil: timer across sheet close, reload, and a second device — built 2026-09-05; **the session row is the truth and the store is re-seeded from it on every refetch**
-- [ ] **USE-4** · Manual time, sessions, pause/resume, and a one-off from the day: IT-02, G1, G3 — M · (USE-3)
+- [x] **USE-4** · Manual time, sessions, pause/resume, and a one-off from the day: IT-02, G1, G3 — M · (USE-3) — built 2026-09-06; **sessions on one item never overlap, and back-to-back is not overlap**
 
 ### Phase 3 — The Schedule
 - [ ] **USE-5** · Schedule: SC-01, SC-02 (read), ghosts, window spans, shift bands — L · (USE-3) · Vesper review of block density

@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 981 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 983 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -245,6 +245,7 @@ apps/
         copy.ts
         index.ts
         item-sheet.tsx
+        manual-time-sheet.tsx
         use-item-sheet.ts
       one-off-sheet/
         index.ts
@@ -527,6 +528,7 @@ packages/
           get-day.ts
           get-item.ts
           item-fields.ts
+          manual-time.ts
           materialize-day.ts
           one-off.ts
           set-done.ts
@@ -550,8 +552,6 @@ packages/
           save-reason.ts
           starter-set.ts
           to-view.ts
-        notification/
-          list-prefs.ts
         notifications/
           build-payload.ts
           deliver.ts
@@ -1302,6 +1302,7 @@ packages/
       reason.ts
       review.ts
       template.ts
+      timer.ts
       user.ts
       week.ts
     .gitignore
