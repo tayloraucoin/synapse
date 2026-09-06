@@ -197,6 +197,23 @@ export function settingsAboutRoute(): string {
   return "/settings/about";
 }
 
+/* ---------------------------------------------------------------- legal -- */
+
+/**
+ * The two legal pages — SYS-3.
+ *
+ * PUBLIC, AND OUTSIDE THE THREE ROUTE GROUPS. A privacy policy a person has to
+ * sign in to read is not a privacy policy, and both the landing page's footer
+ * and About link to them. They have no shell and no gate.
+ */
+export function legalPrivacyRoute(): string {
+  return "/legal/privacy";
+}
+
+export function legalTermsRoute(): string {
+  return "/legal/terms";
+}
+
 /* --------------------------------------------------------------- helper -- */
 
 /** Append a status flag to a path that may already carry a query. */

@@ -103,10 +103,16 @@ is a defect.**
 | `/settings/data` | `settingsDataRoute()` | ST-10 |
 | `/settings/share` | `settingsShareRoute()` | ST-11 |
 | `/settings/about` | `settingsAboutRoute()` | SY-01 |
+| `/legal/privacy` | `legalPrivacyRoute()` | SYS-3 — public, no shell, no gate |
+| `/legal/terms` | `legalTermsRoute()` | SYS-3 — public, no shell, no gate |
 
 `{date}` is `YYYY-MM-DD` and `{week}` is `YYYY-Www`; both are validated by
 `dateKeySchema` / `weekKeySchema` from `@syn/validators` — the same schemas the
 API uses, so a key that 404s here cannot succeed against a procedure.
+
+The two `/legal/*` pages sit outside all three groups on purpose: a privacy
+policy a person has to sign in to read is not a privacy policy, and both the
+landing footer and About link to them.
 
 ### The three route groups
 

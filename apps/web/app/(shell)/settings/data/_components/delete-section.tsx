@@ -6,6 +6,7 @@ import { Button, GroupHeading, StatusLine, Text, TypedConfirmDialog } from "@syn
 import { DELETE_CONFIRMATION_WORD } from "@syn/validators";
 
 import { AUTH_NOTICE } from "@/app/(auth)/_components/copy";
+import { beginDeliberateSignOut } from "@/lib/auth/session-expired";
 import { useOnline } from "@/lib/hooks/use-online";
 import { logoutRoute, signInRoute, withNotice } from "@/lib/routes";
 import { trpc } from "@/lib/trpc/client";
@@ -49,6 +50,10 @@ export function DeleteSection() {
       setError(COPY.deleteFailed);
       return;
     }
+
+    // The session is about to end because the person asked, so SY-04's dialog
+    // must not appear on the way out.
+    beginDeliberateSignOut();
 
     try {
       await fetch(logoutRoute(), { method: "POST" });

@@ -1,6 +1,7 @@
 import { assetRouter } from "./routers/asset";
 import { categoryRouter } from "./routers/category";
 import { dayRouter } from "./routers/day";
+import { feedbackRouter } from "./routers/feedback";
 import { habitRouter } from "./routers/habit";
 import { itemRouter } from "./routers/item";
 import { notificationRouter } from "./routers/notification";
@@ -25,6 +26,7 @@ export const appRouter = router({
   asset: assetRouter,
   category: categoryRouter,
   day: dayRouter,
+  feedback: feedbackRouter,
   habit: habitRouter,
   item: itemRouter,
   notification: notificationRouter,

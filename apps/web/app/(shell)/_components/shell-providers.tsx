@@ -2,6 +2,11 @@
 
 import * as React from "react";
 
+import {
+  SessionExpiredDialog,
+  SessionWatcher,
+} from "@/components/session-expired-dialog";
+
 import { AppShell } from "./app-shell";
 import { ShellStateProvider, useShell } from "./shell-context";
 import { ThemeSync } from "./theme-sync";
@@ -39,6 +44,13 @@ export function ShellProviders({
       <ThemeSync />
       {/* Also renders nothing; keeps the tab title telling a running timer. */}
       <TimerTitle />
+      {/*
+       * SY-04. The watcher renders nothing and listens for a session ending
+       * while nobody is asking for anything; the dialog is mounted once, here,
+       * so every signed-in screen has it and no `(auth)` screen does.
+       */}
+      <SessionWatcher />
+      <SessionExpiredDialog />
       <ShellChrome user={user} reviewHasPending={reviewHasPending}>
         {children}
       </ShellChrome>

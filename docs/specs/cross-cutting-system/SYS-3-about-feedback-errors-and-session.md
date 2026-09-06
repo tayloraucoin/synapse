@@ -4,7 +4,7 @@
 **Slice type:** Four small system surfaces with fixed copy. The risk class is *a leak or a dead end*: list data in a feedback message, a stack trace on screen, a session-expired dialog that loses a running timer, a legal link to nowhere.
 **Vigil:** review the feedback payload (nothing from the list — read the insert), the session-expired path with a running timer, and the error page's logging (a digest, never a message with content).
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 ---
 

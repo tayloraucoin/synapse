@@ -40,6 +40,8 @@ export {
   type SetNotificationPrefInput,
 } from "./notification";
 
+export { feedbackInput, type FeedbackInput } from "./feedback";
+
 export {
   decideInput,
   decisionInput,

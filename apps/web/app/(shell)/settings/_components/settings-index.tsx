@@ -28,6 +28,7 @@ import {
   settingsTemplatesRoute,
   settingsWeekRoute,
 } from "@/lib/routes";
+import { beginDeliberateSignOut } from "@/lib/auth/session-expired";
 import { useOnline } from "@/lib/hooks/use-online";
 import { useRunningTimer } from "@/lib/stores/use-timer-store";
 import { trpc } from "@/lib/trpc/client";
@@ -208,6 +209,8 @@ export function SignOutDialog({
     if (running !== null) {
       await stop.mutateAsync({ id: running.itemId }).catch(() => undefined);
     }
+    // AU-06 is a deliberate sign-out, so SY-04's dialog stays shut (SYS-3).
+    beginDeliberateSignOut();
     formRef.current?.requestSubmit();
   }
 

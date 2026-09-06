@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 1005 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 1020 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -122,6 +122,10 @@ apps/
             copy.ts
             settings-index.tsx
           about/
+            _components/
+              copy.ts
+              feedback-form.tsx
+              shortcuts-table.tsx
             page.tsx
           account/
             _components/
@@ -216,6 +220,13 @@ apps/
           route.ts
         confirm/
           route.ts
+      legal/
+        _components/
+          legal-page.tsx
+        privacy/
+          page.tsx
+        terms/
+          page.tsx
       logout/
         route.ts
       error.tsx
@@ -287,6 +298,11 @@ apps/
         layout.ts
         schedule-canvas.tsx
         shift-sheet.tsx
+      session-expired-dialog/
+        copy.ts
+        index.ts
+        session-expired-dialog.tsx
+        session-watcher.tsx
       starter-set/
         copy.ts
         index.ts
@@ -321,6 +337,7 @@ apps/
         get-request-context.ts
         get-request-user.ts
         require-verified-email.ts
+        session-expired.ts
       clients/
         supabase/
           client.ts
@@ -349,6 +366,8 @@ apps/
         use-undo-window.ts
       image/
         reencode.ts
+      keyboard/
+        shortcuts.ts
       pwa/
         install-detection.ts
         permission-state.ts
@@ -525,6 +544,7 @@ packages/
         asset.ts
         category.ts
         day.ts
+        feedback.ts
         habit.ts
         item.ts
         notification.ts
@@ -597,6 +617,8 @@ packages/
         shell/
           settings-counts.ts
           status.ts
+        system/
+          send-feedback.ts
         user/
           apply-pending-settings.ts
           avatar.ts
@@ -1318,6 +1340,7 @@ packages/
       auth-credentials.ts
       category.ts
       day.ts
+      feedback.ts
       habit.ts
       index.ts
       item.ts

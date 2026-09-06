@@ -38,7 +38,12 @@ import {
 } from "@syn/ui";
 
 import { LANDING_COPY } from "@/content/landing";
-import { signInRoute, signUpRoute } from "@/lib/routes";
+import {
+  legalPrivacyRoute,
+  legalTermsRoute,
+  signInRoute,
+  signUpRoute,
+} from "@/lib/routes";
 
 import { buildPlannedRows, STATIC_TIME_ZONE } from "./example-day";
 import { ExampleDay, MovedRows } from "./example-list";
@@ -259,10 +264,20 @@ export function LandingPage() {
             {LANDING_COPY.footer.wordmark}
           </Text>
           {/*
-           * `Privacy` and `Terms` arrive with SYS-3, which owns both routes and
-           * their copy. Linking them from here before the pages exist would be
-           * the one thing a footer must never do.
+           * SYS-3 built both pages, so the links are live (landing UX §3.7).
+           * They were held back until the routes existed, because a dead link
+           * in a footer is the one thing a footer must never have.
            */}
+          <Link href={legalPrivacyRoute()} className="underline">
+            <Text as="span" variant="body" tone="secondary">
+              {LANDING_COPY.footer.privacy}
+            </Text>
+          </Link>
+          <Link href={legalTermsRoute()} className="underline">
+            <Text as="span" variant="body" tone="secondary">
+              {LANDING_COPY.footer.terms}
+            </Text>
+          </Link>
         </footer>
       </div>
     </>
