@@ -14,6 +14,7 @@ import type { MissTier, ReasonView } from "@syn/types";
 import { formatClock } from "@syn/utils";
 
 import { REVIEW_COPY as COPY } from "./copy";
+import { ReflectionsSection } from "./reflections-section";
 import type { ReviewDay } from "./use-review-day";
 
 /**
@@ -35,13 +36,24 @@ import type { ReviewDay } from "./use-review-day";
 export function DecisionColumn({
   day,
   reasons,
+  batch,
+  editing,
   onDecide,
   onOpenItem,
+  onTradedUp,
+  onReflectionChanged,
+  registerReflectionFlush,
 }: {
   day: ReviewDay;
   reasons: Readonly<Record<MissTier, readonly ReasonView[]>> | null;
+  /** Edit mode's unwritten decisions. Empty in live mode. */
+  batch: ReadonlyMap<string, Decision>;
+  editing: boolean;
   onDecide: (itemId: string, decision: Decision) => void;
   onOpenItem: (itemId: string) => void;
+  onTradedUp: (itemId: string) => void;
+  onReflectionChanged: () => void;
+  registerReflectionFlush: (flush: () => Promise<void>) => void;
 }) {
   const [notes, setNotes] = React.useState<Record<string, string>>({});
 
@@ -55,12 +67,17 @@ export function DecisionColumn({
     entry: ReviewDay["toDecide"][number],
     state: ReviewDay["toDecide"][number]["state"],
   ) {
+    // Edit mode shows every panel as already decided, with *Change* — the
+    // section is *Decided*, not *To decide* (Epic 3 DR-01 edit mode).
+    const shown = editing && batch.has(entry.item.id) ? "decided" : state;
     return (
       <DecisionPanel
         key={entry.item.id}
         item={entry.item}
-        state={state}
-        decision={toDecision(entry)}
+        state={shown}
+        // The batch wins over the stored decision so an edit-mode change shows
+        // its new decided line immediately, while still being discardable.
+        decision={batch.get(entry.item.id) ?? toDecision(entry)}
         reasons={reasons ?? empty}
         // A habit cannot be carried — tomorrow's copy of it already exists in
         // tomorrow's plan (Epic 3 DR-02).
@@ -77,9 +94,7 @@ export function DecisionColumn({
         onMissed={() => undefined}
         onDecide={(decision) => onDecide(entry.item.id, decision)}
         onChange={() => undefined}
-        // REV-3 wires the traded-up picker; until then the chip selects and
-        // the panel waits, which is what the ticket asks for.
-        onTradedUp={() => undefined}
+        onTradedUp={() => onTradedUp(entry.item.id)}
         note={notes[entry.item.id] ?? ""}
         onNoteChange={(note) =>
           setNotes((current) => ({ ...current, [entry.item.id]: note }))
@@ -92,7 +107,7 @@ export function DecisionColumn({
     <div className="flex flex-col gap-(--space-5)">
       {day.toDecide.length === 0 ? null : (
         <section className="flex flex-col gap-(--space-3)">
-          <GroupHeading>{COPY.toDecide}</GroupHeading>
+          <GroupHeading>{editing ? COPY.decided : COPY.toDecide}</GroupHeading>
           {sortForReview(day.toDecide).map((entry) =>
             panelFor(entry, entry.state),
           )}
@@ -108,6 +123,11 @@ export function DecisionColumn({
 
       {day.doneItems.length === 0 ? null : (
         <CollapsiblePanel
+          // Collapsed while deciding — it is the part that went right and needs
+          // no decision. Expanded in edit mode (Epic 3 DR-01 edit mode), where
+          // the screen is a record being read rather than a queue being worked
+          // through, and what was done is most of what the record says.
+          defaultOpen={editing}
           trigger={
             <Text as="span" variant="row-title">
               {COPY.doneSection}
@@ -137,10 +157,9 @@ export function DecisionColumn({
       )}
 
       {/*
-       * The reflections section is a header with a count and no body — REV-3
-       * fills it. It is present rather than absent so the day's shape is
-       * complete: a person who rated three things yesterday should see that
-       * they did, even before the block that shows them exists.
+       * DR-06. The body mounts only while the panel is open, which is what
+       * makes "notes flush on collapse" a consequence of unmounting rather
+       * than a listener that could be forgotten.
        */}
       {day.reflections.rateable === 0 ? null : (
         <CollapsiblePanel
@@ -150,7 +169,11 @@ export function DecisionColumn({
             </Text>
           }
         >
-          <span />
+          <ReflectionsSection
+            day={day}
+            onChanged={onReflectionChanged}
+            registerFlush={registerReflectionFlush}
+          />
         </CollapsiblePanel>
       )}
     </div>

@@ -43,6 +43,22 @@ export type DecisionItemView = {
   shiftContext: { deltaMin: number; at: Date; reasonLabel: string | null } | null;
 };
 
+/**
+ * One reflection block's data — DR-06.
+ *
+ * `DayItemView` deliberately carries none of this: it is the row as the List
+ * and the Schedule draw it, and three fields nobody outside the review reads
+ * would be three fields every consumer has to skip past. The axes come from the
+ * item's SNAPSHOT (`reflection_axes`), so archiving the habit later does not
+ * change what the day says was asked.
+ */
+export type ReflectionItemView = {
+  item: DayItemView;
+  axes: string[];
+  ratings: Record<string, number>;
+  note: string | null;
+};
+
 export type ReviewDayView = {
   dateKey: string;
   mode: ReviewMode;
@@ -54,6 +70,8 @@ export type ReviewDayView = {
    * belongs to the day's read model.
    */
   reflections: { rateable: number; rated: number };
+  /** DR-06's bodies, in the same order the count above was taken. */
+  reflectionItems: ReflectionItemView[];
   closedAt: Date | null;
   closeReason: "manual" | "auto" | null;
   reviewedAt: Date | null;
@@ -68,6 +86,13 @@ export type ReviewDayView = {
   toDecide: DecisionItemView[];
   cut: DecisionItemView[];
   doneItems: DayItemView[];
+  /**
+   * The items still running — DR-04's picker offers them alongside the done
+   * ones. They appear in none of the three collections above by design: an
+   * active item is not owed a decision and is not finished, so it is listed
+   * here rather than smuggled into one of them.
+   */
+  activeItems: DayItemView[];
   shifts: Array<{
     id: string;
     at: Date;
@@ -124,6 +149,7 @@ export async function getReviewDay(
         habitId: dayItems.habitId,
         reflectionAxes: dayItems.reflectionAxes,
         reflectionRatings: dayItems.reflectionRatings,
+        notesReflection: dayItems.notesReflection,
       })
       .from(dayItems)
       .where(and(eq(dayItems.dayId, row.id), eq(dayItems.userId, userId)))
@@ -286,9 +312,46 @@ export async function getReviewDay(
     .map((row) => viewByItemId.get(row.id))
     .filter((view): view is DayItemView => view !== undefined);
 
+  const activeItems = raw.items
+    .filter(
+      (row) =>
+        row.assignmentState === "assigned" && row.completionState === "active",
+    )
+    .map((row) => viewByItemId.get(row.id))
+    .filter((view): view is DayItemView => view !== undefined);
+
   const pendingCount = Object.values(result.perItem).filter(
     (entry) => entry.verdict === "pending",
   ).length;
+
+  /*
+   * DR-06's blocks — the same rule the count uses, so the heading and the body
+   * can never disagree about what is rateable.
+   *
+   * ALREADY-RATED ITEMS ARE LAST (Epic 3 §2). The section is a prompt, and the
+   * things still worth answering belong at the top of it; ordering by "has a
+   * rating" rather than by time is the one place in the review where the day's
+   * sequence is not the right order.
+   */
+  const reflectionRows = raw.items.filter(
+    (row) => reflectableIds.has(row.id) || row.completionState === "done",
+  );
+
+  const reflectionItems: ReflectionItemView[] = [
+    ...reflectionRows.filter((row) => !ratedIds.has(row.id)),
+    ...reflectionRows.filter((row) => ratedIds.has(row.id)),
+  ]
+    .map((row) => {
+      const view = viewByItemId.get(row.id);
+      if (!view) return null;
+      return {
+        item: view,
+        axes: [...row.reflectionAxes],
+        ratings: { ...row.reflectionRatings },
+        note: row.notesReflection,
+      };
+    })
+    .filter((entry): entry is ReflectionItemView => entry !== null);
 
   /*
    * THE MODE IS ABOUT WHAT THE SCREEN IS FOR, not about the calendar.
@@ -312,6 +375,7 @@ export async function getReviewDay(
       ).length,
       rated: ratedIds.size,
     },
+    reflectionItems,
     closedAt: raw.day.closedAt,
     closeReason: raw.day.closeReason,
     reviewedAt: raw.day.reviewedAt,
@@ -329,6 +393,7 @@ export async function getReviewDay(
     toDecide,
     cut,
     doneItems,
+    activeItems,
     shifts: detail.shiftRows.map((row) => ({
       id: row.id,
       at: row.at,
@@ -411,6 +476,7 @@ function emptyReview(
     mode: "live",
     timezone,
     reflections: { rateable: 0, rated: 0 },
+    reflectionItems: [],
     closedAt: null,
     closeReason: null,
     reviewedAt: null,
@@ -419,6 +485,7 @@ function emptyReview(
     toDecide: [],
     cut: [],
     doneItems: [],
+    activeItems: [],
     shifts: [],
     result: null,
     pendingCount: 0,

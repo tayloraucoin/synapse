@@ -65,3 +65,23 @@ export const decideInput = z.object({
 });
 
 export type DecideInput = z.infer<typeof decideInput>;
+
+/**
+ * Edit mode's batch — REV-3.
+ *
+ * IT REUSES `decideInput`, deliberately: a change made in edit mode is the same
+ * decision as one made live, and a second schema would be a second place the
+ * traded-up rule or the reason refinement could drift. The batch is capped
+ * because it is one transaction, and a day cannot honestly have more decisions
+ * than it has items.
+ *
+ * An empty array is allowed. *Save changes* is disabled until the batch is
+ * dirty, so an empty one means a change was made and then reversed — which is
+ * still a person pressing Save, and still an edit worth stamping.
+ */
+export const saveChangesInput = z.object({
+  date: dateKeySchema,
+  changes: z.array(decideInput).max(200),
+});
+
+export type SaveChangesInput = z.infer<typeof saveChangesInput>;

@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 1000 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 1005 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -106,6 +106,9 @@ apps/
             [date]/
               page.tsx
           history/
+            _components/
+              copy.ts
+              history-list.tsx
             page.tsx
           week/
             [week]/
@@ -274,7 +277,9 @@ apps/
         decision-column.tsx
         finished.tsx
         index.ts
+        reflections-section.tsx
         review-day.tsx
+        traded-up-sheet.tsx
         use-review-day.ts
       schedule-canvas/
         copy.ts
@@ -587,6 +592,7 @@ packages/
           get-review-history.ts
           get-review-week.ts
           pending-days.ts
+          save-changes.ts
           to-scored.ts
         shell/
           settings-counts.ts

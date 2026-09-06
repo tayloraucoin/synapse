@@ -5,6 +5,7 @@ import {
   reviewDayInput,
   reviewHistoryInput,
   reviewWeekInput,
+  saveChangesInput,
 } from "@syn/validators";
 
 import { resolveTodayFor } from "../services/day/today";
@@ -17,6 +18,7 @@ import { getReviewDay } from "../services/review/get-review-day";
 import { getReviewHistory } from "../services/review/get-review-history";
 import { getReviewWeek } from "../services/review/get-review-week";
 import { pendingDays } from "../services/review/pending-days";
+import { saveReviewChanges } from "../services/review/save-changes";
 import { protectedProcedure, router } from "../trpc";
 
 /**
@@ -97,6 +99,31 @@ export const reviewRouter = router({
           dayCloseTime: today.dayCloseTime,
           now: new Date(),
         });
+      } catch (error) {
+        throw asTrpcError(error);
+      }
+
+      return getReviewDay(ctx.rls, ctx.authContext.userId, input.date, {
+        todayKey: today.todayKey,
+        timeZone: today.timeZone,
+        dayCloseTime: today.dayCloseTime,
+        now: new Date(),
+      });
+    }),
+
+  /**
+   * Edit mode's *Save changes* — REV-3.
+   *
+   * The whole batch in one transaction, stamped once. Returns the recomputed
+   * view for the same reason `finish` does: the number is never stored, so the
+   * only honest way to show the effect of a change is to read it back.
+   */
+  saveChanges: protectedProcedure
+    .input(saveChangesInput)
+    .mutation(async ({ ctx, input }) => {
+      const today = await requireToday(ctx);
+      try {
+        await saveReviewChanges(ctx.rls, ctx.authContext.userId, input);
       } catch (error) {
         throw asTrpcError(error);
       }

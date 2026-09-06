@@ -73,6 +73,34 @@ export const REVIEW_COPY = {
   saveError:
     "Couldn't save the review. Your decisions are kept on this device — try again.",
 
+  /* ------------------------------------------------------------ DR-04 -- */
+  tradedUpTitle: "What did you stay on?",
+  tradedUpBody:
+    "If it was at least as important and got done, this one isn't counted. Otherwise it counts half.",
+  /** Only when there is nothing to point at — a fact, not a warning. */
+  tradedUpNothingDone: "Nothing's done yet today, so this will count half.",
+  tradedUpHeading: "Today",
+  tradedUpNotOnTheList: "Something not on the list",
+  tradedUpWhatWasIt: "What was it?",
+  tradedUpSearch: "Search today's items",
+  tradedUpNoMatch: "Nothing on today matches that.",
+  tradedUpOtherHelper: "This counts half — there's nothing to check it against.",
+  /** "priority 7 · done 12:40 · not counted" */
+  tradedUpMetaDone: (priority: number, clock: string) =>
+    `priority ${priority} · done ${clock} · not counted`,
+  /** An active item's verdict can still change, and says so. */
+  tradedUpMetaRunning: (priority: number) =>
+    `priority ${priority} · running · counts half — finish it and this changes`,
+  cancel: "Cancel",
+  save: "Save",
+
+  /* -------------------------------------------------- DR-01 edit mode -- */
+  decided: "Decided",
+  saveChanges: "Save changes",
+  /** "Reviewed Thursday" · "Reviewed Thursday · edited yesterday" */
+  reviewedWhen: (when: string) => `Reviewed ${when}`,
+  editedWhen: (when: string) => `edited ${when}`,
+
   /* ------------------------------------------------------------ DR-07 -- */
   reviewed: "Reviewed",
   done: "Done",

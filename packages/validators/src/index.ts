@@ -46,7 +46,9 @@ export {
   reviewDayInput,
   reviewHistoryInput,
   reviewWeekInput,
+  saveChangesInput,
   type DecideInput,
+  type SaveChangesInput,
 } from "./review";
 
 export {

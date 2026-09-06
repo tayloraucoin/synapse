@@ -33,6 +33,9 @@ export type DecisionInput =
       tradedUpItemId: string | null;
     };
 
+/** The transaction handle every write in this file takes. */
+export type ReviewTx = Parameters<Parameters<RlsClient["execute"]>[0]>[0];
+
 export async function decide(
   rls: RlsClient,
   userId: string,
@@ -40,69 +43,87 @@ export async function decide(
   decision: DecisionInput,
   at: Date = new Date(),
 ): Promise<{ itemId: string }> {
-  return rls.execute(async (tx) => {
-    const [item] = await tx
-      .select({ id: dayItems.id, dayId: dayItems.dayId })
-      .from(dayItems)
-      .where(and(eq(dayItems.id, itemId), eq(dayItems.userId, userId)))
-      .limit(1);
+  return rls.execute((tx) => applyDecision(tx, userId, itemId, decision, at));
+}
 
-    if (!item) throw new Error("no such item");
+/**
+ * One decision, inside a transaction the caller owns.
+ *
+ * IT IS SPLIT OUT SO EDIT MODE CAN BATCH (REV-3). `review.saveChanges` applies
+ * several decisions atomically and stamps once; calling `decide` in a loop
+ * would open a transaction per item, so a failure halfway would leave the
+ * record half-changed — which is exactly what *Discard* is supposed to make
+ * impossible. Both paths run this function, so a rule added here cannot apply
+ * to only one of them.
+ */
+export async function applyDecision(
+  tx: ReviewTx,
+  userId: string,
+  itemId: string,
+  decision: DecisionInput,
+  at: Date = new Date(),
+): Promise<{ itemId: string }> {
+  const [item] = await tx
+    .select({ id: dayItems.id, dayId: dayItems.dayId })
+    .from(dayItems)
+    .where(and(eq(dayItems.id, itemId), eq(dayItems.userId, userId)))
+    .limit(1);
 
-    if (decision.kind === "carry") {
-      // Any earlier *Missed* on this item is withdrawn: a person who changed
-      // their mind to *Carry forward* has not also missed it.
-      await tx
-        .delete(misses)
-        .where(and(eq(misses.dayItemId, item.id), eq(misses.userId, userId)));
+  if (!item) throw new Error("no such item");
 
-      await tx
-        .update(dayItems)
-        .set({ completionState: "carried", updatedAt: at })
-        .where(eq(dayItems.id, item.id));
-
-      return stampIfClosed(tx, userId, item.dayId, at, { itemId: item.id });
-    }
-
-    // Keep whatever `shift_id` the row already carries: a re-decision is a
-    // change to the same record, not a new one, and the shift stays named.
-    const [existing] = await tx
-      .select({ shiftId: misses.shiftId })
-      .from(misses)
-      .where(and(eq(misses.dayItemId, item.id), eq(misses.userId, userId)))
-      .limit(1);
+  if (decision.kind === "carry") {
+    // Any earlier *Missed* on this item is withdrawn: a person who changed
+    // their mind to *Carry forward* has not also missed it.
+    await tx
+      .delete(misses)
+      .where(and(eq(misses.dayItemId, item.id), eq(misses.userId, userId)));
 
     await tx
-      .insert(misses)
-      .values({
-        userId,
-        dayItemId: item.id,
+      .update(dayItems)
+      .set({ completionState: "carried", updatedAt: at })
+      .where(eq(dayItems.id, item.id));
+
+    return stampIfClosed(tx, userId, item.dayId, at, { itemId: item.id });
+  }
+
+  // Keep whatever `shift_id` the row already carries: a re-decision is a
+  // change to the same record, not a new one, and the shift stays named.
+  const [existing] = await tx
+    .select({ shiftId: misses.shiftId })
+    .from(misses)
+    .where(and(eq(misses.dayItemId, item.id), eq(misses.userId, userId)))
+    .limit(1);
+
+  await tx
+    .insert(misses)
+    .values({
+      userId,
+      dayItemId: item.id,
+      tier: decision.tier,
+      reasonKey: decision.reasonKey,
+      reasonText: decision.reasonText,
+      tradedUpItemId: decision.tradedUpItemId,
+      resolvedBy: "day_review",
+      shiftId: existing?.shiftId ?? null,
+    })
+    .onConflictDoUpdate({
+      target: misses.dayItemId,
+      set: {
         tier: decision.tier,
         reasonKey: decision.reasonKey,
         reasonText: decision.reasonText,
         tradedUpItemId: decision.tradedUpItemId,
         resolvedBy: "day_review",
-        shiftId: existing?.shiftId ?? null,
-      })
-      .onConflictDoUpdate({
-        target: misses.dayItemId,
-        set: {
-          tier: decision.tier,
-          reasonKey: decision.reasonKey,
-          reasonText: decision.reasonText,
-          tradedUpItemId: decision.tradedUpItemId,
-          resolvedBy: "day_review",
-          updatedAt: at,
-        },
-      });
+        updatedAt: at,
+      },
+    });
 
-    await tx
-      .update(dayItems)
-      .set({ completionState: "missed", updatedAt: at })
-      .where(eq(dayItems.id, item.id));
+  await tx
+    .update(dayItems)
+    .set({ completionState: "missed", updatedAt: at })
+    .where(eq(dayItems.id, item.id));
 
-    return stampIfClosed(tx, userId, item.dayId, at, { itemId: item.id });
-  });
+  return stampIfClosed(tx, userId, item.dayId, at, { itemId: item.id });
 }
 
 /**
@@ -110,8 +131,8 @@ export async function decide(
  * On an open day nothing is stamped — the review has not happened yet, so
  * there is no record to have edited.
  */
-async function stampIfClosed<T>(
-  tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
+export async function stampIfClosed<T>(
+  tx: ReviewTx,
   userId: string,
   dayId: string,
   at: Date,

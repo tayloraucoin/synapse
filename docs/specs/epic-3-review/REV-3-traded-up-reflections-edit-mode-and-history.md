@@ -4,7 +4,7 @@
 **Slice type:** Four completions of the review — one picker sheet, one collapsed block, one mode, one list. The risk class is *a record edited without a trace*: a past review changed with no stamp, a traded-up verdict that never updates, a history that shows a number for an unreviewed day.
 **Vigil:** none. Induce: a traded-up choice on an active item that is finished before *Finish review*; an edit-mode *Save changes* on a day two weeks old; *Finish later* in edit mode with changes (the discard prompt).
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 ---
 
