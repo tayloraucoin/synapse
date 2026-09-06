@@ -274,6 +274,7 @@ export async function getDay(
         part,
         view: {
           id: row.id,
+          habitId: row.habitId,
           title: row.title,
           icon: row.icon,
           type: row.type,

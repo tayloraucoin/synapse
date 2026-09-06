@@ -5,6 +5,7 @@ import { habitRouter } from "./routers/habit";
 import { shellRouter } from "./routers/shell";
 import { templateRouter } from "./routers/template";
 import { userRouter } from "./routers/user";
+import { weekRouter } from "./routers/week";
 import { createCallerFactory, router } from "./trpc";
 
 /**
@@ -23,6 +24,7 @@ export const appRouter = router({
   shell: shellRouter,
   template: templateRouter,
   user: userRouter,
+  week: weekRouter,
 });
 
 export type AppRouter = typeof appRouter;

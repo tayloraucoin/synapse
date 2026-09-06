@@ -106,3 +106,23 @@ One section per architectural choice that had real alternatives. Written when th
 **Consequences:** Buys a denial that survives a later permissive grant, and a file that states the access model rather than merely happening to enforce it. Costs twelve policies where four would nominally do, and one real constraint to remember: **if a Phase-2 ticket ever needs browser-side storage access, these must be narrowed deliberately** — it cannot be granted around them, which is the point, but it does mean the failure will present as "my correct-looking grant does nothing". The comment in the SQL says so.
 
 **Revisit trigger:** a surface that genuinely needs the browser to talk to storage directly — a resumable upload for large files is the plausible one, and it would narrow the `insert` policy for one bucket rather than dropping the set.
+
+---
+
+## SET-6 — one predicate, expressed twice, with the negation derived
+
+**Context:** Four write paths decide what materialisation may rewrite: apply a template, change the anchor, remove the template, re-apply after a template edit. Each needs to know whether a row is "untouched". Removing a template additionally needs the complement — which rows are kept — and WK-02 needs to COUNT that complement before the person chooses.
+
+**Options:**
+
+- **A. Each caller writes the conditions it needs.** Direct, and how the first draft of `removeTemplateFromDay` was written.
+- **B. One `untouchedWhere()`, and each caller negates it however it likes.**
+- **C. One `untouchedWhere()` plus a `touchedWhere()` defined as `NOT (untouchedWhere())`, both returning a narrowed `SQL`.**
+
+**Decision:** C. A was not hypothetical — the draft it produced omitted the timer-session and miss sub-selects, so removing a template would have deleted an item somebody had already started, while the materialiser kept the identical row. That is not a slip a reviewer reliably catches: the four column checks it DID have look complete, and the two it dropped are the ones that live in sub-selects rather than columns. B fixes the positive case but leaves each negation site free to be subtly different. C makes the complement a derivation rather than a second author.
+
+The narrowed `SQL` return type is part of the decision. Drizzle types `and()` as `SQL | undefined` because it is undefined for an empty argument list; that is untrue of a six-condition list written in place, and leaving it optional would have forced an assertion at every call site — or, worse, made `touchedWhere()` impossible, since `not()` will not take an optional.
+
+**Consequences:** Every column the untouched predicate gains, the touched predicate gains in the same edit. The count WK-02 shows before the choice is produced by the same SQL the choice runs. The cost is that "touched" has no independent definition to read — someone wanting to know what it means has to negate six conditions in their head — which the comment on it states directly.
+
+**Revisit trigger:** a caller that needs a PARTIAL notion of touched, such as "started but not done". That is a third predicate, not a variation on these two, and it should be written as one rather than by loosening either of these.

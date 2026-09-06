@@ -28,6 +28,7 @@ export const CATEGORY_SKY: CategoryView = { key: "sky", name: "Deep work" };
 
 export const ITEM: DayItemView = {
   id: "item-1",
+  habitId: "habit-1",
   title: "Morning run",
   icon: { kind: "curated", value: "footprints", colorKey: "leaf" },
   type: "habit",

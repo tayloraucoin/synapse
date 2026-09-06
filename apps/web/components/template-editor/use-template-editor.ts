@@ -81,8 +81,23 @@ export function useTemplateEditor(templateId: string) {
     inFlight.current = false;
   }, [templateId, update, utils]);
 
+  /**
+   * Whether anything changed in this session — TP-04's trigger.
+   *
+   * It is a ref rather than state because nothing renders from it: asking the
+   * question on the way out is the only thing it is for, and making it state
+   * would re-render the canvas on the first keystroke to no effect.
+   */
+  const changed = React.useRef(false);
+
+  /** Slot edits go through the sheet's own mutations, so they say so here. */
+  const markChanged = React.useCallback(() => {
+    changed.current = true;
+  }, []);
+
   const patch = React.useCallback(
     (next: TemplatePatch) => {
+      changed.current = true;
       pending.current = { ...pending.current, ...next };
       if (timer.current !== null) window.clearTimeout(timer.current);
       timer.current = window.setTimeout(() => {
@@ -132,6 +147,11 @@ export function useTemplateEditor(templateId: string) {
     status,
     saveFailed: failed,
     patch,
+    markChanged,
+    /** Read on the way out; TP-04 asks nothing when nothing changed. */
+    hasChanged: () => changed.current,
     validateForLeave,
   };
 }
+
+export type TemplateEditorApi = ReturnType<typeof useTemplateEditor>;

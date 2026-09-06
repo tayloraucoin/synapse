@@ -10,9 +10,15 @@ import { PageFrame } from "@/components/page-frame";
 import { trpc } from "@/lib/trpc/client";
 import { settingsTemplatesRoute } from "@/lib/routes";
 
+import { WEEK_COPY } from "@/components/week-build/copy";
+
+import { ApplyChangesDialog } from "./apply-changes-dialog";
 import { TEMPLATE_COPY as COPY } from "./copy";
 import { TemplateEditor } from "./template-editor";
 import { useTemplateEditor } from "./use-template-editor";
+
+/** How long *Applied to {n} days.* stays up before the screen leaves (TP-04). */
+const APPLIED_NOTICE_MS = 4000;
 
 /**
  * TP-02 as a whole screen: the header and the canvas, sharing one editor.
@@ -31,13 +37,10 @@ export function TemplateEditorScreen({ templateId }: { templateId: string }) {
   const editor = useTemplateEditor(templateId);
   const discardIfEmpty = trpc.template.discardIfEmpty.useMutation();
   const [nameError, setNameError] = React.useState<string | null>(null);
+  const [askApply, setAskApply] = React.useState(false);
+  const [notice, setNotice] = React.useState<string | null>(null);
 
-  function leave(): void {
-    // Held once when there are slots and no name; the second attempt leaves.
-    if (!editor.validateForLeave()) {
-      setNameError(COPY.nameRequired);
-      return;
-    }
+  const exit = React.useCallback((): void => {
     // A draft nobody named and nothing was put in is not a template.
     void discardIfEmpty
       .mutateAsync({ id: templateId })
@@ -45,7 +48,33 @@ export function TemplateEditorScreen({ templateId }: { templateId: string }) {
       .finally(() => {
         router.push(settingsTemplatesRoute());
       });
+  }, [discardIfEmpty, router, templateId]);
+
+  function leave(): void {
+    // Held once when there are slots and no name; the second attempt leaves.
+    if (!editor.validateForLeave()) {
+      setNameError(COPY.nameRequired);
+      return;
+    }
+    // TP-04: the days already using this template are asked about on the way
+    // out, and only when there are some and something actually changed.
+    if (editor.hasChanged() && editor.appliedDays > 0) {
+      setAskApply(true);
+      return;
+    }
+    exit();
   }
+
+  /**
+   * The result stays on screen for four seconds before the screen goes. Saying
+   * *Applied to 3 days.* and navigating in the same frame would be saying it
+   * to nobody.
+   */
+  React.useEffect(() => {
+    if (notice === null) return;
+    const timer = window.setTimeout(exit, APPLIED_NOTICE_MS);
+    return () => window.clearTimeout(timer);
+  }, [notice, exit]);
 
   return (
     <PageFrame
@@ -70,9 +99,10 @@ export function TemplateEditorScreen({ templateId }: { templateId: string }) {
               />
             }
             subtitle={
-              editor.appliedDays > 0
+              notice ??
+              (editor.appliedDays > 0
                 ? COPY.appliedDays(editor.appliedDays)
-                : undefined
+                : undefined)
             }
             saveStatus={editor.status}
             onBack={leave}
@@ -86,6 +116,24 @@ export function TemplateEditorScreen({ templateId }: { templateId: string }) {
       }
     >
       <TemplateEditor templateId={templateId} editor={editor} />
+
+      <ApplyChangesDialog
+        open={askApply}
+        templateId={templateId}
+        templateName={editor.template?.name ?? ""}
+        onDone={(applied) => {
+          setAskApply(false);
+          if (applied === null) {
+            setNotice(WEEK_COPY.applyError);
+            return;
+          }
+          if (applied === 0) {
+            exit();
+            return;
+          }
+          setNotice(WEEK_COPY.appliedResult(applied));
+        }}
+      />
     </PageFrame>
   );
 }

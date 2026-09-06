@@ -4,7 +4,7 @@
 **Slice type:** The write path that turns plans into records. One service (`materializeDay`) is called from five surfaces and must be idempotent, zone-correct, and respectful of anything a person already touched. The risk class is *a rewritten record*: a re-materialisation that replaces a done item, an anchor change that moves a `done_at`, a template swap that deletes a started task.
 **Vigil:** none. **Mason review:** the materialiser (AC 9–13) — the keep rules are the ticket.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05)
 
 > **Mason — materialiser review.** Four write paths converge on `services/day/materialize-day.ts`: apply a template, change the anchor, remove the template, re-apply after a template edit (TP-04). Each has a keep rule in cross-cutting §8.1 and Epic 1 WK-01/WK-02/TP-04. Review that the predicate for "untouched" is one function used by all four, and that the zone and DST arithmetic is USE-1's, not a local copy.
 

@@ -92,7 +92,12 @@ export function TemplateEditor({
   const readOnly = editor.archived || !online;
   const anchorMinutes = clockToMinutes(template.anchorTime);
 
+  /**
+   * Every slot mutation ends here, which makes this the one place that knows a
+   * slot changed. TP-04's question on the way out is asked from that fact.
+   */
   async function refresh(): Promise<void> {
+    editor.markChanged();
     await utils.template.get.invalidate({ id: templateId });
     await utils.template.list.invalidate();
   }

@@ -30,6 +30,12 @@ export interface CategoryView {
 
 export interface DayItemView {
   id: string;
+  /**
+   * The library entry this came from, or null for a *Just a title* one-off.
+   * WK-03's edit needs it to reopen the sheet on the habit that was chosen;
+   * the title alone cannot distinguish a habit from a title someone typed.
+   */
+  habitId: string | null;
   title: string;
   icon: IconValue;
   type: ItemType;

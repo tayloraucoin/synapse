@@ -215,6 +215,9 @@ function toItem(spec: ExampleSpec, local: boolean, today: Date): DayItemView {
 
   return {
     id: spec.id,
+    // The landing page's day is an illustration; nothing in it links to a
+    // library entry, and a one-off with no habit is exactly what null means.
+    habitId: null,
     title: spec.title,
     icon: { kind: "curated", value: spec.glyph, colorKey: spec.category.key },
     type: spec.type,

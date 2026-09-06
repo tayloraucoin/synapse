@@ -1,12 +1,17 @@
 import { notFound } from "next/navigation";
 
-import { Text } from "@syn/ui";
 import { weekKeySchema } from "@syn/validators";
 
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { PageFrame } from "@/components/page-frame";
+import { WeekCanvas, WeekHeader } from "@/components/week-build";
 
-/** Placeholder — WK-01 Week build, for a specific week. */
-export default async function SettingsWeekPage({
+/**
+ * WK-01 Week build, for one named week.
+ *
+ * The key is validated with the same `weekKeySchema` the procedures use, so a
+ * key that 404s here could not have succeeded against `week.get` either.
+ */
+export default async function SettingsWeekKeyPage({
   params,
 }: {
   params: Promise<{ week: string }>;
@@ -15,10 +20,8 @@ export default async function SettingsWeekPage({
   if (!weekKeySchema.safeParse(week).success) notFound();
 
   return (
-    <PageFrame
-      header={<ShellPageHeader title={<>WK-01 Week build — {week}</>} showBack />}
-    >
-      <Text as="p" tone="secondary">Seven days, one template each.</Text>
+    <PageFrame contentWidth="canvas" header={<WeekHeader weekKey={week} />}>
+      <WeekCanvas weekKey={week} />
     </PageFrame>
   );
 }

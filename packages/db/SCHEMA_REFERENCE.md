@@ -1456,6 +1456,18 @@ export const dayItems = pgTable(
     /** Tie-break inside a minute. */
     sortOrder: smallint("sort_order").notNull().default(0),
     timeMode: timeModeEnum("time_mode").notNull(),
+    /**
+     * Which template put this item on the day — kept as a NAME, not a link.
+     *
+     * A template can be removed from a day while items a person already
+     * started stay behind (Epic 1 WK-02). Those rows lose their
+     * `template_slot_id`, so without this there is no way to say "from
+     * Morning" about an item that came from one — and a link would break
+     * again the moment the template is archived or renamed. The snapshot is
+     * the same discipline as `title` and `icon`: the record says what was
+     * true when it was made.
+     */
+    templateNameSnapshot: text("template_name_snapshot"),
     /** Snapshot of the habit's title, or the typed title of a *Just a title*. */
     title: text("title").notNull(),
     /** Snapshot; `task_appointment` for a bare title. */

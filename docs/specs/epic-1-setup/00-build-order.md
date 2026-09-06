@@ -28,7 +28,7 @@ The schema, then the library a template is built from, then the template a week 
 
 ### Phase 3 — Templates and the week
 - [x] **SET-5** · Templates: API, TP-01/02/03, the multitask rule — L · (SET-4) — built 2026-09-05; **the invariant was probed directly; the screens need a reachable session**
-- [ ] **SET-6** · Week build and materialisation: WK-01/02/03, TP-04, the apply flow — L · (SET-5, USE-1) · **Mason review of the materialiser**
+- [x] **SET-6** · Week build and materialisation: WK-01/02/03, TP-04, the apply flow — L · (SET-5, USE-1) · **Mason review of the materialiser** — built 2026-09-05; **one untouched predicate, four callers; the rendered SQL caught a syntax error the type system could not**
 
 ### Phase 4 — Sequences and settings
 - [ ] **SET-7** · First run: FR-01…05, resume, the setup status line — M · (SET-4, SET-5, SET-6)

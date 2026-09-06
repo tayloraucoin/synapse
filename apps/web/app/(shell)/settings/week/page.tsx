@@ -1,21 +1,15 @@
-import { Text } from "@syn/ui";
-
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { CurrentWeek } from "./_components/current-week";
 
 /**
- * Placeholder — WK-01 Week build. 
+ * WK-01 Week build, on the current week.
  *
- * Replaced by the Epic 1 track.
- * The screen's one `h1` is the header's title (cross-cutting §11).
+ * IT RESOLVES WITHOUT REDIRECTING (SET-6). `/settings/week` is the address a
+ * person keeps; sending them to `/settings/week/2026-W37` would make Monday's
+ * bookmark point at last week for the rest of the year.
+ *
+ * WHICH WEEK IT IS depends on the person's own close time, which only the
+ * server knows, so the resolution happens in a client leaf that asks.
  */
 export default function SettingsWeekPage() {
-  return (
-    <PageFrame
-      header={<ShellPageHeader title={"WK-01 Week build"} showBack />}
-    >
-      <Text as="p" tone="secondary">
-        This week, day by day.
-      </Text>
-    </PageFrame>
-  );
+  return <CurrentWeek />;
 }

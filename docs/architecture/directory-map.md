@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 869 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 887 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -141,6 +141,8 @@ apps/
               page.tsx
             page.tsx
           week/
+            _components/
+              current-week.tsx
             [week]/
               page.tsx
             page.tsx
@@ -192,6 +194,9 @@ apps/
         icon-chooser.tsx
         index.ts
         use-habit-sheet.ts
+      one-off-sheet/
+        index.ts
+        one-off-sheet.tsx
       page-frame/
         index.ts
         page-frame.tsx
@@ -203,6 +208,7 @@ apps/
         index.ts
         starter-set-chooser.tsx
       template-editor/
+        apply-changes-dialog.tsx
         copy.ts
         index.ts
         slot-row.tsx
@@ -210,6 +216,13 @@ apps/
         template-editor-screen.tsx
         template-editor.tsx
         use-template-editor.ts
+      week-build/
+        copy.ts
+        day-sheet.tsx
+        index.ts
+        week-canvas.tsx
+        week-header.tsx
+        week-keys.ts
     content/
       landing.ts  # the landing page's copy deck (SYS-6). Surface prose lives here, never inline
     lib/
@@ -423,14 +436,21 @@ packages/
         shell.ts
         template.ts
         user.ts
+        week.ts
       services/
         asset/
           create-upload-url.ts
           storage.ts
         day/
+          apply-template-changes.ts
           close-day.ts
+          copy-week.ts
           get-day.ts
+          materialize-day.ts
+          one-off.ts
           today.ts
+          untouched.ts
+          week-view.ts
         jobs/
           auto-close-days.ts
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
@@ -515,8 +535,8 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <2 migration .sql files, 0000–0001 — append-only, human-reviewed before a hosted migrate>
-      meta/ <3 drizzle snapshot files + _journal.json>
+      <3 migration .sql files, 0000–0002 — append-only, human-reviewed before a hosted migrate>
+      meta/ <4 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
@@ -1170,6 +1190,7 @@ packages/
       push.ts
       template.ts
       user.ts
+      week.ts
     .gitignore
     eslint.config.mjs
     package.json
