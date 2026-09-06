@@ -24,6 +24,7 @@ import { dateKeyIn } from "@syn/utils";
 
 import { HabitSheet } from "@/components/habit-sheet";
 import { SheetHost } from "@/components/page-frame";
+import { ReminderPrompt, useReminderPrompt } from "@/components/reminder-prompt";
 import { WEEK_COPY as COPY } from "@/components/week-build/copy";
 import { useOnline } from "@/lib/hooks/use-online";
 import { trpc } from "@/lib/trpc/client";
@@ -57,6 +58,7 @@ export function OneOffSheet({
 }) {
   const online = useOnline();
   const utils = trpc.useUtils();
+  const reminder = useReminderPrompt();
 
   const habits = trpc.habit.list.useQuery(
     { includeArchived: false },
@@ -153,6 +155,11 @@ export function OneOffSheet({
       await utils.week.get.invalidate();
       await utils.week.dayPreview.invalidate();
       onSaved?.();
+      // SET-9's ask, from the second of its two trigger points.
+      reminder.maybeOffer({
+        timeMode: when,
+        startLabel: when === "unscheduled" ? null : startClock,
+      });
       onOpenChange(false);
     } catch (caught) {
       const parsed = parseConflict(caught);
@@ -352,6 +359,8 @@ export function OneOffSheet({
           });
         }}
       />
+
+      <ReminderPrompt controller={reminder} />
     </SheetHost>
   );
 }

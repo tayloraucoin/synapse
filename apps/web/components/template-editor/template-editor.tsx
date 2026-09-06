@@ -24,6 +24,7 @@ import type { SlotView } from "@syn/types";
 import type { Weekday } from "@syn/ui";
 import { clockToMinutes } from "@syn/utils";
 
+import { ReminderPrompt, useReminderPrompt } from "@/components/reminder-prompt";
 import { useOnline } from "@/lib/hooks/use-online";
 import { trpc } from "@/lib/trpc/client";
 import { settingsHabitsRoute } from "@/lib/routes";
@@ -64,6 +65,7 @@ export function TemplateEditor({
 }) {
   const online = useOnline();
   const utils = trpc.useUtils();
+  const reminder = useReminderPrompt();
 
   const [slotSheet, setSlotSheet] = React.useState<{
     open: boolean;
@@ -305,8 +307,15 @@ export function TemplateEditor({
         onOpenChange={(next) => {
           setSlotSheet(next ? { open: true } : { open: false });
         }}
-        onSaved={() => void refresh()}
+        onSaved={(saved) => {
+          void refresh();
+          // SET-9's ask: the only moment reminders are ever offered, and only
+          // when the person has just committed to something at a time.
+          reminder.maybeOffer(saved);
+        }}
       />
+
+      <ReminderPrompt controller={reminder} />
     </div>
   );
 }

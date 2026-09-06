@@ -4,7 +4,7 @@
 **Slice type:** Two preference surfaces and one moment. The risk class is *a permission asked at the wrong time* (official §8.3 is a rule about *when*, and the OS never lets you ask twice) and *a reason set that drifts from its defaults*.
 **Vigil:** review the permission moment by inducing it — first fixed-time slot saved during first run (must not fire), after first run (fires once), after *Not now* (never again), on iOS in the browser (the install variant), after an OS denial (the ST-07 line, no re-prompt). QA states which of the five it exercised.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05)
 
 ---
 

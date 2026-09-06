@@ -56,6 +56,18 @@ export const updatePreferencesInput = z
      */
     pendingDayCloseTime: dayCloseTimeSchema.optional(),
     pendingTimezone: timezoneSchema.optional(),
+    /** ST-07's N6 value — Monday = 0, matching the product's weekday index. */
+    weekBuildReminderWeekday: z.number().int().min(0).max(6).optional(),
+    weekBuildReminderTime: clockTimeSchema.optional(),
+    /**
+     * When the in-context reminder ask was answered — SET-9's whole rule.
+     *
+     * It records that a person ANSWERED, not what they said: *Not now* and
+     * *Turn on reminders* both set it, because the product's promise is that
+     * it asks once. Whether reminders are actually on is a device question the
+     * OS owns, and this must never be re-derived from it.
+     */
+    reminderPromptAnsweredAt: z.coerce.date().optional(),
   })
   .refine(
     (value) => Object.values(value).some((field) => field !== undefined),

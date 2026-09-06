@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 922 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 941 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -151,8 +151,13 @@ apps/
               page.tsx
             page.tsx
           notifications/
+            _components/
+              notifications-screen.tsx
             page.tsx
           reasons/
+            _components/
+              reason-sheet.tsx
+              reasons-screen.tsx
             page.tsx
           share/
             _components/
@@ -235,6 +240,15 @@ apps/
         sheet-host.tsx
         shell-page-header.tsx
         shell-status-line.tsx
+      platform-steps-sheet/
+        copy.ts
+        index.ts
+        platform-steps-sheet.tsx
+      reminder-prompt/
+        copy.ts
+        index.ts
+        reminder-prompt.tsx
+        use-reminder-prompt.ts
       starter-set/
         copy.ts
         index.ts
@@ -294,6 +308,7 @@ apps/
         reencode.ts
       pwa/
         install-detection.ts
+        permission-state.ts
         push-subscribe.ts
         use-install-prompt.ts
       stores/
@@ -468,6 +483,8 @@ packages/
         day.ts
         habit.ts
         item.ts
+        notification.ts
+        reason.ts
         shell.ts
         template.ts
         user.ts
@@ -493,13 +510,18 @@ packages/
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
         library/
           archive-habit.ts
+          ensure-reason-set.ts
           get-habit.ts
           habit-usage.ts
           list-habits.ts
+          list-reasons.ts
           save-category.ts
           save-habit.ts
+          save-reason.ts
           starter-set.ts
           to-view.ts
+        notification/
+          list-prefs.ts
         notifications/
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
           web-push.ts
@@ -1228,8 +1250,10 @@ packages/
       index.ts
       item.ts
       keys.ts
+      notification.ts
       preferences.ts
       push.ts
+      reason.ts
       template.ts
       user.ts
       week.ts

@@ -1,21 +1,15 @@
-import { Text } from "@syn/ui";
-
 import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { REMINDER_COPY } from "@/components/reminder-prompt";
 
-/**
- * Placeholder — ST-07 Notifications. 
- *
- * Replaced by the Epic 1 track.
- * The screen's one `h1` is the header's title (cross-cutting §11).
- */
+import { NotificationsScreen } from "./_components/notifications-screen";
+
+/** ST-07 Notifications. */
 export default function SettingsNotificationsPage() {
   return (
     <PageFrame
-      header={<ShellPageHeader title={"ST-07 Notifications"} showBack />}
+      header={<ShellPageHeader title={REMINDER_COPY.title} showBack />}
     >
-      <Text as="p" tone="secondary">
-        One toggle per row of the catalogue.
-      </Text>
+      <NotificationsScreen />
     </PageFrame>
   );
 }

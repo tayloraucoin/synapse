@@ -36,6 +36,10 @@ export type UserPreferencesRow = {
   pendingDayCloseTimeFrom: string | null;
   pendingTimezone: string | null;
   pendingTimezoneFrom: string | null;
+  /** ST-07's N6 value, and the one server fact about the reminder ask. */
+  weekBuildReminderWeekday: number;
+  weekBuildReminderTime: string;
+  reminderPromptAnsweredAt: Date | null;
 };
 
 const PREFERENCE_COLUMNS = {
@@ -53,6 +57,9 @@ const PREFERENCE_COLUMNS = {
   pendingDayCloseTimeFrom: users.pendingDayCloseTimeFrom,
   pendingTimezone: users.pendingTimezone,
   pendingTimezoneFrom: users.pendingTimezoneFrom,
+  weekBuildReminderWeekday: users.weekBuildReminderWeekday,
+  weekBuildReminderTime: users.weekBuildReminderTime,
+  reminderPromptAnsweredAt: users.reminderPromptAnsweredAt,
 } as const;
 
 /** The caller's own row, or null. RLS makes "own" the only reachable answer. */
@@ -103,6 +110,15 @@ export async function updatePreferences(
     // owed" — so the guard is against `undefined` alone, as everywhere above.
     ...(input.firstRunStep !== undefined
       ? { firstRunStep: input.firstRunStep }
+      : {}),
+    ...(input.weekBuildReminderWeekday !== undefined
+      ? { weekBuildReminderWeekday: input.weekBuildReminderWeekday }
+      : {}),
+    ...(input.weekBuildReminderTime !== undefined
+      ? { weekBuildReminderTime: input.weekBuildReminderTime }
+      : {}),
+    ...(input.reminderPromptAnsweredAt !== undefined
+      ? { reminderPromptAnsweredAt: input.reminderPromptAnsweredAt }
       : {}),
     updatedAt: new Date(),
   };

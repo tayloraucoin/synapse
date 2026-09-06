@@ -170,3 +170,25 @@ The write is fire-and-forget. The visible change has already happened locally; b
 **Consequences:** No flash on cold open, and a choice that follows the account. The cost is a window where the two disagree — a failed write leaves the other device one theme behind until the next successful one. Nothing else reads `users.theme`, so that window has no other consequence.
 
 **Revisit trigger:** a second setting that has to be right before hydration. Two of these would justify one server-rendered preferences payload on the document rather than two independent caches.
+
+---
+
+## SET-9 — permission state is a device fact, and the ask is a server fact
+
+**Context:** Whether reminders work depends on a browser on a device. Whether the person has been ASKED is a fact about the person. The screen and the prompt both need both, and conflating them is the standard way this feature goes wrong.
+
+**Options:**
+
+- **A. Store the permission on the account** and read it back everywhere. One query, one answer.
+- **B. Compute everything on the device,** including whether to ask.
+- **C. Split them: `Notification.permission` on the device, `reminder_prompt_answered_at` on the account.**
+
+**Decision:** C. A is wrong the moment a person uses two browsers: reminders can be granted in the home-screen app and untouched in Safari, and a stored value would be false on one of them — probably the one they are looking at. B loses the only fact worth persisting: the OS lets a site prompt once, so "have we already spent that one ask" must outlive a cleared cache, and it must be true on a second device that has never prompted at all.
+
+The stored field records that the question was PUT, not what was said. *Not now* writes it exactly as *Turn on reminders* does, and it is written even when the subscription then fails — the person answered, and a missing VAPID key on that tier is not their mistake to be asked about twice.
+
+The device half is computed in a fixed order, and the order is the rule: iOS outside a home screen is decided BEFORE anything is asked about `Notification.permission`, because push cannot arrive there at all and telling someone their reminders "arent turned on yet" would send them hunting for a switch that does not exist on that platform.
+
+**Consequences:** The four-condition predicate reads as one expression in one hook, and every condition is checkable in isolation. The cost is that the two halves can disagree in a harmless way — a person who answered on their phone sees ST-07 offer the switch on their laptop, which is correct: that device has never been asked.
+
+**Revisit trigger:** per-device preferences. If reminders ever become something you can have on one device and off on another by choice rather than by OS state, the account gains a device table and this decision becomes about which device the ask belongs to.

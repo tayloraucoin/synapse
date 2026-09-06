@@ -60,7 +60,14 @@ export function SlotSheet({
   /** Where *Starts at* defaults to — the previous slot's end, or the anchor. */
   previousEndMin: number;
   onOpenChange: (open: boolean) => void;
-  onSaved?: () => void;
+  /**
+   * The saved slot, described enough for SET-9's reminder ask: it fires only
+   * for a fixed time, and it names that time in its question.
+   */
+  onSaved?: (saved: {
+    timeMode: "fixed_time" | "window" | "unscheduled";
+    startLabel: string | null;
+  }) => void;
 }) {
   const online = useOnline();
   const utils = trpc.useUtils();
@@ -173,7 +180,10 @@ export function SlotSheet({
 
       await utils.template.get.invalidate({ id: templateId });
       await utils.template.list.invalidate();
-      onSaved?.();
+      onSaved?.({
+        timeMode: when,
+        startLabel: when === "unscheduled" ? null : startClock,
+      });
       onOpenChange(false);
     } catch (caught) {
       const parsed = parseConflict(caught);

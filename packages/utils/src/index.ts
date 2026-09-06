@@ -49,6 +49,7 @@ export {
   getInitials,
   normalizeEmailInput,
   pluralize,
+  slugify,
   truncate,
   withTrailingGap,
 } from "./string";

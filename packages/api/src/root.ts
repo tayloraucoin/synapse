@@ -3,6 +3,8 @@ import { categoryRouter } from "./routers/category";
 import { dayRouter } from "./routers/day";
 import { habitRouter } from "./routers/habit";
 import { itemRouter } from "./routers/item";
+import { notificationRouter } from "./routers/notification";
+import { reasonRouter } from "./routers/reason";
 import { shellRouter } from "./routers/shell";
 import { templateRouter } from "./routers/template";
 import { userRouter } from "./routers/user";
@@ -23,6 +25,8 @@ export const appRouter = router({
   day: dayRouter,
   habit: habitRouter,
   item: itemRouter,
+  notification: notificationRouter,
+  reason: reasonRouter,
   shell: shellRouter,
   template: templateRouter,
   user: userRouter,
