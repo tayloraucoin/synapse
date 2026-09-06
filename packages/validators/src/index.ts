@@ -36,9 +36,12 @@ export {
 } from "./notification";
 
 export {
+  decideInput,
+  decisionInput,
   reviewDayInput,
   reviewHistoryInput,
   reviewWeekInput,
+  type DecideInput,
 } from "./review";
 
 export {

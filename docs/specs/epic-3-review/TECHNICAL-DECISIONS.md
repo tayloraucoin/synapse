@@ -59,3 +59,25 @@ Terms are the middle: counts and weights are facts about the computation, and `F
 **Consequences:** Nothing is stored (§3.11), so a reviewed day whose items are later undone from the List shows the new number, with `review_edited_at` recording that the record was touched. Every call recomputes; the cost is a query and a pass over tens of items, and the benefit is that this number cannot be stale. 41 cases run as a pure function, including the specification worked example.
 
 **Revisit trigger:** a fifth weight. The terms list is four entries because the resolver has four outcomes; a new tier would add one, and the sentence order in `TERM_LABELS` is where it would go.
+
+---
+
+## REV-2 — decisions write on tap; only the carried row waits for finish
+
+**Context:** *Finish later* must keep what was decided. *Finish review* must be the only thing that changes tomorrow. Those two requirements pull in opposite directions for one decision: *Carry forward*.
+
+**Options:**
+
+- **A. Everything on finish.** One transaction, easy to reason about — and *Finish later* loses every decision, which the document forbids in as many words.
+- **B. Everything on tap.** Decisions survive leaving, and a carry that was tapped and then abandoned has already put a task on tomorrow, with no state left to represent "decided but not committed".
+- **C. Both decisions write on tap; only the carried ITEM CREATION waits for finish.**
+
+**Decision:** C. The split falls on a real seam: `completion_state = carried` is a fact about TODAY item, and tomorrow row is a fact about tomorrow. Writing the first immediately is what makes *Finish later* keep its promise; deferring the second is what makes *Finish review* the only thing that touches another day.
+
+The resolver already agrees. A `carried` item is excluded from its own day (official spec §7.3), so a day left half-reviewed with three carries scores correctly without any special case — the state means the same thing before and after finish.
+
+Both halves are idempotent. `carryItemForward` finds an existing row by `carried_from_item_id` and does nothing; `finishReview` returns early on `reviewed_at`. A double submit, a retry after a timeout, or a finish racing the 03:00 auto-close all land on the same answer.
+
+**Consequences:** *Finish later* writes nothing, which is why it is a navigation rather than a mutation. The cost is that a person who carries a task and then abandons the review leaves an item in `carried` on an open day — visible to the resolver as excluded, which is the honest reading, and re-decidable when they come back.
+
+**Revisit trigger:** a decision with a side effect on another day that is NOT reversible — scheduling something, sending something. That would need the same split and a way to undo the far half, which this arrangement does not provide because carrying does not need one.

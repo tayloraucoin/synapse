@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 963 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 974 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -100,6 +100,8 @@ apps/
               page.tsx
             page.tsx
         review/
+          _components/
+            review-tab.tsx
           day/
             [date]/
               page.tsx
@@ -259,6 +261,13 @@ apps/
         index.ts
         reminder-prompt.tsx
         use-reminder-prompt.ts
+      review-day/
+        copy.ts
+        decision-column.tsx
+        finished.tsx
+        index.ts
+        review-day.tsx
+        use-review-day.ts
       starter-set/
         copy.ts
         index.ts
@@ -509,6 +518,7 @@ packages/
         day/
           apply-template-changes.ts
           bring-back.ts
+          carry-item.ts
           close-day.ts
           copy-week.ts
           get-day.ts
@@ -547,10 +557,13 @@ packages/
           templates.ts
           to-view.ts
         review/
+          decide.ts
           decision-state.ts
+          finish-review.ts
           get-review-day.ts
           get-review-history.ts
           get-review-week.ts
+          pending-days.ts
           to-scored.ts
         shell/
           settings-counts.ts

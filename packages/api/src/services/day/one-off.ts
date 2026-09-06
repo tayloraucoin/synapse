@@ -61,7 +61,16 @@ export class OneOffSameStartError extends Error {
   }
 }
 
-async function ensureDay(
+/**
+ * The day's row, created from the account's defaults if it does not exist.
+ *
+ * EXPORTED FOR REV-2's CARRY. Carrying a task to tomorrow has to put it
+ * somewhere, and tomorrow may never have been planned — the same situation a
+ * one-off on an empty Tuesday is in, with the same answer: a day with no
+ * template is a real, empty day (official spec §3.6). One helper, so the zone
+ * and close time are snapshotted the same way whichever path created the row.
+ */
+export async function ensureDay(
   tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
   userId: string,
   date: string,

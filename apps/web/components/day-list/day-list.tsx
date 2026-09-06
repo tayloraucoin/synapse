@@ -174,8 +174,12 @@ export function DayList({
               ? null
               : COPY.dayClosedAt(formatClock(day.closedAt, day.timezone))
           }
-          reviewHref={reviewDayRoute(day.dateKey)}
-          onComplete={() => router.push(reviewDayRoute(day.dateKey))}
+          // `?from=list` so *Finish later* and DR-07's *Done* come back here
+          // rather than to the Review tab (REV-2).
+          reviewHref={`${reviewDayRoute(day.dateKey)}?from=list`}
+          onComplete={() =>
+            router.push(`${reviewDayRoute(day.dateKey)}?from=list`)
+          }
         />
       )}
 

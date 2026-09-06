@@ -46,6 +46,14 @@ export type DecisionItemView = {
 export type ReviewDayView = {
   dateKey: string;
   mode: ReviewMode;
+  /** The day's own zone — every clock on this screen is formatted in it. */
+  timezone: string;
+  /**
+   * How many items could carry a reflection, and how many have one — DR-06's
+   * section header. The body is REV-3's; the count is a fact about the day and
+   * belongs to the day's read model.
+   */
+  reflections: { rateable: number; rated: number };
   closedAt: Date | null;
   closeReason: "manual" | "auto" | null;
   reviewedAt: Date | null;
@@ -114,6 +122,8 @@ export async function getReviewDay(
         completionState: dayItems.completionState,
         carriedFromItemId: dayItems.carriedFromItemId,
         habitId: dayItems.habitId,
+        reflectionAxes: dayItems.reflectionAxes,
+        reflectionRatings: dayItems.reflectionRatings,
       })
       .from(dayItems)
       .where(and(eq(dayItems.dayId, row.id), eq(dayItems.userId, userId)))
@@ -123,7 +133,7 @@ export async function getReviewDay(
   });
 
   if (raw === null) {
-    return emptyReview(dateKey, day.wakeAnchorItemId);
+    return emptyReview(dateKey, day.timezone, day.wakeAnchorItemId);
   }
 
   const itemIds = raw.items.map((item) => item.id);
@@ -183,6 +193,20 @@ export async function getReviewDay(
   );
 
   const carriedSince = await resolveCarriedSince(rls, userId, raw.items);
+
+  // An item with configured axes can be reflected on; one with any rating has
+  // been. Both are read off the snapshot, so archiving the habit later does
+  // not change what the day says happened.
+  const reflectableIds = new Set(
+    raw.items
+      .filter((row) => row.reflectionAxes.length > 0)
+      .map((row) => row.id),
+  );
+  const ratedIds = new Set(
+    raw.items
+      .filter((row) => Object.keys(row.reflectionRatings).length > 0)
+      .map((row) => row.id),
+  );
 
   const dayClosed = raw.day.closedAt !== null;
   const viewByItemId = new Map<string, DayItemView>();
@@ -278,6 +302,16 @@ export async function getReviewDay(
   return {
     dateKey,
     mode,
+    timezone: day.timezone,
+    reflections: {
+      // An item can be reflected on when its habit configured axes, or once it
+      // is done — the same rule the item sheet uses to show the block.
+      rateable: raw.items.filter(
+        (row) =>
+          reflectableIds.has(row.id) || row.completionState === "done",
+      ).length,
+      rated: ratedIds.size,
+    },
     closedAt: raw.day.closedAt,
     closeReason: raw.day.closeReason,
     reviewedAt: raw.day.reviewedAt,
@@ -369,11 +403,14 @@ async function resolveCarriedSince(
 /** A date with no `days` row — nothing was ever planned, so nothing to review. */
 function emptyReview(
   dateKey: string,
+  timezone: string,
   wakeAnchorItemId: string | null,
 ): ReviewDayView {
   return {
     dateKey,
     mode: "live",
+    timezone,
+    reflections: { rateable: 0, rated: 0 },
     closedAt: null,
     closeReason: null,
     reviewedAt: null,

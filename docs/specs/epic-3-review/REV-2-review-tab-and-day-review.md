@@ -4,7 +4,7 @@
 **Slice type:** The one ceremony in the product — a column of decisions that closes a day and then, only then, prints a number. The risk class is *a review that pressures or lies*: a percentage before the decisions, a forced answer at 11pm, a carry that writes early, a finish that closes a day with an undecided item, a shift's record rewritten by a *Change*.
 **Vigil:** review by inducing — *Finish later* with one decided and two undecided; the 03:00 auto-close after that (pending mode next morning); *Finish review* with a running timer; *Change* on a cut item; *Keep this reason* then reopen the chooser. QA states which of the five it exercised.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05)
 
 > **Vesper — register review.** Read every string on DR-01 and DR-07 against Epic 3 §6's never-list. Then close a bad day (five missed) on a phone at night and say whether anything on the screen judged you.
 

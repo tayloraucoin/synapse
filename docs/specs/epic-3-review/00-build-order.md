@@ -20,7 +20,7 @@ The number, the review that produces it, the history that reopens it.
 - [x] **REV-1** · The resolver and the number: credit, counted, bands, off-schedule, traded-up verification, the day and week read models — L · (SET-1, USE-1) · **Mason review of the resolver cases** — built 2026-09-05; **41 cases run including §7.4's worked example; excluded leaves the denominator and the rounding happens once**
 
 ### Phase 1 — The Day Review
-- [ ] **REV-2** · Review tab and Day Review: RV-00, DR-01 live and pending, DR-02/03/05/07, finish, finish later, carry forward — L · (REV-1, USE-3, SET-9, SYS-1)
+- [x] **REV-2** · Review tab and Day Review: RV-00, DR-01 live and pending, DR-02/03/05/07, finish, finish later, carry forward — L · (REV-1, USE-3, SET-9, SYS-1) — built 2026-09-05; **no number before the decisions; decisions write on tap and only the carried row waits for finish**
 - [ ] **REV-3** · Traded-up, reflections, edit mode, and history: DR-04, DR-06, DR-01 edit, HS-01 — M · (REV-2)
 
 ### Phase 2 — Phase-2 surface (does not gate launch)
