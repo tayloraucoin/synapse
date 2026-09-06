@@ -9,6 +9,7 @@ import {
   shifts,
   templates,
   timerSessions,
+  users,
   type RlsClient,
 } from "@syn/db";
 import type { DayItemView, DayMode, MissTier } from "@syn/types";
@@ -72,6 +73,20 @@ export type DayView = {
   hasPending: boolean;
   /** "times in Vancouver" — only when the caller's device zone differs. */
   zoneLabel: string | null;
+  /**
+   * Which of this day's items is the wake anchor, or null — USE-2's addition.
+   *
+   * Marking it done sets the day's `woke_at` (official spec §5.2), and the
+   * List has to know which row that is BEFORE the tap. It is resolved here
+   * rather than carried on `DayItemView` because "is the anchor" is a fact
+   * about the account joined to this day, not about the item: the same habit
+   * is the anchor on every day at once, and putting the flag on each row would
+   * be the same fact written once per row.
+   *
+   * It survives archiving the habit (cross-cutting §8.3): the join is on
+   * `habit_id`, which an archived habit keeps.
+   */
+  wakeAnchorItemId: string | null;
 };
 
 const PART_ORDER: DayPart[] = ["morning", "afternoon", "evening", "anytime"];
@@ -116,6 +131,14 @@ export async function getDay(
     }
 
     const zone = safeZone(day.timezone, context.timeZone);
+
+    // The account's wake anchor, matched to this day's rows below. One scalar.
+    const [account] = await tx
+      .select({ wakeAnchorHabitId: users.wakeAnchorHabitId })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    const anchorHabitId = account?.wakeAnchorHabitId ?? null;
 
     const [template] = day.templateId
       ? await tx
@@ -369,6 +392,10 @@ export async function getDay(
         (entry) => entry.view.state === "pending-review",
       ),
       zoneLabel: zoneLabelFor(zone, context.deviceZone ?? null),
+      wakeAnchorItemId:
+        anchorHabitId === null
+          ? null
+          : (itemRows.find((row) => row.habitId === anchorHabitId)?.id ?? null),
     };
   });
 }
@@ -399,6 +426,8 @@ function emptyDay(
     hasUndone: false,
     hasPending: false,
     zoneLabel: zoneLabelFor(context.timeZone, context.deviceZone ?? null),
+    // A day with no items has no anchor row to mark done.
+    wakeAnchorItemId: null,
   };
 }
 

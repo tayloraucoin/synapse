@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 909 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 922 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -213,6 +213,13 @@ apps/
         category-sheet.tsx
         copy.ts
         index.ts
+      day-list/
+        copy.ts
+        day-list-header.tsx
+        day-list.tsx
+        day-section.tsx
+        index.ts
+        use-day-list.ts
       habit-sheet/
         copy.ts
         habit-sheet.tsx
@@ -278,9 +285,11 @@ apps/
         use-local-draft.ts
         use-now.ts
         use-online.ts
+        use-pull-to-refresh.ts
         use-remembered-toggle.ts
         use-scroll-memory.ts
         use-sheet.ts
+        use-undo-window.ts
       image/
         reencode.ts
       pwa/
@@ -458,6 +467,7 @@ packages/
         category.ts
         day.ts
         habit.ts
+        item.ts
         shell.ts
         template.ts
         user.ts
@@ -468,11 +478,13 @@ packages/
           storage.ts
         day/
           apply-template-changes.ts
+          bring-back.ts
           close-day.ts
           copy-week.ts
           get-day.ts
           materialize-day.ts
           one-off.ts
+          set-done.ts
           today.ts
           untouched.ts
           week-view.ts
@@ -492,6 +504,7 @@ packages/
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
           web-push.ts
         plan/
+          most-used-template.ts
           save-slot.ts
           templates.ts
           to-view.ts
@@ -1213,6 +1226,7 @@ packages/
       day.ts
       habit.ts
       index.ts
+      item.ts
       keys.ts
       preferences.ts
       push.ts

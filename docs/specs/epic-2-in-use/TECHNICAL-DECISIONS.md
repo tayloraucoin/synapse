@@ -50,3 +50,23 @@ One section per architectural choice that had real alternatives. Written when th
 **Decision:** B. A writes cuts the server never checked, which is how a done item gets cut. C is a request per tap on the one screen where the person is already late. One function, two callers, and the same shape USE-7's trim uses.
 **Consequences:** Buys a preview that is exactly what will be written and a place (`@syn/utils/day/`) the mobile app imports. Costs a staleness check on apply and the rule that undo subtracts the shift's own delta from the still-movable set rather than replaying a stored list. Forecloses nothing.
 **Revisit trigger:** per-field offline reconciliation (Phase 2), when a shift made offline must merge with a day changed elsewhere.
+
+---
+
+## USE-2 — the optimistic patch re-derives, and the minute tick preserves identity
+
+**Context:** Two requirements pull against each other. Done must be instant — no spinner, no wait (Epic 2 §0.1). And every row state has to track the clock, so a row that says *soon* stops saying it fifteen minutes later. Both touch the same rows, sixty times an hour.
+
+**Options:**
+
+- **A. Patch `doneAt` optimistically; let the refetch fix the state.** Simplest, and wrong for the length of a round trip: the row reads *now* with a checkmark on it.
+- **B. Re-derive on the client only, and treat the server `state` as a first-paint hint.** One authority, but two implementations of the precedence rules unless the same function runs in both places.
+- **C. One `deriveItemState`, called by the server for the first paint and by the client on every patch and every tick, with object identity preserved when nothing changed.**
+
+**Decision:** C. `deriveItemState` is already the one implementation (USE-1); the work here is calling it in the two client moments that need it — the optimistic patch, so the row is indistinguishable from the real one before the server answers, and the minute tick, so a state that is a fact about a clock keeps up with the clock.
+
+Identity is the part that is easy to miss. `useDerivedItems` returns the SAME item object when its state has not changed, and the reassembly returns the SAME day object when no item changed. Without that, every minute would produce a new object for every row and React would repaint a thirty-row list sixty times an hour to display exactly what it already displayed.
+
+**Consequences:** A tick that moves nothing costs one comparison per row and no render. Probed over nine ticks against a three-row day: five rebuilt, four returned the identical object, and rows in untouched parts kept identity across every rebuild. The cost is that the reassembly addresses items by index across three collections in a fixed order, so the flatten and the rebuild must walk them in the same order — they are adjacent in the file for that reason.
+
+**Revisit trigger:** a row field that changes on the tick without changing `state` — a live countdown, say. That would break the identity shortcut, and the answer would be to isolate the ticking field in its own component rather than to widen what the tick rebuilds.

@@ -2,6 +2,7 @@ import { assetRouter } from "./routers/asset";
 import { categoryRouter } from "./routers/category";
 import { dayRouter } from "./routers/day";
 import { habitRouter } from "./routers/habit";
+import { itemRouter } from "./routers/item";
 import { shellRouter } from "./routers/shell";
 import { templateRouter } from "./routers/template";
 import { userRouter } from "./routers/user";
@@ -21,6 +22,7 @@ export const appRouter = router({
   category: categoryRouter,
   day: dayRouter,
   habit: habitRouter,
+  item: itemRouter,
   shell: shellRouter,
   template: templateRouter,
   user: userRouter,

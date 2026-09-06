@@ -20,7 +20,7 @@ The day model, the list that renders it, the sheet that acts on it, the reminder
 - [x] **USE-1** · The day model: boundaries, today, state derivation, day parts, auto-close, the day read model — L · (SET-1) · **Mason review of the time arithmetic**
 
 ### Phase 1 — The List
-- [ ] **USE-2** · Plain List: LS-00/01/02/03, done and undo, the wake anchor, record and plan modes — L · (USE-1, SET-6, SYS-1)
+- [x] **USE-2** · Plain List: LS-00/01/02/03, done and undo, the wake anchor, record and plan modes — L · (USE-1, SET-6, SYS-1) — built 2026-09-05; **done is optimistic and undo restores the original `done_at`; the minute tick rebuilds only rows whose state moved**
 
 ### Phase 2 — The sheets and the timer
 - [ ] **USE-3** · Item sheet and day header: IT-01, DH-01, DH-02, the timer engine and the tick store — L · (USE-2, SET-9) · Vigil: timer across sheet close, reload, and a second device

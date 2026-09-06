@@ -4,7 +4,7 @@
 **Slice type:** The surface a person touches most, on a phone, at arm's length. The risk class is *a tab that thinks*: a count, a question, a spinner over a row, a passed item that stopped responding, a done that waited for the server.
 **Vigil:** none — but the **worst-moment test** (official §14) is the review: one-handed, arm's length, every action a 44px target, nothing asks. **Vesper review** of the day header and the expanders on compact.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05)
 
 > **Vesper — worst-moment review.** Open today on a phone with the seeded day. Check off three items with a thumb without looking closely. If anything on the screen made you read a number, answer a question, or wait, it is a defect against this ticket, not a preference.
 

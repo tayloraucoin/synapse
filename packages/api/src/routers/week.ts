@@ -28,6 +28,7 @@ import {
 } from "../services/day/one-off";
 import { resolveTodayFor } from "../services/day/today";
 import { getWeek } from "../services/day/week-view";
+import { mostUsedTemplate } from "../services/plan/most-used-template";
 import { protectedProcedure, router } from "../trpc";
 
 /**
@@ -158,6 +159,16 @@ export const weekRouter = router({
         input.overwrite,
       ),
     ),
+
+  /** LS-00's third door: the template this person's days usually use. */
+  mostUsedTemplate: protectedProcedure.query(async ({ ctx }) => {
+    const resolved = await today(ctx);
+    return mostUsedTemplate(
+      ctx.rls,
+      ctx.authContext.userId,
+      resolved.todayKey,
+    );
+  }),
 
   /** WK-02's *This day* preview — the same read model the List will use. */
   dayPreview: protectedProcedure

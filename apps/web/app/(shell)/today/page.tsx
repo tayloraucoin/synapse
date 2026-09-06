@@ -1,21 +1,29 @@
-import { Text } from "@syn/ui";
-
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { PageFrame } from "@/components/page-frame";
+import { DayList, DayListHeader } from "@/components/day-list";
+import { getServerApi } from "@/lib/trpc/server";
 
 /**
- * Placeholder — LS-01 Plain List. 
+ * LS-01 — today.
  *
- * Replaced by the Epic 2 track.
- * The screen's one `h1` is the header's title (cross-cutting §11).
+ * THE DAY IS READ ON THE SERVER and handed to the client as `initialData`, so
+ * the first paint is the real day rather than a skeleton that resolves a beat
+ * later. The hook then subscribes to the same query and owns every write; the
+ * page does no mutation and holds no state.
+ *
+ * WHICH DAY "TODAY" IS depends on the person's close time, so it comes from
+ * `day.today` rather than from the server's calendar date. At 01:00 under a
+ * 03:00 close, today is still yesterday's date — and this is the screen where
+ * getting that wrong would show someone an empty list at the end of a long
+ * evening.
  */
-export default function TodayPage() {
+export default async function TodayPage() {
+  const api = await getServerApi();
+  const { todayKey } = await api.day.today();
+  const day = await api.day.get({ date: todayKey });
+
   return (
-    <PageFrame
-      header={<ShellPageHeader title={"LS-01 Plain List"} />}
-    >
-      <Text as="p" tone="secondary">
-        Today, top to bottom, in time order.
-      </Text>
+    <PageFrame dayKey={todayKey} header={<DayListHeader day={day} />}>
+      <DayList dateKey={todayKey} initial={day} />
     </PageFrame>
   );
 }

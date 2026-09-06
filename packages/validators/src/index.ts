@@ -19,6 +19,12 @@ export {
 } from "./account";
 
 export {
+  itemIdInput,
+  setDoneInput,
+  type SetDoneInput,
+} from "./item";
+
+export {
   displayNameSchema,
   emailSchema,
   forgotPasswordInput,
