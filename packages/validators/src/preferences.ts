@@ -46,3 +46,23 @@ export const clockTimeSchema = z
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use a time like 07:00.");
 
 export type ClockTime = z.infer<typeof clockTimeSchema>;
+
+/**
+ * When the day closes — 00:00 to 06:00, working default 03:00 (Epic 1 §13.1).
+ *
+ * THE BOUND IS THE PRODUCT'S DEFINITION OF A DAY, not a UI convenience. A
+ * close at 14:00 would make "today" a thing that ends in the afternoon, and
+ * every day boundary, every review window and every carried item would follow
+ * it. Enforced here as well as by the field's `min`/`max`, because the field
+ * is a suggestion to a browser and this is the rule.
+ *
+ * `[PROVISIONAL — Taylor]` per the ticket: the bound and default are built as
+ * §13.1 states them, pending a one-line confirmation.
+ *
+ * `[COPY — needs Vesper sign-off]` on the message: §9 gives the bound but no
+ * sentence for breaking it.
+ */
+export const dayCloseTimeSchema = clockTimeSchema.refine(
+  (value) => value >= "00:00" && value <= "06:00",
+  { message: "Pick a time between midnight and 6:00." },
+);

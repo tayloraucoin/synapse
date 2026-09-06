@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 897 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-06 · 909 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -89,6 +89,7 @@ apps/
           shell-providers.tsx
           status-line-slot.tsx
           tab-bar.tsx
+          theme-sync.tsx
         day/
           [date]/
             item/
@@ -111,11 +112,21 @@ apps/
               page.tsx
           page.tsx
         settings/
+          _components/
+            copy.ts
+            settings-index.tsx
           about/
             page.tsx
           account/
+            _components/
+              account-form.tsx
+              account-photo.tsx
+              account-screen.tsx
+              password-section.tsx
             page.tsx
           appearance/
+            _components/
+              appearance-form.tsx
             page.tsx
           categories/
             _components/
@@ -125,6 +136,8 @@ apps/
           data/
             page.tsx
           day/
+            _components/
+              day-time-form.tsx
             page.tsx
           habits/
             _components/
@@ -142,6 +155,8 @@ apps/
           reasons/
             page.tsx
           share/
+            _components/
+              share-panel.tsx
             page.tsx
           templates/
             _components/
@@ -481,6 +496,7 @@ packages/
           templates.ts
           to-view.ts
         shell/
+          settings-counts.ts
           status.ts
         user/
           avatar.ts
@@ -1190,6 +1206,7 @@ packages/
     tsconfig.json
   validators/
     src/
+      account.ts
       asset.ts
       auth-credentials.ts
       category.ts

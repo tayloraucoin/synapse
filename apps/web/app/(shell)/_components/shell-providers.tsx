@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { AppShell } from "./app-shell";
 import { ShellStateProvider, useShell } from "./shell-context";
+import { ThemeSync } from "./theme-sync";
 
 /**
  * The client half of the signed-in frame.
@@ -29,6 +30,12 @@ export function ShellProviders({
 }) {
   return (
     <ShellStateProvider>
+      {/*
+       * Renders nothing; applies the account's stored theme once per session.
+       * It lives here because this is the first place a signed-in person is,
+       * and the only place that is true of.
+       */}
+      <ThemeSync />
       <ShellChrome user={user} reviewHasPending={reviewHasPending}>
         {children}
       </ShellChrome>

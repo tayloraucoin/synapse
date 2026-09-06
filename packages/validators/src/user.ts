@@ -2,7 +2,12 @@ import { z } from "zod";
 
 import { DISPLAY_NAME_MAX } from "@syn/constants";
 
-import { clockTimeSchema, themePreferenceSchema, timezoneSchema } from "./preferences";
+import {
+  clockTimeSchema,
+  dayCloseTimeSchema,
+  themePreferenceSchema,
+  timezoneSchema,
+} from "./preferences";
 
 /**
  * The account preferences a person can change — official spec §3.1, edited on
@@ -39,6 +44,18 @@ export const updatePreferencesInput = z
      * device resumes where the person actually stopped.
      */
     firstRunStep: z.number().int().min(1).max(5).nullable().optional(),
+    /**
+     * ST-08's two deferred changes (cross-cutting §7.3, §7.5).
+     *
+     * A day close or a zone that took effect the instant it was saved would
+     * move the boundary of the day the person is currently living in — items
+     * could jump to yesterday mid-afternoon. These write the pending pair
+     * instead, and USE-1's `resolveTodayFor` promotes them at the next
+     * boundary. The `_from` date is computed on the server, never sent, so a
+     * client cannot ask for a change that applies retroactively.
+     */
+    pendingDayCloseTime: dayCloseTimeSchema.optional(),
+    pendingTimezone: timezoneSchema.optional(),
   })
   .refine(
     (value) => Object.values(value).some((field) => field !== undefined),

@@ -4,7 +4,7 @@
 **Slice type:** Five settled screens over account scalars — one index, three forms, one share action. The risk class is *a second entry tree or a second theme source*: the index guessing the resume step, appearance stored in two places that disagree.
 **Vigil:** none.
 
-**Status:** Not started
+**Status:** Complete (2026-09-05)
 
 ---
 

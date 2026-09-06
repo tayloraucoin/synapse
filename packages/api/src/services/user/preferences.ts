@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { users, type RlsClient } from "@syn/db";
 import type { UpdatePreferencesInput } from "@syn/validators";
+import { addDays, resolveDayKey } from "@syn/utils";
 
 /**
  * The one home for "change my account preferences".
@@ -25,6 +26,16 @@ export type UserPreferencesRow = {
   theme: "system" | "light" | "dark";
   firstRunStep: number | null;
   firstRunCompletedAt: Date | null;
+  /**
+   * The deferred half of ST-08 (cross-cutting §7.3, §7.5). Non-null means the
+   * person has changed the value and it takes effect on `…From`; the screen
+   * shows the pending value with *Applies from tomorrow.*, because showing the
+   * old one would look like the save failed.
+   */
+  pendingDayCloseTime: string | null;
+  pendingDayCloseTimeFrom: string | null;
+  pendingTimezone: string | null;
+  pendingTimezoneFrom: string | null;
 };
 
 const PREFERENCE_COLUMNS = {
@@ -38,6 +49,10 @@ const PREFERENCE_COLUMNS = {
   theme: users.theme,
   firstRunStep: users.firstRunStep,
   firstRunCompletedAt: users.firstRunCompletedAt,
+  pendingDayCloseTime: users.pendingDayCloseTime,
+  pendingDayCloseTimeFrom: users.pendingDayCloseTimeFrom,
+  pendingTimezone: users.pendingTimezone,
+  pendingTimezoneFrom: users.pendingTimezoneFrom,
 } as const;
 
 /** The caller's own row, or null. RLS makes "own" the only reachable answer. */
@@ -68,6 +83,8 @@ export async function updatePreferences(
   rls: RlsClient,
   userId: string,
   input: UpdatePreferencesInput,
+  /** Injectable for a fixed clock; the resolver never passes one. */
+  now: Date = new Date(),
 ): Promise<UserPreferencesRow | null> {
   const patch = {
     ...(input.displayName !== undefined ? { displayName: input.displayName } : {}),
@@ -90,10 +107,63 @@ export async function updatePreferences(
     updatedAt: new Date(),
   };
 
+  const deferring =
+    input.pendingDayCloseTime !== undefined ||
+    input.pendingTimezone !== undefined;
+
+  /**
+   * The date a deferred change starts applying: the day after the one the
+   * person is currently in.
+   *
+   * IT IS COMPUTED FROM THEIR CURRENT ZONE AND CLOSE TIME, not the new ones.
+   * "Has tomorrow arrived" has to be answered in the day they are still living
+   * in — the same reason `resolveTodayFor` compares with the old values before
+   * promoting. Computing it with the new zone would let a westward move set a
+   * boundary that has already passed, applying the change immediately, which
+   * is the one thing the pending pair exists to prevent.
+   *
+   * It is computed on the SERVER and never accepted from the client, so no
+   * request can ask for a change that applies retroactively.
+   */
+  const pendingPatch = deferring
+    ? await rls.execute(async (tx) => {
+        const [current] = await tx
+          .select({
+            timezone: users.timezone,
+            dayCloseTime: users.dayCloseTime,
+          })
+          .from(users)
+          .where(eq(users.id, userId))
+          .limit(1);
+
+        if (!current) return {};
+
+        const from = addDays(
+          resolveDayKey(now, current.timezone, current.dayCloseTime),
+          1,
+        );
+
+        return {
+          ...(input.pendingDayCloseTime !== undefined
+            ? {
+                pendingDayCloseTime: input.pendingDayCloseTime,
+                pendingDayCloseTimeFrom: from,
+              }
+            : {}),
+          ...(input.pendingTimezone !== undefined
+            ? {
+                pendingTimezone: input.pendingTimezone,
+                pendingTimezoneFrom: from,
+              }
+            : {}),
+        };
+      })
+    : {};
+
   const rows = await rls.execute((tx) =>
     tx
       .update(users)
-      .set(patch)
+      .set({ ...patch, ...pendingPatch })
       .where(eq(users.id, userId))
       .returning(PREFERENCE_COLUMNS),
   );

@@ -1,21 +1,15 @@
-import { Text } from "@syn/ui";
-
 import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 
-/**
- * Placeholder — ST-08 Day & time. 
- *
- * Replaced by the Epic 1 track.
- * The screen's one `h1` is the header's title (cross-cutting §11).
- */
+import { SETTINGS_COPY } from "../_components/copy";
+import { DayTimeForm } from "./_components/day-time-form";
+
+/** ST-08 Day & time. */
 export default function SettingsDayPage() {
   return (
     <PageFrame
-      header={<ShellPageHeader title={"ST-08 Day & time"} showBack />}
+      header={<ShellPageHeader title={SETTINGS_COPY.dayAndTime} showBack />}
     >
-      <Text as="p" tone="secondary">
-        Time zone, day close time, review reminder.
-      </Text>
+      <DayTimeForm />
     </PageFrame>
   );
 }

@@ -148,3 +148,25 @@ The single exception is FR-03 template id, which is `sessionStorage`. It is not 
 **Consequences:** Resume works across devices and cold opens. `first_run_step` and `first_run_completed_at` are written together on FR-05 so an account can never be both finished and owing a step. Every step transition is one mutation, which is visible in the network tab and is the thing to look at first if resume ever misbehaves.
 
 **Revisit trigger:** an offline-capable first run. Phase 2 has offline writes; if the sequence ever has to work on a plane, the step would need a local queue and this decision becomes "the account is the source of truth, the browser is a cache".
+
+---
+
+## SET-8 — the theme has two stores and one authority
+
+**Context:** A colour scheme has to be right in the first painted frame, and it has to follow a person to a second device. Those two requirements pull in opposite directions.
+
+**Options:**
+
+- **A. `localStorage` only** (next-themes as shipped by INF-3). Correct on first paint, per-device forever.
+- **B. `users.theme` only.** Follows the person, but every cold open paints the default first and corrects itself after the first query returns — a visible flash of the wrong theme on every launch.
+- **C. Both, with the row as the authority and the local store as a cache.**
+
+**Decision:** C. The two stores are not redundant; they answer different questions. `localStorage` answers "what did this browser paint last time", which is the only question available before JavaScript runs. `users.theme` answers "what did this person choose", which is the only question that survives a new device.
+
+The reconciliation is what makes it one fact rather than two: ST-09 writes both on every change, and `ThemeSync` applies the stored value ONCE per session when it differs. Once, guarded by a ref — a sync that re-ran would fight the control, because a stale query result arriving after a fresh choice would flip the theme back a moment after someone made it.
+
+The write is fire-and-forget. The visible change has already happened locally; blocking a colour scheme behind a round trip, or reverting it because one failed, would be the screen arguing with something the person can plainly see.
+
+**Consequences:** No flash on cold open, and a choice that follows the account. The cost is a window where the two disagree — a failed write leaves the other device one theme behind until the next successful one. Nothing else reads `users.theme`, so that window has no other consequence.
+
+**Revisit trigger:** a second setting that has to be right before hydration. Two of these would justify one server-rendered preferences payload on the document rather than two independent caches.
