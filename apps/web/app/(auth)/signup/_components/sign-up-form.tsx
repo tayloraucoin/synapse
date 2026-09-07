@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { mapAuthError } from "@syn/auth/errors";
+import { describeAuthError } from "@/lib/auth/describe-auth-error";
 import { STORAGE_KEYS } from "@syn/constants";
 import { Button, Input, OAuthButton, Text } from "@syn/ui";
 import { signUpInput, type SignUpInput } from "@syn/validators";
@@ -81,7 +81,7 @@ export function SignUpForm() {
     });
 
     if (error) {
-      setFormError(mapAuthError(error));
+      setFormError(describeAuthError(error));
       return;
     }
 
@@ -123,7 +123,7 @@ export function SignUpForm() {
 
     if (error) {
       setOauthBusy(false);
-      setFormError(mapAuthError(error));
+      setFormError(describeAuthError(error));
     }
   }
 

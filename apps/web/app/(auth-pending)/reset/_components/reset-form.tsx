@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { mapAuthError } from "@syn/auth/errors";
+import { describeAuthError } from "@/lib/auth/describe-auth-error";
 import { Button, Input } from "@syn/ui";
 import { resetPasswordInput, type ResetPasswordInput } from "@syn/validators";
 
@@ -48,7 +48,7 @@ export function ResetForm() {
     });
 
     if (error) {
-      setFormError(mapAuthError(error));
+      setFormError(describeAuthError(error));
       return;
     }
 

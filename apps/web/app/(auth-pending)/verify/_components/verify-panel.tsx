@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { mapAuthError } from "@syn/auth/errors";
+import { describeAuthError } from "@/lib/auth/describe-auth-error";
 import { STORAGE_KEYS } from "@syn/constants";
 import { AuthFrame, Button, Text } from "@syn/ui";
 
@@ -93,7 +93,7 @@ export function VerifyPanel({ sessionEmail }: { sessionEmail: string | null }) {
     });
 
     if (resendError) {
-      setError(mapAuthError(resendError));
+      setError(describeAuthError(resendError));
       return;
     }
 

@@ -3407,6 +3407,7 @@ __metadata:
     "@supabase/supabase-js": "npm:^2.49.1"
     "@syn/config": "npm:*"
     "@syn/db": "npm:*"
+    "@syn/observability": "npm:*"
     "@syn/types": "npm:*"
     "@syn/utils": "npm:*"
     "@types/node": "npm:^22.7.5"
