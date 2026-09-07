@@ -43,7 +43,27 @@ export type Timezone = z.infer<typeof timezoneSchema>;
  */
 export const clockTimeSchema = z
   .string()
-  .regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use a time like 07:00.");
+  .trim()
+  /*
+   * SECONDS ARE ACCEPTED AND DROPPED, because the database sends them.
+   *
+   * Postgres `time` columns come back as `HH:mm:ss` — `07:00:00` for a column
+   * whose default was written `07:00`. Every form in the product reads a row,
+   * puts that string in a field, and posts it back, so a schema that only
+   * matched `HH:mm` rejected the app's own stored value: first run could not
+   * be completed, and ST-07, ST-08 and the template anchor had the same fault.
+   *
+   * Normalising here rather than at five call sites is the boundary doing its
+   * job — an input validator exists to turn what arrives into what the app
+   * stores. `HH:mm` remains the only form ever WRITTEN.
+   *
+   * `[REVISIT: the durable fix is a Drizzle `customType` on the eight `time`
+   * columns so the driver never surfaces seconds at all. That is a schema
+   * change and needs Mason's ratification; it would make this leniency
+   * redundant rather than wrong.]`
+   */
+  .regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/, "Use a time like 07:00.")
+  .transform((value) => value.slice(0, 5));
 
 export type ClockTime = z.infer<typeof clockTimeSchema>;
 
