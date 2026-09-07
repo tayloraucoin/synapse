@@ -27,7 +27,7 @@ The shell first, because every later screen renders inside it; the install offer
 - [x] **SYS-5** · PWA: the install offer and sheet SY-07, the update line SY-02, standalone resume — M · (REV-2, SET-9)
 
 ### Phase 3 — Does not gate launch
-- [ ] **SYS-4** · Keyboard and focus: global shortcuts, `?`, list and canvas navigation, form submit keys — M · (USE-2, USE-5, SYS-3)
+- [x] **SYS-4** · Keyboard and focus: global shortcuts, `?`, list and canvas navigation, form submit keys — M · (USE-2, USE-5, SYS-3)
 
 ### The front door (no build-order gate; gated on Taylor's approval of the handoff)
 - [x] **SYS-6** · The landing page: `/` for a visitor who is not signed in — the hero's live example day, three pillars with the product as the picture, the trust line once, `Create an account` — M · (nothing not yet Complete; SYS-3 soft, for the footer's legal links) — built 2026-09-05; the footer's two legal links were added by SYS-3 on 2026-09-06

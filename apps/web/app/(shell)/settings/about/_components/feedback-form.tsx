@@ -16,6 +16,7 @@ import {
 import { FEEDBACK_MAX } from "@syn/constants";
 
 import { useOnline } from "@/lib/hooks/use-online";
+import { useSubmitShortcut } from "@/lib/hooks/use-submit-shortcut";
 import { trpc } from "@/lib/trpc/client";
 
 import { ABOUT_COPY as COPY } from "./copy";
@@ -49,6 +50,14 @@ export function FeedbackForm() {
   const [includeContext, setIncludeContext] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [sent, setSent] = React.useState(false);
+
+  /*
+   * SYS-4 — `Cmd/Ctrl+Enter` sends from the message field. It is a real
+   * `<form>` for this reason: `requestSubmit` runs the same path the button
+   * does, so the shortcut cannot become a second, laxer way to send.
+   */
+  const formRef = React.useRef<HTMLFormElement>(null);
+  useSubmitShortcut(formRef);
 
   const version = process.env.NEXT_PUBLIC_APP_VERSION;
 
@@ -93,7 +102,14 @@ export function FeedbackForm() {
           {COPY.sent}
         </Text>
       ) : (
-        <>
+        <form
+          ref={formRef}
+          className="flex flex-col gap-(--space-3)"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit();
+          }}
+        >
           <Textarea
             label={COPY.messageLabel}
             value={message}
@@ -127,14 +143,14 @@ export function FeedbackForm() {
 
           <div>
             <Button
+              type="submit"
               busy={send.isPending}
               disabled={!online}
-              onClick={() => void submit()}
             >
               {COPY.send}
             </Button>
           </div>
-        </>
+        </form>
       )}
     </section>
   );

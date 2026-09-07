@@ -30,6 +30,7 @@ import {
 import type { HabitFormInput } from "@syn/validators";
 
 import { SheetHost } from "@/components/page-frame";
+import { useSubmitShortcut } from "@/lib/hooks/use-submit-shortcut";
 import { visibleFieldError } from "@/lib/forms/use-synapse-form";
 import { useOnline } from "@/lib/hooks/use-online";
 
@@ -63,6 +64,14 @@ export function HabitSheet({
 }: HabitSheetProps) {
   const online = useOnline();
   const sheet = useHabitSheet(options);
+
+  /*
+   * SYS-4 — `Cmd/Ctrl+Enter` submits from *Note before starting*. `Enter` in
+   * the textarea still inserts a newline, which is why the gesture needs the
+   * modifier here and nowhere else.
+   */
+  const formRef = React.useRef<HTMLFormElement>(null);
+  useSubmitShortcut(formRef);
   const { form } = sheet;
 
   const [moreOpen, setMoreOpen] = React.useState(false);
@@ -132,6 +141,7 @@ export function HabitSheet({
         }
       >
         <form
+          ref={formRef}
           className="flex flex-col gap-(--space-4)"
           onSubmit={(event) => {
             event.preventDefault();

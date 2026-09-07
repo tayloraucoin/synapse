@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import { ResumeGuard } from "@/components/resume-guard";
+import { ShortcutsHost } from "@/components/shortcuts-host";
 import {
   SessionExpiredDialog,
   SessionWatcher,
@@ -57,6 +58,11 @@ export function ShellProviders({
        * comes back after more than an hour away.
        */}
       <ResumeGuard />
+      {/*
+       * SYS-4. One `keydown` listener for the whole app, plus the `?` dialog
+       * it opens — both suppressed while a field or a dialog has focus.
+       */}
+      <ShortcutsHost />
       <ShellChrome user={user} reviewHasPending={reviewHasPending}>
         {children}
       </ShellChrome>

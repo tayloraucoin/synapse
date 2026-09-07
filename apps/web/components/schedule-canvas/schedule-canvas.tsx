@@ -16,6 +16,8 @@ import {
 } from "@syn/ui";
 import { formatClock } from "@syn/utils";
 
+import { useRovingFocus } from "@/lib/hooks/use-roving-focus";
+
 import { DAY_LIST_COPY } from "@/components/day-list";
 import { ItemSheet } from "@/components/item-sheet";
 import { useNow } from "@/lib/hooks/use-now";
@@ -70,6 +72,17 @@ export function ScheduleCanvas({
   const [extendLaterH, setExtendLaterH] = React.useState(0);
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  /*
+   * SYS-4 — the same arrow navigation the List has, over blocks instead of
+   * rows. The scroll container is the focus container, and DOM order is time
+   * order here too because the canvas renders in schedule order.
+   *
+   * No `s` here: a block has no timer control, and starting one from a canvas
+   * a person is scanning is not a gesture the document gives.
+   */
+  useRovingFocus(scrollRef, { selector: "[data-item-row]" });
+
   const nowRef = React.useRef<HTMLDivElement>(null);
 
   /**

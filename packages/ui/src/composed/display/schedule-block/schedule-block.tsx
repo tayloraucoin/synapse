@@ -100,6 +100,14 @@ export function ScheduleBlock({
   return (
     <button
       type="button"
+      /*
+       * SYS-4's handles. The block is itself the button, so it carries both:
+       * roving focus moves between blocks by `data-item-row`, and `Enter`
+       * presses `data-row-open`, which is this same element.
+       */
+      data-item-row
+      data-item-id={item.id}
+      data-row-open
       onClick={() => onOpen(item)}
       aria-label={`${item.title}, ${startLabel}–${endLabel}, ${item.state}`}
       style={{

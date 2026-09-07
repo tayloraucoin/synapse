@@ -4,7 +4,7 @@
 **Slice type:** Bindings over built surfaces. The risk class is *a key that fires in a field*: a shortcut stealing a typed letter, arrow keys fighting a radiogroup, Enter submitting from a textarea.
 **Vigil:** none. **Vesper review:** the focus ring on rows and blocks; the roving focus in time order.
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 ---
 

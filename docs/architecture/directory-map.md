@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-07 · 1046 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-07 · 1051 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -317,6 +317,9 @@ apps/
         copy.ts
         index.ts
         shift-sheet.tsx
+      shortcuts-host/
+        index.ts
+        shortcuts-host.tsx
       starter-set/
         copy.ts
         index.ts
@@ -372,6 +375,7 @@ apps/
         use-device-zone.ts
         use-dismissed.ts
         use-elapsed.ts
+        use-global-shortcuts.ts
         use-icon-upload.ts
         use-leave-guard.ts
         use-local-draft.ts
@@ -379,8 +383,10 @@ apps/
         use-online.ts
         use-pull-to-refresh.ts
         use-remembered-toggle.ts
+        use-roving-focus.ts
         use-scroll-memory.ts
         use-sheet.ts
+        use-submit-shortcut.ts
         use-undo-window.ts
       image/
         reencode.ts

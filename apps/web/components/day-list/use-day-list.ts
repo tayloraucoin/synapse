@@ -60,6 +60,9 @@ export function useDayList(dateKey: string, initial: DayView) {
 
   const setDone = trpc.item.setDone.useMutation();
   const bringBack = trpc.item.bringBack.useMutation();
+  // SYS-4's `s`. The same two mutations the item sheet uses (USE-3).
+  const startTimer = trpc.timer.start.useMutation();
+  const stopTimer = trpc.timer.stop.useMutation();
   const doAnyway = trpc.item.doAnyway.useMutation();
 
   const raw = query.data ?? initial;
@@ -233,6 +236,24 @@ export function useDayList(dateKey: string, initial: DayView) {
     [utils, key],
   );
 
+  /**
+   * `s` on a focused row (SYS-4, Epic 2 LS-01: "bubbles to the list, which
+   * owns the timer"). It starts an idle item and stops a running one — the
+   * same two mutations the item sheet calls, so a timer started by a key and
+   * one started by a button are the same write.
+   */
+  const toggleTimer = React.useCallback(
+    (item: DayItemView) => {
+      const done = () => void refresh();
+      if (item.state === "active") {
+        stopTimer.mutate({ id: item.id }, { onSettled: done });
+      } else {
+        startTimer.mutate({ id: item.id }, { onSettled: done });
+      }
+    },
+    [startTimer, stopTimer, refresh],
+  );
+
   return {
     day,
     now,
@@ -240,6 +261,7 @@ export function useDayList(dateKey: string, initial: DayView) {
     isError: query.isError,
     hasUndo: (id: string) => undo.open.has(id),
     toggleDone,
+    toggleTimer,
     undoRow,
     onBringBack,
     onDoAnyway,

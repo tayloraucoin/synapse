@@ -21,6 +21,7 @@ import { ItemSheet } from "@/components/item-sheet";
 import { OneOffSheet } from "@/components/one-off-sheet";
 import { ShiftSheet } from "@/components/shift-sheet";
 import { usePullToRefresh } from "@/lib/hooks/use-pull-to-refresh";
+import { useRovingFocus } from "@/lib/hooks/use-roving-focus";
 import { reviewDayRoute } from "@/lib/routes";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
@@ -90,6 +91,27 @@ export function DayList({
   useScrollToItem(landing.focusId, !list.isError);
 
   /*
+   * SYS-4 — arrows between rows in time order, `Space` to tick, `Enter` to
+   * open, `s` for the timer. The hook moves focus and presses the row's own
+   * controls; the timer is the one thing it cannot press, because the row has
+   * no timer button — so the List, which has the mutations, handles it.
+   */
+  const listRef = React.useRef<HTMLDivElement>(null);
+
+  useRovingFocus(listRef, {
+    selector: "[data-item-row]",
+    onToggleTimer: (element) => {
+      const id = element.getAttribute("data-item-id");
+      if (id === null) return;
+      const item = day.parts
+        .flatMap((part) => part.items)
+        .find((candidate) => candidate.id === id);
+      if (item === undefined) return;
+      list.toggleTimer(item);
+    },
+  });
+
+  /*
    * `?sheet=shift` — the late offer's action (USE-6). The status line is chrome
    * above the page and has no day to hand SF-01, so it navigates here and this
    * opens the sheet. Read once and cleaned off the address, the same way a
@@ -150,6 +172,9 @@ export function DayList({
       <span aria-live="polite" className="sr-only">
         {refreshing ? COPY.refreshing : ""}
       </span>
+
+      {/* The roving-focus container — every `[data-item-row]` under it. */}
+      <div ref={listRef} className="flex flex-col">
 
       {list.isError ? (
         <RegionRetry
@@ -216,6 +241,8 @@ export function DayList({
           </ul>
         </ExpanderSection>
       )}
+
+      </div>
 
       {list.error === null ? null : (
         <div className="px-(--space-4)">

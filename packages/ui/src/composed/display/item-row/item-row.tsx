@@ -173,7 +173,21 @@ export function ItemRow({
   );
 
   return (
-    <li className={cn("relative flex items-center", className)}>
+    /*
+     * `data-item-row` is SYS-4's handle: the roving-focus hook finds rows by it
+     * and moves `tabIndex` between them. It is a data attribute rather than a
+     * class so restyling can never break keyboard navigation.
+     */
+    <li
+      data-item-row
+      // SYS-4's `s` needs to know WHICH item; the List holds the mutations.
+      data-item-id={item.id}
+      className={cn(
+        "relative flex items-center",
+        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",
+        className,
+      )}
+    >
       {item.category === null ? null : (
         <span
           aria-hidden="true"
@@ -225,6 +239,8 @@ export function ItemRow({
       {onOpen !== undefined && variant !== "read-only" ? (
         <button
           type="button"
+          // SYS-4's `Enter` presses this; the handler stays in one place.
+          data-row-open
           onClick={() => onOpen(item)}
           aria-label={`${item.title}${stateLabel}${categoryLabel}`}
           className={cn(
