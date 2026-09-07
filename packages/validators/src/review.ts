@@ -85,3 +85,11 @@ export const saveChangesInput = z.object({
 });
 
 export type SaveChangesInput = z.infer<typeof saveChangesInput>;
+
+/** WR-02 — one habit inside one week. */
+export const habitWeekInput = z.object({
+  week: weekKeySchema,
+  habitId: z.string().uuid(),
+});
+
+export type HabitWeekInput = z.infer<typeof habitWeekInput>;

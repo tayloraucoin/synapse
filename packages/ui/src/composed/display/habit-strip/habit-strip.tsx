@@ -105,7 +105,17 @@ export function StripSquare({
 }
 
 export interface HabitStripProps {
-  habit: HabitSummaryView;
+  /**
+   * Only the icon and the title are read, so only those are asked for.
+   *
+   * It took a whole `HabitSummaryView` until REV-4, whose week model carries a
+   * DIFFERENT view of the same habit — it has the two fields this needs and
+   * none of the library ones. Widening the caller to satisfy a type nothing
+   * here uses would have meant a cast at the one call site, which is the type
+   * system being talked out of its job. (`ReflectionBlock` was narrowed for the
+   * same reason in REV-3.)
+   */
+  habit: Pick<HabitSummaryView, "icon" | "title">;
   /** Monday–Sunday. */
   days: readonly [
     StripState,

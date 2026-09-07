@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 import {
   decideInput,
+  habitWeekInput,
   reviewDayInput,
   reviewHistoryInput,
   reviewWeekInput,
@@ -16,6 +17,7 @@ import {
 } from "../services/review/finish-review";
 import { getReviewDay } from "../services/review/get-review-day";
 import { getReviewHistory } from "../services/review/get-review-history";
+import { getHabitWeek } from "../services/review/habit-week";
 import { getReviewWeek } from "../services/review/get-review-week";
 import { pendingDays } from "../services/review/pending-days";
 import { saveReviewChanges } from "../services/review/save-changes";
@@ -50,7 +52,27 @@ export const reviewRouter = router({
         ctx.authContext.userId,
         input.week,
         today.todayKey,
+        today.timeZone,
       );
+    }),
+
+  /** WR-02 — one habit's week and its four-week fact. */
+  habitWeek: protectedProcedure
+    .input(habitWeekInput)
+    .query(async ({ ctx, input }) => {
+      const view = await getHabitWeek(
+        ctx.rls,
+        ctx.authContext.userId,
+        input.week,
+        input.habitId,
+      );
+      if (view === null) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "That habit was not assigned this week.",
+        });
+      }
+      return view;
     }),
 
   history: protectedProcedure

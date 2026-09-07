@@ -5,11 +5,12 @@ import {
   dayItems,
   days,
   habits,
+  reasons,
   shifts,
   templates,
   type RlsClient,
 } from "@syn/db";
-import type { CategoryKey } from "@syn/types";
+import type { CategoryKey, IconValue } from "@syn/types";
 import {
   computeAdherence,
   stripStateFor,
@@ -37,12 +38,45 @@ import { readMisses, toScoredItems } from "./to-scored";
 export type HabitStripView = {
   habitId: string;
   title: string;
+  /** From the ITEM's snapshot, so an archived habit still draws its strip. */
+  icon: IconValue;
   days: StripSquare[];
   credit: number;
   counted: number;
 };
 
+/** WR-01's *Deep work* rows — one per deep-work habit that ran this week. */
+export type DeepWorkRow = {
+  habitId: string | null;
+  title: string;
+  icon: IconValue;
+  sessions: number;
+  minutes: number;
+  done: number;
+  counted: number;
+};
+
 export type TemplateUsage = { id: string; name: string; days: number };
+
+/** WR-03's rows — tasks that went into next week. */
+export type CarriedItem = {
+  id: string;
+  title: string;
+  icon: IconValue;
+  /** The earliest day this task appears on, walking the carry chain back. */
+  firstAssignedDate: string;
+  carriedCount: number;
+};
+
+/** WR-04's rows — one per shift this week. */
+export type WeekShiftRow = {
+  id: string;
+  date: string;
+  at: Date;
+  deltaMin: number;
+  reasonLabel: string | null;
+  cutCount: number;
+};
 
 export type CategorySegment = {
   key: CategoryKey;
@@ -52,6 +86,8 @@ export type CategorySegment = {
 
 export type ReviewWeekView = {
   weekKey: string;
+  /** The person's zone — every clock in the week's rows is formatted in it. */
+  timezone: string;
   planned: number;
   reviewed: number;
   /** True while the week has not finished — the number reads *so far*. */
@@ -61,8 +97,11 @@ export type ReviewWeekView = {
   templates: TemplateUsage[];
   habits: HabitStripView[];
   deepWork: { done: number; minutes: number };
+  deepWorkRows: DeepWorkRow[];
   tasks: { done: number; carried: number };
   shifts: { count: number; totalMin: number; mostCommonReason: string | null };
+  shiftRows: WeekShiftRow[];
+  carriedItems: CarriedItem[];
   categories: CategorySegment[];
 };
 
@@ -71,6 +110,7 @@ export async function getReviewWeek(
   userId: string,
   weekKey: string,
   todayKey: string,
+  timezone = "UTC",
 ): Promise<ReviewWeekView> {
   const dates = weekDates(weekKey);
 
@@ -99,6 +139,7 @@ export async function getReviewWeek(
               dayId: dayItems.dayId,
               habitId: dayItems.habitId,
               title: dayItems.title,
+              icon: dayItems.icon,
               type: dayItems.type,
               priority: dayItems.priority,
               durationMin: dayItems.durationMin,
@@ -110,6 +151,7 @@ export async function getReviewWeek(
               deferredAt: dayItems.deferredAt,
               assignmentState: dayItems.assignmentState,
               completionState: dayItems.completionState,
+              carriedFromItemId: dayItems.carriedFromItemId,
               categoryName: categories.name,
               categoryKey: categories.colorKey,
             })
@@ -128,6 +170,8 @@ export async function getReviewWeek(
         ? []
         : await tx
             .select({
+              id: shifts.id,
+              dayId: shifts.dayId,
               deltaMin: shifts.deltaMin,
               reasonKey: shifts.reasonKey,
               reasonText: shifts.reasonText,
@@ -139,7 +183,13 @@ export async function getReviewWeek(
             )
             .orderBy(asc(shifts.at));
 
-    return { dayRows, items, shiftRows };
+    // The reason words, for WR-04's rows. An archived reason keeps its label.
+    const reasonLabels = await tx
+      .select({ key: reasons.key, label: reasons.label })
+      .from(reasons)
+      .where(eq(reasons.userId, userId));
+
+    return { dayRows, items, shiftRows, reasonLabels };
   });
 
   const dateByDayId = new Map(
@@ -189,6 +239,7 @@ export async function getReviewWeek(
       strip = {
         habitId: item.habitId,
         title: item.title,
+        icon: item.icon,
         // A day with no item for this habit is `not-assigned`, which is also
         // what an unplanned day gets — the same fact from the strip's view.
         days: Array.from({ length: 7 }, () => "not-assigned" as StripSquare),
@@ -238,12 +289,125 @@ export async function getReviewWeek(
       });
   }
 
+  const reasonLabelByKey = new Map(
+    raw.reasonLabels.map((row) => [row.key, row.label]),
+  );
+
+  /*
+   * WR-04's rows. `cutCount` is the items this shift took, by the same
+   * `misses.shift_id` link the Schedule's SC-02 sheet reads — one relationship,
+   * two screens.
+   */
+  const cutCountByShift = new Map<string, number>();
+  for (const miss of missRows) {
+    if (miss.shiftId === null) continue;
+    cutCountByShift.set(
+      miss.shiftId,
+      (cutCountByShift.get(miss.shiftId) ?? 0) + 1,
+    );
+  }
+
+  const weekShiftRows: WeekShiftRow[] = raw.shiftRows.map((row) => ({
+    id: row.id,
+    date: dateByDayId.get(row.dayId) ?? "",
+    at: row.at,
+    deltaMin: row.deltaMin,
+    reasonLabel:
+      (row.reasonKey === null
+        ? null
+        : (reasonLabelByKey.get(row.reasonKey) ?? null)) ?? row.reasonText,
+    cutCount: cutCountByShift.get(row.id) ?? 0,
+  }));
+
+  /*
+   * WR-03's rows — tasks carried out of this week.
+   *
+   * `firstAssignedDate` is the earliest day in the item's own carry chain that
+   * falls inside the rows we read; walking further back would need another
+   * query per item for a line that says "this has been moving for a while".
+   * `[REVISIT: if a chain older than the week reads as wrong, this needs the
+   * recursive walk `get-review-day.ts` already has.]`
+   */
+  const dateByItemId = new Map(
+    raw.items.map((item) => [item.id, dateByDayId.get(item.dayId) ?? ""]),
+  );
+  const carriedFromById = new Map(
+    raw.items.map((item) => [item.id, item.carriedFromItemId]),
+  );
+
+  const carriedItems: CarriedItem[] = raw.items
+    .filter((item) => item.completionState === "carried")
+    .map((item) => {
+      let cursor: string | null = item.carriedFromItemId ?? null;
+      let count = 1;
+      let first = dateByItemId.get(item.id) ?? "";
+      const seen = new Set<string>();
+
+      while (cursor !== null && !seen.has(cursor)) {
+        seen.add(cursor);
+        const date = dateByItemId.get(cursor);
+        if (date === undefined) break;
+        first = date;
+        count += 1;
+        cursor = carriedFromById.get(cursor) ?? null;
+      }
+
+      return {
+        id: item.id,
+        title: item.title,
+        icon: item.icon,
+        firstAssignedDate: first,
+        carriedCount: count,
+      };
+    })
+    .sort((a, b) => b.carriedCount - a.carriedCount);
+
   const doneDeepWork = raw.items.filter(
     (item) => item.type === "deep_work" && item.completionState === "done",
   );
 
+  /*
+   * WR-01's *Deep work* rows — one per habit rather than one per item, because
+   * "Writing, 4 sessions, 6 h" is what a week of deep work actually looks like;
+   * four separate Writing rows would be the same fact said four times.
+   *
+   * `sessions` counts the ITEMS that ran, not `timer_sessions`: a block started
+   * and paused twice is one sitting, and the week model does not read sessions.
+   * `[REVISIT: if the distinction matters in use, this needs the session rows.]`
+   */
+  const deepWorkRows = new Map<string, DeepWorkRow>();
+  for (const item of raw.items) {
+    if (item.type !== "deep_work") continue;
+    const key = item.habitId ?? `title:${item.title}`;
+
+    let row = deepWorkRows.get(key);
+    if (row === undefined) {
+      row = {
+        habitId: item.habitId,
+        title: item.title,
+        icon: item.icon,
+        sessions: 0,
+        minutes: 0,
+        done: 0,
+        counted: 0,
+      };
+      deepWorkRows.set(key, row);
+    }
+
+    if (item.completionState === "done") {
+      row.sessions += 1;
+      row.minutes += item.durationMin ?? 0;
+      row.done += 1;
+    }
+    if (reviewedDayIds.has(item.dayId)) {
+      const credit = allVerdicts[item.id]?.credit ?? null;
+      if (credit !== null) row.counted += 1;
+    }
+  }
+
   return {
     weekKey,
+    timezone,
     planned: raw.dayRows.filter((row) => row.templateId !== null).length,
     reviewed: reviewedDayIds.size,
     // The week is open while today is still inside it.
@@ -255,6 +419,9 @@ export async function getReviewWeek(
     // find what slipped, not to rank what did not.
     habits: [...habitStrips.values()].sort(
       (a, b) => rate(a) - rate(b) || a.title.localeCompare(b.title),
+    ),
+    deepWorkRows: [...deepWorkRows.values()].sort(
+      (a, b) => b.minutes - a.minutes || a.title.localeCompare(b.title),
     ),
     deepWork: {
       done: doneDeepWork.length,
@@ -271,6 +438,8 @@ export async function getReviewWeek(
       carried: raw.items.filter((item) => item.completionState === "carried")
         .length,
     },
+    shiftRows: weekShiftRows,
+    carriedItems,
     shifts: {
       count: raw.shiftRows.length,
       totalMin: raw.shiftRows.reduce((total, row) => total + row.deltaMin, 0),

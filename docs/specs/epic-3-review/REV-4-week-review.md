@@ -4,7 +4,7 @@
 **Slice type:** A record over a week — the same arithmetic, read slowly, with strips, bars, and lists. The risk class is *a dashboard*: a trend, a comparison, a colour on an outcome, a number without its sentence.
 **Vigil:** none. **Vesper review:** the strip's seven glyphs at 16px on compact; the sort by what slipped; the category bar's legend.
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 > **Vesper — dashboard review.** If WR-01 reads as a dashboard, it failed. There is no trend arrow, no comparison to last week, no colour on any outcome, and every number prints its sentence.
 

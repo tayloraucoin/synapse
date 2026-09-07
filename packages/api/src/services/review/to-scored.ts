@@ -45,6 +45,8 @@ export type MissRow = {
   tier: MissTier;
   reasonKey: string | null;
   tradedUpItemId: string | null;
+  /** The shift that cut this item, or null — REV-4's WR-04 counts by it. */
+  shiftId: string | null;
 };
 
 export async function toScoredItems(
@@ -154,6 +156,8 @@ export async function readMisses(
         tier: misses.tier,
         reasonKey: misses.reasonKey,
         tradedUpItemId: misses.tradedUpItemId,
+        // REV-4's WR-04 counts what each shift took by this link.
+        shiftId: misses.shiftId,
       })
       .from(misses)
       .where(

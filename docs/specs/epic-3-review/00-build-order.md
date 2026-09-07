@@ -24,7 +24,7 @@ The number, the review that produces it, the history that reopens it.
 - [x] **REV-3** · Traded-up, reflections, edit mode, and history: DR-04, DR-06, DR-01 edit, HS-01 — M · (REV-2)
 
 ### Phase 2 — Phase-2 surface (does not gate launch)
-- [ ] **REV-4** · Week Review: WR-01, WR-02, WR-03, WR-04 — L · (REV-3, USE-3)
+- [x] **REV-4** · Week Review: WR-01, WR-02, WR-03, WR-04 — L · (REV-3, USE-3)
 
 ## Ordering constraints (alphabetical order hides these)
 
