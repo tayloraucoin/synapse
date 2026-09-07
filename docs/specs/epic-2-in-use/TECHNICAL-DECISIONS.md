@@ -167,3 +167,11 @@ Minutes rather than pixels because mixing the two units is precisely how a block
 **Consequences:** The canvas is layout-free and mostly a `map`. The cost is one more file and a shape to keep in step with the composites props; the benefit is that the part which could be silently wrong is the part that can be run without a browser.
 
 **Revisit trigger:** drag, zoom, or any interaction that changes a position. All three are forbidden in Phase 1 and all three would make the layout a function of interaction state rather than of the day, which is a different design.
+
+## 2026-09-06 · USE-6 · The fit is one pure function; the preview advises and the write decides
+
+**Context (as it was then):** SF-01 shows a person what a shift will do — how many items move, which no longer fit, which to cut — and then does it. The sheet may sit open for minutes while the day changes underneath it.
+**Options weighed:** A — the preview returns a plan and `commit` executes exactly that plan, trusting the ids it was given. B — the arithmetic is one pure function; `preview` renders from it and `commit` recomputes from it inside the write, refusing with `CONFLICT` when the day has changed since. C — no preview; the sheet computes the fit client-side and the server trusts it.
+**Decision:** B. A is the tempting one and it is wrong in a specific way: an item finished while the sheet was open changes what moves, and executing a stale plan would move a done item or cut something the person had just completed — the exact failure the ticket's risk class names. C puts a scoring-adjacent rule in a client bundle and makes the server a typist. B costs one extra read per write and buys the guarantee that what is written is what the arithmetic says now.
+**Consequences:** Buys a preview that can never diverge from the write, and a stale sheet that re-previews instead of lying. Costs a fingerprint check (row count plus latest `updated_at`) and a `CONFLICT` path the sheet has to handle silently. Forecloses nothing — the pure function is in `@syn/utils` and has no transport or storage in it.
+**Revisit trigger:** a fingerprint that proves too sensitive in use — any unrelated edit to the day invalidates a preview — at which point it would narrow to the items the fit actually reads.

@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-06 · 1024 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-07 · 1034 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -306,6 +306,10 @@ apps/
         index.ts
         session-expired-dialog.tsx
         session-watcher.tsx
+      shift-sheet/
+        copy.ts
+        index.ts
+        shift-sheet.tsx
       starter-set/
         copy.ts
         index.ts
@@ -556,6 +560,7 @@ packages/
         reason.ts
         review.ts
         shell.ts
+        shift.ts
         template.ts
         timer.ts
         user.ts
@@ -565,6 +570,7 @@ packages/
           create-upload-url.ts
           storage.ts
         day/
+          apply-shift.ts
           apply-template-changes.ts
           bring-back.ts
           carry-item.ts
@@ -577,8 +583,10 @@ packages/
           materialize-day.ts
           one-off.ts
           set-done.ts
+          shift-fit.ts
           timer.ts
           today.ts
+          undo-shift.ts
           untouched.ts
           week-view.ts
         jobs/
@@ -1322,7 +1330,9 @@ packages/
         day-parts.ts
         index.ts
         item-state.ts
+        late-offer.ts
         priority.ts
+        shift-fit.ts
         wall-clock.ts
         week.ts
       review/
@@ -1355,6 +1365,7 @@ packages/
       push.ts
       reason.ts
       review.ts
+      shift.ts
       template.ts
       timer.ts
       user.ts

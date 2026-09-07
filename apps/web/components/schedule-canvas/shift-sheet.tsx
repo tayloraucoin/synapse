@@ -1,10 +1,13 @@
 "use client";
 
-import { Button, ResponsiveSheet, Text } from "@syn/ui";
+import * as React from "react";
+
+import { Button, HelperText, ResponsiveSheet, Text } from "@syn/ui";
 import { formatClock } from "@syn/utils";
 
 import { SheetHost } from "@/components/page-frame";
-import type { RouterOutputs } from "@/lib/trpc/client";
+import { SHIFT_COPY } from "@/components/shift-sheet";
+import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { SCHEDULE_COPY as COPY } from "./copy";
 
@@ -13,10 +16,12 @@ type DayView = RouterOutputs["day"]["get"];
 /**
  * SC-02 — what one shift did, as a record.
  *
- * IT IS READ-ONLY HERE. *Undo this shift* and its ten-minute rule belong to
- * USE-6, which is what writes shifts in the first place; an undo offered by a
- * ticket that cannot create the thing it undoes would be an action with no
- * tested path back.
+ * *UNDO THIS SHIFT* APPEARS ONLY WHILE IT WOULD BE A TRUE REVERSAL (USE-6).
+ * The server decides — within ten minutes, no later shift, and nothing that was
+ * cut has since been done anyway — and when it says no, the action is ABSENT
+ * rather than disabled. A greyed *Undo* on a record that has settled would
+ * invite a tap that can only ever fail, and the record settling is not an error
+ * state; it is the point.
  *
  * IT NAMES WHAT WAS CUT, OR SAYS NOTHING WAS. *Nothing was cut.* is a real
  * answer — a shift that moved the day without dropping anything is the good
@@ -32,13 +37,38 @@ export function ShiftSheet({
   day,
   shiftId,
   onOpenChange,
+  onUndone,
 }: {
   open: boolean;
   day: DayView;
   shiftId: string | null;
   onOpenChange: (open: boolean) => void;
+  onUndone?: () => void;
 }) {
   const shift = day.shifts.find((row) => row.id === shiftId) ?? null;
+
+  const eligibility = trpc.shift.canUndo.useQuery(
+    { shiftId: shiftId ?? "" },
+    { enabled: open && shiftId !== null },
+  );
+  const undo = trpc.shift.undo.useMutation();
+  const [error, setError] = React.useState<string | null>(null);
+
+  const canUndo = eligibility.data?.canUndo === true;
+
+  async function runUndo(): Promise<void> {
+    if (shiftId === null) return;
+    setError(null);
+    try {
+      await undo.mutateAsync({ shiftId });
+      onOpenChange(false);
+      onUndone?.();
+    } catch {
+      // The window closed, or something was done anyway, while the sheet was
+      // open — the record won, which is the correct outcome.
+      setError(SHIFT_COPY.undoRefused);
+    }
+  }
 
   // What this shift took, by the `misses.shift_id` link the day view resolves.
   const cutTitles = day.cutByShift
@@ -52,7 +82,16 @@ export function ShiftSheet({
         onOpenChange={onOpenChange}
         title={shift === null ? "" : COPY.shiftedTitle(shift.deltaMin)}
         footer={
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-(--space-2)">
+            {canUndo ? (
+              <Button
+                variant="ghost"
+                busy={undo.isPending}
+                onClick={() => void runUndo()}
+              >
+                {SHIFT_COPY.undoThisShift}
+              </Button>
+            ) : null}
             <Button onClick={() => onOpenChange(false)}>{COPY.close}</Button>
           </div>
         }
@@ -73,6 +112,7 @@ export function ShiftSheet({
                 ? COPY.nothingWasCut
                 : COPY.cut(cutTitles.join(", "))}
             </Text>
+            {error === null ? null : <HelperText error>{error}</HelperText>}
           </div>
         )}
       </ResponsiveSheet>

@@ -33,7 +33,7 @@ The day model, the list that renders it, the sheet that acts on it, the reminder
 - [x] **USE-8** · Notifications: N1/N4/N5/N6 jobs, payloads, grouping, quiet after complete, landings PN-01/04/05/06 — L · (USE-3, REV-2, SET-6, SET-9) · **Vigil: payload privacy** — built 2026-09-05; **exactly-once is a unique constraint, not a job's care; every sentence is one of §8.2's four rows**
 
 ### Phase 5 — Phase-2 surfaces (do not gate launch)
-- [ ] **USE-6** · Shift my day: SF-01, the late offer, LS-03 *Do it anyway*, SC-02 undo — L · (USE-5, SET-9)
+- [x] **USE-6** · Shift my day: SF-01, the late offer, LS-03 *Do it anyway*, SC-02 undo — L · (USE-5, SET-9)
 - [ ] **USE-7** · Capacity trim: TR-01, LS-02 *Bring back*, *Keep instead* — M · (USE-2, USE-3)
 
 ## Ordering constraints (alphabetical order hides these)

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import {
@@ -19,6 +19,7 @@ import { formatClock } from "@syn/utils";
 import { DaySheet } from "@/components/week-build";
 import { ItemSheet } from "@/components/item-sheet";
 import { OneOffSheet } from "@/components/one-off-sheet";
+import { ShiftSheet } from "@/components/shift-sheet";
 import { usePullToRefresh } from "@/lib/hooks/use-pull-to-refresh";
 import { reviewDayRoute } from "@/lib/routes";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
@@ -57,7 +58,9 @@ export function DayList({
   const { day } = list;
   const refreshing = usePullToRefresh(list.refresh);
 
-  const [sheet, setSheet] = React.useState<"day-plan" | "one-off" | null>(null);
+  const [sheet, setSheet] = React.useState<
+    "day-plan" | "one-off" | "shift" | null
+  >(null);
   const [openItemId, setOpenItemId] = React.useState<string | null>(null);
 
   /*
@@ -86,6 +89,24 @@ export function DayList({
 
   useScrollToItem(landing.focusId, !list.isError);
 
+  /*
+   * `?sheet=shift` — the late offer's action (USE-6). The status line is chrome
+   * above the page and has no day to hand SF-01, so it navigates here and this
+   * opens the sheet. Read once and cleaned off the address, the same way a
+   * notification landing is: a shift sheet that reopened on every back would be
+   * the app asking a question the person already answered.
+   */
+  const shiftParam = useSearchParams().get("sheet");
+  const dayKeyRoute = usePathname();
+  const shiftConsumed = React.useRef(false);
+
+  React.useEffect(() => {
+    if (shiftParam !== "shift" || shiftConsumed.current) return;
+    shiftConsumed.current = true;
+    setSheet("shift");
+    router.replace(dayKeyRoute, { scroll: false });
+  }, [shiftParam, router, dayKeyRoute]);
+
   React.useEffect(() => {
     // `?sheet=item&id=…` opens the sheet; `?focus=` deliberately does not.
     if (landing.action === "done") return;
@@ -110,6 +131,7 @@ export function DayList({
         />
         <Sheets
           dateKey={dateKey}
+          day={day}
           sheet={sheet}
           onClose={() => setSheet(null)}
           onSaved={() => void list.refresh()}
@@ -220,6 +242,7 @@ export function DayList({
 
       <Sheets
         dateKey={dateKey}
+        day={day}
         sheet={sheet}
         onClose={() => setSheet(null)}
         onSaved={() => void list.refresh()}
@@ -325,12 +348,14 @@ function EmptyDay({
  */
 function Sheets({
   dateKey,
+  day,
   sheet,
   onClose,
   onSaved,
 }: {
   dateKey: string;
-  sheet: "day-plan" | "one-off" | null;
+  day: DayView | null;
+  sheet: "day-plan" | "one-off" | "shift" | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -356,6 +381,22 @@ function Sheets({
             if (!next) onClose();
           }}
           onSaved={onSaved}
+        />
+      ) : null}
+
+      {/*
+       * SF-01, opened by the late offer's `?sheet=shift` as well as by DH-01.
+       * The status line is chrome above the page and has no day to hand the
+       * sheet, so it navigates and the page — which does — opens it.
+       */}
+      {sheet === "shift" && day !== null ? (
+        <ShiftSheet
+          open
+          day={day}
+          onOpenChange={(next) => {
+            if (!next) onClose();
+          }}
+          onShifted={onSaved}
         />
       ) : null}
     </>

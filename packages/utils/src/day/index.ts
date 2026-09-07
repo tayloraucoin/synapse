@@ -22,7 +22,16 @@ export {
   isOffSchedule,
   type ItemStateInput,
 } from "./item-state";
+export { LATE_OFFER_THRESHOLD_MIN, isLateOffer } from "./late-offer";
 export { compareForTrim, type PrioritySortable } from "./priority";
+export {
+  computeShiftFit,
+  freedMinutes,
+  overMinutes,
+  type ShiftFit,
+  type ShiftFitInput,
+  type ShiftItem,
+} from "./shift-fit";
 export {
   clockMinutes,
   dateKeyIn,

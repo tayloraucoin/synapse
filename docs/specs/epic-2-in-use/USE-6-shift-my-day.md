@@ -4,7 +4,7 @@
 **Slice type:** A three-step sheet over a day-level mutation with a required reason, a fit computation, and a true undo window. The risk class is *a shift that lies*: a hard item moved, a cut item scored without its reason, an undo that resurrects a cut item someone already did anyway, overflow computed against the wrong anchor.
 **Vigil:** review by inducing — shift with no overflow; shift with overflow against a hard item; shift past `day_close_time`; shift with a done item and a running timer; undo within 10 minutes after *Do it anyway* on a cut item (must refuse); a second shift the same day. QA states which of the six it exercised.
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 > **Vigil — consequence review.** Every shift writes a `shifts` row, moves soft items, and may write `misses` rows. Verify each against the rows and against the List and the Schedule, not the sheet.
 

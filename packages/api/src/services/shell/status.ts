@@ -8,7 +8,12 @@ import {
   users,
   type RlsClient,
 } from "@syn/db";
-import { resolveDayKey, weekdayForDayKey, daysBefore } from "@syn/utils";
+import {
+  daysBefore,
+  isLateOffer,
+  resolveDayKey,
+  weekdayForDayKey,
+} from "@syn/utils";
 
 /**
  * Everything the shell chrome needs, in one query.
@@ -49,9 +54,14 @@ export type ShellStatus = {
   /** Most recent first. The status line shows the first. */
   pendingDays: PendingDay[];
   reviewedDayCount: number;
-  /** USE-6's late offer. */
+  /**
+   * USE-6's late offer. `lateOffer` is the answer now; `firstFixedStartToday`
+   * is what lets the client re-derive it on the minute tick, so a line that
+   * becomes true at 10:29 does not wait for a refetch.
+   */
   firstFixedStartToday: Date | null;
   hasShiftToday: boolean;
+  lateOffer: boolean;
 };
 
 /** How many pending days the line could ever need. */
@@ -128,13 +138,14 @@ export async function readShellStatus(
       .where(and(eq(days.userId, userId), isNotNull(days.reviewedAt)));
 
     const [today] = await tx
-      .select({ id: days.id })
+      .select({ id: days.id, closedAt: days.closedAt })
       .from(days)
       .where(and(eq(days.userId, userId), eq(days.date, todayKey)))
       .limit(1);
 
     let firstFixedStartToday: Date | null = null;
     let hasShiftToday = false;
+    let todayClosedAt: Date | null = null;
 
     if (today) {
       const [firstFixed] = await tx
@@ -145,6 +156,9 @@ export async function readShellStatus(
             eq(dayItems.dayId, today.id),
             eq(dayItems.timeMode, "fixed_time"),
             eq(dayItems.assignmentState, "assigned"),
+            // Untouched only: a first item already done is not evidence that
+            // anyone is running late (USE-6).
+            eq(dayItems.completionState, "upcoming"),
             isNotNull(dayItems.scheduledStart),
           ),
         )
@@ -160,6 +174,7 @@ export async function readShellStatus(
         .limit(1);
 
       hasShiftToday = shift !== undefined;
+      todayClosedAt = today.closedAt;
     }
 
     return {
@@ -177,6 +192,13 @@ export async function readShellStatus(
       reviewedDayCount: Number(reviewed?.value ?? 0),
       firstFixedStartToday,
       hasShiftToday,
+      lateOffer: isLateOffer({
+        isToday: true,
+        closedAt: todayClosedAt,
+        hasShiftToday,
+        firstFixedStartToday,
+        now,
+      }),
     };
   });
 }

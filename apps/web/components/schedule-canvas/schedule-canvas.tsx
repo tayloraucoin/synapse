@@ -60,6 +60,7 @@ export function ScheduleCanvas({
   const now = useNow();
   const online = useOnline();
 
+  const utils = trpc.useUtils();
   const query = trpc.day.get.useQuery({ date: dateKey }, { initialData: initial });
   const day = query.data ?? initial;
 
@@ -261,6 +262,10 @@ export function ScheduleCanvas({
         shiftId={openShiftId}
         onOpenChange={(next) => {
           if (!next) setOpenShiftId(null);
+        }}
+        onUndone={() => {
+          setOpenShiftId(null);
+          void utils.day.get.invalidate({ date: dateKey });
         }}
       />
     </ScreenFrame>

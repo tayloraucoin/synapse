@@ -11,11 +11,13 @@
 
 export {
   DAY_PART_HOURS,
+  LATE_OFFER_THRESHOLD_MIN,
   SOON_MINUTES,
   addDays,
   clockMinutes,
   closingThresholdMin,
   compareForTrim,
+  computeShiftFit,
   dateKeyIn,
   dayModeFor,
   dayPartBoundaries,
@@ -25,10 +27,13 @@ export {
   dayWindow,
   daysBefore,
   deriveItemState,
+  freedMinutes,
   instantToWallClockMinutes,
+  isLateOffer,
   isOffSchedule,
   isSameOrBefore,
   mondayOf,
+  overMinutes,
   resolveDayKey,
   wallClockToInstant,
   weekDates,
@@ -39,6 +44,8 @@ export {
   type DayPart,
   type DayPartAnchors,
   type ItemStateInput,
+  type ShiftFit,
+  type ShiftItem,
   type PrioritySortable,
 } from "./day";
 export { AppError, isAppError } from "./errors";

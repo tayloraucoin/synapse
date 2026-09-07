@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import { pendingReviewText } from "@syn/ui";
+import { isLateOffer } from "@syn/utils";
 
 import { StatusLineSlot } from "@/app/(shell)/_components/status-line-slot";
 import { PlatformStepsSheet } from "@/components/platform-steps-sheet";
@@ -22,7 +23,8 @@ import {
   subscribeUpdateReady,
 } from "@/lib/pwa/update-ready";
 import { trpc } from "@/lib/trpc/client";
-import { reviewDayRoute, setupRoute } from "@/lib/routes";
+import { dayRoute, reviewDayRoute, setupRoute, todayRoute } from "@/lib/routes";
+import { useNow } from "@/lib/hooks/use-now";
 
 /**
  * The shell's status line, with its sources attached.
@@ -62,6 +64,9 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
   const [installStepsOpen, setInstallStepsOpen] = React.useState(false);
   const installable = useInstallable();
   const deferredPrompt = useDeferredInstallPrompt();
+  // USE-6's offer becomes true on a clock, not on a mutation, so it is
+  // re-derived on the minute tick from a field the query already returns.
+  const now = useNow();
   const updateReady = React.useSyncExternalStore(
     subscribeUpdateReady,
     readUpdateReady,
@@ -109,6 +114,23 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
    * The dismissal is the slot's own `useDismissed("install", "forever")`. It
    * never returns, which is why there is no condition for it here.
    */
+  /*
+   * *Running late?* — recomputed here rather than trusted from the query, so a
+   * line that becomes true at 10:29 appears at 10:29 rather than at the next
+   * refetch. `shell.status.lateOffer` is the same answer at fetch time; the two
+   * call one function (`isLateOffer`) so they cannot disagree.
+   */
+  const lateOffer =
+    dayKey === undefined || dayKey === data.todayKey
+      ? isLateOffer({
+          isToday: true,
+          closedAt: null,
+          hasShiftToday: data.hasShiftToday,
+          firstFixedStartToday: data.firstFixedStartToday,
+          now,
+        })
+      : false;
+
   const installOffer = isInstallOfferEligible({
     installable,
     reviewedDayCount: data.reviewedDayCount,
@@ -162,7 +184,11 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
               router.push(reviewDayRoute(firstPending.date));
             }
       }
-      lateOffer={false}
+      lateOffer={lateOffer}
+      onShiftDay={() => {
+        // SF-01 needs the day; the page has it, so the offer navigates.
+        router.push(`${dayKey === undefined ? todayRoute() : dayRoute(dayKey)}?sheet=shift`);
+      }}
       updateReady={updateReady}
       onReload={reloadForUpdate}
       timezoneMismatch={timezoneMismatch}

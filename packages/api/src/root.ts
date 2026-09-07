@@ -8,6 +8,7 @@ import { notificationRouter } from "./routers/notification";
 import { reasonRouter } from "./routers/reason";
 import { reviewRouter } from "./routers/review";
 import { shellRouter } from "./routers/shell";
+import { shiftRouter } from "./routers/shift";
 import { templateRouter } from "./routers/template";
 import { timerRouter } from "./routers/timer";
 import { userRouter } from "./routers/user";
@@ -33,6 +34,7 @@ export const appRouter = router({
   reason: reasonRouter,
   review: reviewRouter,
   shell: shellRouter,
+  shift: shiftRouter,
   template: templateRouter,
   timer: timerRouter,
   user: userRouter,
