@@ -34,7 +34,7 @@ The day model, the list that renders it, the sheet that acts on it, the reminder
 
 ### Phase 5 — Phase-2 surfaces (do not gate launch)
 - [x] **USE-6** · Shift my day: SF-01, the late offer, LS-03 *Do it anyway*, SC-02 undo — L · (USE-5, SET-9)
-- [ ] **USE-7** · Capacity trim: TR-01, LS-02 *Bring back*, *Keep instead* — M · (USE-2, USE-3)
+- [x] **USE-7** · Capacity trim: TR-01, LS-02 *Bring back*, *Keep instead* — M · (USE-2, USE-3)
 
 ## Ordering constraints (alphabetical order hides these)
 

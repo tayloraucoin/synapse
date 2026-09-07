@@ -8,6 +8,7 @@ import { formatCalendarDay, formatClock } from "@syn/utils";
 import { ITEM_COPY as COPY } from "@/components/item-sheet";
 import { OneOffSheet } from "@/components/one-off-sheet";
 import { ShiftSheet } from "@/components/shift-sheet";
+import { TrimSheet } from "@/components/trim-sheet";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { WakeTimeSheet } from "./wake-time-sheet";
@@ -17,13 +18,13 @@ type DayView = RouterOutputs["day"]["get"];
 /**
  * DH-01 — the four things you can do to a day.
  *
- * ONE ROW IS STILL HIDDEN. *I have less time today* arrives with USE-7; a
- * greyed row for a feature that does not exist is a promise the product has not
- * made, and `ActionRowSheet` filters `hidden` rows out entirely rather than
- * dimming them. *Shift my day* is live as of USE-6.
+ * ALL FOUR ROWS ARE LIVE as of USE-6 and USE-7. `ActionRowSheet` filters
+ * `hidden` rows out entirely rather than dimming them, which is what kept the
+ * two unbuilt actions from reading as promises the product had not made.
  *
- * A CLOSED DAY LOSES BOTH ANYWAY. Trimming or shifting a day that has ended is
- * not something anyone can mean.
+ * A CLOSED DAY LOSES THREE OF THEM. Trimming, shifting, or adding to a day that
+ * has ended is not something anyone can mean; setting its wake time still is,
+ * because that is a fact about a day already lived.
  */
 export function DayHeaderSheet({
   open,
@@ -39,6 +40,7 @@ export function DayHeaderSheet({
   const [wakeOpen, setWakeOpen] = React.useState(false);
   const [oneOffOpen, setOneOffOpen] = React.useState(false);
   const [shiftOpen, setShiftOpen] = React.useState(false);
+  const [trimOpen, setTrimOpen] = React.useState(false);
 
   // Only to name the habit in DH-02's *set by* line.
   const habits = trpc.habit.list.useQuery(
@@ -70,8 +72,14 @@ export function DayHeaderSheet({
               setWakeOpen(true);
             },
           },
-          // USE-7.
-          { label: COPY.lessTimeToday, onSelect: () => undefined, hidden: true },
+          {
+            label: COPY.lessTimeToday,
+            onSelect: () => {
+              onOpenChange(false);
+              setTrimOpen(true);
+            },
+            hidden: closed,
+          },
           {
             label: COPY.shiftMyDay,
             onSelect: () => {
@@ -89,6 +97,13 @@ export function DayHeaderSheet({
             hidden: closed,
           },
         ]}
+      />
+
+      <TrimSheet
+        open={trimOpen}
+        day={day}
+        onOpenChange={setTrimOpen}
+        onTrimmed={onChanged}
       />
 
       <ShiftSheet

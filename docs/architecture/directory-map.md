@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-07 · 1034 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-07 · 1039 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -323,6 +323,10 @@ apps/
         template-editor-screen.tsx
         template-editor.tsx
         use-template-editor.ts
+      trim-sheet/
+        copy.ts
+        index.ts
+        trim-sheet.tsx
       week-build/
         copy.ts
         day-sheet.tsx
@@ -572,6 +576,7 @@ packages/
         day/
           apply-shift.ts
           apply-template-changes.ts
+          apply-trim.ts
           bring-back.ts
           carry-item.ts
           close-day.ts
@@ -1333,6 +1338,7 @@ packages/
         late-offer.ts
         priority.ts
         shift-fit.ts
+        trim.ts
         wall-clock.ts
         week.ts
       review/

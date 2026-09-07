@@ -4,7 +4,7 @@
 **Slice type:** One sheet over one day-level mutation with a preview loop. The risk class is *a trim that scores*: a trimmed item counted as missed, a hard item trimmed, a second trim that forgets the first.
 **Vigil:** none. Induce: a trim that cannot fit (nothing else flexible); a second trim the same day that brings items back; a trim with done and active items on the day.
 
-**Status:** Not started
+**Status:** Complete (2026-09-06)
 
 ---
 

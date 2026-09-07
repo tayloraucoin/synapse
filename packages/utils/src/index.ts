@@ -18,6 +18,7 @@ export {
   closingThresholdMin,
   compareForTrim,
   computeShiftFit,
+  computeTrim,
   dateKeyIn,
   dayModeFor,
   dayPartBoundaries,
@@ -46,6 +47,8 @@ export {
   type ItemStateInput,
   type ShiftFit,
   type ShiftItem,
+  type TrimItem,
+  type TrimResult,
   type PrioritySortable,
 } from "./day";
 export { AppError, isAppError } from "./errors";

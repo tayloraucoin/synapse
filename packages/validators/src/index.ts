@@ -128,7 +128,12 @@ export {
   type UpdateHabitInput,
 } from "./habit";
 
-export { getDayInput, type GetDayInput } from "./day";
+export {
+  applyTrimInput,
+  getDayInput,
+  type ApplyTrimInput,
+  type GetDayInput,
+} from "./day";
 
 export {
   dateKeySchema,

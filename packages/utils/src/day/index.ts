@@ -24,6 +24,7 @@ export {
 } from "./item-state";
 export { LATE_OFFER_THRESHOLD_MIN, isLateOffer } from "./late-offer";
 export { compareForTrim, type PrioritySortable } from "./priority";
+export { computeTrim, type TrimItem, type TrimResult } from "./trim";
 export {
   computeShiftFit,
   freedMinutes,

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { CAPACITY_MAX, CAPACITY_MIN } from "@syn/constants";
+
 import { dateKeySchema } from "./keys";
 
 /**
@@ -17,3 +19,24 @@ export const getDayInput = z.object({
 });
 
 export type GetDayInput = z.infer<typeof getDayInput>;
+
+/**
+ * TR-01's input — official spec §5.8.
+ *
+ * `keep` IS THE PERSON OVERRIDING THE ORDER. The trim offers the least
+ * important things first (§6.6); *Keep instead* says "not that one", and the
+ * next-lowest goes instead. The set is sent rather than the resulting trim
+ * list, so the server computes the same answer from the same rule rather than
+ * being told which rows to set aside.
+ */
+export const applyTrimInput = z.object({
+  date: dateKeySchema,
+  capacityMin: z
+    .number()
+    .int()
+    .min(CAPACITY_MIN, `Between ${CAPACITY_MIN} and ${CAPACITY_MAX} minutes.`)
+    .max(CAPACITY_MAX, `Between ${CAPACITY_MIN} and ${CAPACITY_MAX} minutes.`),
+  keep: z.array(z.string().uuid()).max(200),
+});
+
+export type ApplyTrimInput = z.infer<typeof applyTrimInput>;
