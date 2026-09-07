@@ -91,4 +91,9 @@ export {
   type ScoredMiss,
   type TradedUp,
 } from "./review/adherence";
-export { stripStateFor, type StripSquare } from "./review/strip";
+export {
+  emptyStripWeek,
+  stripStateFor,
+  toStripWeek,
+  type StripSquare,
+} from "./review/strip";

@@ -112,22 +112,25 @@ export function DayList({
   });
 
   /*
-   * `?sheet=shift` — the late offer's action (USE-6). The status line is chrome
-   * above the page and has no day to hand SF-01, so it navigates here and this
-   * opens the sheet. Read once and cleaned off the address, the same way a
-   * notification landing is: a shift sheet that reopened on every back would be
+   * `?sheet=…` — how the chrome asks the page to open something.
+   *
+   * The status line (USE-6's late offer) and the keyboard host (SYS-4's `n`)
+   * both sit ABOVE the page and have no `DayView` to hand a sheet, so they
+   * navigate and this opens it. Read once and cleaned off the address, the same
+   * way a notification landing is: a sheet that reopened on every back would be
    * the app asking a question the person already answered.
    */
-  const shiftParam = useSearchParams().get("sheet");
+  const sheetParam = useSearchParams().get("sheet");
   const dayKeyRoute = usePathname();
-  const shiftConsumed = React.useRef(false);
+  const sheetConsumed = React.useRef(false);
 
   React.useEffect(() => {
-    if (shiftParam !== "shift" || shiftConsumed.current) return;
-    shiftConsumed.current = true;
-    setSheet("shift");
+    if (sheetConsumed.current) return;
+    if (sheetParam !== "shift" && sheetParam !== "one-off") return;
+    sheetConsumed.current = true;
+    setSheet(sheetParam);
     router.replace(dayKeyRoute, { scroll: false });
-  }, [shiftParam, router, dayKeyRoute]);
+  }, [sheetParam, router, dayKeyRoute]);
 
   React.useEffect(() => {
     // `?sheet=item&id=…` opens the sheet; `?focus=` deliberately does not.

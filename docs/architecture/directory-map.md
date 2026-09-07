@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-07 · 1051 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-07 · 1052 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -446,6 +446,8 @@ docs/
     rls.md
   product/
     value-proposition.md
+  reviews/
+    2026-09-06-full-build-review.md
   roles/
     engineering/
       Forge—staff-engineer-role-prompt.md

@@ -16,6 +16,11 @@ type DayView = RouterOutputs["day"]["get"];
 /**
  * SC-02 — what one shift did, as a record.
  *
+ * NAMED `ShiftRecordSheet`, NOT `ShiftSheet`. USE-6 added a `ShiftSheet` that
+ * CREATES a shift (SF-01, `components/shift-sheet/`); two exports with one
+ * name in one app is an auto-import that is right half the time. This one
+ * reads a shift that already happened, and the name says so.
+ *
  * *UNDO THIS SHIFT* APPEARS ONLY WHILE IT WOULD BE A TRUE REVERSAL (USE-6).
  * The server decides — within ten minutes, no later shift, and nothing that was
  * cut has since been done anyway — and when it says no, the action is ABSENT
@@ -32,7 +37,7 @@ type DayView = RouterOutputs["day"]["get"];
  * words that define the tier where a person chose it are the words that report
  * it here, so the vocabulary is learned once.
  */
-export function ShiftSheet({
+export function ShiftRecordSheet({
   open,
   day,
   shiftId,

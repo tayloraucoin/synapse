@@ -79,6 +79,25 @@ export type StripState =
   | "not-assigned"
   | "pending";
 
+/**
+ * A whole week of squares — Monday to Sunday, always exactly seven.
+ *
+ * A TUPLE, NOT AN ARRAY. `HabitStrip` draws seven squares and its prop says so;
+ * a plain `StripState[]` forced every caller to cast, which is the type system
+ * being talked out of a length invariant the read models actually guarantee
+ * (`weekDates` returns seven keys, and the builders map over them). Named once,
+ * a six-day week fails to compile rather than failing to render.
+ */
+export type StripWeek = readonly [
+  StripState,
+  StripState,
+  StripState,
+  StripState,
+  StripState,
+  StripState,
+  StripState,
+];
+
 /** The item timer — official spec §5.4. */
 export type TimerStatus = "idle" | "running" | "paused";
 

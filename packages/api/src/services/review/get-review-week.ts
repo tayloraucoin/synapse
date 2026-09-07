@@ -10,10 +10,12 @@ import {
   templates,
   type RlsClient,
 } from "@syn/db";
-import type { CategoryKey, IconValue } from "@syn/types";
+import type { CategoryKey, IconValue, StripWeek } from "@syn/types";
 import {
   computeAdherence,
   stripStateFor,
+  emptyStripWeek,
+  toStripWeek,
   weekDates,
   type AdherenceResult,
   type StripSquare,
@@ -40,7 +42,7 @@ export type HabitStripView = {
   title: string;
   /** From the ITEM's snapshot, so an archived habit still draws its strip. */
   icon: IconValue;
-  days: StripSquare[];
+  days: StripWeek;
   credit: number;
   counted: number;
 };
@@ -224,7 +226,16 @@ export async function getReviewWeek(
   const allScored = await toScoredItems(rls, userId, raw.items, allMisses);
   const allVerdicts = computeAdherence(allScored).perItem;
 
-  const habitStrips = new Map<string, HabitStripView>();
+  /*
+   * Built with a MUTABLE day array and narrowed to the seven-day tuple at the
+   * boundary — the squares are filled in as the items are walked, and a
+   * readonly tuple cannot be filled in. `toStripWeek` is where the invariant
+   * is asserted, once, rather than trusted at every write.
+   */
+  const habitStrips = new Map<
+    string,
+    Omit<HabitStripView, "days"> & { days: StripSquare[] }
+  >();
 
   for (const item of raw.items) {
     if (item.habitId === null) continue;
@@ -242,7 +253,7 @@ export async function getReviewWeek(
         icon: item.icon,
         // A day with no item for this habit is `not-assigned`, which is also
         // what an unplanned day gets — the same fact from the strip's view.
-        days: Array.from({ length: 7 }, () => "not-assigned" as StripSquare),
+        days: [...emptyStripWeek()],
         credit: 0,
         counted: 0,
       };
@@ -417,9 +428,9 @@ export async function getReviewWeek(
     templates: [...templateUsage.values()].sort((a, b) => b.days - a.days),
     // Sorted by how the week went, worst first — the point of the strip is to
     // find what slipped, not to rank what did not.
-    habits: [...habitStrips.values()].sort(
-      (a, b) => rate(a) - rate(b) || a.title.localeCompare(b.title),
-    ),
+    habits: [...habitStrips.values()]
+      .sort((a, b) => rate(a) - rate(b) || a.title.localeCompare(b.title))
+      .map((strip) => ({ ...strip, days: toStripWeek(strip.days) })),
     deepWorkRows: [...deepWorkRows.values()].sort(
       (a, b) => b.minutes - a.minutes || a.title.localeCompare(b.title),
     ),
@@ -453,7 +464,8 @@ export async function getReviewWeek(
 
 
 /** A strip with nothing counted sorts last, not first — it did not slip. */
-function rate(strip: HabitStripView): number {
+/** Reads only the two counters, so it serves the mutable and final shapes. */
+function rate(strip: { credit: number; counted: number }): number {
   return strip.counted === 0
     ? Number.POSITIVE_INFINITY
     : strip.credit / strip.counted;

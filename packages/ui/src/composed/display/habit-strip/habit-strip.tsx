@@ -16,7 +16,7 @@
  */
 "use client";
 
-import type { HabitSummaryView, StripState } from "@syn/types";
+import type { HabitSummaryView, StripState, StripWeek } from "@syn/types";
 import * as React from "react";
 
 import { cn } from "../../../lib/cn";
@@ -116,16 +116,8 @@ export interface HabitStripProps {
    * same reason in REV-3.)
    */
   habit: Pick<HabitSummaryView, "icon" | "title">;
-  /** Monday–Sunday. */
-  days: readonly [
-    StripState,
-    StripState,
-    StripState,
-    StripState,
-    StripState,
-    StripState,
-    StripState,
-  ];
+  /** Monday–Sunday — the named tuple, so callers never cast (`@syn/utils`). */
+  days: StripWeek;
   /** "Monday" … — the accessible names for each square. */
   dayLabels: readonly string[];
   credit: number;

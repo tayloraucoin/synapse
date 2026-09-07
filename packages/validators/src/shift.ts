@@ -59,6 +59,16 @@ export const shiftApplyInput = z.object({
   reason: shiftReasonSchema,
   /** The items to cut. Everything else that overflows simply runs long. */
   cut: z.array(z.string().uuid()).max(200),
+  /**
+   * The preview's `fingerprint` — the day's shape when the sheet last looked.
+   *
+   * WITHOUT IT THE WRITE IS STILL SAFE (the server recomputes the fit from live
+   * rows, so it can never move a done item or cut something that now fits) but
+   * it is SILENT: the person would press *Shift and cut 2* and get a different
+   * outcome than the sheet showed them. Sending it is what turns that into a
+   * `CONFLICT` the sheet answers by re-previewing.
+   */
+  fingerprint: z.string().max(64).optional(),
 });
 
 export type ShiftApplyInput = z.infer<typeof shiftApplyInput>;

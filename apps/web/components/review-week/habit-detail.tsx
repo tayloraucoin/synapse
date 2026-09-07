@@ -61,11 +61,7 @@ export function HabitDetail({
       <div className="flex flex-col gap-(--space-5) py-(--space-4)">
         <HabitStrip
           habit={{ icon: habit.icon, title: habit.title }}
-          days={
-            habit.strip as unknown as React.ComponentProps<
-              typeof HabitStrip
-            >["days"]
-          }
+          days={habit.strip}
           dayLabels={COPY.dayLabels}
           credit={habit.credit}
           counted={habit.counted}

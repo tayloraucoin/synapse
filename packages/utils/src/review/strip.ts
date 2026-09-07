@@ -1,3 +1,5 @@
+import type { StripState, StripWeek } from "@syn/types";
+
 import type { ItemVerdict } from "./adherence";
 
 /**
@@ -13,14 +15,36 @@ import type { ItemVerdict } from "./adherence";
  * planned" are the same fact from the strip's point of view, and colouring
  * them differently would invite reading one as a failure.
  */
-export type StripSquare =
-  | "done"
-  | "done-moved"
-  | "not-counted"
-  | "half"
-  | "didnt-do"
-  | "not-assigned"
-  | "pending";
+/**
+ * An ALIAS of `@syn/types`' `StripState`, not a second copy.
+ *
+ * The two were declared independently — the same seven members in two packages
+ * — which is two places to add an eighth and one place to forget. `@syn/types`
+ * is the lower layer and the one `@syn/ui` already reads, so it owns the
+ * vocabulary and this name stays for the callers that use it.
+ */
+export type StripSquare = StripState;
+
+/** Seven `not-assigned` squares — a habit with nothing on the week. */
+export function emptyStripWeek(): StripWeek {
+  return [
+    "not-assigned",
+    "not-assigned",
+    "not-assigned",
+    "not-assigned",
+    "not-assigned",
+    "not-assigned",
+    "not-assigned",
+  ];
+}
+
+/** Narrows a built array to the week tuple; throws only on a coding error. */
+export function toStripWeek(days: readonly StripSquare[]): StripWeek {
+  if (days.length !== 7) {
+    throw new Error(`a strip week has seven days, not ${days.length}`);
+  }
+  return days as unknown as StripWeek;
+}
 
 export function stripStateFor(verdict: ItemVerdict | null): StripSquare {
   switch (verdict) {

@@ -5,4 +5,4 @@
 export { SCHEDULE_COPY } from "./copy";
 export { buildLayout, type ScheduleLayout } from "./layout";
 export { ScheduleCanvas } from "./schedule-canvas";
-export { ShiftSheet } from "./shift-sheet";
+export { ShiftRecordSheet } from "./shift-sheet";

@@ -47,6 +47,7 @@ export type {
   StateWordKind,
   StatusLineVariant,
   StripState,
+  StripWeek,
   TimerStatus,
 } from "./domain/ui-state";
 

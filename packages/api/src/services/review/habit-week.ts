@@ -1,12 +1,13 @@
 import { and, asc, eq, inArray } from "drizzle-orm";
 
 import { dayItems, days, reasons, type RlsClient } from "@syn/db";
-import type { IconValue, MissTier } from "@syn/types";
+import type { IconValue, MissTier, StripWeek } from "@syn/types";
 import {
   computeAdherence,
   mondayOf,
   stripStateFor,
   weekDates,
+  toStripWeek,
   weekKeyOf,
   type StripSquare,
 } from "@syn/utils";
@@ -53,7 +54,7 @@ export type HabitWeekView = {
   title: string;
   icon: IconValue;
   days: HabitDayOutcome[];
-  strip: StripSquare[];
+  strip: StripWeek;
   credit: number;
   counted: number;
   lastFourWeeks: { credit: number; counted: number };
@@ -153,11 +154,13 @@ export async function getHabitWeek(
     thisWeek.map((item) => [dateByDayId.get(item.dayId) ?? "", item]),
   );
 
-  const strip: StripSquare[] = dates.map((date) => {
-    const item = byDate.get(date);
-    if (item === undefined) return "not-assigned";
-    return stripStateFor(verdicts[item.id]?.verdict ?? null);
-  });
+  const strip = toStripWeek(
+    dates.map((date) => {
+      const item = byDate.get(date);
+      if (item === undefined) return "not-assigned";
+      return stripStateFor(verdicts[item.id]?.verdict ?? null);
+    }),
+  );
 
   const days7: HabitDayOutcome[] = dates.map((date) => {
     const item = byDate.get(date);

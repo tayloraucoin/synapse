@@ -72,6 +72,12 @@ Index: [`ai-guides/README.md`](ai-guides/README.md).
 | [`epic-3-review/`](specs/epic-3-review/) | `REV-1…4` — the resolver, the Day Review, history, the Week Review: [README](specs/epic-3-review/README.md) · [build order](specs/epic-3-review/00-build-order.md) · [PROGRESS](specs/epic-3-review/PROGRESS.md). |
 | [`cross-cutting-system/`](specs/cross-cutting-system/) | `SYS-1…5` — the shell, time zones, About & feedback, keyboard, PWA install and update: [README](specs/cross-cutting-system/README.md) · [build order](specs/cross-cutting-system/00-build-order.md) · [PROGRESS](specs/cross-cutting-system/PROGRESS.md). |
 
+## `reviews/` — what was checked, and what was found
+
+| Path | What |
+|---|---|
+| [`2026-09-06-full-build-review.md`](reviews/2026-09-06-full-build-review.md) | Mason, Forge and Vigil over all 39 tickets. Verdict, red/orange/yellow findings, the executed-check table, and the recommended order of work. |
+
 ## `roles/` — who is reading
 
 | Document | What |

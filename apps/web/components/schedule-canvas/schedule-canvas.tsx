@@ -27,7 +27,7 @@ import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { SCHEDULE_COPY as COPY } from "./copy";
 import { buildLayout, type PxPerHour } from "./layout";
-import { ShiftSheet } from "./shift-sheet";
+import { ShiftRecordSheet } from "./shift-sheet";
 
 type DayView = RouterOutputs["day"]["get"];
 
@@ -269,7 +269,7 @@ export function ScheduleCanvas({
         }}
       />
 
-      <ShiftSheet
+      <ShiftRecordSheet
         open={openShiftId !== null}
         day={day}
         shiftId={openShiftId}

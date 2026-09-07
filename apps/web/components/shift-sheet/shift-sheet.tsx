@@ -175,6 +175,9 @@ export function ShiftSheet({
           tier: chosenTier,
         },
         cut: [...cut],
+        // The day as the sheet last saw it. A mismatch is a `CONFLICT` and a
+        // re-preview rather than a shift the person did not agree to.
+        fingerprint: preview.data.fingerprint,
       });
 
       onOpenChange(false);

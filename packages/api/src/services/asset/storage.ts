@@ -2,14 +2,23 @@ import { createAdminClient } from "@syn/auth";
 import { parseAssetPath, toStorageKey, type AssetBucket } from "@syn/constants";
 
 /**
- * THE ONE PLACE `@syn/api` REACHES FOR THE SERVICE ROLE.
+ * ICON AND AVATAR OBJECTS, UNDER THE SERVICE ROLE.
  *
  * Storage has no equivalent of the RLS bridge: `ctx.rls` scopes SQL, not
  * objects, and the app never hands a person's JWT to the storage client. So
  * every object operation runs as the service role under a server-side check,
  * and the discipline is the same one `buildServiceRoleAuthContext` gives the
- * database — the bypass is named, it lives in one file, and it is greppable.
- * The only other admin call in the product is the read route in `apps/web`.
+ * database — the bypass is named and greppable.
+ *
+ * IT IS NO LONGER THE ONLY ONE. SET-3 wrote this file as the single service-
+ * role reach in `@syn/api`, and later tickets added their own, each for an
+ * object class this file's `AssetBucket` grammar deliberately excludes:
+ * `services/user/request-export.ts` and `delete-account.ts` (SET-10, the
+ * `exports` bucket and the account-wide prefix sweep) and
+ * `services/jobs/expire-exports.ts` (SYS-5). Plus the read route in
+ * `apps/web`. **`grep -rn "createAdminClient()" packages/api/src apps/web` is
+ * the list** — four files and one route — and it is the check to run, rather
+ * than trusting this paragraph to stay current.
  *
  * THE AUTHORIZATION IS THE CALLER'S. Nothing here decides who may touch a
  * path; the services above do, by building every path from the session's user

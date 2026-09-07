@@ -121,11 +121,7 @@ export function ReviewWeek({
               <HabitStrip
                 key={habit.habitId}
                 habit={{ icon: habit.icon, title: habit.title }}
-                days={
-                  habit.days as unknown as React.ComponentProps<
-                    typeof HabitStrip
-                  >["days"]
-                }
+                days={habit.days}
                 dayLabels={COPY.dayLabels}
                 credit={habit.credit}
                 counted={habit.counted}
