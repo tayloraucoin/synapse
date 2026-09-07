@@ -1,10 +1,10 @@
 /**
  * The starter chooser's strings — Epic 1 FR-02, verbatim.
  *
- * The ten habit titles are not here: they are `STARTER_HABITS` in
+ * The habit titles are not here: they are `STARTER_HABITS` in
  * `@syn/constants`, because they are data a person confirms by saving rather
  * than copy the product says. The server reads the same constant, so a client
- * cannot invent an eleventh.
+ * cannot invent one that is not in it.
  */
 export const STARTER_SET_COPY = {
   open: "Start from a small set",

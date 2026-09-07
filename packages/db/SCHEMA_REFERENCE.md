@@ -2352,7 +2352,7 @@ All three are **private**; a public bucket would be a URL anyone who has seen it
 
 | Function | Writes | Idempotent by |
 |---|---|---|
-| `seedStarterLibrary` | 2 categories (*Health* leaf, *Deep work* sky) and the 10 habits of Epic 1 FR-02, the first four in *Health*; sets `users.wake_anchor_habit_id` to the first | "already has habits → do nothing" |
+| `seedStarterLibrary` | 2 categories (*Health* leaf, *Deep work* sky) and the starter habits of Epic 1 FR-02 as amended, the physical ones in *Health*; sets `users.wake_anchor_habit_id` to the first | "already has habits → do nothing" |
 | `seedDefaultReasons` | the 7 rows of official spec §3.10, `built_in`, with `structural` on `chose_not_to` and `other` | `ON CONFLICT (user_id, key) DO NOTHING` |
 | `seedMorningTemplate` | one template *Morning* at 07:00 with the first five habits as `fixed_time` slots at offsets 0/2/10/30/60, durations at each range's midpoint, the wake-up slot `hard` | "already has a template → do nothing" |
 

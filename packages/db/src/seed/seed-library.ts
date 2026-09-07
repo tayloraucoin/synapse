@@ -1,5 +1,5 @@
 /**
- * The starter library, for one person: two categories and the ten habits of
+ * The starter library, for one person: two categories and the starter habits of
  * Epic 1 FR-02.
  *
  * THIS IS THE ONLY PLACE THE STARTER SET IS WRITTEN AS ROWS. A real person
@@ -28,8 +28,22 @@ const SEED_CATEGORIES = [
   { name: "Deep work", colorKey: "sky" as const },
 ];
 
-/** The first four starter habits go in *Health*. */
-const HEALTH_HABIT_COUNT = 4;
+/**
+ * Which starter habits land in *Health*, BY TITLE.
+ *
+ * It was a positional slice (`index < 4`), which silently mis-assigned the
+ * moment the starter set changed: splitting *Cold shower or bath* in two
+ * pushed *Stretch or yoga* out of Health without a word. A set of titles says
+ * what it means and breaks visibly — a renamed habit simply stops matching,
+ * which is a missing category rather than a wrong one.
+ */
+const HEALTH_HABIT_TITLES = new Set([
+  "Wake up immediately",
+  "Cold shower",
+  "Cold bath",
+  "Meditate",
+  "Stretch or yoga",
+]);
 
 export async function seedStarterLibrary(
   db: Db,
@@ -56,8 +70,10 @@ export async function seedStarterLibrary(
   const insertedHabits = await db
     .insert(habits)
     .values(
-      STARTER_HABITS.map((habit, index) => ({
-        categoryId: index < HEALTH_HABIT_COUNT ? (healthId ?? null) : null,
+      STARTER_HABITS.map((habit) => ({
+        categoryId: HEALTH_HABIT_TITLES.has(habit.title)
+          ? (healthId ?? null)
+          : null,
         durationMaxMin: habit.rangeMax,
         durationMinMin: habit.rangeMin,
         lifePriority: habit.importance,
