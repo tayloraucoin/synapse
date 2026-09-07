@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { useShell } from "@/app/(shell)/_components/shell-context";
+import { useOptionalShell } from "@/app/(shell)/_components/shell-context";
 
 /**
  * Wraps any open sheet so the shell knows one is open.
@@ -21,6 +21,13 @@ import { useShell } from "@/app/(shell)/_components/shell-context";
  *   <SheetHost open={sheet.open}>
  *     <ResponsiveSheet open={sheet.open} onOpenChange={…}>…</ResponsiveSheet>
  *   </SheetHost>
+ *
+ * OUTSIDE THE SHELL IT DOES NOTHING, deliberately. The same sheets open during
+ * first run, where the `(setup)` group has no chrome at all — no tab bar to dim
+ * and no `main` to hide — so there is nothing to tell and nothing to fail
+ * about. `useOptionalShell` is what makes "no shell" a state rather than an
+ * error; the throwing `useShell` stays the default for chrome that genuinely
+ * cannot work without it.
  */
 export function SheetHost({
   open,
@@ -29,10 +36,11 @@ export function SheetHost({
   open: boolean;
   children: React.ReactNode;
 }) {
-  const { setSheetOpen } = useShell();
+  const shell = useOptionalShell();
+  const setSheetOpen = shell?.setSheetOpen;
 
   React.useEffect(() => {
-    if (!open) return;
+    if (!open || setSheetOpen === undefined) return;
     setSheetOpen(true);
     return () => {
       setSheetOpen(false);

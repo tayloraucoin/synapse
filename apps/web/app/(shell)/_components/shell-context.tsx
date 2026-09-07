@@ -31,12 +31,37 @@ export type ShellContextValue = {
 
 const ShellContext = React.createContext<ShellContextValue | null>(null);
 
+/**
+ * The shell's state, or a throw — for chrome that cannot exist without it.
+ *
+ * `PageFrame`, `AppShell` and `useBack` are all shell-only, and a missing
+ * provider there is a real mistake worth failing loudly on.
+ */
 export function useShell(): ShellContextValue {
   const value = React.useContext(ShellContext);
   if (value === null) {
     throw new Error("useShell must be used inside <ShellProviders>");
   }
   return value;
+}
+
+/**
+ * The shell's state, or null — for components that legitimately render in BOTH
+ * trees.
+ *
+ * `SheetHost` is the case that forced this. A sheet is a feature's component,
+ * and the same habit sheet opens from Settings (inside the shell) and from the
+ * first-run sequence (the `(setup)` group, which deliberately has no chrome —
+ * no tab bar to dim, no `main` to hide). Throwing there was the guard firing on
+ * the one caller for which absence is the correct state, and it dead-ended
+ * setup step 2.
+ *
+ * The throwing version stays the default precisely so this stays the exception:
+ * a component reaching for the shell is usually chrome, and usually wrong to be
+ * outside it.
+ */
+export function useOptionalShell(): ShellContextValue | null {
+  return React.useContext(ShellContext);
 }
 
 /**
