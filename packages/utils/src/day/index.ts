@@ -6,6 +6,16 @@ export {
   resolveDayKey,
 } from "./boundaries";
 export {
+  computeAdjust,
+  fingerprintOf as adjustFingerprintOf,
+  type AdjustHow,
+  type AdjustInput,
+  type AdjustItem,
+  type AdjustPlacement,
+  type AdjustResult,
+  type AdjustWhat,
+} from "./adjust";
+export {
   computeBudget,
   fitToBudget,
   type FitItem,

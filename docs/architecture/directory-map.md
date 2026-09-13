@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1102 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1111 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -592,6 +592,7 @@ packages/
   api/
     src/
       routers/
+        adjust.ts
         asset.ts
         category.ts
         day.ts
@@ -614,6 +615,7 @@ packages/
           create-upload-url.ts
           storage.ts
         day/
+          adjust-day.ts  # Adjust — scope computed, preview then commit with a fingerprint, one shifts row of the right kind, undo per decision (b)
           apply-shift.ts
           apply-template-changes.ts
           apply-trim.ts
@@ -623,6 +625,8 @@ packages/
           close-day.ts
           confirm-day.ts  # Set the day — resolves the pools, walks once, writes original_scheduled_start for the first and only time
           copy-week.ts
+          do-now.ts
+          edit-habit-day.ts
           get-day.ts
           get-item.ts
           item-fields.ts
@@ -630,9 +634,12 @@ packages/
           lay-out-day.ts  # the whole day's arithmetic — chains stackBlock per kind, forward from wake, backward to work and lights-out. Pure; build and confirm both call it
           manual-time.ts
           materialize-day.ts  # THE materialiser, by block (v1.1 §11.11). Reconciles, never rebuilds; pooled blocks hold nothing; originals only for fixtures and pins
+          move-item.ts
           one-off.ts
           prefill-week.ts
+          preview-fit.ts
           quick-pick.ts
+          reflow-block.ts  # the one re-lay of a set day (v1.1 §6.3–6.5): fixed points as pins, the rest walked forward; two columns written, never the original
           set-done.ts
           shift-fit.ts
           timer.ts
@@ -1392,6 +1399,7 @@ packages/
   utils/
     src/
       day/
+        adjust.ts  # Adjust's arithmetic, pure: slide or hold; shorten · cut · choose over fitToBudget and stackBlock
         boundaries.ts
         budget.ts
         day-key.ts
@@ -1421,6 +1429,7 @@ packages/
   validators/
     src/
       account.ts
+      adjust.ts
       asset.ts
       auth-credentials.ts
       block.ts

@@ -5,6 +5,8 @@ import {
   applyTrimInput,
   confirmDayInput,
   getDayInput,
+  moveBlockInput,
+  previewFitInput,
   quickPickInput,
   setWakeTimeInput,
 } from "@syn/validators";
@@ -14,9 +16,12 @@ import { backfillBlocks } from "../services/day/backfill-blocks";
 import { ConfirmRuleError, confirmDay } from "../services/day/confirm-day";
 import { getDay } from "../services/day/get-day";
 import { setWakeTime } from "../services/day/item-fields";
+import { moveBlock } from "../services/day/move-item";
+import { previewFit } from "../services/day/preview-fit";
 import { getQuickPick } from "../services/day/quick-pick";
 import { resolveTodayFor } from "../services/day/today";
 import { protectedProcedure, router } from "../trpc";
+import { asMoveError } from "./item";
 
 /** The two refusals *Set the day* makes, as sentences (UX v1.1 §3.7, R25). */
 function confirmError(error: ConfirmRuleError): TRPCError {
@@ -152,6 +157,24 @@ export const dayRouter = router({
     }
     return backfillBlocks(ctx.rls, ctx.authContext.userId, today.todayKey);
   }),
+
+  /* -------------------------------------------------- UX v1.1 (DYN-6) -- */
+
+  /** The Schedule's band drag — §6.5. Every movable item and the band, by the same minutes. */
+  moveBlock: protectedProcedure
+    .input(moveBlockInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await moveBlock(ctx.rls, ctx.authContext.userId, input);
+      } catch (error) {
+        throw asMoveError(error);
+      }
+    }),
+
+  /** *Shorten to fit* — §5.3. `fitToBudget` against the day's budget; writes nothing. */
+  previewFit: protectedProcedure
+    .input(previewFitInput)
+    .query(async ({ ctx, input }) => previewFit(ctx.rls, ctx.authContext.userId, input)),
 
   /* ------------------------------------------------------------- TR-01 -- */
 

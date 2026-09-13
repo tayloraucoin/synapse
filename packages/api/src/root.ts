@@ -1,3 +1,4 @@
+import { adjustRouter } from "./routers/adjust";
 import { assetRouter } from "./routers/asset";
 import { categoryRouter } from "./routers/category";
 import { dayRouter } from "./routers/day";
@@ -26,6 +27,7 @@ import { createCallerFactory, router } from "./trpc";
  * epics' tech spec, mounted here as they land.
  */
 export const appRouter = router({
+  adjust: adjustRouter,
   asset: assetRouter,
   category: categoryRouter,
   day: dayRouter,

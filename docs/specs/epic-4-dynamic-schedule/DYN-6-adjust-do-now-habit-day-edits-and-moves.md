@@ -4,7 +4,7 @@
 **Slice type:** The day-level mutations — every way a set day changes after it is set. One pure function (`computeAdjust`) previewed by the client and recomputed by the server before writing, as USE-6 established; one reflow (`reflowBlock`) shared by four writers. The risk class is *a rewritten record* (a move that touches `original_scheduled_start`, a pin that moves) and *a stale apply* (an Adjust applied to a day that changed between preview and apply).
 **Vigil:** induce staleness — preview an Adjust, mark an item done from a second caller, apply; preview, start a timer elsewhere, apply; *Do now* on an item whose slide would cross a pin. State which paths were exercised.
 
-**Status:** Not started
+**Status:** Complete (2026-09-13 — AC 1–6's arithmetic probed through `computeAdjust` and the fingerprint; AC 15's grep and AC 18's four commands verified; every database-backed criterion, including Vigil's induced staleness cases, waits for `0004`/`0005` on a tier; the undo `[NEEDS DECISION]` taken as (b); see `DEVIATIONS.md`)
 
 > **Mason — mutation review.** Five writers (`adjustDay`, `doNow`, `editHabitDay`, `moveItem`, `moveBlock`) all re-lay part of a day. Review that the re-lay is one function over `stackBlock` (`reflowBlock`), that none of them ever includes `original_scheduled_start` in an update set, that pins and fixtures are refused by every one of them (not just the one the UI guards), that `adjustDay` recomputes and refuses on staleness exactly as `apply-shift` does today, that the three *how*s (shorten · cut · choose) share `fitToBudget`, and that a `shift` moves `days.work_start_time` while a `refit` never does.
 

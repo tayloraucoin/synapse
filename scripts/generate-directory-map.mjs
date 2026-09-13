@@ -101,6 +101,9 @@ const ANNOTATIONS = {
   "packages/api/src/services/day/confirm-day.ts": "Set the day — resolves the pools, walks once, writes original_scheduled_start for the first and only time",
   "packages/api/src/services/day/untouched.ts": "the two predicates that decide what materialisation may rewrite — item and block",
   "packages/api/src/services/day/backfill-blocks.ts": "the one data migration that is not SQL: v1.0 days into one morning block each. Run per account after 0005, before 0006",
+  "packages/api/src/services/day/reflow-block.ts": "the one re-lay of a set day (v1.1 §6.3–6.5): fixed points as pins, the rest walked forward; two columns written, never the original",
+  "packages/api/src/services/day/adjust-day.ts": "Adjust — scope computed, preview then commit with a fingerprint, one shifts row of the right kind, undo per decision (b)",
+  "packages/utils/src/day/adjust.ts": "Adjust's arithmetic, pure: slide or hold; shorten · cut · choose over fitToBudget and stackBlock",
   "packages/api/src/services/notifications/block-pushes.ts": "the named seam DYN-20 fills; confirmDay calls it and it enqueues nothing yet",
 
   // --- ui ---

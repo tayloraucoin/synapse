@@ -24,7 +24,7 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 ### Phase 1 — The services
 - [x] **DYN-4** · Plan services: block templates by kind, the same-position rule with *one of*, fixtures, workouts and focuses, the library by block — L · (DYN-3) · **Mason review of the position invariant**
 - [x] **DYN-5** · Materialisation per block and *Set the day*: `materializeDay` rewritten, `confirmDay`, the day read model by block, the week view by block — L · (DYN-4) · **Mason review of the keep rules and the trigger transition**
-- [ ] **DYN-6** · Adjust, *Do now*, habit-day edits, and moves: `adjustDay`, `doNow`, `editHabitDay`, `moveItem`, `moveBlock`, the reflow — L · (DYN-5) · **Mason review; Vigil: induced staleness between preview and apply**
+- [x] **DYN-6** · Adjust, *Do now*, habit-day edits, and moves: `adjustDay`, `doNow`, `editHabitDay`, `moveItem`, `moveBlock`, the reflow — L · (DYN-5) · **Mason review; Vigil: induced staleness between preview and apply**
 
 ### Phase 2 — The composites
 - [ ] **DYN-7** · `@syn/ui` for v1.1: `BlockHeader`, `BlockBand`, `GapBand`, `BudgetLine`, `DragLayer`, `ConfirmYesterdayRows`, the serif `Textarea` variant, `StepFrame` to twelve, `ScheduleBlock`/`ItemRow`/`SlotView` extensions, stories — L · (DYN-1) · **Vesper review of stories in both themes**

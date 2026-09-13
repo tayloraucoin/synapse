@@ -251,3 +251,24 @@ export {
   quickPickInput,
   type ConfirmDayInput,
 } from "./confirm";
+
+export {
+  adjustApplyInput,
+  adjustEntrySchema,
+  adjustHowSchema,
+  adjustPreviewInput,
+  adjustScopeInput,
+  adjustWhatSchema,
+  doNowInput,
+  habitDayEditInput,
+  moveBlockInput,
+  moveItemInput,
+  previewFitInput,
+  type AdjustApplyInput,
+  type AdjustPreviewInput,
+  type DoNowInput,
+  type HabitDayEditInput,
+  type MoveBlockInput,
+  type MoveItemInput,
+  type PreviewFitInput,
+} from "./adjust";

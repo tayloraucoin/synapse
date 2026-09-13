@@ -46,7 +46,20 @@ export async function startTimer(
   itemId: string,
   context: { todayKey: string; now: Date },
 ): Promise<StartTimerResult> {
-  return rls.execute(async (tx) => {
+  return rls.execute((tx) => startTimerInTx(tx, userId, itemId, context));
+}
+
+/**
+ * The same start, inside a caller's transaction — *Do now* (DYN-6) moves the
+ * item, starts it, and re-lays its block in one commit.
+ */
+export async function startTimerInTx(
+  tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
+  userId: string,
+  itemId: string,
+  context: { todayKey: string; now: Date },
+): Promise<StartTimerResult> {
+  {
     const [item] = await tx
       .select({
         id: dayItems.id,
@@ -164,7 +177,7 @@ export async function startTimer(
       .where(eq(dayItems.id, item.id));
 
     return { itemId: item.id, startedAt: context.now, stopped, movedTo };
-  });
+  }
 }
 
 /**
