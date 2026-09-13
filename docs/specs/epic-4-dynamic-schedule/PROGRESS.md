@@ -21,8 +21,8 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | DYN-15 | Today by block, the day header, the item sheet, the habit-day sheet | DYN-14 | Complete (authored from the handoff and built in one thread; the list by block with the container work row and the marker, the header's focus and anchor, the five-row day header sheet with *Add from the library*, the item sheet's *Do now* / *Edit today's* / one-of, `components/habit-day-sheet/`; `item.chooseAlternate`, `day.addFromLibrary`, `DayView.unblocked`; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-16 | The Schedule, editable | DYN-15, DYN-6 | Not started (handoff) · does not gate | — |
 | DYN-17 | Adjust | DYN-15, DYN-6 | Complete (authored from the handoff and built in one thread; `components/adjust-sheet/` over `adjust.preview/commit/undo`, three entries, the late-wake offer from `shell.status.lateWakeOffer`; the shift and trim rows gone from the day header sheet; the four commands and the Storybook build pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
-| DYN-18 | The evening | DYN-15, DYN-14 | Not started (handoff) | — |
-| DYN-19 | Review amended | DYN-18 | Not started (handoff) | — |
+| DYN-18 | The evening | DYN-15, DYN-14 | Complete (authored from the handoff and built in one thread with DYN-19; `/day/{date}/journal` + `components/journal/`, the wind-down *Journal* row's navigation and self-tick (`syncJournalItem`), `review.confirmLastNight` with the panel first in the Day Review, Settings → Your day → *Closing the day* as the embedded screen with the wind-down chooser band and the ghost row; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
+| DYN-19 | Review amended | DYN-18 | Complete (authored and built with DYN-18; the Day Review grouped by `BlockHeader` with the work line, the intention, *planned · done* and *shortened*; the Week Review's counts line, time by block, Reflections; `stripStateFor` reads `not_confirmed`; the export's three new CSVs; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-20 | Notifications revised | DYN-14, DYN-18 | Not started (handoff) | — |
 | DYN-21 | Migration `0006` and the retirements | DYN-9, DYN-16, DYN-17, DYN-19, DYN-20 | Not started (handoff) | — |
 
@@ -45,7 +45,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] DYN-15
 - [ ] DYN-16 (does not gate)
 - [x] DYN-17
-- [ ] DYN-18
-- [ ] DYN-19
+- [x] DYN-18
+- [x] DYN-19
 - [ ] DYN-20
 - [ ] DYN-21

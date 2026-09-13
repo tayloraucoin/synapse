@@ -84,6 +84,7 @@ is a defect.**
 | `/day/{date}` | `dayRoute(date)` | LS-01, record or plan mode |
 | `/day/{date}/schedule` | `dayScheduleRoute(date)` | SC-01, past or future |
 | `/day/{date}/item/{id}` | `dayItemRoute(date, id)` | IT-01 — addressable for deep links |
+| `/day/{date}/journal` | `journalRoute(date)` | UX v1.1 §7.2 — the journal (DYN-18); today or a past day, read-only from Review (`?from=review`), a future day is a 404 |
 | `/review` | `reviewRoute()` | RV-00 |
 | `/review/day/{date}` | `reviewDayRoute(date)` | DR-01 |
 | `/review/week/{week}` | `reviewWeekRoute(week)` | WR-01 |
@@ -94,7 +95,7 @@ is a defect.**
 | `/settings/habits` | `settingsHabitsRoute()` | LB-01 |
 | `/settings/habits/{id}` | `settingsHabitRoute(id)` | LB-02 |
 | `/settings/your-day` | `settingsYourDayRoute()` | UX v1.1 §4.14 — the twelve first-run screens as a list (DYN-8) |
-| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one of DYN-10's six screens, embedded: `shape · work-days · work-start · commitments · wake · before-the-day` |
+| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one of DYN-10's six screens, or DYN-18's `closing-the-day` (screen 10), embedded: `shape · work-days · work-start · commitments · wake · before-the-day · closing-the-day` |
 | `/settings/your-day/block/{kind}` | `settingsYourDayBlockRoute(kind, templateId?)` | the block editor for a kind (§3.11); the template list above it when more than one |
 | `/settings/your-day/order` | `settingsYourDayOrderRoute()` | Block order (§4.14) |
 | `/settings/templates` | `settingsTemplatesRoute()` | redirects to `/settings/your-day` (DYN-8) |

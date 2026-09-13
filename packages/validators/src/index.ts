@@ -63,6 +63,7 @@ export {
   reviewDayInput,
   reviewHistoryInput,
   reviewWeekInput,
+  confirmLastNightInput,
   saveChangesInput,
   type DecideInput,
   type HabitWeekInput,

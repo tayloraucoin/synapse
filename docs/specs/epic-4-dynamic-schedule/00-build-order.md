@@ -46,8 +46,8 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 - [x] **DYN-17** · Adjust: the four-step sheet, its three entries and the late offer; the shift and trim sheets re-pointed — L · (DYN-15, DYN-6) · **Vigil: the doesn't-fit-even-cut path and the 10 s undo**
 
 ### Phase 6 — The evening and the review
-- [ ] **DYN-18** · The evening: the wind-down section's confirm-in-the-morning rows and the devices-off marker, the journal screen, the confirm-yesterday panel in the Day Review, Settings → Closing the day — L · (DYN-15, DYN-14)
-- [ ] **DYN-19** · Review amended: Day Review by block with *not confirmed* and *shortened*, the intention line; Week Review counts, *time by block*, reflections, the strip state; export additions — M · (DYN-18)
+- [x] **DYN-18** · The evening: the wind-down section's confirm-in-the-morning rows and the devices-off marker, the journal screen, the confirm-yesterday panel in the Day Review, Settings → Closing the day — L · (DYN-15, DYN-14)
+- [x] **DYN-19** · Review amended: Day Review by block with *not confirmed* and *shortened*, the intention line; Week Review counts, *time by block*, reflections, the strip state; export additions — M · (DYN-18)
 - [ ] **DYN-20** · Notifications revised: the catalogue, enqueue at *Set the day*, block-boundary jobs, per-block item toggles, devices-off — M · (DYN-14, DYN-18) · **Vigil: payload privacy, enqueue-at-pick**
 
 ### Phase 7 — Cleanup
@@ -107,7 +107,7 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 | 5 | DYN-10, DYN-11 | First run, one sequence in two halves | Handoff written |
 | 6 | DYN-13, DYN-14 | The morning: the two screens of the waking state | Handoff written |
 | 7 | DYN-15, DYN-16, DYN-17 | The day: the tab, the axis, the one sheet that adjusts it | Handoff written |
-| 8 | DYN-18, DYN-19 | The evening and the review that reads it | Handoff written |
+| 8 | DYN-18, DYN-19 | The evening and the review that reads it | Expanded and built 2026-09-13 |
 | 9 | DYN-20, DYN-21 | Notifications and the cleanup | Handoff written |
 
 Batches 1 and 2 exceed the guide's §7.4 ceiling of three per thread by being written in one thread together, for the same reason Epics 1–3 did: one data model, and tickets written apart would disagree about it. Logged in `DEVIATIONS.md`.

@@ -51,6 +51,19 @@ export const WEEK_COPY = {
   weekClosed: (date: string) => `Week closed ${date}`,
   nothingPlanned: "Nothing was planned this week.",
 
+  /* ------------------------------------------- UX v1.1 §8.2 (DYN-19) -- */
+  /** "Morning A 2 of 2" · "Menu 3" — used-of-target, or the count alone. */
+  countEntry: (label: string, used: number, target: number | null) =>
+    target === null ? `${label} ${used}` : `${label} ${used} of ${target}`,
+  /** "2 not confirmed" — the count is of items, said as a fact. */
+  notConfirmed: (n: number) => `${n} not confirmed`,
+  timeByBlock: "Time by block",
+  reflectionsHeading: "Reflections",
+  /** [COPY — v1.1 §8.2 names the empty state.] */
+  nothingWritten: "Nothing written this week.",
+  gratefulFor: "Grateful for today",
+  lookingForward: "Looking forward to",
+
   /* -------------------------------------------------------------- WR-02 -- */
   thisWeek: (credit: number, counted: number) =>
     `${credit} of ${counted} this week`,

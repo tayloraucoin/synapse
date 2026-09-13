@@ -194,6 +194,8 @@
 
 ### DYN-18 — The evening: the wind-down section, the journal, confirm-yesterday in the review, Settings → Closing the day
 
+> **Expanded 2026-09-13** into `DYN-18-the-evening.md` and built in the same thread (batch 10, with DYN-19). `/day/{date}/journal` and `components/journal/`; the wind-down *Journal* row navigates and self-ticks (`syncJournalItem`); `review.confirmLastNight` with the panel first in the Day Review; Settings → Your day → *Closing the day* is screen 10 embedded with the wind-down chooser band and the ghost row. Kept here as the record of the dense form.
+
 **Size:** L. **Slice type:** the winding-down state's surfaces — the lowest-willpower hour. Risk class: *a nag* (any pressure on an empty journal) and *a fabricated record* (a pre-ticked confirm). **Sage's lens** is quoted in the ticket.
 
 **Outcome.** The journal screen at `/day/{date}/journal` (`journalRoute(date)`) per §7.2 verbatim: back and the date, paper, six prompts as captions over serif autogrow `Textarea`s, `SaveStatus` *saved* in caption size, no finish button, no timer, no count; the wind-down row *Journal* ticks itself when any field has text; read-only for past days from Review. The wind-down section on Today per §7.1 (rows after devices-off with the *confirm in the morning* caption — DYN-15 renders them; this ticket wires the journal row and the push landing). The confirm-yesterday panel as the first section of the Day Review when unconfirmed items exist (§7.3; `ConfirmYesterdayRows`; writes through `review.decide`'s new `confirm` kind or `day.confirm`'s `lastNight` — one path, DYN-5's). **Settings → Closing the day** (the first-run screen 10, frame-less, under Your day — DYN-8 lists it; this ticket makes the prompt editor live there too). The wind-down starter library through `habit.createFromStarterLibrary`.
@@ -207,6 +209,8 @@
 **Depends on:** DYN-15, DYN-14. **Model:** Opus.
 
 ### DYN-19 — Review amended
+
+> **Expanded 2026-09-13** into `DYN-19-review-amended.md` and built in the same thread (batch 10, with DYN-18). The Day Review groups by `BlockHeader` with the intention, the work line, *planned · done* and *shortened*; the Week Review's counts line, time by block and Reflections are derived at read time; `stripStateFor` reads `not_confirmed`; the export gains three CSVs. Kept here as the record of the dense form.
 
 **Size:** M. **Slice type:** existing review surfaces re-pointed at blocks and the journal. Risk class: *synthesis* (a summary over the journal) and *a scored container*.
 

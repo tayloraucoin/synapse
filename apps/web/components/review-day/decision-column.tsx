@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import {
+  BlockHeader,
   CollapsiblePanel,
   DecisionPanel,
   GroupHeading,
@@ -103,14 +104,67 @@ export function DecisionColumn({
     );
   }
 
+  /*
+   * UX v1.1 §8.1 (DYN-19): "Undone items are grouped under `BlockHeader`s in
+   * block order"; the work block "appears once as a line" and is never a
+   * panel; panels with no block (a day the backfill has not reached, a
+   * one-off) sit under *Also today*.
+   */
+  const sorted = sortForReview(day.toDecide);
+  const byBlock = day.blocks.map((block) => ({
+    block,
+    entries: block.kind === "work" ? [] : sorted.filter((entry) => entry.item.dayBlockId === block.id),
+  }));
+  const blockIds = new Set(day.blocks.map((block) => block.id));
+  const loose = sorted.filter(
+    (entry) =>
+      entry.item.dayBlockId === null ||
+      !blockIds.has(entry.item.dayBlockId) ||
+      entry.item.blockKind === "work",
+  );
+  const hasBlocks = day.blocks.length > 0;
+
   return (
     <div className="flex flex-col gap-(--space-5)">
-      {day.toDecide.length === 0 ? null : (
+      {hasBlocks ? (
+        <>
+          {day.toDecide.length === 0 ? null : (
+            <GroupHeading>{editing ? COPY.decided : COPY.toDecide}</GroupHeading>
+          )}
+          {byBlock.map(({ block, entries }) =>
+            block.kind === "work" ? (
+              <section key={block.id} className="flex flex-col gap-(--space-1)">
+                <BlockHeader kind={block.kind} name={block.name} span={spanOf(block)} />
+                {/* Never scored: one line, no decision (§8.1). */}
+                <Text as="p" variant="secondary" tone="secondary" className="px-(--space-4)">
+                  {COPY.workLine(
+                    day.focusLabel,
+                    block.startLabel === null || block.endLabel === null
+                      ? null
+                      : `${block.startLabel}–${block.endLabel}`,
+                  )}
+                </Text>
+              </section>
+            ) : entries.length === 0 ? null : (
+              <section key={block.id} className="flex flex-col gap-(--space-3)">
+                <BlockHeader kind={block.kind} name={block.name} span={spanOf(block)} />
+                {entries.map((entry) => panelFor(entry, entry.state))}
+              </section>
+            ),
+          )}
+          {loose.filter((entry) => entry.item.blockKind !== "work").length === 0 ? null : (
+            <section className="flex flex-col gap-(--space-3)">
+              <GroupHeading>{COPY.alsoToday}</GroupHeading>
+              {loose
+                .filter((entry) => entry.item.blockKind !== "work")
+                .map((entry) => panelFor(entry, entry.state))}
+            </section>
+          )}
+        </>
+      ) : day.toDecide.length === 0 ? null : (
         <section className="flex flex-col gap-(--space-3)">
           <GroupHeading>{editing ? COPY.decided : COPY.toDecide}</GroupHeading>
-          {sortForReview(day.toDecide).map((entry) =>
-            panelFor(entry, entry.state),
-          )}
+          {sorted.map((entry) => panelFor(entry, entry.state))}
         </section>
       )}
 
@@ -140,7 +194,7 @@ export function DecisionColumn({
                 key={item.id}
                 as="li"
                 title={item.title}
-                meta={doneMeta(item, day.timezone ?? "UTC")}
+                meta={doneMeta(item, day.timezone ?? "UTC", day.shortenedIds.includes(item.id))}
                 trailing={
                   <button
                     type="button"
@@ -225,6 +279,7 @@ function toDecision(
 function doneMeta(
   item: ReviewDay["doneItems"][number],
   timeZone: string,
+  shortened = false,
 ): string {
   if (item.doneAt === null) return "";
   const done = COPY.doneRow(formatClock(item.doneAt, timeZone));
@@ -234,10 +289,19 @@ function doneMeta(
     item.scheduledStart !== null &&
     item.originalScheduledStart.getTime() !== item.scheduledStart.getTime();
 
-  return moved && item.originalScheduledStart !== null
-    ? COPY.doneRowMoved(
-        formatClock(item.doneAt, timeZone),
-        formatClock(item.originalScheduledStart, timeZone),
-      )
-    : done;
+  const line =
+    moved && item.originalScheduledStart !== null
+      ? COPY.doneRowMoved(
+          formatClock(item.doneAt, timeZone),
+          formatClock(item.originalScheduledStart, timeZone),
+        )
+      : done;
+  // §8.1: *shortened* as a line on items Adjust shortened.
+  return shortened ? `${line} · ${COPY.shortened}` : line;
+}
+
+function spanOf(block: ReviewDay["blocks"][number]): { startLabel: string; endLabel: string } | null {
+  return block.startLabel === null || block.endLabel === null
+    ? null
+    : { startLabel: block.startLabel, endLabel: block.endLabel };
 }

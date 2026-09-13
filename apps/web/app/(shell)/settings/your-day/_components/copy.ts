@@ -43,6 +43,8 @@ export const YOUR_DAY_COPY = {
   passage: "passage",
   lastNight: "last night",
   gratitude: "gratitude",
+  /** [COPY] The *Closing the day* row's value: "22:45 · journal". */
+  journalOn: "journal",
   both: "both",
   nothing: "Nothing",
   templates: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "template" : "templates"}`),

@@ -4,10 +4,13 @@ import type { PgColumn, PgTable } from "drizzle-orm/pg-core";
 import {
   categories,
   dataExports,
+  dayBlocks,
   dayItems,
   days,
   feedbackMessages,
+  fixtures,
   habits,
+  journalEntries,
   misses,
   notificationDeliveries,
   notificationPrefs,
@@ -61,6 +64,10 @@ export const EXPORT_FILE_NAMES = [
   "misses.csv",
   "shifts.csv",
   "timer_sessions.csv",
+  // UX v1.1 (DYN-19): the block model's three tables.
+  "day_blocks.csv",
+  "fixtures.csv",
+  "journal_entries.csv",
   "synapse-export.json",
 ] as const;
 
@@ -87,6 +94,10 @@ export type AccountData = {
   webPushSubscriptions: Row[];
   dataExports: Row[];
   feedbackMessages: Row[];
+  /* ---- UX v1.1 (DYN-19) ---- */
+  dayBlocks: Row[];
+  fixtures: Row[];
+  journalEntries: Row[];
 };
 
 /**
@@ -139,6 +150,9 @@ export async function readAccountData(
       pushRows,
       exportRows,
       feedbackRows,
+      blockRows,
+      fixtureRows,
+      journalRows,
     ] = await Promise.all([
       own(users, users.id),
       own(userAvatars, userAvatars.userId),
@@ -157,6 +171,9 @@ export async function readAccountData(
       own(webPushSubscriptions, webPushSubscriptions.userId),
       own(dataExports, dataExports.userId),
       own(feedbackMessages, feedbackMessages.userId),
+      own(dayBlocks, dayBlocks.userId),
+      own(fixtures, fixtures.userId),
+      own(journalEntries, journalEntries.userId),
     ]);
 
     return {
@@ -177,6 +194,9 @@ export async function readAccountData(
       webPushSubscriptions: pushRows,
       dataExports: exportRows,
       feedbackMessages: feedbackRows,
+      dayBlocks: blockRows,
+      fixtures: fixtureRows,
+      journalEntries: journalRows,
     };
   });
 }
@@ -315,6 +335,10 @@ export function buildExportJson(data: AccountData, exportedAt: Date): string {
       timerSessions: jsonRows(timerSessions, data.timerSessions),
       misses: jsonRows(misses, data.misses),
       shifts: jsonRows(shifts, data.shifts),
+      // UX v1.1 (DYN-19): the block model, the fixtures, the journal.
+      dayBlocks: jsonRows(dayBlocks, data.dayBlocks),
+      fixtures: jsonRows(fixtures, data.fixtures),
+      journalEntries: jsonRows(journalEntries, data.journalEntries),
     },
   };
 
@@ -352,6 +376,9 @@ export function buildExportFiles(
     "timer_sessions.csv": encoder.encode(
       toCsv(timerSessions, data.timerSessions),
     ),
+    "day_blocks.csv": encoder.encode(toCsv(dayBlocks, data.dayBlocks)),
+    "fixtures.csv": encoder.encode(toCsv(fixtures, data.fixtures)),
+    "journal_entries.csv": encoder.encode(toCsv(journalEntries, data.journalEntries)),
     "synapse-export.json": encoder.encode(buildExportJson(data, exportedAt)),
   };
 }

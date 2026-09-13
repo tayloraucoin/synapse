@@ -1,16 +1,18 @@
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import {
   categories,
+  dayBlocks,
   dayItems,
   days,
   habits,
+  journalEntries,
   reasons,
   shifts,
   templates,
   type RlsClient,
 } from "@syn/db";
-import type { CategoryKey, IconValue, StripWeek } from "@syn/types";
+import type { BlockKind, CategoryKey, IconValue, StripWeek } from "@syn/types";
 import {
   computeAdherence,
   stripStateFor,
@@ -105,7 +107,27 @@ export type ReviewWeekView = {
   shiftRows: WeekShiftRow[];
   carriedItems: CarriedItem[];
   categories: CategorySegment[];
+
+  /* ---- UX v1.1 §8.2 (DYN-19) ---- */
+  /** The counts line, one entry per pooled thing: *Morning A 2 of 2*, *Menu 3*, *2 not confirmed*. */
+  counts: Array<{ label: string; used: number; target: number | null }>;
+  /** Time by block — done items' lengths per kind, in block order. */
+  blockMinutes: Array<{ kind: BlockKind; minutes: number }>;
+  /** Reflections — the week's two journal lines per day, verbatim, dated. */
+  reflections: Array<{ date: string; gratitude: string | null; lookingForward: string | null }>;
+  notConfirmedCount: number;
 };
+
+const BLOCK_ORDER: readonly BlockKind[] = [
+  "orient",
+  "morning",
+  "training",
+  "prep",
+  "work",
+  "break",
+  "activity",
+  "wind_down",
+];
 
 export async function getReviewWeek(
   rls: RlsClient,
@@ -154,6 +176,7 @@ export async function getReviewWeek(
               assignmentState: dayItems.assignmentState,
               completionState: dayItems.completionState,
               carriedFromItemId: dayItems.carriedFromItemId,
+              dayBlockId: dayItems.dayBlockId,
               categoryName: categories.name,
               categoryKey: categories.colorKey,
             })
@@ -191,7 +214,69 @@ export async function getReviewWeek(
       .from(reasons)
       .where(eq(reasons.userId, userId));
 
-    return { dayRows, items, shiftRows, reasonLabels };
+    /*
+     * UX v1.1 §8.2 (DYN-19): the day's blocks (time by block, the counts line),
+     * the focus per day (the counts line), and the journal (Reflections).
+     */
+    const blockRows =
+      dayIds.length === 0
+        ? []
+        : await tx
+            .select({
+              id: dayBlocks.id,
+              dayId: dayBlocks.dayId,
+              kind: dayBlocks.kind,
+              state: dayBlocks.state,
+              templateId: dayBlocks.templateId,
+              templateNameSnapshot: dayBlocks.templateNameSnapshot,
+            })
+            .from(dayBlocks)
+            .where(and(eq(dayBlocks.userId, userId), inArray(dayBlocks.dayId, dayIds)));
+
+    const dayExtras =
+      dayIds.length === 0
+        ? []
+        : await tx
+            .select({
+              id: days.id,
+              shape: days.shape,
+              confirmedAt: days.confirmedAt,
+              focusTitle: habits.title,
+            })
+            .from(days)
+            .leftJoin(habits, eq(habits.id, days.workFocusHabitId))
+            .where(inArray(days.id, dayIds));
+
+    const rotation = await tx
+      .select({
+        id: habits.id,
+        title: habits.title,
+        type: habits.type,
+        weeklyTarget: habits.weeklyTarget,
+      })
+      .from(habits)
+      .where(
+        and(
+          eq(habits.userId, userId),
+          inArray(habits.type, ["workout", "deep_work"]),
+          isNull(habits.archivedAt),
+        ),
+      );
+
+    const morningTemplates = await tx
+      .select({ id: templates.id, name: templates.name, weeklyTarget: templates.weeklyTarget })
+      .from(templates)
+      .where(and(eq(templates.userId, userId), eq(templates.kind, "morning"), isNull(templates.archivedAt)));
+
+    const journalRows =
+      dayIds.length === 0
+        ? []
+        : await tx
+            .select({ dayId: journalEntries.dayId, answers: journalEntries.answers })
+            .from(journalEntries)
+            .where(and(eq(journalEntries.userId, userId), inArray(journalEntries.dayId, dayIds)));
+
+    return { dayRows, items, shiftRows, reasonLabels, blockRows, dayExtras, rotation, morningTemplates, journalRows };
   });
 
   const dateByDayId = new Map(
@@ -261,7 +346,7 @@ export async function getReviewWeek(
     }
 
     const verdict = allVerdicts[item.id]?.verdict ?? null;
-    strip.days[index] = stripStateFor(verdict);
+    strip.days[index] = stripStateFor(verdict, item.completionState);
 
     if (reviewedDayIds.has(item.dayId)) {
       const credit = allVerdicts[item.id]?.credit ?? null;
@@ -284,6 +369,68 @@ export async function getReviewWeek(
         days: 1,
       });
   }
+
+  /*
+   * UX v1.1 §8.2 (DYN-19). TIME BY BLOCK: done items' lengths per block kind —
+   * the same source as time by category, so the two bars agree. THE COUNTS
+   * LINE: each pooled thing with its used-of-target — a morning variant by
+   * its confirmed blocks, *Menu* by pooled mornings, a focus by the days
+   * carrying it, a workout by its done items, *Unstructured* by shape, and
+   * *not confirmed* by rows. Information, never a score. REFLECTIONS: the two
+   * journal lines per day, verbatim, in date order, no synthesis.
+   */
+  const blockKindById = new Map(raw.blockRows.map((row) => [row.id, row.kind]));
+  const minutesByKind = new Map<BlockKind, number>();
+  for (const item of raw.items) {
+    if (item.completionState !== "done" || item.dayBlockId === null) continue;
+    const kind = blockKindById.get(item.dayBlockId);
+    if (kind === undefined) continue;
+    minutesByKind.set(kind, (minutesByKind.get(kind) ?? 0) + (item.durationMin ?? 0));
+  }
+  const blockMinutes = BLOCK_ORDER.filter((kind) => (minutesByKind.get(kind) ?? 0) > 0).map(
+    (kind) => ({ kind, minutes: minutesByKind.get(kind) ?? 0 }),
+  );
+
+  const counts: ReviewWeekView["counts"] = [];
+  const confirmedDayIds = new Set(
+    raw.dayExtras.filter((row) => row.confirmedAt !== null).map((row) => row.id),
+  );
+  for (const template of raw.morningTemplates) {
+    const used = raw.blockRows.filter(
+      (row) => row.kind === "morning" && row.templateId === template.id && confirmedDayIds.has(row.dayId),
+    ).length;
+    if (used > 0 || template.weeklyTarget !== null) {
+      counts.push({ label: template.name.trim() === "" ? "Morning" : template.name, used, target: template.weeklyTarget });
+    }
+  }
+  const menuDays = raw.blockRows.filter(
+    (row) => row.kind === "morning" && row.state === "pooled" && confirmedDayIds.has(row.dayId),
+  ).length;
+  if (menuDays > 0) counts.push({ label: "Menu", used: menuDays, target: null });
+  for (const habit of raw.rotation) {
+    const used =
+      habit.type === "deep_work"
+        ? raw.dayExtras.filter((row) => row.focusTitle === habit.title && confirmedDayIds.has(row.id)).length
+        : raw.items.filter(
+            (item) => item.habitId === habit.id && item.type === "workout" && item.completionState === "done",
+          ).length;
+    if (used > 0 || habit.weeklyTarget !== null) {
+      counts.push({ label: habit.title, used, target: habit.weeklyTarget });
+    }
+  }
+  const unstructured = raw.dayExtras.filter((row) => row.shape === "unstructured").length;
+  if (unstructured > 0) counts.push({ label: "Unstructured", used: unstructured, target: null });
+  const notConfirmedCount = raw.items.filter((item) => item.completionState === "not_confirmed").length;
+
+  const journalByDayId = new Map(raw.journalRows.map((row) => [row.dayId, row.answers]));
+  const reflections: ReviewWeekView["reflections"] = raw.dayRows
+    .map((row) => {
+      const answers = journalByDayId.get(row.id) ?? {};
+      const gratitude = answers["gratitude_today"]?.trim() || null;
+      const lookingForward = answers["looking_forward"]?.trim() || null;
+      return { date: String(row.date), gratitude, lookingForward };
+    })
+    .filter((entry) => entry.gratitude !== null || entry.lookingForward !== null);
 
   const categoryMinutes = new Map<string, CategorySegment>();
   for (const item of raw.items) {
@@ -459,6 +606,10 @@ export async function getReviewWeek(
     categories: [...categoryMinutes.values()].sort(
       (a, b) => b.minutes - a.minutes,
     ),
+    counts,
+    blockMinutes,
+    reflections,
+    notConfirmedCount,
   };
 }
 

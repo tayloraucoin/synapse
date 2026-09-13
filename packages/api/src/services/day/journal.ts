@@ -1,6 +1,6 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
-import { days, journalEntries, users, type RlsClient } from "@syn/db";
+import { dayBlocks, dayItems, days, journalEntries, templateSlots, users, type RlsClient } from "@syn/db";
 import type { JournalEntryView, JournalPrompt } from "@syn/types";
 import { addDays } from "@syn/utils";
 
@@ -113,6 +113,13 @@ export async function saveJournalAnswer(
       dayId = created.id;
     }
 
+    const [before] = await tx
+      .select({ answers: journalEntries.answers })
+      .from(journalEntries)
+      .where(and(eq(journalEntries.userId, userId), eq(journalEntries.dayId, dayId)))
+      .limit(1);
+    const hadText = Object.values(before?.answers ?? {}).some((value) => value.trim() !== "");
+
     const patch = { [input.key]: input.value };
     await tx
       .insert(journalEntries)
@@ -124,7 +131,80 @@ export async function saveJournalAnswer(
           updatedAt: new Date(),
         },
       });
+
+    await syncJournalItem(tx, userId, dayId, hadText);
   });
 
   return getJournalEntry(rls, userId, input.date);
+}
+
+/**
+ * The wind-down *Journal* row ticks itself — UX v1.1 §7.2 (DYN-18): "The row
+ * in the wind-down section ticks itself when any field has text." Done when
+ * any answer is non-empty, cleared when the last text goes — but a row the
+ * person ticked by hand with nothing written is theirs and is left alone:
+ * the clear runs only on the save that took the entry from text to none.
+ *
+ * THE ROW IS RECOGNISED THE WAY THE MATERIALISER PLACES IT (`markerPosition`):
+ * the wind-down block's closer, else the item titled *journal*. The closer
+ * is a template slot's role, so the block's items are matched to their slots.
+ */
+export async function syncJournalItem(
+  tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
+  userId: string,
+  dayId: string,
+  hadText: boolean,
+): Promise<void> {
+  const [entry] = await tx
+    .select({ answers: journalEntries.answers })
+    .from(journalEntries)
+    .where(and(eq(journalEntries.userId, userId), eq(journalEntries.dayId, dayId)))
+    .limit(1);
+  const hasText = Object.values(entry?.answers ?? {}).some((value) => value.trim() !== "");
+
+  const [block] = await tx
+    .select({ id: dayBlocks.id })
+    .from(dayBlocks)
+    .where(and(eq(dayBlocks.userId, userId), eq(dayBlocks.dayId, dayId), eq(dayBlocks.kind, "wind_down")))
+    .limit(1);
+  if (!block) return;
+
+  const rows = await tx
+    .select({
+      id: dayItems.id,
+      title: dayItems.title,
+      templateSlotId: dayItems.templateSlotId,
+      doneAt: dayItems.doneAt,
+      completionState: dayItems.completionState,
+    })
+    .from(dayItems)
+    .where(and(eq(dayItems.userId, userId), eq(dayItems.dayBlockId, block.id)));
+
+  let journal = rows.find((row) => row.title.trim().toLowerCase() === "journal") ?? null;
+  if (journal === null) {
+    const slotIds = rows.map((row) => row.templateSlotId).filter((id): id is string => id !== null);
+    if (slotIds.length > 0) {
+      const closers = await tx
+        .select({ id: templateSlots.id })
+        .from(templateSlots)
+        .where(and(inArray(templateSlots.id, slotIds), eq(templateSlots.role, "closer")));
+      const closerIds = new Set(closers.map((slot) => slot.id));
+      journal = rows.find((row) => row.templateSlotId !== null && closerIds.has(row.templateSlotId)) ?? null;
+    }
+  }
+  if (journal === null) return;
+
+  const now = new Date();
+  if (hasText && journal.doneAt === null && journal.completionState !== "done") {
+    await tx
+      .update(dayItems)
+      .set({ completionState: "done", doneAt: now, updatedAt: now })
+      .where(eq(dayItems.id, journal.id));
+  } else if (hadText && !hasText && journal.doneAt !== null && journal.completionState === "done") {
+    // The save that cleared the last field un-writes the tick it made.
+    await tx
+      .update(dayItems)
+      .set({ completionState: "upcoming", doneAt: null, updatedAt: now })
+      .where(eq(dayItems.id, journal.id));
+  }
 }

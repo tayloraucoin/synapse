@@ -113,6 +113,11 @@ export function dayScheduleRoute(date: string): string {
   return `/day/${date}/schedule`;
 }
 
+/** The journal — UX v1.1 §7.2 (DYN-18); read-only for a past day from Review. */
+export function journalRoute(date: string): string {
+  return `/day/${date}/journal`;
+}
+
 /** The item sheet, addressable because a notification deep-links to it. */
 export function dayItemRoute(date: string, id: string): string {
   return `/day/${date}/item/${id}`;
@@ -171,8 +176,9 @@ export function settingsTemplateRoute(id: string): string {
 
 /*
  * Settings → Your day (UX v1.1 §4.14): the twelve first-run screens without
- * the frame. The six fact screens are DYN-10's, embedded; the block-kind rows
- * open the block editor for that kind; *Block order* is its own list.
+ * the frame. The six fact screens are DYN-10's, embedded; *Closing the day*
+ * is screen 10 (DYN-18); the block-kind rows open the block editor for that
+ * kind; *Block order* is its own list.
  */
 export type YourDayScreen =
   | "shape"
@@ -180,7 +186,8 @@ export type YourDayScreen =
   | "work-start"
   | "commitments"
   | "wake"
-  | "before-the-day";
+  | "before-the-day"
+  | "closing-the-day";
 
 export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "shape",
@@ -189,6 +196,7 @@ export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "commitments",
   "wake",
   "before-the-day",
+  "closing-the-day",
 ];
 
 export function settingsYourDayRoute(): string {

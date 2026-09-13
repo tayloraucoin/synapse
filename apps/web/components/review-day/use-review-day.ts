@@ -47,6 +47,7 @@ export function useReviewDay(dateKey: string, initial: ReviewDay) {
   const decideMutation = trpc.review.decide.useMutation();
   const finishMutation = trpc.review.finish.useMutation();
   const saveMutation = trpc.review.saveChanges.useMutation();
+  const lastNightMutation = trpc.review.confirmLastNight.useMutation();
 
   const day = query.data ?? initial;
   const editing = day.mode === "edit" && day.result !== null;
@@ -149,6 +150,25 @@ export function useReviewDay(dateKey: string, initial: ReviewDay) {
   );
 
   /**
+   * UX v1.1 §7.3 (DYN-19): the review's own *Last night* write, for a day
+   * whose after-devices-off items the morning never confirmed. One call —
+   * the ticked ids are done, the rest *not confirmed*; nothing asks why.
+   */
+  const confirmLastNight = React.useCallback(
+    (doneItemIds: string[]) => {
+      setError(null);
+      lastNightMutation.mutate(
+        { date: dateKey, doneItemIds },
+        {
+          onError: () => setError(COPY.saveError),
+          onSettled: () => void refresh(),
+        },
+      );
+    },
+    [lastNightMutation, dateKey, refresh],
+  );
+
+  /**
    * Every panel that still owes an answer. `deciding` counts as undecided:
    * a chooser left open is a decision not yet made.
    */
@@ -172,6 +192,8 @@ export function useReviewDay(dateKey: string, initial: ReviewDay) {
     saving: saveMutation.isPending,
     saveChanges,
     discardChanges,
+    confirmLastNight,
+    confirmingLastNight: lastNightMutation.isPending,
   };
 }
 

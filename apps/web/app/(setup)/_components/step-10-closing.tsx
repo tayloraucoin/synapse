@@ -1,11 +1,20 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { Button, EllipsesMenu, Input, ListRow, Switch, Text, TimeField } from "@syn/ui";
-import { DEFAULT_JOURNAL_PROMPTS, JOURNAL_PROMPTS_MAX, JOURNAL_PROMPT_MAX } from "@syn/constants";
+import { Button, CheckboxField, EllipsesMenu, Input, ListRow, Switch, Text, TimeField } from "@syn/ui";
+import {
+  DEFAULT_JOURNAL_PROMPTS,
+  JOURNAL_PROMPTS_MAX,
+  JOURNAL_PROMPT_MAX,
+  STARTER_LIBRARY,
+} from "@syn/constants";
 import type { JournalPrompt } from "@syn/types";
 
+import { midpoint } from "@/components/block-editor";
+import { useOnline } from "@/lib/hooks/use-online";
+import { settingsYourDayBlockRoute } from "@/lib/routes";
 import { trpc } from "@/lib/trpc/client";
 
 import { SETUP_COPY as COPY } from "./copy";
@@ -26,7 +35,16 @@ import { FactScreen } from "./fact-screen";
  * The wind-down template is made when none exists; the journal closer and
  * the *Phone away* pin are placed from the profile at materialisation (§7.1),
  * never as rows here.
+ *
+ * THE WIND-DOWN STARTERS ARE A CHOOSER BAND (§7.1, DYN-18): the library's
+ * wind-down entries less the two the app places, nothing checked. A tick
+ * creates the habit and a slot on the wind-down template; an untick removes
+ * the slot and leaves the habit. The ghost row beneath goes to the routine's
+ * editor, where the order and the lengths live.
  */
+
+/** The library's wind-down offers — the two placed rows are never offered. */
+const WIND_DOWN_OFFERS = STARTER_LIBRARY.wind_down.filter((entry) => entry.placed !== true);
 export function Step10Closing({
   initialLightsOut,
   initialDevicesOff,
@@ -42,10 +60,18 @@ export function Step10Closing({
   embedded?: boolean;
   onSaved?: () => void;
 }) {
+  const router = useRouter();
+  const online = useOnline();
   const save = trpc.user.updatePreferences.useMutation();
   const utils = trpc.useUtils();
   const windDown = trpc.template.list.useQuery({ includeArchived: false, kind: "wind_down" });
   const create = trpc.template.create.useMutation();
+  const templateId = windDown.data?.[0]?.id ?? null;
+  const detail = trpc.template.get.useQuery({ id: templateId ?? "" }, { enabled: templateId !== null });
+  const windDownHabits = trpc.habit.list.useQuery({ includeArchived: false, blockKind: "wind_down" });
+  const saveSlot = trpc.template.saveSlot.useMutation();
+  const removeSlot = trpc.template.removeSlot.useMutation();
+  const fromLibrary = trpc.habit.createFromStarterLibrary.useMutation();
 
   const [lightsOut, setLightsOut] = React.useState(initialLightsOut ?? "22:45");
   const [devicesOff, setDevicesOff] = React.useState(initialDevicesOff ?? "22:15");
@@ -64,6 +90,50 @@ export function Step10Closing({
     ensuring.current = true;
     void create.mutateAsync({ kind: "wind_down" }).then(() => utils.template.list.invalidate());
   }, [windDown.isSuccess, windDown.data, create, utils]);
+
+  const slots = React.useMemo(() => detail.data?.slots ?? [], [detail.data?.slots]);
+  const habits = React.useMemo(() => windDownHabits.data?.habits ?? [], [windDownHabits.data?.habits]);
+  const ticked = new Set(slots.map((slot) => slot.title));
+  const inLibrary = new Set(habits.map((habit) => habit.title));
+  const bandBusy = saveSlot.isPending || removeSlot.isPending || fromLibrary.isPending;
+  const bandDisabled = !online || bandBusy || templateId === null;
+
+  async function refreshBand(): Promise<void> {
+    if (templateId !== null) await utils.template.get.invalidate({ id: templateId });
+    await utils.template.list.invalidate();
+    await utils.habit.list.invalidate();
+  }
+
+  /** A tick: the starter row (when absent), then a slot at the range's midpoint. */
+  async function tick(title: string, minutes: number, on: boolean): Promise<void> {
+    if (templateId === null) return;
+    const slot = slots.find((row) => row.title === title);
+    if (!on) {
+      if (slot) {
+        await removeSlot.mutateAsync({ id: slot.id });
+        await refreshBand();
+      }
+      return;
+    }
+    let habit = habits.find((row) => row.title === title) ?? null;
+    if (habit === null) {
+      await fromLibrary.mutateAsync({ blockKind: "wind_down", titles: [title] });
+      const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind: "wind_down" });
+      habit = fresh.habits.find((row) => row.title === title) ?? null;
+    }
+    if (habit === null) return;
+    await saveSlot.mutateAsync({
+      templateId,
+      habitId: habit.id,
+      durationMin: minutes,
+      gapBeforeMin: 0,
+      pinnedClock: null,
+      role: "stack",
+      priorityOverride: null,
+      scheduling: "soft",
+    });
+    await refreshBand();
+  }
 
   function move(index: number, direction: -1 | 1): void {
     const target = index + direction;
@@ -218,6 +288,41 @@ export function Step10Closing({
               )}
             </>
           ) : null}
+        </div>
+
+        {/* The wind-down starters — a chooser band, nothing checked (§7.1). */}
+        <div className="flex flex-col gap-(--space-3)">
+          <Text as="h2" variant="body" weight={500}>
+            {COPY.windDownBand}
+          </Text>
+          <div role="group" aria-label={COPY.windDownBand} className="flex flex-wrap gap-x-(--space-4) gap-y-(--space-2)">
+            {WIND_DOWN_OFFERS.map((offer) => (
+              <CheckboxField
+                key={offer.title}
+                checked={ticked.has(offer.title)}
+                disabled={bandDisabled}
+                onCheckedChange={(next) => {
+                  void tick(
+                    offer.title,
+                    midpoint({ durationMin: offer.rangeMin, durationMax: offer.rangeMax }),
+                    next === true,
+                  );
+                }}
+              >
+                {inLibrary.has(offer.title) && !ticked.has(offer.title)
+                  ? `${offer.title} · ${COPY.inYourLibrary}`
+                  : offer.title}
+              </CheckboxField>
+            ))}
+          </div>
+          <ul className="flex flex-col">
+            <ListRow
+              as="li"
+              title={COPY.windDownRoutine}
+              meta={COPY.windDownRoutineMeta}
+              onClick={() => router.push(settingsYourDayBlockRoute("wind_down", templateId ?? undefined))}
+            />
+          </ul>
         </div>
       </div>
     </FactScreen>

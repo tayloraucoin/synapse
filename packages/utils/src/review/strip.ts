@@ -46,7 +46,16 @@ export function toStripWeek(days: readonly StripSquare[]): StripWeek {
   return days as unknown as StripWeek;
 }
 
-export function stripStateFor(verdict: ItemVerdict | null): StripSquare {
+export function stripStateFor(
+  verdict: ItemVerdict | null,
+  /**
+   * UX v1.1 §8.2, R16 (DYN-19): a wind-down item left unconfirmed is
+   * `excluded` to the resolver — untouched — but the strip shows it as its
+   * own blank square with the label, so it is excluded and visible.
+   */
+  completionState?: string,
+): StripSquare {
+  if (completionState === "not_confirmed") return "not-confirmed";
   switch (verdict) {
     case "done":
       return "done";

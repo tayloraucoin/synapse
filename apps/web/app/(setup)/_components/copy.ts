@@ -150,6 +150,12 @@ export const SETUP_COPY = {
   moveUp: "Move up",
   moveDown: "Move down",
   done: "Done",
+  /* The wind-down starters (§7.1, DYN-18) — a chooser band, nothing checked. */
+  windDownBand: "Wind-down",
+  inYourLibrary: "in your library",
+  windDownRoutine: "Wind-down routine",
+  /** [COPY] The ghost row's line — where the times and the order are. */
+  windDownRoutineMeta: "Order and lengths",
 
   /* ------------------------------------------------------ screen 11 -- */
   step11Heading: "What kinds of work day do you have?",

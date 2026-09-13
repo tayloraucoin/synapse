@@ -34,6 +34,7 @@ export function BlockSection({
   onToggleDone,
   onUndo,
   onOpen,
+  onOpenJournal,
 }: {
   block: DayBlockView;
   focusLabel: string | null;
@@ -44,6 +45,8 @@ export function BlockSection({
   onToggleDone: (item: DayItemView) => void;
   onUndo: (item: DayItemView) => void;
   onOpen: (item: DayItemView) => void;
+  /** UX v1.1 §7.2: the wind-down *Journal* row opens the journal screen. */
+  onOpenJournal?: () => void;
 }) {
   const ordered = React.useMemo(() => sortForDisplay(block.items), [block.items]);
   const planMode = mode === "plan";
@@ -82,6 +85,20 @@ export function BlockSection({
     );
   }
 
+  /*
+   * UX v1.1 §7.2 (DYN-18): the wind-down *Journal* row opens the journal
+   * screen, not the item sheet — recognised the way the materialiser places
+   * it (the item titled *journal*). Its tick is the journal's own.
+   */
+  const openRow =
+    block.kind === "wind_down" && onOpenJournal !== undefined
+      ? (item: DayItemView) => {
+          if (item.title.trim().toLowerCase() === "journal") onOpenJournal();
+          else onOpen(item);
+        }
+      : onOpen;
+  const windDownRowProps = { ...rowProps, onOpen: openRow };
+
   return (
     <section>
       <BlockHeader kind={block.kind} name={block.name} span={span} />
@@ -95,12 +112,12 @@ export function BlockSection({
           run.multitask ? (
             <MultitaskGroup key={run.key}>
               {run.items.map((item) => (
-                <Row key={item.id} item={item} marker={isMarker(item, devicesOffAt)} {...rowProps} />
+                <Row key={item.id} item={item} marker={isMarker(item, devicesOffAt)} {...windDownRowProps} />
               ))}
             </MultitaskGroup>
           ) : (
             run.items.map((item) => (
-              <Row key={item.id} item={item} marker={isMarker(item, devicesOffAt)} {...rowProps} />
+              <Row key={item.id} item={item} marker={isMarker(item, devicesOffAt)} {...windDownRowProps} />
             ))
           ),
         )}

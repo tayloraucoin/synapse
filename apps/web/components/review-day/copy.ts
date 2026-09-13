@@ -62,8 +62,23 @@ export const REVIEW_COPY = {
     `Closed at ${clock} — ${n} to decide`,
 
   doneRow: (clock: string) => `done ${clock}`,
+  /** UX v1.1 §8.1 — "planned 7:20 · done 7:52" on a moved item. */
   doneRowMoved: (clock: string, planned: string) =>
-    `done ${clock} · moved from ${planned}`,
+    `planned ${planned} · done ${clock}`,
+  /** §8.1 — a line on items Adjust shortened. */
+  shortened: "shortened",
+
+  /* ---------------------------------------- UX v1.1 §8.1, §7.3 (DYN-18/19) -- */
+  /** "Intention: one thing at a time." — the morning's line, read back. */
+  intention: (text: string) => `Intention: ${text}`,
+  lastNight: "Last night",
+  /** [COPY — needs Vesper sign-off: the panel's one button.] */
+  confirm: "Confirm",
+  /** "Work · Viewpoint · 9:04–17:40" — the unscored work line. */
+  workLine: (focus: string | null, span: string | null) =>
+    ["Work", focus, span].filter((part): part is string => part !== null).join(" · "),
+  /** [COPY] Block-less panels, under the blocks. */
+  alsoToday: "Also today",
 
   /**
    * A write that failed. Epic 3 DR-01's error state, and the promise it makes

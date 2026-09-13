@@ -145,6 +145,9 @@ const ANNOTATIONS = {
   "apps/web/components/day-list/block-section.tsx": "one block's rows (v1.1 §6.1): the work container with nested fixtures, the devices-off marker, the confirm-in-the-morning rows",
   "apps/web/components/adjust-sheet/use-adjust.ts": "Adjust's four answers feeding one server preview (v1.1 §6.6); Set sends the fingerprint; nothing is inferred",
   "apps/web/components/habit-day-sheet/habit-day-sheet.tsx": "Edit today's (v1.1 §6.4): the day, never the habit; no clamp on Takes",
+  "apps/web/components/journal/journal-screen.tsx": "the journal (v1.1 §7.2): the person's prompts over serif fields that autosave; no finish, no count, no starter phrase",
+  "packages/api/src/services/review/confirm-last-night.ts": "confirm yesterday from the review (v1.1 §7.3): the morning's rule on the review's own day; never a reason",
+  "packages/api/src/services/review/get-review-week.ts": "the week read: adherence from the resolver, and v1.1 §8.2's counts, time by block and reflections derived from the rows, never stored",
   "apps/mobile/README.md": "a deliberate empty seam. Do not scaffold",
 
   // --- delivery ---

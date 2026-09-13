@@ -11,6 +11,14 @@ export const reviewDayInput = z.object({ date: dateKeySchema });
 
 export const reviewWeekInput = z.object({ week: weekKeySchema });
 
+/** Confirm yesterday from the review — the ticked ids (v1.1 §7.3, DYN-18). */
+export const confirmLastNightInput = z.object({
+  date: dateKeySchema,
+  doneItemIds: z.array(z.string().uuid()).max(100),
+});
+
+export type ConfirmLastNightInput = z.infer<typeof confirmLastNightInput>;
+
 /**
  * History, paginated by WEEK.
  *

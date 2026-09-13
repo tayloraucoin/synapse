@@ -22,7 +22,7 @@ import { ItemSheet } from "@/components/item-sheet";
 import { OneOffSheet } from "@/components/one-off-sheet";
 import { usePullToRefresh } from "@/lib/hooks/use-pull-to-refresh";
 import { useRovingFocus } from "@/lib/hooks/use-roving-focus";
-import { reviewDayRoute } from "@/lib/routes";
+import { journalRoute, reviewDayRoute } from "@/lib/routes";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { BlockSection, UnblockedSection } from "./block-section";
@@ -213,6 +213,7 @@ export function DayList({
           onToggleDone={list.toggleDone}
           onUndo={list.undoRow}
           onOpen={(item) => setOpenItemId(item.id)}
+          onOpenJournal={() => router.push(journalRoute(dateKey))}
         />
       ))}
 

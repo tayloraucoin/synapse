@@ -12,6 +12,7 @@ import {
   Text,
 } from "@syn/ui";
 
+import { ConfirmYesterdayPanel } from "@/components/confirm-yesterday";
 import { ItemSheet } from "@/components/item-sheet";
 import { useOnline } from "@/lib/hooks/use-online";
 import { reviewRoute, todayRoute } from "@/lib/routes";
@@ -59,6 +60,14 @@ export function ReviewDayScreen({
   const [openItemId, setOpenItemId] = React.useState<string | null>(null);
   const [tradedUpFor, setTradedUpFor] = React.useState<string | null>(null);
   const [discardOpen, setDiscardOpen] = React.useState(false);
+  /*
+   * UX v1.1 §7.3: the *Last night* rows are never pre-ticked; the panel holds
+   * the ticks until *Confirm* writes them. Cleared once the day comes back
+   * without the rows.
+   */
+  const [lastNightTicked, setLastNightTicked] = React.useState<Set<string>>(
+    () => new Set(),
+  );
   /*
    * DR-07 is shown for the moment AFTER finishing or saving, and not on a
    * fresh load — which is why this is state rather than derived from the day.
@@ -117,6 +126,53 @@ export function ReviewDayScreen({
                 ? COPY.everyItemWasDone
                 : COPY.summary(day.summary)}
         </Text>
+
+        {/* UX v1.1 §8.1: the morning's intention, read back in serif. */}
+        {day.intention === null ? null : (
+          <Text as="p" variant="review-sentence" tone="secondary">
+            {COPY.intention(day.intention)}
+          </Text>
+        )}
+
+        {/*
+         * §7.3: a day whose after-devices-off items were never confirmed
+         * shows them first — the same rows as the quick-pick, and one
+         * *Confirm*. Never pre-ticked; never asks why.
+         */}
+        {day.lastNight.length === 0 ? null : (
+          <section className="flex flex-col gap-(--space-3)">
+            <Text as="h2" variant="row-title">
+              {COPY.lastNight}
+            </Text>
+            <ConfirmYesterdayPanel
+              items={day.lastNight}
+              ticked={lastNightTicked}
+              showCaption={false}
+              disabled={review.confirmingLastNight}
+              onToggle={(id, on) =>
+                setLastNightTicked((current) => {
+                  const next = new Set(current);
+                  if (on) next.add(id);
+                  else next.delete(id);
+                  return next;
+                })
+              }
+            />
+            <div className="flex justify-end">
+              <Button
+                variant="secondary"
+                busy={review.confirmingLastNight}
+                disabled={!online}
+                onClick={() => {
+                  review.confirmLastNight([...lastNightTicked]);
+                  setLastNightTicked(new Set());
+                }}
+              >
+                {COPY.confirm}
+              </Button>
+            </div>
+          </section>
+        )}
 
         <DecisionColumn
           day={day}

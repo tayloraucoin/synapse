@@ -2,6 +2,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 
 import { dayItems, days, misses, reasons, shifts, type RlsClient } from "@syn/db";
 import type {
+  BlockKind,
   DayItemView,
   DecisionState,
   MissTier,
@@ -103,6 +104,24 @@ export type ReviewDayView = {
   result: AdherenceResult | null;
   pendingCount: number;
   wakeAnchorItemId: string | null;
+
+  /* ---- UX v1.1 §8.1, §7.3 (DYN-18, DYN-19) ---- */
+  /** The morning's intention, in the person's words, or null. */
+  intention: string | null;
+  /** The day's blocks in order — the review's section headers and the work line. */
+  blocks: Array<{
+    id: string;
+    kind: BlockKind;
+    name: string | null;
+    startLabel: string | null;
+    endLabel: string | null;
+  }>;
+  /** Items Adjust shortened (`shifts.shortened_item_ids`, across the day's shifts). */
+  shortenedIds: string[];
+  /** Wind-down items still waiting after devices-off — the confirm panel's rows. */
+  lastNight: DayItemView[];
+  /** The focus's title, for the work line. */
+  focusLabel: string | null;
 };
 
 /** Never walk a carry chain further than this — a cycle would not terminate. */
@@ -126,6 +145,7 @@ export async function getReviewDay(
         closeReason: days.closeReason,
         reviewedAt: days.reviewedAt,
         reviewEditedAt: days.reviewEditedAt,
+        intention: days.intention,
       })
       .from(days)
       .where(and(eq(days.userId, userId), eq(days.date, dateKey)))
@@ -205,6 +225,7 @@ export async function getReviewDay(
         reasonKey: shifts.reasonKey,
         reasonText: shifts.reasonText,
         tier: shifts.tier,
+        shortenedItemIds: shifts.shortenedItemIds,
       })
       .from(shifts)
       .where(and(eq(shifts.userId, userId), eq(shifts.dayId, raw.day.id)))
@@ -235,12 +256,25 @@ export async function getReviewDay(
   );
 
   const dayClosed = raw.day.closedAt !== null;
+  // UX v1.1 §8.1 (DYN-19): the day by block; `parts` is no longer read here.
   const viewByItemId = new Map<string, DayItemView>();
-  for (const part of day.parts) {
-    for (const view of part.items) viewByItemId.set(view.id, view);
+  for (const block of day.blocks) {
+    for (const view of block.items) viewByItemId.set(view.id, view);
   }
+  for (const view of day.unblocked) viewByItemId.set(view.id, view);
   for (const view of day.notAssigned) viewByItemId.set(view.id, view);
   for (const view of day.cutByShift) viewByItemId.set(view.id, view);
+
+  /*
+   * §7.3 — the wind-down items still waiting after devices-off: `upcoming`
+   * (confirm in the morning) or `not_confirmed` (R16: resolvable here). They
+   * are the panel's rows and are kept out of the decision column.
+   */
+  const lastNightIds = new Set(
+    (day.blocks.find((block) => block.kind === "wind_down")?.items ?? [])
+      .filter((view) => view.state === "confirm-later" || view.state === "not-confirmed")
+      .map((view) => view.id),
+  );
 
   function decisionViewFor(itemId: string): DecisionItemView | null {
     const view = viewByItemId.get(itemId);
@@ -297,7 +331,8 @@ export async function getReviewDay(
       (row) =>
         row.assignmentState === "assigned" &&
         row.completionState !== "done" &&
-        row.completionState !== "active",
+        row.completionState !== "active" &&
+        !lastNightIds.has(row.id),
     )
     .map((row) => decisionViewFor(row.id))
     .filter((view): view is DecisionItemView => view !== null);
@@ -407,6 +442,19 @@ export async function getReviewDay(
     result: raw.day.reviewedAt === null ? null : result,
     pendingCount,
     wakeAnchorItemId: day.wakeAnchorItemId,
+    intention: raw.day.intention,
+    blocks: day.blocks.map((block) => ({
+      id: block.id,
+      kind: block.kind,
+      name: block.name,
+      startLabel: block.startLabel,
+      endLabel: block.endLabel,
+    })),
+    shortenedIds: [...new Set(detail.shiftRows.flatMap((row) => row.shortenedItemIds ?? []))],
+    lastNight: [...lastNightIds]
+      .map((id) => viewByItemId.get(id))
+      .filter((view): view is DayItemView => view !== undefined),
+    focusLabel: day.focusLabel,
   };
 }
 
@@ -490,5 +538,10 @@ function emptyReview(
     result: null,
     pendingCount: 0,
     wakeAnchorItemId,
+    intention: null,
+    blocks: [],
+    shortenedIds: [],
+    lastNight: [],
+    focusLabel: null,
   };
 }

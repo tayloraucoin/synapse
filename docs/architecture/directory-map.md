@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1201 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1209 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -103,6 +103,8 @@ apps/
             item/
               [id]/
                 page.tsx
+            journal/
+              page.tsx
             schedule/
               page.tsx
             page.tsx
@@ -320,6 +322,11 @@ apps/
         item-sheet.tsx
         manual-time-sheet.tsx
         use-item-sheet.ts
+      journal/
+        copy.ts
+        index.ts
+        journal-screen.tsx  # the journal (v1.1 §7.2): the person's prompts over serif fields that autosave; no finish, no count, no starter phrase
+        use-journal.ts
       landscape-chooser/
         copy.ts
         index.ts
@@ -613,6 +620,8 @@ docs/
       DYN-14-quick-pick-and-set-the-day.md
       DYN-15-today-by-block.md
       DYN-17-adjust.md
+      DYN-18-the-evening.md
+      DYN-19-review-amended.md
       DYN-2-migration-0004-block-templates-and-stacked-slots.md
       DYN-3-migration-0005-profile-fixtures-day-blocks-journal.md
       DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
@@ -756,12 +765,13 @@ packages/
           templates.ts
           to-view.ts  # one stackBlock walk per template; startClock is derived here, never stored
         review/
+          confirm-last-night.ts  # confirm yesterday from the review (v1.1 §7.3): the morning's rule on the review's own day; never a reason
           decide.ts
           decision-state.ts
           finish-review.ts
           get-review-day.ts
           get-review-history.ts
-          get-review-week.ts
+          get-review-week.ts  # the week read: adherence from the resolver, and v1.1 §8.2's counts, time by block and reflections derived from the rows, never stored
           habit-week.ts
           pending-days.ts
           save-changes.ts

@@ -21,10 +21,11 @@ import { YOUR_DAY_COPY as COPY } from "./copy";
  * block editor for that kind".
  *
  * TWELVE ROWS, IN THE DOCUMENT'S ORDER. Rows 1–6 open DYN-10's screens
- * embedded; *Before work*, *Morning routine* and *Closing the day* open the
- * editor for prep, morning and wind-down; *Training* and *Work focuses* open
- * the training and work editors until DYN-11 re-points them at its own
- * screens; *Block order* is its own list.
+ * embedded; *Before work* and *Morning routine* open the editor for prep and
+ * morning; *Closing the day* opens screen 10 embedded (DYN-18), which carries
+ * the wind-down editor as a ghost row; *Training* and *Work focuses* open the
+ * training and work editors until DYN-11 re-points them at its own screens;
+ * *Block order* is its own list.
  *
  * A VALUE NEVER SPINS (cross-cutting G5): while the account loads each row
  * shows a `SkeletonBlock` where its value goes.
@@ -104,10 +105,17 @@ export function YourDayList() {
         description={value(countOf("training"))}
         href={settingsYourDayBlockRoute("training")}
       />
+      {/* DYN-18: the screen, not the editor — its ghost row reaches the editor. */}
       <SettingsRow
         title={COPY.rows.closingTheDay}
-        description={value(countOf("wind_down"))}
-        href={settingsYourDayBlockRoute("wind_down")}
+        description={value(
+          data === undefined
+            ? undefined
+            : data.lightsOutTime === null
+              ? null
+              : `${clock(data.lightsOutTime)}${data.journalEnabled ? ` · ${COPY.journalOn}` : ""}`,
+        )}
+        href={settingsYourDayScreenRoute("closing-the-day")}
       />
       <SettingsRow
         title={COPY.rows.workFocuses}

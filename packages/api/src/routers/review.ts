@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
 import {
+  confirmLastNightInput,
   decideInput,
   habitWeekInput,
   reviewDayInput,
@@ -10,6 +11,7 @@ import {
 } from "@syn/validators";
 
 import { resolveTodayFor } from "../services/day/today";
+import { confirmLastNight } from "../services/review/confirm-last-night";
 import { decide } from "../services/review/decide";
 import {
   UndecidedItemsError,
@@ -86,6 +88,16 @@ export const reviewRouter = router({
     const today = await requireToday(ctx);
     return pendingDays(ctx.rls, ctx.authContext.userId, today.todayKey);
   }),
+
+  /**
+   * Confirm yesterday from the review (v1.1 §7.3, R16 — DYN-18): the
+   * wind-down items still waiting become done (ticked) or *not confirmed*.
+   */
+  confirmLastNight: protectedProcedure
+    .input(confirmLastNightInput)
+    .mutation(async ({ ctx, input }) =>
+      confirmLastNight(ctx.rls, ctx.authContext.userId, input),
+    ),
 
   /**
    * One decision, written as it is made. A carry writes `carried` at once;

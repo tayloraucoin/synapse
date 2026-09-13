@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import {
+  BLOCK_KIND_WORDS,
   BigNumber,
   CategoryBar,
   FactLine,
@@ -96,6 +97,16 @@ export function ReviewWeek({
           {week.unreviewedCount === 0 ? null : (
             <FactLine>{COPY.notYetReviewed(week.unreviewedCount)}</FactLine>
           )}
+          {/*
+           * UX v1.1 §8.2: the counts line — "Morning A 2 of 2 · Menu 3 ·
+           * Viewpoint 2 of 3 · 2 not confirmed". Tabular, muted; counts of
+           * things, never a grade.
+           */}
+          {countsLine(week).length === 0 ? null : (
+            <Text as="p" variant="secondary" tone="secondary" tabular>
+              {countsLine(week).join(" · ")}
+            </Text>
+          )}
         </section>
 
         {week.templates.length === 0 ? null : (
@@ -187,6 +198,37 @@ export function ReviewWeek({
           </section>
         )}
 
+        {/*
+         * §8.2: time by block, above time by category. A neutral scale — ink
+         * at stepped opacities, block order left to right — because a block
+         * is a part of the day, not a category with a hue of its own. The
+         * minutes are printed in the legend; the bar is decorative.
+         */}
+        {week.blockMinutes.length === 0 ? null : (
+          <section className="flex flex-col gap-(--space-2)">
+            <GroupHeading>{COPY.timeByBlock}</GroupHeading>
+            <div aria-hidden className="flex h-2 w-full overflow-hidden rounded-full">
+              {week.blockMinutes.map((segment, index) => (
+                <div
+                  key={segment.kind}
+                  className={BLOCK_SHADES[index % BLOCK_SHADES.length]}
+                  style={{ flexGrow: segment.minutes, flexBasis: 0 }}
+                />
+              ))}
+            </div>
+            <ul className="flex flex-col">
+              {week.blockMinutes.map((segment) => (
+                <ListRow
+                  key={segment.kind}
+                  as="li"
+                  title={BLOCK_KIND_WORDS[segment.kind]}
+                  meta={COPY.minutes(segment.minutes)}
+                />
+              ))}
+            </ul>
+          </section>
+        )}
+
         {week.categories.length === 0 ? null : (
           <section className="flex flex-col gap-(--space-2)">
             <GroupHeading>{COPY.timeByCategory}</GroupHeading>
@@ -219,6 +261,39 @@ export function ReviewWeek({
           </section>
         )}
 
+        {/*
+         * §8.2 Reflections: the journal's two lines per day, verbatim, dated,
+         * serif — "no synthesis, no theme-finding". The region is always
+         * present so the empty sentence says the week had none.
+         */}
+        <section className="flex flex-col gap-(--space-3)" aria-label={COPY.reflectionsHeading}>
+          <GroupHeading>{COPY.reflectionsHeading}</GroupHeading>
+          {week.reflections.length === 0 ? (
+            <Text as="p" variant="review-sentence" tone="secondary">
+              {COPY.nothingWritten}
+            </Text>
+          ) : (
+            week.reflections.map((entry) => (
+              <figure
+                key={entry.date}
+                className="border-hairline flex flex-col gap-(--space-2) border-t pt-(--space-3)"
+              >
+                <figcaption>
+                  <Text as="span" variant="caption" tone="secondary">
+                    {formatCalendarDay(new Date(`${entry.date}T12:00:00Z`), "UTC", "short")}
+                  </Text>
+                </figcaption>
+                {entry.gratitude === null ? null : (
+                  <ReflectionLine label={COPY.gratefulFor} text={entry.gratitude} />
+                )}
+                {entry.lookingForward === null ? null : (
+                  <ReflectionLine label={COPY.lookingForward} text={entry.lookingForward} />
+                )}
+              </figure>
+            ))
+          )}
+        </section>
+
         {week.open ? null : (
           <Text as="p" tone="secondary">
             {COPY.weekClosed(
@@ -249,6 +324,43 @@ export function ReviewWeek({
         }}
       />
     </ScreenFrame>
+  );
+}
+
+/**
+ * The time-by-block bar's shades — ink at stepped opacities, in block order.
+ * Neutral on purpose: colour on a block would read as a verdict about that
+ * part of the day (§8.2, and the app's colour-never-alone rule — the legend
+ * carries the minutes).
+ */
+const BLOCK_SHADES = [
+  "bg-ink",
+  "bg-ink/80",
+  "bg-ink/65",
+  "bg-ink/50",
+  "bg-ink/35",
+  "bg-ink/25",
+  "bg-ink/15",
+  "bg-ink/10",
+] as const;
+
+/** §8.2's counts line, as its parts — the pooled things used, then the unconfirmed. */
+function countsLine(week: WeekView): string[] {
+  const parts = week.counts.map((entry) => COPY.countEntry(entry.label, entry.used, entry.target));
+  if (week.notConfirmedCount > 0) parts.push(COPY.notConfirmed(week.notConfirmedCount));
+  return parts;
+}
+
+function ReflectionLine({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="flex flex-col gap-(--space-1)">
+      <Text as="span" variant="caption" tone="secondary">
+        {label}
+      </Text>
+      <blockquote className="m-0 font-serif text-(length:--fs-body) leading-relaxed whitespace-pre-wrap">
+        {text}
+      </blockquote>
+    </div>
   );
 }
 
