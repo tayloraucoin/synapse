@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { blockKindSchema } from "./block";
+
 /**
  * ST-07's one write.
  *
@@ -31,6 +33,8 @@ export const notificationKindSchema = z.enum([
 export const setNotificationPrefInput = z.object({
   kind: notificationKindSchema,
   enabled: z.boolean(),
+  /** UX v1.1 §9.3 (DYN-20): `item_start` is a preference per block — *Every item in… prep*. */
+  blockKind: blockKindSchema.nullable().optional(),
 });
 
 export type SetNotificationPrefInput = z.infer<

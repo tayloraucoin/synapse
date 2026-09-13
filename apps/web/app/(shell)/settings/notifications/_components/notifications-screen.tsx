@@ -10,7 +10,8 @@ import {
   StatusLine,
   Text,
 } from "@syn/ui";
-import type { NotificationKind, PermissionState } from "@syn/types";
+import { BLOCK_KIND_WORDS } from "@syn/constants";
+import type { BlockKind, NotificationKind, PermissionState } from "@syn/types";
 
 import { PlatformStepsSheet } from "@/components/platform-steps-sheet";
 import { REMINDER_COPY as COPY } from "@/components/reminder-prompt";
@@ -21,6 +22,10 @@ import { trpc } from "@/lib/trpc/client";
 
 /**
  * ST-07 — every reminder the product can send, each with its default.
+ *
+ * UX v1.1 §9 (DYN-20): the first group is the starts — each block, the pins
+ * and fixtures, the devices-off marker; *Every item in…* is N1b as one
+ * switch per block kind (R19: opt-in per block, off by default).
  *
  * ONLY PHASE-1 ROWS APPEAR. The server filters by the catalogue's `phase`, so
  * a switch is never shown for a sender that does not exist — somebody would
@@ -61,6 +66,13 @@ export function NotificationsScreen() {
       .then(() => utils.notification.prefs.invalidate());
   }
 
+  /** *Every item in… {block}* — the `(item_start, block_kind)` row (§9.3). */
+  function toggleItemStart(blockKind: BlockKind, next: boolean): void {
+    void setPref
+      .mutateAsync({ kind: "item_start", enabled: next, blockKind })
+      .then(() => utils.notification.prefs.invalidate());
+  }
+
   async function turnOn(): Promise<void> {
     setError(null);
     const result = await subscribeToPush();
@@ -93,15 +105,45 @@ export function NotificationsScreen() {
       {error === null ? null : <HelperText error>{error}</HelperText>}
       {!online ? <StatusLine variant="offline" placement="inline" /> : null}
 
+      {/* UX v1.1 §9.1 (DYN-20): the block boundaries, the pins, the marker. */}
       <section className="flex flex-col gap-(--space-2)">
-        <GroupHeading>{COPY.whenAnItemStarts}</GroupHeading>
+        <GroupHeading>{COPY.whenABlockStarts}</GroupHeading>
         <NotificationRow
-          id="item_start"
-          label={COPY.itemStart}
-          checked={enabled("item_start")}
+          id="block_start"
+          label={COPY.blockStart}
+          checked={enabled("block_start")}
           disabled={!online}
-          onCheckedChange={(next) => toggle("item_start", next)}
+          onCheckedChange={(next) => toggle("block_start", next)}
         />
+        <NotificationRow
+          id="fixture_start"
+          label={COPY.fixtureStart}
+          checked={enabled("fixture_start")}
+          disabled={!online}
+          onCheckedChange={(next) => toggle("fixture_start", next)}
+        />
+        <NotificationRow
+          id="devices_off"
+          label={COPY.devicesOff}
+          checked={enabled("devices_off")}
+          disabled={!online}
+          onCheckedChange={(next) => toggle("devices_off", next)}
+        />
+      </section>
+
+      {/* §9.3: N1b as a group of block-kind toggles under one heading (R19). */}
+      <section className="flex flex-col gap-(--space-2)">
+        <GroupHeading>{COPY.everyItemIn}</GroupHeading>
+        {(data?.itemStartBlocks ?? []).map((row) => (
+          <NotificationRow
+            key={row.blockKind}
+            id={`item_start_${row.blockKind}`}
+            label={BLOCK_KIND_WORDS[row.blockKind]}
+            checked={row.enabled}
+            disabled={!online}
+            onCheckedChange={(next) => toggleItemStart(row.blockKind, next)}
+          />
+        ))}
       </section>
 
       <section className="flex flex-col gap-(--space-2)">

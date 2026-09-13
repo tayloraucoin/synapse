@@ -1,17 +1,18 @@
-import { and, eq, gte, isNotNull, isNull, lt, ne } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, isNull, lt, ne } from "drizzle-orm";
 
 import { buildServiceRoleAuthContext } from "@syn/auth";
 import {
   createRlsClient,
+  dayBlocks,
   dayItems,
   days,
   db,
   notificationPrefs,
   users,
 } from "@syn/db";
-import { NOTIFICATION_CATALOGUE } from "@syn/constants";
+import { BLOCK_KIND_WORDS, NOTIFICATION_CATALOGUE } from "@syn/constants";
 import { createLogger } from "@syn/observability";
-import type { NotificationKind } from "@syn/types";
+import type { BlockKind, NotificationKind } from "@syn/types";
 import {
   addDays,
   wallClockToInstant,
@@ -21,18 +22,23 @@ import {
 
 import { resolveTodayFor } from "../day/today";
 import { getWeek } from "../day/week-view";
+import { findDevicesOffMarker } from "../day/wind-down";
 import {
-  groupedItemStartPayload,
+  blockStartPayload,
+  devicesOffPayload,
+  fixtureStartPayload,
+  groupedStartPayload,
   itemStartPayload,
   pendingReviewPayload,
   reviewReminderPayload,
   weekBuildPayload,
 } from "../notifications/build-payload";
-import { deliverOnce, dueSnoozed } from "../notifications/deliver";
+import { atMinute, claimDelivery, deliverOnce, dueSnoozed, sendClaimed } from "../notifications/deliver";
 import type { ScheduledJob } from "./run-scheduled-jobs";
 
 /**
- * The four Phase-1 notification jobs — official spec §8.2.
+ * The Phase-1 notification jobs — official spec §8.2, amended by UX v1.1 §9
+ * (DYN-20): the four start kinds in one scan, then N4, N5, N6.
  *
  * ONE SCAN, FOUR QUESTIONS, ONE WINDOW. The scheduler runs every fifteen
  * minutes; each job asks what was due in `[now − 15 min, now)` in the PERSON'S
@@ -133,37 +139,144 @@ async function isEnabled(
   return rows[0]?.enabled ?? DEFAULT_ENABLED.get(kind) ?? false;
 }
 
-/* --------------------------------------------------------------- N1 ---- */
+/* ------------------------------------------------- N1a · N1b · N1c · N1d ---- */
 
 /**
- * At the minute a fixed-time item starts.
- *
- * ITEMS AT THE SAME MINUTE COLLAPSE INTO ONE. Two notifications a second apart
- * is the phone reporting a schedule rather than telling somebody what is
- * happening; the grouped payload names both and offers no actions, because
- * choosing which one *Start* means is not a choice the product makes.
+ * Whether `item_start` is on for a block kind — the per-block row, and only
+ * it (UX v1.1 §9.3, R19). The v1.0 row with no block is not consulted: R19
+ * made the kind opt-in per block, and a switch nobody can see must not fire.
  */
-export async function notifyItemStart(now = new Date()): Promise<number> {
-  return forEachUser(now, async (context) => {
-    if (!(await isEnabled(context, "item_start"))) return 0;
+async function itemStartBlocks(context: UserContext): Promise<Set<BlockKind>> {
+  const rows = await context.rls.execute((tx) =>
+    tx
+      .select({ blockKind: notificationPrefs.blockKind, enabled: notificationPrefs.enabled })
+      .from(notificationPrefs)
+      .where(
+        and(
+          eq(notificationPrefs.userId, context.userId),
+          eq(notificationPrefs.kind, "item_start"),
+          isNotNull(notificationPrefs.blockKind),
+        ),
+      ),
+  );
+  return new Set(
+    rows.filter((row) => row.enabled && row.blockKind !== null).map((row) => row.blockKind as BlockKind),
+  );
+}
 
-    const rows = await context.rls.execute((tx) =>
+type StartCandidate = {
+  kind: "block_start" | "item_start" | "fixture_start" | "devices_off";
+  targetId: string;
+  title: string;
+  startsAt: Date;
+  /** A single item's push keeps v1's actions; nothing else has any. */
+  item: { id: string; preflightNote: string | null } | null;
+};
+
+/** Block kinds that push at their start (§9.1): never orient or morning — the person just woke. */
+const BLOCK_START_KINDS: readonly BlockKind[] = ["prep", "training", "work", "break", "activity", "wind_down"];
+
+/**
+ * The four start kinds, one scan, grouped by the minute — UX v1.1 §9.1–§9.2
+ * (DYN-20).
+ *
+ * NOTHING THE PICK DERIVES FIRES BEFORE `confirmed_at`. A block's start and
+ * an item's start exist because the day was set, so both scans require
+ * `days.confirmed_at`; a pin or a fixture is a time the person set whatever
+ * the day's state, so N1c scans without it — "on an unconfirmed day at
+ * 9:00, the only push that fires is a fixture's."
+ *
+ * SAME-MINUTE STARTS COLLAPSE INTO ONE. The work block at 9:00 and the
+ * stand-up at 9:00 are one push, *Work · Stand-up · 9:00*; every candidate
+ * in the minute claims its own delivery row first, so a later scan cannot
+ * resend one of them alone, and one sentence is sent for the rows that won.
+ *
+ * QUIET AFTER DAY COMPLETE is `closed_at IS NULL` on every query.
+ */
+export async function notifyStarts(now = new Date()): Promise<number> {
+  return forEachUser(now, async (context) => {
+    const [blockOn, fixtureOn, devicesOffOn] = await Promise.all([
+      isEnabled(context, "block_start"),
+      isEnabled(context, "fixture_start"),
+      isEnabled(context, "devices_off"),
+    ]);
+    const itemBlocks = await itemStartBlocks(context);
+
+    const [day] = await context.rls.execute((tx) =>
+      tx
+        .select({ id: days.id, confirmedAt: days.confirmedAt })
+        .from(days)
+        .where(
+          and(
+            eq(days.userId, context.userId),
+            eq(days.date, context.todayKey),
+            // Quiet after Day Complete (§8.4).
+            isNull(days.closedAt),
+          ),
+        )
+        .limit(1),
+    );
+    if (!day) return 0;
+    const set = day.confirmedAt !== null;
+
+    const candidates: StartCandidate[] = [];
+
+    // N1a — the blocks, after the pick.
+    if (blockOn && set) {
+      const blocks = await context.rls.execute((tx) =>
+        tx
+          .select({
+            id: dayBlocks.id,
+            kind: dayBlocks.kind,
+            name: dayBlocks.templateNameSnapshot,
+            scheduledStart: dayBlocks.scheduledStart,
+            state: dayBlocks.state,
+          })
+          .from(dayBlocks)
+          .where(
+            and(
+              eq(dayBlocks.userId, context.userId),
+              eq(dayBlocks.dayId, day.id),
+              inArray(dayBlocks.kind, [...BLOCK_START_KINDS]),
+              inArray(dayBlocks.state, ["planned", "set"]),
+              isNotNull(dayBlocks.scheduledStart),
+              gte(dayBlocks.scheduledStart, context.from),
+              lt(dayBlocks.scheduledStart, context.to),
+            ),
+          ),
+      );
+      for (const block of blocks) {
+        if (block.scheduledStart === null) continue;
+        candidates.push({
+          kind: "block_start",
+          targetId: block.id,
+          title: block.name?.trim() || BLOCK_KIND_WORDS[block.kind],
+          startsAt: block.scheduledStart,
+          item: null,
+        });
+      }
+    }
+
+    // The items in the window — N1b, N1c and N1d are all rows of this shape.
+    const items = await context.rls.execute((tx) =>
       tx
         .select({
           id: dayItems.id,
           title: dayItems.title,
           scheduledStart: dayItems.scheduledStart,
           notesPreflight: dayItems.notesPreflight,
-          multitaskId: dayItems.multitaskId,
+          pinned: dayItems.pinned,
+          origin: dayItems.origin,
+          type: dayItems.type,
+          templateSlotId: dayItems.templateSlotId,
+          blockKind: dayBlocks.kind,
         })
         .from(dayItems)
-        .innerJoin(days, eq(days.id, dayItems.dayId))
+        .leftJoin(dayBlocks, eq(dayBlocks.id, dayItems.dayBlockId))
         .where(
           and(
             eq(dayItems.userId, context.userId),
-            eq(days.date, context.todayKey),
-            // Quiet after Day Complete (§8.4).
-            isNull(days.closedAt),
+            eq(dayItems.dayId, day.id),
             eq(dayItems.timeMode, "fixed_time"),
             eq(dayItems.assignmentState, "assigned"),
             eq(dayItems.completionState, "upcoming"),
@@ -174,70 +287,138 @@ export async function notifyItemStart(now = new Date()): Promise<number> {
         ),
     );
 
-    if (rows.length === 0) return 0;
+    // The marker is recognised by shape, as the wind-down does (DYN-18).
+    const marker = findDevicesOffMarker(
+      items.filter((row) => row.blockKind === "wind_down"),
+    );
 
-    // Group by the minute, and by multitask group inside it.
-    const groups = new Map<string, typeof rows>();
-    for (const row of rows) {
+    for (const row of items) {
       if (row.scheduledStart === null) continue;
-      const minute = new Date(row.scheduledStart.getTime());
-      minute.setSeconds(0, 0);
-      const key = `${minute.getTime()}:${row.multitaskId ?? ""}`;
-      const bucket = groups.get(key);
-      if (bucket) bucket.push(row);
-      else groups.set(key, [row]);
+      if (marker !== null && row.id === marker.id) {
+        if (devicesOffOn) {
+          candidates.push({
+            kind: "devices_off",
+            targetId: row.id,
+            title: row.title,
+            startsAt: row.scheduledStart,
+            item: null,
+          });
+        }
+        continue;
+      }
+      const fixed = row.pinned || row.origin === "fixture";
+      if (fixed) {
+        if (fixtureOn) {
+          candidates.push({
+            kind: "fixture_start",
+            targetId: row.id,
+            title: row.title,
+            startsAt: row.scheduledStart,
+            item: null,
+          });
+        }
+        continue;
+      }
+      // N1b: opt-in per block; an item with no block never fires under it.
+      if (set && row.blockKind !== null && itemBlocks.has(row.blockKind)) {
+        candidates.push({
+          kind: "item_start",
+          targetId: row.id,
+          title: row.title,
+          startsAt: row.scheduledStart,
+          item: { id: row.id, preflightNote: row.notesPreflight },
+        });
+      }
     }
 
+    if (candidates.length === 0) return 0;
+
+    // Group by the minute.
+    const groups = new Map<number, StartCandidate[]>();
+    for (const candidate of candidates) {
+      const key = atMinute(candidate.startsAt).getTime();
+      const bucket = groups.get(key);
+      if (bucket) bucket.push(candidate);
+      else groups.set(key, [candidate]);
+    }
+
+    /*
+     * Always `/today`. This job only ever scans the person's CURRENT day, so
+     * the landing is today's canonical URL — `/day/{todayKey}` would just
+     * redirect there (SYS-1's rule) and cost a round trip on a phone that
+     * has only just woken up.
+     */
+    const dayPath = "/today";
     let sent = 0;
 
     for (const group of groups.values()) {
-      const first = group[0];
-      if (first?.scheduledStart == null) continue;
+      // Every candidate claims its row; the ones that won and are on time
+      // are what the one sentence is about.
+      const won: Array<{ rowId: string; candidate: StartCandidate }> = [];
+      for (const candidate of group) {
+        const claim = await claimDelivery(
+          context.rls,
+          context.userId,
+          {
+            kind: candidate.kind,
+            targetId: candidate.targetId,
+            targetKey: null,
+            scheduledFor: candidate.startsAt,
+          },
+          context.now,
+        );
+        if (claim === "duplicate" || claim === "skipped") continue;
+        won.push({ rowId: claim.id, candidate });
+      }
+      if (won.length === 0) continue;
 
-      /*
-       * Always `/today`. This job only ever scans the person's CURRENT day, so
-       * the landing is today's canonical URL — `/day/{todayKey}` would just
-       * redirect there (SYS-1's rule) and cost a round trip on a phone that
-       * has only just woken up.
-       */
-      const dayPath = "/today";
-
+      const first = won[0]?.candidate;
+      if (first === undefined) continue;
       const payload =
-        group.length === 1
-          ? itemStartPayload({
-              title: first.title,
-              startsAt: first.scheduledStart,
+        won.length === 1
+          ? payloadFor(first, context.timeZone, dayPath)
+          : groupedStartPayload({
+              titles: won.map((entry) => entry.candidate.title),
+              startsAt: first.startsAt,
               timeZone: context.timeZone,
-              preflightNote: first.notesPreflight,
-              itemUrl: `${dayPath}?sheet=item&id=${first.id}`,
-              startUrl: `${dayPath}?sheet=item&id=${first.id}&action=start`,
-              doneUrl: `${dayPath}?action=done&id=${first.id}`,
-            })
-          : groupedItemStartPayload({
-              titles: group.map((row) => row.title),
-              startsAt: first.scheduledStart,
-              timeZone: context.timeZone,
-              focusUrl: `${dayPath}?focus=${first.id}`,
+              url: dayPath,
             });
 
-      const outcome = await deliverOnce(
+      await sendClaimed(
         context.rls,
         context.userId,
-        {
-          kind: "item_start",
-          targetId: first.id,
-          targetKey: null,
-          scheduledFor: first.scheduledStart,
-        },
+        won.map((entry) => entry.rowId),
         payload,
         context.now,
       );
-
-      if (outcome === "sent") sent += 1;
+      sent += 1;
     }
 
     return sent;
   });
+}
+
+function payloadFor(candidate: StartCandidate, timeZone: string, dayPath: string) {
+  switch (candidate.kind) {
+    case "block_start":
+      return blockStartPayload({ name: candidate.title, startsAt: candidate.startsAt, timeZone, url: dayPath });
+    case "fixture_start":
+      return fixtureStartPayload({ title: candidate.title, startsAt: candidate.startsAt, timeZone, url: dayPath });
+    case "devices_off":
+      return devicesOffPayload({ title: candidate.title, startsAt: candidate.startsAt, timeZone, url: dayPath });
+    case "item_start": {
+      const id = candidate.item?.id ?? candidate.targetId;
+      return itemStartPayload({
+        title: candidate.title,
+        startsAt: candidate.startsAt,
+        timeZone,
+        preflightNote: candidate.item?.preflightNote ?? null,
+        itemUrl: `${dayPath}?sheet=item&id=${id}`,
+        startUrl: `${dayPath}?sheet=item&id=${id}&action=start`,
+        doneUrl: `${dayPath}?action=done&id=${id}`,
+      });
+    }
+  }
 }
 
 /* --------------------------------------------------------------- N4 ---- */
@@ -475,9 +656,10 @@ export async function notifyWeekBuild(now = new Date()): Promise<number> {
   });
 }
 
-export const notifyItemStartJob: ScheduledJob = {
-  name: "notify-item-start",
-  run: () => notifyItemStart(),
+/** N1a–N1d in one scan (DYN-20); replaces v1.0's `notify-item-start`. */
+export const notifyStartsJob: ScheduledJob = {
+  name: "notify-starts",
+  run: () => notifyStarts(),
 };
 
 export const notifyReviewReminderJob: ScheduledJob = {

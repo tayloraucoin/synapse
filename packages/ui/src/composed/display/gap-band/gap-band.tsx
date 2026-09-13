@@ -35,6 +35,8 @@ export interface GapBandProps {
   /** The axis's hour-label column; the band starts after it, the minutes sit in it. */
   gutterPx?: number;
   resizable?: boolean;
+  /** The slot below the seam — the `DragLayer` writes its gap (DYN-9). */
+  afterId?: string;
   onSeamPointerDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
   onSeamKeyDown?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
   className?: string;
@@ -48,6 +50,7 @@ export function GapBand({
   between,
   gutterPx = SCHEDULE_GUTTER_PX,
   resizable = false,
+  afterId,
   onSeamPointerDown,
   onSeamKeyDown,
   className,
@@ -93,6 +96,7 @@ export function GapBand({
           aria-valuemin={0}
           tabIndex={0}
           data-gap-seam
+          data-after-id={afterId}
           onPointerDown={onSeamPointerDown}
           onKeyDown={onSeamKeyDown}
           style={{ insetInlineStart: `${gutterPx}px` }}

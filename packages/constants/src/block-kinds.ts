@@ -27,6 +27,22 @@ export const BLOCK_KINDS = [
 
 export type BlockKindValue = (typeof BLOCK_KINDS)[number];
 
+/**
+ * The block kinds' words — UX v1.1 §3.1, §6.1, §12.2. One source for the
+ * band header, the block header and a push's title (DYN-20): the default
+ * name a block shows when the day's block has no template name of its own.
+ */
+export const BLOCK_KIND_WORDS: Record<BlockKindValue, string> = {
+  orient: "Orient",
+  morning: "Morning",
+  training: "Training",
+  prep: "Before work",
+  work: "Work",
+  break: "Break",
+  activity: "Activity",
+  wind_down: "Wind-down",
+};
+
 /** The kinds a person orders; the two placeable kinds are absent by design. */
 export const DEFAULT_BLOCK_ORDER = [
   "orient",

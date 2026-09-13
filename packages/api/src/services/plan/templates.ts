@@ -634,62 +634,71 @@ export async function restoreSlot(
  * A bracket or a one-of group moves as one. Swapping past a pin moves the
  * pin's INDEX, never its time — the walk places a pin by its clock regardless,
  * so the moved slot simply lands on the other side of it.
+ *
+ * `steps` (DYN-9): a drag to a position is the same adjacent swap repeated
+ * in one transaction; it stops at the edge of the stack and reports whether
+ * anything moved.
  */
 export async function moveSlot(
   rls: RlsClient,
   userId: string,
   id: string,
   direction: "up" | "down",
+  steps = 1,
 ): Promise<boolean> {
   return rls.execute(async (tx) => {
-    const [slot] = await tx
-      .select({
-        id: templateSlots.id,
-        templateId: templateSlots.templateId,
-        sortOrder: templateSlots.sortOrder,
-      })
-      .from(templateSlots)
-      .where(and(eq(templateSlots.id, id), eq(templateSlots.userId, userId)))
-      .limit(1);
+    let moved = false;
+    for (let step = 0; step < steps; step += 1) {
+      const [slot] = await tx
+        .select({
+          id: templateSlots.id,
+          templateId: templateSlots.templateId,
+          sortOrder: templateSlots.sortOrder,
+        })
+        .from(templateSlots)
+        .where(and(eq(templateSlots.id, id), eq(templateSlots.userId, userId)))
+        .limit(1);
 
-    if (!slot) return false;
+      if (!slot) return moved;
 
-    const target = direction === "up" ? slot.sortOrder - 1 : slot.sortOrder + 1;
-    if (target < 0) return false;
+      const target = direction === "up" ? slot.sortOrder - 1 : slot.sortOrder + 1;
+      if (target < 0) return moved;
 
-    const movers = await tx
-      .select({ id: templateSlots.id })
-      .from(templateSlots)
-      .where(
-        and(
-          eq(templateSlots.templateId, slot.templateId),
-          eq(templateSlots.sortOrder, slot.sortOrder),
-        ),
-      );
-    const displaced = await tx
-      .select({ id: templateSlots.id })
-      .from(templateSlots)
-      .where(
-        and(
-          eq(templateSlots.templateId, slot.templateId),
-          eq(templateSlots.sortOrder, target),
-        ),
-      );
-    if (displaced.length === 0) return false;
+      const movers = await tx
+        .select({ id: templateSlots.id })
+        .from(templateSlots)
+        .where(
+          and(
+            eq(templateSlots.templateId, slot.templateId),
+            eq(templateSlots.sortOrder, slot.sortOrder),
+          ),
+        );
+      const displaced = await tx
+        .select({ id: templateSlots.id })
+        .from(templateSlots)
+        .where(
+          and(
+            eq(templateSlots.templateId, slot.templateId),
+            eq(templateSlots.sortOrder, target),
+          ),
+        );
+      if (displaced.length === 0) return moved;
 
-    for (const row of movers) {
-      await tx
-        .update(templateSlots)
-        .set({ sortOrder: target, updatedAt: new Date() })
-        .where(eq(templateSlots.id, row.id));
+      for (const row of movers) {
+        await tx
+          .update(templateSlots)
+          .set({ sortOrder: target, updatedAt: new Date() })
+          .where(eq(templateSlots.id, row.id));
+      }
+      for (const row of displaced) {
+        await tx
+          .update(templateSlots)
+          .set({ sortOrder: slot.sortOrder, updatedAt: new Date() })
+          .where(eq(templateSlots.id, row.id));
+      }
+      moved = true;
     }
-    for (const row of displaced) {
-      await tx
-        .update(templateSlots)
-        .set({ sortOrder: slot.sortOrder, updatedAt: new Date() })
-        .where(eq(templateSlots.id, row.id));
-    }
 
-    return true;
+    return moved;
   });
 }

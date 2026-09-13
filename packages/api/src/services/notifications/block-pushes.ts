@@ -1,28 +1,45 @@
-import type { RlsClient } from "@syn/db";
+import { and, eq, gt, inArray, isNotNull } from "drizzle-orm";
+
+import { dayBlocks, type RlsClient } from "@syn/db";
 
 /**
- * The block-boundary pushes — UX v1.1 §9 (N10 *block_start*, N11
- * *fixture_start*, N12 *devices_off*).
+ * The block-boundary pushes — UX v1.1 §9 (N1a *block_start*, N1c
+ * *fixture_start*, N1d *devices_off*).
  *
- * THIS IS THE NAMED SEAM DYN-20 FILLS. `confirmDay` calls it at the moment
- * v1.1 §5.4 says the transition pushes are enqueued, so that DYN-20 changes
- * one file and no caller. Until then it enqueues nothing, and says so.
+ * THIS IS THE SEAM `confirmDay` CALLS at the moment v1.1 §5.4 says the
+ * transition pushes are enqueued. Under DYN-20's ruling there is nothing
+ * to write: Phase 1's notifications are a scan, not a queue — USE-8's
+ * scheduler reads each fifteen-minute window and `claimDelivery` keys each
+ * send on `(kind, target, scheduled_for)` — and "enqueued at the pick" is
+ * the scan's condition, `days.confirmed_at IS NOT NULL` on every block and
+ * item start (`jobs/notify.ts`, `notifyStarts`). A queue would be a second
+ * delivery model with its own exactly-once to keep.
  *
- * WHY NOTHING IS ENQUEUED TODAY. Phase 1's notifications are not a queue:
- * USE-8's scheduler scans each fifteen-minute window and `deliverOnce` keys
- * each delivery on `(kind, target, scheduled_for)`, so a fixture pinned at
- * 9:30 is already found by the *item_start* scan the minute it starts. The
- * three v1.1 kinds need their own scans over `day_blocks` and the marker,
- * and those scans are DYN-20's — a queue would be a second delivery model.
+ * What this reports is what the scans will find: the block boundaries still
+ * ahead on the day just set, so `confirmDay`'s return says something true.
  */
+const BLOCK_START_KINDS = ["prep", "training", "work", "break", "activity", "wind_down"] as const;
+
 export async function enqueueBlockPushes(
   rls: RlsClient,
   userId: string,
   dayId: string,
+  now: Date = new Date(),
 ): Promise<{ enqueued: number; dayId: string }> {
-  // TODO(DYN-20): the three scans over `day_blocks` and the marker, keyed by
-  // `deliverOnce`. The arguments are the ones they need; nothing runs yet.
-  void rls;
-  void userId;
-  return { enqueued: 0, dayId };
+  const ahead = await rls.execute((tx) =>
+    tx
+      .select({ id: dayBlocks.id })
+      .from(dayBlocks)
+      .where(
+        and(
+          eq(dayBlocks.userId, userId),
+          eq(dayBlocks.dayId, dayId),
+          inArray(dayBlocks.kind, [...BLOCK_START_KINDS]),
+          inArray(dayBlocks.state, ["planned", "set"]),
+          isNotNull(dayBlocks.scheduledStart),
+          gt(dayBlocks.scheduledStart, now),
+        ),
+      ),
+  );
+  return { enqueued: ahead.length, dayId };
 }

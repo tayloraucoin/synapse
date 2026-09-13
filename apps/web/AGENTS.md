@@ -80,9 +80,9 @@ is a defect.**
 | `/setup/{1–12}` | `setupRoute(step)` | UX v1.1 §4.1–§4.12 — screens 1–6 (DYN-10), 7–12 (DYN-11); 12 completes first run and pre-fills the week |
 | `/orient` | `orientRoute()` | UX v1.1 §5.2 — the orient frame; the entry tree puts it before any tab while today has no `woke_at` (DYN-13); no header, no tab bar |
 | `/today` | `todayRoute()` | LS-01 — the quick-pick while `confirmed_at` is null (v1.1 §5.3, DYN-14), the list after |
-| `/today/schedule` | `todayScheduleRoute()` | SC-01 |
+| `/today/schedule` | `todayScheduleRoute(options?)` | SC-01, editable (UX v1.1 §6.5, DYN-16); `{ move: true }` → `?mode=move`, the tap-to-lift fallback the day header sheet's *Edit today* opens |
 | `/day/{date}` | `dayRoute(date)` | LS-01, record or plan mode |
-| `/day/{date}/schedule` | `dayScheduleRoute(date)` | SC-01, past or future |
+| `/day/{date}/schedule` | `dayScheduleRoute(date, options?)` | SC-01, past (record: no drag) or future (plan: drag, no ghosts); the same `{ move }` option |
 | `/day/{date}/item/{id}` | `dayItemRoute(date, id)` | IT-01 — addressable for deep links |
 | `/day/{date}/journal` | `journalRoute(date)` | UX v1.1 §7.2 — the journal (DYN-18); today or a past day, read-only from Review (`?from=review`), a future day is a 404 |
 | `/review` | `reviewRoute()` | RV-00 |

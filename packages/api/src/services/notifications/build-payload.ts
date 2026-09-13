@@ -48,6 +48,10 @@ export type BuiltPayload = {
 export const TTL_SECONDS = {
   /** The item's moment has passed within the quarter hour. */
   item_start: 15 * 60,
+  /** UX v1.1 §9.1 — a block's, a fixture's and the marker's moment, likewise. */
+  block_start: 15 * 60,
+  fixture_start: 15 * 60,
+  devices_off: 15 * 60,
   /** The evening it belongs to. */
   review_reminder: 2 * 60 * 60,
   /** The morning it belongs to. */
@@ -85,23 +89,73 @@ export function itemStartPayload(input: {
 }
 
 /**
- * N1, grouped — two or more items at the same minute (§8.2's grouping rule).
+ * N1a — at a block's `scheduled_start`, after the pick (UX v1.1 §9.1).
  *
- * NO ACTIONS ON A GROUP. *Start* would have to pick one of them, and picking
- * for someone is the one thing this product does not do. The tap lands on the
- * list with the first row in view, where both are visible and either can be
- * chosen.
+ * The title is the block's own name — the template's, or the kind's word —
+ * and its time. Nothing beneath. No actions: a block is not a thing to start
+ * or tick.
  */
-export function groupedItemStartPayload(input: {
+export function blockStartPayload(input: {
+  name: string;
+  startsAt: Date;
+  timeZone: string;
+  url: string;
+}): BuiltPayload {
+  return {
+    title: `${input.name} · ${formatClock(input.startsAt, input.timeZone)}`,
+    url: input.url,
+    ttlSeconds: TTL_SECONDS.block_start,
+  };
+}
+
+/**
+ * N1c — a pin or a fixture at its time (UX v1.1 §9.1): *Stand-up · 9:30*.
+ * "Fixtures always notify, they are the times most worth a push."
+ */
+export function fixtureStartPayload(input: {
+  title: string;
+  startsAt: Date;
+  timeZone: string;
+  url: string;
+}): BuiltPayload {
+  return {
+    title: `${input.title} · ${formatClock(input.startsAt, input.timeZone)}`,
+    url: input.url,
+    ttlSeconds: TTL_SECONDS.fixture_start,
+  };
+}
+
+/**
+ * N1d — the devices-off marker (UX v1.1 §9.1): *Phone away · 22:15*. A time
+ * the person set, in the words the marker already carries.
+ */
+export function devicesOffPayload(input: {
+  title: string;
+  startsAt: Date;
+  timeZone: string;
+  url: string;
+}): BuiltPayload {
+  return {
+    title: `${input.title} · ${formatClock(input.startsAt, input.timeZone)}`,
+    url: input.url,
+    ttlSeconds: TTL_SECONDS.devices_off,
+  };
+}
+
+/**
+ * Same-minute starts of any kind, grouped (UX v1.1 §9.1's grouping rule,
+ * DYN-20): *Work · Stand-up · 9:00*. No actions, for N1's reason.
+ */
+export function groupedStartPayload(input: {
   titles: readonly string[];
   startsAt: Date;
   timeZone: string;
-  focusUrl: string;
+  url: string;
 }): BuiltPayload {
   return {
     title: `${input.titles.join(" · ")} · ${formatClock(input.startsAt, input.timeZone)}`,
-    url: input.focusUrl,
-    ttlSeconds: TTL_SECONDS.item_start,
+    url: input.url,
+    ttlSeconds: TTL_SECONDS.block_start,
   };
 }
 
@@ -127,7 +181,7 @@ export function reviewReminderPayload(input: {
       { action: "review", title: "Review" },
       { action: "later", title: "Later" },
     ],
-    // *Later* has no URL on purpose: it defers, it does not take you anywhere.
+    // *Later* has no URL on purpose: it defers; it navigates nowhere.
     actionUrls: { review: input.reviewUrl },
     snoozeDate: input.dateKey,
     ttlSeconds: TTL_SECONDS.review_reminder,

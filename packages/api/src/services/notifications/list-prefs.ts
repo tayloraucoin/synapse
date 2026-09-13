@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 
 import { notificationPrefs, users, type RlsClient } from "@syn/db";
-import { NOTIFICATION_CATALOGUE } from "@syn/constants";
-import type { NotificationKind } from "@syn/types";
+import { BLOCK_KINDS, NOTIFICATION_CATALOGUE } from "@syn/constants";
+import type { BlockKind, NotificationKind } from "@syn/types";
 
 /**
  * ST-07's rows — the catalogue merged with whatever the person has said.
@@ -17,6 +17,12 @@ import type { NotificationKind } from "@syn/types";
  * on *When a window opens*, receive nothing, and reasonably conclude the
  * reminders are broken. They appear with their senders (USE-8).
  *
+ * `item_start` IS A PREFERENCE PER BLOCK (UX v1.1 §9.3, R19, DYN-20): the
+ * rows for it are `(item_start, block_kind)`, one per kind with items, and
+ * `itemStartBlocks` is what *Every item in…* renders. The catalogue row for
+ * `item_start` with no block is the v1.0 switch; it stays in `rows` for the
+ * shape's sake and nothing reads it.
+ *
  * THE TIMES ARE NOT HERE. N4's time is `users.review_reminder_time` and N6's
  * is `week_build_reminder_*` — account scalars, edited by ST-08 as well as
  * this screen. `notification_prefs` holds `enabled` and nothing else, so there
@@ -30,10 +36,17 @@ export type NotificationPrefView = {
 
 export type NotificationPrefs = {
   rows: NotificationPrefView[];
+  /** *Every item in…* — one switch per block kind with items; orient has none. */
+  itemStartBlocks: Array<{ blockKind: BlockKind; enabled: boolean }>;
   reviewReminderTime: string;
   weekBuildReminderWeekday: number;
   weekBuildReminderTime: string;
 };
+
+/** The kinds *Every item in…* offers — orient's one item is the person's own words. */
+export const ITEM_START_BLOCK_KINDS: readonly BlockKind[] = BLOCK_KINDS.filter(
+  (kind) => kind !== "orient",
+);
 
 export async function listNotificationPrefs(
   rls: RlsClient,
@@ -44,12 +57,20 @@ export async function listNotificationPrefs(
     const stored = await tx
       .select({
         kind: notificationPrefs.kind,
+        blockKind: notificationPrefs.blockKind,
         enabled: notificationPrefs.enabled,
       })
       .from(notificationPrefs)
       .where(eq(notificationPrefs.userId, userId));
 
-    const byKind = new Map(stored.map((row) => [row.kind, row.enabled]));
+    const byKind = new Map(
+      stored.filter((row) => row.blockKind === null).map((row) => [row.kind, row.enabled]),
+    );
+    const itemStartByBlock = new Map(
+      stored
+        .filter((row) => row.kind === "item_start" && row.blockKind !== null)
+        .map((row) => [row.blockKind as BlockKind, row.enabled]),
+    );
 
     const [account] = await tx
       .select({
@@ -69,6 +90,11 @@ export async function listNotificationPrefs(
         n: entry.n,
         enabled: byKind.get(entry.kind) ?? entry.defaultEnabled,
       })),
+      // Off unless the person turned a block on — R19's default.
+      itemStartBlocks: ITEM_START_BLOCK_KINDS.map((blockKind) => ({
+        blockKind,
+        enabled: itemStartByBlock.get(blockKind) ?? false,
+      })),
       reviewReminderTime: account?.reviewReminderTime ?? "21:00",
       weekBuildReminderWeekday: account?.weekBuildReminderWeekday ?? 6,
       weekBuildReminderTime: account?.weekBuildReminderTime ?? "18:00",
@@ -85,13 +111,14 @@ export async function listNotificationPrefs(
  * unique constraint is `(user_id, kind, block_kind) NULLS NOT DISTINCT`, and a
  * target that names only two of its columns matches no arbiter and fails at
  * runtime with "no unique or exclusion constraint matching". Every v1.0 kind
- * writes `block_kind = null`; DYN-20 writes a block for `item_start`.
+ * writes `block_kind = null`; `item_start` writes the block (DYN-20).
  */
 export async function setNotificationPref(
   rls: RlsClient,
   userId: string,
-  input: { kind: NotificationKind; enabled: boolean },
-): Promise<{ kind: NotificationKind; enabled: boolean }> {
+  input: { kind: NotificationKind; enabled: boolean; blockKind?: BlockKind | null },
+): Promise<{ kind: NotificationKind; enabled: boolean; blockKind: BlockKind | null }> {
+  const blockKind = input.kind === "item_start" ? (input.blockKind ?? null) : null;
   await rls.execute((tx) =>
     tx
       .insert(notificationPrefs)
@@ -99,7 +126,7 @@ export async function setNotificationPref(
         userId,
         kind: input.kind,
         enabled: input.enabled,
-        blockKind: null,
+        blockKind,
       })
       .onConflictDoUpdate({
         target: [
@@ -111,5 +138,5 @@ export async function setNotificationPref(
       }),
   );
 
-  return input;
+  return { kind: input.kind, enabled: input.enabled, blockKind };
 }

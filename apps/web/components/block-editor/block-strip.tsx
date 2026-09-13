@@ -3,6 +3,7 @@
 import * as React from "react";
 
 import {
+  DragLayer,
   EmptyState,
   GapBand,
   SCHEDULE_GUTTER_PX,
@@ -11,11 +12,17 @@ import {
   SlotRow,
   StateWord,
   Text,
+  type DragIntent,
+  type DragLayerItem,
 } from "@syn/ui";
-import type { DayItemView, SlotView } from "@syn/types";
+import { GAP_MAX } from "@syn/constants";
+import type { BlockKind, DayItemView, DragState, SlotView } from "@syn/types";
+import { clockFromMinutes, formatClockFromMinutes } from "@syn/utils";
+
+import { trpc } from "@/lib/trpc/client";
 
 import { BLOCK_EDITOR_COPY as COPY } from "./copy";
-import type { WalkResult } from "./use-block-editor";
+import { parseClock, type WalkResult } from "./use-block-editor";
 
 /**
  * The strip — UX v1.1 §3.11: "a vertical strip: the time gutter on the left
@@ -31,22 +38,35 @@ import type { WalkResult } from "./use-block-editor";
  *
  * 96 px/hour (§3.11). Every block is a `ScheduleBlock` fed a `DayItemView`
  * shaped from the slot — the same composite the Schedule draws, so the two
- * cannot look different. Drag is DYN-9's: every block is `draggable={false}`
- * here, and the slot sheet is the whole editing surface.
+ * cannot look different.
+ *
+ * THE GESTURES ARE DYN-7'S LAYER, IN `editor` MODE (DYN-9): a lift and drop
+ * reorders through `template.moveSlot` (the adjacent swap, `steps` times);
+ * the bottom edge resizes through `template.saveSlot` with nothing clamped
+ * (R21) and the habit's range drawn as a faint band; the seam between two
+ * blocks — and `g` then a number — sets the lower slot's gap, bounded by the
+ * validator's `GAP_MAX`. A pin never lifts, reorders, or takes a gap. Every
+ * gesture has its keyboard path in the layer, and the slot sheet stays as
+ * the fallback for all three (§13 #8).
  *
  * A PLACEABLE KIND (training, break) has no anchor of its own — it is placed
  * each morning — so its strip is the stack as rows, in order, with the gaps
- * written between them; the gutter would have nothing true to say.
+ * written between them; the gutter would have nothing true to say, and no
+ * layer is mounted.
  */
 
 const PX_PER_HOUR = 96;
 const PX_PER_MIN = PX_PER_HOUR / 60;
 
 export interface BlockStripProps {
+  templateId: string;
+  kind: BlockKind;
   slots: readonly SlotView[];
   walk: WalkResult | null;
   onOpen: (slot: SlotView) => void;
   onAdd: () => void;
+  /** After a gesture's write — the editor re-reads and the walk re-flows. */
+  onChanged: () => Promise<void> | void;
   disabled?: boolean;
 }
 
@@ -93,7 +113,17 @@ function toItemView(slot: SlotView, startMin: number, endMin: number): DayItemVi
 
 type Placed = { slot: SlotView; startMin: number; endMin: number };
 
-export function BlockStrip({ slots, walk, onOpen, onAdd, disabled = false }: BlockStripProps) {
+export function BlockStrip({
+  templateId,
+  kind,
+  slots,
+  walk,
+  onOpen,
+  onAdd,
+  onChanged,
+  disabled = false,
+}: BlockStripProps) {
+  const gestures = useStripGestures(templateId, kind, slots, onChanged);
   const onWalk = slots.filter((slot) => slot.role !== "pool");
   const pool = slots.filter((slot) => slot.role === "pool");
 
@@ -122,7 +152,13 @@ export function BlockStrip({ slots, walk, onOpen, onAdd, disabled = false }: Blo
   return (
     <div className="flex flex-col gap-(--space-4)">
       {timed ? (
-        <TimedStrip placed={placed} walk={walk} disabled={disabled} onOpen={onOpen} />
+        <TimedStrip
+          placed={placed}
+          walk={walk}
+          disabled={disabled}
+          onOpen={onOpen}
+          gestures={gestures}
+        />
       ) : (
         <ul className="flex flex-col">
           {onWalk.map((slot) => (
@@ -152,11 +188,13 @@ function TimedStrip({
   walk,
   disabled,
   onOpen,
+  gestures,
 }: {
   placed: Placed[];
   walk: WalkResult;
   disabled: boolean;
   onOpen: (slot: SlotView) => void;
+  gestures: StripGestures;
 }) {
   const anchorMin = walk.anchorMin as number;
   const startMin = walk.startMin as number;
@@ -166,12 +204,15 @@ function TimedStrip({
   const spanEnd = Math.max(Math.ceil(Math.max(endMin, anchorMin) / 60) * 60, spanStart + 60);
   const topOf = (minutes: number) => (minutes - spanStart) * PX_PER_MIN;
 
-  // Gaps: the space the walk left between consecutive items.
+  /*
+   * Gaps: the space the walk left between consecutive items. A seam sits on
+   * every one — a zero gap is a hairline with a seam on it — except above a
+   * pin, which has no gap to drag (§3.11).
+   */
   const gaps = placed.flatMap((entry, index) => {
     const next = placed[index + 1];
     if (!next) return [];
-    const gapMin = next.startMin - entry.endMin;
-    if (gapMin <= 0) return [];
+    const gapMin = Math.max(0, next.startMin - entry.endMin);
     return [
       {
         id: `${entry.slot.id}-${next.slot.id}`,
@@ -179,11 +220,36 @@ function TimedStrip({
         minutes: gapMin,
         before: entry.slot.title,
         after: next.slot.title,
+        afterId: next.slot.id,
+        resizable: next.slot.pinnedClock === null,
       },
     ];
   });
 
+  // The layer's geometry: the walk's placement, the pin flag, the range.
+  const layerItems: DragLayerItem[] = placed.map(({ slot, startMin: s, endMin: e }) => ({
+    id: slot.id,
+    title: slot.title,
+    startMin: s,
+    durationMin: Math.max(0, e - s),
+    pinned: slot.pinnedClock !== null,
+    resizable: true,
+    blockId: null,
+    gapBeforeMin: slot.gapBeforeMin,
+    ...gestures.rangeOf(slot),
+  }));
+
   return (
+    <DragLayer
+      editor
+      pxPerHour={PX_PER_HOUR}
+      axisStartMin={spanStart}
+      items={layerItems}
+      state={gestures.state}
+      disabled={disabled}
+      onIntent={(intent) => void gestures.onIntent(intent, placed)}
+      formatTime={formatClockFromMinutes}
+    >
     <ScheduleAxis startMin={spanStart} endMin={spanEnd} pxPerHour={PX_PER_HOUR} timeZone="UTC">
       {gaps.map((gap) => (
         <GapBand
@@ -192,6 +258,8 @@ function TimedStrip({
           topPx={topOf(gap.startMin)}
           heightPx={gap.minutes * PX_PER_MIN}
           between={{ before: gap.before, after: gap.after }}
+          resizable={!disabled && gap.resizable}
+          afterId={gap.afterId}
         />
       ))}
       {placed.map(({ slot, startMin: s, endMin: e }) => (
@@ -202,8 +270,10 @@ function TimedStrip({
             heightPx={Math.max(2, (e - s) * PX_PER_MIN)}
             timeZone="UTC"
             pinned={slot.pinnedClock !== null}
+            draggable={!disabled}
+            resizable={!disabled}
             onOpen={() => {
-              if (!disabled) onOpen(slot);
+              if (!disabled && !gestures.swallowClick()) onOpen(slot);
             }}
           />
           {/* The one-of tabs and the role caption ride on the block (§3.11). */}
@@ -249,5 +319,133 @@ function TimedStrip({
         className="border-edge pointer-events-none absolute end-0 border-t"
       />
     </ScheduleAxis>
+    </DragLayer>
   );
+}
+
+/* ------------------------------------------------------------ gestures -- */
+
+type StripGestures = {
+  state: DragState;
+  rangeOf: (slot: SlotView) => { rangeMin?: number; rangeMax?: number };
+  onIntent: (intent: DragIntent, placed: readonly Placed[]) => Promise<void>;
+  /** True once, right after a drop — the block's own click must not open the sheet. */
+  swallowClick: () => boolean;
+};
+
+/**
+ * The layer's intents as the editor's writes (DYN-9). Every gesture is
+ * `template.saveSlot` or `template.moveSlot`; the range comes from the
+ * kind's habit list, read once.
+ */
+function useStripGestures(
+  templateId: string,
+  kind: BlockKind,
+  slots: readonly SlotView[],
+  onChanged: () => Promise<void> | void,
+): StripGestures {
+  const saveSlot = trpc.template.saveSlot.useMutation();
+  const moveSlot = trpc.template.moveSlot.useMutation();
+  const habits = trpc.habit.list.useQuery({ includeArchived: true, blockKind: kind });
+  const [state, setState] = React.useState<DragState>("idle");
+  const dropped = React.useRef(false);
+
+  const rangeByHabit = React.useMemo(
+    () => new Map((habits.data?.habits ?? []).map((habit) => [habit.id, habit])),
+    [habits.data?.habits],
+  );
+
+  const rangeOf = React.useCallback(
+    (slot: SlotView) => {
+      const habit = rangeByHabit.get(slot.habitId);
+      if (!habit || habit.durationMin === null || habit.durationMax === null) return {};
+      return { rangeMin: habit.durationMin, rangeMax: habit.durationMax };
+    },
+    [rangeByHabit],
+  );
+
+  /** The slot as `saveSlot` wants it, with one field changed. */
+  const patch = React.useCallback(
+    async (slot: SlotView, changes: { durationMin?: number; gapBeforeMin?: number }) => {
+      const pinnedMin = parseClock(slot.pinnedClock);
+      await saveSlot.mutateAsync({
+        templateId,
+        slotId: slot.id,
+        habitId: slot.habitId,
+        durationMin: changes.durationMin ?? slot.durationMin,
+        gapBeforeMin: slot.pinnedClock === null ? (changes.gapBeforeMin ?? slot.gapBeforeMin) : 0,
+        pinnedClock: pinnedMin === null ? null : clockFromMinutes(pinnedMin),
+        role: slot.role,
+        priorityOverride: slot.overridden ? slot.priority : null,
+        scheduling: slot.scheduling,
+      });
+    },
+    [saveSlot, templateId],
+  );
+
+  const settle = React.useCallback(async () => {
+    setState("dropping");
+    await onChanged();
+    setState("idle");
+  }, [onChanged]);
+
+  const onIntent = React.useCallback(
+    async (intent: DragIntent, placed: readonly Placed[]) => {
+      dropped.current = true;
+      window.setTimeout(() => {
+        dropped.current = false;
+      }, 0);
+
+      const byId = new Map(slots.map((slot) => [slot.id, slot]));
+
+      if (intent.kind === "resize") {
+        const slot = byId.get(intent.id);
+        if (!slot) return;
+        // Nothing clamps to the range (R21); the validator's bounds are the day's.
+        await patch(slot, { durationMin: intent.durationMin });
+        await settle();
+        return;
+      }
+
+      if (intent.kind === "gap") {
+        const slot = byId.get(intent.id);
+        if (!slot || slot.pinnedClock !== null) return;
+        await patch(slot, { gapBeforeMin: Math.min(GAP_MAX, Math.max(0, intent.minutes)) });
+        await settle();
+        return;
+      }
+
+      if (intent.kind === "reorder") {
+        /*
+         * The layer's index is among the non-pinned placed slots in start
+         * order; the service swaps adjacent positions in the template's
+         * order, pins included. Map the target neighbour into that order and
+         * step to it — swapping past a pin moves the pin's index, never its
+         * time.
+         */
+        const order = placed.filter((entry) => entry.slot.pinnedClock === null).map((entry) => entry.slot);
+        const from = slots.findIndex((slot) => slot.id === intent.id);
+        const neighbour = order[intent.toIndex];
+        if (from === -1 || neighbour === undefined || neighbour.id === intent.id) return;
+        const to = slots.findIndex((slot) => slot.id === neighbour.id);
+        if (to === -1 || to === from) return;
+        await moveSlot.mutateAsync({
+          id: intent.id,
+          direction: to > from ? "down" : "up",
+          steps: Math.abs(to - from),
+        });
+        await settle();
+        return;
+      }
+      // `move` and `move-block` are the Schedule's; the editor never emits them.
+    },
+    [slots, patch, settle, moveSlot],
+  );
+
+  return {
+    state,
+    rangeOf,
+    onIntent,
+    swallowClick: () => dropped.current,
+  };
 }

@@ -212,6 +212,8 @@ function block(
     endLabel: span === null ? null : clockLabel(span.end),
     startMin: span === null ? null : minutesSinceWake(span.start),
     endMin: span === null ? null : minutesSinceWake(span.end),
+    startAt: span === null ? null : span.start,
+    endAt: span === null ? null : span.end,
     placement: null,
     items,
     split: false,

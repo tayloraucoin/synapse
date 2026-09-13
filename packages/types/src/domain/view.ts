@@ -182,9 +182,12 @@ export interface DayBlockView {
   /** "7:03" / "8:11", in the day's zone; null before the block has times. */
   startLabel: string | null;
   endLabel: string | null;
-  /** Minutes from the day's start, for the Schedule's geometry. */
+  /** Minutes from the day's start — the List's arithmetic. */
   startMin: number | null;
   endMin: number | null;
+  /** The instants — the Schedule measures its bands from these (v1.1 §6.5, DYN-16). */
+  startAt: Date | null;
+  endAt: Date | null;
   /** Training and break only. */
   placement: TrainingPlacement | null;
   items: DayItemView[];

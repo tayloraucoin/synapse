@@ -1,4 +1,4 @@
-import { and, eq, gte, isNull, lt } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lt } from "drizzle-orm";
 
 import { notificationDeliveries, type RlsClient } from "@syn/db";
 import type { NotificationKind } from "@syn/types";
@@ -46,13 +46,19 @@ export function atMinute(at: Date): Date {
   return minute;
 }
 
-export async function deliverOnce(
+/**
+ * The claim alone — the row, or the reason there is none.
+ *
+ * Split from the send (DYN-20) so a grouped push can claim every candidate
+ * in its minute before sending one sentence for all of them; `deliverOnce`
+ * below is the two halves composed, and N4–N6 call it unchanged.
+ */
+export async function claimDelivery(
   rls: RlsClient,
   userId: string,
   target: DeliveryTarget,
-  payload: BuiltPayload,
   now: Date,
-): Promise<DeliveryOutcome> {
+): Promise<{ id: string } | "duplicate" | "skipped"> {
   const scheduledFor = atMinute(target.scheduledFor);
   const late = now.getTime() - scheduledFor.getTime() > MAX_LATENESS_MS;
 
@@ -75,7 +81,17 @@ export async function deliverOnce(
   const row = claimed[0];
   if (!row) return "duplicate";
   if (late) return "skipped";
+  return row;
+}
 
+/** The send, and the rows it settles. */
+export async function sendClaimed(
+  rls: RlsClient,
+  userId: string,
+  rowIds: readonly string[],
+  payload: BuiltPayload,
+  now: Date,
+): Promise<void> {
   await sendToUser(
     userId,
     {
@@ -88,13 +104,25 @@ export async function deliverOnce(
     { ttlSeconds: payload.ttlSeconds },
   );
 
+  if (rowIds.length === 0) return;
   await rls.execute((tx) =>
     tx
       .update(notificationDeliveries)
       .set({ sentAt: now })
-      .where(eq(notificationDeliveries.id, row.id)),
+      .where(inArray(notificationDeliveries.id, [...rowIds])),
   );
+}
 
+export async function deliverOnce(
+  rls: RlsClient,
+  userId: string,
+  target: DeliveryTarget,
+  payload: BuiltPayload,
+  now: Date,
+): Promise<DeliveryOutcome> {
+  const claim = await claimDelivery(rls, userId, target, now);
+  if (claim === "duplicate" || claim === "skipped") return claim;
+  await sendClaimed(rls, userId, [claim.id], payload, now);
   return "sent";
 }
 

@@ -28,7 +28,8 @@ type DayView = RouterOutputs["day"]["get"];
  * THE SHIFT AND TRIM ROWS ARE GONE (DYN-17): Adjust is the day's one
  * reasoned mutation; their sheets stay on disk until DYN-21 deletes them.
  * *Adjust the day* needs a set day that is not closed; *Edit today* opens the
- * Schedule, where the drag layer lives (DYN-16).
+ * Schedule in move mode — tap to lift, tap to drop — for people who cannot
+ * hold a press (§10.4, DYN-16).
  */
 export function DayHeaderSheet({
   open,
@@ -83,11 +84,14 @@ export function DayHeaderSheet({
     },
     hidden: closed,
   };
+  // §10.4's long-press fallback: the Schedule in move mode (DYN-16).
   const editRow = {
     label: COPY.editToday,
     onSelect: () => {
       onOpenChange(false);
-      router.push(live ? todayScheduleRoute() : dayScheduleRoute(day.dateKey));
+      router.push(
+        live ? todayScheduleRoute({ move: true }) : dayScheduleRoute(day.dateKey, { move: true }),
+      );
     },
   };
 

@@ -45,10 +45,16 @@ export const REMINDER_COPY = {
   subscribeFailed: "Couldn't turn on reminders. Try again.",
 
   /* --------------------------------------------------- the row headings -- */
-  whenAnItemStarts: "When an item starts",
+  /* UX v1.1 §9.1–§9.3 (DYN-20): the starts, then *Every item in…* per block. */
+  whenABlockStarts: "When a block starts",
+  everyItemIn: "Every item in…",
   reviews: "Reviews",
   planning: "Planning",
 
+  blockStart: "Each block, at its start",
+  fixtureStart: "Pins and fixtures, at their time",
+  devicesOff: "Phone away, at the time you set",
+  /** The per-block switch's label is the block's own word. */
   itemStart: "Fixed-time items, at the time you set",
   reviewReminder: "Close out today",
   reviewReminderTime: "Close out today, time",

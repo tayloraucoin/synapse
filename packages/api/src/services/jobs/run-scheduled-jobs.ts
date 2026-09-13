@@ -3,7 +3,7 @@ import { createLogger } from "@syn/observability";
 import { autoCloseDaysJob } from "./auto-close-days";
 import { expireExportsJob } from "./expire-exports";
 import {
-  notifyItemStartJob,
+  notifyStartsJob,
   notifyPendingReviewJob,
   notifyReviewReminderJob,
   notifyWeekBuildJob,
@@ -20,10 +20,10 @@ const log = createLogger("jobs/scheduler");
  * §8.2's N1 fires at an item's `scheduled_start`, and a reminder that arrives
  * hours later is worse than none.
  *
- * `auto_close_days` (USE-1) is the first entry. The notification jobs — N1
- * fixed-time start, N4 review reminder, N5 pending review, N6 week build —
- * register the same way as USE-8 lands them; nothing about this file changes
- * when they do.
+ * `auto_close_days` (USE-1) is the first entry. The notification jobs — the
+ * four start kinds in one scan (UX v1.1 §9, DYN-20), N4 review reminder, N5
+ * pending review, N6 week build — register the same way as USE-8 lands
+ * them; nothing about this file changes when they do.
  *
  * A job that throws is logged and does not stop the others: one broken job
  * must not silence every notification in the product.
@@ -51,7 +51,7 @@ export type ScheduledJob = {
  */
 export const SCHEDULED_JOBS: readonly ScheduledJob[] = [
   autoCloseDaysJob,
-  notifyItemStartJob,
+  notifyStartsJob,
   notifyReviewReminderJob,
   notifyPendingReviewJob,
   notifyWeekBuildJob,

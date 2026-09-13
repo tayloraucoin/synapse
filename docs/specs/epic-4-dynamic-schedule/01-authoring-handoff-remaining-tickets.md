@@ -52,6 +52,8 @@
 
 ### DYN-9 — The block editor, step two: drag to reorder, resize, seam-drag gaps, keyboard equivalents
 
+> **Expanded 2026-09-13** into `DYN-9-block-editor-step-two.md` and built in the same thread (batch 11, with DYN-20 and DYN-16). The layer gained the seam, `g`, the range band and a haptic; `template.moveSlot` gained `steps`; every write is `saveSlot`/`moveSlot`. Kept here as the record of the dense form.
+
 **Size:** M. **Slice type:** gesture layer over a working editor. **Does not gate.** Risk class: *a drag that moves a pin* or *a resize that clamps*.
 
 **Outcome.** On the block editor's strip: long-press lifts a block and dragging reorders it with the stack re-flowing under it; dragging a block's bottom edge changes its duration in 5-minute steps with the minutes live in the gutter and the range as a faint band; dragging the seam between two blocks opens a gap; keyboard: Alt+↑/↓ reorders, Shift+↑/↓ resizes, `g` then digits sets a gap; a `[OPEN]` fallback *+ gap* row in the slot sheet stays (§13 #8). Haptics where available. Reduced motion: positions jump.
@@ -162,6 +164,8 @@
 
 ### DYN-16 — The Schedule, editable
 
+> **Expanded 2026-09-13** into `DYN-16-schedule-editable.md` and built in the same thread (batch 11, with DYN-20 and DYN-9). `DayBlockView.startAt/endAt`; the canvas by blocks with bands, slack and the work container; the layer's `onPinnedDrop` for the dialog; the morning band → Adjust; `?mode=move`. Kept here as the record of the dense form.
+
 **Size:** L. **Slice type:** direct manipulation on the time axis. **Does not gate.** Risk class: *a slip of the thumb moving a fixture* and *a drag with no keyboard path*. **Vesper review:** the lifted state, the re-stack preview, the refused line, the move mode.
 
 **Outcome.** `/today/schedule` and `/day/{date}/schedule` per §6.5 verbatim: `BlockBand`s behind items with the kind in the gutter; the work band splitting around training; slack bands labelled in the gutter; `DragLayer` wired — long-press lifts an item, 5-min snap, the displaced re-stack beneath, drop writes `item.move`; a band-header drag writes `day.moveBlock`, and on the **morning** band opens Adjust instead (DYN-17's sheet with `entry: band-drag` — until it ships, the plain move, state which); bottom-edge drag writes `item.editToday({ durationMin })`; a pin or fixture does not lift and instead a `ConfirmDialog` *Move Dentist to 3:15?* — **Move** · **Cancel** → `item.move({ confirmed: true })`; a refused drop returns the block with the one-line `StatusLine` *Fixed things don't move by drag*; **Edit today** from the day header sheet enters an explicit move mode (tap to lift, tap to drop) for people who cannot long-press; keyboard: Alt+↑/↓, Shift+↑/↓, `m` then a time; announcements on lift/drop; record mode: no drag layer; plan mode: drag allowed, no ghosts, no now line.
@@ -223,6 +227,8 @@
 ## Batch 9
 
 ### DYN-20 — Notifications revised
+
+> **Expanded 2026-09-13** into `DYN-20-notifications-revised.md` and built in the same thread (batch 11, with DYN-9 and DYN-16). "Enqueue at the pick" became the scan's `confirmed_at` condition rather than a queue; one `notifyStarts` job over the four start kinds grouped by the minute; `item_start` per block in `list-prefs` and ST-07. Kept here as the record of the dense form.
 
 **Size:** M. **Slice type:** the scheduler's catalogue and timing. Risk class: *a push before the pick* and *payload privacy*. **Vigil:** enqueue-at-pick (no N1a/N1b before `confirmed_at`), grouping, quiet after Day Complete, payload text per §8.1.
 

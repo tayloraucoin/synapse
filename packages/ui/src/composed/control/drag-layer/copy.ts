@@ -12,5 +12,9 @@ export const DRAG_LAYER_COPY = {
   /** The `m`-then-time entry (§10.4). */
   timeEntryLabel: (title: string) => `Move ${title} to`,
   timeEntryPlaceholder: "08:30",
+  /** The `g`-then-number entry and the seam (§3.11, §10.4 — DYN-9). */
+  gapSet: (title: string, minutes: number) => `Gap before ${title} is now ${minutes} min`,
+  gapEntryLabel: (title: string) => `Gap before ${title}, minutes`,
+  gapEntryPlaceholder: "10",
   cancelled: "",
 } as const;

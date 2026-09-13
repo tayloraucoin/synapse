@@ -252,3 +252,35 @@ The first nine (TD-1…TD-9) are Mason's architecture pass over v1.1 §11, made 
 **Decision:** B. A count that is written can disagree with the rows it counts — a re-pick after confirm, a workout trade, an archive — and the week has no natural write moment that sees all of them. The read is over rows the resolver already fetches, plus three small selects; the number it prints is always the rows'.
 **Consequences:** Buys a line that cannot drift. Costs three more selects per week read (blocks, day extras, templates) and a derivation that lives in one function. Forecloses a stored history of the counts (a P2 monthly view would compute the same way over more weeks).
 **Revisit trigger:** P2-4's monthly view, if it reads more weeks than one request should derive.
+
+## 2026-09-13 · DYN-20 · "Enqueued at the pick" is a condition on the existing scan, not a queue
+
+**Context (as it was then):** UX v1.1 §9.2 says N1a/N1b "enqueue at `days.confirmed_at`" and fixtures "enqueue at week build". USE-8's delivery model is a fifteen-minute scan that claims `(kind, target, scheduled_for)` rows in `notification_deliveries` under a unique constraint; DYN-5 left `enqueueBlockPushes` as a named stub and said a queue would be a second delivery model.
+**Options weighed:** A — a queue: `confirmDay` and the week build insert future delivery rows with `scheduled_for`, and a sender job drains what is due. B — the scan, with the pick as a condition: `block_start` and `item_start` scans require `days.confirmed_at IS NOT NULL`; `fixture_start` scans without it; `enqueueBlockPushes` reports what lies ahead and writes nothing.
+**Decision:** B. A queue written at the pick goes stale the moment the day changes — Adjust slides a block, *Not today* drops training, a drag moves a fixture — and every one of those would need to rewrite rows or the push would name a time that no longer exists. The scan reads the rows as they are at the minute, which is the one truth §8.1 promises ("a scheduled fact"), and exactly-once stays the unique constraint it already is.
+**Consequences:** Buys pushes that are right after any mutation, with no second exactly-once to keep. Costs one more scan per window (`day_blocks` and the items joined to their block), and a seam whose name says "enqueue" while its body reports. Forecloses a push for a day other than today (the scan is over the person's current day — a future fixture's push waits for its day).
+**Revisit trigger:** a push whose time cannot be read from a row at its minute — none in v1.1's catalogue.
+
+## 2026-09-13 · DYN-20 · Same-minute starts of any kind are one push, claimed row by row
+
+**Context (as it was then):** §9.1's grouping rule ("items at the same minute collapse into one") now spans four kinds: the work block at 9:00 and the stand-up at 9:00 are one moment. The v1.0 job grouped items only, inside one kind.
+**Options weighed:** A — four jobs, one per kind, each grouping within itself (two pushes at 9:00). B — one job over the four kinds, grouped by the scheduled minute; every candidate claims its own delivery row (`claimDelivery`), and one sentence is sent for the rows that won (`sendClaimed`).
+**Decision:** B. Two pushes a second apart is the phone reporting a schedule. Claiming per candidate keeps the constraint the unit of truth: a second scan of the same minute loses every claim; a candidate that was late is `skipped` on its own row and left out of the sentence; nothing is sent twice and nothing is dropped silently.
+**Consequences:** Buys one push per minute across kinds. Costs `deliverOnce` split into two halves (re-composed, so N4–N6 are untouched) and a payload that names several things with no action. Forecloses per-kind TTLs inside a group (the group takes fifteen minutes, as every start does).
+**Revisit trigger:** N8 (timer running) — a push that is not a start and must not group with one.
+
+## 2026-09-13 · DYN-9 · A drag to a position is `moveSlot` repeated, not a new reorder procedure
+
+**Context (as it was then):** §3.11's reorder drops a slot at an index among the walk's non-pinned blocks; `template.moveSlot` swaps adjacent `sort_order`s (a bracket or a one-of group as one) and the handoff rules "no new procedure".
+**Options weighed:** A — `template.reorderSlot({ id, toIndex })` rewriting `sort_order` for the template in one statement. B — `moveSlot` gains `steps`: the target neighbour is mapped from the walk's order into the template's order and the adjacent swap runs that many times in one transaction.
+**Decision:** B. The adjacent swap already carries the rules that matter — a bracket and a one-of group move as one, swapping past a pin moves its index and never its time — and A would have to restate them. The cost is *n* swaps inside one transaction, and *n* is the length of a block.
+**Consequences:** Buys one write path for the menu's *Move up · Move down* and the drag. Costs a loop of small updates. Forecloses a reorder across templates.
+**Revisit trigger:** a block long enough that the loop is felt — none in the starter library.
+
+## 2026-09-13 · DYN-16 · A pin's drag is tracked by the layer and answered by the canvas
+
+**Context (as it was then):** §6.5: "Tap an appointment or fixture and drag: the block does not lift; instead a Dialog asks *Move Dentist to 3:15?*". DYN-7's layer ignored a `data-pinned` block on press and said "the caller's tap handler asks" — but a tap opens the sheet, and the question needs the target time, which only the drag's geometry knows.
+**Options weighed:** A — the canvas tracks the pointer on pinned blocks itself, duplicating the layer's snap and tolerance. B — the layer tracks a pin without lifting it (no ghost, no announcement, no haptic) and reports the snapped target on release through `onPinnedDrop`; the canvas opens the dialog and, on *Move*, sends `confirmed: true`.
+**Decision:** B. One place owns the geometry; the layer's "a pin never lifts" stays literal (it draws nothing and emits no intent); the service's refusal without `confirmed` remains the first guard and the dialog the second.
+**Consequences:** Buys the dialog with the right time in it. Costs one optional prop on the layer and a `pin` drag kind that draws nothing. Forecloses a pin moving by keyboard (Alt+arrows stay blocked on a pin — the keyboard path to move one is the item sheet's *At*).
+**Revisit trigger:** a keyboard-only person who needs to move a fixture from the Schedule — the sheet's field answers it today.

@@ -6,6 +6,7 @@ import { Button } from "../../../primitives/control/button";
 import { Text } from "../../../primitives/typography/text";
 import { BLOCK_MORNING, BLOCK_PREP, BLOCK_WORK, STORY_TIME_ZONE } from "../../__fixtures__/view-models";
 import { BlockBand } from "../../display/block-band";
+import { GapBand } from "../../display/gap-band";
 import { ScheduleAxis } from "../../display/schedule-axis";
 import { ScheduleBlock } from "../../display/schedule-block";
 import { DragLayer, type DragIntent, type DragLayerBlock, type DragLayerItem } from "./drag-layer";
@@ -45,13 +46,23 @@ function Playground({
   moveMode = false,
   editor = false,
   refuseAll = false,
+  seams = false,
+  askPins = false,
 }: {
   state?: DragState;
   moveMode?: boolean;
   editor?: boolean;
   refuseAll?: boolean;
+  /** The editor's seams between blocks, and a range on each item (DYN-9). */
+  seams?: boolean;
+  /** A pin's drag reports its target for the caller's dialog (DYN-16). */
+  askPins?: boolean;
 }) {
-  const [items, setItems] = React.useState(MORNING_ITEMS);
+  const [items, setItems] = React.useState<DragLayerItem[]>(() =>
+    seams
+      ? MORNING_ITEMS.map((item) => ({ ...item, gapBeforeMin: 0, rangeMin: 10, rangeMax: 30 }))
+      : MORNING_ITEMS,
+  );
   const [state, setState] = React.useState<DragState>(initialState);
   const [log, setLog] = React.useState<string[]>([]);
 
@@ -83,7 +94,27 @@ function Playground({
         ),
       );
     }
+    if (intent.kind === "gap") {
+      // The story re-flows the one item; the editor's walk does the rest.
+      setItems((current) =>
+        current.map((item) =>
+          item.id === intent.id
+            ? { ...item, startMin: item.startMin + (intent.minutes - (item.gapBeforeMin ?? 0)), gapBeforeMin: intent.minutes }
+            : item,
+        ),
+      );
+    }
   };
+
+  // The seams: one above every non-pinned item after the first in its block.
+  const ordered = [...items].sort((a, b) => a.startMin - b.startMin);
+  const seamRows = seams
+    ? ordered.flatMap((item, index) => {
+        const before = ordered[index - 1];
+        if (!before || item.pinned || before.blockId !== item.blockId) return [];
+        return [{ afterId: item.id, before: before.title, after: item.title, startMin: before.startMin + before.durationMin, minutes: item.gapBeforeMin ?? 0 }];
+      })
+    : [];
 
   const viewOf = (item: DragLayerItem) => {
     const source = [...BLOCK_MORNING.items, ...BLOCK_PREP.items, ...BLOCK_WORK.items].find((v) => v.id === item.id);
@@ -109,6 +140,15 @@ function Playground({
         onIntent={onIntent}
         onLift={() => setState("lifted")}
         onCancel={() => setState("idle")}
+        onPinnedDrop={
+          askPins
+            ? (id, toMin) => {
+                setLog((entries) => [...entries, `ask: move ${id} to ${formatTime(toMin)}?`]);
+                setState("confirming");
+                window.setTimeout(() => setState("idle"), 1500);
+              }
+            : undefined
+        }
         moveMode={moveMode}
         editor={editor}
         formatTime={formatTime}
@@ -124,6 +164,17 @@ function Playground({
               topPx={pxOf(band.startMin)}
               heightPx={pxOf(band.endMin) - pxOf(band.startMin)}
               draggable={band.draggable}
+            />
+          ))}
+          {seamRows.map((seam) => (
+            <GapBand
+              key={seam.afterId}
+              minutes={seam.minutes}
+              topPx={pxOf(seam.startMin)}
+              heightPx={(seam.minutes / 60) * PX_PER_HOUR}
+              between={{ before: seam.before, after: seam.after }}
+              resizable
+              afterId={seam.afterId}
             />
           ))}
           {items.map((item) => (
@@ -183,6 +234,16 @@ export const MoveMode: Story = { args: { moveMode: true } };
 
 /** The block editor: Alt+↑/↓ reorders rather than moves in time (§3.11). */
 export const EditorReorder: Story = { args: { editor: true } };
+
+/**
+ * The editor's gaps (§3.11, DYN-9): drag a seam between two blocks to open
+ * the gap before the lower one; `g` then a number on a focused block does
+ * the same; a resize draws the range as a faint band and clamps to nothing.
+ */
+export const EditorSeams: Story = { args: { editor: true, seams: true } };
+
+/** A pin dragged (§6.5, R22): no lift, no ghost; the release asks the caller (DYN-16). */
+export const PinAsks: Story = { args: { askPins: true } };
 
 /**
  * By keyboard alone (§10.4): Tab to a block, then Alt+↓ twice, Shift+↑ once,

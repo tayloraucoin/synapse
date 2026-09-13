@@ -1,4 +1,4 @@
-import type { DayItemView } from "@syn/types";
+import type { BlockKind, DayBlockView, DayItemView, DayMode } from "@syn/types";
 
 /**
  * The Schedule's arithmetic — pure, so it can be run without a browser.
@@ -6,15 +6,24 @@ import type { DayItemView } from "@syn/types";
  * EVERYTHING IS MINUTES FROM MIDNIGHT IN THE DAY'S OWN ZONE, converted to
  * pixels at one place. Mixing the two is how a block ends up an hour out on a
  * DST day; keeping the conversion to a single `topPx` helper means the axis,
- * the blocks, the ghosts, the bands and the now line all agree by construction.
+ * the bands, the blocks, the ghosts, the shift bands and the now line all
+ * agree by construction.
  *
- * A GHOST IS DRAWN FROM `original_scheduled_start` AND NOTHING ELSE. The
- * canvas never infers where something was "supposed" to be from a template, a
- * duration, or a neighbouring block — the column exists precisely so the
- * picture cannot be reconstructed wrongly, and the trigger that protects it
- * from being rewritten is what makes it trustworthy.
+ * THE DAY IS ITS BLOCKS (UX v1.1 §6.5, DYN-16). Each block is a `BlockBand`
+ * behind its items; the empty span between two bands is slack, labelled in
+ * the gutter; the work block is a container — the focus as the title, its
+ * fixtures inside as pinned blocks — and splits around training because the
+ * day has two work blocks then, not because the canvas cuts one.
  *
- * NOTHING HERE READS A CLOCK. `nowMin` is a parameter.
+ * A GHOST IS DRAWN FROM `original_scheduled_start` AND NOTHING ELSE, and
+ * ONLY ONCE THAT TIME HAS PASSED (§6.5: "the ghost shows on the axis only
+ * after the original time has passed"). The canvas never infers where
+ * something was "supposed" to be from a template, a duration, or a
+ * neighbouring block — the column exists precisely so the picture cannot be
+ * reconstructed wrongly. A plan (a future day) has no ghosts: nothing on it
+ * has been lived.
+ *
+ * NOTHING HERE READS A CLOCK. `now` is a parameter.
  */
 
 /** The composite's two densities — 96 is the 150%-text-scale path. */
@@ -28,6 +37,14 @@ export type BlockLayout = {
   multitask?: { index: number; count: number };
 };
 
+/** The work block: the focus as a container, its fixtures relative to it. */
+export type ContainerLayout = {
+  item: DayItemView;
+  topPx: number;
+  heightPx: number;
+  children: BlockLayout[];
+};
+
 export type SpanLayout = { key: string; topPx: number; heightPx: number };
 
 export type GhostLayout = {
@@ -36,20 +53,43 @@ export type GhostLayout = {
   heightPx: number;
 };
 
-export type BandLayout = {
+export type ShiftBandLayout = {
   id: string;
   topPx: number;
   deltaMin: number;
   reasonLabel: string;
 };
 
+export type BandLayout = {
+  id: string;
+  kind: BlockKind;
+  name: string | null;
+  topPx: number;
+  heightPx: number;
+  startMin: number;
+  endMin: number;
+  pooled: boolean;
+  /** A band with times, on a day that can change. */
+  draggable: boolean;
+};
+
+export type SlackLayout = {
+  key: string;
+  topPx: number;
+  heightPx: number;
+  minutes: number;
+};
+
 export type ScheduleLayout = {
   startMin: number;
   endMin: number;
+  bands: BandLayout[];
+  slack: SlackLayout[];
+  containers: ContainerLayout[];
   blocks: BlockLayout[];
   spans: SpanLayout[];
   ghosts: GhostLayout[];
-  bands: BandLayout[];
+  shiftBands: ShiftBandLayout[];
   /** Null in record and plan modes, and on a day with no clock to show. */
   nowTopPx: number | null;
 };
@@ -59,6 +99,9 @@ const PAD_MIN = 60;
 
 /** A block never renders shorter than this, or it cannot be tapped at all. */
 const MIN_BLOCK_PX = 2;
+
+/** Slack shorter than this is a hairline with no label — there is no room for one. */
+const MIN_SLACK_LABEL_MIN = 5;
 
 export function minutesInZone(at: Date, timeZone: string): number {
   const parts = new Intl.DateTimeFormat("en-GB", {
@@ -76,7 +119,9 @@ export function minutesInZone(at: Date, timeZone: string): number {
 
 export type LayoutInput = {
   timezone: string;
-  items: readonly DayItemView[];
+  mode: DayMode;
+  blocks: readonly DayBlockView[];
+  unblocked: readonly DayItemView[];
   cutByShift: readonly DayItemView[];
   shifts: ReadonlyArray<{
     id: string;
@@ -100,20 +145,38 @@ export function buildLayout(
   const toMin = (at: Date) => minutesInZone(at, zone);
   const px = (minutes: number) => (minutes / 60) * pxPerHour;
 
-  const scheduled = input.items.filter(
-    (item) => item.scheduledStart !== null,
-  );
+  /*
+   * The work block's container item and its fixtures leave the flat list:
+   * they are drawn as one container. Everything else — the other blocks'
+   * items, the work block's non-fixture rows, the block-less — is a block of
+   * its own.
+   */
+  const containerItems: Array<{ block: DayBlockView; item: DayItemView; fixtures: DayItemView[] }> = [];
+  const flat: DayItemView[] = [...input.unblocked];
+  for (const block of input.blocks) {
+    if (block.kind === "work") {
+      const container = block.items.find((item) => item.type === "deep_work" && item.origin !== "fixture") ?? null;
+      const fixtures = block.items.filter((item) => item.origin === "fixture");
+      if (container !== null) {
+        containerItems.push({ block, item: container, fixtures });
+        flat.push(...block.items.filter((item) => item !== container && item.origin !== "fixture"));
+        continue;
+      }
+    }
+    flat.push(...block.items);
+  }
+
+  const scheduled = flat.filter((item) => item.scheduledStart !== null);
+  const everything = [...scheduled, ...containerItems.flatMap((entry) => [entry.item, ...entry.fixtures])];
 
   /*
    * The range must cover everything that will be drawn, not only the blocks:
-   * a ghost at 07:00 for an item started at 14:00, and a shift band, both sit
-   * on the axis and would otherwise fall outside it. The ticket's own edge
-   * case — "an item whose duration exceeds the axis end" — is the same
-   * problem, so every drawn minute goes into the bounds.
+   * a band, a ghost at 07:00 for an item started at 14:00, a shift band —
+   * all sit on the axis and would otherwise fall outside it.
    */
   const marks: number[] = [];
 
-  for (const item of scheduled) {
+  for (const item of everything) {
     if (item.scheduledStart === null) continue;
     const start = toMin(item.scheduledStart);
     marks.push(start);
@@ -122,6 +185,10 @@ export function buildLayout(
     if (item.originalScheduledStart !== null) {
       marks.push(toMin(item.originalScheduledStart));
     }
+  }
+  for (const block of input.blocks) {
+    if (block.startAt !== null) marks.push(toMin(block.startAt));
+    if (block.endAt !== null) marks.push(toMin(block.endAt));
   }
   for (const item of input.cutByShift) {
     const at = item.originalScheduledStart ?? item.scheduledStart;
@@ -142,6 +209,76 @@ export function buildLayout(
   );
 
   const topOf = (minutes: number) => px(minutes - startMin);
+
+  /* ------------------------------------------------------------ bands -- */
+
+  const canChange = input.mode !== "record";
+  const bands: BandLayout[] = [];
+  for (const block of input.blocks) {
+    if (block.startAt === null || block.endAt === null) continue;
+    if (block.state === "not_today") continue;
+    const s = toMin(block.startAt);
+    const e = Math.max(s, toMin(block.endAt));
+    bands.push({
+      id: block.id,
+      kind: block.kind,
+      name: block.name,
+      topPx: topOf(s),
+      heightPx: Math.max(MIN_BLOCK_PX, px(e - s)),
+      startMin: s,
+      endMin: e,
+      pooled: block.state === "pooled",
+      draggable: canChange,
+    });
+  }
+  bands.sort((a, b) => a.startMin - b.startMin);
+
+  // Slack: the open span between one band's end and the next band's start.
+  const slack: SlackLayout[] = [];
+  for (let index = 0; index + 1 < bands.length; index += 1) {
+    const before = bands[index];
+    const after = bands[index + 1];
+    if (!before || !after) continue;
+    const minutes = after.startMin - before.endMin;
+    if (minutes < MIN_SLACK_LABEL_MIN) continue;
+    slack.push({
+      key: `${before.id}-${after.id}`,
+      topPx: topOf(before.endMin),
+      heightPx: px(minutes),
+      minutes,
+    });
+  }
+
+  /* ------------------------------------------------------- containers -- */
+
+  const containers: ContainerLayout[] = [];
+  for (const entry of containerItems) {
+    // The container spans its block; the item's own span when the block has none.
+    const startAt = entry.block.startAt ?? entry.item.scheduledStart;
+    const endAt = entry.block.endAt ?? entry.item.scheduledEnd;
+    if (startAt === null) continue;
+    const s = toMin(startAt);
+    const e = endAt === null ? s + (entry.item.durationMin ?? 30) : Math.max(s, toMin(endAt));
+    const top = topOf(s);
+    containers.push({
+      item: entry.item,
+      topPx: top,
+      heightPx: Math.max(MIN_BLOCK_PX, px(e - s)),
+      children: entry.fixtures
+        .filter((fixture) => fixture.scheduledStart !== null)
+        .map((fixture) => {
+          const fs = toMin(fixture.scheduledStart as Date);
+          return {
+            item: fixture,
+            // Relative to the container.
+            topPx: topOf(fs) - top,
+            heightPx: Math.max(MIN_BLOCK_PX, px(fixture.durationMin ?? 30)),
+          };
+        }),
+    });
+  }
+
+  /* ----------------------------------------------------------- blocks -- */
 
   /*
    * Multitask members share a start; the read model orders them adjacently and
@@ -183,7 +320,7 @@ export function buildLayout(
         });
       }
 
-      const heightMin = item.durationMin ?? (isWindow ? 30 : 30);
+      const heightMin = item.durationMin ?? 30;
       blocks.push({
         item,
         topPx: topOf(startAt),
@@ -196,41 +333,50 @@ export function buildLayout(
     });
   }
 
+  /* ----------------------------------------------------------- ghosts -- */
+
   /*
-   * A ghost for anything that moved, and for anything cut.
+   * A ghost for anything that moved, once its original time has passed, and
+   * for anything cut.
    *
    * "Moved" is `scheduled_start !== original_scheduled_start` — the same
    * comparison the row's *moved* word comes from, so the two can never
-   * disagree about whether there is a ghost to draw.
+   * disagree about whether there is a ghost to draw. A plan has none; a
+   * record's are all past.
    */
   const ghosts: GhostLayout[] = [];
+  const nowMin =
+    input.mode === "record" ? Number.POSITIVE_INFINITY : input.now === null ? null : toMin(input.now);
 
-  for (const item of scheduled) {
-    if (item.originalScheduledStart === null || item.scheduledStart === null) {
-      continue;
+  if (input.mode !== "plan" && nowMin !== null) {
+    for (const item of everything) {
+      if (item.originalScheduledStart === null || item.scheduledStart === null) {
+        continue;
+      }
+      const original = toMin(item.originalScheduledStart);
+      if (original === toMin(item.scheduledStart)) continue;
+      if (original > nowMin) continue;
+
+      ghosts.push({
+        item,
+        topPx: topOf(original),
+        heightPx: Math.max(MIN_BLOCK_PX, px(item.durationMin ?? 30)),
+      });
     }
-    const original = toMin(item.originalScheduledStart);
-    if (original === toMin(item.scheduledStart)) continue;
 
-    ghosts.push({
-      item,
-      topPx: topOf(original),
-      heightPx: Math.max(MIN_BLOCK_PX, px(item.durationMin ?? 30)),
-    });
+    // A cut item has no live block at all — only the outline of where it was.
+    for (const item of input.cutByShift) {
+      const at = item.originalScheduledStart ?? item.scheduledStart;
+      if (at === null) continue;
+      ghosts.push({
+        item,
+        topPx: topOf(toMin(at)),
+        heightPx: Math.max(MIN_BLOCK_PX, px(item.durationMin ?? 30)),
+      });
+    }
   }
 
-  // A cut item has no live block at all — only the outline of where it was.
-  for (const item of input.cutByShift) {
-    const at = item.originalScheduledStart ?? item.scheduledStart;
-    if (at === null) continue;
-    ghosts.push({
-      item,
-      topPx: topOf(toMin(at)),
-      heightPx: Math.max(MIN_BLOCK_PX, px(item.durationMin ?? 30)),
-    });
-  }
-
-  const bands: BandLayout[] = input.shifts.map((shift) => ({
+  const shiftBands: ShiftBandLayout[] = input.shifts.map((shift) => ({
     id: shift.id,
     topPx: topOf(toMin(shift.at)),
     deltaMin: shift.deltaMin,
@@ -245,5 +391,5 @@ export function buildLayout(
   const nowAt = input.closedAt ?? input.now;
   const nowTopPx = nowAt === null ? null : topOf(toMin(nowAt));
 
-  return { startMin, endMin, blocks, spans, ghosts, bands, nowTopPx };
+  return { startMin, endMin, bands, slack, containers, blocks, spans, ghosts, shiftBands, nowTopPx };
 }

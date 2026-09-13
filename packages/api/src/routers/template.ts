@@ -194,6 +194,7 @@ export const templateRouter = router({
         ctx.authContext.userId,
         input.id,
         input.direction,
+        input.steps ?? 1,
       );
       return { moved: ok };
     }),

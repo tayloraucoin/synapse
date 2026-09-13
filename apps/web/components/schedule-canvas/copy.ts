@@ -25,6 +25,20 @@ export const SCHEDULE_COPY = {
 
   /* ------------------------------------------------------------ SC-01 -- */
   closed: "closed",
+
+  /* ------------------------------------------ UX v1.1 §6.5, §10.1 (DYN-16) -- */
+  /** §6.5's refused line — the service says it too. */
+  fixedThingsDontMove: "Fixed things don't move by drag.",
+  /** The pin's dialog (R22): *Move Dentist to 3:15?* */
+  movePinTitle: (title: string, time: string) => `Move ${title} to ${time}?`,
+  move: "Move",
+  cancel: "Cancel",
+  /** §10.1's unconfirmed day: a centred line with a link. */
+  setTheDayFirst: "Set the day first",
+  /** [COPY] The move-mode caption (§10.4's long-press fallback). */
+  moveModeCaption: "Tap a block to lift it; tap again to drop it.",
+  /** [COPY] A write that failed for a reason other than a pin. */
+  couldntMove: "Couldn't move that. Nothing changed — try again.",
 } as const;
 
 /*

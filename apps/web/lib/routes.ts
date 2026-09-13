@@ -100,8 +100,22 @@ export function todayRoute(): string {
   return "/today";
 }
 
-export function todayScheduleRoute(): string {
-  return "/today/schedule";
+/**
+ * The Schedule's one option (UX v1.1 §10.4, DYN-16): `move` opens it in
+ * move mode — a tap lifts, a tap drops — the long-press fallback the day
+ * header sheet's *Edit today* row reaches.
+ */
+export type ScheduleRouteOptions = { move?: boolean };
+
+export const SCHEDULE_MOVE_MODE_PARAM = "mode";
+export const SCHEDULE_MOVE_MODE_VALUE = "move";
+
+function scheduleQuery(options?: ScheduleRouteOptions): string {
+  return options?.move ? `?${SCHEDULE_MOVE_MODE_PARAM}=${SCHEDULE_MOVE_MODE_VALUE}` : "";
+}
+
+export function todayScheduleRoute(options?: ScheduleRouteOptions): string {
+  return `/today/schedule${scheduleQuery(options)}`;
 }
 
 /** A past or future day. `date` is `YYYY-MM-DD`. */
@@ -109,8 +123,8 @@ export function dayRoute(date: string): string {
   return `/day/${date}`;
 }
 
-export function dayScheduleRoute(date: string): string {
-  return `/day/${date}/schedule`;
+export function dayScheduleRoute(date: string, options?: ScheduleRouteOptions): string {
+  return `/day/${date}/schedule${scheduleQuery(options)}`;
 }
 
 /** The journal — UX v1.1 §7.2 (DYN-18); read-only for a past day from Review. */

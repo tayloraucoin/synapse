@@ -31,7 +31,7 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 
 ### Phase 3 — Setup (planning mode)
 - [x] **DYN-8** · The block editor, step one, and Settings → Your day: kind-aware editor with the slot sheet's fallbacks, the library by block, the habit sheet's block chip — L · (DYN-4, DYN-7)
-- [ ] **DYN-9** · The block editor, step two: drag to reorder, resize, seam-drag gaps, keyboard equivalents — M · (DYN-8) · does not gate
+- [x] **DYN-9** · The block editor, step two: drag to reorder, resize, seam-drag gaps, keyboard equivalents — M · (DYN-8) · does not gate
 - [x] **DYN-10** · First run 1–6: the shape of the week, work days, work start and what gives, standing commitments, wake, before the day — L · (DYN-7, DYN-4)
 - [x] **DYN-11** · First run 7–12: before work with *one of*, the landscape, training, closing the day, focuses, the fit; the first week pre-filled — L · (DYN-10, DYN-8, DYN-5)
 - [x] **DYN-12** · The week build amended: per-block day sheet, shape toggle, the pre-filled week, the training swap confirm — M · (DYN-5, DYN-7)
@@ -42,13 +42,13 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 
 ### Phase 5 — The day (executing state)
 - [x] **DYN-15** · Today by block: `BlockHeader` sections, the container work row, the day header with focus and anchor, the day header sheet's rows, the item sheet's *Do now* / *Edit today's* / *one of*, the habit-day sheet — L · (DYN-14)
-- [ ] **DYN-16** · The Schedule, editable: bands, the drag layer wired, the pin confirm, band drag → Adjust, the explicit move mode, keyboard — L · (DYN-15, DYN-6) · does not gate · **Vesper review**
+- [x] **DYN-16** · The Schedule, editable: bands, the drag layer wired, the pin confirm, band drag → Adjust, the explicit move mode, keyboard — L · (DYN-15, DYN-6) · does not gate · **Vesper review**
 - [x] **DYN-17** · Adjust: the four-step sheet, its three entries and the late offer; the shift and trim sheets re-pointed — L · (DYN-15, DYN-6) · **Vigil: the doesn't-fit-even-cut path and the 10 s undo**
 
 ### Phase 6 — The evening and the review
 - [x] **DYN-18** · The evening: the wind-down section's confirm-in-the-morning rows and the devices-off marker, the journal screen, the confirm-yesterday panel in the Day Review, Settings → Closing the day — L · (DYN-15, DYN-14)
 - [x] **DYN-19** · Review amended: Day Review by block with *not confirmed* and *shortened*, the intention line; Week Review counts, *time by block*, reflections, the strip state; export additions — M · (DYN-18)
-- [ ] **DYN-20** · Notifications revised: the catalogue, enqueue at *Set the day*, block-boundary jobs, per-block item toggles, devices-off — M · (DYN-14, DYN-18) · **Vigil: payload privacy, enqueue-at-pick**
+- [x] **DYN-20** · Notifications revised: the catalogue, enqueue at *Set the day*, block-boundary jobs, per-block item toggles, devices-off — M · (DYN-14, DYN-18) · **Vigil: payload privacy, enqueue-at-pick**
 
 ### Phase 7 — Cleanup
 - [ ] **DYN-21** · Migration `0006` and the retirements: drop the offset columns, `days.template_id`, `wake_anchor_habit_id`; remove the shift and trim sheets and services, day parts, the old starter set, the template routes; regenerate the references — M · (DYN-9, DYN-16, DYN-17, DYN-19, DYN-20) · **Mason migration review**
@@ -103,12 +103,12 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 | 1 | DYN-1, DYN-2, DYN-3 | The contract and the two migrations: one data model, written together so the backfill, the types, and the columns agree | **Authored 2026-09-12** |
 | 2 | DYN-4, DYN-5, DYN-6 | The three service tickets over that model: the write path, the materialiser, the mutations | **Authored 2026-09-12** |
 | 3 | DYN-7 | The composites alone — a Storybook ticket with Vesper's review list | Handoff written; expand next |
-| 4 | DYN-8, DYN-9, DYN-12 | The block editor and the week build: one editing grammar | Handoff written |
+| 4 | DYN-8, DYN-9, DYN-12 | The block editor and the week build: one editing grammar | Expanded and built 2026-09-13 (DYN-9 in batch 11) |
 | 5 | DYN-10, DYN-11 | First run, one sequence in two halves | Handoff written |
 | 6 | DYN-13, DYN-14 | The morning: the two screens of the waking state | Handoff written |
-| 7 | DYN-15, DYN-16, DYN-17 | The day: the tab, the axis, the one sheet that adjusts it | Handoff written |
+| 7 | DYN-15, DYN-16, DYN-17 | The day: the tab, the axis, the one sheet that adjusts it | Expanded and built 2026-09-13 (DYN-16 in batch 11) |
 | 8 | DYN-18, DYN-19 | The evening and the review that reads it | Expanded and built 2026-09-13 |
-| 9 | DYN-20, DYN-21 | Notifications and the cleanup | Handoff written |
+| 9 | DYN-20, DYN-21 | Notifications and the cleanup | DYN-20 expanded and built 2026-09-13; DYN-21 next |
 
 Batches 1 and 2 exceed the guide's §7.4 ceiling of three per thread by being written in one thread together, for the same reason Epics 1–3 did: one data model, and tickets written apart would disagree about it. Logged in `DEVIATIONS.md`.
 

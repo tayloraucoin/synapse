@@ -537,6 +537,8 @@ export async function getDay(
       endLabel: block.scheduledEnd === null ? null : formatClock(block.scheduledEnd, zone),
       startMin: minutesOf(block.scheduledStart),
       endMin: minutesOf(block.scheduledEnd),
+      startAt: block.scheduledStart,
+      endAt: block.scheduledEnd,
       placement: block.placement,
       // Time order inside the block; the unscheduled by their stack position.
       items: views

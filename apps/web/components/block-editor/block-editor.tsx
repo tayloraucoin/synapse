@@ -115,10 +115,13 @@ export function BlockEditor({ templateId, embedded = false, exitHref }: BlockEdi
       ) : null}
 
       <BlockStrip
+        templateId={templateId}
+        kind={template.kind}
         slots={slots}
         walk={walk}
         onOpen={(slot) => setEditing(slot)}
         onAdd={() => setAddOpen(true)}
+        onChanged={editor.refresh}
         disabled={readOnly}
       />
 

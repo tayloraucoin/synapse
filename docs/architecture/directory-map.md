@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1209 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1212 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -274,7 +274,7 @@ apps/
         add-sheet.tsx
         apply-changes-dialog.tsx
         block-editor.tsx
-        block-strip.tsx
+        block-strip.tsx  # the editor's strip (v1.1 §3.11): the layer in editor mode — reorder through moveSlot, resize and gap through saveSlot, nothing clamped
         copy.ts
         editor-footer.tsx
         index.ts
@@ -385,8 +385,8 @@ apps/
       schedule-canvas/
         copy.ts
         index.ts
-        layout.ts
-        schedule-canvas.tsx
+        layout.ts  # the Schedule's arithmetic, pure: bands, slack, the work container, blocks, ghosts only once the original time has passed (v1.1 §6.5)
+        schedule-canvas.tsx  # the editable Schedule (v1.1 §6.5): the layer's intents as DYN-6's writes; a pin asks, the morning band goes to Adjust, a record has no layer
         shift-sheet.tsx
       session-expired-dialog/
         copy.ts
@@ -619,16 +619,19 @@ docs/
       DYN-13-orient-frame-and-the-wake-moment.md
       DYN-14-quick-pick-and-set-the-day.md
       DYN-15-today-by-block.md
+      DYN-16-schedule-editable.md
       DYN-17-adjust.md
       DYN-18-the-evening.md
       DYN-19-review-amended.md
       DYN-2-migration-0004-block-templates-and-stacked-slots.md
+      DYN-20-notifications-revised.md
       DYN-3-migration-0005-profile-fixtures-day-blocks-journal.md
       DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
       DYN-5-materialisation-per-block-and-set-the-day.md
       DYN-6-adjust-do-now-habit-day-edits-and-moves.md
       DYN-7-ui-composites-for-v1-1.md
       DYN-8-block-editor-step-one-and-your-day.md
+      DYN-9-block-editor-step-two.md
       PROGRESS.md
       README.md
       TECHNICAL-DECISIONS.md
@@ -733,7 +736,7 @@ packages/
         jobs/
           auto-close-days.ts
           expire-exports.ts
-          notify.ts
+          notify.ts  # the notification scans: the four start kinds in one job gated on confirmed_at and grouped by the minute (v1.1 §9), then N4–N6; quiet after Day Complete on every query
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
         library/
           archive-habit.ts

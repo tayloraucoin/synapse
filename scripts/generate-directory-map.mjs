@@ -148,6 +148,10 @@ const ANNOTATIONS = {
   "apps/web/components/journal/journal-screen.tsx": "the journal (v1.1 §7.2): the person's prompts over serif fields that autosave; no finish, no count, no starter phrase",
   "packages/api/src/services/review/confirm-last-night.ts": "confirm yesterday from the review (v1.1 §7.3): the morning's rule on the review's own day; never a reason",
   "packages/api/src/services/review/get-review-week.ts": "the week read: adherence from the resolver, and v1.1 §8.2's counts, time by block and reflections derived from the rows, never stored",
+  "packages/api/src/services/jobs/notify.ts": "the notification scans: the four start kinds in one job gated on confirmed_at and grouped by the minute (v1.1 §9), then N4–N6; quiet after Day Complete on every query",
+  "apps/web/components/schedule-canvas/layout.ts": "the Schedule's arithmetic, pure: bands, slack, the work container, blocks, ghosts only once the original time has passed (v1.1 §6.5)",
+  "apps/web/components/schedule-canvas/schedule-canvas.tsx": "the editable Schedule (v1.1 §6.5): the layer's intents as DYN-6's writes; a pin asks, the morning band goes to Adjust, a record has no layer",
+  "apps/web/components/block-editor/block-strip.tsx": "the editor's strip (v1.1 §3.11): the layer in editor mode — reorder through moveSlot, resize and gap through saveSlot, nothing clamped",
   "apps/mobile/README.md": "a deliberate empty seam. Do not scaffold",
 
   // --- delivery ---

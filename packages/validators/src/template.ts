@@ -161,6 +161,8 @@ export const listTemplatesInput = z
 export const moveSlotInput = z.object({
   id: z.string().uuid(),
   direction: z.enum(["up", "down"]),
+  /** A drag to a position is the adjacent swap repeated (v1.1 §3.11, DYN-9). */
+  steps: z.number().int().min(1).max(50).optional(),
 });
 
 /**
