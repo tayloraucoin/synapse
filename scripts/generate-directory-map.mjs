@@ -105,6 +105,9 @@ const ANNOTATIONS = {
   "packages/api/src/services/day/adjust-day.ts": "Adjust — scope computed, preview then commit with a fingerprint, one shifts row of the right kind, undo per decision (b)",
   "packages/utils/src/day/adjust.ts": "Adjust's arithmetic, pure: slide or hold; shorten · cut · choose over fitToBudget and stackBlock",
   "packages/api/src/services/notifications/block-pushes.ts": "the named seam DYN-20 fills; confirmDay calls it and it enqueues nothing yet",
+  "packages/api/src/services/plan/fit.ts": "the fit at planning time (v1.1 §3.10): computeBudget over the profile and the orient/prep templates — first run's last screen reads it",
+  "packages/api/src/services/day/trade-workouts.ts": "the week build's training swap (R25): both days' workout items, refused on a set day",
+  "packages/api/src/services/user/complete-first-run.ts": "the one write that ends first run: marks the row, stores the overflow mode, pre-fills the current week",
 
   // --- ui ---
   "packages/ui/src/index.ts": "enumerated exports; no \"./*\" wildcard",
@@ -131,6 +134,8 @@ const ANNOTATIONS = {
   "apps/web/components/block-editor/slot-sheet.tsx": "the editor's one form; the same-position question with three answers lives in its footer",
   "apps/web/app/(setup)/_components/fact-screen.tsx": "one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)",
   "apps/web/app/(shell)/settings/your-day/_components/your-day-list.tsx": "the twelve first-run screens as a list (v1.1 §4.14); block-kind rows open the editor for their kind",
+  "apps/web/components/landscape-chooser/use-landscape.ts": "the landscape's single commit (W4): ticks are local, Continue writes the habits then the morning template's slots — never a fit number",
+  "apps/web/components/week-build/day-sheet.tsx": "one day's plan by block (v1.1 §4.13): every write is assignBlocks with the whole assignment; the sheet never reconciles",
   "apps/mobile/README.md": "a deliberate empty seam. Do not scaffold",
 
   // --- delivery ---

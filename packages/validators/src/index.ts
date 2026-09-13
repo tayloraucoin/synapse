@@ -225,7 +225,9 @@ export {
 } from "./template";
 
 export {
+  completeFirstRunInput,
   updatePreferencesInput,
+  type CompleteFirstRunInput,
   type UpdatePreferencesInput,
 } from "./user";
 
@@ -237,13 +239,16 @@ export {
   changeAnchorInput,
   copyWeekInput,
   dayDateInput,
+  defaultPlanInput,
   oneOffFormSchema,
   prefillWeekInput,
   removeOneOffInput,
+  tradeWorkoutsInput,
   weekInput,
   type AssignBlocksInput,
   type BlockAssignmentInput,
   type OneOffFormInput,
+  type TradeWorkoutsInput,
 } from "./week";
 
 export {

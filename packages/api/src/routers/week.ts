@@ -7,12 +7,15 @@ import {
   changeAnchorInput,
   copyWeekInput,
   dayDateInput,
+  defaultPlanInput,
   oneOffFormSchema,
   prefillWeekInput,
   removeOneOffInput,
   restorePayloadInput,
+  tradeWorkoutsInput,
   weekInput,
 } from "@syn/validators";
+import { weekDates, weekKeyOf } from "@syn/utils";
 
 import {
   appliedDaysFor,
@@ -23,6 +26,7 @@ import { getDay } from "../services/day/get-day";
 import {
   applyTemplateToDay,
   materializeDay,
+  readDayProfile,
 } from "../services/day/materialize-day";
 import {
   OneOffSameStartError,
@@ -32,8 +36,9 @@ import {
   restoreOneOff,
   saveOneOff,
 } from "../services/day/one-off";
-import { prefillWeek } from "../services/day/prefill-week";
+import { defaultPlanFor, prefillWeek } from "../services/day/prefill-week";
 import { resolveTodayFor } from "../services/day/today";
+import { TradeRuleError, tradeWorkouts } from "../services/day/trade-workouts";
 import { getWeek } from "../services/day/week-view";
 import { mostUsedTemplate } from "../services/plan/most-used-template";
 import { protectedProcedure, router } from "../trpc";
@@ -103,12 +108,57 @@ export const weekRouter = router({
       }
     }),
 
-  /** The first week, and *Copy last week*'s replacement — UX v1.1 §4.13. */
+  /** The first week, and *Plan from your defaults* — UX v1.1 §4.13. */
   prefill: protectedProcedure
     .input(prefillWeekInput)
     .mutation(async ({ ctx, input }) =>
       prefillWeek(ctx.rls, ctx.authContext.userId, input.week),
     ),
+
+  /**
+   * What the profile would plan for one date — the day sheet's *Structured*
+   * toggle reads it so the day gets the blocks the pre-fill would have given
+   * it (DYN-12). Writes nothing.
+   */
+  defaultPlan: protectedProcedure
+    .input(defaultPlanInput)
+    .query(async ({ ctx, input }) =>
+      ctx.rls.execute(async (tx) => {
+        const profile = await readDayProfile(tx, ctx.authContext.userId);
+        return defaultPlanFor(
+          tx,
+          ctx.authContext.userId,
+          profile,
+          input.date,
+          weekDates(weekKeyOf(input.date)),
+        );
+      }),
+    ),
+
+  /**
+   * The training swap between two days (v1.1 §4.13, R25): *Trade with
+   * Tuesday's pull?* A set day refuses with its weekday in the sentence.
+   */
+  tradeWorkouts: protectedProcedure
+    .input(tradeWorkoutsInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await tradeWorkouts(ctx.rls, ctx.authContext.userId, input.date, input.withDate);
+      } catch (error) {
+        if (error instanceof TradeRuleError) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            // [COPY — needs Vesper sign-off]
+            message:
+              error.code === "day_set"
+                ? `${error.detail ?? "That day"} is already set.`
+                : "Nothing to trade.",
+            cause: error,
+          });
+        }
+        throw error;
+      }
+    }),
 
   removeTemplate: protectedProcedure
     .input(dayDateInput)

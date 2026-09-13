@@ -129,6 +129,8 @@ export type DayView = {
   anchor: { clock: string; isHard: boolean } | null;
   /** Today's focus, for the header line; null without one. */
   focusLabel: string | null;
+  /** The focus's habit id — the week build's picker selects by it (DYN-12). */
+  focusHabitId: string | null;
   /** The devices-off marker's instant; items from it on read *confirm in the morning*. */
   devicesOffAt: Date | null;
   /** Yesterday's after-devices-off items still to answer — only while today is unset. */
@@ -653,6 +655,7 @@ export async function getDay(
       confirmedAt: day.confirmedAt,
       anchor,
       focusLabel: focus?.title ?? null,
+      focusHabitId: day.workFocusHabitId ?? null,
       devicesOffAt,
       lastNight,
     };
@@ -833,6 +836,7 @@ function emptyDay(
     confirmedAt: null,
     anchor: null,
     focusLabel: null,
+    focusHabitId: null,
     devicesOffAt: null,
     lastNight: [],
   };

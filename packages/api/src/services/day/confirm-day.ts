@@ -95,7 +95,7 @@ export type ConfirmContext = {
 };
 
 /** The rotation's typical length: the range floor, else its midpoint, else an hour. */
-function workoutLength(habit: { durationMinMin: number | null; durationMaxMin: number | null }): number {
+export function workoutLength(habit: { durationMinMin: number | null; durationMaxMin: number | null }): number {
   if (habit.durationMinMin !== null) return habit.durationMinMin;
   if (habit.durationMaxMin !== null) return habit.durationMaxMin;
   return 60;
@@ -108,7 +108,7 @@ function midpoint(min: number | null, max: number | null): number {
   return Math.round((min + max) / 2);
 }
 
-type HabitLite = {
+export type HabitLite = {
   id: string;
   title: string;
   icon: IconValue;
@@ -138,7 +138,7 @@ const HABIT_LITE = {
   weeklyTarget: habits.weeklyTarget,
 } as const;
 
-async function readHabits(tx: Tx, userId: string, ids: readonly string[]): Promise<Map<string, HabitLite>> {
+export async function readHabits(tx: Tx, userId: string, ids: readonly string[]): Promise<Map<string, HabitLite>> {
   if (ids.length === 0) return new Map();
   const rows = await tx
     .select(HABIT_LITE)
@@ -163,7 +163,7 @@ export async function typicalWorkoutFor(
 }
 
 /** A habit as a pick-made item: no slot, its own snapshot. */
-function habitItem(
+export function habitItem(
   habit: HabitLite,
   input: { durationMin: number | null; sortOrder: number; snapshot: string | null },
 ) {
@@ -591,7 +591,7 @@ async function resolveTraining(
 }
 
 /** The other day's training block, creating the day from its default plan if needed. */
-async function ensureTrainingBlock(
+export async function ensureTrainingBlock(
   tx: Tx,
   userId: string,
   profile: DayProfile,

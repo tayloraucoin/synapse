@@ -22,6 +22,38 @@ export const WEEK_COPY = {
     `${name} ${used} of ${target}`,
   mostBehind: "most behind",
 
+  /* --------------------------------------- UX v1.1 §4.13 — the row line -- */
+  structured: "Structured",
+  unstructured: "Unstructured",
+  /** A *sometimes* work day with no plan: the shape is a question (§3.9). */
+  shapeUnknown: "?",
+  decideInTheMorning: "decide in the morning",
+  planFromDefaults: "Plan from your defaults",
+  /** [COPY — needs Vesper sign-off] */
+  planFromDefaultsDone: (n: number) => `Planned ${n} ${n === 1 ? "day" : "days"}.`,
+
+  /* -------------------------------------------- the amended day sheet -- */
+  shape: "Shape",
+  set: "Set",
+  menu: "Menu — decide in the morning",
+  menuShort: "Menu",
+  /** "1 of 2 this week" */
+  ofThisWeek: (used: number, target: number) => `${used} of ${target} this week`,
+  focus: "Focus",
+  focusSearchLabel: "Search focuses",
+  focusEmpty: "No focuses yet",
+  training: "Training",
+  noWorkoutToday: "None on this day",
+  swapWith: "Swap with…",
+  swapSearchLabel: "Search days",
+  swapEmpty: "No other days",
+  /** "Trade with Tuesday's pull?" — R25, one sentence. */
+  tradeTitle: (day: string, workout: string) => `Trade with ${day}'s ${workout}?`,
+  tradeTitleEmpty: (day: string) => `Move it to ${day}?`,
+  trade: "Trade",
+  setInTheMorning: "Set in the morning",
+  newOfKind: "New",
+
   copyTitle: "Copy last week?",
   copyBody: "Templates and start times are copied. One-off items are not.",
   copyOverwriteLine: (n: number) => `${n} planned days will be replaced.`,

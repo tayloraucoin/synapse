@@ -13,6 +13,7 @@ import {
   templatePatchSchema,
 } from "@syn/validators";
 
+import { planFit } from "../services/plan/fit";
 import {
   SamePositionError,
   SlotRuleError,
@@ -66,6 +67,9 @@ export const templateRouter = router({
       if (!detail) throw new TRPCError(NOT_FOUND);
       return detail;
     }),
+
+  /** The fit at planning time — first run's last screen (v1.1 §3.10, §4.12). */
+  fit: protectedProcedure.query(async ({ ctx }) => planFit(ctx.rls, ctx.authContext.userId)),
 
   /** A block of the given kind; the anchor comes from the profile (v1.1 §11.4). */
   create: protectedProcedure

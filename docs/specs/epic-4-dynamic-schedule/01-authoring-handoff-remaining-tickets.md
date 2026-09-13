@@ -60,6 +60,8 @@
 
 ### DYN-12 — The week build amended: per-block day sheet, the shape toggle, the pre-filled week, the training swap confirm
 
+> **Expanded 2026-09-13** into `DYN-12-week-build-amended.md` and built in the same thread (batch 7, with DYN-11). `week.tradeWorkouts` and `week.defaultPlan` are the two additions; *Plan from your defaults* sits beside *Copy last week* rather than replacing it. Kept here as the record of the dense form.
+
 **Size:** M. **Slice type:** an existing canvas re-pointed at the block read model. Risk class: *two vocabularies on one screen*.
 
 **Outcome.** WK-01's day rows read v1.1 §4.13's one line — *Menu · Viewpoint · Push · Stand-up 9:30* — with the shape; the `DaySheet` becomes a row per block kind present, each a `PickerList` of that kind's templates with target status, the shape toggle at the top, *Add a one-off* at the bottom; the first week after first run is pre-filled (`week.prefill`) so the build's first job is reading; dragging *Push* from Monday onto Tuesday (compact: a *Swap with…* row in the day sheet's training row) shows *Trade with Tuesday's pull?* — **Trade** · **Cancel** (R25). `copyLastWeek` uses `prefill` for the replacement.
@@ -87,6 +89,8 @@
 **Depends on:** DYN-7, DYN-4. **Model:** Opus — six screens of state and gating with a persuasion guardrail on each; a cheaper model pre-selects a *what gives* answer to make the primary enabled.
 
 ### DYN-11 — First run 7–12: before work with *one of*, the landscape, training, closing the day, focuses, the fit; the first week pre-filled
+
+> **Expanded 2026-09-13** into `DYN-11-first-run-7-12-and-the-first-week.md` and built in the same thread (batch 7, with DYN-12). `template.fit` is the fit's arithmetic; `completeFirstRun({ overflowMode })` pre-fills the week; `components/starter-set/` is deleted for `landscape-chooser/`; *Open today* lands on `/today` until DYN-13. Kept here as the record of the dense form.
 
 **Size:** L. **Slice type:** the second half of the sequence, three of whose screens are the block editor embedded, and the one computed screen. Risk class: *a fit number on the landscape screen* (§4.8's rule) and *a first week that has to be authored* (§4.13's promise).
 

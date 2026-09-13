@@ -14,8 +14,8 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | DYN-8 | The block editor, step one, and Settings → Your day | DYN-4, DYN-7 | Complete (authored from the handoff and built in one thread; the editor, Your day, the library regrouped, the redirects, `template-editor/` deleted; the four commands and the Storybook build pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-9 | The block editor, step two: drag, resize, gaps | DYN-8 | Not started (handoff) · does not gate | — |
 | DYN-10 | First run 1–6 | DYN-7, DYN-4 | Complete (authored from the handoff and built in one thread; six screens at `/setup/{1–6}`, the transitional ready at 7, the v1.0 steps deleted; the four commands pass; the browser walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
-| DYN-11 | First run 7–12 and the first week | DYN-10, DYN-8, DYN-5 | Not started (handoff) | — |
-| DYN-12 | The week build amended | DYN-5, DYN-7 | Not started (handoff) | — |
+| DYN-11 | First run 7–12 and the first week | DYN-10, DYN-8, DYN-5 | Complete (authored from the handoff and built in one thread; six screens, the landscape chooser replacing `starter-set/`, `template.fit`, `completeFirstRun` pre-filling the week; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
+| DYN-12 | The week build amended | DYN-5, DYN-7 | Complete (authored from the handoff and built in one thread; the row line, the per-block day sheet, `week.tradeWorkouts`, `week.defaultPlan`, *Plan from your defaults*; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-13 | The orient frame and the wake moment | DYN-5, DYN-7 | Not started (handoff) | — |
 | DYN-14 | The quick-pick and *Set the day* | DYN-13, DYN-6 | Not started (handoff) | — |
 | DYN-15 | Today by block, the day header, the item sheet, the habit-day sheet | DYN-14 | Not started (handoff) | — |
@@ -38,8 +38,8 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] DYN-8
 - [ ] DYN-9 (does not gate)
 - [x] DYN-10
-- [ ] DYN-11
-- [ ] DYN-12
+- [x] DYN-11
+- [x] DYN-12
 - [ ] DYN-13
 - [ ] DYN-14
 - [ ] DYN-15

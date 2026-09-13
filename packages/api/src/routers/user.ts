@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 
 import {
+  completeFirstRunInput,
   deleteAccountInput,
   exportDownloadInput,
   setAvatarInput,
@@ -63,11 +64,15 @@ export const userRouter = router({
     }),
 
   /**
-   * FR-05's *Open today*. Idempotent, so a double submit is not an error.
+   * The fit screen's *Open today* / *Plan this week first* (v1.1 §4.12).
+   * Writes the overflow mode, marks the row, pre-fills the week. Idempotent,
+   * so a double submit is not an error.
    */
-  completeFirstRun: protectedProcedure.mutation(async ({ ctx }) =>
-    completeFirstRun(ctx.rls, ctx.authContext.userId),
-  ),
+  completeFirstRun: protectedProcedure
+    .input(completeFirstRunInput)
+    .mutation(async ({ ctx, input }) =>
+      completeFirstRun(ctx.rls, ctx.authContext.userId, input ?? {}),
+    ),
 
   /** The account photo's stored path, or null. ST-01 and the header read it. */
   avatar: protectedProcedure.query(async ({ ctx }) =>

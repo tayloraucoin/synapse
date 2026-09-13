@@ -2,26 +2,32 @@ import { notFound } from "next/navigation";
 
 import { getServerApi } from "@/lib/trpc/server";
 
-import { SETUP_COPY, SETUP_LAST_BUILT_STEP, SETUP_TOTAL_STEPS } from "../../_components/copy";
+import { SETUP_COPY, SETUP_TOTAL_STEPS } from "../../_components/copy";
 import { Step1Shape } from "../../_components/step-1-shape";
 import { Step2WorkDays } from "../../_components/step-2-work-days";
 import { Step3WorkStart } from "../../_components/step-3-work-start";
 import { Step4Commitments } from "../../_components/step-4-commitments";
 import { Step5Wake } from "../../_components/step-5-wake";
 import { Step6BeforeTheDay } from "../../_components/step-6-before-the-day";
-import { Step7Ready } from "../../_components/step-7-ready";
+import { Step7BeforeWork } from "../../_components/step-7-before-work";
+import { Step8Landscape } from "../../_components/step-8-landscape";
+import { Step9Training } from "../../_components/step-9-training";
+import { Step10Closing } from "../../_components/step-10-closing";
+import { Step11Focuses } from "../../_components/step-11-focuses";
+import { Step12Fit } from "../../_components/step-12-fit";
 
 /**
- * The first-run sequence — UX v1.1 §4, screens 1–6 (DYN-10) and the
- * transitional ready at 7 until DYN-11 lands 7–12.
+ * The first-run sequence — UX v1.1 §4, screens 1–6 (DYN-10) and 7–12
+ * (DYN-11).
  *
- * THE STEP IS THE URL, and the segment is validated: a step above the last
- * built one is a 404, because a sequence that renders an empty screen is
- * worse than a 404.
+ * THE STEP IS THE URL, and the segment is validated: a step outside 1–12 is
+ * a 404, because a sequence that renders an empty screen is worse than a
+ * 404.
  *
  * THE PAGE IS A SERVER COMPONENT and each screen is a client leaf that
  * receives its current values as props, so a pre-filled field renders as
- * value + Change on first paint rather than after a fetch.
+ * value + Change on first paint rather than after a fetch. Screens whose
+ * content is a list the person builds (7–9, 11) read their own queries.
  *
  * IT DOES NOT GATE ON `first_run_completed_at`. Someone who finished setup
  * and types `/setup/3` gets screen 3 — everything in the sequence is editable
@@ -35,11 +41,7 @@ export default async function SetupStepPage({
 }) {
   const { step } = await params;
   const stepNumber = Number(step);
-  if (
-    !Number.isInteger(stepNumber) ||
-    stepNumber < 1 ||
-    stepNumber > SETUP_LAST_BUILT_STEP
-  ) {
+  if (!Number.isInteger(stepNumber) || stepNumber < 1 || stepNumber > SETUP_TOTAL_STEPS) {
     notFound();
   }
 
@@ -79,8 +81,25 @@ export default async function SetupStepPage({
           initialAskGratitude={me.orientAskGratitude}
         />
       );
+    case 7:
+      return <Step7BeforeWork initialWake={me.usualWakeTime} initialWorkStart={me.workStartTime} />;
+    case 8:
+      return <Step8Landscape />;
+    case 9:
+      return <Step9Training />;
+    case 10:
+      return (
+        <Step10Closing
+          initialLightsOut={me.lightsOutTime}
+          initialDevicesOff={me.devicesOffTime}
+          initialJournalEnabled={me.journalEnabled}
+          initialPrompts={me.journalPrompts}
+        />
+      );
+    case 11:
+      return <Step11Focuses initialWorkStart={me.workStartTime} />;
     default:
-      return <Step7Ready />;
+      return <Step12Fit />;
   }
 }
 
@@ -95,11 +114,7 @@ export async function generateMetadata({
 }) {
   const { step } = await params;
   const stepNumber = Number(step);
-  if (
-    !Number.isInteger(stepNumber) ||
-    stepNumber < 1 ||
-    stepNumber > SETUP_LAST_BUILT_STEP
-  ) {
+  if (!Number.isInteger(stepNumber) || stepNumber < 1 || stepNumber > SETUP_TOTAL_STEPS) {
     return {};
   }
   return { title: SETUP_COPY.progress(stepNumber, SETUP_TOTAL_STEPS) };

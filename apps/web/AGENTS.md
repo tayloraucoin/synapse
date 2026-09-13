@@ -77,7 +77,7 @@ is a defect.**
 | `/logout` | `logoutRoute()` | AU-06 (a route handler) |
 | `/auth/callback` | `authCallbackRoute()` | OAuth / PKCE |
 | `/auth/confirm` | `authConfirmRoute()` | email `token_hash` |
-| `/setup/{1–12}` | `setupRoute(step)` | UX v1.1 §4.1–§4.12 — screens 1–6 (DYN-10); 7–12 arrive with DYN-11, and until then `/setup/7` is the transitional ready screen |
+| `/setup/{1–12}` | `setupRoute(step)` | UX v1.1 §4.1–§4.12 — screens 1–6 (DYN-10), 7–12 (DYN-11); 12 completes first run and pre-fills the week |
 | `/today` | `todayRoute()` | LS-01 |
 | `/today/schedule` | `todayScheduleRoute()` | SC-01 |
 | `/day/{date}` | `dayRoute(date)` | LS-01, record or plan mode |

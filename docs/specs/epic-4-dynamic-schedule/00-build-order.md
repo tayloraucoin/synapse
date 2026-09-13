@@ -33,8 +33,8 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 - [x] **DYN-8** · The block editor, step one, and Settings → Your day: kind-aware editor with the slot sheet's fallbacks, the library by block, the habit sheet's block chip — L · (DYN-4, DYN-7)
 - [ ] **DYN-9** · The block editor, step two: drag to reorder, resize, seam-drag gaps, keyboard equivalents — M · (DYN-8) · does not gate
 - [x] **DYN-10** · First run 1–6: the shape of the week, work days, work start and what gives, standing commitments, wake, before the day — L · (DYN-7, DYN-4)
-- [ ] **DYN-11** · First run 7–12: before work with *one of*, the landscape, training, closing the day, focuses, the fit; the first week pre-filled — L · (DYN-10, DYN-8, DYN-5)
-- [ ] **DYN-12** · The week build amended: per-block day sheet, shape toggle, the pre-filled week, the training swap confirm — M · (DYN-5, DYN-7)
+- [x] **DYN-11** · First run 7–12: before work with *one of*, the landscape, training, closing the day, focuses, the fit; the first week pre-filled — L · (DYN-10, DYN-8, DYN-5)
+- [x] **DYN-12** · The week build amended: per-block day sheet, shape toggle, the pre-filled week, the training swap confirm — M · (DYN-5, DYN-7)
 
 ### Phase 4 — The morning (waking state)
 - [ ] **DYN-13** · The orient frame and the wake moment: the entry route, `woke_at` stamping, last night's words, the two optional lines, the R18 line, the wake-anchor path retired — M · (DYN-5, DYN-7) · **Sage line flagged (v1.1 §13 #9)**

@@ -12,7 +12,7 @@ import {
   StatusLine,
   Text,
 } from "@syn/ui";
-import { weekDates } from "@syn/utils";
+import { weekDates, weekdayIndex } from "@syn/utils";
 
 import { useOnline } from "@/lib/hooks/use-online";
 import { settingsYourDayRoute } from "@/lib/routes";
@@ -67,11 +67,19 @@ export function WeekCanvas({
 
   const week = trpc.week.get.useQuery({ week: weekKey });
   const templates = trpc.template.list.useQuery({ includeArchived: false });
+  const me = trpc.user.me.useQuery();
   const copy = trpc.week.copyLastWeek.useMutation();
+  const prefill = trpc.week.prefill.useMutation();
+  const [prefilled, setPrefilled] = React.useState<number | null>(null);
 
   const days = week.data?.days ?? [];
   const targets = week.data?.targets ?? [];
-  const plannedCount = days.filter((day) => day.templateId !== null).length;
+  const plannedCount = days.filter((day) => day.planned).length;
+
+  // A *sometimes* work day with no plan shows its shape as a question (§3.9).
+  const workDays = me.data?.workDays ?? null;
+  const isSometimes = (date: string): boolean =>
+    workDays !== null && workDays[String(weekdayIndex(date)) as keyof typeof workDays] === "sometimes";
 
   // Only once the list has actually loaded: offering *Build one* against an
   // undefined query would flash the empty state at someone who has templates.
@@ -149,8 +157,8 @@ export function WeekCanvas({
                   </span>
                 }
                 tag={day.isToday ? COPY.today : undefined}
-                meta={<DayMeta day={day} />}
-                ariaLabel={rowLabel(day)}
+                meta={<DayMeta day={day} sometimes={isSometimes(day.date)} />}
+                ariaLabel={rowLabel(day, isSometimes(day.date))}
                 onClick={() => setOpenDate(day.date)}
               />
             ))}
@@ -158,6 +166,27 @@ export function WeekCanvas({
         )}
 
         <div className="flex flex-wrap items-center gap-(--space-3)">
+          {/* UX v1.1 §4.13: the profile plans the week; the build reads it. */}
+          {week.isSuccess && plannedCount < days.length ? (
+            <Button
+              variant={plannedCount === 0 ? "secondary" : "ghost"}
+              disabled={!online}
+              busy={prefill.isPending}
+              onClick={() => {
+                void prefill.mutateAsync({ week: weekKey }).then(async (result) => {
+                  await utils.week.get.invalidate();
+                  setPrefilled(result.planned);
+                });
+              }}
+            >
+              {COPY.planFromDefaults}
+            </Button>
+          ) : null}
+          {prefilled === null ? null : (
+            <Text as="span" variant="caption" tone="secondary" aria-live="polite">
+              {COPY.planFromDefaultsDone(prefilled)}
+            </Text>
+          )}
           {week.data?.lastWeekPlanned ? (
             <Button
               variant="ghost"
@@ -217,44 +246,42 @@ export function WeekCanvas({
   );
 }
 
-/** Template name or *Nothing planned* · *starts {time}* · *+{n} one-off*. */
-function DayMeta({ day }: { day: DayPlanView }) {
-  if (day.templateName === null && day.oneOffCount === 0) {
-    return (
-      <Text as="span" variant="caption" tone="secondary">
-        {COPY.nothingPlanned}
-      </Text>
-    );
-  }
+/**
+ * The row's one line — UX v1.1 §4.13: "its shape, its morning, its focus, its
+ * workout, and its fixtures — as one line of muted text: *Menu · Viewpoint ·
+ * Push · Stand-up 9:30*". What is null is left out; a *sometimes* work day
+ * with no plan shows its shape as a question (§3.9).
+ */
+function lineParts(day: DayPlanView, sometimes: boolean): string[] {
+  const parts: string[] = [];
+  if (day.shape !== null) parts.push(day.shape === "structured" ? COPY.structured : COPY.unstructured);
+  else if (sometimes) parts.push(COPY.shapeUnknown);
+  if (day.morningLabel !== null) parts.push(day.morningLabel);
+  if (day.shape === "structured") parts.push(day.focusLabel ?? COPY.decideInTheMorning);
+  if (day.workoutLabel !== null) parts.push(day.workoutLabel);
+  parts.push(...day.fixtureLabels);
+  if (day.oneOffCount > 0) parts.push(COPY.oneOffCount(day.oneOffCount));
+  return parts;
+}
 
+function DayMeta({ day, sometimes }: { day: DayPlanView; sometimes: boolean }) {
+  const parts = lineParts(day, sometimes);
   return (
-    <span className="flex flex-wrap items-center gap-(--space-2)">
-      {day.templateName === null ? null : <span>{day.templateName}</span>}
-      {day.anchorTime === null ? null : (
-        <Text as="span" variant="caption" tone="secondary">
-          {COPY.startsAt(day.anchorTime)}
-        </Text>
-      )}
-      {day.oneOffCount === 0 ? null : (
-        <Text as="span" variant="caption" tone="secondary">
-          {COPY.oneOffCount(day.oneOffCount)}
-        </Text>
-      )}
-    </span>
+    <Text as="span" variant="caption" tone="secondary">
+      {parts.length === 0 ? COPY.nothingPlanned : parts.join(" · ")}
+    </Text>
   );
 }
 
 /**
- * The row's accessible name, spoken as one sentence. The visual row splits the
- * same facts across a title and three meta fragments, which a screen reader
- * would otherwise read as four unrelated strings.
+ * The row's accessible name, spoken as one sentence — the same facts the
+ * line shows, so a screen reader hears one row rather than five fragments.
  */
-function rowLabel(day: DayPlanView): string {
+function rowLabel(day: DayPlanView, sometimes: boolean): string {
   const parts = [`${day.weekday} ${monthDay(day.date)}`];
   if (day.isToday) parts.push(COPY.today);
-  parts.push(day.templateName ?? COPY.nothingPlanned);
-  if (day.anchorTime !== null) parts.push(COPY.startsAt(day.anchorTime));
-  if (day.oneOffCount > 0) parts.push(COPY.oneOffCount(day.oneOffCount));
+  const line = lineParts(day, sometimes);
+  parts.push(...(line.length === 0 ? [COPY.nothingPlanned] : line));
   return parts.join(", ");
 }
 

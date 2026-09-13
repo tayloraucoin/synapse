@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1157 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1169 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -69,13 +69,19 @@ apps/
         _components/
           copy.ts
           fact-screen.tsx  # one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)
+          rotation-rows.tsx
           step-1-shape.tsx
+          step-10-closing.tsx
+          step-11-focuses.tsx
+          step-12-fit.tsx
           step-2-work-days.tsx
           step-3-work-start.tsx
           step-4-commitments.tsx
           step-5-wake.tsx
           step-6-before-the-day.tsx
-          step-7-ready.tsx
+          step-7-before-work.tsx
+          step-8-landscape.tsx
+          step-9-training.tsx
           step-frame.tsx
         setup/
           [step]/
@@ -295,6 +301,12 @@ apps/
         item-sheet.tsx
         manual-time-sheet.tsx
         use-item-sheet.ts
+      landscape-chooser/
+        copy.ts
+        index.ts
+        landscape-chooser.tsx
+        landscape-sheet.tsx
+        use-landscape.ts  # the landscape's single commit (W4): ticks are local, Continue writes the habits then the morning template's slots — never a fit number
       one-off-sheet/
         index.ts
         one-off-sheet.tsx
@@ -350,17 +362,13 @@ apps/
       shortcuts-host/
         index.ts
         shortcuts-host.tsx
-      starter-set/
-        copy.ts
-        index.ts
-        starter-set-chooser.tsx
       trim-sheet/
         copy.ts
         index.ts
         trim-sheet.tsx
       week-build/
         copy.ts
-        day-sheet.tsx
+        day-sheet.tsx  # one day's plan by block (v1.1 §4.13): every write is assignBlocks with the whole assignment; the sheet never reconciles
         index.ts
         week-canvas.tsx
         week-header.tsx
@@ -568,6 +576,8 @@ docs/
       DEVIATIONS.md
       DYN-1-vocabulary-view-models-and-stack-block.md
       DYN-10-first-run-1-6.md
+      DYN-11-first-run-7-12-and-the-first-week.md
+      DYN-12-week-build-amended.md
       DYN-2-migration-0004-block-templates-and-stacked-slots.md
       DYN-3-migration-0005-profile-fixtures-day-blocks-journal.md
       DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
@@ -668,6 +678,7 @@ packages/
           shift-fit.ts
           timer.ts
           today.ts
+          trade-workouts.ts  # the week build's training swap (R25): both days' workout items, refused on a set day
           undo-shift.ts
           untouched.ts  # the two predicates that decide what materialisation may rewrite — item and block
           week-view.ts
@@ -700,6 +711,7 @@ packages/
           web-push.ts
         plan/
           anchors.ts  # which profile time a block kind walks from, and in which direction — the only reader of that mapping
+          fit.ts  # the fit at planning time (v1.1 §3.10): computeBudget over the profile and the orient/prep templates — first run's last screen reads it
           fixtures.ts
           most-used-template.ts
           save-slot.ts  # THE same-position rule (v1.1 §3.5): multitask or one-of at one position, else SamePositionError. Every slot write pays it
@@ -725,7 +737,7 @@ packages/
           apply-pending-settings.ts
           avatar.ts
           build-export.ts
-          complete-first-run.ts
+          complete-first-run.ts  # the one write that ends first run: marks the row, stores the overflow mode, pre-fills the current week
           delete-account.ts
           preferences.ts
           request-export.ts

@@ -22,7 +22,7 @@ import type { BlockKind, HabitSummaryView } from "@syn/types";
 
 import { CategorySheet } from "@/components/category-sheet";
 import { HabitSheet } from "@/components/habit-sheet";
-import { StarterSetChooser } from "@/components/starter-set";
+import { LandscapeSheet } from "@/components/landscape-chooser";
 import { iconImageUrl } from "@/lib/assets/icon-url";
 import { useOnline } from "@/lib/hooks/use-online";
 import { useSheet } from "@/lib/hooks/use-sheet";
@@ -170,14 +170,8 @@ export function Library() {
               },
             ]}
           />
-          {starterOpen ? (
-            <StarterSetChooser
-              existingTitles={habits.map((habit) => habit.title)}
-              onClose={() => {
-                setStarterOpen(false);
-              }}
-            />
-          ) : null}
+          {/* UX v1.1 §4.15: the per-block landscape, as the library's door (DYN-11). */}
+          <LandscapeSheet open={starterOpen} onOpenChange={setStarterOpen} />
         </>
       ) : (
         <>

@@ -141,3 +141,14 @@ export const updatePreferencesInput = z
   );
 
 export type UpdatePreferencesInput = z.infer<typeof updatePreferencesInput>;
+
+/**
+ * *Open today* / *Plan this week first* (v1.1 §4.12): the overflow mode rides
+ * in the completing write when the fit screen asked the question; absent
+ * when it fit and the screen showed no rows.
+ */
+export const completeFirstRunInput = z
+  .object({ overflowMode: overflowModeSchema.optional() })
+  .optional();
+
+export type CompleteFirstRunInput = z.infer<typeof completeFirstRunInput>;

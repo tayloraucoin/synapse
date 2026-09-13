@@ -42,6 +42,20 @@ export type AssignBlocksInput = z.infer<typeof assignBlocksInput>;
 
 export const prefillWeekInput = z.object({ week: weekKeySchema });
 
+/** The training swap between two days of the build — v1.1 §4.13, R25 (DYN-12). */
+export const tradeWorkoutsInput = z
+  .object({ date: dateKeySchema, withDate: dateKeySchema })
+  .refine((value) => value.date !== value.withDate, {
+    // [COPY — needs Vesper sign-off]
+    message: "Pick another day.",
+    path: ["withDate"],
+  });
+
+export type TradeWorkoutsInput = z.infer<typeof tradeWorkoutsInput>;
+
+/** The profile's default plan for a date — the *Structured* toggle's read (DYN-12). */
+export const defaultPlanInput = z.object({ date: dateKeySchema });
+
 export const applyTemplateInput = z.object({
   date: dateKeySchema,
   templateId: z.string().uuid(),
