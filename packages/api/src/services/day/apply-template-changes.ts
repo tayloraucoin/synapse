@@ -1,6 +1,6 @@
-import { and, eq, gte, type SQL } from "drizzle-orm";
+import { and, eq, gte, or, type SQL } from "drizzle-orm";
 
-import { days, type RlsClient } from "@syn/db";
+import { dayBlocks, days, type RlsClient } from "@syn/db";
 import { addDays } from "@syn/utils";
 
 import { materializeDay } from "./materialize-day";
@@ -16,6 +16,10 @@ import { materializeDay } from "./materialize-day";
  * The keep rules are not re-implemented here — `materializeDay` owns them, so
  * a done item on a re-applied day survives for exactly the same reason it
  * survives everywhere else.
+ *
+ * UNDER v1.1 A TEMPLATE IS ON A DAY THROUGH ITS BLOCK (`day_blocks.template_id`,
+ * TD-1). `days.template_id` is still read for a day that predates the block
+ * backfill (DYN-5's `backfillBlocks`), and never written.
  */
 
 export type ApplyScope = "all" | "from_tomorrow" | "none";
@@ -28,12 +32,13 @@ export async function appliedDaysFor(
 ): Promise<{ count: number; dates: string[] }> {
   const rows = await rls.execute((tx) =>
     tx
-      .select({ date: days.date })
+      .selectDistinct({ date: days.date })
       .from(days)
+      .leftJoin(dayBlocks, eq(dayBlocks.dayId, days.id))
       .where(
         and(
           eq(days.userId, userId),
-          eq(days.templateId, templateId),
+          or(eq(dayBlocks.templateId, templateId), eq(days.templateId, templateId)),
           // Today and forward: a past day's record is not re-applied to.
           gte(days.date, todayKey) as SQL,
         ),
@@ -58,7 +63,9 @@ export async function applyTemplateChanges(
   const { dates } = await appliedDaysFor(rls, userId, templateId, from);
 
   for (const date of dates) {
-    await materializeDay(rls, userId, { date, templateId });
+    // "Keep": the day's blocks stay what they are; their untouched items
+    // follow the template's new shape.
+    await materializeDay(rls, userId, { date, blocks: "keep" });
   }
 
   return { applied: dates.length };

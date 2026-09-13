@@ -96,6 +96,12 @@ const ANNOTATIONS = {
   "packages/api/src/services/plan/save-slot.ts": "THE same-position rule (v1.1 \u00a73.5): multitask or one-of at one position, else SamePositionError. Every slot write pays it",
   "packages/api/src/services/plan/anchors.ts": "which profile time a block kind walks from, and in which direction \u2014 the only reader of that mapping",
   "packages/api/src/services/plan/to-view.ts": "one stackBlock walk per template; startClock is derived here, never stored",
+  "packages/api/src/services/day/materialize-day.ts": "THE materialiser, by block (v1.1 §11.11). Reconciles, never rebuilds; pooled blocks hold nothing; originals only for fixtures and pins",
+  "packages/api/src/services/day/lay-out-day.ts": "the whole day's arithmetic — chains stackBlock per kind, forward from wake, backward to work and lights-out. Pure; build and confirm both call it",
+  "packages/api/src/services/day/confirm-day.ts": "Set the day — resolves the pools, walks once, writes original_scheduled_start for the first and only time",
+  "packages/api/src/services/day/untouched.ts": "the two predicates that decide what materialisation may rewrite — item and block",
+  "packages/api/src/services/day/backfill-blocks.ts": "the one data migration that is not SQL: v1.0 days into one morning block each. Run per account after 0005, before 0006",
+  "packages/api/src/services/notifications/block-pushes.ts": "the named seam DYN-20 fills; confirmDay calls it and it enqueues nothing yet",
 
   // --- ui ---
   "packages/ui/src/index.ts": "enumerated exports; no \"./*\" wildcard",

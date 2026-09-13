@@ -1,6 +1,7 @@
-import { and, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 
 import {
+  dayBlocks,
   dayItems,
   days,
   habits,
@@ -12,7 +13,8 @@ import {
 import type { IconValue } from "@syn/types";
 import { wallClockToInstant } from "@syn/utils";
 
-import { touchedWhere, untouchedWhere } from "./untouched";
+import { materializeDay } from "./materialize-day";
+import { touchedWhere } from "./untouched";
 
 /**
  * One-off items — WK-03, and the door the day header opens.
@@ -371,76 +373,71 @@ export async function restoreOneOff(
 }
 
 /**
- * Removing a template from a day: untouched items go, touched items stay
+ * Removing the templates from a day: untouched items go, touched items stay
  * (Epic 1 WK-02's dialog says exactly this).
  *
- * The survivors lose their slot link and keep `template_name_snapshot`, so the
- * List can still say where they came from after the template is gone.
+ * UNDER v1.1 THIS IS THE MATERIALISER'S JOB (DYN-5): every block on the day
+ * is re-assigned with no template, so the untouched blocks and their items
+ * go and the touched ones keep their rows and lose only their link — the same
+ * keep rules as every other write path, in one place. The survivors keep
+ * `template_name_snapshot`, so the List can still say where they came from.
+ *
+ * `days.template_id` is cleared here and nowhere else: it is the v1.0 column
+ * (deprecated since 0005), and a day that predates the block backfill would
+ * otherwise keep naming a template it no longer uses.
  */
 export async function removeTemplateFromDay(
   rls: RlsClient,
   userId: string,
   date: string,
 ): Promise<{ removed: number; kept: number }> {
-  return rls.execute(async (tx) => {
-    const [day] = await tx
+  const day = await rls.execute(async (tx) => {
+    const [row] = await tx
       .select({ id: days.id })
       .from(days)
       .where(and(eq(days.userId, userId), eq(days.date, date)))
       .limit(1);
+    return row ?? null;
+  });
 
-    if (!day) return { removed: 0, kept: 0 };
+  if (!day) return { removed: 0, kept: 0 };
 
-    // The shared predicate, never a local copy of it. An earlier draft of this
-    // function inlined the four column checks and omitted the session and miss
-    // sub-selects, which would have deleted an item somebody had already run a
-    // timer on — the precise drift `untouched.ts` exists to prevent.
+  // Counted before the write with the shared predicates, so the number a
+  // person was shown (`countKeptOnRemove`) is the number they get.
+  const { blocks, total, kept } = await rls.execute(async (tx) => {
     const mine = and(
       eq(dayItems.dayId, day.id),
       eq(dayItems.userId, userId),
       isNotNull(dayItems.templateSlotId),
     );
-
-    const doomed = await tx
-      .select({ id: dayItems.id })
-      .from(dayItems)
-      .where(and(mine, untouchedWhere()));
-
-    const kept = await tx
+    const all = await tx.select({ id: dayItems.id }).from(dayItems).where(mine);
+    const touched = await tx
       .select({ id: dayItems.id })
       .from(dayItems)
       .where(and(mine, touchedWhere()));
+    const rows = await tx
+      .select({ kind: dayBlocks.kind })
+      .from(dayBlocks)
+      .where(and(eq(dayBlocks.dayId, day.id), eq(dayBlocks.userId, userId)));
+    return { blocks: rows, total: all.length, kept: touched.length };
+  });
 
-    if (doomed.length > 0) {
-      await tx.delete(dayItems).where(
-        inArray(
-          dayItems.id,
-          doomed.map((row) => row.id),
-        ),
-      );
-    }
+  await materializeDay(rls, userId, {
+    date,
+    blocks: [...new Set(blocks.map((row) => row.kind))].map((kind) => ({
+      kind,
+      templateId: null,
+    })),
+  });
 
-    // A kept row loses its slot id but keeps `template_name_snapshot`, so the
-    // record still says which template put it there.
-    if (kept.length > 0) {
-      await tx
-        .update(dayItems)
-        .set({ templateSlotId: null, updatedAt: new Date() })
-        .where(
-          inArray(
-            dayItems.id,
-            kept.map((row) => row.id),
-          ),
-        );
-    }
-
-    await tx
+  await rls.execute((tx) =>
+    tx
       .update(days)
       .set({ templateId: null, updatedAt: new Date() })
-      .where(eq(days.id, day.id));
+      .where(eq(days.id, day.id)),
+  );
 
-    return { removed: doomed.length, kept: kept.length };
-  });
+  return { removed: total - kept, kept };
 }
 
 /**
@@ -481,20 +478,4 @@ export async function countKeptOnRemove(
 
     return rows.length;
   });
-}
-
-/** Which template a day currently uses — the anchor change needs to keep it. */
-export async function readDayTemplateId(
-  rls: RlsClient,
-  userId: string,
-  date: string,
-): Promise<string | null> {
-  const rows = await rls.execute((tx) =>
-    tx
-      .select({ templateId: days.templateId })
-      .from(days)
-      .where(and(eq(days.userId, userId), eq(days.date, date)))
-      .limit(1),
-  );
-  return rows[0]?.templateId ?? null;
 }

@@ -20,8 +20,9 @@ import { eq } from "drizzle-orm";
 import { getDb, type Db } from "../client";
 import { users } from "../schema";
 import { seedStarterLibrary } from "./seed-library";
+import { seedFixture, seedProfile, seedRotation } from "./seed-profile";
 import { seedDefaultReasons } from "./seed-reasons";
-import { seedMorningTemplate } from "./seed-template";
+import { seedBlockTemplates } from "./seed-template";
 
 /** Matches `scripts/seed-users.ts`. A `.test` domain cannot resolve. */
 const SMOKE_ACCOUNT_EMAIL = "dev@synapse.test";
@@ -46,17 +47,27 @@ async function seed(): Promise<void> {
     return;
   }
 
+  // UX v1.1 (DYN-5): Taylor's day — the profile first, then the library the
+  // templates reference, then the templates, the rotation, and the fixture.
+  const profile = await seedProfile(db, account.id);
   const library = await seedStarterLibrary(db, account.id);
   const reasonCount = await seedDefaultReasons(db, account.id);
-  const template = await seedMorningTemplate(db, account.id);
+  const template = await seedBlockTemplates(db, account.id);
+  const rotation = await seedRotation(db, account.id);
+  const fixture = await seedFixture(db, account.id);
 
   console.log(`@syn/db seed — ${SMOKE_ACCOUNT_EMAIL}`);
+  console.log(`  profile written:     ${profile.profile}`);
   console.log(`  categories inserted: ${library.categories}`);
   console.log(`  habits inserted:     ${library.habits}`);
   console.log(`  reasons inserted:    ${reasonCount}`);
-  console.log(`  templates inserted:  ${template.template}`);
+  console.log(`  templates inserted:  ${template.templates}`);
   console.log(`  slots inserted:      ${template.slots}`);
+  console.log(`  workouts inserted:   ${rotation.workouts}`);
+  console.log(`  focuses inserted:    ${rotation.focuses}`);
+  console.log(`  fixtures inserted:   ${fixture.fixtures}`);
   console.log("  (0 across the board on a re-run means idempotent, not broken)");
+  console.log("  Days are not seeded: run week.prefill for the current week from the app or a probe.");
 }
 
 seed()

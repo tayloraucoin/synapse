@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1093 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1102 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -617,24 +617,30 @@ packages/
           apply-shift.ts
           apply-template-changes.ts
           apply-trim.ts
+          backfill-blocks.ts  # the one data migration that is not SQL: v1.0 days into one morning block each. Run per account after 0005, before 0006
           bring-back.ts
           carry-item.ts
           close-day.ts
+          confirm-day.ts  # Set the day — resolves the pools, walks once, writes original_scheduled_start for the first and only time
           copy-week.ts
           get-day.ts
           get-item.ts
           item-fields.ts
           journal.ts
+          lay-out-day.ts  # the whole day's arithmetic — chains stackBlock per kind, forward from wake, backward to work and lights-out. Pure; build and confirm both call it
           manual-time.ts
-          materialize-day.ts
+          materialize-day.ts  # THE materialiser, by block (v1.1 §11.11). Reconciles, never rebuilds; pooled blocks hold nothing; originals only for fixtures and pins
           one-off.ts
+          prefill-week.ts
+          quick-pick.ts
           set-done.ts
           shift-fit.ts
           timer.ts
           today.ts
           undo-shift.ts
-          untouched.ts
+          untouched.ts  # the two predicates that decide what materialisation may rewrite — item and block
           week-view.ts
+          wind-down.ts
         jobs/
           auto-close-days.ts
           expire-exports.ts
@@ -647,6 +653,7 @@ packages/
           habit-usage.ts
           list-habits.ts
           list-reasons.ts
+          placed-habits.ts
           save-category.ts
           save-habit.ts
           save-reason.ts
@@ -654,13 +661,13 @@ packages/
           starter-set.ts
           to-view.ts
         notifications/
+          block-pushes.ts  # the named seam DYN-20 fills; confirmDay calls it and it enqueues nothing yet
           build-payload.ts
           deliver.ts
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
           list-prefs.ts
           web-push.ts
         plan/
-          anchor-fallback.ts
           anchors.ts  # which profile time a block kind walks from, and in which direction — the only reader of that mapping
           fixtures.ts
           most-used-template.ts
@@ -809,6 +816,7 @@ packages/
       seed/
         index.ts
         seed-library.ts
+        seed-profile.ts
         seed-reasons.ts
         seed-template.ts
       build-database-env-for-next-config.ts
@@ -1417,6 +1425,7 @@ packages/
       auth-credentials.ts
       block.ts
       category.ts
+      confirm.ts
       day.ts
       feedback.ts
       fixture.ts

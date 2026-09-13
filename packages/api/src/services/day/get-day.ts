@@ -2,33 +2,43 @@ import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import {
   categories,
+  dayBlocks,
   dayItems,
   days,
   habits,
   misses,
   reasons,
   shifts,
+  templateSlots,
   templates,
   timerSessions,
   users,
   type RlsClient,
 } from "@syn/db";
 import type {
+  DayBlockView,
   DayItemView,
   DayMode,
+  DayShape,
   MissTier,
   WokeAtSource,
 } from "@syn/types";
 import {
+  addDays,
   dayModeFor,
   dayPartOf,
   dayPartSpans,
   dayStartInstant,
   deriveItemState,
+  formatClock,
+  formatClockFromMinutes,
+  minutesFromDayStart,
   weekdayForDayKey,
   zoneCityLabel,
   type DayPart,
 } from "@syn/utils";
+
+import { afterDevicesOff, devicesOffInstant } from "./wind-down";
 
 /**
  * The whole day, as view models, in one call.
@@ -104,9 +114,37 @@ export type DayView = {
    * and widening it would send a shift id to every one of them.
    */
   cutByShiftIds: Record<string, string>;
+
+  /*
+   * ---- UX v1.1 (§5.4, §6.1, §7.1, §7.3, §11.7) — the day by block (DYN-5).
+   * `parts` above is DEPRECATED: populated until DYN-15 stops reading it,
+   * removed in DYN-21. Both shapes coexist for the window.
+   */
+  /** The blocks in `sort_order`, each with its items in time order. */
+  blocks: DayBlockView[];
+  shape: DayShape;
+  /** *Set the day* — null is the unconfirmed state the quick-pick renders (R6). */
+  confirmedAt: Date | null;
+  /** The work anchor as the header reads it: *Work 9:00*, or *Work ~9:00* when soft. */
+  anchor: { clock: string; isHard: boolean } | null;
+  /** Today's focus, for the header line; null without one. */
+  focusLabel: string | null;
+  /** The devices-off marker's instant; items from it on read *confirm in the morning*. */
+  devicesOffAt: Date | null;
+  /** Yesterday's after-devices-off items still to answer — only while today is unset. */
+  lastNight: DayItemView[];
 };
 
 const PART_ORDER: DayPart[] = ["morning", "afternoon", "evening", "anytime"];
+
+/** The v1.1 half of a `DayItemView`, before the blocks are known. */
+const NO_BLOCK = {
+  dayBlockId: null,
+  blockKind: null,
+  pinned: false,
+  gapBeforeMin: 0,
+  alternates: null,
+} as const;
 
 export async function getDay(
   rls: RlsClient,
@@ -138,6 +176,11 @@ export async function getDay(
         closeReason: days.closeReason,
         capacityMin: days.capacityMin,
         templateId: days.templateId,
+        shape: days.shape,
+        confirmedAt: days.confirmedAt,
+        anchorIsHard: days.anchorIsHard,
+        workStartTime: days.workStartTime,
+        workFocusHabitId: days.workFocusHabitId,
       })
       .from(days)
       .where(and(eq(days.userId, userId), eq(days.date, dateKey)))
@@ -149,9 +192,32 @@ export async function getDay(
 
     const zone = safeZone(day.timezone, context.timeZone);
 
+    // The blocks, in order — the Today tab's sections (§6.1).
+    const blockRows = await tx
+      .select({
+        id: dayBlocks.id,
+        kind: dayBlocks.kind,
+        templateId: dayBlocks.templateId,
+        templateNameSnapshot: dayBlocks.templateNameSnapshot,
+        state: dayBlocks.state,
+        placement: dayBlocks.placement,
+        sortOrder: dayBlocks.sortOrder,
+        scheduledStart: dayBlocks.scheduledStart,
+        scheduledEnd: dayBlocks.scheduledEnd,
+      })
+      .from(dayBlocks)
+      .where(and(eq(dayBlocks.dayId, day.id), eq(dayBlocks.userId, userId)))
+      .orderBy(asc(dayBlocks.sortOrder), asc(dayBlocks.createdAt));
+    const blockById = new Map(blockRows.map((row) => [row.id, row]));
+    const workCount = blockRows.filter((row) => row.kind === "work").length;
+
     // The account's wake anchor, matched to this day's rows below. One scalar.
     const [account] = await tx
-      .select({ wakeAnchorHabitId: users.wakeAnchorHabitId })
+      .select({
+        wakeAnchorHabitId: users.wakeAnchorHabitId,
+        workStartTime: users.workStartTime,
+        anchorDirection: users.anchorDirection,
+      })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
@@ -192,14 +258,93 @@ export async function getDay(
         categoryId: habits.categoryId,
         categoryName: categories.name,
         categoryKey: categories.colorKey,
+        dayBlockId: dayItems.dayBlockId,
+        templateSlotId: dayItems.templateSlotId,
+        pinned: dayItems.pinned,
+        gapBeforeMin: dayItems.gapBeforeMin,
+        alternatesId: dayItems.alternatesId,
+        alternatesChosen: dayItems.alternatesChosen,
+        slotAlternatesGroup: templateSlots.alternatesGroup,
+        slotTemplateId: templateSlots.templateId,
       })
       .from(dayItems)
       .leftJoin(habits, eq(habits.id, dayItems.habitId))
       .leftJoin(categories, eq(categories.id, habits.categoryId))
+      .leftJoin(templateSlots, eq(templateSlots.id, dayItems.templateSlotId))
       .where(and(eq(dayItems.dayId, day.id), eq(dayItems.userId, userId)))
       .orderBy(asc(dayItems.scheduledStart), asc(dayItems.sortOrder));
 
     const ids = itemRows.map((row) => row.id);
+
+    /*
+     * The other member of each *one of* (§3.5), named so the sheet can offer
+     * the swap: the template's other slot in the same group, by title and
+     * length. One query for every group on the day.
+     */
+    const groupKeys = itemRows
+      .filter((row) => row.slotAlternatesGroup !== null && row.slotTemplateId !== null)
+      .map((row) => ({
+        group: row.slotAlternatesGroup as string,
+        templateId: row.slotTemplateId as string,
+        slotId: row.templateSlotId as string,
+      }));
+    const otherMembers =
+      groupKeys.length === 0
+        ? []
+        : await tx
+            .select({
+              slotId: templateSlots.id,
+              templateId: templateSlots.templateId,
+              group: templateSlots.alternatesGroup,
+              durationMin: templateSlots.durationMin,
+              title: habits.title,
+            })
+            .from(templateSlots)
+            .innerJoin(habits, eq(habits.id, templateSlots.habitId))
+            .where(
+              and(
+                eq(templateSlots.userId, userId),
+                inArray(
+                  templateSlots.templateId,
+                  [...new Set(groupKeys.map((key) => key.templateId))],
+                ),
+                inArray(
+                  templateSlots.alternatesGroup,
+                  [...new Set(groupKeys.map((key) => key.group))],
+                ),
+              ),
+            );
+    const otherOf = (row: (typeof itemRows)[number]) => {
+      if (row.alternatesId === null || row.slotAlternatesGroup === null) return null;
+      const other = otherMembers.find(
+        (member) =>
+          member.templateId === row.slotTemplateId &&
+          member.group === row.slotAlternatesGroup &&
+          member.slotId !== row.templateSlotId,
+      );
+      if (!other) return null;
+      return {
+        id: row.alternatesId,
+        chosen: row.alternatesChosen === true,
+        otherTitle: other.title,
+        otherDurationMin: other.durationMin,
+      };
+    };
+
+    // Which items sit after the phone goes away (§7.1).
+    const windDown = blockRows.find((row) => row.kind === "wind_down");
+    const windDownItems = itemRows
+      .filter((row) => windDown !== undefined && row.dayBlockId === windDown.id)
+      .map((row) => ({
+        id: row.id,
+        pinned: row.pinned,
+        templateSlotId: row.templateSlotId,
+        origin: row.origin,
+        type: row.type,
+        scheduledStart: row.scheduledStart,
+      }));
+    const devicesOffAt = devicesOffInstant(windDownItems);
+    const afterDevicesOffIds = new Set(afterDevicesOff(windDownItems).map((row) => row.id));
 
     // Running sessions, for `active` and the elapsed count.
     const running =
@@ -300,6 +445,8 @@ export async function getDay(
           doneAt: row.doneAt,
           deferredAt: row.deferredAt,
           hasRunningSession: runningByItem.has(row.id),
+          isAfterDevicesOff: afterDevicesOffIds.has(row.id),
+          pinned: row.pinned,
         },
         { closedAt: day.closedAt, mode },
         context.now,
@@ -348,15 +495,68 @@ export async function getDay(
                 ),
           state,
           multitask: multitaskOrder.get(row.id) ?? "none",
-          // UX v1.1 (§10.1, §11.8) — neutral until DYN-5 reads `day_blocks`.
-          dayBlockId: null,
-          blockKind: null,
-          pinned: false,
-          gapBeforeMin: 0,
-          alternates: null,
+          dayBlockId: row.dayBlockId,
+          blockKind:
+            row.dayBlockId === null ? null : (blockById.get(row.dayBlockId)?.kind ?? null),
+          pinned: row.pinned,
+          gapBeforeMin: row.gapBeforeMin,
+          alternates: otherOf(row),
         },
       });
     }
+
+    const dayStartClock = day.wokeAt === null ? day.anchorTime.slice(0, 5) : null;
+    const minutesOf = (at: Date | null): number | null => {
+      if (at === null) return null;
+      const start = dayStartClock ?? formatStartClock(day.wokeAt as Date, zone);
+      return minutesFromDayStart(at, start, zone);
+    };
+
+    const blocks: DayBlockView[] = blockRows.map((block) => ({
+      id: block.id,
+      kind: block.kind,
+      name: block.templateNameSnapshot,
+      templateId: block.templateId,
+      state: block.state,
+      startLabel: block.scheduledStart === null ? null : formatClock(block.scheduledStart, zone),
+      endLabel: block.scheduledEnd === null ? null : formatClock(block.scheduledEnd, zone),
+      startMin: minutesOf(block.scheduledStart),
+      endMin: minutesOf(block.scheduledEnd),
+      placement: block.placement,
+      // Time order inside the block; the unscheduled by their stack position.
+      items: views
+        .filter((entry) => entry.view.dayBlockId === block.id)
+        .map((entry) => entry.view),
+      split: block.kind === "work" && workCount >= 2,
+    }));
+
+    // Yesterday's after-devices-off items, only while today is unset (§7.3).
+    const lastNight =
+      dateKey === context.todayKey && day.confirmedAt === null
+        ? await readLastNight(tx, userId, addDays(dateKey, -1), zone, mode, context.now)
+        : [];
+
+    const [focus] = day.workFocusHabitId
+      ? await tx
+          .select({ title: habits.title })
+          .from(habits)
+          .where(eq(habits.id, day.workFocusHabitId))
+          .limit(1)
+      : [];
+
+    // Today's anchor once set; the profile's until then. None on an
+    // unstructured day — there is no work to anchor to (§3.9).
+    const anchorClock =
+      day.shape === "unstructured"
+        ? null
+        : (day.workStartTime ?? account?.workStartTime ?? null);
+    const anchor =
+      anchorClock === null
+        ? null
+        : {
+            clock: formatClockFromMinutes(clockToMinutes(anchorClock.slice(0, 5))),
+            isHard: day.anchorIsHard ?? account?.anchorDirection !== "work_waits",
+          };
 
     const assigned = views.filter(
       (entry) =>
@@ -448,8 +648,155 @@ export async function getDay(
         anchorHabitId === null
           ? null
           : (itemRows.find((row) => row.habitId === anchorHabitId)?.id ?? null),
+      blocks,
+      shape: day.shape,
+      confirmedAt: day.confirmedAt,
+      anchor,
+      focusLabel: focus?.title ?? null,
+      devicesOffAt,
+      lastNight,
     };
   });
+}
+
+/** `woke_at` as `HH:mm` in the day's zone — the axis origin once the day has begun. */
+function formatStartClock(wokeAt: Date, zone: string): string {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: zone,
+  }).formatToParts(wokeAt);
+  const hour = parts.find((part) => part.type === "hour")?.value ?? "00";
+  const minute = parts.find((part) => part.type === "minute")?.value ?? "00";
+  return `${hour}:${minute}`;
+}
+
+function clockToMinutes(clock: string): number {
+  const [hour = "0", minute = "0"] = clock.split(":");
+  return Number(hour) * 60 + Number(minute);
+}
+
+/**
+ * Yesterday's wind-down items at or after devices-off that nobody has
+ * answered — the quick-pick's *Last night* section (§7.3). Rendered with the
+ * facts the checkbox rows need and nothing the day's own list would add.
+ */
+export async function readLastNight(
+  tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
+  userId: string,
+  dateKey: string,
+  zone: string,
+  mode: DayMode,
+  now: Date,
+): Promise<DayItemView[]> {
+  const [yesterday] = await tx
+    .select({ id: days.id, closedAt: days.closedAt })
+    .from(days)
+    .where(and(eq(days.userId, userId), eq(days.date, dateKey)))
+    .limit(1);
+  if (!yesterday) return [];
+
+  const [windDown] = await tx
+    .select({ id: dayBlocks.id })
+    .from(dayBlocks)
+    .where(
+      and(
+        eq(dayBlocks.dayId, yesterday.id),
+        eq(dayBlocks.userId, userId),
+        eq(dayBlocks.kind, "wind_down"),
+      ),
+    )
+    .limit(1);
+  if (!windDown) return [];
+
+  const rows = await tx
+    .select({
+      id: dayItems.id,
+      habitId: dayItems.habitId,
+      title: dayItems.title,
+      icon: dayItems.icon,
+      type: dayItems.type,
+      timeMode: dayItems.timeMode,
+      scheduledStart: dayItems.scheduledStart,
+      scheduledEnd: dayItems.scheduledEnd,
+      originalScheduledStart: dayItems.originalScheduledStart,
+      durationMin: dayItems.durationMin,
+      priority: dayItems.priority,
+      scheduling: dayItems.scheduling,
+      origin: dayItems.origin,
+      doneAt: dayItems.doneAt,
+      deferredAt: dayItems.deferredAt,
+      quantityUnit: dayItems.quantityUnit,
+      quantityValue: dayItems.quantityValue,
+      assignmentState: dayItems.assignmentState,
+      completionState: dayItems.completionState,
+      pinned: dayItems.pinned,
+      gapBeforeMin: dayItems.gapBeforeMin,
+      templateSlotId: dayItems.templateSlotId,
+    })
+    .from(dayItems)
+    .where(
+      and(
+        eq(dayItems.dayId, yesterday.id),
+        eq(dayItems.userId, userId),
+        eq(dayItems.dayBlockId, windDown.id),
+      ),
+    )
+    .orderBy(asc(dayItems.scheduledStart), asc(dayItems.sortOrder));
+
+  const pending = afterDevicesOff(rows).filter(
+    (row) =>
+      row.assignmentState === "assigned" &&
+      row.completionState === "upcoming" &&
+      row.doneAt === null,
+  );
+  void zone;
+
+  return pending.map((row) => ({
+    id: row.id,
+    habitId: row.habitId,
+    title: row.title,
+    icon: row.icon,
+    type: row.type,
+    category: null,
+    timeMode: row.timeMode,
+    scheduledStart: row.scheduledStart,
+    scheduledEnd: row.scheduledEnd,
+    originalScheduledStart: row.originalScheduledStart,
+    durationMin: row.durationMin,
+    priority: row.priority,
+    scheduling: row.scheduling,
+    origin: row.origin,
+    carriedFromLabel: null,
+    doneAt: row.doneAt,
+    quantityUnit: row.quantityUnit,
+    quantityValue: row.quantityValue,
+    timerElapsedSec: null,
+    state: deriveItemState(
+      {
+        assignmentState: row.assignmentState,
+        completionState: row.completionState,
+        timeMode: row.timeMode,
+        scheduledStart: row.scheduledStart,
+        scheduledEnd: row.scheduledEnd,
+        originalScheduledStart: row.originalScheduledStart,
+        doneAt: row.doneAt,
+        deferredAt: row.deferredAt,
+        hasRunningSession: false,
+        isAfterDevicesOff: true,
+        pinned: row.pinned,
+      },
+      { closedAt: yesterday.closedAt, mode: mode === "live" ? "record" : mode },
+      now,
+    ),
+    multitask: "none",
+    ...NO_BLOCK,
+    dayBlockId: windDown.id,
+    blockKind: "wind_down",
+    pinned: row.pinned,
+    gapBeforeMin: row.gapBeforeMin,
+  }));
 }
 
 /** A date with no row — a real day nobody has planned. */
@@ -481,6 +828,13 @@ function emptyDay(
     // A day with no items has no anchor row to mark done, and nothing to cut.
     wakeAnchorItemId: null,
     cutByShiftIds: {},
+    blocks: [],
+    shape: "structured",
+    confirmedAt: null,
+    anchor: null,
+    focusLabel: null,
+    devicesOffAt: null,
+    lastNight: [],
   };
 }
 

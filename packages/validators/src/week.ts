@@ -8,11 +8,39 @@ import {
   PRIORITY_MIN,
 } from "@syn/constants";
 
+import { blockKindSchema, dayShapeSchema } from "./block";
 import { dateKeySchema, weekKeySchema } from "./keys";
 import { clockTimeSchema } from "./preferences";
 import { schedulingSchema, timeModeSchema } from "./template";
 
 /** WK-01/02/03's inputs. */
+
+/**
+ * One block's assignment on one day — UX v1.1 §4.13, §11.11 (DYN-5).
+ *
+ * `templateId` null is a block with no template (an empty wind-down on an
+ * unstructured day, a training block whose workout is decided at the pick);
+ * `"pool"` is *decide in the morning* — the block exists and holds nothing
+ * until *Set the day*.
+ */
+export const blockAssignmentSchema = z.object({
+  kind: blockKindSchema,
+  templateId: z.union([z.string().uuid(), z.literal("pool")]).nullable(),
+});
+
+export type BlockAssignmentInput = z.infer<typeof blockAssignmentSchema>;
+
+export const assignBlocksInput = z.object({
+  date: dateKeySchema,
+  blocks: z.array(blockAssignmentSchema).max(16),
+  shape: dayShapeSchema.optional(),
+  /** The week's focus for a work day; null clears it. */
+  focusHabitId: z.string().uuid().nullable().optional(),
+});
+
+export type AssignBlocksInput = z.infer<typeof assignBlocksInput>;
+
+export const prefillWeekInput = z.object({ week: weekKeySchema });
 
 export const applyTemplateInput = z.object({
   date: dateKeySchema,

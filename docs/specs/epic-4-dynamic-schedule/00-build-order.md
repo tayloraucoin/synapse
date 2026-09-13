@@ -23,7 +23,7 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 
 ### Phase 1 — The services
 - [x] **DYN-4** · Plan services: block templates by kind, the same-position rule with *one of*, fixtures, workouts and focuses, the library by block — L · (DYN-3) · **Mason review of the position invariant**
-- [ ] **DYN-5** · Materialisation per block and *Set the day*: `materializeDay` rewritten, `confirmDay`, the day read model by block, the week view by block — L · (DYN-4) · **Mason review of the keep rules and the trigger transition**
+- [x] **DYN-5** · Materialisation per block and *Set the day*: `materializeDay` rewritten, `confirmDay`, the day read model by block, the week view by block — L · (DYN-4) · **Mason review of the keep rules and the trigger transition**
 - [ ] **DYN-6** · Adjust, *Do now*, habit-day edits, and moves: `adjustDay`, `doNow`, `editHabitDay`, `moveItem`, `moveBlock`, the reflow — L · (DYN-5) · **Mason review; Vigil: induced staleness between preview and apply**
 
 ### Phase 2 — The composites

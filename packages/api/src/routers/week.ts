@@ -3,10 +3,12 @@ import { TRPCError } from "@trpc/server";
 import {
   applyChangesInput,
   applyTemplateInput,
+  assignBlocksInput,
   changeAnchorInput,
   copyWeekInput,
   dayDateInput,
   oneOffFormSchema,
+  prefillWeekInput,
   removeOneOffInput,
   restorePayloadInput,
   weekInput,
@@ -18,16 +20,19 @@ import {
 } from "../services/day/apply-template-changes";
 import { copyLastWeek } from "../services/day/copy-week";
 import { getDay } from "../services/day/get-day";
-import { materializeDay } from "../services/day/materialize-day";
+import {
+  applyTemplateToDay,
+  materializeDay,
+} from "../services/day/materialize-day";
 import {
   OneOffSameStartError,
   countKeptOnRemove,
-  readDayTemplateId,
   removeOneOff,
   removeTemplateFromDay,
   restoreOneOff,
   saveOneOff,
 } from "../services/day/one-off";
+import { prefillWeek } from "../services/day/prefill-week";
 import { resolveTodayFor } from "../services/day/today";
 import { getWeek } from "../services/day/week-view";
 import { mostUsedTemplate } from "../services/plan/most-used-template";
@@ -63,12 +68,16 @@ export const weekRouter = router({
     );
   }),
 
-  /** Applying is immediate: the day's items exist the moment this returns. */
+  /**
+   * Applying is immediate: the day's items exist the moment this returns.
+   * Under v1.1 the template's kind names the block it lands in; the day's
+   * other blocks are kept (DYN-5).
+   */
   applyTemplate: protectedProcedure
     .input(applyTemplateInput)
     .mutation(async ({ ctx, input }) => {
       try {
-        return await materializeDay(ctx.rls, ctx.authContext.userId, {
+        return await applyTemplateToDay(ctx.rls, ctx.authContext.userId, {
           date: input.date,
           templateId: input.templateId,
           anchorTime: input.anchorTime,
@@ -77,6 +86,29 @@ export const weekRouter = router({
         throw asNotFound(error);
       }
     }),
+
+  /** The week build's per-day assignment — UX v1.1 §4.13 (DYN-5). */
+  assignBlocks: protectedProcedure
+    .input(assignBlocksInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await materializeDay(ctx.rls, ctx.authContext.userId, {
+          date: input.date,
+          blocks: input.blocks,
+          shape: input.shape,
+          focusHabitId: input.focusHabitId,
+        });
+      } catch (error) {
+        throw asNotFound(error);
+      }
+    }),
+
+  /** The first week, and *Copy last week*'s replacement — UX v1.1 §4.13. */
+  prefill: protectedProcedure
+    .input(prefillWeekInput)
+    .mutation(async ({ ctx, input }) =>
+      prefillWeek(ctx.rls, ctx.authContext.userId, input.week),
+    ),
 
   removeTemplate: protectedProcedure
     .input(dayDateInput)
@@ -101,20 +133,15 @@ export const weekRouter = router({
    */
   changeAnchor: protectedProcedure
     .input(changeAnchorInput)
-    .mutation(async ({ ctx, input }) => {
-      // Keep whichever template the day already has; only the start moves.
-      const templateId = await readDayTemplateId(
-        ctx.rls,
-        ctx.authContext.userId,
-        input.date,
-      );
-      return materializeDay(ctx.rls, ctx.authContext.userId, {
+    .mutation(async ({ ctx, input }) =>
+      // Keep whichever blocks the day already has; only the start moves.
+      materializeDay(ctx.rls, ctx.authContext.userId, {
         date: input.date,
-        templateId,
+        blocks: "keep",
         anchorTime: input.anchorTime,
         recomputeTouchedTimes: true,
-      });
-    }),
+      }),
+    ),
 
   addOneOff: protectedProcedure
     .input(oneOffFormSchema)

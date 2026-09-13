@@ -173,14 +173,22 @@ export async function rateItem(
 export async function setWakeTime(
   rls: RlsClient,
   userId: string,
-  input: { date: string; wokeAt: Date | null },
+  input: { date: string; wokeAt: Date | null; source?: "manual" | "orient" },
 ): Promise<{ wokeAt: Date | null }> {
+  /*
+   * UX v1.1 R11 — the orient frame stamps `orient` the moment it opens
+   * (DYN-13); a picker stamps `manual`. A wake-time edit re-lays only an
+   * UNCONFIRMED day (the walk is `confirmDay`'s, from `woke_at`); on a set
+   * day it changes the header line and nothing moves — the same rule USE-3
+   * gave DH-02. Nothing here re-lays: the materialiser reads `woke_at` on
+   * its next pass, and a confirmed day has no next pass.
+   */
   await rls.execute((tx) =>
     tx
       .update(days)
       .set({
         wokeAt: input.wokeAt,
-        wokeAtSource: input.wokeAt === null ? null : "manual",
+        wokeAtSource: input.wokeAt === null ? null : (input.source ?? "manual"),
         updatedAt: new Date(),
       })
       .where(and(eq(days.userId, userId), eq(days.date, input.date))),

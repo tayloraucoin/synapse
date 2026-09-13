@@ -1,17 +1,29 @@
-import { and, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 
-import { dayItems, days, templates, type RlsClient } from "@syn/db";
-import type { WeekPlanStatus } from "@syn/types";
-import { addDays, weekDates, weekKeyOf, weekdayForDayKey } from "@syn/utils";
+import {
+  dayBlocks,
+  dayItems,
+  days,
+  fixtures,
+  habits,
+  templates,
+  type RlsClient,
+} from "@syn/db";
+import type { DayShape, WeekPlanStatus } from "@syn/types";
+import { addDays, weekDates, weekKeyOf, weekdayForDayKey, weekdayIndex } from "@syn/utils";
 
 /**
- * WK-01's seven rows, plus the target line.
+ * WK-01's seven rows, plus the target line — under v1.1, one line per day
+ * (§4.13): the shape, the morning, the focus, the workout, the fixtures.
  *
  * A WEEK IS NOT A TABLE. `week_plans` does not exist (SET-1's ruling): a
- * week's status is "does any day have a template or a one-off", which is a
- * question about days. Deriving it means it can never be stale — the failure a
- * stored flag would eventually have is a week that says *planned* after its
- * last template was removed.
+ * week's status is "does any day have a block or a one-off", which is a
+ * question about days. Deriving it means it can never be stale.
+ *
+ * THE v1.0 FIELDS STAY for the week canvas until DYN-12 replaces it:
+ * `templateId`/`templateName` are the MORNING block's — the v1.0 whole-day
+ * template was a morning (TD-1) — falling back to `days.template_id` for a
+ * day the block backfill has not reached.
  */
 
 export type DayPlanView = {
@@ -19,10 +31,22 @@ export type DayPlanView = {
   weekday: string;
   isToday: boolean;
   isPast: boolean;
+  /** DEPRECATED (v1.0): the morning block's template. Read by the v1.0 canvas. */
   templateId: string | null;
   templateName: string | null;
   anchorTime: string | null;
   oneOffCount: number;
+
+  /* ---- UX v1.1 §4.13 — the line per day (DYN-5) ---- */
+  shape: DayShape | null;
+  /** The variant's name · *Menu* · *one of A/B*; null when nothing is planned. */
+  morningLabel: string | null;
+  focusLabel: string | null;
+  workoutLabel: string | null;
+  fixtureLabels: string[];
+  confirmed: boolean;
+  /** True once the day has any block — "planned" under v1.1. */
+  planned: boolean;
 };
 
 export type WeekTarget = {
@@ -42,6 +66,9 @@ export type WeekView = {
   lastWeekPlanned: boolean;
 };
 
+// [COPY — needs Vesper sign-off: the week line's word for a pooled morning.]
+const MENU_LABEL = "Menu";
+
 export async function getWeek(
   rls: RlsClient,
   userId: string,
@@ -51,60 +78,121 @@ export async function getWeek(
   const dates = weekDates(weekKey);
 
   return rls.execute(async (tx) => {
-    const rows = await tx
+    const dayRows = await tx
       .select({
+        id: days.id,
         date: days.date,
         templateId: days.templateId,
         anchorTime: days.anchorTime,
-        templateName: templates.name,
+        shape: days.shape,
+        confirmedAt: days.confirmedAt,
+        focusId: days.workFocusHabitId,
+        legacyTemplateName: templates.name,
+        focusTitle: habits.title,
       })
       .from(days)
       .leftJoin(templates, eq(templates.id, days.templateId))
+      .leftJoin(habits, eq(habits.id, days.workFocusHabitId))
       .where(and(eq(days.userId, userId), inArray(days.date, dates)));
 
-    const byDate = new Map(rows.map((row) => [String(row.date), row]));
+    const byDate = new Map(dayRows.map((row) => [String(row.date), row]));
+    const dayIds = dayRows.map((row) => row.id);
 
-    const dayIds = await tx
-      .select({ id: days.id, date: days.date })
-      .from(days)
-      .where(and(eq(days.userId, userId), inArray(days.date, dates)));
-
-    const oneOffs =
+    const blockRows =
       dayIds.length === 0
         ? []
         : await tx
-            .select({ dayId: dayItems.dayId, id: dayItems.id })
+            .select({
+              dayId: dayBlocks.dayId,
+              kind: dayBlocks.kind,
+              templateId: dayBlocks.templateId,
+              templateNameSnapshot: dayBlocks.templateNameSnapshot,
+              state: dayBlocks.state,
+            })
+            .from(dayBlocks)
+            .where(and(eq(dayBlocks.userId, userId), inArray(dayBlocks.dayId, dayIds)))
+            .orderBy(asc(dayBlocks.sortOrder));
+
+    const itemRows =
+      dayIds.length === 0
+        ? []
+        : await tx
+            .select({
+              dayId: dayItems.dayId,
+              origin: dayItems.origin,
+              type: dayItems.type,
+              title: dayItems.title,
+            })
             .from(dayItems)
             .where(
               and(
                 eq(dayItems.userId, userId),
-                eq(dayItems.origin, "one_off"),
-                inArray(
-                  dayItems.dayId,
-                  dayIds.map((row) => row.id),
+                inArray(dayItems.dayId, dayIds),
+                or(
+                  eq(dayItems.origin, "one_off"),
+                  eq(dayItems.origin, "fixture"),
+                  eq(dayItems.type, "workout"),
                 ),
               ),
             );
 
-    const dateByDayId = new Map(dayIds.map((row) => [row.id, String(row.date)]));
-    const oneOffCounts = new Map<string, number>();
-    for (const item of oneOffs) {
-      const date = dateByDayId.get(item.dayId);
-      if (date === undefined) continue;
-      oneOffCounts.set(date, (oneOffCounts.get(date) ?? 0) + 1);
-    }
+    // The rotation, for a workout label before the day is set.
+    const workouts = await tx
+      .select({ title: habits.title, typicalDays: habits.typicalDays })
+      .from(habits)
+      .where(
+        and(eq(habits.userId, userId), eq(habits.type, "workout"), isNull(habits.archivedAt)),
+      )
+      .orderBy(asc(habits.createdAt));
+    const fixtureRows = await tx
+      .select({ title: fixtures.title, weekdays: fixtures.weekdays })
+      .from(fixtures)
+      .where(and(eq(fixtures.userId, userId), isNull(fixtures.archivedAt)));
 
     const dayViews: DayPlanView[] = dates.map((date) => {
       const row = byDate.get(date);
+      const blocks = row ? blockRows.filter((block) => block.dayId === row.id) : [];
+      const items = row ? itemRows.filter((item) => item.dayId === row.id) : [];
+      const weekday = weekdayIndex(date);
+
+      const morning = blocks.find((block) => block.kind === "morning");
+      const training = blocks.find((block) => block.kind === "training");
+      const morningLabel =
+        morning === undefined
+          ? null
+          : morning.state === "pooled"
+            ? MENU_LABEL
+            : (morning.templateNameSnapshot ?? null);
+      const workoutItem = items.find((item) => item.type === "workout");
+      const workoutLabel =
+        training === undefined || training.state === "not_today"
+          ? null
+          : (workoutItem?.title ??
+            workouts.find((workout) => (workout.typicalDays ?? []).includes(weekday))?.title ??
+            null);
+      const fixtureLabels =
+        items.length > 0 && items.some((item) => item.origin === "fixture")
+          ? items.filter((item) => item.origin === "fixture").map((item) => item.title)
+          : row
+            ? fixtureRows.filter((fixture) => fixture.weekdays.includes(weekday)).map((f) => f.title)
+            : [];
+
       return {
         date,
         weekday: weekdayForDayKey(date),
         isToday: date === todayKey,
         isPast: date < todayKey,
-        templateId: row?.templateId ?? null,
-        templateName: row?.templateName ?? null,
+        templateId: morning?.templateId ?? row?.templateId ?? null,
+        templateName: morning?.templateNameSnapshot ?? row?.legacyTemplateName ?? null,
         anchorTime: row?.anchorTime ?? null,
-        oneOffCount: oneOffCounts.get(date) ?? 0,
+        oneOffCount: items.filter((item) => item.origin === "one_off").length,
+        shape: row?.shape ?? null,
+        morningLabel,
+        focusLabel: row?.focusTitle ?? null,
+        workoutLabel,
+        fixtureLabels,
+        confirmed: row?.confirmedAt != null,
+        planned: blocks.length > 0 || (row?.templateId ?? null) !== null,
       };
     });
 
@@ -119,12 +207,17 @@ export async function getWeek(
       .where(eq(templates.userId, userId));
 
     const usageByTemplate = new Map<string, number>();
+    for (const block of blockRows) {
+      if (block.templateId === null) continue;
+      usageByTemplate.set(block.templateId, (usageByTemplate.get(block.templateId) ?? 0) + 1);
+    }
     for (const view of dayViews) {
-      if (view.templateId === null) continue;
-      usageByTemplate.set(
-        view.templateId,
-        (usageByTemplate.get(view.templateId) ?? 0) + 1,
-      );
+      // A day the backfill has not reached counts through its legacy column.
+      const row = byDate.get(view.date);
+      const hasBlocks = row ? blockRows.some((block) => block.dayId === row.id) : false;
+      if (!hasBlocks && row?.templateId) {
+        usageByTemplate.set(row.templateId, (usageByTemplate.get(row.templateId) ?? 0) + 1);
+      }
     }
 
     const withTargets = targeted
@@ -149,32 +242,30 @@ export async function getWeek(
     }
     if (worst) worst.mostBehind = true;
 
-    // *Copy last week* is hidden when last week had no template on any day —
+    // *Copy last week* is hidden when last week had no block on any day —
     // copying nothing is not an offer worth making.
     const lastWeekDates = weekDates(weekKeyOf(addDays(dates[0] ?? todayKey, -7)));
-    const lastWeekWithTemplate = await tx
+    const lastWeekPlanned = await tx
       .select({ id: days.id })
       .from(days)
+      .leftJoin(dayBlocks, eq(dayBlocks.dayId, days.id))
       .where(
         and(
           eq(days.userId, userId),
           inArray(days.date, lastWeekDates),
-          isNotNull(days.templateId),
+          or(isNotNull(dayBlocks.id), isNotNull(days.templateId)),
         ),
-      );
+      )
+      .limit(1);
 
     return {
       weekKey,
       days: dayViews,
       targets: withTargets,
-      status: dayViews.some(
-        (day) => day.templateId !== null || day.oneOffCount > 0,
-      )
+      status: dayViews.some((day) => day.planned || day.oneOffCount > 0)
         ? "planned"
         : "unplanned",
-      // "Unplanned" for last week means no template on any of its days, which
-      // is what hides *Copy last week* rather than offering an empty copy.
-      lastWeekPlanned: lastWeekWithTemplate.length > 0,
+      lastWeekPlanned: lastWeekPlanned.length > 0,
     };
   });
 }

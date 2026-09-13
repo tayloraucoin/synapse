@@ -26,6 +26,7 @@ export {
   SOON_MINUTES,
   closingThresholdMin,
   deriveItemState,
+  isMoved,
   isOffSchedule,
   type ItemStateInput,
 } from "./item-state";

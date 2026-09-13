@@ -41,6 +41,15 @@ export type ItemStateInput = {
   deferredAt: Date | null;
   /** True while a timer session on this item has no `ended_at`. */
   hasRunningSession: boolean;
+  /*
+   * ---- UX v1.1 (§7.1, §7.3, §10.1) — the two facts the three new states
+   * read. Optional so the v1.0 callers that never see a wind-down block
+   * (the shift preview, the resolver's inputs) keep their shape.
+   */
+  /** A wind-down item at or after the devices-off pin — confirmed next morning. */
+  isAfterDevicesOff?: boolean;
+  /** A pin — the anchor glyph; never `moved`, because it never moves (R3). */
+  pinned?: boolean;
 };
 
 /**
@@ -76,8 +85,7 @@ export function deriveItemState(
   if (item.completionState === "carried") return "carried";
   if (item.completionState === "missed") return "missed";
   // UX v1.1 R16 — left unticked the next morning. What happened outranks the
-  // clock, as with every state above. (`confirm-later` and `moved` need facts
-  // this input does not carry yet; DYN-5 adds them.)
+  // clock, as with every state above.
   if (item.completionState === "not_confirmed") return "not-confirmed";
 
   if (item.doneAt !== null || item.completionState === "done") {
@@ -86,6 +94,16 @@ export function deriveItemState(
 
   if (item.deferredAt !== null) return "deferred";
   if (item.hasRunningSession) return "active";
+
+  /*
+   * UX v1.1 §7.1, §7.3 — after the phone goes away nothing is ticked live.
+   * The row reads *confirm in the morning* from the moment the day is set
+   * until the next morning's pick resolves it (done, or not-confirmed above),
+   * whatever the clock says: a passed-but-unconfirmed item is still waiting
+   * for its answer, not missed. A closed day's `pending_review` outranks it
+   * above, so the Day Review's own state wins there.
+   */
+  if (item.isAfterDevicesOff === true) return "confirm-later";
 
   // A day that is not live has no now, soon, open, or closing — those describe
   // a clock running inside the day, and on a record or a plan day it is not.
@@ -119,5 +137,19 @@ export function deriveItemState(
   if (end !== null && nowMs >= end) return "passed";
   if (nowMs >= start) return end === null ? "passed" : "now";
   if (nowMs >= start - SOON_MINUTES * 60000) return "soon";
-  return "upcoming";
+  return isMoved(item) ? "moved" : "upcoming";
+}
+
+/**
+ * UX v1.1 §10.1 — an upcoming item whose planned start is not where the plan
+ * put it: a *Do now*, an Adjust, a drag. Counted in the header's plain words,
+ * never scored. Only while upcoming: once it is *soon* or *now* the clock is
+ * the more useful word, and a pin never moves, so a pin is never moved.
+ */
+export function isMoved(item: ItemStateInput): boolean {
+  if (item.pinned === true) return false;
+  if (item.scheduledStart === null || item.originalScheduledStart === null) {
+    return false;
+  }
+  return item.scheduledStart.getTime() !== item.originalScheduledStart.getTime();
 }

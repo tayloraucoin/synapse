@@ -46,6 +46,26 @@ export function isUntouchedItem(row: TouchableRow): boolean {
 }
 
 /**
+ * The block-level predicate — UX v1.1 §11.7, TD-2 (DYN-5).
+ *
+ * A block is untouched while every item in it is untouched AND nobody has set
+ * the day: `original_scheduled_start` on a block is written by confirm alone,
+ * so a confirmed block is touched by definition. The materialiser may delete
+ * or re-point an untouched block; a touched one keeps its rows and, at most,
+ * loses its template link — the same shape as an item.
+ */
+export type TouchableBlock = {
+  originalScheduledStart: Date | null;
+  items: ReadonlyArray<TouchableRow>;
+};
+
+export function isUntouchedBlock(block: TouchableBlock): boolean {
+  return (
+    block.originalScheduledStart === null && block.items.every(isUntouchedItem)
+  );
+}
+
+/**
  * The two sub-selects the SQL half needs, as reusable fragments.
  *
  * THE PARENTHESES ARE LOAD-BEARING. `notExists()` renders `not exists ` and

@@ -62,4 +62,6 @@ export const rateItemInput = z.object({
 export const setWakeTimeInput = z.object({
   date: dateKeySchema,
   wokeAt: z.coerce.date().nullable(),
+  /** UX v1.1 R11 — the orient frame stamps `orient`; the picker, `manual`. */
+  source: z.enum(["manual", "orient"]).default("manual"),
 });

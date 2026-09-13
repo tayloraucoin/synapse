@@ -232,11 +232,22 @@ export {
 export {
   applyChangesInput,
   applyTemplateInput,
+  assignBlocksInput,
+  blockAssignmentSchema,
   changeAnchorInput,
   copyWeekInput,
   dayDateInput,
   oneOffFormSchema,
+  prefillWeekInput,
   removeOneOffInput,
   weekInput,
+  type AssignBlocksInput,
+  type BlockAssignmentInput,
   type OneOffFormInput,
 } from "./week";
+
+export {
+  confirmDayInput,
+  quickPickInput,
+  type ConfirmDayInput,
+} from "./confirm";

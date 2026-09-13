@@ -4,7 +4,7 @@
 **Slice type:** The write path that turns plans into records, rebuilt around blocks; and the new moment at which the record begins. The risk class is *a rewritten record* (a re-materialisation that replaces a touched block or item) and *a record that begins too early* (an `original_scheduled_start` written on a pooled day before the person set it).
 **Vigil:** none. **Mason review:** the keep rules (AC 5–8), the trigger transition (AC 9–10), the backfill of existing items into blocks (AC 12).
 
-**Status:** Not started
+**Status:** Complete (2026-09-13 — the layout arithmetic of AC 2, 4, 10, 11 and the state derivations of AC 15, 17 probed through the pure functions; AC 20 verified; every database-backed criterion waits for `0004`/`0005` on a tier, which Taylor applies at the end of the epic; see `DEVIATIONS.md`)
 
 > **Mason — materialiser and confirm review.** Five callers converge on `materializeDay` (apply a template to a block, change a day's shape, remove a block's template, re-apply after a template edit, the week's pre-fill) and one new service, `confirmDay`, resolves every pooled part and writes `original_scheduled_start` for the first time. Review that "untouched" is still one predicate (`isUntouchedItem`, extended to blocks as `isUntouchedBlock`), that the walk is `stackBlock` and nothing else, that pooled blocks materialise **no items** before confirm, that fixtures and pins on structured days keep v1.0's write-at-build behaviour, that `confirmDay` is idempotent (a second call on a confirmed day is a no-op returning the day), and that the one-time backfill of v1.0 items into a `morning` block on their day is reversible in reasoning if not in SQL.
 

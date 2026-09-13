@@ -78,7 +78,6 @@ export async function afterSettingsApplied(
         timezone: days.timezone,
         dayCloseTime: days.dayCloseTime,
         anchorTime: days.anchorTime,
-        templateId: days.templateId,
       })
       .from(days)
       .where(
@@ -124,19 +123,18 @@ export async function afterSettingsApplied(
     if (!zoneChanged) continue;
 
     /*
-     * Template-derived items: the materialiser owns them. It reads the day's
-     * zone off the row we have just committed and recomputes every untouched
-     * item from `anchor + offset`, which is the wall clock the template holds.
-     * The anchor is passed explicitly so a template whose own anchor has since
-     * changed does not silently re-anchor this day.
+     * Block-derived items: the materialiser owns them. It reads the day's
+     * zone off the row we have just committed and re-walks every untouched
+     * item from the day's anchors, which are the wall clocks the profile and
+     * the blocks hold. "Keep" leaves the day's blocks as they are; the anchor
+     * is passed explicitly so a profile whose wake has since changed does not
+     * silently re-anchor this day.
      */
-    if (day.templateId !== null) {
-      await materializeDay(rls, userId, {
-        date: String(day.date),
-        templateId: day.templateId,
-        anchorTime: day.anchorTime,
-      });
-    }
+    await materializeDay(rls, userId, {
+      date: String(day.date),
+      blocks: "keep",
+      anchorTime: day.anchorTime,
+    });
 
     await relayOneOffs(rls, userId, day.id, oldZone, newZone);
   }

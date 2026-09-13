@@ -1,13 +1,46 @@
 import { TRPCError } from "@trpc/server";
 
 import { addDays } from "@syn/utils";
-import { applyTrimInput, getDayInput, setWakeTimeInput } from "@syn/validators";
+import {
+  applyTrimInput,
+  confirmDayInput,
+  getDayInput,
+  quickPickInput,
+  setWakeTimeInput,
+} from "@syn/validators";
 
 import { applyTrim, previewTrim } from "../services/day/apply-trim";
+import { backfillBlocks } from "../services/day/backfill-blocks";
+import { ConfirmRuleError, confirmDay } from "../services/day/confirm-day";
 import { getDay } from "../services/day/get-day";
 import { setWakeTime } from "../services/day/item-fields";
+import { getQuickPick } from "../services/day/quick-pick";
 import { resolveTodayFor } from "../services/day/today";
 import { protectedProcedure, router } from "../trpc";
+
+/** The two refusals *Set the day* makes, as sentences (UX v1.1 §3.7, R25). */
+function confirmError(error: ConfirmRuleError): TRPCError {
+  switch (error.code) {
+    case "closed":
+      return new TRPCError({ code: "CONFLICT", message: "That day is closed.", cause: error });
+    case "workout_unplaced":
+      return new TRPCError({
+        code: "BAD_REQUEST",
+        // [COPY — needs Vesper sign-off: v1.1 §5.3's primary label, as a refusal.]
+        message: `Choose a time for ${error.subject ?? "the workout"}.`,
+        cause: error,
+      });
+    case "trade_day_set":
+      return new TRPCError({
+        code: "CONFLICT",
+        // [COPY — needs Vesper sign-off.]
+        message: `${error.subject ?? "That day"} is already set.`,
+        cause: error,
+      });
+    case "no_such_habit":
+      return new TRPCError({ code: "NOT_FOUND", message: "No such habit.", cause: error });
+  }
+}
 
 /**
  * The day, read.
@@ -61,6 +94,64 @@ export const dayRouter = router({
     .mutation(async ({ ctx, input }) =>
       setWakeTime(ctx.rls, ctx.authContext.userId, input),
     ),
+
+  /* -------------------------------------------------- UX v1.1 (DYN-5) -- */
+
+  /** The quick-pick's sections, each already answered with today's default. */
+  quickPick: protectedProcedure
+    .input(quickPickInput)
+    .query(async ({ ctx, input }) => {
+      const today = await resolveTodayFor(ctx.rls, ctx.authContext.userId);
+      if (!today) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "No account row." });
+      }
+      return getQuickPick(ctx.rls, ctx.authContext.userId, input.date, {
+        todayKey: today.todayKey,
+        timeZone: today.timeZone,
+        dayCloseTime: today.dayCloseTime,
+        now: new Date(),
+      });
+    }),
+
+  /**
+   * *Set the day* — the moment the record begins (R23). Idempotent: a day
+   * already set returns itself. Refuses only a closed day, an unplaced
+   * workout, and a trade with a day already set.
+   */
+  confirm: protectedProcedure
+    .input(confirmDayInput)
+    .mutation(async ({ ctx, input }) => {
+      const today = await resolveTodayFor(ctx.rls, ctx.authContext.userId);
+      if (!today) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "No account row." });
+      }
+      try {
+        return await confirmDay(ctx.rls, ctx.authContext.userId, input, {
+          todayKey: today.todayKey,
+          timeZone: today.timeZone,
+          dayCloseTime: today.dayCloseTime,
+          now: new Date(),
+        });
+      } catch (error) {
+        if (error instanceof ConfirmRuleError) throw confirmError(error);
+        if (error instanceof Error && error.message === "no such template") {
+          throw new TRPCError({ code: "NOT_FOUND", message: "No such template." });
+        }
+        throw error;
+      }
+    }),
+
+  /**
+   * The one-time move of v1.0 days into blocks (TD-2). Idempotent; run once
+   * per tier after `0005` — see `docs/developer-guides/migrations.md`.
+   */
+  backfillBlocks: protectedProcedure.mutation(async ({ ctx }) => {
+    const today = await resolveTodayFor(ctx.rls, ctx.authContext.userId);
+    if (!today) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "No account row." });
+    }
+    return backfillBlocks(ctx.rls, ctx.authContext.userId, today.todayKey);
+  }),
 
   /* ------------------------------------------------------------- TR-01 -- */
 
