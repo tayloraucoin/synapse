@@ -13,6 +13,7 @@ import {
 } from "@syn/validators";
 
 import { bringBackItem, doItemAnyway } from "../services/day/bring-back";
+import { ChooseAlternateError, chooseAlternate } from "../services/day/choose-alternate";
 import { DoNowError, doNow } from "../services/day/do-now";
 import { EditHabitDayError, editHabitDay } from "../services/day/edit-habit-day";
 import { getItem } from "../services/day/get-item";
@@ -180,6 +181,35 @@ export const itemRouter = router({
               throw new TRPCError({ code: "NOT_FOUND", message: "No such item.", cause: error });
             case "fixture":
               throw new TRPCError({ code: "BAD_REQUEST", message: FIXED_MESSAGE, cause: error });
+            case "done":
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                // [COPY — needs Vesper sign-off.]
+                message: "That one has happened; its length and time are the record.",
+                cause: error,
+              });
+            case "closed":
+              throw new TRPCError({ code: "CONFLICT", message: "That day is closed.", cause: error });
+          }
+        }
+        throw asNotFound(error);
+      }
+    }),
+
+  /** *One of*, after the pick — §6.3 (3). The row takes the other member; prep re-flows. */
+  chooseAlternate: protectedProcedure
+    .input(itemIdInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await chooseAlternate(ctx.rls, ctx.authContext.userId, { itemId: input.id });
+      } catch (error) {
+        if (error instanceof ChooseAlternateError) {
+          switch (error.code) {
+            case "not_found":
+              throw new TRPCError({ code: "NOT_FOUND", message: "No such item.", cause: error });
+            case "not_alternate":
+              // [COPY — needs Vesper sign-off.]
+              throw new TRPCError({ code: "BAD_REQUEST", message: "That one has no other.", cause: error });
             case "done":
               throw new TRPCError({
                 code: "BAD_REQUEST",

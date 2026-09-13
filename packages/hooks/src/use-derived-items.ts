@@ -51,6 +51,10 @@ const CLOCK_INDEPENDENT: ReadonlySet<ItemState> = new Set([
   "active",
   "done",
   "done-off-schedule",
+  // UX v1.1 §7.1, §7.3 (DYN-15): a wind-down row after devices-off waits
+  // for the morning whatever the clock says, and *not confirmed* is a record.
+  "confirm-later",
+  "not-confirmed",
 ]);
 
 export function useDerivedItems<TItem extends DerivableItem>(

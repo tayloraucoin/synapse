@@ -81,9 +81,12 @@ export function useDayList(dateKey: string, initial: DayView) {
    * is the whole re-render budget: rebuilding every row each minute would make
    * a list of thirty items repaint sixty times an hour for nothing.
    */
+  // UX v1.1 §6.1 (DYN-15): the day is read by block; `parts` is no longer
+  // enumerated here (DYN-21 removes it from the model).
   const flat = React.useMemo(
     () => [
-      ...raw.parts.flatMap((part) => part.items),
+      ...raw.blocks.flatMap((block) => block.items),
+      ...raw.unblocked,
       ...raw.notAssigned,
       ...raw.cutByShift,
     ],
@@ -287,12 +290,17 @@ function reassemble(day: DayView, derived: readonly DayItemView[]): DayView {
     return slice;
   };
 
-  const parts = day.parts.map((part) => {
-    const items = take(part.items.length);
-    if (items.every((item, i) => item === part.items[i])) return part;
+  const blocks = day.blocks.map((block) => {
+    const items = take(block.items.length);
+    if (items.every((item, i) => item === block.items[i])) return block;
     changed = true;
-    return { ...part, items };
+    return { ...block, items };
   });
+
+  const unblocked = take(day.unblocked.length);
+  if (!unblocked.every((item, i) => item === day.unblocked[i])) {
+    changed = true;
+  }
 
   const notAssigned = take(day.notAssigned.length);
   if (!notAssigned.every((item, i) => item === day.notAssigned[i])) {
@@ -305,7 +313,7 @@ function reassemble(day: DayView, derived: readonly DayItemView[]): DayView {
   }
 
   if (!changed) return day;
-  return { ...day, parts, notAssigned, cutByShift };
+  return { ...day, blocks, unblocked, notAssigned, cutByShift };
 }
 
 /** Apply `fn` to every item in the day, in every place items live. */
@@ -315,7 +323,8 @@ function mapItems(
 ): DayView {
   return {
     ...day,
-    parts: day.parts.map((part) => ({ ...part, items: part.items.map(fn) })),
+    blocks: day.blocks.map((block) => ({ ...block, items: block.items.map(fn) })),
+    unblocked: day.unblocked.map(fn),
     notAssigned: day.notAssigned.map(fn),
     cutByShift: day.cutByShift.map(fn),
   };

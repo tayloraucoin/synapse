@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { DURATION_MAX, DURATION_MIN, PRIORITY_MAX, PRIORITY_MIN } from "@syn/constants";
 
+import { blockKindSchema } from "./block";
 import { dateKeySchema } from "./keys";
 import { clockTimeSchema } from "./preferences";
 
@@ -88,6 +89,16 @@ export const doNowInput = z.object({
 });
 
 export type DoNowInput = z.infer<typeof doNowInput>;
+
+/** *Add from the library* — the day header sheet's row (v1.1 §6.2, DYN-15). */
+export const addFromLibraryInput = z.object({
+  date: dateKeySchema,
+  habitId: z.string().uuid(),
+  /** The block it lands in; null on an unstructured day. */
+  blockKind: blockKindSchema.nullable(),
+});
+
+export type AddFromLibraryInput = z.infer<typeof addFromLibraryInput>;
 
 export const moveItemInput = z.object({
   itemId: z.string().uuid(),

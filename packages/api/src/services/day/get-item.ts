@@ -1,10 +1,11 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, ne } from "drizzle-orm";
 
 import {
   categories,
   dayItems,
   days,
   habits,
+  templateSlots,
   timerSessions,
   type RlsClient,
 } from "@syn/db";
@@ -81,6 +82,18 @@ export type ItemDetailView = {
   loggedSec: number;
   /** Set while a session is open. */
   runningSince: Date | null;
+
+  /* ---- UX v1.1 §6.3, §6.4 (DYN-15) ---- */
+  /** Resolved, 1–7 — *Priority today*. */
+  priority: number;
+  /** A pin — the anchor glyph; *At* on the habit-day sheet reads it. */
+  pinned: boolean;
+  /** The habit's range, as information under *Takes* (R21); null without one. */
+  habitRange: { min: number; max: number } | null;
+  /** The *one of* group, with the other member named for the two-segment control. */
+  alternates: { otherTitle: string; otherDurationMin: number } | null;
+  dayBlockId: string | null;
+  assignmentState: string;
 };
 
 export async function getItem(
@@ -117,7 +130,14 @@ export async function getItem(
         reflectionRatings: dayItems.reflectionRatings,
         multitaskId: dayItems.multitaskId,
         templateNameSnapshot: dayItems.templateNameSnapshot,
+        priority: dayItems.priority,
+        pinned: dayItems.pinned,
+        dayBlockId: dayItems.dayBlockId,
+        templateSlotId: dayItems.templateSlotId,
+        alternatesId: dayItems.alternatesId,
         habitArchivedAt: habits.archivedAt,
+        habitMin: habits.durationMinMin,
+        habitMax: habits.durationMaxMin,
         categoryName: categories.name,
         categoryKey: categories.colorKey,
         dayDate: days.date,
@@ -221,6 +241,45 @@ export async function getItem(
       sessions: sessionRows,
       loggedSec,
       runningSince: running?.startedAt ?? null,
+      priority: row.priority,
+      pinned: row.pinned,
+      habitRange:
+        row.habitMin === null || row.habitMax === null
+          ? null
+          : { min: row.habitMin, max: row.habitMax },
+      alternates: await otherMemberOf(tx, userId, row.templateSlotId, row.alternatesId),
+      dayBlockId: row.dayBlockId,
+      assignmentState: row.assignmentState,
     };
   });
+}
+
+/** The other member of an item's *one of* group, by its template slot (§6.3). */
+async function otherMemberOf(
+  tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
+  userId: string,
+  templateSlotId: string | null,
+  alternatesId: string | null,
+): Promise<{ otherTitle: string; otherDurationMin: number } | null> {
+  if (templateSlotId === null || alternatesId === null) return null;
+  const [current] = await tx
+    .select({ templateId: templateSlots.templateId, group: templateSlots.alternatesGroup })
+    .from(templateSlots)
+    .where(eq(templateSlots.id, templateSlotId))
+    .limit(1);
+  if (!current || current.group === null) return null;
+  const [other] = await tx
+    .select({ title: habits.title, durationMin: templateSlots.durationMin })
+    .from(templateSlots)
+    .innerJoin(habits, eq(habits.id, templateSlots.habitId))
+    .where(
+      and(
+        eq(templateSlots.userId, userId),
+        eq(templateSlots.templateId, current.templateId),
+        eq(templateSlots.alternatesGroup, current.group),
+        ne(templateSlots.id, templateSlotId),
+      ),
+    )
+    .limit(1);
+  return other ? { otherTitle: other.title, otherDurationMin: other.durationMin } : null;
 }

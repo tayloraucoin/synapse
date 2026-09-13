@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1188 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1201 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -263,6 +263,11 @@ apps/
       not-found.tsx
       page.tsx  # the landing page when signed out; the §4.2 entry tree when signed in
     components/
+      adjust-sheet/
+        adjust-sheet.tsx
+        copy.ts
+        index.ts
+        use-adjust.ts  # Adjust's four answers feeding one server preview (v1.1 §6.6); Set sends the fingerprint; nothing is inferred
       block-editor/
         add-sheet.tsx
         apply-changes-dialog.tsx
@@ -282,20 +287,26 @@ apps/
         copy.ts
         index.ts
       day-header-sheet/
+        copy.ts
         day-header-sheet.tsx
         index.ts
+        library-pick-sheet.tsx
         wake-time-sheet.tsx
       day-list/
+        block-section.tsx  # one block's rows (v1.1 §6.1): the work container with nested fixtures, the devices-off marker, the confirm-in-the-morning rows
         copy.ts
         day-list-header.tsx
         day-list.tsx
-        day-section.tsx
         index.ts
         use-day-list.ts
         use-landing.ts
       fixture-sheet/
         copy.ts
         fixture-sheet.tsx
+        index.ts
+      habit-day-sheet/
+        copy.ts
+        habit-day-sheet.tsx  # Edit today's (v1.1 §6.4): the day, never the habit; no clamp on Takes
         index.ts
       habit-sheet/
         copy.ts
@@ -600,6 +611,8 @@ docs/
       DYN-12-week-build-amended.md
       DYN-13-orient-frame-and-the-wake-moment.md
       DYN-14-quick-pick-and-set-the-day.md
+      DYN-15-today-by-block.md
+      DYN-17-adjust.md
       DYN-2-migration-0004-block-templates-and-stacked-slots.md
       DYN-3-migration-0005-profile-fixtures-day-blocks-journal.md
       DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
@@ -671,6 +684,7 @@ packages/
           create-upload-url.ts
           storage.ts
         day/
+          add-from-library.ts  # Add from the library: a habit-day item at the end of a block, re-flowed; no block on an unstructured day
           adjust-day.ts  # Adjust — scope computed, preview then commit with a fingerprint, one shifts row of the right kind, undo per decision (b)
           apply-shift.ts
           apply-template-changes.ts
@@ -678,6 +692,7 @@ packages/
           backfill-blocks.ts  # the one data migration that is not SQL: v1.0 days into one morning block each. Run per account after 0005, before 0006
           bring-back.ts
           carry-item.ts
+          choose-alternate.ts  # one of, after the pick (v1.1 §6.3): the row takes the other member; the block re-flows
           close-day.ts
           confirm-day.ts  # Set the day — resolves the pools, walks once, writes original_scheduled_start for the first and only time
           copy-week.ts

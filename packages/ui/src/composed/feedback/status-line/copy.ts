@@ -61,10 +61,13 @@ export const STATUS_LINE_COPY: Record<StatusLineVariant, StatusLineCopyEntry> =
       actionLabel: "Review",
     },
 
-    /** Epic 2 §3.6 — verbatim, including the one permitted question. */
+    /**
+     * UX v1.1 §6.6 — the late-wake offer, verbatim (DYN-17): one fact, no
+     * question. It replaced Epic 2 §3.6's *Running late? · Shift the day*.
+     */
     "late-offer": {
-      text: "Running late?",
-      actionLabel: "Shift the day",
+      text: "Up later than planned",
+      actionLabel: "Adjust the morning",
       dismissLabel: "Dismiss for today",
     },
 

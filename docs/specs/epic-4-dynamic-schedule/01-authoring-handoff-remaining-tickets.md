@@ -146,6 +146,8 @@
 
 ### DYN-15 — Today by block: the tab, the day header and its sheet, the item sheet's additions, the habit-day sheet
 
+> **Expanded 2026-09-13** into `DYN-15-today-by-block.md` and built in the same thread (batch 9, with DYN-17). `DayView.unblocked`, `item.chooseAlternate` and `day.addFromLibrary` are the additions; `day-section.tsx` is deleted; *Adjust the day* opens DYN-17's sheet. Kept here as the record of the dense form.
+
 **Size:** L. **Slice type:** the execution tab re-sectioned and its two sheets extended. Risk class: *a number on the tab* and *configuration reachable from the tab beyond the one designed exception*.
 
 **Outcome.** `/today` (confirmed) and `/day/{date}` per §6.1 verbatim: `DayHeader` with the focus and the anchor as a plain time (*Viewpoint · Work 9:00*, *~9:00* when soft, R17) and *Woke 7:12* when it differs; `BlockHeader` sections in block order with computed spans; `ItemRow`s as v1 §5.2 with the pin glyph and the chosen one-of title; the work block as a `container` row with nested fixtures, split into two rows around training; the now dot; the not-assigned expander; **Day Complete**. Day parts are no longer rendered (R20). The day header sheet (§6.2): **Adjust the day · Set wake time · Add from the library · Edit today · Add a one-off** (the row set per day state; *Add from the library* first on an unstructured day; *Adjust the day* opens DYN-17's sheet — until it ships, the row is absent, state which). The item sheet (§6.3): **Do now** in the footer with the one-line overflow sentence and *Do now anyway* / *Adjust instead*; **Edit today's** ghost in the header → the `HabitDaySheet` (§6.4: *Takes* with the range as muted text, *At* stack/clock, *Priority today*, *Leave out today*, *Changes the day, not the habit.* with *Also change the habit*); the one-of segment for alternates members; *Not today* exactly as v1. `Add from the library` opens the library filtered to the day's block kinds and adds a habit-day item into the block the person picks.
@@ -171,6 +173,8 @@
 **Depends on:** DYN-15, DYN-6. **Model:** Opus — the drag layer's semantics against pins and the two modes.
 
 ### DYN-17 — Adjust: the one sheet for slept in, ran long, something came up
+
+> **Expanded 2026-09-13** into `DYN-17-adjust.md` and built in the same thread (batch 9, with DYN-15). The late-wake offer is `shell.status.lateWakeOffer`; the status line's preset carries the v1.1 words; the band-drag entry is a prop for DYN-16. Kept here as the record of the dense form.
 
 **Size:** L. **Slice type:** the day's one reasoned mutation, replacing two v1.0 sheets. Risk class: *detection* (an offer that infers lateness from taps) and *a scored word in the sheet* (*late*, *behind*, *counts half* — the tier's words live in Review only). **Vigil:** the doesn't-fit-even-cut path, the stale-apply `CONFLICT`, the 10 s undo, the band-drag entry.
 

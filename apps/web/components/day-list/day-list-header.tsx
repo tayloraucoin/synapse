@@ -41,6 +41,16 @@ type DayView = RouterOutputs["day"]["get"];
  * device zone; the browser does not tell the server, so the client computes it
  * from the one hook and falls back to the server's when it has one.
  */
+/** "Viewpoint · Work 9:00" — or the v1.0 template name for a day the backfill has not reached. */
+function headerLine(day: DayView): string {
+  if (day.blocks.length === 0) return day.templateName ?? COPY.noTemplate;
+  if (day.shape === "unstructured") return COPY.unstructured;
+  const parts: string[] = [];
+  if (day.focusLabel !== null) parts.push(day.focusLabel);
+  if (day.anchor !== null) parts.push(COPY.workAt(day.anchor.clock, !day.anchor.isHard));
+  return parts.length === 0 ? (day.templateName ?? COPY.noTemplate) : parts.join(" · ");
+}
+
 export function DayListHeader({ day }: { day: DayView }) {
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const deviceZone = useDeviceZone();
@@ -61,7 +71,10 @@ export function DayListHeader({ day }: { day: DayView }) {
           "UTC",
           "long",
         )}
-        templateName={day.templateName ?? COPY.noTemplate}
+        // UX v1.1 §6.1 (R17): the focus and the anchor as a plain time —
+        // *Viewpoint · Work 9:00*, *Work ~9:00* when soft; the tilde is the
+        // whole difference. An unstructured day says so.
+        templateName={headerLine(day)}
         wokeAtLabel={
           day.wokeAt === null
             ? null

@@ -122,6 +122,8 @@ export type DayView = {
    */
   /** The blocks in `sort_order`, each with its items in time order. */
   blocks: DayBlockView[];
+  /** Assigned items with no block — one-offs, an unstructured day's adds (DYN-15). */
+  unblocked: DayItemView[];
   shape: DayShape;
   /** *Set the day* — null is the unconfirmed state the quick-pick renders (R6). */
   confirmedAt: Date | null;
@@ -514,6 +516,17 @@ export async function getDay(
       return minutesFromDayStart(at, start, zone);
     };
 
+    // Assigned items that belong to no block — one-offs and an unstructured
+    // day's grab-and-go — rendered under the blocks (DYN-15).
+    const unblocked = views
+      .filter(
+        (entry) =>
+          entry.view.dayBlockId === null &&
+          entry.view.state !== "not-assigned" &&
+          entry.view.state !== "cut-by-shift",
+      )
+      .map((entry) => entry.view);
+
     const blocks: DayBlockView[] = blockRows.map((block) => ({
       id: block.id,
       kind: block.kind,
@@ -651,6 +664,7 @@ export async function getDay(
           ? null
           : (itemRows.find((row) => row.habitId === anchorHabitId)?.id ?? null),
       blocks,
+      unblocked,
       shape: day.shape,
       confirmedAt: day.confirmedAt,
       anchor,
@@ -832,6 +846,7 @@ function emptyDay(
     wakeAnchorItemId: null,
     cutByShiftIds: {},
     blocks: [],
+    unblocked: [],
     shape: "structured",
     confirmedAt: null,
     anchor: null,

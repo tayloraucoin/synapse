@@ -140,6 +140,11 @@ const ANNOTATIONS = {
   "apps/web/components/quick-pick/use-quick-pick.ts": "the quick-pick's answers and the live budget line (v1.1 §5.3); Set the day sends only what changed",
   "packages/utils/src/day/skip-line.ts": "R18 as code: the one behaviour line, second consecutive skip only, once in seven days",
   "packages/api/src/services/day/orient.ts": "the frame's read, and the wake stamp that rides in it — once per day (R11)",
+  "packages/api/src/services/day/choose-alternate.ts": "one of, after the pick (v1.1 §6.3): the row takes the other member; the block re-flows",
+  "packages/api/src/services/day/add-from-library.ts": "Add from the library: a habit-day item at the end of a block, re-flowed; no block on an unstructured day",
+  "apps/web/components/day-list/block-section.tsx": "one block's rows (v1.1 §6.1): the work container with nested fixtures, the devices-off marker, the confirm-in-the-morning rows",
+  "apps/web/components/adjust-sheet/use-adjust.ts": "Adjust's four answers feeding one server preview (v1.1 §6.6); Set sends the fingerprint; nothing is inferred",
+  "apps/web/components/habit-day-sheet/habit-day-sheet.tsx": "Edit today's (v1.1 §6.4): the day, never the habit; no clamp on Takes",
   "apps/mobile/README.md": "a deliberate empty seam. Do not scaffold",
 
   // --- delivery ---

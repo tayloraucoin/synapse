@@ -16,17 +16,17 @@ import {
 import { UNDO_LONG_MS } from "@syn/constants";
 import { formatClock } from "@syn/utils";
 
+import { AdjustSheet, type AdjustEntry } from "@/components/adjust-sheet";
 import { DaySheet } from "@/components/week-build";
 import { ItemSheet } from "@/components/item-sheet";
 import { OneOffSheet } from "@/components/one-off-sheet";
-import { ShiftSheet } from "@/components/shift-sheet";
 import { usePullToRefresh } from "@/lib/hooks/use-pull-to-refresh";
 import { useRovingFocus } from "@/lib/hooks/use-roving-focus";
 import { reviewDayRoute } from "@/lib/routes";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
+import { BlockSection, UnblockedSection } from "./block-section";
 import { DAY_LIST_COPY as COPY } from "./copy";
-import { DaySection } from "./day-section";
 import { useLanding, useScrollToItem } from "./use-landing";
 import { useDayList } from "./use-day-list";
 
@@ -60,9 +60,21 @@ export function DayList({
   const refreshing = usePullToRefresh(list.refresh);
 
   const [sheet, setSheet] = React.useState<
-    "day-plan" | "one-off" | "shift" | null
+    "day-plan" | "one-off" | "adjust" | null
   >(null);
+  const [adjustEntry, setAdjustEntry] = React.useState<AdjustEntry>("header");
   const [openItemId, setOpenItemId] = React.useState<string | null>(null);
+
+  /** Every item on the day, in every place items live (v1.1: by block). */
+  const allItems = React.useMemo(
+    () => [
+      ...day.blocks.flatMap((block) => block.items),
+      ...day.unblocked,
+      ...day.notAssigned,
+      ...day.cutByShift,
+    ],
+    [day],
+  );
 
   /*
    * A notification landing — USE-8's PN-01.
@@ -79,14 +91,12 @@ export function DayList({
     if (doneFired.current) return;
 
     // The item must be in the cache before the optimistic patch can find it.
-    const item = day.parts
-      .flatMap((part) => part.items)
-      .find((candidate) => candidate.id === landing.actionItemId);
+    const item = allItems.find((candidate) => candidate.id === landing.actionItemId);
     if (!item) return;
 
     doneFired.current = true;
     list.toggleDone(item);
-  }, [landing, day, list]);
+  }, [landing, allItems, list]);
 
   useScrollToItem(landing.focusId, !list.isError);
 
@@ -103,9 +113,7 @@ export function DayList({
     onToggleTimer: (element) => {
       const id = element.getAttribute("data-item-id");
       if (id === null) return;
-      const item = day.parts
-        .flatMap((part) => part.items)
-        .find((candidate) => candidate.id === id);
+      const item = allItems.find((candidate) => candidate.id === id);
       if (item === undefined) return;
       list.toggleTimer(item);
     },
@@ -120,17 +128,21 @@ export function DayList({
    * way a notification landing is: a sheet that reopened on every back would be
    * the app asking a question the person already answered.
    */
-  const sheetParam = useSearchParams().get("sheet");
+  const search = useSearchParams();
+  const sheetParam = search.get("sheet");
+  const entryParam = search.get("entry");
   const dayKeyRoute = usePathname();
   const sheetConsumed = React.useRef(false);
 
   React.useEffect(() => {
     if (sheetConsumed.current) return;
-    if (sheetParam !== "shift" && sheetParam !== "one-off") return;
+    if (sheetParam !== "adjust" && sheetParam !== "one-off") return;
     sheetConsumed.current = true;
+    // UX v1.1 §6.6: the late-wake offer arrives as `?sheet=adjust&entry=late-offer`.
+    if (sheetParam === "adjust") setAdjustEntry(entryParam === "late-offer" ? "late-offer" : "header");
     setSheet(sheetParam);
     router.replace(dayKeyRoute, { scroll: false });
-  }, [sheetParam, router, dayKeyRoute]);
+  }, [sheetParam, entryParam, router, dayKeyRoute]);
 
   React.useEffect(() => {
     // `?sheet=item&id=…` opens the sheet; `?focus=` deliberately does not.
@@ -141,7 +153,8 @@ export function DayList({
   }, [landing]);
 
   const isEmpty =
-    day.parts.length === 0 &&
+    day.blocks.length === 0 &&
+    day.unblocked.length === 0 &&
     day.notAssigned.length === 0 &&
     day.cutByShift.length === 0;
 
@@ -158,6 +171,7 @@ export function DayList({
           dateKey={dateKey}
           day={day}
           sheet={sheet}
+          adjustEntry={adjustEntry}
           onClose={() => setSheet(null)}
           onSaved={() => void list.refresh()}
         />
@@ -186,12 +200,13 @@ export function DayList({
         />
       ) : null}
 
-      {day.parts.map((part) => (
-        <DaySection
-          key={part.part}
-          part={part.part}
-          span={part.span}
-          items={part.items}
+      {/* UX v1.1 §6.1 (R20): sectioned by block, in block order. */}
+      {day.blocks.map((block) => (
+        <BlockSection
+          key={block.id}
+          block={block}
+          focusLabel={day.focusLabel}
+          devicesOffAt={day.devicesOffAt}
           mode={day.mode}
           timeZone={day.timezone}
           hasUndo={list.hasUndo}
@@ -200,6 +215,16 @@ export function DayList({
           onOpen={(item) => setOpenItemId(item.id)}
         />
       ))}
+
+      <UnblockedSection
+        items={day.unblocked}
+        mode={day.mode}
+        timeZone={day.timezone}
+        hasUndo={list.hasUndo}
+        onToggleDone={list.toggleDone}
+        onUndo={list.undoRow}
+        onOpen={(item) => setOpenItemId(item.id)}
+      />
 
       {day.notAssigned.length === 0 ? null : (
         <ExpanderSection
@@ -274,6 +299,7 @@ export function DayList({
         dateKey={dateKey}
         day={day}
         sheet={sheet}
+        adjustEntry={adjustEntry}
         onClose={() => setSheet(null)}
         onSaved={() => void list.refresh()}
       />
@@ -380,12 +406,14 @@ function Sheets({
   dateKey,
   day,
   sheet,
+  adjustEntry,
   onClose,
   onSaved,
 }: {
   dateKey: string;
   day: DayView | null;
-  sheet: "day-plan" | "one-off" | "shift" | null;
+  sheet: "day-plan" | "one-off" | "adjust" | null;
+  adjustEntry: AdjustEntry;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -415,18 +443,20 @@ function Sheets({
       ) : null}
 
       {/*
-       * SF-01, opened by the late offer's `?sheet=shift` as well as by DH-01.
-       * The status line is chrome above the page and has no day to hand the
-       * sheet, so it navigates and the page — which does — opens it.
+       * Adjust (UX v1.1 §6.6, DYN-17), opened by the late-wake offer's
+       * `?sheet=adjust&entry=late-offer`. The status line is chrome above the
+       * page and has no day to hand the sheet, so it navigates and the page —
+       * which does — opens it.
        */}
-      {sheet === "shift" && day !== null ? (
-        <ShiftSheet
+      {sheet === "adjust" && day !== null ? (
+        <AdjustSheet
           open
-          day={day}
+          date={dateKey}
+          entry={adjustEntry}
           onOpenChange={(next) => {
             if (!next) onClose();
           }}
-          onShifted={onSaved}
+          onApplied={onSaved}
         />
       ) : null}
     </>

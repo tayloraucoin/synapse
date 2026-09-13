@@ -7,10 +7,12 @@ import {
   CategoryChip,
   ConfirmDialog,
   HelperText,
+  InlineQuestionRow,
   ItemIcon,
   NumberUnitInput,
   PreflightNote,
   ResponsiveSheet,
+  SegmentedControl,
   SessionRow,
   SkeletonRow,
   StateWord,
@@ -25,6 +27,8 @@ import { UNDO_SHORT_MS } from "@syn/constants";
 import type { CategoryKey, IconValue, TimerStatus } from "@syn/types";
 import { formatCalendarDay, formatClock } from "@syn/utils";
 
+import { AdjustSheet } from "@/components/adjust-sheet";
+import { HabitDaySheet } from "@/components/habit-day-sheet";
 import { OneOffSheet } from "@/components/one-off-sheet";
 import { SheetHost } from "@/components/page-frame";
 import { trpc } from "@/lib/trpc/client";
@@ -79,6 +83,8 @@ export function ItemSheet({
     session: ItemDetail["sessions"][number] | null;
   } | null>(null);
   const [editOneOff, setEditOneOff] = React.useState(false);
+  const [habitDayOpen, setHabitDayOpen] = React.useState(false);
+  const [adjustOpen, setAdjustOpen] = React.useState(false);
   const [removeOpen, setRemoveOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -113,6 +119,21 @@ export function ItemSheet({
   const recordMode = item?.mode === "record";
   const done = item?.doneAt != null;
 
+  /*
+   * UX v1.1 §6.3 (1): *Do now* — "present whenever the item is upcoming or
+   * passed and not done", on a live day, never on a fixture (fixed things
+   * don't move). §6.3 (2): *Edit today's* edits the day, never the library —
+   * absent on a fixture and in record mode.
+   */
+  const canDoNow =
+    item !== null &&
+    item.mode === "live" &&
+    !done &&
+    item.origin !== "fixture" &&
+    item.runningSince === null &&
+    ["upcoming", "soon", "now", "open", "closing", "passed"].includes(item.state);
+  const canEditToday = item !== null && !recordMode && item.origin !== "fixture";
+
   return (
     <SheetHost open={open}>
       <ResponsiveSheet
@@ -126,16 +147,56 @@ export function ItemSheet({
         initialFocus="title"
         header={
           item === null ? undefined : (
-            <IdentityRow
-              item={item}
-              onEditOneOff={() => setEditOneOff(true)}
-            />
+            <div className="flex flex-col gap-(--space-3)">
+              <IdentityRow
+                item={item}
+                onEditOneOff={() => setEditOneOff(true)}
+                onEditToday={canEditToday ? () => setHabitDayOpen(true) : undefined}
+              />
+              {/*
+               * §6.3 (3) — *One of*: the choice can be changed after the
+               * pick; choosing the other re-flows prep.
+               */}
+              {item.alternates === null || recordMode || done ? null : (
+                <SegmentedControl
+                  label={COPY.oneOf}
+                  value="this"
+                  onChange={(next) => {
+                    if (next === "other") void sheet.onChooseAlternate();
+                  }}
+                  options={[
+                    { value: "this" as const, label: item.title },
+                    { value: "other" as const, label: item.alternates.otherTitle },
+                  ]}
+                  disabled={sheet.choosing}
+                />
+              )}
+            </div>
           )
         }
         footer={
-          item === null ? null : (
+          item === null ? null : sheet.overflow !== null ? (
+            // The slide would push something into a pin or past the anchor:
+            // one line, two answers (§6.3). Nothing has been written.
+            <InlineQuestionRow
+              text={COPY.overflowLine(sheet.overflow.title)}
+              primary={{ label: COPY.doNowAnyway, onClick: () => void sheet.onDoNow(true) }}
+              secondary={{
+                label: COPY.adjustInstead,
+                onClick: () => {
+                  sheet.clearOverflow();
+                  setAdjustOpen(true);
+                },
+              }}
+            />
+          ) : (
             <div className="flex items-center justify-between gap-(--space-2)">
               <div className="flex items-center gap-(--space-2)">
+                {canDoNow ? (
+                  <Button variant="secondary" busy={sheet.doingNow} onClick={() => void sheet.onDoNow()}>
+                    {COPY.doNow}
+                  </Button>
+                ) : null}
                 {/*
                  * *Remove* is a one-off's alone (cross-cutting §9.3 G1). A
                  * template-derived item is not deleted from a day — the
@@ -282,6 +343,27 @@ export function ItemSheet({
         onSaved={() => undefined}
       />
 
+      {/* §6.4 — *Edit today's*: the day, never the habit. Stacked over this sheet. */}
+      {item === null ? null : (
+        <HabitDaySheet
+          open={habitDayOpen}
+          item={item}
+          onOpenChange={setHabitDayOpen}
+          onSaved={() => void sheet.refresh()}
+        />
+      )}
+
+      {/* §6.3 — *Adjust instead* from a *Do now* overflow. */}
+      {item === null ? null : (
+        <AdjustSheet
+          open={adjustOpen}
+          date={item.dayKey}
+          entry={item.origin === "one_off" ? "one-off" : "header"}
+          onOpenChange={setAdjustOpen}
+          onApplied={() => void sheet.refresh()}
+        />
+      )}
+
       {/* G1's *Edit* — WK-03 in edit mode, stacked over this sheet. */}
       {item === null ? null : (
         <OneOffSheet
@@ -405,9 +487,12 @@ function outcomeOf(item: ItemDetail): string {
 function IdentityRow({
   item,
   onEditOneOff,
+  onEditToday,
 }: {
   item: ItemDetail;
   onEditOneOff: () => void;
+  /** UX v1.1 §6.3 (2) — ghost text in the header; the day, never the habit. */
+  onEditToday?: () => void;
 }) {
   const isOneOff = item.origin === "one_off";
 
@@ -429,15 +514,18 @@ function IdentityRow({
         </Text>
         {item.habitArchived ? <StateWord kind="archived" /> : null}
 
-        {isOneOff ? (
-          <Button
-            variant="ghost"
-            className="ml-auto"
-            onClick={onEditOneOff}
-          >
-            {COPY.editOneOff}
-          </Button>
-        ) : null}
+        <span className="ml-auto flex items-center gap-(--space-1)">
+          {onEditToday === undefined ? null : (
+            <Button variant="ghost" size="sm" onClick={onEditToday}>
+              {COPY.editTodays}
+            </Button>
+          )}
+          {isOneOff ? (
+            <Button variant="ghost" size="sm" onClick={onEditOneOff}>
+              {COPY.editOneOff}
+            </Button>
+          ) : null}
+        </span>
       </div>
 
       {isOneOff ? null : (

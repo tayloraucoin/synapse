@@ -16,6 +16,16 @@ export const DAY_LIST_COPY = {
   shifted: (minutes: number) => `Shifted +${minutes} min`,
   notUntil: (weekday: string) => `Not until ${weekday}`,
 
+  /* ------------------------------------ UX v1.1 §6.1 — by block (DYN-15) -- */
+  /** "Viewpoint · Work 9:00" / "Work ~9:00" — the header's second line. */
+  workAt: (clock: string, soft: boolean) => `Work ${soft ? "~" : ""}${clock}`,
+  unstructured: "Unstructured",
+  work: "Work",
+  /** A pooled block before the pick — the week build's promise (§4.13). */
+  setInTheMorning: "Set in the morning",
+  /** [COPY — needs Vesper sign-off: items with no block, under the blocks.] */
+  alsoToday: "Also today",
+
   dayComplete: "Day Complete",
   dayClosedAt: (clock: string) => `Day closed at ${clock}`,
   review: "Review",

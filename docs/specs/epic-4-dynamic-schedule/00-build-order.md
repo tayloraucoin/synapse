@@ -41,9 +41,9 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 - [x] **DYN-14** · The quick-pick and *Set the day*: the unconfirmed Today tab, collapsed sections, the budget line, over budget, *Unstructured today*, the *Last night* section — L · (DYN-13, DYN-6)
 
 ### Phase 5 — The day (executing state)
-- [ ] **DYN-15** · Today by block: `BlockHeader` sections, the container work row, the day header with focus and anchor, the day header sheet's rows, the item sheet's *Do now* / *Edit today's* / *one of*, the habit-day sheet — L · (DYN-14)
+- [x] **DYN-15** · Today by block: `BlockHeader` sections, the container work row, the day header with focus and anchor, the day header sheet's rows, the item sheet's *Do now* / *Edit today's* / *one of*, the habit-day sheet — L · (DYN-14)
 - [ ] **DYN-16** · The Schedule, editable: bands, the drag layer wired, the pin confirm, band drag → Adjust, the explicit move mode, keyboard — L · (DYN-15, DYN-6) · does not gate · **Vesper review**
-- [ ] **DYN-17** · Adjust: the four-step sheet, its three entries and the late offer; the shift and trim sheets re-pointed — L · (DYN-15, DYN-6) · **Vigil: the doesn't-fit-even-cut path and the 10 s undo**
+- [x] **DYN-17** · Adjust: the four-step sheet, its three entries and the late offer; the shift and trim sheets re-pointed — L · (DYN-15, DYN-6) · **Vigil: the doesn't-fit-even-cut path and the 10 s undo**
 
 ### Phase 6 — The evening and the review
 - [ ] **DYN-18** · The evening: the wind-down section's confirm-in-the-morning rows and the devices-off marker, the journal screen, the confirm-yesterday panel in the Day Review, Settings → Closing the day — L · (DYN-15, DYN-14)

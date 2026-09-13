@@ -23,6 +23,14 @@ export const ITEM_COPY = {
     `time logged: ${minutes} min in ${sessions} ${sessions === 1 ? "session" : "sessions"}`,
 
   notTodayAction: "Not today",
+  /* -------------------------------------- UX v1.1 §6.3 (DYN-15) -- */
+  doNow: "Do now",
+  /** "Stretch no longer fits before work" — the one line on overflow. */
+  overflowLine: (title: string) => `${title} no longer fits`,
+  doNowAnyway: "Do now anyway",
+  adjustInstead: "Adjust instead",
+  editTodays: "Edit today's",
+  oneOf: "One of",
   backInTheList: "Back in the list",
   done: "Done",
   undoDone: "Undo done",

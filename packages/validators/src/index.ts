@@ -261,6 +261,7 @@ export {
 } from "./confirm";
 
 export {
+  addFromLibraryInput,
   adjustApplyInput,
   adjustEntrySchema,
   adjustHowSchema,

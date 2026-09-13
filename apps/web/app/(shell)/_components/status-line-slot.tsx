@@ -118,7 +118,7 @@ export function StatusLineSlot({
     return (
       <StatusLine
         variant="late-offer"
-        action={{ label: "Shift the day", onClick: onShiftDay }}
+        action={{ label: "Adjust the morning", onClick: onShiftDay }}
         onDismiss={dismissLate}
       />
     );

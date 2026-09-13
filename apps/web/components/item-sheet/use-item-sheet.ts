@@ -56,6 +56,8 @@ export function useItemSheet(itemId: string | null, dayKey: string) {
   const setQuantity = trpc.item.setQuantity.useMutation();
   const setNote = trpc.item.setNote.useMutation();
   const rate = trpc.item.rate.useMutation();
+  const doNow = trpc.item.doNow.useMutation();
+  const chooseAlternate = trpc.item.chooseAlternate.useMutation();
 
   /**
    * Keep the store in step with the server's answer for THIS item.
@@ -262,10 +264,57 @@ export function useItemSheet(itemId: string | null, dayKey: string) {
     item.state === "active" &&
     item.loggedSec > 0;
 
+  /*
+   * UX v1.1 §6.3 (DYN-15). *Do now*: to now, started, the rest slid by the
+   * minimum; when the slide would push something into a pin or past the
+   * anchor nothing is written and `overflow` names it — the sheet offers
+   * *Do now anyway* or *Adjust instead*. The one-of switch rewrites the row
+   * to the other member and re-flows prep.
+   */
+  const [overflow, setOverflow] = React.useState<{ title: string } | null>(null);
+
+  const onDoNow = React.useCallback(
+    async (anyway = false): Promise<void> => {
+      if (item === null) return;
+      setError(null);
+      try {
+        const result = await doNow.mutateAsync({ itemId: item.id, anyway });
+        if (!result.applied && result.overflow !== null) {
+          setOverflow({ title: result.overflow.title });
+          return;
+        }
+        setOverflow(null);
+        if (result.startedAt !== null) startLocal(item.id, result.startedAt, item.loggedSec);
+        await refresh();
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : COPY.saveError);
+      }
+    },
+    [item, doNow, startLocal, refresh],
+  );
+
+  const onChooseAlternate = React.useCallback(async (): Promise<void> => {
+    if (item === null) return;
+    setError(null);
+    try {
+      await chooseAlternate.mutateAsync({ id: item.id });
+      await refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : COPY.saveError);
+    }
+  }, [item, chooseAlternate, refresh]);
+
   return {
     item,
     elapsedSec,
     error,
+    overflow,
+    clearOverflow: () => setOverflow(null),
+    onDoNow,
+    doingNow: doNow.isPending,
+    onChooseAlternate,
+    choosing: chooseAlternate.isPending,
+    refresh,
     /** The store's answer, not the query's — it ticks. */
     running: elapsedSec !== null,
     paused,

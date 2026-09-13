@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 import { addDays } from "@syn/utils";
 import {
+  addFromLibraryInput,
   applyTrimInput,
   confirmDayInput,
   getDayInput,
@@ -13,6 +14,7 @@ import {
   setWakeTimeInput,
 } from "@syn/validators";
 
+import { AddFromLibraryError, addFromLibrary } from "../services/day/add-from-library";
 import { applyTrim, previewTrim } from "../services/day/apply-trim";
 import { backfillBlocks } from "../services/day/backfill-blocks";
 import { ConfirmRuleError, confirmDay } from "../services/day/confirm-day";
@@ -93,6 +95,30 @@ export const dayRouter = router({
   saveMorning: protectedProcedure
     .input(saveMorningInput)
     .mutation(async ({ ctx, input }) => saveMorning(ctx.rls, ctx.authContext.userId, input)),
+
+  /* ------------------------------------------------- UX v1.1 (DYN-15) -- */
+
+  /** *Add from the library* — a habit-day item into the block the person picked (§6.2). */
+  addFromLibrary: protectedProcedure
+    .input(addFromLibraryInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await addFromLibrary(ctx.rls, ctx.authContext.userId, input);
+      } catch (error) {
+        if (error instanceof AddFromLibraryError) {
+          switch (error.code) {
+            case "no_such_habit":
+              throw new TRPCError({ code: "NOT_FOUND", message: "No such habit.", cause: error });
+            case "no_such_block":
+              // [COPY — needs Vesper sign-off.]
+              throw new TRPCError({ code: "NOT_FOUND", message: "That block isn't on this day.", cause: error });
+            case "closed":
+              throw new TRPCError({ code: "CONFLICT", message: "That day is closed.", cause: error });
+          }
+        }
+        throw error;
+      }
+    }),
 
   get: protectedProcedure
     .input(getDayInput)

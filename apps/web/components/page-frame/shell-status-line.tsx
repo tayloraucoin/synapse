@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import { pendingReviewText } from "@syn/ui";
-import { isLateOffer } from "@syn/utils";
 
 import { StatusLineSlot } from "@/app/(shell)/_components/status-line-slot";
 import { PlatformStepsSheet } from "@/components/platform-steps-sheet";
@@ -24,7 +23,6 @@ import {
 } from "@/lib/pwa/update-ready";
 import { trpc } from "@/lib/trpc/client";
 import { dayRoute, reviewDayRoute, setupRoute, todayRoute } from "@/lib/routes";
-import { useNow } from "@/lib/hooks/use-now";
 
 /**
  * The shell's status line, with its sources attached.
@@ -64,9 +62,6 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
   const [installStepsOpen, setInstallStepsOpen] = React.useState(false);
   const installable = useInstallable();
   const deferredPrompt = useDeferredInstallPrompt();
-  // USE-6's offer becomes true on a clock, not on a mutation, so it is
-  // re-derived on the minute tick from a field the query already returns.
-  const now = useNow();
   const updateReady = React.useSyncExternalStore(
     subscribeUpdateReady,
     readUpdateReady,
@@ -115,21 +110,15 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
    * never returns, which is why there is no condition for it here.
    */
   /*
-   * *Running late?* — recomputed here rather than trusted from the query, so a
-   * line that becomes true at 10:29 appears at 10:29 rather than at the next
-   * refetch. `shell.status.lateOffer` is the same answer at fetch time; the two
-   * call one function (`isLateOffer`) so they cannot disagree.
+   * UX v1.1 §6.6 (DYN-17): the late-wake offer replaces USE-6's *Running
+   * late?*. Its four conditions are the server's (`shell.status.lateWakeOffer`
+   * — the orient frame opened more than `LATE_WAKE_OFFER_MIN` after the wake
+   * target, the day set the night before with a hard anchor); nothing here
+   * infers lateness from taps, and nothing re-derives it on the minute. Today
+   * only; the dismissal is scoped to the day by the slot.
    */
   const lateOffer =
-    dayKey === undefined || dayKey === data.todayKey
-      ? isLateOffer({
-          isToday: true,
-          closedAt: null,
-          hasShiftToday: data.hasShiftToday,
-          firstFixedStartToday: data.firstFixedStartToday,
-          now,
-        })
-      : false;
+    (dayKey === undefined || dayKey === data.todayKey) && data.lateWakeOffer;
 
   const installOffer = isInstallOfferEligible({
     installable,
@@ -186,8 +175,8 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
       }
       lateOffer={lateOffer}
       onShiftDay={() => {
-        // SF-01 needs the day; the page has it, so the offer navigates.
-        router.push(`${dayKey === undefined ? todayRoute() : dayRoute(dayKey)}?sheet=shift`);
+        // Adjust needs the day; the page has it, so the offer navigates.
+        router.push(`${dayKey === undefined ? todayRoute() : dayRoute(dayKey)}?sheet=adjust&entry=late-offer`);
       }}
       updateReady={updateReady}
       onReload={reloadForUpdate}

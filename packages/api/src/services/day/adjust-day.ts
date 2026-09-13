@@ -95,6 +95,8 @@ export type AdjustPreview = {
   shortened: string[];
   cut: string[];
   notAssigned: string[];
+  /** `cut` and `notAssigned`, with their titles. */
+  gone: Array<{ id: string; title: string }>;
   keptHard: string[];
   slideMin: number;
   newAnchorClock: string;
@@ -458,6 +460,12 @@ function toPreview(computed: Computed): AdjustPreview {
     shortened: result.shortened,
     cut: result.cut,
     notAssigned: result.notAssigned,
+    // Everything the proposal leaves off the day, named — the sheet's
+    // *Not assigned today* list and its *Keep instead* rows (DYN-17).
+    gone: [...result.cut, ...result.notAssigned].map((id) => ({
+      id,
+      title: titleOf.get(id) ?? "",
+    })),
     keptHard: result.keptHard,
     slideMin: result.slideMin,
     newAnchorClock: clock(result.newAnchorMin),

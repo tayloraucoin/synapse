@@ -18,9 +18,9 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | DYN-12 | The week build amended | DYN-5, DYN-7 | Complete (authored from the handoff and built in one thread; the row line, the per-block day sheet, `week.tradeWorkouts`, `week.defaultPlan`, *Plan from your defaults*; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-13 | The orient frame and the wake moment | DYN-5, DYN-7 | Complete (authored from the handoff and built in one thread; `/orient` with the chrome hidden, the entry tree's new branch, `day.orient`/`saveMorning`, `shouldShowSkipLine` (probed: the four rules hold), the wake-anchor switch retired; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-14 | The quick-pick and *Set the day* | DYN-13, DYN-6 | Complete (authored from the handoff and built in one thread; `components/quick-pick/` with six collapsed sections, the live budget line, the R7 dialog, `ConfirmYesterdayPanel`; `/today` branches on `confirmedAt`; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
-| DYN-15 | Today by block, the day header, the item sheet, the habit-day sheet | DYN-14 | Not started (handoff) | — |
+| DYN-15 | Today by block, the day header, the item sheet, the habit-day sheet | DYN-14 | Complete (authored from the handoff and built in one thread; the list by block with the container work row and the marker, the header's focus and anchor, the five-row day header sheet with *Add from the library*, the item sheet's *Do now* / *Edit today's* / one-of, `components/habit-day-sheet/`; `item.chooseAlternate`, `day.addFromLibrary`, `DayView.unblocked`; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-16 | The Schedule, editable | DYN-15, DYN-6 | Not started (handoff) · does not gate | — |
-| DYN-17 | Adjust | DYN-15, DYN-6 | Not started (handoff) | — |
+| DYN-17 | Adjust | DYN-15, DYN-6 | Complete (authored from the handoff and built in one thread; `components/adjust-sheet/` over `adjust.preview/commit/undo`, three entries, the late-wake offer from `shell.status.lateWakeOffer`; the shift and trim rows gone from the day header sheet; the four commands and the Storybook build pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-18 | The evening | DYN-15, DYN-14 | Not started (handoff) | — |
 | DYN-19 | Review amended | DYN-18 | Not started (handoff) | — |
 | DYN-20 | Notifications revised | DYN-14, DYN-18 | Not started (handoff) | — |
@@ -42,9 +42,9 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] DYN-12
 - [x] DYN-13
 - [x] DYN-14
-- [ ] DYN-15
+- [x] DYN-15
 - [ ] DYN-16 (does not gate)
-- [ ] DYN-17
+- [x] DYN-17
 - [ ] DYN-18
 - [ ] DYN-19
 - [ ] DYN-20

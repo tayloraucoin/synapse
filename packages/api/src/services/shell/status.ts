@@ -8,8 +8,11 @@ import {
   users,
   type RlsClient,
 } from "@syn/db";
+import { LATE_WAKE_OFFER_MIN } from "@syn/constants";
 import {
+  clockMinutes,
   daysBefore,
+  instantToWallClockMinutes,
   isLateOffer,
   resolveDayKey,
   weekdayForDayKey,
@@ -62,7 +65,28 @@ export type ShellStatus = {
   firstFixedStartToday: Date | null;
   hasShiftToday: boolean;
   lateOffer: boolean;
+  /** UX v1.1 §6.6 — *Up later than planned · Adjust the morning* (DYN-17). */
+  lateWakeOffer: boolean;
 };
+
+/** The four conditions of the late-wake offer, in one place. */
+export function isLateWakeOffer(input: {
+  wokeAt: Date | null;
+  wokeAtSource: string | null;
+  confirmedAt: Date | null;
+  closedAt: Date | null;
+  anchorIsHard: boolean;
+  hasShiftToday: boolean;
+  usualWakeTime: string;
+  timeZone: string;
+}): boolean {
+  if (input.wokeAt === null || input.wokeAtSource !== "orient") return false;
+  if (input.confirmedAt === null || input.confirmedAt >= input.wokeAt) return false;
+  if (input.closedAt !== null || input.hasShiftToday || !input.anchorIsHard) return false;
+  const wokeMin = instantToWallClockMinutes(input.wokeAt, input.timeZone);
+  const targetMin = clockMinutes(input.usualWakeTime.slice(0, 5));
+  return wokeMin - targetMin > LATE_WAKE_OFFER_MIN;
+}
 
 /** How many pending days the line could ever need. */
 const PENDING_DAY_LIMIT = 7;
@@ -81,6 +105,8 @@ export async function readShellStatus(
         dayCloseTime: users.dayCloseTime,
         firstRunStep: users.firstRunStep,
         firstRunCompletedAt: users.firstRunCompletedAt,
+        usualWakeTime: users.usualWakeTime,
+        anchorDirection: users.anchorDirection,
       })
       .from(users)
       .where(eq(users.id, userId))
@@ -138,7 +164,15 @@ export async function readShellStatus(
       .where(and(eq(days.userId, userId), isNotNull(days.reviewedAt)));
 
     const [today] = await tx
-      .select({ id: days.id, closedAt: days.closedAt })
+      .select({
+        id: days.id,
+        closedAt: days.closedAt,
+        wokeAt: days.wokeAt,
+        wokeAtSource: days.wokeAtSource,
+        confirmedAt: days.confirmedAt,
+        anchorIsHard: days.anchorIsHard,
+        timezone: days.timezone,
+      })
       .from(days)
       .where(and(eq(days.userId, userId), eq(days.date, todayKey)))
       .limit(1);
@@ -146,6 +180,7 @@ export async function readShellStatus(
     let firstFixedStartToday: Date | null = null;
     let hasShiftToday = false;
     let todayClosedAt: Date | null = null;
+    let lateWakeOffer = false;
 
     if (today) {
       const [firstFixed] = await tx
@@ -175,6 +210,26 @@ export async function readShellStatus(
 
       hasShiftToday = shift !== undefined;
       todayClosedAt = today.closedAt;
+
+      /*
+       * UX v1.1 §6.6 — the late-wake offer (DYN-17): "when the orient frame
+       * is opened more than 30 minutes after the wake target AND the day was
+       * set the night before with a hard anchor". Set the night before means
+       * confirmed before the wake was stamped; a hard anchor is the day's own
+       * answer, else the profile's direction. Never on an unset day, never
+       * after an Adjust (the shift row says one happened), never on a closed
+       * day. The client scopes the dismissal to the day.
+       */
+      lateWakeOffer = isLateWakeOffer({
+        wokeAt: today.wokeAt,
+        wokeAtSource: today.wokeAtSource,
+        confirmedAt: today.confirmedAt,
+        closedAt: today.closedAt,
+        anchorIsHard: today.anchorIsHard ?? account.anchorDirection !== "work_waits",
+        hasShiftToday,
+        usualWakeTime: account.usualWakeTime,
+        timeZone: today.timezone,
+      });
     }
 
     return {
@@ -192,6 +247,7 @@ export async function readShellStatus(
       reviewedDayCount: Number(reviewed?.value ?? 0),
       firstFixedStartToday,
       hasShiftToday,
+      lateWakeOffer,
       lateOffer: isLateOffer({
         isToday: true,
         closedAt: todayClosedAt,
