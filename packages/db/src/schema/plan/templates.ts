@@ -1,10 +1,26 @@
 /**
- * templates — a named day plan (official spec §3.4, the former Variant).
+ * templates — a saved BLOCK (UX v1.1 §3.1, §11.4, TD-1; formerly official
+ * spec §3.4's whole-day plan).
  *
- * Built in planning mode and applied to days during the week build. A template
- * holds slots at OFFSETS from its anchor, never at absolute times, which is
- * what lets the same template be applied at 06:00 or 08:00 without editing a
- * slot — and what makes shift-forward cheap.
+ * UNDER v1.1 A TEMPLATE IS A BLOCK, NOT A DAY. It carries a `kind` (morning,
+ * prep, wind-down, …), a `flow` (forward from wake, or backward to an anchor),
+ * and a `structure` (a plain stack, or opener · pool · closer). A day's
+ * template list is `day_blocks` (0005); a routine variant with a weekly count
+ * is exactly what this row already was, which is why the table was widened
+ * rather than replaced (TD-1).
+ *
+ * Slots STACK: each holds a duration and a gap (`template_slots`), and the
+ * offsets are derived by `stackBlock` in the block's flow direction from an
+ * anchor the PROFILE supplies at materialisation — wake for a morning block,
+ * work start for prep, lights-out for wind-down. `anchor_time` is therefore
+ * NULLABLE since 0004 and means "an explicit override", which only a work
+ * template with its own hours needs (v1.1 R5). Rows written under v1.0 keep
+ * the value they had; DYN-5's materialiser ignores it for every kind but
+ * `work`, and `0006` nulls it for the rest.
+ *
+ * `kind` WAS BACKFILLED TO `morning` for every row that existed before 0004.
+ * Every v1.0 template was a whole day anchored at wake; as a morning block it
+ * lays out identically, and the block editor lets a person re-kind it.
  *
  * `weekly_target` IS NULL FOR *none*, NEVER 0 (Epic 1 TP-02). The form's
  * stepper shows 0 as *none*; the column stores the absence.
@@ -26,8 +42,10 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import { blockKindEnum } from "../enums";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
+import { blockFlowEnum, blockStructureEnum } from "./enums";
 import { templateSlots } from "./template-slots";
 
 export const templates = pgTable(
@@ -41,11 +59,21 @@ export const templates = pgTable(
       .notNull()
       .defaultNow(),
 
-    /** The time this template's 00:00 offset maps to when applied (§3.4). */
-    anchorTime: time("anchor_time").notNull().default("07:00"),
+    /**
+     * An explicit anchor override — meaningful for a work template with its
+     * own hours (v1.1 R5). Every other kind anchors from the profile at
+     * materialisation (v1.1 §3.1). Nullable since 0004; see the header.
+     */
+    anchorTime: time("anchor_time"),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
+    /** Forward from the anchor, or backward to it (v1.1 §3.3). */
+    flow: blockFlowEnum("flow").notNull().default("forward"),
+    /** Which block this template is (v1.1 §3.1). Backfilled to `morning` in 0004. */
+    kind: blockKindEnum("kind").notNull(),
     /** 1–40 — Epic 1 §9. */
     name: text("name").notNull(),
+    /** A plain stack, or opener · pool · closer (v1.1 §3.4). */
+    structure: blockStructureEnum("structure").notNull().default("stack"),
     /**
      * A hint shown during the week build, nothing more (§3.4). Mon = 0 … Sun =
      * 6, matching `TemplateSummaryView.typicalDays`.
@@ -64,6 +92,7 @@ export const templates = pgTable(
       table.archivedAt,
     ),
     index("templates_user_id_idx").on(table.userId),
+    index("templates_user_id_kind_idx").on(table.userId, table.kind),
     check(
       "templates_weekly_target_check",
       sql`${table.weeklyTarget} IS NULL OR ${table.weeklyTarget} BETWEEN 1 AND 7`,

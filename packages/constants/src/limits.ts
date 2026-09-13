@@ -79,3 +79,56 @@ export const FEEDBACK_MAX = 1000;
 
 /** Free-entry miss reason behind *Other* — Epic 3 DR-03. */
 export const OTHER_REASON_MAX = 80;
+
+/*
+ * ---- UX v1.1 (§11, §3.11, §5.2, §6.5, §6.6, §7.2) ----
+ */
+
+/** A gap before a slot, in minutes — `template_slots.gap_before_min`, 0–240 (§11.5). */
+export const GAP_MAX = 240;
+
+/** The passage read before the day — `users.orient_passage` (§11.2). */
+export const ORIENT_PASSAGE_MAX = 2000;
+
+/** *Today's intention* — `days.intention` (§11.7). */
+export const INTENTION_MAX = 140;
+
+/** *Grateful for, this morning* — `days.morning_gratitude` (§11.7). */
+export const MORNING_GRATITUDE_MAX = 280;
+
+/** One journal answer — `journal_entries.answers[key]` (§7.2, TD-7). */
+export const JOURNAL_ANSWER_MAX = 2000;
+
+/** One journal prompt's label (§4.10). */
+export const JOURNAL_PROMPT_MAX = 60;
+
+/** How many prompts a person may keep (§4.10). */
+export const JOURNAL_PROMPTS_MAX = 10;
+
+/** A fixture's title — `fixtures.title` (§11.6). */
+export const FIXTURE_TITLE_MAX = 60;
+
+/** A work focus's title — a `deep_work` habit (§3.8). */
+export const FOCUS_TITLE_MAX = 40;
+
+/** A workout's title — a `workout` habit (§3.7). */
+export const WORKOUT_TITLE_MAX = 40;
+
+/**
+ * The one behaviour line (§5.2, R18) appears at most once in this many days,
+ * and only on the second consecutive skipped gratitude.
+ */
+export const SKIP_LINE_WINDOW_DAYS = 7;
+
+/**
+ * The quiet Adjust offer (§6.6) appears when the orient frame opened at least
+ * this many minutes after the wake target, on a day set the night before with
+ * a hard anchor. Never on an unset day.
+ */
+export const LATE_WAKE_OFFER_MIN = 30;
+
+/** Drags on the Schedule and in the block editor snap to this (§6.5, §3.11). */
+export const DRAG_SNAP_MIN = 5;
+
+/** A long-press lifts a block (§3.11, §6.5). */
+export const LONG_PRESS_MS = 300;

@@ -14,6 +14,7 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
 import type {
+  BlockKind,
   CategoryKey,
   ItemType,
   MissTier,
@@ -23,10 +24,36 @@ import type {
 
 import { enumValues } from "./enum-values";
 
-/** Habit.type / DayItem.type — official spec §3.3. `habits`, `day_items`. */
+/**
+ * Habit.type / DayItem.type — official spec §3.3. `habits`, `day_items`.
+ *
+ * `workout` is UX v1.1 §11.3 (TD-3). The TypeScript side moved in DYN-1 to
+ * keep the workspace building; the `ALTER TYPE … ADD VALUE` ships in
+ * migration `0004` (DYN-2). Nothing writes the value before then.
+ */
 export const itemTypeEnum = pgEnum(
   "item_type",
-  enumValues<ItemType>()(["habit", "task_appointment", "deep_work"]),
+  enumValues<ItemType>()(["habit", "task_appointment", "deep_work", "workout"]),
+);
+
+/**
+ * Block.kind — UX v1.1 §3.1, the eight kinds. `templates` and `habits` (0004),
+ * then `fixtures`, `day_blocks`, `notification_prefs` (0005) — three
+ * directories, so it lives here. The order is the default a day reads in;
+ * `DEFAULT_BLOCK_ORDER` in `@syn/constants` is the person-editable subset.
+ */
+export const blockKindEnum = pgEnum(
+  "block_kind",
+  enumValues<BlockKind>()([
+    "orient",
+    "morning",
+    "training",
+    "prep",
+    "work",
+    "break",
+    "activity",
+    "wind_down",
+  ]),
 );
 
 /** §3.5, §3.7. `template_slots`, `day_items`. */

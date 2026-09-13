@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 
 import { habits, users, type RlsClient } from "@syn/db";
-import type { IconValue } from "@syn/types";
+import type { IconValue, ItemType } from "@syn/types";
 
 /**
  * One habit, in the shape LB-02 edits.
@@ -14,7 +14,7 @@ import type { IconValue } from "@syn/types";
 export type EditableHabit = {
   id: string;
   title: string;
-  type: "habit" | "task_appointment" | "deep_work";
+  type: ItemType;
   icon: IconValue;
   categoryId: string | null;
   durationMinMin: number | null;

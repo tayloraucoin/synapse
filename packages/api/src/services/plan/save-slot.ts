@@ -4,6 +4,8 @@ import { habits, templateSlots, templates, type RlsClient } from "@syn/db";
 import { clockToMinutes, formatClockFromMinutes } from "@syn/utils";
 import type { SlotFormInput } from "@syn/validators";
 
+import { anchorOrFallback } from "./anchor-fallback";
+
 /**
  * Saving one slot, and THE invariant.
  *
@@ -103,7 +105,8 @@ export async function saveSlot(
             withSlotId: first.id,
             withTitle: first.title,
             atClock: formatClockFromMinutes(
-              clockToMinutes(template.anchorTime) + input.offsetStartMin,
+              clockToMinutes(anchorOrFallback(template.anchorTime)) +
+                input.offsetStartMin,
             ),
           });
         }

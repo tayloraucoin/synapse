@@ -38,10 +38,13 @@ export * from "./schema";
 import {
   categories,
   dataExports,
+  dayBlocks,
   dayItems,
   days,
   feedbackMessages,
+  fixtures,
   habits,
+  journalEntries,
   misses,
   notificationPrefs,
   reasons,
@@ -69,12 +72,18 @@ export type DataExport = typeof dataExports.$inferSelect;
 export type NewDataExport = typeof dataExports.$inferInsert;
 export type Day = typeof days.$inferSelect;
 export type NewDay = typeof days.$inferInsert;
+export type DayBlock = typeof dayBlocks.$inferSelect;
+export type NewDayBlock = typeof dayBlocks.$inferInsert;
 export type DayItem = typeof dayItems.$inferSelect;
 export type NewDayItem = typeof dayItems.$inferInsert;
 export type FeedbackMessage = typeof feedbackMessages.$inferSelect;
 export type NewFeedbackMessage = typeof feedbackMessages.$inferInsert;
+export type Fixture = typeof fixtures.$inferSelect;
+export type NewFixture = typeof fixtures.$inferInsert;
 export type Habit = typeof habits.$inferSelect;
 export type NewHabit = typeof habits.$inferInsert;
+export type JournalEntry = typeof journalEntries.$inferSelect;
+export type NewJournalEntry = typeof journalEntries.$inferInsert;
 export type Miss = typeof misses.$inferSelect;
 export type NewMiss = typeof misses.$inferInsert;
 export type NotificationPref = typeof notificationPrefs.$inferSelect;

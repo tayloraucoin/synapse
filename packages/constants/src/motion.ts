@@ -20,3 +20,9 @@ export const UNDO_LONG_MS = 10000;
 
 /** A shift, which is a logged event once the window closes (§5.6). */
 export const SHIFT_UNDO_WINDOW_MS = 600000;
+
+/**
+ * An Adjust (UX v1.1 §6.6) has the same window as the shift it generalises —
+ * an alias, not a second value, so the two can never drift apart.
+ */
+export const ADJUST_UNDO_WINDOW_MS = SHIFT_UNDO_WINDOW_MS;

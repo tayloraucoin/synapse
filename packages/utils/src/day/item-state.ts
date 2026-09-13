@@ -1,4 +1,10 @@
-import type { DayMode, ItemState } from "@syn/types";
+import type {
+  AssignmentState,
+  CompletionState,
+  DayMode,
+  ItemState,
+  TimeMode,
+} from "@syn/types";
 
 /**
  * THE state function. One implementation, called by the API for first paint
@@ -25,15 +31,9 @@ export function closingThresholdMin(windowMin: number): number {
 }
 
 export type ItemStateInput = {
-  assignmentState: "assigned" | "not_assigned" | "cut_by_shift";
-  completionState:
-    | "upcoming"
-    | "active"
-    | "done"
-    | "missed"
-    | "carried"
-    | "pending_review";
-  timeMode: "fixed_time" | "window" | "unscheduled";
+  assignmentState: AssignmentState;
+  completionState: CompletionState;
+  timeMode: TimeMode;
   scheduledStart: Date | null;
   scheduledEnd: Date | null;
   originalScheduledStart: Date | null;
@@ -75,6 +75,10 @@ export function deriveItemState(
   if (item.completionState === "pending_review") return "pending-review";
   if (item.completionState === "carried") return "carried";
   if (item.completionState === "missed") return "missed";
+  // UX v1.1 R16 — left unticked the next morning. What happened outranks the
+  // clock, as with every state above. (`confirm-later` and `moved` need facts
+  // this input does not carry yet; DYN-5 adds them.)
+  if (item.completionState === "not_confirmed") return "not-confirmed";
 
   if (item.doneAt !== null || item.completionState === "done") {
     return isOffSchedule(item) ? "done-off-schedule" : "done";

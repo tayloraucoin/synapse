@@ -1,3 +1,5 @@
+import type { AssignmentState, CompletionState } from "@syn/types";
+
 /**
  * The resolver — official spec §7.3 and §7.4, and Epic 3 §5.
  *
@@ -54,14 +56,8 @@ export type ScoredItem = {
   priority: number;
   done: boolean;
   offSchedule: boolean;
-  assignmentState: "assigned" | "not_assigned" | "cut_by_shift";
-  completionState:
-    | "upcoming"
-    | "active"
-    | "done"
-    | "missed"
-    | "carried"
-    | "pending_review";
+  assignmentState: AssignmentState;
+  completionState: CompletionState;
   miss: ScoredMiss | null;
 };
 
@@ -114,6 +110,14 @@ export function creditFor(item: ScoredItem): {
 
   // Carried forward: excluded TODAY, scored on the day it resolves (§7.3).
   if (item.completionState === "carried") {
+    return { credit: null, verdict: "excluded" };
+  }
+
+  // A wind-down item left unconfirmed the next morning (UX v1.1 R16): the
+  // record does not know what happened after the phone went away, so the
+  // number does not guess. Excluded, never hidden — the review still lists
+  // it as a decision to make, and resolving it there re-scores it.
+  if (item.completionState === "not_confirmed") {
     return { credit: null, verdict: "excluded" };
   }
 

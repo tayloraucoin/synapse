@@ -48,9 +48,14 @@ export const ITEM: DayItemView = {
   timerElapsedSec: null,
   state: "upcoming",
   multitask: "none",
+  dayBlockId: null,
+  blockKind: null,
+  pinned: false,
+  gapBeforeMin: 0,
+  alternates: null,
 };
 
-/** One item in a named state, for the fifteen-state matrix stories. */
+/** One item in a named state, for the state-matrix stories. */
 export function itemInState(
   state: ItemState,
   overrides: Partial<DayItemView> = {},
@@ -81,6 +86,9 @@ export const HABIT: HabitSummaryView = {
   lifePriority: 5,
   isWakeAnchor: false,
   archived: false,
+  blockKind: null,
+  weeklyTarget: null,
+  typicalDays: null,
 };
 
 export const REASONS: Readonly<

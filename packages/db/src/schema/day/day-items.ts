@@ -21,12 +21,29 @@
  * A ONE-OFF IS THE ONLY DELETABLE ITEM (cross-cutting §8.4). Everything else
  * on a day is annotated.
  *
+ * UNDER UX v1.1 (0005) AN ITEM BELONGS TO A BLOCK (`day_block_id`, TD-2),
+ * may be a PIN (`pinned` — the anchor glyph; the stack flows around it, R3),
+ * carries the gap before it (snapshotted from the slot; edited by a seam drag
+ * on the day), and may be one member of a *one of* group (`alternates_id`
+ * per day like `multitask_id`; `alternates_chosen` marks the live member —
+ * the other is `not_assigned`). `day_block_id` is NULLABLE in 0005 and made
+ * NOT NULL in 0006, after DYN-5's `backfillBlocks` has put every v1.0 item
+ * under a `morning` block; SQL cannot decide which block an item belongs to,
+ * the materialiser's rules can.
+ *
+ * WHEN `original_scheduled_start` IS WRITTEN changes under v1.1 (R23, TD-5):
+ * at week build for fixtures and pins on a structured day, and at *Set the
+ * day* for everything else — null until then. The trigger permits exactly
+ * that one `NULL → value` transition and refuses every other write; its body
+ * already did, and 0005 arms the same function on `day_blocks`.
+ *
  * POLICIES: owner-private CRUD, on this table's own `user_id` — the service
  * writes the day's owner, never the caller's claim.
  */
 import { relations, sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
+  boolean,
   check,
   index,
   jsonb,
@@ -49,6 +66,7 @@ import type {
 import { enumValues } from "../enum-values";
 import { itemTypeEnum, schedulingEnum, timeModeEnum } from "../enums";
 import { habits } from "../library/habits";
+import { dayBlocks } from "../plan/day-blocks";
 import { days } from "../plan/days";
 import { templateSlots } from "../plan/template-slots";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
@@ -63,7 +81,12 @@ export const assignmentStateEnum = pgEnum(
   enumValues<AssignmentState>()(["assigned", "not_assigned", "cut_by_shift"]),
 );
 
-/** §3.7. */
+/**
+ * §3.7. `not_confirmed` is UX v1.1 R16 — a wind-down item left unticked the
+ * next morning; excluded from the number, never hidden. The TypeScript side
+ * moved in DYN-1; the `ADD VALUE` ships in migration `0004` (DYN-2). Nothing
+ * writes it before DYN-5.
+ */
 export const completionStateEnum = pgEnum(
   "completion_state",
   enumValues<CompletionState>()([
@@ -73,6 +96,7 @@ export const completionStateEnum = pgEnum(
     "missed",
     "carried",
     "pending_review",
+    "not_confirmed",
   ]),
 );
 
@@ -88,6 +112,9 @@ export const itemOriginEnum = pgEnum(
     "one_off",
     "carried",
     "calendar_import",
+    // UX v1.1 §3.6 (TD-8) — a weekday fixture, materialised as a pin. Moved
+    // in DYN-1; the `ADD VALUE` ships in `0004`; written from DYN-5.
+    "fixture",
   ]),
 );
 
@@ -102,6 +129,10 @@ export const dayItems = pgTable(
       .notNull()
       .defaultNow(),
 
+    /** The live member of a *one of* group; the other is `not_assigned` (UX v1.1 §3.5, 0005). */
+    alternatesChosen: boolean("alternates_chosen"),
+    /** One id per *one of* group per day, like `multitask_id` (UX v1.1 §3.5, 0005). */
+    alternatesId: uuid("alternates_id"),
     assignmentState: assignmentStateEnum("assignment_state")
       .notNull()
       .default("assigned"),
@@ -114,6 +145,8 @@ export const dayItems = pgTable(
     deferredAt: timestamp("deferred_at", { withTimezone: true }),
     doneAt: timestamp("done_at", { withTimezone: true }),
     durationMin: smallint("duration_min"),
+    /** Transition before this item, 0–240; snapshotted from the slot (UX v1.1 §3.2, 0005). */
+    gapBeforeMin: smallint("gap_before_min").notNull().default(0),
     /** JSON shape: IconValue — see @syn/types. Snapshot of the habit's icon. */
     icon: jsonb("icon").$type<IconValue>().notNull(),
     /** One id per multitask group per day; assigned at materialisation (§5.5). */
@@ -123,6 +156,8 @@ export const dayItems = pgTable(
     /** ≤ 500 — Epic 2 IT-01. */
     notesReflection: text("notes_reflection"),
     origin: itemOriginEnum("origin").notNull(),
+    /** A pin — at a clock time; the stack flows around it, it never moves by drag (UX v1.1 R3, R22, 0005). */
+    pinned: boolean("pinned").notNull().default(false),
     /** Never updated after insert — enforced by trigger. See the note above. */
     originalScheduledStart: timestamp("original_scheduled_start", {
       withTimezone: true,
@@ -175,6 +210,15 @@ export const dayItems = pgTable(
       (): AnyPgColumn => dayItems.id,
       { onDelete: "set null" },
     ),
+    /**
+     * The block this item sits in (UX v1.1 §11.8, TD-2). Nullable in 0005
+     * only; NOT NULL from 0006 after DYN-5's backfill. Cascades: an item
+     * without a block is not renderable, and only untouched blocks are ever
+     * deleted (see `day_blocks`).
+     */
+    dayBlockId: uuid("day_block_id").references(() => dayBlocks.id, {
+      onDelete: "cascade",
+    }),
     dayId: uuid("day_id")
       .notNull()
       .references(() => days.id, { onDelete: "cascade" }),
@@ -202,10 +246,19 @@ export const dayItems = pgTable(
     index("day_items_habit_id_idx").on(table.habitId),
     index("day_items_template_slot_id_idx").on(table.templateSlotId),
     index("day_items_user_id_idx").on(table.userId),
+    index("day_items_day_block_id_sort_order_idx").on(
+      table.dayBlockId,
+      table.sortOrder,
+    ),
+    index("day_items_alternates_id_idx").on(table.alternatesId),
     check("day_items_priority_check", sql`${table.priority} BETWEEN 1 AND 7`),
     check(
       "day_items_duration_min_check",
       sql`${table.durationMin} IS NULL OR ${table.durationMin} BETWEEN 1 AND 480`,
+    ),
+    check(
+      "day_items_gap_before_min_check",
+      sql`${table.gapBeforeMin} BETWEEN 0 AND 240`,
     ),
     ...ownerPrivateCrudPolicies({
       prefix: "day_items",
@@ -223,6 +276,10 @@ export const dayItemsRelations = relations(dayItems, ({ one }) => ({
   day: one(days, {
     fields: [dayItems.dayId],
     references: [days.id],
+  }),
+  dayBlock: one(dayBlocks, {
+    fields: [dayItems.dayBlockId],
+    references: [dayBlocks.id],
   }),
   habit: one(habits, {
     fields: [dayItems.habitId],

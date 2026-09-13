@@ -80,6 +80,12 @@ export async function listNotificationPrefs(
  * One switch. Upsert rather than update: the first time a person disagrees
  * with a default there is no row to change, and an update that matched nothing
  * would report success and change nothing.
+ *
+ * THE CONFLICT TARGET INCLUDES `block_kind` since 0005 (UX v1.1 §9.3): the
+ * unique constraint is `(user_id, kind, block_kind) NULLS NOT DISTINCT`, and a
+ * target that names only two of its columns matches no arbiter and fails at
+ * runtime with "no unique or exclusion constraint matching". Every v1.0 kind
+ * writes `block_kind = null`; DYN-20 writes a block for `item_start`.
  */
 export async function setNotificationPref(
   rls: RlsClient,
@@ -89,9 +95,18 @@ export async function setNotificationPref(
   await rls.execute((tx) =>
     tx
       .insert(notificationPrefs)
-      .values({ userId, kind: input.kind, enabled: input.enabled })
+      .values({
+        userId,
+        kind: input.kind,
+        enabled: input.enabled,
+        blockKind: null,
+      })
       .onConflictDoUpdate({
-        target: [notificationPrefs.userId, notificationPrefs.kind],
+        target: [
+          notificationPrefs.userId,
+          notificationPrefs.kind,
+          notificationPrefs.blockKind,
+        ],
         set: { enabled: input.enabled, updatedAt: new Date() },
       }),
   );

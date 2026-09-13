@@ -13,7 +13,12 @@ import {
   users,
   type RlsClient,
 } from "@syn/db";
-import type { DayItemView, DayMode, MissTier } from "@syn/types";
+import type {
+  DayItemView,
+  DayMode,
+  MissTier,
+  WokeAtSource,
+} from "@syn/types";
 import {
   dayModeFor,
   dayPartOf,
@@ -55,7 +60,7 @@ export type DayView = {
   dayCloseTime: string;
   anchorTime: string | null;
   wokeAt: Date | null;
-  wokeAtSource: "anchor" | "manual" | null;
+  wokeAtSource: WokeAtSource | null;
   closedAt: Date | null;
   closeReason: "manual" | "auto" | null;
   capacityMin: number | null;
@@ -343,6 +348,12 @@ export async function getDay(
                 ),
           state,
           multitask: multitaskOrder.get(row.id) ?? "none",
+          // UX v1.1 (§10.1, §11.8) — neutral until DYN-5 reads `day_blocks`.
+          dayBlockId: null,
+          blockKind: null,
+          pinned: false,
+          gapBeforeMin: 0,
+          alternates: null,
         },
       });
     }

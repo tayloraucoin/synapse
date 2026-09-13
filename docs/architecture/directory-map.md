@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1073 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1084 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -656,6 +656,7 @@ packages/
           list-prefs.ts
           web-push.ts
         plan/
+          anchor-fallback.ts
           most-used-template.ts
           save-slot.ts
           templates.ts
@@ -726,14 +727,17 @@ packages/
     package.json
   constants/
     src/
+      block-kinds.ts
       brand.ts
       contact.ts
       default-reasons.ts
       index.ts
+      journal-prompts.ts
       limits.ts  # Epic 1 §9's bounds, shared by the zod schema and the input's maxLength
       motion.ts
       notification-catalogue.ts
       starter-habits.ts
+      starter-library.ts
       storage-buckets.ts
       storage-keys.ts
       timezones.ts
@@ -744,8 +748,8 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <4 migration .sql files, 0000–0003 — append-only, human-reviewed before a hosted migrate>
-      meta/ <5 drizzle snapshot files + _journal.json>
+      <6 migration .sql files, 0000–0005 — append-only, human-reviewed before a hosted migrate>
+      meta/ <7 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
@@ -758,6 +762,7 @@ packages/
         day/
           day-items.ts  # the record. Snapshots title/icon/unit/axes/preflight; original_scheduled_start is trigger-immutable
           index.ts
+          journal-entries.ts
           misses.ts
           shifts.ts
           timer-sessions.ts
@@ -772,7 +777,10 @@ packages/
           notification-prefs.ts
           web-push-subscriptions.ts
         plan/
+          day-blocks.ts
           days.ts
+          enums.ts
+          fixtures.ts
           index.ts
           template-slots.ts
           templates.ts
@@ -784,6 +792,7 @@ packages/
           feedback-messages.ts
           index.ts
         user/
+          enums.ts
           index.ts
           user-avatars.ts
           users.ts
@@ -1370,6 +1379,7 @@ packages/
     src/
       day/
         boundaries.ts
+        budget.ts
         day-key.ts
         day-parts.ts
         index.ts
@@ -1377,6 +1387,7 @@ packages/
         late-offer.ts
         priority.ts
         shift-fit.ts
+        stack.ts
         trim.ts
         wall-clock.ts
         week.ts

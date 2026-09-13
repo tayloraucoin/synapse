@@ -20,7 +20,13 @@ const GROUPS = [
     title: "GROUP 1 — AUTH & USERS",
     intro:
       "The shadow `users` table mirrors `auth.users` (Supabase Auth is the source of truth for identity). Its row is created by the `handle_new_user()` trigger, never by the app. `user_avatars` is the optional account photo, keyed by `user_id` because there is exactly one per person.",
-    files: ["auth.ts", "enums.ts", "user/users.ts", "user/user-avatars.ts"],
+    files: [
+      "auth.ts",
+      "enums.ts",
+      "user/enums.ts",
+      "user/users.ts",
+      "user/user-avatars.ts",
+    ],
   },
   {
     title: "GROUP 2 — LIBRARY",
@@ -35,18 +41,26 @@ const GROUPS = [
   {
     title: "GROUP 3 — PLAN",
     intro:
-      "The shapes a day can take. A template holds slots at offsets from its anchor; a day is one date in the person's stored zone, snapshotting the time rules it was created under. There is no `week_plans` table — week status is derived from the week's days.",
-    files: ["plan/templates.ts", "plan/template-slots.ts", "plan/days.ts"],
+      "The shapes a day can take. Since UX v1.1 (0004, 0005) a template is a block whose slots stack — a duration and a gap each, offsets derived — and a day is an ordered set of `day_blocks`; `fixtures` are the weekday things every block flows around. A day is one date in the person's stored zone, snapshotting the time rules it was created under. There is no `week_plans` table — week status is derived from the week's days.",
+    files: [
+      "plan/enums.ts",
+      "plan/templates.ts",
+      "plan/template-slots.ts",
+      "plan/fixtures.ts",
+      "plan/days.ts",
+      "plan/day-blocks.ts",
+    ],
   },
   {
     title: "GROUP 4 — DAY",
     intro:
-      "The record. `day_items` is the row the execution tabs render, snapshotting its habit's title, icon, unit, axes and preflight note so a past day reads as it was lived. Timer sessions, misses and shifts are what happened to it.",
+      "The record. `day_items` is the row the execution tabs render, snapshotting its habit's title, icon, unit, axes and preflight note so a past day reads as it was lived. Timer sessions, misses and shifts (and, since UX v1.1, re-fits) are what happened to it; `journal_entries` is what the person wrote about it, in their own words.",
     files: [
       "day/day-items.ts",
       "day/timer-sessions.ts",
       "day/shifts.ts",
       "day/misses.ts",
+      "day/journal-entries.ts",
     ],
   },
   {
@@ -159,15 +173,15 @@ function buildEntityOverview(tables) {
 
 **${publicCount} tables** in \`public\`, plus a reference-only mirror of Supabase's \`auth.users\`. Grouped by domain.
 
-**Group 1 — Auth & Users.** \`users\` is the shadow of \`auth.users\` — its primary key **is** the foreign key, and the row is created by the \`handle_new_user()\` trigger, never by the app. It carries every account scalar: timezone, day-close and review-reminder times, theme, display name, the usual wake time, the week-build reminder's day and time, the first-run resume point, the deferred-settings pending pair, and \`wake_anchor_habit_id\`. \`user_avatars\` is the optional photo, keyed by \`user_id\` — one per person, no surrogate id. Deleting the auth user cascades through this row to everything.
+**Group 1 — Auth & Users.** \`users\` is the shadow of \`auth.users\` — its primary key **is** the foreign key, and the row is created by the \`handle_new_user()\` trigger, never by the app. It carries every account scalar: timezone, day-close and review-reminder times, theme, display name, the usual wake time, the week-build reminder's day and time, the first-run resume point, the deferred-settings pending pair, and — since UX v1.1 (0005) — the shape of the week (\`schedule_shape\`, \`work_days\`, \`work_start_time\`, \`work_end_time\`, \`anchor_direction\`), the wake range, lights-out and devices-off, the overflow mode, the orient frame's settings, the journal's switch and prompts, and the block order. \`wake_anchor_habit_id\` is deprecated (v1.1 R11) and goes in 0006. \`user_avatars\` is the optional photo, keyed by \`user_id\` — one per person, no surrogate id. Deleting the auth user cascades through this row to everything.
 
-**Group 2 — Library.** What a person keeps, independent of any day. \`habits\` is the reusable definition (type, title, icon, the duration range, the 1–7 life priority, the quantity unit, the reflection axes); \`categories\` group them for reporting only, never for a mechanic; \`reasons\` is the per-person, editable set a miss is attributed from, seeded from \`DEFAULT_REASONS\`. Habits, templates and reasons archive; only a category is deleted, and it unassigns.
+**Group 2 — Library.** What a person keeps, independent of any day. \`habits\` is the reusable definition (type, title, icon, the duration range, the 1–7 life priority, the quantity unit, the reflection axes, and — since 0004 — a default \`block_kind\` and, for workouts and focuses, a rotation: \`weekly_target\` and \`typical_days\`); \`categories\` group them for reporting only, never for a mechanic; \`reasons\` is the per-person, editable set a miss is attributed from, seeded from \`DEFAULT_REASONS\`. Habits, templates and reasons archive; only a category is deleted, and it unassigns.
 
-**Group 3 — Plan.** \`templates\` is a named day plan whose \`template_slots\` sit at **offsets** from an anchor, which is what lets one template be applied at 06:00 or 08:00 and what makes shift-forward cheap. \`days\` is one calendar date in the person's stored zone; it snapshots \`timezone\` and \`day_close_time\` so a later settings change cannot re-key or re-window a past day.
+**Group 3 — Plan.** \`templates\` is a saved BLOCK (UX v1.1, 0004): a \`kind\`, a \`flow\` and a \`structure\`, whose \`template_slots\` STACK — each a duration and a \`gap_before_min\`, offsets derived by \`stackBlock\` from an anchor the profile supplies; a slot may be pinned to a clock time, and two slots at one position share a \`multitask_group\` (both happen) or an \`alternates_group\` (one of). \`offset_start_min\` / \`offset_end_min\` are deprecated and go in 0006. \`fixtures\` are weekday things (a stand-up on Tuesdays) that materialise as pins whatever template the day gets. \`days\` is one calendar date in the person's stored zone; it snapshots \`timezone\` and \`day_close_time\` so a later settings change cannot re-key or re-window a past day, and since 0005 carries its \`shape\`, \`confirmed_at\` (*Set the day*), today's anchor and focus, and the morning's two lines. \`day_blocks\` is one block on one day — the Today tab's section, the Schedule's band — with its own immutable \`original_scheduled_start\`; \`days.template_id\` is deprecated and goes in 0006.
 
-**Group 4 — Day.** The record, and the part of the schema that is deliberately append-and-annotate. \`day_items\` snapshots \`title\`, \`icon\`, \`quantity_unit\`, \`reflection_axes\` and \`notes_preflight\` at materialisation; \`original_scheduled_start\` is immutable once set, enforced by a trigger. \`timer_sessions\` record time (a manual entry is marked as one), \`misses\` record how one undone item was attributed, \`shifts\` record a whole-day move.
+**Group 4 — Day.** The record, and the part of the schema that is deliberately append-and-annotate. \`day_items\` snapshots \`title\`, \`icon\`, \`quantity_unit\`, \`reflection_axes\` and \`notes_preflight\` at materialisation, belongs to a \`day_block\` (nullable until 0006), may be \`pinned\`, and carries its gap and its *one of* group; \`original_scheduled_start\` is immutable once set, enforced by a trigger, and is written at *Set the day* for items of a pooled or unconfirmed day. \`timer_sessions\` record time (a manual entry is marked as one), \`misses\` record how one undone item was attributed, \`shifts\` record a whole-day move or, since 0005, a \`refit\` that held the anchor and shortened or cut. \`journal_entries\` is one row per day, its answers keyed by the person's own prompt keys, merged one key at a time.
 
-**Group 5 — Notifications.** \`web_push_subscriptions\` holds one row per browser that agreed to reminders (endpoint + p256dh + auth, plus platform and revocation); the scheduler reads it. \`notification_prefs\` holds one row per kind the person has an opinion about — a missing row means the §8.2 default. \`notification_deliveries\` is the exactly-once ledger: one row per \`(user, kind, target, minute)\`, written before a push is sent and unique \`NULLS NOT DISTINCT\`, so an overlapping or repeated cron scan loses to the constraint rather than to a job's own care. Service-role only — nobody reads their own delivery log.
+**Group 5 — Notifications.** \`web_push_subscriptions\` holds one row per browser that agreed to reminders (endpoint + p256dh + auth, plus platform and revocation); the scheduler reads it. \`notification_prefs\` holds one row per kind the person has an opinion about — a missing row means the §8.2 default — and, since 0005, one row per block for \`item_start\` (\`block_kind\`, unique \`NULLS NOT DISTINCT\`). \`notification_deliveries\` is the exactly-once ledger: one row per \`(user, kind, target, minute)\`, written before a push is sent and unique \`NULLS NOT DISTINCT\`, so an overlapping or repeated cron scan loses to the constraint rather than to a job's own care. Service-role only — nobody reads their own delivery log.
 
 **Group 6 — System.** \`data_exports\` tracks a request to export everything (preparing → ready → expired, with the object path and a 24-hour expiry). \`feedback_messages\` is the About message: insert-only for its author, no authenticated read, and it holds only the message plus the two optional context fields the switch controls.
 
@@ -179,11 +193,11 @@ function buildRelationshipSummary() {
 
 **The one central entity.** \`users\`. Synapse is single-player: there is no couple, no team, no shared row. **Every table hangs directly off this one** and carries its own denormalised \`user_id\`, so every policy is the same three lines and every table is greppable for its owner — no policy ever subqueries another RLS-guarded table.
 
-**One-to-many from \`users\`.** \`categories\`, \`habits\`, \`reasons\`, \`templates\`, \`template_slots\`, \`days\`, \`day_items\`, \`timer_sessions\`, \`shifts\`, \`misses\`, \`notification_prefs\`, \`notification_deliveries\`, \`web_push_subscriptions\`, \`data_exports\`, \`feedback_messages\`. **One-to-one:** \`user_avatars\`.
+**One-to-many from \`users\`.** \`categories\`, \`habits\`, \`reasons\`, \`templates\`, \`template_slots\`, \`fixtures\`, \`days\`, \`day_blocks\`, \`day_items\`, \`timer_sessions\`, \`shifts\`, \`misses\`, \`journal_entries\`, \`notification_prefs\`, \`notification_deliveries\`, \`web_push_subscriptions\`, \`data_exports\`, \`feedback_messages\`. **One-to-one:** \`user_avatars\`.
 
-**The ownership chains** (each child also carries \`user_id\` directly): \`categories\` → \`habits\` → \`template_slots\` → \`day_items\`; \`templates\` → \`template_slots\` and \`templates\` → \`days\` → \`day_items\` → { \`timer_sessions\`, \`misses\` }; \`days\` → \`shifts\` → \`misses\`.
+**The ownership chains** (each child also carries \`user_id\` directly): \`categories\` → \`habits\` → \`template_slots\` → \`day_items\`; \`templates\` → \`template_slots\` and \`templates\` → \`day_blocks\`; \`days\` → \`day_blocks\` → \`day_items\` → { \`timer_sessions\`, \`misses\` }; \`days\` → \`shifts\` → \`misses\`; \`days\` → \`journal_entries\` (one each).
 
-**Two references that are not ownership.** \`users.wake_anchor_habit_id\` → \`habits\` (the anchor's one home, \`set null\`), and \`day_items.carried_from_item_id\` / \`misses.traded_up_item_id\` → \`day_items\` (both \`set null\` — a record points at another record without owning it).
+**References that are not ownership.** \`users.wake_anchor_habit_id\` → \`habits\` (deprecated, \`set null\`), \`days.work_focus_habit_id\` → \`habits\` and \`fixtures.habit_id\` → \`habits\` (both \`set null\`), and \`day_items.carried_from_item_id\` / \`misses.traded_up_item_id\` → \`day_items\` (both \`set null\` — a record points at another record without owning it).
 
 **Identity.** \`public.users.id\` = \`auth.users.id\`. One identity, two schemas, no drift, no join key to get wrong.
 

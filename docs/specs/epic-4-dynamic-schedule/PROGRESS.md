@@ -4,9 +4,9 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 
 | Ticket | Title | Depends on | Status | Date |
 |---|---|---|---|---|
-| DYN-1 | Vocabulary, view models, constants, and `stackBlock` | — | Not started | — |
-| DYN-2 | Migration `0004`: block templates, stacked slots, habits' block kinds and rotations, the offset backfill | DYN-1 | Not started | — |
-| DYN-3 | Migration `0005`: the profile, fixtures, `day_blocks`, the day-side columns, the journal, per-block notification prefs, the trigger amendment | DYN-2 | Not started | — |
+| DYN-1 | Vocabulary, view models, constants, and `stackBlock` | — | Complete (twelve probes pasted in the closing report) | 2026-09-12 |
+| DYN-2 | Migration `0004`: block templates, stacked slots, habits' block kinds and rotations, the offset backfill | DYN-1 | Complete (verified on scratch databases; hosted and project-local application pending Taylor) | 2026-09-12 |
+| DYN-3 | Migration `0005`: the profile, fixtures, `day_blocks`, the day-side columns, the journal, per-block notification prefs, the trigger amendment | DYN-2 | Complete (verified on scratch databases; application to Supabase tiers pending Taylor) | 2026-09-12 |
 | DYN-4 | Plan services: block templates by kind, the same-position rule, fixtures, workouts and focuses, the library by block | DYN-3 | Not started | — |
 | DYN-5 | Materialisation per block and *Set the day* | DYN-4 | Not started | — |
 | DYN-6 | Adjust, *Do now*, habit-day edits, and moves | DYN-5 | Not started | — |
@@ -28,9 +28,9 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 
 ## Checklist
 
-- [ ] DYN-1
-- [ ] DYN-2
-- [ ] DYN-3
+- [x] DYN-1
+- [x] DYN-2
+- [x] DYN-3
 - [ ] DYN-4
 - [ ] DYN-5
 - [ ] DYN-6

@@ -9,6 +9,13 @@
  * day and must not move under a shift (official spec §5.6), and the rest are
  * `soft`.
  *
+ * SINCE 0004 (DYN-2) THE SEED WRITES BOTH SHAPES: the deprecated offsets, and
+ * the gap each offset implies (`gap_before_min = offset − previous end`,
+ * floored at 0), so a template seeded after the migration lays out under
+ * `stackBlock` exactly as one migrated through the backfill does. `kind` is
+ * `morning`, which every v1.0 template is. DYN-5 replaces this seed with the
+ * v1.1 day; until then this is the v1.0 morning, stacked.
+ *
  * Idempotent by "a template named Morning already exists → do nothing".
  */
 import { eq } from "drizzle-orm";
@@ -61,6 +68,7 @@ export async function seedMorningTemplate(
     .insert(templates)
     .values({
       anchorTime: ANCHOR_TIME,
+      kind: "morning",
       name: TEMPLATE_NAME,
       typicalDays: [0, 1, 2, 3, 4],
       userId,
@@ -72,17 +80,27 @@ export async function seedMorningTemplate(
     return { slots: 0, template: 0 };
   }
 
-  const slots = library.map((habit, index) => ({
-    durationMin: midpoint(habit.durationMinMin, habit.durationMaxMin),
-    habitId: habit.id,
-    offsetStartMin: SLOT_OFFSETS[index] ?? 0,
-    // The wake-up habit is the day's anchor: hard, so a shift never moves it.
-    scheduling: index === 0 ? ("hard" as const) : ("soft" as const),
-    sortOrder: index,
-    templateId: template.id,
-    timeMode: "fixed_time" as const,
-    userId,
-  }));
+  const durations = library.map((habit) =>
+    midpoint(habit.durationMinMin, habit.durationMaxMin),
+  );
+
+  const slots = library.map((habit, index) => {
+    const offset = SLOT_OFFSETS[index] ?? 0;
+    const previousEnd =
+      index === 0 ? offset : (SLOT_OFFSETS[index - 1] ?? 0) + (durations[index - 1] ?? 0);
+    return {
+      durationMin: durations[index] ?? 15,
+      gapBeforeMin: Math.max(0, offset - previousEnd),
+      habitId: habit.id,
+      offsetStartMin: offset,
+      // The wake-up habit is the day's anchor: hard, so a shift never moves it.
+      scheduling: index === 0 ? ("hard" as const) : ("soft" as const),
+      sortOrder: index,
+      templateId: template.id,
+      timeMode: "fixed_time" as const,
+      userId,
+    };
+  });
 
   const insertedSlots = await db
     .insert(templateSlots)

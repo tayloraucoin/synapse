@@ -4,7 +4,7 @@
 **Slice type:** Schema — a one-way door with a trigger change on the record's one immutable column. The risk class is *a rewritten record*: a trigger amendment that lets `original_scheduled_start` change twice, or a `day_blocks` cascade that deletes items a person has touched.
 **Vigil:** none. **Mason review:** the whole migration; AC 8–10 (the trigger's exact transitions); AC 11 (cascade semantics).
 
-**Status:** Not started
+**Status:** Complete (2026-09-12) — authored and verified on scratch databases; not applied to any tier (Taylor runs migrations at the end of the epic)
 
 > **Mason — migration review.** `0005` adds two tables (`fixtures`, `day_blocks`, `journal_entries` — three), sixteen profile columns, eight day-side columns, three enum values, a nullable `block_kind` on `notification_prefs` with a re-keyed unique index, and amends `day_items_original_start_immutable` to permit exactly one `NULL → value` transition (TD-5). Review the trigger function as SQL (AC 8–10 are the transitions), review every `ON DELETE` (AC 11), review that `day_items.day_block_id` is nullable now and only now, and that the setup file matches the migration so a fresh database and a migrated one agree. **Stop before any hosted tier.**
 

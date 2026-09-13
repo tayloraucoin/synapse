@@ -26,6 +26,16 @@
  * and the scheduler's per-user pass does the same so the switch happens even
  * if the app is never opened.
  *
+ * THE v1.1 PROFILE (UX v1.1 §11.2, migration 0005). The shape of the week
+ * (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`,
+ * `anchor_direction`), the wake range (`earliest_wake_time`), the evening
+ * (`lights_out_time`, `devices_off_time`), the overflow mode, the orient
+ * frame's three settings, the journal's switch and prompts, and the block
+ * order. These are the anchors the materialiser lays every block out from;
+ * a template no longer carries its own (TD-1). `wake_anchor_habit_id` is
+ * DEPRECATED since 0005 (v1.1 R11): the orient frame is the wake moment; the
+ * column is not written after DYN-13 and is dropped in 0006.
+ *
  * POLICIES. Select and update are the owner's alone. Insert and delete are
  * denied to the authenticated role outright: the trigger inserts, and deletion
  * goes through `auth.admin.deleteUser` and cascades. There is no admin read.
@@ -33,9 +43,11 @@
 import { relations, sql } from "drizzle-orm";
 import {
   type AnyPgColumn,
+  boolean,
   check,
   date,
   index,
+  jsonb,
   pgEnum,
   pgPolicy,
   pgTable,
@@ -47,6 +59,8 @@ import {
 } from "drizzle-orm/pg-core";
 import { authenticatedRole } from "drizzle-orm/supabase";
 
+import type { BlockKind, JournalPrompt, WorkDays } from "@syn/types";
+
 import { authUsers } from "../auth";
 import { categories } from "../library/categories";
 import { habits } from "../library/habits";
@@ -56,7 +70,35 @@ import { webPushSubscriptions } from "../notification/web-push-subscriptions";
 import { days } from "../plan/days";
 import { templates } from "../plan/templates";
 import { denyAuthenticated, isOwner } from "../rls/helpers";
+import {
+  anchorDirectionEnum,
+  overflowModeEnum,
+  scheduleShapeEnum,
+} from "./enums";
 import { userAvatars } from "./user-avatars";
+
+/**
+ * The column defaults for the two jsonb settings — copied once into 0005 as
+ * history; `@syn/constants` (`DEFAULT_BLOCK_ORDER`, `DEFAULT_JOURNAL_PROMPTS`)
+ * is the living copy and the seed reads from there.
+ */
+const DEFAULT_BLOCK_ORDER_LITERAL: BlockKind[] = [
+  "orient",
+  "morning",
+  "prep",
+  "work",
+  "activity",
+  "wind_down",
+];
+
+const DEFAULT_JOURNAL_PROMPTS_LITERAL: JournalPrompt[] = [
+  { key: "day_went", label: "How the day went" },
+  { key: "gratitude_today", label: "Grateful for today" },
+  { key: "gratitude_life", label: "Grateful for, in life" },
+  { key: "looking_forward", label: "Looking forward to" },
+  { key: "make_happen_tomorrow", label: "What I want to make happen tomorrow" },
+  { key: "visualisation", label: "Tomorrow, as I see it" },
+];
 
 /**
  * The Appearance setting (Epic 1 ST-09). One table uses it, so it lives here
@@ -84,11 +126,23 @@ export const users = pgTable(
       .notNull()
       .defaultNow(),
 
+    // UX v1.1 §3.3 — "when your morning runs long, what gives?" (0005).
+    anchorDirection: anchorDirectionEnum("anchor_direction"),
+    // UX v1.1 §3.1 — the person's order for the six non-placeable kinds (0005).
+    // JSON shape: BlockKind[] — see @syn/types.
+    blockOrder: jsonb("block_order")
+      .$type<BlockKind[]>()
+      .notNull()
+      .default(DEFAULT_BLOCK_ORDER_LITERAL),
     // A day opens at this wall-clock time and closes at the next one (§6.1).
     dayCloseTime: time("day_close_time").notNull().default("03:00"),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    // UX v1.1 §7.1 — *Phone away*; a pin in the wind-down routine (0005).
+    devicesOffTime: time("devices_off_time"),
     // What the app calls you. 1–40 (Epic 1 §9).
     displayName: text("display_name"),
+    // UX v1.1 §4.5 — the wake range's early end; informational in v1.1 (0005).
+    earliestWakeTime: time("earliest_wake_time"),
     // Mirrored from auth.users by handle_user_email_sync().
     email: text("email"),
     // Which first-run step to resume at; null once first run is done.
@@ -96,6 +150,28 @@ export const users = pgTable(
     firstRunCompletedAt: timestamp("first_run_completed_at", {
       withTimezone: true,
     }),
+    // UX v1.1 §7.2 — *A few lines at night* (0005).
+    journalEnabled: boolean("journal_enabled").notNull().default(true),
+    // UX v1.1 §7.2, TD-7 — the person's prompts, ordered, keyed stably (0005).
+    // JSON shape: JournalPrompt[] — see @syn/types.
+    journalPrompts: jsonb("journal_prompts")
+      .$type<JournalPrompt[]>()
+      .notNull()
+      .default(DEFAULT_JOURNAL_PROMPTS_LITERAL),
+    // UX v1.1 §7.1 — the wind-down routine flows backward to this (0005).
+    lightsOutTime: time("lights_out_time"),
+    // UX v1.1 §5.2 — the one optional morning line, and with it the R18 line (0005).
+    orientAskGratitude: boolean("orient_ask_gratitude").notNull().default(true),
+    // UX v1.1 §4.6 — the passage read every morning; ≤ 2000 (0005).
+    orientPassage: text("orient_passage"),
+    // UX v1.1 §4.6 — show last night's journal lines on the orient frame (0005).
+    orientShowLastNight: boolean("orient_show_last_night")
+      .notNull()
+      .default(true),
+    // UX v1.1 §3.10 — how the days that do not fit are handled (0005).
+    overflowMode: overflowModeEnum("overflow_mode")
+      .notNull()
+      .default("daily_menu"),
     // The pending pair — see the header. `*_from` is the day key the new value
     // takes effect on; a reader applies it once the person's current day key is
     // at or past that date, then clears both.
@@ -110,6 +186,8 @@ export const users = pgTable(
     }),
     // The review reminder's time (§8.2 N4). Default 21:00.
     reviewReminderTime: time("review_reminder_time").notNull().default("21:00"),
+    // UX v1.1 §4.1 — which archetype; only the first is live (0005).
+    scheduleShape: scheduleShapeEnum("schedule_shape"),
     theme: themePreferenceEnum("theme").notNull().default("system"),
     // The zone the person's days are stored and rendered in (cross-cutting
     // §7.3) — not the viewer's device zone. Defaults from the device at first
@@ -126,7 +204,17 @@ export const users = pgTable(
     weekBuildReminderWeekday: smallint("week_build_reminder_weekday")
       .notNull()
       .default(6),
+    // UX v1.1 §4.2 — always · sometimes · never, per weekday, Mon = "0" (0005).
+    // JSON shape: WorkDays — see @syn/types.
+    workDays: jsonb("work_days").$type<WorkDays>(),
+    // UX v1.1 §4.3 — *until about*; where the evening starts (0005, R24).
+    workEndTime: time("work_end_time"),
+    // UX v1.1 §4.3 — the anchor prep flows backward to (0005).
+    workStartTime: time("work_start_time"),
 
+    // DEPRECATED since 0005 (UX v1.1 R11): the orient frame is the wake
+    // moment. Not written after DYN-13; dropped in 0006. Until then:
+    //
     // At most one per person, enforced by there being one column (SET-1).
     // `set null` because archiving or deleting the habit must not orphan the
     // reference — the person simply has no anchor until they pick another.
@@ -147,6 +235,10 @@ export const users = pgTable(
     check(
       "users_week_build_reminder_weekday_check",
       sql`${table.weekBuildReminderWeekday} BETWEEN 0 AND 6`,
+    ),
+    check(
+      "users_orient_passage_check",
+      sql`${table.orientPassage} IS NULL OR length(${table.orientPassage}) <= 2000`,
     ),
     pgPolicy("users_select", {
       for: "select",

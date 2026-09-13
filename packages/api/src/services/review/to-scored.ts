@@ -1,7 +1,12 @@
 import { and, eq, inArray } from "drizzle-orm";
 
 import { dayItems, misses, type RlsClient } from "@syn/db";
-import type { MissTier } from "@syn/types";
+import type {
+  AssignmentState,
+  CompletionState,
+  MissTier,
+  TimeMode,
+} from "@syn/types";
 import { isOffSchedule, type ScoredItem } from "@syn/utils";
 
 /**
@@ -24,20 +29,14 @@ import { isOffSchedule, type ScoredItem } from "@syn/utils";
 export type ScoredRow = {
   id: string;
   priority: number;
-  timeMode: "fixed_time" | "window" | "unscheduled";
+  timeMode: TimeMode;
   scheduledStart: Date | null;
   scheduledEnd: Date | null;
   originalScheduledStart: Date | null;
   doneAt: Date | null;
   deferredAt: Date | null;
-  assignmentState: "assigned" | "not_assigned" | "cut_by_shift";
-  completionState:
-    | "upcoming"
-    | "active"
-    | "done"
-    | "missed"
-    | "carried"
-    | "pending_review";
+  assignmentState: AssignmentState;
+  completionState: CompletionState;
 };
 
 export type MissRow = {

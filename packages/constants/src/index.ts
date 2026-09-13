@@ -11,6 +11,14 @@
  * Files: kebab-case (storage-keys.ts, user-images.ts, …).
  */
 
+export {
+  BLOCK_KINDS,
+  DEFAULT_BLOCK_ORDER,
+  PLACEABLE_KINDS,
+  TRAINING_PLACEMENTS,
+  type BlockKindValue,
+  type TrainingPlacementValue,
+} from "./block-kinds";
 export { SITE_NAME } from "./brand";
 export { CONTACT_EMAIL, VAPID_MAILTO_SUBJECT } from "./contact";
 export {
@@ -19,16 +27,33 @@ export {
   type DefaultReasonTier,
 } from "./default-reasons";
 export {
+  DEFAULT_JOURNAL_PROMPTS,
+  ORIENT_READBACK_KEYS,
+  type DefaultJournalPrompt,
+} from "./journal-prompts";
+export {
   CAPACITY_MAX,
   CAPACITY_MIN,
   CATEGORY_NAME_MAX,
   DISPLAY_NAME_MAX,
+  DRAG_SNAP_MIN,
   DURATION_MAX,
   DURATION_MIN,
   FEEDBACK_MAX,
+  FIXTURE_TITLE_MAX,
+  FOCUS_TITLE_MAX,
+  GAP_MAX,
   HABIT_TITLE_MAX,
+  INTENTION_MAX,
+  JOURNAL_ANSWER_MAX,
+  JOURNAL_PROMPT_MAX,
+  JOURNAL_PROMPTS_MAX,
+  LATE_WAKE_OFFER_MIN,
+  LONG_PRESS_MS,
   MISS_NOTE_MAX,
+  MORNING_GRATITUDE_MAX,
   NOTE_MAX,
+  ORIENT_PASSAGE_MAX,
   OTHER_REASON_MAX,
   PASSWORD_MIN,
   PREFLIGHT_NOTE_MAX,
@@ -40,12 +65,15 @@ export {
   REFLECTION_AXIS_MAX,
   SHIFT_MAX,
   SHIFT_MIN,
+  SKIP_LINE_WINDOW_DAYS,
   TEMPLATE_NAME_MAX,
   TEMPLATE_OFFSET_MIN,
   WEEKLY_TARGET_MAX,
   WEEKLY_TARGET_MIN,
+  WORKOUT_TITLE_MAX,
 } from "./limits";
 export {
+  ADJUST_UNDO_WINDOW_MS,
   DURATION_SHEET_MS,
   DURATION_STATE_MS,
   SHIFT_UNDO_WINDOW_MS,
@@ -57,6 +85,7 @@ export {
   type NotificationCatalogueEntry,
 } from "./notification-catalogue";
 export { STARTER_HABITS, type StarterHabit } from "./starter-habits";
+export { STARTER_LIBRARY, type StarterLibraryEntry } from "./starter-library";
 export {
   ASSET_BUCKET_BY_KIND,
   ASSET_FILE_NAME_PATTERN,

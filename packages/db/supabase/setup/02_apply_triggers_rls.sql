@@ -59,11 +59,14 @@ end;
 $$;
 
 -- ----------------------------------------------------------------------------
--- B2) day_items.original_scheduled_start is immutable once set (official spec
---     §3.7). The function is in 01_init_functions.sql with every other
---     function; this is the trigger that arms it.
+-- B2) original_scheduled_start is immutable once set — on day_items (official
+--     spec §3.7) and, since migration 0005, on day_blocks (UX v1.1 TD-5). The
+--     function is in 01_init_functions.sql with every other function and is
+--     table-agnostic; this arms it on both tables. Migration 0005 also arms
+--     the day_blocks trigger, so a database migrated before setup ran has it;
+--     this block keeps the two in step on every re-run.
 --
---     Guarded on the table existing so this file stays runnable against a
+--     Guarded on each table existing so this file stays runnable against a
 --     database that has only migration 0000 applied — db:setup is documented
 --     as idempotent and re-runnable, and a hard reference here would make that
 --     false.
@@ -72,14 +75,23 @@ do $$
 begin
   if to_regclass('public.day_items') is null then
     raise notice 'day_items not found — skipping the immutability trigger (run drizzle-kit migrate first)';
-    return;
+  else
+    drop trigger if exists day_items_original_start_immutable on public.day_items;
+    create trigger day_items_original_start_immutable
+      before update on public.day_items
+      for each row
+      execute function public.day_items_original_start_immutable();
   end if;
 
-  drop trigger if exists day_items_original_start_immutable on public.day_items;
-  create trigger day_items_original_start_immutable
-    before update on public.day_items
-    for each row
-    execute function public.day_items_original_start_immutable();
+  if to_regclass('public.day_blocks') is null then
+    raise notice 'day_blocks not found — skipping its immutability trigger (migration 0005 not applied)';
+  else
+    drop trigger if exists day_blocks_original_start_immutable on public.day_blocks;
+    create trigger day_blocks_original_start_immutable
+      before update on public.day_blocks
+      for each row
+      execute function public.day_items_original_start_immutable();
+  end if;
 end;
 $$;
 

@@ -10,6 +10,7 @@ import {
 import type { SlotView, TemplateSummaryView } from "@syn/types";
 import type { RestoreSlotInput, TemplatePatchInput } from "@syn/validators";
 
+import { anchorOrFallback } from "./anchor-fallback";
 import { findCollisions } from "./save-slot";
 import {
   compareSlots,
@@ -171,12 +172,12 @@ export async function getTemplate(
       template: {
         id: row.id,
         name: row.name,
-        anchorTime: row.anchorTime,
+        anchorTime: anchorOrFallback(row.anchorTime),
         weeklyTarget: row.weeklyTarget,
         typicalDays: row.typicalDays ?? [],
         archived: row.archivedAt !== null,
       },
-      slots: toSlotViews(slotRows, row.anchorTime),
+      slots: toSlotViews(slotRows, anchorOrFallback(row.anchorTime)),
       collisions: findCollisions(slotRows),
       appliedDays: Number(applied?.value ?? 0),
     };
@@ -192,7 +193,9 @@ export async function createTemplate(
   const rows = await rls.execute((tx) =>
     tx
       .insert(templates)
-      .values({ userId, name: "", anchorTime })
+      // Every template the v1.0 editor creates is a morning block (TD-1);
+      // DYN-4's `template.create({ kind })` replaces this.
+      .values({ userId, name: "", anchorTime, kind: "morning" })
       .returning({ id: templates.id }),
   );
   const row = rows[0];
@@ -335,6 +338,9 @@ export async function duplicateTemplate(
         anchorTime: source.anchorTime,
         weeklyTarget: source.weeklyTarget,
         typicalDays: source.typicalDays,
+        kind: source.kind,
+        flow: source.flow,
+        structure: source.structure,
       })
       .returning({ id: templates.id });
 
@@ -354,10 +360,19 @@ export async function duplicateTemplate(
       // Groups are re-keyed so the copy's brackets are its own; sharing a group
       // id across templates would make a later regroup reach into both.
       const remapped = new Map<string, string>();
+      const remappedAlternates = new Map<string, string>();
       for (const slot of slots) {
-        if (slot.multitaskGroup === null) continue;
-        if (!remapped.has(slot.multitaskGroup)) {
+        if (slot.multitaskGroup !== null && !remapped.has(slot.multitaskGroup)) {
           remapped.set(slot.multitaskGroup, crypto.randomUUID().slice(0, 8));
+        }
+        if (
+          slot.alternatesGroup !== null &&
+          !remappedAlternates.has(slot.alternatesGroup)
+        ) {
+          remappedAlternates.set(
+            slot.alternatesGroup,
+            crypto.randomUUID().slice(0, 8),
+          );
         }
       }
 
@@ -377,6 +392,15 @@ export async function duplicateTemplate(
               ? null
               : (remapped.get(slot.multitaskGroup) ?? null),
           sortOrder: slot.sortOrder,
+          // UX v1.1 (0004): the stacked shape copies with the slot.
+          gapBeforeMin: slot.gapBeforeMin,
+          pinnedAt: slot.pinnedAt,
+          role: slot.role,
+          alternatesGroup:
+            slot.alternatesGroup === null
+              ? null
+              : (remappedAlternates.get(slot.alternatesGroup) ?? null),
+          alternatesDefault: slot.alternatesDefault,
         })),
       );
     }

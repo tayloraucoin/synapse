@@ -4,7 +4,7 @@
 **Slice type:** Contract / pure logic — no UI, no schema, no procedure. The risk class is *a second arithmetic*: if `stackBlock` is not general enough (pins, backward flow, alternates, multitask) a later ticket writes its own walk and two screens disagree about when breakfast starts.
 **Vigil:** none. **Mason review:** `stackBlock`'s probes (AC 6–12) — the edge cases *are* the ticket.
 
-**Status:** Not started
+**Status:** Complete (2026-09-12)
 
 > **Mason — arithmetic review.** One function will be called by the block editor's footer, the quick-pick's budget line, the first-run fit screen, Adjust's proposal, and the materialiser (v1.1 §11.11, TD-4). Review that it is pure (rows, minutes, a flow direction — no `Date`, no zone, no I/O), that a pin never moves, that backward flow ends exactly at the anchor, that overrun is reported rather than clamped, and that alternates contribute exactly one member's duration. Each probe in AC 6–12 is a case a later ticket would otherwise discover in production.
 

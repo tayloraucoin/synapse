@@ -239,6 +239,11 @@ function toItem(spec: ExampleSpec, local: boolean, today: Date): DayItemView {
     timerElapsedSec: null,
     state: "upcoming",
     multitask: "none",
+    dayBlockId: null,
+    blockKind: null,
+    pinned: false,
+    gapBeforeMin: 0,
+    alternates: null,
   };
 }
 

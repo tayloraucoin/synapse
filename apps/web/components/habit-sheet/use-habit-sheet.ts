@@ -3,7 +3,11 @@
 import * as React from "react";
 
 import type { IconValue } from "@syn/types";
-import { habitFormSchema, type HabitFormInput } from "@syn/validators";
+import {
+  habitFormSchema,
+  habitTypeSchema,
+  type HabitFormInput,
+} from "@syn/validators";
 
 import { useIconUpload } from "@/lib/hooks/use-icon-upload";
 import { useSynapseForm } from "@/lib/forms/use-synapse-form";
@@ -135,10 +139,18 @@ export function useHabitSheet({
     if (mode !== "edit" || !existing.data) return;
     if (loadedFor.current === existing.data.id) return;
 
+    /*
+     * This sheet edits the three v1.0 types. A `workout` (UX v1.1, TD-3) is
+     * edited on the training screen (DYN-11), never here; none exists before
+     * migration `0004`, and DYN-4 removes `type` from this form altogether.
+     */
+    const type = habitTypeSchema.safeParse(existing.data.type);
+    if (!type.success) return;
+
     loadedFor.current = existing.data.id;
     form.reset({
       title: existing.data.title,
-      type: existing.data.type,
+      type: type.data,
       icon: existing.data.icon,
       categoryId: existing.data.categoryId,
       durationMinMin: existing.data.durationMinMin,

@@ -72,7 +72,12 @@ $$;
 -- this table. A rule enforced in four services is a rule until someone adds a
 -- fifth; the database is where it holds regardless.
 --
--- Setting it from NULL is allowed: that is materialisation writing it once.
+-- Setting it from NULL is allowed: that is materialisation writing it once —
+-- or, since UX v1.1 (TD-5), *Set the day* writing it once for items and blocks
+-- of a day that was pooled or unconfirmed at week build. The body is
+-- table-agnostic and is armed on day_blocks too (02_apply_triggers_rls.sql,
+-- migration 0005). Migration 0005 re-declares it identically; keep the two in
+-- step if this ever changes.
 -- ----------------------------------------------------------------------------
 create or replace function public.day_items_original_start_immutable()
 returns trigger

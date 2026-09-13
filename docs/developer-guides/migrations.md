@@ -143,3 +143,12 @@ This matters for any statement Postgres forbids from sharing a transaction with 
 Do this on **every** tier independently. A tier that is already caught up past the enum-add is unaffected; a tier where both are still pending will fail until it gets the two-pass treatment.
 
 **Prevention:** when authoring an `ALTER TYPE … ADD VALUE` and its first use, say so in the migration header — the split alone does not solve it, and a comment claiming otherwise sends the next person down the wrong path.
+
+## Epic 4 (UX v1.1): `0004`, `0005`, `0006` — the order per tier
+
+Authored by DYN-2, DYN-3 and DYN-21 and verified on scratch databases; Taylor applies them to each Supabase tier (session pooler, `db:migrate`).
+
+1. **`0004` and `0005` may run in one `db:migrate`.** `0004` adds five enum values (`workout`, `orient`, `not_confirmed`, `fixture`, the three notification kinds) and **neither file uses one of them**, so the one-transaction rule above does not bite. `0004`'s backfill emits `NOTICE` lines — `0004 overlap:` for v1.0 slots that overlapped and are now sequenced, `0004 before-wake:` for slots that started before the anchor — and a final `0004 backfill: overlaps=n before-wake=n`. Read them; they name rows a person may want to look at in the block editor. Zero of each is the expected result for the smoke account.
+2. **After `0005`, re-run the platform setup** (`01_init_functions.sql`, `02_apply_triggers_rls.sql`): it arms the immutability trigger on `day_blocks` (the migration also does, so a database migrated without setup still has it) and enables RLS on the three new tables (the migration also does).
+3. **Before `0006`, run `day.backfillBlocks`** (DYN-5) on that tier as the smoke account, or as each real account — it puts every v1.0 `day_items` row under a `morning` block. `0006` asserts no `day_block_id` is null and refuses to apply otherwise.
+4. **`0006` last**, on its own: it drops `template_slots.offset_*`, `days.template_id`, and `users.wake_anchor_habit_id`. Nothing reads them by then; `yarn check-types` after DYN-21 is the proof.

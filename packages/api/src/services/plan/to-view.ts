@@ -79,6 +79,12 @@ export function toSlotViews(
       row.multitaskGroup === null
         ? "none"
         : multitaskPosition(row, byGroup.get(row.multitaskGroup) ?? []),
+    // UX v1.1 fields — neutral until DYN-4 reads them from the slot and
+    // derives the clock with `stackBlock` (TD-4).
+    gapBeforeMin: 0,
+    pinnedClock: null,
+    role: "stack",
+    alternates: null,
   }));
 }
 
@@ -104,7 +110,8 @@ export function compareSlots(a: SlotRow, b: SlotRow): number {
 export type TemplateRow = {
   id: string;
   name: string;
-  anchorTime: string;
+  /** Nullable since 0004 (v1.1 §11.4); the summary does not read it. */
+  anchorTime: string | null;
   weeklyTarget: number | null;
   typicalDays: number[] | null;
   archivedAt: Date | null;
@@ -125,5 +132,10 @@ export function toTemplateSummaryView(
     weeklyTarget: row.weeklyTarget,
     usedThisWeek,
     archived: row.archivedAt !== null,
+    // UX v1.1: every v1.0 template lays out as a morning block until DYN-2
+    // backfills `kind` and DYN-4 reads the three columns (TD-1).
+    kind: "morning",
+    flow: "forward",
+    structure: "stack",
   };
 }

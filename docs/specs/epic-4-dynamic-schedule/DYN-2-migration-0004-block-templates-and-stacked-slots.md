@@ -4,7 +4,7 @@
 **Slice type:** Schema — a one-way door with a backfill. The risk class is *a silently wrong backfill*: a template whose derived starts no longer match the offsets it had, discovered when a person's Monday morning is laid out five minutes off from the one they built.
 **Vigil:** none. **Mason review:** the whole migration, and AC 6–9 (the backfill's equivalence proof).
 
-**Status:** Not started
+**Status:** Complete (2026-09-12) — authored and verified on scratch databases; not applied to the project's local tier or any hosted tier (Taylor runs migrations at the end of the epic)
 
 > **Mason — migration review.** This slice authors `0004`: eleven columns across three tables, one enum extension, one column made nullable, a check constraint, and a data backfill that turns absolute offsets into gaps. Review that the backfill is expressed once in SQL inside the migration (not in a script someone has to remember to run), that it reproduces every well-formed template's starts exactly (AC 7), that it logs rather than guesses for malformed ones (AC 8), that nothing is dropped (TD-9 — `offset_*` survive until `0006`), and that `_journal.json` has the entry. **Stop before any hosted tier** (root `AGENTS.md`); Taylor applies it.
 

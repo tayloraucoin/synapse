@@ -17,10 +17,20 @@
  * derivable from the week's days, so `WeekPlanStatus` is computed by the week
  * read model. See the Epic 1 TECHNICAL-DECISIONS entry.
  *
+ * UNDER UX v1.1 (0005) A DAY IS AN ORDERED SET OF BLOCKS (`day_blocks`, TD-2).
+ * `template_id` — the v1.0 whole-day template — is DEPRECATED since 0005: not
+ * written after DYN-5, dropped in 0006. `anchor_time` stays as the wake
+ * anchor, which is what it always was in practice. The v1.1 columns are the
+ * day's shape, the moment it was set (`confirmed_at` — nothing derived from
+ * the pick exists before it, R23), today's work anchor and its hardness, the
+ * focus, and the two lines the orient frame captures.
+ *
  * POLICIES: owner-private CRUD.
  */
 import { relations, sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
+  boolean,
   check,
   date,
   index,
@@ -37,8 +47,11 @@ import {
 import type { DayCloseReason, WokeAtSource } from "@syn/types";
 
 import { enumValues } from "../enum-values";
+import { habits } from "../library/habits";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
+import { dayBlocks } from "./day-blocks";
+import { dayShapeEnum } from "./enums";
 import { templates } from "./templates";
 
 /** One table uses it, so it lives here (drizzle-orm-conventions §3). */
@@ -47,10 +60,15 @@ export const dayCloseReasonEnum = pgEnum(
   enumValues<DayCloseReason>()(["manual", "auto"]),
 );
 
-/** Epic 2 DH-02: the wake time came from the anchor habit, or from a picker. */
+/**
+ * Epic 2 DH-02: the wake time came from the anchor habit, or from a picker —
+ * or, from UX v1.1 R11, from opening the orient frame (`orient`). `anchor`
+ * stays: rows written under v1.0 keep their source. Moved in DYN-1; the
+ * `ADD VALUE` ships in `0004`; written from DYN-13.
+ */
 export const wokeAtSourceEnum = pgEnum(
   "woke_at_source",
-  enumValues<WokeAtSource>()(["anchor", "manual"]),
+  enumValues<WokeAtSource>()(["anchor", "manual", "orient"]),
 );
 
 export const days = pgTable(
@@ -64,41 +82,83 @@ export const days = pgTable(
       .notNull()
       .defaultNow(),
 
-    /** The applied start — the template's anchor, overridable per day (§3.6). */
+    /**
+     * Today's anchor is hard — under *depends on the day* the pick's answer,
+     * otherwise copied from the profile at *Set the day* (UX v1.1 §3.3, 0005).
+     */
+    anchorIsHard: boolean("anchor_is_hard"),
+    /** The wake anchor — the day's start; overridable per day (§3.6). */
     anchorTime: time("anchor_time").notNull(),
     /** 5–1440. Set only by a capacity trim (§3.6, §5.8). */
     capacityMin: smallint("capacity_min"),
     closeReason: dayCloseReasonEnum("close_reason"),
     closedAt: timestamp("closed_at", { withTimezone: true }),
+    /** *Set the day* (UX v1.1 §5.3, R23, 0005). Null = unconfirmed. */
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
     /** The day key, in `timezone`. Unique per person. */
     date: date("date").notNull(),
     /** Snapshot of the rule this day was created under (cross-cutting §7.1). */
     dayCloseTime: time("day_close_time").notNull(),
+    /** *Today's intention* — the person's own words; ≤ 140 (UX v1.1 §5.2, 0005). */
+    intention: text("intention"),
+    /** *Grateful for, this morning* — the person's own words; ≤ 280 (UX v1.1 §5.2, 0005). */
+    morningGratitude: text("morning_gratitude"),
     /** Stamped when a closed day's record is edited (cross-cutting §8.1). */
     reviewEditedAt: timestamp("review_edited_at", { withTimezone: true }),
     /** Set by *Finish review* — the day has a number (Epic 3 DR-01). */
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    /** Structured from templates, or unstructured (UX v1.1 §3.9, 0005). */
+    shape: dayShapeEnum("shape").notNull().default("structured"),
     /** Snapshot of `users.timezone` at creation. */
     timezone: text("timezone").notNull(),
-    /** Set by the wake-anchor habit or by hand (official spec §0.3 R5). */
+    /** Set by the orient frame (v1.1 R11), the v1.0 anchor habit, or by hand. */
     wokeAt: timestamp("woke_at", { withTimezone: true }),
     wokeAtSource: wokeAtSourceEnum("woke_at_source"),
+    /** Today's work anchor after any slide (UX v1.1 §6.6, 0005); null until set. */
+    workStartTime: time("work_start_time"),
 
+    /**
+     * DEPRECATED since 0005 (TD-1): the v1.0 whole-day template. Not written
+     * after DYN-5; dropped in 0006. A day's templates are its `day_blocks`.
+     */
     templateId: uuid("template_id").references(() => templates.id, {
       onDelete: "set null",
     }),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    /**
+     * Today's focus — a `deep_work` habit (UX v1.1 §3.8, 0005). `set null`
+     * because a hard-deleted habit must not take the day with it; an archived
+     * one leaves the reference and the item's title snapshot says what it was.
+     *
+     * `: AnyPgColumn` for the same reason as `users.wake_anchor_habit_id`: this
+     * edge closes a cycle (days → habits → categories → users → days) that
+     * TypeScript cannot otherwise infer through.
+     */
+    workFocusHabitId: uuid("work_focus_habit_id").references(
+      (): AnyPgColumn => habits.id,
+      { onDelete: "set null" },
+    ),
   },
   (table) => [
     uniqueIndex("days_user_id_date_idx").on(table.userId, table.date),
     index("days_user_id_closed_at_idx").on(table.userId, table.closedAt),
+    index("days_user_id_confirmed_at_idx").on(table.userId, table.confirmedAt),
     index("days_template_id_idx").on(table.templateId),
     index("days_user_id_idx").on(table.userId),
+    index("days_work_focus_habit_id_idx").on(table.workFocusHabitId),
     check(
       "days_capacity_min_check",
       sql`${table.capacityMin} IS NULL OR ${table.capacityMin} BETWEEN 5 AND 1440`,
+    ),
+    check(
+      "days_intention_check",
+      sql`${table.intention} IS NULL OR length(${table.intention}) <= 140`,
+    ),
+    check(
+      "days_morning_gratitude_check",
+      sql`${table.morningGratitude} IS NULL OR length(${table.morningGratitude}) <= 280`,
     ),
     ...ownerPrivateCrudPolicies({
       prefix: "days",
@@ -107,7 +167,8 @@ export const days = pgTable(
   ],
 );
 
-export const daysRelations = relations(days, ({ one }) => ({
+export const daysRelations = relations(days, ({ many, one }) => ({
+  blocks: many(dayBlocks),
   template: one(templates, {
     fields: [days.templateId],
     references: [templates.id],
@@ -115,5 +176,9 @@ export const daysRelations = relations(days, ({ one }) => ({
   user: one(users, {
     fields: [days.userId],
     references: [users.id],
+  }),
+  workFocus: one(habits, {
+    fields: [days.workFocusHabitId],
+    references: [habits.id],
   }),
 }));

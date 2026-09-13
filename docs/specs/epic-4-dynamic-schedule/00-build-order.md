@@ -17,9 +17,9 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 ## Build-order checklist
 
 ### Phase 0 — The contract (no UI)
-- [ ] **DYN-1** · Vocabulary, view models, constants, and `stackBlock`: the block model's types and its one arithmetic — M · (none) · **Mason review of `stackBlock`'s probes**
-- [ ] **DYN-2** · Migration `0004`: block templates, stacked slots, block kinds and rotations on habits, the offset backfill — L · (DYN-1) · **Mason migration review**
-- [ ] **DYN-3** · Migration `0005`: the profile, fixtures, `day_blocks`, the day-side columns, the journal, per-block notification prefs, the trigger amendment — L · (DYN-2) · **Mason migration review**
+- [x] **DYN-1** · Vocabulary, view models, constants, and `stackBlock`: the block model's types and its one arithmetic — M · (none) · **Mason review of `stackBlock`'s probes** — built 2026-09-12; **the five `pgEnum` tuples moved with the unions so the workspace stays green; `0004` carries all five `ADD VALUE`s**
+- [x] **DYN-2** · Migration `0004`: block templates, stacked slots, block kinds and rotations on habits, the offset backfill — L · (DYN-1) · **Mason migration review** — authored 2026-09-12; **the backfill measures gaps from the previous position's end, a window's end being its own end and a before-wake slot's being shifted to the anchor; verified on scratch databases, not yet applied to any tier**
+- [x] **DYN-3** · Migration `0005`: the profile, fixtures, `day_blocks`, the day-side columns, the journal, per-block notification prefs, the trigger amendment — L · (DYN-2) · **Mason migration review** — authored 2026-09-12; **the existing immutability function already permitted exactly `NULL → value`, so it is armed on `day_blocks` unchanged; `0004` and `0005` may run in one `db:migrate`; verified on scratch databases, not yet applied to any tier**
 
 ### Phase 1 — The services
 - [ ] **DYN-4** · Plan services: block templates by kind, the same-position rule with *one of*, fixtures, workouts and focuses, the library by block — L · (DYN-3) · **Mason review of the position invariant**

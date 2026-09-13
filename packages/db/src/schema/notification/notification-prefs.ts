@@ -24,17 +24,22 @@ import {
   pgEnum,
   pgTable,
   timestamp,
-  uniqueIndex,
+  unique,
   uuid,
 } from "drizzle-orm/pg-core";
 
 import type { NotificationKind } from "@syn/types";
 
 import { enumValues } from "../enum-values";
+import { blockKindEnum } from "../enums";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 
-/** The nine rows of official spec §8.2, N1…N9 in order. */
+/**
+ * The nine rows of official spec §8.2, N1…N9 in order, then UX v1.1 §9.1's
+ * three (`block_start`, `fixture_start`, `devices_off`). Moved in DYN-1; the
+ * `ADD VALUE`s ship in `0004`; the scheduler writes them from DYN-20.
+ */
 export const notificationKindEnum = pgEnum(
   "notification_kind",
   enumValues<NotificationKind>()([
@@ -47,6 +52,9 @@ export const notificationKindEnum = pgEnum(
     "week_ready",
     "timer_running",
     "calendar_item",
+    "block_start",
+    "fixture_start",
+    "devices_off",
   ]),
 );
 
@@ -61,6 +69,14 @@ export const notificationPrefs = pgTable(
       .notNull()
       .defaultNow(),
 
+    /**
+     * UX v1.1 §9.3 (0005): `item_start` is a preference PER BLOCK — *Every
+     * item in… prep*. Null for every other kind, and for the row that means
+     * "item_start, every block" if one is ever written. The unique index below
+     * treats nulls as equal, so one row per (kind, block) and one row per kind
+     * without a block.
+     */
+    blockKind: blockKindEnum("block_kind"),
     enabled: boolean("enabled").notNull(),
     kind: notificationKindEnum("kind").notNull(),
 
@@ -69,10 +85,11 @@ export const notificationPrefs = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
   },
   (table) => [
-    uniqueIndex("notification_prefs_user_id_kind_idx").on(
-      table.userId,
-      table.kind,
-    ),
+    // A constraint, not an index: `nullsNotDistinct` exists only on the
+    // constraint builder (the same reason as `notification_deliveries_key`).
+    unique("notification_prefs_user_id_kind_block_kind_key")
+      .on(table.userId, table.kind, table.blockKind)
+      .nullsNotDistinct(),
     index("notification_prefs_user_id_idx").on(table.userId),
     ...ownerPrivateCrudPolicies({
       prefix: "notification_prefs",

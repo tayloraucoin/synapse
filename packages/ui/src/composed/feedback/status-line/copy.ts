@@ -91,6 +91,19 @@ export const STATUS_LINE_COPY: Record<StatusLineVariant, StatusLineCopyEntry> =
       actionLabel: "Turn on",
       dismissLabel: "Dismiss",
     },
+
+    /**
+     * UX v1.1 §6.6 — verbatim. The one quiet Adjust offer: shown once when
+     * the orient frame opened well after the wake target on a day set the
+     * night before with a hard anchor; never on an unset day, never twice.
+     * Not a question and not a detection — the person opened the frame late,
+     * and the line says so and offers the sheet.
+     */
+    "late-wake-offer": {
+      text: "Up later than planned",
+      actionLabel: "Adjust the morning",
+      dismissLabel: "Dismiss",
+    },
   };
 
 /** SY-06's line names both zones; the copy table holds the shape. */

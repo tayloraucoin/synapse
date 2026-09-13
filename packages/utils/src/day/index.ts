@@ -5,6 +5,13 @@ export {
   isSameOrBefore,
   resolveDayKey,
 } from "./boundaries";
+export {
+  computeBudget,
+  fitToBudget,
+  type FitItem,
+  type FitMode,
+  type FitResult,
+} from "./budget";
 export { daysBefore, weekdayForDayKey } from "./day-key";
 export {
   DAY_PART_HOURS,
@@ -33,6 +40,13 @@ export {
   type ShiftFitInput,
   type ShiftItem,
 } from "./shift-fit";
+export {
+  stackBlock,
+  type PlacedItem,
+  type StackInput,
+  type StackItem,
+  type StackResult,
+} from "./stack";
 export {
   clockMinutes,
   dateKeyIn,

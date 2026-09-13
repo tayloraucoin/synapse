@@ -16,7 +16,14 @@
  * NO `is_wake_anchor` COLUMN. Official §3.3 lists one, but "at most one per
  * user" is a fact about the person: `users.wake_anchor_habit_id` is the single
  * home and `HabitSummaryView.isWakeAnchor` is derived in the view mapper. See
- * the Epic 1 TECHNICAL-DECISIONS entry.
+ * the Epic 1 TECHNICAL-DECISIONS entry. (UX v1.1 R11 retires the anchor
+ * habit altogether; the column goes in `0006`.)
+ *
+ * WORKOUTS AND FOCUSES ARE HABITS (UX v1.1 §11.3, TD-3). A workout is
+ * `type = workout`; a focus is `type = deep_work`; both carry a rotation —
+ * `weekly_target` and `typical_days` — that no other type uses. `block_kind`
+ * is the block a habit lives in by default (null = anywhere) and drives the
+ * library's grouping and the block editor's *Add* filter. Since 0004.
  *
  * POLICIES: owner-private CRUD.
  */
@@ -34,7 +41,7 @@ import {
 
 import type { IconValue } from "@syn/types";
 
-import { itemTypeEnum } from "../enums";
+import { blockKindEnum, itemTypeEnum } from "../enums";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { categories } from "./categories";
@@ -64,6 +71,8 @@ export const habits = pgTable(
 
     /** Set by LB-01 *Archive*; never hard-deleted (§3.3). */
     archivedAt: timestamp("archived_at", { withTimezone: true }),
+    /** The block this habit lives in by default; null = anywhere (v1.1 §11.3). */
+    blockKind: blockKindEnum("block_kind"),
     /** ≤ 280. Snapshotted onto every item as `notes_preflight`. */
     defaultNotesPreflight: text("default_notes_preflight"),
     /**
@@ -91,6 +100,13 @@ export const habits = pgTable(
     /** 1–60 — Epic 1 §9. */
     title: text("title").notNull(),
     type: itemTypeEnum("type").notNull(),
+    /**
+     * Workouts and focuses only — the days the rotation usually falls on.
+     * Mon = 0 … Sun = 6, the same shape and check as `templates.typical_days`.
+     */
+    typicalDays: smallint("typical_days").array(),
+    /** Workouts and focuses only — the rotation's weekly count, 1–7. */
+    weeklyTarget: smallint("weekly_target"),
 
     categoryId: uuid("category_id").references(() => categories.id, {
       onDelete: "set null",
@@ -103,6 +119,15 @@ export const habits = pgTable(
     index("habits_user_id_archived_at_idx").on(table.userId, table.archivedAt),
     index("habits_category_id_idx").on(table.categoryId),
     index("habits_user_id_idx").on(table.userId),
+    index("habits_user_id_block_kind_idx").on(table.userId, table.blockKind),
+    check(
+      "habits_weekly_target_check",
+      sql`${table.weeklyTarget} IS NULL OR ${table.weeklyTarget} BETWEEN 1 AND 7`,
+    ),
+    check(
+      "habits_typical_days_check",
+      sql`${table.typicalDays} IS NULL OR (${table.typicalDays} <@ ARRAY[0,1,2,3,4,5,6]::smallint[])`,
+    ),
     check(
       "habits_life_priority_check",
       sql`${table.lifePriority} BETWEEN 1 AND 7`,
