@@ -3,18 +3,25 @@ import { z } from "zod";
 import {
   DURATION_MAX,
   DURATION_MIN,
+  GAP_MAX,
   PRIORITY_MAX,
   PRIORITY_MIN,
   TEMPLATE_NAME_MAX,
-  TEMPLATE_OFFSET_MIN,
   WEEKLY_TARGET_MAX,
   WEEKLY_TARGET_MIN,
 } from "@syn/constants";
 
+import {
+  blockFlowSchema,
+  blockKindSchema,
+  blockStructureSchema,
+  slotRoleSchema,
+} from "./block";
 import { clockTimeSchema } from "./preferences";
 
 /**
- * TP-02 and TP-03's rules — Epic 1 §5 and §9.
+ * The block editor's rules — UX v1.1 §3.2, §3.4, §3.5, §3.11, §11.4, §11.5
+ * (formerly TP-02 and TP-03, Epic 1 §5 and §9).
  *
  * TWO SCHEMAS FOR THE NAME, DELIBERATELY. `templatePatchSchema` allows an
  * empty name because the editor creates the row on open and autosaves every
@@ -35,7 +42,8 @@ export const templatePatchSchema = z.object({
   patch: z.object({
     /** May be empty while drafting; `templateLeaveSchema` is the real gate. */
     name: z.string().trim().max(TEMPLATE_NAME_MAX).optional(),
-    anchorTime: clockTimeSchema.optional(),
+    /** An explicit override — meaningful for a work template (v1.1 R5). */
+    anchorTime: clockTimeSchema.nullable().optional(),
     /** Null is *none*, never 0 — official spec §3.4 and SET-1's column. */
     weeklyTarget: z
       .number()
@@ -45,6 +53,9 @@ export const templatePatchSchema = z.object({
       .nullable()
       .optional(),
     typicalDays: z.array(weekdaySchema).max(7).nullable().optional(),
+    kind: blockKindSchema.optional(),
+    flow: blockFlowSchema.optional(),
+    structure: blockStructureSchema.optional(),
   }),
 });
 
@@ -63,25 +74,31 @@ export const timeModeSchema = z.enum(["fixed_time", "window", "unscheduled"]);
 export const schedulingSchema = z.enum(["hard", "soft"]);
 
 /**
- * One slot.
+ * One slot in a stacked block (UX v1.1 §11.5).
  *
- * The cross-field rules are the document's, in `superRefine` because each is a
- * relationship rather than a property of one field:
+ * A SLOT HAS NO OFFSET — and no time mode. It has a length, the gap before
+ * it, and, if it is a pin, a clock time; where it starts is derived by
+ * `stackBlock`. Windows and *anytime* are day-level ideas (a one-off can be
+ * either); inside a stacked block a slot is always `fixed_time`. Rows written
+ * under v1.0 with another mode are read as they are and refused on write
+ * (Mason, DYN-4 — logged).
  *
- * - a fixed slot needs a start;
- * - a window needs both ends, in order, and at least as long as the item —
- *   *The window is shorter than the item.* is Epic 1 §9's sentence;
- * - *Anytime* needs neither, and must not be told it does.
+ * The cross-field rules are relationships and live in `superRefine`:
+ *
+ * - a pin has no gap (the database check refuses it too; this is the sentence);
+ * - a slot joins a multitask bracket OR a one-of group at a shared position,
+ *   never both.
  */
 export const slotFormSchema = z
   .object({
     templateId: z.string().uuid(),
     slotId: z.string().uuid().optional(),
     habitId: z.string().uuid(),
-    timeMode: timeModeSchema,
-    offsetStartMin: z.number().int().min(TEMPLATE_OFFSET_MIN).nullable(),
-    offsetEndMin: z.number().int().nullable(),
     durationMin: z.number().int().min(DURATION_MIN).max(DURATION_MAX),
+    gapBeforeMin: z.number().int().min(0).max(GAP_MAX),
+    /** A clock time when the slot is a pin; the stack flows around it (R3). */
+    pinnedClock: clockTimeSchema.nullable(),
+    role: slotRoleSchema,
     priorityOverride: z
       .number()
       .int()
@@ -90,49 +107,31 @@ export const slotFormSchema = z
       .nullable(),
     scheduling: schedulingSchema,
     /**
-     * The other slot to join at this start. Present only when the person has
-     * answered the same-start question with *Yes, multitask*.
+     * The other slot to share a position with. Present only when the person
+     * has answered the same-position question — *Yes, multitask* or *No, one
+     * or the other* (v1.1 §3.5).
      */
     multitaskWith: z.string().uuid().optional(),
+    alternatesWith: z.string().uuid().optional(),
+    /** For a one-of member: this is the one the fit arithmetic uses. */
+    alternatesDefault: z.boolean().optional(),
   })
   .superRefine((value, ctx) => {
-    if (value.timeMode === "fixed_time" && value.offsetStartMin === null) {
+    if (value.pinnedClock !== null && value.gapBeforeMin !== 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["offsetStartMin"],
-        message: "Pick a time.",
+        path: ["gapBeforeMin"],
+        // [COPY — needs Vesper sign-off: v1.1 §3.2 states the rule, not a sentence.]
+        message: "Pinned things have no gap before them.",
       });
-      return;
     }
 
-    if (value.timeMode !== "window") return;
-
-    if (value.offsetStartMin === null || value.offsetEndMin === null) {
+    if (value.multitaskWith !== undefined && value.alternatesWith !== undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["offsetEndMin"],
-        message: "Pick a window.",
-      });
-      return;
-    }
-
-    if (value.offsetEndMin <= value.offsetStartMin) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["offsetEndMin"],
-        // [COPY — needs Vesper sign-off: Epic 1 gives no sentence for a window
-        // whose end is before its start. LB-02's "From"/"to" line is a
-        // different control and is not borrowed.]
-        message: "The window ends before it starts.",
-      });
-      return;
-    }
-
-    if (value.offsetEndMin - value.offsetStartMin < value.durationMin) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["offsetEndMin"],
-        message: "The window is shorter than the item.",
+        path: ["alternatesWith"],
+        // [COPY — needs Vesper sign-off]
+        message: "A thing is either a multitask or one of two, not both.",
       });
     }
   });
@@ -152,7 +151,11 @@ export const discardTemplateInput = z.object({
 export const slotIdInput = z.object({ id: z.string().uuid() });
 
 export const listTemplatesInput = z
-  .object({ includeArchived: z.boolean().optional() })
+  .object({
+    includeArchived: z.boolean().optional(),
+    /** Only this block kind — the editor's list for one kind (v1.1 §4.14). */
+    kind: blockKindSchema.optional(),
+  })
   .optional();
 
 export const moveSlotInput = z.object({
@@ -160,17 +163,25 @@ export const moveSlotInput = z.object({
   direction: z.enum(["up", "down"]),
 });
 
-/** The payload `removeSlot` returns, so *Undo* can put it back exactly. */
+/**
+ * The payload `removeSlot` returns, so *Undo* can put it back exactly — the
+ * stacked shape included (v1.1 §11.5). `sortOrder` is the position it had;
+ * the service re-densifies around it.
+ */
 export const restoreSlotInput = z.object({
   templateId: z.string().uuid(),
   habitId: z.string().uuid(),
+  /** Kept for legacy rows; a restored slot is otherwise `fixed_time`. */
   timeMode: timeModeSchema,
-  offsetStartMin: z.number().int().nullable(),
-  offsetEndMin: z.number().int().nullable(),
   durationMin: z.number().int(),
+  gapBeforeMin: z.number().int(),
+  pinnedAt: clockTimeSchema.nullable(),
+  role: slotRoleSchema,
   priorityOverride: z.number().int().nullable(),
   scheduling: schedulingSchema,
   multitaskGroup: z.string().nullable(),
+  alternatesGroup: z.string().nullable(),
+  alternatesDefault: z.boolean(),
   sortOrder: z.number().int(),
 });
 

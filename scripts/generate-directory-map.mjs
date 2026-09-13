@@ -93,6 +93,9 @@ const ANNOTATIONS = {
   "packages/api/src/trpc.ts": "two procedure tiers, the error formatter, and the RLS rule in its header",
   "packages/api/src/services/notifications/fan-out.ts": "the one named RLS bypass, for the sessionless scheduler",
   "packages/api/src/services/jobs/run-scheduled-jobs.ts": "the job registry \u2014 empty until the feature epics land",
+  "packages/api/src/services/plan/save-slot.ts": "THE same-position rule (v1.1 \u00a73.5): multitask or one-of at one position, else SamePositionError. Every slot write pays it",
+  "packages/api/src/services/plan/anchors.ts": "which profile time a block kind walks from, and in which direction \u2014 the only reader of that mapping",
+  "packages/api/src/services/plan/to-view.ts": "one stackBlock walk per template; startClock is derived here, never stored",
 
   // --- ui ---
   "packages/ui/src/index.ts": "enumerated exports; no \"./*\" wildcard",

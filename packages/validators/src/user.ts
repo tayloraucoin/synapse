@@ -1,13 +1,26 @@
 import { z } from "zod";
 
-import { DISPLAY_NAME_MAX } from "@syn/constants";
+import { DISPLAY_NAME_MAX, ORIENT_PASSAGE_MAX } from "@syn/constants";
 
+import {
+  anchorDirectionSchema,
+  blockOrderSchema,
+  overflowModeSchema,
+  scheduleShapeSchema,
+  workDaysSchema,
+} from "./block";
+import { journalPromptsSchema } from "./journal";
 import {
   clockTimeSchema,
   dayCloseTimeSchema,
   themePreferenceSchema,
   timezoneSchema,
 } from "./preferences";
+
+/** `HH:mm` compared as strings; both are already normalised by `clockTimeSchema`. */
+function clockLte(a: string, b: string): boolean {
+  return a <= b;
+}
 
 /**
  * The account preferences a person can change — official spec §3.1, edited on
@@ -68,10 +81,51 @@ export const updatePreferencesInput = z
      * OS owns, and this must never be re-derived from it.
      */
     reminderPromptAnsweredAt: z.coerce.date().optional(),
+
+    /*
+     * ---- UX v1.1 §11.2 — the profile the block model lays days out from.
+     * Written by first run (§4.1–§4.11) and Settings → Your day (§4.14).
+     */
+    scheduleShape: scheduleShapeSchema.nullable().optional(),
+    workDays: workDaysSchema.nullable().optional(),
+    workStartTime: clockTimeSchema.nullable().optional(),
+    workEndTime: clockTimeSchema.nullable().optional(),
+    anchorDirection: anchorDirectionSchema.nullable().optional(),
+    earliestWakeTime: clockTimeSchema.nullable().optional(),
+    lightsOutTime: clockTimeSchema.nullable().optional(),
+    devicesOffTime: clockTimeSchema.nullable().optional(),
+    overflowMode: overflowModeSchema.optional(),
+    orientPassage: z
+      .string()
+      .trim()
+      .max(ORIENT_PASSAGE_MAX)
+      .nullable()
+      .transform((value) => (value === "" ? null : value))
+      .optional(),
+    orientShowLastNight: z.boolean().optional(),
+    orientAskGratitude: z.boolean().optional(),
+    journalEnabled: z.boolean().optional(),
+    journalPrompts: journalPromptsSchema.optional(),
+    blockOrder: blockOrderSchema.optional(),
   })
   .refine(
     (value) => Object.values(value).some((field) => field !== undefined),
     { message: "Nothing to update." },
+  )
+  .refine(
+    (value) =>
+      !value.devicesOffTime ||
+      !value.lightsOutTime ||
+      // Phone away is before lights out, allowing a wrap past midnight
+      // (lights out 00:30, phone away 23:45): the pair is ordered unless
+      // both sit on the same side of midnight and the phone comes second.
+      clockLte(value.devicesOffTime, value.lightsOutTime) ||
+      value.lightsOutTime < "06:00",
+    {
+      // [COPY — needs Vesper sign-off: v1.1 §4.10 names the rule, not a sentence.]
+      message: "Phone away comes before lights out.",
+      path: ["devicesOffTime"],
+    },
   );
 
 export type UpdatePreferencesInput = z.infer<typeof updatePreferencesInput>;

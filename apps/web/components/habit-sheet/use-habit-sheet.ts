@@ -3,11 +3,7 @@
 import * as React from "react";
 
 import type { IconValue } from "@syn/types";
-import {
-  habitFormSchema,
-  habitTypeSchema,
-  type HabitFormInput,
-} from "@syn/validators";
+import { habitFormSchema, type HabitFormInput } from "@syn/validators";
 
 import { useIconUpload } from "@/lib/hooks/use-icon-upload";
 import { useSynapseForm } from "@/lib/forms/use-synapse-form";
@@ -42,12 +38,12 @@ const DEFAULT_ICON: IconValue = {
 const EMPTY_HABITS: never[] = [];
 const EMPTY_CATEGORIES: never[] = [];
 
-function emptyValues(type: HabitFormInput["type"]): HabitFormInput {
+function emptyValues(): HabitFormInput {
   return {
     title: "",
-    type,
     icon: DEFAULT_ICON,
     categoryId: null,
+    blockKind: null,
     durationMinMin: null,
     durationMaxMin: null,
     // `Stepper17` starts unselected; zod reports the document's sentence when
@@ -66,7 +62,8 @@ export interface UseHabitSheetOptions {
   open: boolean;
   mode: HabitSheetMode;
   habitId?: string;
-  defaults?: { type?: HabitFormInput["type"] };
+  /** Kept for callers' signatures; the sheet makes habits only (v1.1 §4.15). */
+  defaults?: { type?: string };
   onSaved?: (habit: { id: string }) => void;
   onOpenChange: (open: boolean) => void;
 }
@@ -97,7 +94,7 @@ export function useHabitSheet({
 
   const form = useSynapseForm<HabitFormInput>({
     schema: habitFormSchema,
-    defaultValues: emptyValues(defaults?.type ?? "habit"),
+    defaultValues: emptyValues(),
   });
 
   /**
@@ -140,19 +137,19 @@ export function useHabitSheet({
     if (loadedFor.current === existing.data.id) return;
 
     /*
-     * This sheet edits the three v1.0 types. A `workout` (UX v1.1, TD-3) is
-     * edited on the training screen (DYN-11), never here; none exists before
-     * migration `0004`, and DYN-4 removes `type` from this form altogether.
+     * This sheet edits habits (UX v1.1 §4.15). A workout or a focus is edited
+     * on its block screen (DYN-11), never here.
      */
-    const type = habitTypeSchema.safeParse(existing.data.type);
-    if (!type.success) return;
+    if (existing.data.type === "workout" || existing.data.type === "deep_work") {
+      return;
+    }
 
     loadedFor.current = existing.data.id;
     form.reset({
       title: existing.data.title,
-      type: type.data,
       icon: existing.data.icon,
       categoryId: existing.data.categoryId,
+      blockKind: existing.data.blockKind,
       durationMinMin: existing.data.durationMinMin,
       durationMaxMin: existing.data.durationMaxMin,
       lifePriority: existing.data.lifePriority,
@@ -165,21 +162,19 @@ export function useHabitSheet({
 
   /*
    * Reset to a blank form each time the sheet opens in create mode.
-   *
-   * The dependency is `defaultType`, not `defaults`: every caller passes an
-   * object literal, so depending on the object would reset the form on every
-   * parent render — wiping what someone was typing. `discardIcon` is pulled
-   * out because `iconUpload` is rebuilt each render and its callbacks are not.
+   * `discardIcon` is pulled out because `iconUpload` is rebuilt each render
+   * and its callbacks are not. `defaults` is accepted for callers' sake and
+   * read for nothing: the sheet makes habits only.
    */
-  const defaultType = defaults?.type ?? "habit";
+  void defaults;
   const discardIcon = iconUpload.discard;
 
   React.useEffect(() => {
     if (!open || mode !== "create") return;
-    form.reset(emptyValues(defaultType));
+    form.reset(emptyValues());
     setFormError(null);
     discardIcon();
-  }, [open, mode, defaultType, form, discardIcon]);
+  }, [open, mode, form, discardIcon]);
 
   const createMutation = trpc.habit.create.useMutation();
   const updateMutation = trpc.habit.update.useMutation();
@@ -193,7 +188,6 @@ export function useHabitSheet({
   );
 
   const title = form.watch("title");
-  const type = form.watch("type");
   const isWakeAnchor = form.watch("isWakeAnchor");
 
   /** Non-blocking, computed from the list already loaded (SET-4's ruling). */
@@ -323,7 +317,6 @@ export function useHabitSheet({
     anchorHolder,
     categories,
     habits,
-    type,
     templateCount: templateCount.data ?? 0,
     archived: existing.data?.archived ?? false,
     loading: mode === "edit" && existing.isLoading,

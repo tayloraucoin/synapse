@@ -159,20 +159,28 @@ export function SlotSheet({
     if (!habitId || duration === null) return;
     setError(null);
 
-    const startMin =
-      when === "unscheduled" ? null : clockToMinutes(startClock) - anchorMinutes;
-    const endMin =
-      when === "window" ? clockToMinutes(endClock) - anchorMinutes : null;
+    /*
+     * TRANSITIONAL (DYN-4 → DYN-8). The slot contract is UX v1.1's: a length,
+     * a gap, and a pin — no offset. This v1.0 sheet still shows a start time,
+     * so it is read as a PIN only when the person moved it off the stacked
+     * default; left alone, the slot takes its place in the stack. DYN-8's
+     * block editor replaces this sheet with the real controls.
+     */
+    const stackedDefault = clockFromMinutes(anchorMinutes + previousEndMin);
+    const pinnedClock =
+      when === "fixed_time" && startClock !== "" && startClock !== stackedDefault
+        ? startClock
+        : null;
 
     try {
       await saveSlot.mutateAsync({
         templateId,
         slotId,
         habitId,
-        timeMode: when,
-        offsetStartMin: startMin,
-        offsetEndMin: endMin,
         durationMin: duration,
+        gapBeforeMin: 0,
+        pinnedClock,
+        role: "stack",
         priorityOverride: priority,
         scheduling,
         ...(multitaskWith ? { multitaskWith } : {}),
@@ -437,18 +445,21 @@ function parseConflict(error: unknown): {
   const message = messageFrom(error);
   if (!message.startsWith("{")) return null;
   try {
+    // UX v1.1 (DYN-4): the position rule's payload. The v1.0 question names a
+    // clock; a stacked position has none, so the pin's clock or the occupant's
+    // title stands in until DYN-8's three-answer sheet.
     const parsed = JSON.parse(message) as {
       code?: string;
       withSlotId?: string;
       withTitle?: string;
-      atClock?: string;
+      position?: { sortOrder?: number; pinnedClock?: string | null };
     };
-    if (parsed.code !== "same_start") return null;
-    if (!parsed.withSlotId || !parsed.withTitle || !parsed.atClock) return null;
+    if (parsed.code !== "same_position") return null;
+    if (!parsed.withSlotId || !parsed.withTitle) return null;
     return {
       withSlotId: parsed.withSlotId,
       withTitle: parsed.withTitle,
-      atClock: parsed.atClock,
+      atClock: parsed.position?.pinnedClock ?? "",
     };
   } catch {
     return null;

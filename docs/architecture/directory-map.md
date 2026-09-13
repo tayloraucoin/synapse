@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1084 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1093 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -596,8 +596,10 @@ packages/
         category.ts
         day.ts
         feedback.ts
+        fixture.ts
         habit.ts
         item.ts
+        journal.ts
         notification.ts
         reason.ts
         review.ts
@@ -622,6 +624,7 @@ packages/
           get-day.ts
           get-item.ts
           item-fields.ts
+          journal.ts
           manual-time.ts
           materialize-day.ts
           one-off.ts
@@ -647,6 +650,7 @@ packages/
           save-category.ts
           save-habit.ts
           save-reason.ts
+          starter-library.ts
           starter-set.ts
           to-view.ts
         notifications/
@@ -657,10 +661,12 @@ packages/
           web-push.ts
         plan/
           anchor-fallback.ts
+          anchors.ts  # which profile time a block kind walks from, and in which direction — the only reader of that mapping
+          fixtures.ts
           most-used-template.ts
-          save-slot.ts
+          save-slot.ts  # THE same-position rule (v1.1 §3.5): multitask or one-of at one position, else SamePositionError. Every slot write pays it
           templates.ts
-          to-view.ts
+          to-view.ts  # one stackBlock walk per template; startClock is derived here, never stored
         review/
           decide.ts
           decision-state.ts
@@ -1409,12 +1415,15 @@ packages/
       account.ts
       asset.ts
       auth-credentials.ts
+      block.ts
       category.ts
       day.ts
       feedback.ts
+      fixture.ts
       habit.ts
       index.ts
       item.ts
+      journal.ts
       keys.ts
       notification.ts
       preferences.ts

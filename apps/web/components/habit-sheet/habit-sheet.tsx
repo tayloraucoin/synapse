@@ -12,7 +12,6 @@ import {
   Label,
   RangeInput,
   ResponsiveSheet,
-  SegmentedControl,
   Stepper17,
   Switch,
   Text,
@@ -164,37 +163,10 @@ export function HabitSheet({
             </Text>
           ) : null}
 
-          <SegmentedControl
-            label={COPY.type}
-            value={values.type}
-            onChange={(next) => {
-              form.setValue("type", next, { shouldDirty: true });
-            }}
-            disabled={disabled}
-            options={[
-              {
-                value: "habit" as const,
-                label: COPY.typeOptions.habit,
-                helper: COPY.typeHelpers.habit,
-              },
-              {
-                value: "task_appointment" as const,
-                label: COPY.typeOptions.task_appointment,
-                helper: COPY.typeHelpers.task_appointment,
-              },
-              {
-                value: "deep_work" as const,
-                label: COPY.typeOptions.deep_work,
-                helper: COPY.typeHelpers.deep_work,
-              },
-            ]}
-          />
-
-          {options.mode === "edit" && sheet.templateCount > 0 ? (
-            <Text as="p" variant="secondary" tone="secondary">
-              {COPY.typeChangeKeepsTemplates}
-            </Text>
-          ) : null}
+          {/*
+            UX v1.1 §4.15 (W6): this sheet makes habits, and only habits. The
+            v1.0 type segment is gone; the block chip row arrives with DYN-8.
+          */}
 
           <IconChooser
             value={values.icon}
@@ -236,12 +208,8 @@ export function HabitSheet({
               form.setValue("durationMinMin", next.from, { shouldDirty: true });
               form.setValue("durationMaxMin", next.to, { shouldDirty: true });
             }}
-            helperText={
-              values.type === "task_appointment"
-                ? COPY.rangeHelperOptional
-                : COPY.rangeHelperRequired
-            }
-            required={values.type !== "task_appointment"}
+            helperText={COPY.rangeHelperRequired}
+            required
             disabled={disabled}
             error={
               visibleFieldError(form.formState, "durationMinMin") ??
@@ -331,9 +299,8 @@ export function HabitSheet({
                 disabled={disabled}
               />
 
-              {/* Only a Habit can be the wake anchor (Epic 1 LB-02). */}
-              {values.type === "habit" ? (
-                <div className="flex flex-col gap-(--space-2)">
+              {/* Every entry here is a habit; the anchor goes with DYN-13 (v1.1 R11). */}
+              <div className="flex flex-col gap-(--space-2)">
                   <div className="flex items-center justify-between gap-(--space-3)">
                     <Label htmlFor="habit-wake-anchor">
                       {COPY.wakeAnchor}
@@ -355,8 +322,7 @@ export function HabitSheet({
                       {COPY.wakeAnchorReplaces(sheet.anchorHolder)}
                     </Text>
                   )}
-                </div>
-              ) : null}
+              </div>
             </div>
           )}
 

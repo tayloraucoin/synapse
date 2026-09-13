@@ -92,7 +92,10 @@ export function TemplateEditor({
   if (!template) return null;
 
   const readOnly = editor.archived || !online;
-  const anchorMinutes = clockToMinutes(template.anchorTime);
+  // UX v1.1 (DYN-4): the anchor comes from the profile per kind; the template's
+  // own `anchorTime` is an override. The read model says where the walk began.
+  const anchorClock = template.anchorClock ?? template.anchorTime ?? "07:00";
+  const anchorMinutes = clockToMinutes(anchorClock);
 
   /**
    * Every slot mutation ends here, which makes this the one place that knows a
@@ -129,12 +132,12 @@ export function TemplateEditor({
       <div className="flex flex-wrap items-center gap-(--space-3)">
         <SettingPopover
           label={COPY.startsAt}
-          value={template.anchorTime}
+          value={anchorClock}
           disabled={readOnly}
         >
           <TimeField
             label={COPY.startsAt}
-            value={template.anchorTime}
+            value={anchorClock}
             onChange={(next) => {
               editor.patch({ anchorTime: next });
             }}
@@ -215,16 +218,10 @@ export function TemplateEditor({
                 .mutateAsync({
                   templateId,
                   habitId: slot.habitId,
-                  timeMode: slot.timeMode,
-                  offsetStartMin:
-                    slot.startClock === null
-                      ? null
-                      : clockToMinutes(slot.startClock) - anchorMinutes,
-                  offsetEndMin:
-                    slot.endClock === null
-                      ? null
-                      : clockToMinutes(slot.endClock) - anchorMinutes,
                   durationMin: slot.durationMin,
+                  gapBeforeMin: 0,
+                  pinnedClock: slot.pinnedClock,
+                  role: slot.role,
                   priorityOverride: slot.overridden ? slot.priority : null,
                   scheduling: slot.scheduling,
                   multitaskWith: slot.id,
@@ -259,13 +256,10 @@ export function TemplateEditor({
                   templateId,
                   slotId: later.id,
                   habitId: later.habitId,
-                  timeMode: later.timeMode,
-                  offsetStartMin:
-                    later.startClock === null
-                      ? null
-                      : clockToMinutes(later.startClock) - anchorMinutes,
-                  offsetEndMin: null,
                   durationMin: later.durationMin,
+                  gapBeforeMin: later.gapBeforeMin,
+                  pinnedClock: later.pinnedClock,
+                  role: later.role,
                   priorityOverride: later.overridden ? later.priority : null,
                   scheduling: later.scheduling,
                   multitaskWith: a,
@@ -301,7 +295,7 @@ export function TemplateEditor({
       <SlotSheet
         open={slotSheet.open}
         templateId={templateId}
-        anchorTime={template.anchorTime}
+        anchorTime={anchorClock}
         slotId={slotSheet.slotId}
         previousEndMin={lastEndOffset(slots, anchorMinutes)}
         onOpenChange={(next) => {

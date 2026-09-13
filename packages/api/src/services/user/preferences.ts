@@ -1,6 +1,14 @@
 import { eq } from "drizzle-orm";
 
 import { users, type RlsClient } from "@syn/db";
+import type {
+  AnchorDirection,
+  BlockKind,
+  JournalPrompt,
+  OverflowMode,
+  ScheduleShape,
+  WorkDays,
+} from "@syn/types";
 import type { UpdatePreferencesInput } from "@syn/validators";
 import { addDays, resolveDayKey } from "@syn/utils";
 
@@ -40,6 +48,25 @@ export type UserPreferencesRow = {
   weekBuildReminderWeekday: number;
   weekBuildReminderTime: string;
   reminderPromptAnsweredAt: Date | null;
+
+  /*
+   * ---- UX v1.1 §11.2 — the profile the block model lays days out from.
+   */
+  scheduleShape: ScheduleShape | null;
+  workDays: WorkDays | null;
+  workStartTime: string | null;
+  workEndTime: string | null;
+  anchorDirection: AnchorDirection | null;
+  earliestWakeTime: string | null;
+  lightsOutTime: string | null;
+  devicesOffTime: string | null;
+  overflowMode: OverflowMode;
+  orientPassage: string | null;
+  orientShowLastNight: boolean;
+  orientAskGratitude: boolean;
+  journalEnabled: boolean;
+  journalPrompts: JournalPrompt[];
+  blockOrder: BlockKind[];
 };
 
 const PREFERENCE_COLUMNS = {
@@ -60,6 +87,21 @@ const PREFERENCE_COLUMNS = {
   weekBuildReminderWeekday: users.weekBuildReminderWeekday,
   weekBuildReminderTime: users.weekBuildReminderTime,
   reminderPromptAnsweredAt: users.reminderPromptAnsweredAt,
+  scheduleShape: users.scheduleShape,
+  workDays: users.workDays,
+  workStartTime: users.workStartTime,
+  workEndTime: users.workEndTime,
+  anchorDirection: users.anchorDirection,
+  earliestWakeTime: users.earliestWakeTime,
+  lightsOutTime: users.lightsOutTime,
+  devicesOffTime: users.devicesOffTime,
+  overflowMode: users.overflowMode,
+  orientPassage: users.orientPassage,
+  orientShowLastNight: users.orientShowLastNight,
+  orientAskGratitude: users.orientAskGratitude,
+  journalEnabled: users.journalEnabled,
+  journalPrompts: users.journalPrompts,
+  blockOrder: users.blockOrder,
 } as const;
 
 /** The caller's own row, or null. RLS makes "own" the only reachable answer. */
@@ -120,6 +162,47 @@ export async function updatePreferences(
     ...(input.reminderPromptAnsweredAt !== undefined
       ? { reminderPromptAnsweredAt: input.reminderPromptAnsweredAt }
       : {}),
+    // UX v1.1 §11.2. `null` is a real value on the nullable ones (a person
+    // clearing their lights-out time), so the guard is against `undefined`.
+    ...(input.scheduleShape !== undefined
+      ? { scheduleShape: input.scheduleShape }
+      : {}),
+    ...(input.workDays !== undefined ? { workDays: input.workDays } : {}),
+    ...(input.workStartTime !== undefined
+      ? { workStartTime: input.workStartTime }
+      : {}),
+    ...(input.workEndTime !== undefined ? { workEndTime: input.workEndTime } : {}),
+    ...(input.anchorDirection !== undefined
+      ? { anchorDirection: input.anchorDirection }
+      : {}),
+    ...(input.earliestWakeTime !== undefined
+      ? { earliestWakeTime: input.earliestWakeTime }
+      : {}),
+    ...(input.lightsOutTime !== undefined
+      ? { lightsOutTime: input.lightsOutTime }
+      : {}),
+    ...(input.devicesOffTime !== undefined
+      ? { devicesOffTime: input.devicesOffTime }
+      : {}),
+    ...(input.overflowMode !== undefined
+      ? { overflowMode: input.overflowMode }
+      : {}),
+    ...(input.orientPassage !== undefined
+      ? { orientPassage: input.orientPassage }
+      : {}),
+    ...(input.orientShowLastNight !== undefined
+      ? { orientShowLastNight: input.orientShowLastNight }
+      : {}),
+    ...(input.orientAskGratitude !== undefined
+      ? { orientAskGratitude: input.orientAskGratitude }
+      : {}),
+    ...(input.journalEnabled !== undefined
+      ? { journalEnabled: input.journalEnabled }
+      : {}),
+    ...(input.journalPrompts !== undefined
+      ? { journalPrompts: input.journalPrompts }
+      : {}),
+    ...(input.blockOrder !== undefined ? { blockOrder: input.blockOrder } : {}),
     updatedAt: new Date(),
   };
 

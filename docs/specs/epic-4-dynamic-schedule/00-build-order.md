@@ -22,7 +22,7 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 - [x] **DYN-3** · Migration `0005`: the profile, fixtures, `day_blocks`, the day-side columns, the journal, per-block notification prefs, the trigger amendment — L · (DYN-2) · **Mason migration review** — authored 2026-09-12; **the existing immutability function already permitted exactly `NULL → value`, so it is armed on `day_blocks` unchanged; `0004` and `0005` may run in one `db:migrate`; verified on scratch databases, not yet applied to any tier**
 
 ### Phase 1 — The services
-- [ ] **DYN-4** · Plan services: block templates by kind, the same-position rule with *one of*, fixtures, workouts and focuses, the library by block — L · (DYN-3) · **Mason review of the position invariant**
+- [x] **DYN-4** · Plan services: block templates by kind, the same-position rule with *one of*, fixtures, workouts and focuses, the library by block — L · (DYN-3) · **Mason review of the position invariant**
 - [ ] **DYN-5** · Materialisation per block and *Set the day*: `materializeDay` rewritten, `confirmDay`, the day read model by block, the week view by block — L · (DYN-4) · **Mason review of the keep rules and the trigger transition**
 - [ ] **DYN-6** · Adjust, *Do now*, habit-day edits, and moves: `adjustDay`, `doNow`, `editHabitDay`, `moveItem`, `moveBlock`, the reflow — L · (DYN-5) · **Mason review; Vigil: induced staleness between preview and apply**
 

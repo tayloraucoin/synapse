@@ -1,52 +1,212 @@
-import { and, eq, ne, sql } from "drizzle-orm";
+import { and, asc, eq, ne } from "drizzle-orm";
 
 import { habits, templateSlots, templates, type RlsClient } from "@syn/db";
-import { clockToMinutes, formatClockFromMinutes } from "@syn/utils";
 import type { SlotFormInput } from "@syn/validators";
 
-import { anchorOrFallback } from "./anchor-fallback";
-
 /**
- * Saving one slot, and THE invariant.
+ * Saving one slot, and THE invariant — UX v1.1 §3.5, §11.5 (DYN-4).
  *
- * TWO FIXED SLOTS AT ONE START MUST BE A MULTITASK GROUP (official spec §3.5:
- * "two slots sharing a start offset must be in the same group or the template
- * won't save"). This is enforced HERE, in the service, on every write — not in
- * the sheet.
+ * TWO SLOTS AT ONE POSITION MUST SHARE A GROUP. A POSITION is a place in the
+ * stack (`sort_order`) or, for pins, a clock time (`pinned_at`). Two slots at
+ * one position mean one of two things, and the person has to say which:
+ * *Yes, multitask* (both happen — `multitask_group`, v1 §5.5) or *No, one or
+ * the other* (`alternates_group`, v1.1 §3.5). A slot is never in both.
+ * Otherwise the save is refused with `SamePositionError` carrying the occupant
+ * and the position, so the sheet can ask the person's own question rather
+ * than show an error code.
  *
- * The difference matters. A rule that lives in the sheet is a rule that a
- * duplicate, a move, an anchor change, a second device, or the next write path
- * someone adds can walk straight past, and the result is a template that
- * silently stacks two things at 7:00 and a day that materialises them on top
- * of each other. In the service, every path pays the check: add, edit,
- * duplicate, restore-after-undo, and whatever SET-6 and SET-7 add later.
+ * ENFORCED HERE, IN THE SERVICE, ON EVERY WRITE — add, edit, duplicate,
+ * restore-after-undo, move — for the reason the v1.0 rule was: a rule that
+ * lives in a sheet is a rule the next write path walks past, and the result
+ * is breakfast materialised on top of the walk.
  *
- * WINDOWS AND ANYTIME NEVER COLLIDE. A window is a span the person may do the
- * thing inside, and two spans overlapping is a fact rather than an error
- * (Epic 1 TP-02's Vesper call: "enforcing non-overlap would make the editor
- * argue with the person"). Only an exact shared `fixed_time` start is asked
- * about, because only that is genuinely ambiguous.
+ * WHAT ELSE THE SERVICE OWNS, so no caller has to:
+ *
+ *  - `sort_order` is DENSE. A new slot appends; the caller never sends one.
+ *    A bracket or a one-of group is one position.
+ *  - A PIN HAS NO GAP. Normalised on write; the database check refuses it
+ *    anyway, and the sheet never sees the check.
+ *  - A ONE-OF GROUP'S MEMBERS ARE STRUCTURALLY IDENTICAL: same position, gap,
+ *    pin and role. Writing one member syncs the others. Exactly one is the
+ *    default; the partial unique index holds "at most one", this holds "at
+ *    least one".
+ *  - `role` is `stack` unless the template's structure allows otherwise.
+ *  - A slot is always `fixed_time`; windows and *anytime* are day-level ideas
+ *    (Mason, DYN-4 — logged). Legacy rows keep their mode on read.
  */
 
-export type SameStartConflict = {
-  code: "same_start";
+export type SamePositionConflict = {
+  code: "same_position";
   withSlotId: string;
   withTitle: string;
-  atClock: string;
+  position: { sortOrder: number; pinnedClock: string | null };
 };
 
-export class SameStartError extends Error {
-  readonly conflict: SameStartConflict;
-  constructor(conflict: SameStartConflict) {
-    super("same_start");
-    this.name = "SameStartError";
+export class SamePositionError extends Error {
+  readonly conflict: SamePositionConflict;
+  constructor(conflict: SamePositionConflict) {
+    super("same_position");
+    this.name = "SamePositionError";
     this.conflict = conflict;
   }
 }
 
-/** Short and local to the template; SET-6 turns it into a per-day uuid. */
-function newMultitaskGroup(): string {
+export class SlotRuleError extends Error {
+  readonly code: "already_multitask" | "already_alternates" | "not_found";
+  constructor(code: SlotRuleError["code"]) {
+    super(code);
+    this.name = "SlotRuleError";
+    this.code = code;
+  }
+}
+
+/** Short and local to the template; the materialiser mints per-day uuids. */
+function newGroupId(): string {
   return crypto.randomUUID().slice(0, 8);
+}
+
+type Tx = Parameters<Parameters<RlsClient["execute"]>[0]>[0];
+
+type PositionRow = {
+  id: string;
+  sortOrder: number;
+  pinnedAt: string | null;
+  multitaskGroup: string | null;
+  alternatesGroup: string | null;
+  alternatesDefault: boolean;
+  gapBeforeMin: number;
+  role: "stack" | "opener" | "pool" | "closer";
+  title: string;
+};
+
+/** Two slots share a position when they share a pin time, or a stack index. */
+export function samePosition(
+  a: { sortOrder: number; pinnedAt: string | null },
+  b: { sortOrder: number; pinnedAt: string | null },
+): boolean {
+  if (a.pinnedAt !== null || b.pinnedAt !== null) {
+    return a.pinnedAt !== null && b.pinnedAt !== null && a.pinnedAt === b.pinnedAt;
+  }
+  return a.sortOrder === b.sortOrder;
+}
+
+async function readPositions(
+  tx: Tx,
+  userId: string,
+  templateId: string,
+): Promise<PositionRow[]> {
+  return tx
+    .select({
+      id: templateSlots.id,
+      sortOrder: templateSlots.sortOrder,
+      pinnedAt: templateSlots.pinnedAt,
+      multitaskGroup: templateSlots.multitaskGroup,
+      alternatesGroup: templateSlots.alternatesGroup,
+      alternatesDefault: templateSlots.alternatesDefault,
+      gapBeforeMin: templateSlots.gapBeforeMin,
+      role: templateSlots.role,
+      title: habits.title,
+    })
+    .from(templateSlots)
+    .innerJoin(habits, eq(habits.id, templateSlots.habitId))
+    .where(
+      and(
+        eq(templateSlots.templateId, templateId),
+        eq(templateSlots.userId, userId),
+      ),
+    )
+    .orderBy(asc(templateSlots.sortOrder), asc(templateSlots.createdAt));
+}
+
+/**
+ * Re-number positions 0…n densely, keeping bracket and one-of members on one
+ * number. Called after every write that can leave a hole.
+ */
+export async function densifyPositions(
+  tx: Tx,
+  userId: string,
+  templateId: string,
+): Promise<void> {
+  const rows = await readPositions(tx, userId, templateId);
+  let position = -1;
+  let previous: PositionRow | null = null;
+  for (const row of rows) {
+    const shares =
+      previous !== null &&
+      ((row.multitaskGroup !== null &&
+        row.multitaskGroup === previous.multitaskGroup) ||
+        (row.alternatesGroup !== null &&
+          row.alternatesGroup === previous.alternatesGroup));
+    if (!shares) position += 1;
+    if (row.sortOrder !== position) {
+      await tx
+        .update(templateSlots)
+        .set({ sortOrder: position, updatedAt: new Date() })
+        .where(eq(templateSlots.id, row.id));
+    }
+    previous = { ...row, sortOrder: position };
+  }
+}
+
+/** Copy the structural fields to every other member of a one-of group. */
+async function syncAlternates(
+  tx: Tx,
+  userId: string,
+  templateId: string,
+  group: string,
+  fromSlotId: string,
+): Promise<void> {
+  const [source] = await tx
+    .select({
+      sortOrder: templateSlots.sortOrder,
+      gapBeforeMin: templateSlots.gapBeforeMin,
+      pinnedAt: templateSlots.pinnedAt,
+      role: templateSlots.role,
+      alternatesDefault: templateSlots.alternatesDefault,
+    })
+    .from(templateSlots)
+    .where(eq(templateSlots.id, fromSlotId))
+    .limit(1);
+  if (!source) return;
+
+  await tx
+    .update(templateSlots)
+    .set({
+      sortOrder: source.sortOrder,
+      gapBeforeMin: source.gapBeforeMin,
+      pinnedAt: source.pinnedAt,
+      role: source.role,
+      updatedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(templateSlots.templateId, templateId),
+        eq(templateSlots.userId, userId),
+        eq(templateSlots.alternatesGroup, group),
+        ne(templateSlots.id, fromSlotId),
+      ),
+    );
+
+  // At least one default: if none is, the first member by creation is.
+  const members = await tx
+    .select({ id: templateSlots.id, isDefault: templateSlots.alternatesDefault })
+    .from(templateSlots)
+    .where(
+      and(
+        eq(templateSlots.templateId, templateId),
+        eq(templateSlots.alternatesGroup, group),
+      ),
+    )
+    .orderBy(asc(templateSlots.createdAt));
+  if (members.length > 0 && !members.some((member) => member.isDefault)) {
+    const first = members[0];
+    if (first) {
+      await tx
+        .update(templateSlots)
+        .set({ alternatesDefault: true, updatedAt: new Date() })
+        .where(eq(templateSlots.id, first.id));
+    }
+  }
 }
 
 export async function saveSlot(
@@ -56,7 +216,7 @@ export async function saveSlot(
 ): Promise<{ id: string } | null> {
   return rls.execute(async (tx) => {
     const [template] = await tx
-      .select({ id: templates.id, anchorTime: templates.anchorTime })
+      .select({ id: templates.id, structure: templates.structure })
       .from(templates)
       .where(
         and(
@@ -69,78 +229,130 @@ export async function saveSlot(
     // Another person's template is NOT_FOUND to the caller, never FORBIDDEN.
     if (!template) return null;
 
-    let multitaskGroup: string | null = null;
+    // Normalise what the service owns.
+    const pinnedAt = input.pinnedClock;
+    const gapBeforeMin = pinnedAt === null ? input.gapBeforeMin : 0;
+    const role =
+      template.structure === "opener_pool_closer" ? input.role : "stack";
 
-    if (input.timeMode === "fixed_time" && input.offsetStartMin !== null) {
-      const occupants = await tx
-        .select({
-          id: templateSlots.id,
-          multitaskGroup: templateSlots.multitaskGroup,
-          title: habits.title,
-        })
-        .from(templateSlots)
-        .innerJoin(habits, eq(habits.id, templateSlots.habitId))
-        .where(
-          and(
-            eq(templateSlots.templateId, input.templateId),
-            eq(templateSlots.userId, userId),
-            eq(templateSlots.timeMode, "fixed_time"),
-            eq(templateSlots.offsetStartMin, input.offsetStartMin),
-            input.slotId
-              ? ne(templateSlots.id, input.slotId)
-              : sql`true`,
-          ),
-        );
+    const positions = await readPositions(tx, userId, input.templateId);
+    const existing = input.slotId
+      ? (positions.find((row) => row.id === input.slotId) ?? null)
+      : null;
+    if (input.slotId && !existing) return null;
 
-      if (occupants.length > 0) {
-        const partner =
-          occupants.find((slot) => slot.id === input.multitaskWith) ??
-          occupants[0];
+    // Where this slot will sit: an edit keeps its position unless it is
+    // being pinned; a new slot appends after the last position.
+    const lastPosition = positions.reduce(
+      (max, row) => Math.max(max, row.sortOrder),
+      -1,
+    );
+    let sortOrder = existing ? existing.sortOrder : lastPosition + 1;
+    let multitaskGroup = existing?.multitaskGroup ?? null;
+    let alternatesGroup = existing?.alternatesGroup ?? null;
+    let alternatesDefault = input.alternatesDefault ?? existing?.alternatesDefault ?? false;
 
-        if (input.multitaskWith === undefined || partner === undefined) {
-          const first = occupants[0];
-          if (!first) return null;
-          throw new SameStartError({
-            code: "same_start",
-            withSlotId: first.id,
-            withTitle: first.title,
-            atClock: formatClockFromMinutes(
-              clockToMinutes(anchorOrFallback(template.anchorTime)) +
-                input.offsetStartMin,
-            ),
-          });
+    const partnerId = input.multitaskWith ?? input.alternatesWith;
+    if (partnerId !== undefined) {
+      const partner = positions.find((row) => row.id === partnerId);
+      if (!partner || partner.id === input.slotId) {
+        throw new SlotRuleError("not_found");
+      }
+      if (input.multitaskWith !== undefined) {
+        if (partner.alternatesGroup !== null) {
+          throw new SlotRuleError("already_alternates");
         }
-
-        // Joining an existing bracket keeps its id; two loose slots start one.
-        multitaskGroup = partner.multitaskGroup ?? newMultitaskGroup();
-
+        multitaskGroup = partner.multitaskGroup ?? newGroupId();
+        alternatesGroup = null;
         if (partner.multitaskGroup === null) {
           await tx
             .update(templateSlots)
             .set({ multitaskGroup, updatedAt: new Date() })
             .where(eq(templateSlots.id, partner.id));
         }
+      } else {
+        if (partner.multitaskGroup !== null) {
+          throw new SlotRuleError("already_multitask");
+        }
+        alternatesGroup = partner.alternatesGroup ?? newGroupId();
+        multitaskGroup = null;
+        if (partner.alternatesGroup === null) {
+          await tx
+            .update(templateSlots)
+            .set({
+              alternatesGroup,
+              // The occupant was the only member; it is the default unless
+              // the newcomer claims it.
+              alternatesDefault: !(input.alternatesDefault ?? false),
+              updatedAt: new Date(),
+            })
+            .where(eq(templateSlots.id, partner.id));
+        }
+        if (input.alternatesDefault === undefined) alternatesDefault = false;
       }
+      // Joining a group means taking its position and its pin.
+      sortOrder = partner.sortOrder;
     }
 
-    // `sort_order` only means anything inside a bracket; elsewhere the list is
-    // in time order and this is a stable tie-break.
-    const nextSortOrder = multitaskGroup === null ? 0 : await nextOrder(tx, multitaskGroup);
+    // THE POSITION RULE. Anyone else at this position must share our group.
+    const candidate = { sortOrder, pinnedAt };
+    for (const occupant of positions) {
+      if (occupant.id === input.slotId) continue;
+      if (!samePosition(occupant, candidate)) continue;
+      const shared =
+        (multitaskGroup !== null && occupant.multitaskGroup === multitaskGroup) ||
+        (alternatesGroup !== null && occupant.alternatesGroup === alternatesGroup);
+      if (shared) continue;
+      throw new SamePositionError({
+        code: "same_position",
+        withSlotId: occupant.id,
+        withTitle: occupant.title,
+        position: {
+          sortOrder: occupant.sortOrder,
+          pinnedClock: occupant.pinnedAt === null ? null : occupant.pinnedAt.slice(0, 5),
+        },
+      });
+    }
 
+    // The partial unique index holds "at most one default per group" and is
+    // checked per statement, so the old default yields BEFORE the new one is
+    // written, never after.
+    if (alternatesGroup !== null && alternatesDefault) {
+      await tx
+        .update(templateSlots)
+        .set({ alternatesDefault: false, updatedAt: new Date() })
+        .where(
+          and(
+            eq(templateSlots.templateId, input.templateId),
+            eq(templateSlots.alternatesGroup, alternatesGroup),
+            ...(input.slotId ? [ne(templateSlots.id, input.slotId)] : []),
+          ),
+        );
+    }
+
+    const values = {
+      habitId: input.habitId,
+      timeMode: "fixed_time" as const,
+      durationMin: input.durationMin,
+      gapBeforeMin,
+      pinnedAt,
+      role,
+      priorityOverride: input.priorityOverride,
+      scheduling: input.scheduling,
+      multitaskGroup,
+      alternatesGroup,
+      alternatesDefault: alternatesGroup === null ? false : alternatesDefault,
+      sortOrder,
+      // DEPRECATED columns are never written again (v1.1 §11.5).
+      offsetStartMin: null,
+      offsetEndMin: null,
+    };
+
+    let savedId: string;
     if (input.slotId) {
       const rows = await tx
         .update(templateSlots)
-        .set({
-          habitId: input.habitId,
-          timeMode: input.timeMode,
-          offsetStartMin: input.offsetStartMin,
-          offsetEndMin: input.offsetEndMin,
-          durationMin: input.durationMin,
-          priorityOverride: input.priorityOverride,
-          scheduling: input.scheduling,
-          ...(multitaskGroup === null ? {} : { multitaskGroup, sortOrder: nextSortOrder }),
-          updatedAt: new Date(),
-        })
+        .set({ ...values, updatedAt: new Date() })
         .where(
           and(
             eq(templateSlots.id, input.slotId),
@@ -148,104 +360,58 @@ export async function saveSlot(
           ),
         )
         .returning({ id: templateSlots.id });
-
-      return rows[0] ?? null;
+      const row = rows[0];
+      if (!row) return null;
+      savedId = row.id;
+    } else {
+      const rows = await tx
+        .insert(templateSlots)
+        .values({ ...values, userId, templateId: input.templateId })
+        .returning({ id: templateSlots.id });
+      const row = rows[0];
+      if (!row) return null;
+      savedId = row.id;
     }
 
-    const rows = await tx
-      .insert(templateSlots)
-      .values({
-        userId,
-        templateId: input.templateId,
-        habitId: input.habitId,
-        timeMode: input.timeMode,
-        offsetStartMin: input.offsetStartMin,
-        offsetEndMin: input.offsetEndMin,
-        durationMin: input.durationMin,
-        priorityOverride: input.priorityOverride,
-        scheduling: input.scheduling,
-        multitaskGroup,
-        sortOrder: nextSortOrder,
-      })
-      .returning({ id: templateSlots.id });
+    if (alternatesGroup !== null) {
+      await syncAlternates(tx, userId, input.templateId, alternatesGroup, savedId);
+    }
+    await densifyPositions(tx, userId, input.templateId);
 
-    return rows[0] ?? null;
+    return { id: savedId };
   });
 }
 
-async function nextOrder(
-  tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
-  multitaskGroup: string,
-): Promise<number> {
-  const rows = await tx
-    .select({ sortOrder: templateSlots.sortOrder })
-    .from(templateSlots)
-    .where(eq(templateSlots.multitaskGroup, multitaskGroup));
-
-  return rows.reduce((max, row) => Math.max(max, row.sortOrder + 1), 0);
-}
-
 /**
- * Fixed slots that share a start without sharing a bracket.
- *
- * THE READER'S RULE MATCHES THE WRITER'S, and that is the whole point of it.
- * `saveSlot` refuses to put a slot at an occupied fixed start unless it joins
- * that start's group, so at any one start the slots must ALL be in ONE
- * non-null group. Anything else is an anomaly:
- *
- * - two loose slots (the obvious case);
- * - a loose slot stacked beside an existing bracket (subtler, and just as
- *   ambiguous — the loose one is not in the multitask, it is merely on top of
- *   it);
- * - two different brackets at one start (only reachable by a data edit).
- *
- * An earlier version exempted every grouped slot and so reported none of the
- * last two. Reachable only by a second device, a SQL edit, or a bug — which is
- * exactly the population this function exists for. A reader that is more
- * permissive than the writer cannot surface the states the writer prevents,
- * and those are the ones nobody is looking for.
+ * Slots sharing a position without sharing a group — the read side of the
+ * rule above, for the editor's inline question and for anything a second
+ * device, a SQL edit, or a bug left behind. THE READER'S RULE MATCHES THE
+ * WRITER'S: at any one position every slot must be in ONE non-null group,
+ * multitask or alternates; anything else is a pair to report.
  */
 export function findCollisions(
   slots: ReadonlyArray<{
     id: string;
-    timeMode: string;
-    offsetStartMin: number | null;
+    sortOrder: number;
+    pinnedAt: string | null;
     multitaskGroup: string | null;
+    alternatesGroup: string | null;
   }>,
 ): Array<[string, string]> {
-  const byStart = new Map<
-    number,
-    Array<{ id: string; multitaskGroup: string | null }>
-  >();
-
-  for (const slot of slots) {
-    if (slot.timeMode !== "fixed_time") continue;
-    if (slot.offsetStartMin === null) continue;
-    const members = byStart.get(slot.offsetStartMin) ?? [];
-    members.push({ id: slot.id, multitaskGroup: slot.multitaskGroup });
-    byStart.set(slot.offsetStartMin, members);
-  }
-
   const pairs: Array<[string, string]> = [];
-
-  for (const members of byStart.values()) {
-    if (members.length < 2) continue;
-
-    const first = members[0];
-    if (!first) continue;
-
-    // One shared, non-null group is the only legal shape at a shared start.
-    const settled =
-      first.multitaskGroup !== null &&
-      members.every((member) => member.multitaskGroup === first.multitaskGroup);
-    if (settled) continue;
-
-    for (let index = 1; index < members.length; index += 1) {
-      const earlier = members[index - 1];
-      const later = members[index];
-      if (earlier && later) pairs.push([earlier.id, later.id]);
+  for (let i = 0; i < slots.length; i += 1) {
+    const a = slots[i];
+    if (!a) continue;
+    for (let j = i + 1; j < slots.length; j += 1) {
+      const b = slots[j];
+      if (!b) continue;
+      if (!samePosition(a, b)) continue;
+      const shared =
+        (a.multitaskGroup !== null && a.multitaskGroup === b.multitaskGroup) ||
+        (a.alternatesGroup !== null && a.alternatesGroup === b.alternatesGroup);
+      if (!shared) pairs.push([a.id, b.id]);
     }
   }
-
   return pairs;
 }
+

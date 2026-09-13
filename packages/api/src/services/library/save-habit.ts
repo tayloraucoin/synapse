@@ -9,11 +9,17 @@ import {
   type RlsClient,
 } from "@syn/db";
 import { toDateKey } from "@syn/utils";
-import type { HabitFormInput } from "@syn/validators";
+import type { HabitFormInput, RotationHabitInput } from "@syn/validators";
 
 /**
  * Create and update one habit, plus the two things a save can move: the wake
- * anchor, and the snapshots on tomorrow's already-materialised items.
+ * anchor (deprecated, UX v1.1 R11; still honoured until DYN-13), and the
+ * snapshots on tomorrow's already-materialised items.
+ *
+ * THE FORM NEVER SETS `type` (UX v1.1 §4.15, W6). `createHabit` writes a
+ * `habit`; `createRotationHabit` writes a `workout` or a `deep_work` focus
+ * with its rotation (TD-3); one-offs and fixtures have their own services.
+ * `updateHabit` never changes a row's type.
  */
 
 export type SavedHabit = { id: string };
@@ -29,9 +35,10 @@ export async function createHabit(
       .values({
         userId,
         title: input.title,
-        type: input.type,
+        type: "habit",
         icon: input.icon,
         categoryId: input.categoryId,
+        blockKind: input.blockKind,
         durationMinMin: input.durationMinMin,
         durationMaxMin: input.durationMaxMin,
         lifePriority: input.lifePriority,
@@ -71,9 +78,9 @@ export async function updateHabit(
       .update(habits)
       .set({
         title: input.title,
-        type: input.type,
         icon: input.icon,
         categoryId: input.categoryId,
+        blockKind: input.blockKind,
         durationMinMin: input.durationMinMin,
         durationMaxMin: input.durationMaxMin,
         lifePriority: input.lifePriority,
@@ -109,6 +116,95 @@ export async function updateHabit(
     }
 
     return { id: row.id };
+  });
+}
+
+/**
+ * A workout or a focus — a habit with a rotation (UX v1.1 §3.7, §3.8, TD-3).
+ * The caller says which; the block follows the type. A focus has no range (a
+ * work block is as long as the work day); a workout's typical length is its
+ * range, min and max alike, until the person widens it in the library.
+ */
+export async function createRotationHabit(
+  rls: RlsClient,
+  userId: string,
+  type: "workout" | "deep_work",
+  input: RotationHabitInput,
+): Promise<SavedHabit> {
+  const rows = await rls.execute((tx) =>
+    tx
+      .insert(habits)
+      .values({
+        userId,
+        title: input.title,
+        type,
+        icon: { kind: "curated", value: "dot", colorKey: null },
+        blockKind: type === "workout" ? "training" : "work",
+        durationMinMin: type === "workout" ? input.durationMin : null,
+        durationMaxMin: type === "workout" ? input.durationMin : null,
+        lifePriority: input.lifePriority,
+        weeklyTarget: input.weeklyTarget,
+        typicalDays:
+          input.typicalDays === null || input.typicalDays.length === 0
+            ? null
+            : [...new Set(input.typicalDays)].sort((a, b) => a - b),
+        reflectionAxes: [],
+      })
+      .returning({ id: habits.id }),
+  );
+  const row = rows[0];
+  if (!row) throw new Error("habit insert returned no row");
+  return { id: row.id };
+}
+
+export class RotationRuleError extends Error {
+  readonly code: "not_rotation";
+  constructor() {
+    super("not_rotation");
+    this.name = "RotationRuleError";
+    this.code = "not_rotation";
+  }
+}
+
+/**
+ * The rotation fields may only be written on a workout or a focus; on a
+ * habit they are meaningless and refused (v1.1 §11.3, AC 11).
+ */
+export async function updateRotationHabit(
+  rls: RlsClient,
+  userId: string,
+  id: string,
+  input: RotationHabitInput,
+): Promise<SavedHabit | null> {
+  return rls.execute(async (tx) => {
+    const [existing] = await tx
+      .select({ id: habits.id, type: habits.type })
+      .from(habits)
+      .where(and(eq(habits.id, id), eq(habits.userId, userId)))
+      .limit(1);
+    if (!existing) return null;
+    if (existing.type !== "workout" && existing.type !== "deep_work") {
+      throw new RotationRuleError();
+    }
+
+    const [row] = await tx
+      .update(habits)
+      .set({
+        title: input.title,
+        lifePriority: input.lifePriority,
+        weeklyTarget: input.weeklyTarget,
+        typicalDays:
+          input.typicalDays === null || input.typicalDays.length === 0
+            ? null
+            : [...new Set(input.typicalDays)].sort((a, b) => a - b),
+        ...(existing.type === "workout" && input.durationMin !== null
+          ? { durationMinMin: input.durationMin, durationMaxMin: input.durationMin }
+          : {}),
+        updatedAt: new Date(),
+      })
+      .where(and(eq(habits.id, id), eq(habits.userId, userId)))
+      .returning({ id: habits.id });
+    return row ? { id: row.id } : null;
   });
 }
 

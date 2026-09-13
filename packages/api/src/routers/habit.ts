@@ -1,10 +1,14 @@
 import { TRPCError } from "@trpc/server";
 
+import { z } from "zod";
+
 import {
+  createFromStarterLibraryInput,
   createFromStarterSetInput,
   createHabitInput,
   habitIdInput,
   listHabitsInput,
+  rotationHabitSchema,
   slotsOutsideRangeInput,
   updateHabitInput,
 } from "@syn/validators";
@@ -21,7 +25,14 @@ import {
   readHabitUsage,
 } from "../services/library/habit-usage";
 import { listHabits } from "../services/library/list-habits";
-import { createHabit, updateHabit } from "../services/library/save-habit";
+import {
+  RotationRuleError,
+  createHabit,
+  createRotationHabit,
+  updateHabit,
+  updateRotationHabit,
+} from "../services/library/save-habit";
+import { createFromStarterLibrary } from "../services/library/starter-library";
 import { createFromStarterSet } from "../services/library/starter-set";
 import { readPreferences } from "../services/user/preferences";
 import { protectedProcedure, router } from "../trpc";
@@ -42,6 +53,8 @@ export const habitRouter = router({
     .query(async ({ ctx, input }) =>
       listHabits(ctx.rls, ctx.authContext.userId, {
         includeArchived: input?.includeArchived ?? true,
+        blockKind: input?.blockKind,
+        types: input?.types,
       }),
     ),
 
@@ -53,11 +66,53 @@ export const habitRouter = router({
     return habit;
   }),
 
+  /** A `habit` — the library sheet's only kind (UX v1.1 §4.15, W6). */
   create: protectedProcedure
     .input(createHabitInput)
     .mutation(async ({ ctx, input }) =>
       createHabit(ctx.rls, ctx.authContext.userId, input),
     ),
+
+  /** A workout — the training screen (UX v1.1 §3.7, §4.9). */
+  createWorkout: protectedProcedure
+    .input(rotationHabitSchema)
+    .mutation(async ({ ctx, input }) =>
+      createRotationHabit(ctx.rls, ctx.authContext.userId, "workout", input),
+    ),
+
+  /** A focus — the work screen (UX v1.1 §3.8, §4.11). */
+  createFocus: protectedProcedure
+    .input(rotationHabitSchema)
+    .mutation(async ({ ctx, input }) =>
+      createRotationHabit(ctx.rls, ctx.authContext.userId, "deep_work", input),
+    ),
+
+  /** The rotation fields; refused on a plain habit (v1.1 §11.3). */
+  updateRotation: protectedProcedure
+    .input(z.object({ id: z.string().uuid(), habit: rotationHabitSchema }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const saved = await updateRotationHabit(
+          ctx.rls,
+          ctx.authContext.userId,
+          input.id,
+          input.habit,
+        );
+        if (!saved) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "No such habit." });
+        }
+        return saved;
+      } catch (error) {
+        if (error instanceof RotationRuleError) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: error.code,
+            cause: error,
+          });
+        }
+        throw error;
+      }
+    }),
 
   update: protectedProcedure
     .input(updateHabitInput)
@@ -147,9 +202,17 @@ export const habitRouter = router({
       ),
     ),
 
+  /** v1.0's flat set — kept until DYN-11 switches first run; removed in DYN-21. */
   createFromStarterSet: protectedProcedure
     .input(createFromStarterSetInput)
     .mutation(async ({ ctx, input }) =>
       createFromStarterSet(ctx.rls, ctx.authContext.userId, input.titles),
+    ),
+
+  /** The per-block library (UX v1.1 §12.4). */
+  createFromStarterLibrary: protectedProcedure
+    .input(createFromStarterLibraryInput)
+    .mutation(async ({ ctx, input }) =>
+      createFromStarterLibrary(ctx.rls, ctx.authContext.userId, input),
     ),
 });

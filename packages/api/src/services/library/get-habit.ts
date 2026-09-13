@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 
 import { habits, users, type RlsClient } from "@syn/db";
-import type { IconValue, ItemType } from "@syn/types";
+import type { BlockKind, IconValue, ItemType } from "@syn/types";
 
 /**
  * One habit, in the shape LB-02 edits.
@@ -25,6 +25,10 @@ export type EditableHabit = {
   defaultNotesPreflight: string | null;
   isWakeAnchor: boolean;
   archived: boolean;
+  /** UX v1.1 §11.3. */
+  blockKind: BlockKind | null;
+  weeklyTarget: number | null;
+  typicalDays: number[] | null;
 };
 
 export async function getHabit(
@@ -47,6 +51,9 @@ export async function getHabit(
         reflectionAxes: habits.reflectionAxes,
         defaultNotesPreflight: habits.defaultNotesPreflight,
         archivedAt: habits.archivedAt,
+        blockKind: habits.blockKind,
+        weeklyTarget: habits.weeklyTarget,
+        typicalDays: habits.typicalDays,
       })
       .from(habits)
       .where(and(eq(habits.id, id), eq(habits.userId, userId)))
@@ -74,6 +81,9 @@ export async function getHabit(
       defaultNotesPreflight: row.defaultNotesPreflight,
       isWakeAnchor: account?.wakeAnchorHabitId === row.id,
       archived: row.archivedAt !== null,
+      blockKind: row.blockKind,
+      weeklyTarget: row.weeklyTarget,
+      typicalDays: row.typicalDays,
     };
   });
 }

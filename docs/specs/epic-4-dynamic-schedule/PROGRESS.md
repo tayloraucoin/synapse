@@ -7,7 +7,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | DYN-1 | Vocabulary, view models, constants, and `stackBlock` | — | Complete (twelve probes pasted in the closing report) | 2026-09-12 |
 | DYN-2 | Migration `0004`: block templates, stacked slots, habits' block kinds and rotations, the offset backfill | DYN-1 | Complete (verified on scratch databases; hosted and project-local application pending Taylor) | 2026-09-12 |
 | DYN-3 | Migration `0005`: the profile, fixtures, `day_blocks`, the day-side columns, the journal, per-block notification prefs, the trigger amendment | DYN-2 | Complete (verified on scratch databases; application to Supabase tiers pending Taylor) | 2026-09-12 |
-| DYN-4 | Plan services: block templates by kind, the same-position rule, fixtures, workouts and focuses, the library by block | DYN-3 | Not started | — |
+| DYN-4 | Plan services: block templates by kind, the same-position rule, fixtures, workouts and focuses, the library by block | DYN-3 | Complete (validators, grep, and the four verify commands probed; the database-backed criteria wait for `0004`/`0005` on a tier — see `DEVIATIONS.md`) | 2026-09-12 |
 | DYN-5 | Materialisation per block and *Set the day* | DYN-4 | Not started | — |
 | DYN-6 | Adjust, *Do now*, habit-day edits, and moves | DYN-5 | Not started | — |
 | DYN-7 | `@syn/ui` for v1.1 | DYN-1 | Not started (ticket to be authored from `01-authoring-handoff-remaining-tickets.md`) | — |
@@ -31,7 +31,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] DYN-1
 - [x] DYN-2
 - [x] DYN-3
-- [ ] DYN-4
+- [x] DYN-4
 - [ ] DYN-5
 - [ ] DYN-6
 - [ ] DYN-7

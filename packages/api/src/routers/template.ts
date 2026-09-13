@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import {
+  createTemplateInput,
   discardTemplateInput,
   listTemplatesInput,
   moveSlotInput,
@@ -12,7 +13,11 @@ import {
   templatePatchSchema,
 } from "@syn/validators";
 
-import { SameStartError, saveSlot } from "../services/plan/save-slot";
+import {
+  SamePositionError,
+  SlotRuleError,
+  saveSlot,
+} from "../services/plan/save-slot";
 import {
   archiveTemplate,
   createTemplate,
@@ -25,17 +30,18 @@ import {
   restoreSlot,
   updateTemplate,
 } from "../services/plan/templates";
-import { readPreferences } from "../services/user/preferences";
 import { protectedProcedure, router } from "../trpc";
 
 /**
- * Templates and their slots.
+ * Block templates and their slots (UX v1.1 §3.11, §11.4, §11.5).
  *
  * `saveSlot` is the only resolver here that is not boring, and it is not
- * boring in exactly one way: the same-start invariant surfaces as a `CONFLICT`
- * carrying the other slot's title and time, so the sheet can ask the person's
- * own question — *Another item starts at 7:00: Meditate. Do these happen at
- * the same time?* — rather than showing them an error code.
+ * boring in exactly one way: the same-position invariant surfaces as a
+ * `CONFLICT` carrying the other slot's title and position, so the sheet can
+ * ask the person's own question — *Do these happen at the same time?* with
+ * three answers (v1.1 §3.5) — rather than showing them an error code. A
+ * `SlotRuleError` (joining a bracket member as a one-of, or the reverse) is a
+ * `BAD_REQUEST` the sheet phrases.
  */
 const NOT_FOUND = { code: "NOT_FOUND" as const, message: "No such template." };
 
@@ -43,11 +49,10 @@ export const templateRouter = router({
   list: protectedProcedure
     .input(listTemplatesInput)
     .query(async ({ ctx, input }) =>
-      listTemplates(
-        ctx.rls,
-        ctx.authContext.userId,
-        input?.includeArchived ?? true,
-      ),
+      listTemplates(ctx.rls, ctx.authContext.userId, {
+        includeArchived: input?.includeArchived ?? true,
+        kind: input?.kind,
+      }),
     ),
 
   get: protectedProcedure
@@ -62,15 +67,12 @@ export const templateRouter = router({
       return detail;
     }),
 
-  /** The anchor defaults to the person's usual wake time (Epic 1 TP-02). */
-  create: protectedProcedure.mutation(async ({ ctx }) => {
-    const prefs = await readPreferences(ctx.rls, ctx.authContext.userId);
-    return createTemplate(
-      ctx.rls,
-      ctx.authContext.userId,
-      prefs?.usualWakeTime ?? "07:00",
-    );
-  }),
+  /** A block of the given kind; the anchor comes from the profile (v1.1 §11.4). */
+  create: protectedProcedure
+    .input(createTemplateInput)
+    .mutation(async ({ ctx, input }) =>
+      createTemplate(ctx.rls, ctx.authContext.userId, input.kind),
+    ),
 
   update: protectedProcedure
     .input(templatePatchSchema)
@@ -138,10 +140,17 @@ export const templateRouter = router({
         if (!saved) throw new TRPCError(NOT_FOUND);
         return saved;
       } catch (error) {
-        if (error instanceof SameStartError) {
+        if (error instanceof SamePositionError) {
           throw new TRPCError({
             code: "CONFLICT",
             message: JSON.stringify(error.conflict),
+            cause: error,
+          });
+        }
+        if (error instanceof SlotRuleError) {
+          throw new TRPCError({
+            code: error.code === "not_found" ? "NOT_FOUND" : "BAD_REQUEST",
+            message: error.code,
             cause: error,
           });
         }

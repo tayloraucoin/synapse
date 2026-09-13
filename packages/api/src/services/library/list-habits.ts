@@ -1,7 +1,12 @@
-import { asc, eq, isNull, and } from "drizzle-orm";
+import { asc, eq, inArray, isNull, and } from "drizzle-orm";
 
 import { categories, habits, users, type RlsClient } from "@syn/db";
-import type { CategoryView, HabitSummaryView } from "@syn/types";
+import type {
+  BlockKind,
+  CategoryView,
+  HabitSummaryView,
+  ItemType,
+} from "@syn/types";
 
 import {
   toCategoryView,
@@ -29,10 +34,18 @@ export type HabitListResult = {
   categories: Array<CategoryView & { id: string; habitCount: number }>;
 };
 
+export type ListHabitsOptions = {
+  includeArchived?: boolean;
+  /** Only this block; `null` for *anywhere* (UX v1.1 §4.15). Omit for all. */
+  blockKind?: BlockKind | null;
+  /** Only these types — the block screens ask for workouts or focuses. */
+  types?: readonly ItemType[];
+};
+
 export async function listHabits(
   rls: RlsClient,
   userId: string,
-  options: { includeArchived?: boolean } = {},
+  options: ListHabitsOptions = {},
 ): Promise<HabitListResult> {
   return rls.execute(async (tx) => {
     const [account] = await tx
@@ -51,6 +64,19 @@ export async function listHabits(
       .where(eq(categories.userId, userId))
       .orderBy(asc(categories.name));
 
+    const conditions = [eq(habits.userId, userId)];
+    if (!options.includeArchived) conditions.push(isNull(habits.archivedAt));
+    if (options.blockKind !== undefined) {
+      conditions.push(
+        options.blockKind === null
+          ? isNull(habits.blockKind)
+          : eq(habits.blockKind, options.blockKind),
+      );
+    }
+    if (options.types && options.types.length > 0) {
+      conditions.push(inArray(habits.type, [...options.types]));
+    }
+
     const habitRows = await tx
       .select({
         id: habits.id,
@@ -62,13 +88,12 @@ export async function listHabits(
         lifePriority: habits.lifePriority,
         archivedAt: habits.archivedAt,
         categoryId: habits.categoryId,
+        blockKind: habits.blockKind,
+        weeklyTarget: habits.weeklyTarget,
+        typicalDays: habits.typicalDays,
       })
       .from(habits)
-      .where(
-        options.includeArchived
-          ? eq(habits.userId, userId)
-          : and(eq(habits.userId, userId), isNull(habits.archivedAt)),
-      );
+      .where(and(...conditions));
 
     const byId = new Map<string, CategoryRow>(
       categoryRows.map((row) => [row.id, row]),

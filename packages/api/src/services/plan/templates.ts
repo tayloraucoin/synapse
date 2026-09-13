@@ -1,4 +1,4 @@
-import { and, asc, count, eq, isNull, isNotNull, sql } from "drizzle-orm";
+import { and, asc, count, eq, isNull, isNotNull } from "drizzle-orm";
 
 import {
   days,
@@ -7,45 +7,72 @@ import {
   templates,
   type RlsClient,
 } from "@syn/db";
-import type { SlotView, TemplateSummaryView } from "@syn/types";
+import type {
+  BlockFlow,
+  BlockKind,
+  BlockStructure,
+  SlotView,
+  TemplateSummaryView,
+} from "@syn/types";
 import type { RestoreSlotInput, TemplatePatchInput } from "@syn/validators";
 
-import { anchorOrFallback } from "./anchor-fallback";
-import { findCollisions } from "./save-slot";
+import { readPreferences } from "../user/preferences";
+import {
+  defaultFlowFor,
+  resolveTemplateAnchor,
+  type AnchorProfile,
+} from "./anchors";
+import { densifyPositions, findCollisions } from "./save-slot";
 import {
   compareSlots,
   toSlotViews,
   toTemplateSummaryView,
+  walkTemplate,
   type SlotRow,
 } from "./to-view";
 
 /**
- * Templates: list, read, patch, archive, restore, duplicate, and the slot
- * operations that are not `saveSlot`.
+ * Block templates: list, read, create, patch, archive, restore, duplicate, and
+ * the slot operations that are not `saveSlot` (UX v1.1 §3.11, §11.4, §11.5).
  *
  * A TEMPLATE IS ALWAYS EDITABLE (cross-cutting §8.1) — there is no locked
- * state, and days already applied are reconciled by TP-04 (SET-6) rather than
- * by refusing the edit.
+ * state, and days already applied are reconciled by the materialiser rather
+ * than by refusing the edit.
+ *
+ * THE CLOCKS ARE DERIVED. `getTemplate` walks the slots once with `stackBlock`
+ * from the anchor the profile supplies for the kind (`anchors.ts`) and hands
+ * the editor `startClock`s; nothing is stored. A placeable kind (training,
+ * break) has no anchor at planning time and no clocks.
  */
 
 export type TemplateDetail = {
   template: {
     id: string;
     name: string;
-    anchorTime: string;
+    kind: BlockKind;
+    flow: BlockFlow;
+    structure: BlockStructure;
+    /** The one override (v1.1 R5); null for every kind but work, usually. */
+    anchorTime: string | null;
+    /** "7:00" — where the walk started, or null for a placeable kind. */
+    anchorClock: string | null;
     weeklyTarget: number | null;
     typicalDays: number[];
     archived: boolean;
   };
   slots: SlotView[];
-  /** Ungrouped fixed slots sharing a start — the editor's inline question. */
+  /** The walk's arithmetic, for the sticky footer (v1.1 §3.11). */
+  footer: { totalMin: number; startClock: string | null; endClock: string | null };
+  /** Slots sharing a position without a group — the editor's inline question. */
   collisions: Array<[string, string]>;
-  /** Zero until SET-6 creates days. */
+  /** Days this template is on, current and future (TP-04). */
   appliedDays: number;
 };
 
+type Tx = Parameters<Parameters<RlsClient["execute"]>[0]>[0];
+
 async function readSlotRows(
-  tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
+  tx: Tx,
   userId: string,
   templateId: string,
 ): Promise<SlotRow[]> {
@@ -57,9 +84,14 @@ async function readSlotRows(
       offsetStartMin: templateSlots.offsetStartMin,
       offsetEndMin: templateSlots.offsetEndMin,
       durationMin: templateSlots.durationMin,
+      gapBeforeMin: templateSlots.gapBeforeMin,
+      pinnedAt: templateSlots.pinnedAt,
+      role: templateSlots.role,
       priorityOverride: templateSlots.priorityOverride,
       scheduling: templateSlots.scheduling,
       multitaskGroup: templateSlots.multitaskGroup,
+      alternatesGroup: templateSlots.alternatesGroup,
+      alternatesDefault: templateSlots.alternatesDefault,
       sortOrder: templateSlots.sortOrder,
       habitTitle: habits.title,
       habitIcon: habits.icon,
@@ -72,52 +104,63 @@ async function readSlotRows(
         eq(templateSlots.templateId, templateId),
         eq(templateSlots.userId, userId),
       ),
-    );
+    )
+    .orderBy(asc(templateSlots.sortOrder), asc(templateSlots.createdAt));
 
   return rows.sort(compareSlots);
+}
+
+async function anchorProfileFor(
+  rls: RlsClient,
+  userId: string,
+): Promise<AnchorProfile> {
+  const prefs = await readPreferences(rls, userId);
+  return {
+    usualWakeTime: prefs?.usualWakeTime ?? "07:00",
+    workStartTime: prefs?.workStartTime ?? null,
+    workEndTime: prefs?.workEndTime ?? null,
+    lightsOutTime: prefs?.lightsOutTime ?? null,
+  };
+}
+
+function clock(min: number | null): string | null {
+  if (min === null) return null;
+  const hour = Math.floor(min / 60) % 24;
+  const minute = ((min % 60) + 60) % 60;
+  return `${hour}:${String(minute).padStart(2, "0")}`;
 }
 
 export async function listTemplates(
   rls: RlsClient,
   userId: string,
-  includeArchived = true,
+  options: { includeArchived?: boolean; kind?: BlockKind } = {},
 ): Promise<TemplateSummaryView[]> {
+  const includeArchived = options.includeArchived ?? true;
+  const profile = await anchorProfileFor(rls, userId);
+
   return rls.execute(async (tx) => {
+    const conditions = [eq(templates.userId, userId)];
+    if (!includeArchived) conditions.push(isNull(templates.archivedAt));
+    if (options.kind) conditions.push(eq(templates.kind, options.kind));
+
     const rows = await tx
       .select({
         id: templates.id,
         name: templates.name,
+        kind: templates.kind,
+        flow: templates.flow,
+        structure: templates.structure,
         anchorTime: templates.anchorTime,
         weeklyTarget: templates.weeklyTarget,
         typicalDays: templates.typicalDays,
         archivedAt: templates.archivedAt,
       })
       .from(templates)
-      .where(
-        includeArchived
-          ? eq(templates.userId, userId)
-          : and(eq(templates.userId, userId), isNull(templates.archivedAt)),
-      )
-      .orderBy(asc(templates.name));
+      .where(and(...conditions))
+      .orderBy(asc(templates.kind), asc(templates.name));
 
-    const totals = await tx
-      .select({
-        templateId: templateSlots.templateId,
-        itemCount: count(),
-        totalMin: sql<number>`COALESCE(SUM(${templateSlots.durationMin}), 0)`,
-      })
-      .from(templateSlots)
-      .where(eq(templateSlots.userId, userId))
-      .groupBy(templateSlots.templateId);
-
-    const byTemplate = new Map(
-      totals.map((row) => [
-        row.templateId,
-        { itemCount: Number(row.itemCount), totalMin: Number(row.totalMin) },
-      ]),
-    );
-
-    // Zero until SET-6 writes days; the query is here so nothing changes then.
+    // Zero until days carry blocks (DYN-5); the query is here so nothing
+    // changes then. `days.template_id` is deprecated but still the v1.0 link.
     const used = await tx
       .select({ templateId: days.templateId, value: count() })
       .from(days)
@@ -128,15 +171,21 @@ export async function listTemplates(
       used.map((row) => [row.templateId, Number(row.value)]),
     );
 
-    return rows.map((row) => {
-      const totalsFor = byTemplate.get(row.id);
-      return toTemplateSummaryView(
-        row,
-        totalsFor?.itemCount ?? 0,
-        totalsFor?.totalMin ?? 0,
-        usedByTemplate.get(row.id) ?? 0,
+    const views: TemplateSummaryView[] = [];
+    for (const row of rows) {
+      const slotRows = await readSlotRows(tx, userId, row.id);
+      const anchor = resolveTemplateAnchor(row.kind, row.flow, profile, row.anchorTime);
+      const walk = walkTemplate(slotRows, anchor.flow, anchor.anchorMin);
+      views.push(
+        toTemplateSummaryView(
+          row,
+          slotRows.length,
+          walk.totalMin,
+          usedByTemplate.get(row.id) ?? 0,
+        ),
       );
-    });
+    }
+    return views;
   });
 }
 
@@ -145,11 +194,16 @@ export async function getTemplate(
   userId: string,
   id: string,
 ): Promise<TemplateDetail | null> {
+  const profile = await anchorProfileFor(rls, userId);
+
   return rls.execute(async (tx) => {
     const [row] = await tx
       .select({
         id: templates.id,
         name: templates.name,
+        kind: templates.kind,
+        flow: templates.flow,
+        structure: templates.structure,
         anchorTime: templates.anchorTime,
         weeklyTarget: templates.weeklyTarget,
         typicalDays: templates.typicalDays,
@@ -162,40 +216,64 @@ export async function getTemplate(
     if (!row) return null;
 
     const slotRows = await readSlotRows(tx, userId, id);
+    const anchor = resolveTemplateAnchor(row.kind, row.flow, profile, row.anchorTime);
+    const walk = walkTemplate(slotRows, anchor.flow, anchor.anchorMin);
 
     const [applied] = await tx
       .select({ value: count() })
       .from(days)
       .where(and(eq(days.userId, userId), eq(days.templateId, id)));
 
+    const hasClocks = anchor.anchorMin !== null && slotRows.length > 0;
+
     return {
       template: {
         id: row.id,
         name: row.name,
-        anchorTime: anchorOrFallback(row.anchorTime),
+        kind: row.kind,
+        flow: row.flow,
+        structure: row.structure,
+        anchorTime: row.anchorTime,
+        anchorClock: clock(anchor.anchorMin),
         weeklyTarget: row.weeklyTarget,
         typicalDays: row.typicalDays ?? [],
         archived: row.archivedAt !== null,
       },
-      slots: toSlotViews(slotRows, anchorOrFallback(row.anchorTime)),
+      slots: toSlotViews(slotRows, walk),
+      footer: {
+        totalMin: walk.totalMin,
+        startClock: hasClocks ? clock(walk.startMin) : null,
+        endClock: hasClocks ? clock(walk.endMin) : null,
+      },
       collisions: findCollisions(slotRows),
       appliedDays: Number(applied?.value ?? 0),
     };
   });
 }
 
-/** Create mode makes the row on open: a slot needs a template id to hang off. */
+/**
+ * Create mode makes the row on open: a slot needs a template id to hang off.
+ * `flow` follows the kind; `anchor_time` is null except for a work template,
+ * which starts from the profile's work start until the person overrides it
+ * (v1.1 R5).
+ */
 export async function createTemplate(
   rls: RlsClient,
   userId: string,
-  anchorTime: string,
+  kind: BlockKind,
 ): Promise<{ id: string }> {
+  const profile = await anchorProfileFor(rls, userId);
   const rows = await rls.execute((tx) =>
     tx
       .insert(templates)
-      // Every template the v1.0 editor creates is a morning block (TD-1);
-      // DYN-4's `template.create({ kind })` replaces this.
-      .values({ userId, name: "", anchorTime, kind: "morning" })
+      .values({
+        userId,
+        name: "",
+        kind,
+        flow: defaultFlowFor(kind),
+        structure: "stack",
+        anchorTime: kind === "work" ? profile.workStartTime : null,
+      })
       .returning({ id: templates.id }),
   );
   const row = rows[0];
@@ -219,6 +297,11 @@ export async function updateTemplate(
     ...(input.patch.typicalDays !== undefined
       ? { typicalDays: input.patch.typicalDays }
       : {}),
+    ...(input.patch.kind !== undefined ? { kind: input.patch.kind } : {}),
+    ...(input.patch.flow !== undefined ? { flow: input.patch.flow } : {}),
+    ...(input.patch.structure !== undefined
+      ? { structure: input.patch.structure }
+      : {}),
   };
 
   if (Object.keys(patch).length === 0) return { id: input.id };
@@ -239,13 +322,14 @@ export async function updateTemplate(
  * TWO CALLERS MEAN TWO DIFFERENT THINGS BY "EMPTY", so the rule is a
  * parameter rather than an assumption:
  *
- * - **TP-02** (`requireUnnamed: true`) writes the row on open so slots have
- *   somewhere to go, so backing straight out would leave a nameless empty row
- *   in the list forever. A NAMED one is kept even with no slots: naming it was
- *   the person saying they meant it.
- * - **FR-03** (`requireUnnamed: false`) prefills the name *Morning* itself, so
- *   nobody typed it. Keeping a slotless *Morning* after *Skip for now* would
- *   put a template in TP-01 that the person explicitly declined to build.
+ * - **The editor** (`requireUnnamed: true`) writes the row on open so slots
+ *   have somewhere to go, so backing straight out would leave a nameless empty
+ *   row in the list forever. A NAMED one is kept even with no slots: naming it
+ *   was the person saying they meant it.
+ * - **First run** (`requireUnnamed: false`) prefills the name itself, so
+ *   nobody typed it. Keeping a slotless prefilled template after *Skip for
+ *   now* would put a template in the list that the person explicitly declined
+ *   to build.
  *
  * Either way a template WITH SLOTS survives: that is work, and this function
  * never deletes work.
@@ -316,6 +400,11 @@ export function duplicateName(name: string): string {
   return `${name} copy`;
 }
 
+/**
+ * A copy is the same block with fresh group ids (a bracket or a one-of group
+ * shared across templates would let a later regroup reach into both) and the
+ * same positions, so the position rule holds by construction.
+ */
 export async function duplicateTemplate(
   rls: RlsClient,
   userId: string,
@@ -357,8 +446,6 @@ export async function duplicateTemplate(
       );
 
     if (slots.length > 0) {
-      // Groups are re-keyed so the copy's brackets are its own; sharing a group
-      // id across templates would make a later regroup reach into both.
       const remapped = new Map<string, string>();
       const remappedAlternates = new Map<string, string>();
       for (const slot of slots) {
@@ -392,7 +479,6 @@ export async function duplicateTemplate(
               ? null
               : (remapped.get(slot.multitaskGroup) ?? null),
           sortOrder: slot.sortOrder,
-          // UX v1.1 (0004): the stacked shape copies with the slot.
           gapBeforeMin: slot.gapBeforeMin,
           pinnedAt: slot.pinnedAt,
           role: slot.role,
@@ -409,7 +495,11 @@ export async function duplicateTemplate(
   });
 }
 
-/** Returns the removed slot so the undo toast can put it back exactly. */
+/**
+ * Returns the removed slot so the undo toast can put it back exactly — the
+ * stacked shape included. Removing the last-but-one member of a one-of group
+ * dissolves the group: the survivor is just a slot again.
+ */
 export async function removeSlot(
   rls: RlsClient,
   userId: string,
@@ -424,39 +514,126 @@ export async function removeSlot(
     const row = rows[0];
     if (!row) return null;
 
+    if (row.alternatesGroup !== null) {
+      const survivors = await tx
+        .select({ id: templateSlots.id })
+        .from(templateSlots)
+        .where(
+          and(
+            eq(templateSlots.templateId, row.templateId),
+            eq(templateSlots.alternatesGroup, row.alternatesGroup),
+          ),
+        );
+      if (survivors.length === 1) {
+        await tx
+          .update(templateSlots)
+          .set({ alternatesGroup: null, alternatesDefault: false, updatedAt: new Date() })
+          .where(eq(templateSlots.id, survivors[0]!.id));
+      } else if (survivors.length > 1 && row.alternatesDefault) {
+        // The default left; the first survivor by creation takes it.
+        const [first] = await tx
+          .select({ id: templateSlots.id })
+          .from(templateSlots)
+          .where(
+            and(
+              eq(templateSlots.templateId, row.templateId),
+              eq(templateSlots.alternatesGroup, row.alternatesGroup),
+            ),
+          )
+          .orderBy(asc(templateSlots.createdAt))
+          .limit(1);
+        if (first) {
+          await tx
+            .update(templateSlots)
+            .set({ alternatesDefault: true, updatedAt: new Date() })
+            .where(eq(templateSlots.id, first.id));
+        }
+      }
+    }
+
+    await densifyPositions(tx, userId, row.templateId);
+
     return {
       templateId: row.templateId,
       habitId: row.habitId,
       timeMode: row.timeMode,
-      offsetStartMin: row.offsetStartMin,
-      offsetEndMin: row.offsetEndMin,
       durationMin: row.durationMin,
+      gapBeforeMin: row.gapBeforeMin,
+      pinnedAt: row.pinnedAt === null ? null : row.pinnedAt.slice(0, 5),
+      role: row.role,
       priorityOverride: row.priorityOverride,
       scheduling: row.scheduling,
       multitaskGroup: row.multitaskGroup,
+      alternatesGroup: row.alternatesGroup,
+      alternatesDefault: row.alternatesDefault,
       sortOrder: row.sortOrder,
     };
   });
 }
 
+/**
+ * Put a removed slot back at the position it had. If a loose slot has since
+ * taken that number, the two get consecutive positions after re-densifying —
+ * the restored one first, because it was there first is not knowable, so
+ * creation order decides. A restored one-of member rejoins its group and the
+ * group re-syncs from the survivor (the survivor is the source of truth for
+ * the structure it kept).
+ */
 export async function restoreSlot(
   rls: RlsClient,
   userId: string,
   payload: RestoreSlotInput,
 ): Promise<{ id: string } | null> {
-  const rows = await rls.execute((tx) =>
-    tx
+  return rls.execute(async (tx) => {
+    let alternatesDefault = payload.alternatesDefault;
+    if (payload.alternatesGroup !== null) {
+      const [survivor] = await tx
+        .select({ id: templateSlots.id, isDefault: templateSlots.alternatesDefault })
+        .from(templateSlots)
+        .where(
+          and(
+            eq(templateSlots.templateId, payload.templateId),
+            eq(templateSlots.alternatesGroup, payload.alternatesGroup),
+          ),
+        )
+        .limit(1);
+      // The survivor kept (or was given) the default; the returner yields.
+      if (survivor?.isDefault) alternatesDefault = false;
+    }
+
+    const rows = await tx
       .insert(templateSlots)
-      .values({ ...payload, userId })
-      .returning({ id: templateSlots.id }),
-  );
-  return rows[0] ?? null;
+      .values({
+        userId,
+        templateId: payload.templateId,
+        habitId: payload.habitId,
+        timeMode: payload.timeMode,
+        durationMin: payload.durationMin,
+        gapBeforeMin: payload.pinnedAt === null ? payload.gapBeforeMin : 0,
+        pinnedAt: payload.pinnedAt,
+        role: payload.role,
+        priorityOverride: payload.priorityOverride,
+        scheduling: payload.scheduling,
+        multitaskGroup: payload.multitaskGroup,
+        alternatesGroup: payload.alternatesGroup,
+        alternatesDefault,
+        sortOrder: payload.sortOrder,
+      })
+      .returning({ id: templateSlots.id });
+
+    const row = rows[0];
+    if (!row) return null;
+
+    await densifyPositions(tx, userId, payload.templateId);
+    return row;
+  });
 }
 
 /**
- * Reorder within a bracket, and only there — Epic 1 TP-02: "only within a
- * shared start; otherwise order is time order". Two items at 7:00 have an
- * order the person chose; two items at 7:00 and 7:20 have one the clock chose.
+ * Move a position up or down the stack (v1.1 §3.11's *Move up · Move down*).
+ * A bracket or a one-of group moves as one. Swapping past a pin moves the
+ * pin's INDEX, never its time — the walk places a pin by its clock regardless,
+ * so the moved slot simply lands on the other side of it.
  */
 export async function moveSlot(
   rls: RlsClient,
@@ -468,42 +645,50 @@ export async function moveSlot(
     const [slot] = await tx
       .select({
         id: templateSlots.id,
-        multitaskGroup: templateSlots.multitaskGroup,
+        templateId: templateSlots.templateId,
         sortOrder: templateSlots.sortOrder,
       })
       .from(templateSlots)
       .where(and(eq(templateSlots.id, id), eq(templateSlots.userId, userId)))
       .limit(1);
 
-    if (!slot || slot.multitaskGroup === null) return false;
+    if (!slot) return false;
 
-    const siblings = await tx
-      .select({ id: templateSlots.id, sortOrder: templateSlots.sortOrder })
+    const target = direction === "up" ? slot.sortOrder - 1 : slot.sortOrder + 1;
+    if (target < 0) return false;
+
+    const movers = await tx
+      .select({ id: templateSlots.id })
       .from(templateSlots)
       .where(
         and(
-          eq(templateSlots.multitaskGroup, slot.multitaskGroup),
-          eq(templateSlots.userId, userId),
+          eq(templateSlots.templateId, slot.templateId),
+          eq(templateSlots.sortOrder, slot.sortOrder),
         ),
-      )
-      .orderBy(asc(templateSlots.sortOrder));
+      );
+    const displaced = await tx
+      .select({ id: templateSlots.id })
+      .from(templateSlots)
+      .where(
+        and(
+          eq(templateSlots.templateId, slot.templateId),
+          eq(templateSlots.sortOrder, target),
+        ),
+      );
+    if (displaced.length === 0) return false;
 
-    const index = siblings.findIndex((row) => row.id === id);
-    const swapWith = direction === "up" ? index - 1 : index + 1;
-    const partner = siblings[swapWith];
-    if (index === -1 || !partner) return false;
-
-    const self = siblings[index];
-    if (!self) return false;
-
-    await tx
-      .update(templateSlots)
-      .set({ sortOrder: partner.sortOrder, updatedAt: new Date() })
-      .where(eq(templateSlots.id, self.id));
-    await tx
-      .update(templateSlots)
-      .set({ sortOrder: self.sortOrder, updatedAt: new Date() })
-      .where(eq(templateSlots.id, partner.id));
+    for (const row of movers) {
+      await tx
+        .update(templateSlots)
+        .set({ sortOrder: target, updatedAt: new Date() })
+        .where(eq(templateSlots.id, row.id));
+    }
+    for (const row of displaced) {
+      await tx
+        .update(templateSlots)
+        .set({ sortOrder: slot.sortOrder, updatedAt: new Date() })
+        .where(eq(templateSlots.id, row.id));
+    }
 
     return true;
   });

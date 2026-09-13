@@ -20,6 +20,10 @@ export type HabitRow = {
   lifePriority: number;
   archivedAt: Date | null;
   categoryId: string | null;
+  /** UX v1.1 §11.3 (0004). */
+  blockKind: HabitSummaryView["blockKind"];
+  weeklyTarget: number | null;
+  typicalDays: number[] | null;
 };
 
 export type CategoryRow = {
@@ -51,11 +55,11 @@ export function toHabitSummaryView(
     lifePriority: row.lifePriority,
     isWakeAnchor: row.id === wakeAnchorHabitId,
     archived: row.archivedAt !== null,
-    // UX v1.1 (§11.3): null and null until DYN-2 adds the columns and DYN-4
-    // reads them. A habit with no block is *anywhere*, which is what every
-    // v1.0 habit is.
-    blockKind: null,
-    weeklyTarget: null,
-    typicalDays: null,
+    blockKind: row.blockKind,
+    weeklyTarget: row.weeklyTarget,
+    typicalDays:
+      row.typicalDays === null
+        ? null
+        : (row.typicalDays as HabitSummaryView["typicalDays"]),
   };
 }

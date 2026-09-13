@@ -4,7 +4,7 @@
 **Slice type:** The write path for everything planned. One invariant (`saveSlot`'s position rule) is stated in the service and paid by every caller; the rest is kind-aware CRUD over DYN-2/3's columns. The risk class is *a template that silently stacks two things*: a save path that walks past the position rule and materialises breakfast on top of the walk.
 **Vigil:** none. **Mason review:** the position invariant (AC 4–7) and the validators' cross-field rules (AC 2).
 
-**Status:** Not started
+**Status:** Complete (2026-09-12 — AC 2, 12, 17, 18 verified; AC 1, 3–11, 13–16 need a database with `0004`/`0005` applied, which Taylor applies at the end of the epic; see `DEVIATIONS.md`)
 
 > **Mason — invariant review.** `saveSlot` today enforces "two fixed slots at one start share a `multitask_group` or the save is refused" (`SameStartError`). This slice replaces *start* with *position* and adds a third legal answer, *one of* (`alternates_group`). Review that the rule is one function on every write path (save, move, duplicate, restore-after-undo, the migration-era `restoreSlot`), that `findCollisions` reads the same rule, that an alternates group's members are forced to share `sort_order` and `gap_before_min` and to have exactly one `alternates_default`, and that no path can leave a pinned slot with a non-zero gap.
 

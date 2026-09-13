@@ -114,6 +114,7 @@ export {
 
 export {
   categoryKeySchema,
+  createFromStarterLibraryInput,
   createFromStarterSetInput,
   createHabitInput,
   habitFormSchema,
@@ -121,14 +122,52 @@ export {
   habitTypeSchema,
   iconValueSchema,
   listHabitsInput,
+  rotationHabitSchema,
   slotsOutsideRangeInput,
   updateHabitInput,
+  type CreateFromStarterLibraryInput,
   type CreateFromStarterSetInput,
   type HabitFormInput,
   type HabitTypeInput,
   type IconValueInput,
+  type RotationHabitInput,
   type UpdateHabitInput,
 } from "./habit";
+
+export {
+  anchorDirectionSchema,
+  blockFlowSchema,
+  blockKindSchema,
+  blockOrderSchema,
+  blockStructureSchema,
+  createTemplateInput,
+  dayShapeSchema,
+  overflowModeSchema,
+  scheduleShapeSchema,
+  slotRoleSchema,
+  trainingPlacementSchema,
+  workDayModeSchema,
+  workDaysSchema,
+  type BlockKindInput,
+  type CreateTemplateInput,
+  type WorkDaysInput,
+} from "./block";
+
+export {
+  fixtureFormSchema,
+  fixtureIdInput,
+  listFixturesInput,
+  type FixtureFormInput,
+} from "./fixture";
+
+export {
+  journalGetInput,
+  journalPromptKeySchema,
+  journalPromptsSchema,
+  journalSaveInput,
+  type JournalPromptsInput,
+  type JournalSaveInput,
+} from "./journal";
 
 export {
   applyTrimInput,

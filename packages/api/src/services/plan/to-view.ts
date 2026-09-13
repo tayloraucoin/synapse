@@ -1,26 +1,46 @@
-import { formatClockFromMinutes, clockToMinutes } from "@syn/utils";
-import type { IconValue, SlotView, TemplateSummaryView } from "@syn/types";
+import type {
+  BlockFlow,
+  BlockKind,
+  BlockStructure,
+  IconValue,
+  SlotRole,
+  SlotView,
+  TemplateSummaryView,
+} from "@syn/types";
+import { formatClockFromMinutes, stackBlock, type StackItem } from "@syn/utils";
 
 /**
- * Rows → the two view models TP-01 and TP-02 render.
+ * Rows → the view models the block editor renders (UX v1.1 §3.11, §11.5,
+ * TD-4).
  *
- * THE CLOCK IS COMPUTED HERE, not in the component. `SlotView` carries
- * `startClock` and `endClock` as strings because a template has no time zone —
- * a slot is an offset from an anchor, and the anchor is a wall-clock time, so
- * the display string is plain arithmetic on minutes. Passing a `Date` and a
- * zone into the row would be inventing a zone the template does not have.
+ * THE CLOCK IS DERIVED HERE, ONCE PER TEMPLATE, BY `stackBlock`. A slot stores
+ * a length and a gap; where it starts is the walk's answer, from the anchor
+ * the profile supplies for the block's kind (`anchors.ts`). One walk per
+ * template, indexed by slot id — never a walk per slot, never a stored start.
+ *
+ * A LEGACY WINDOW SLOT is read as an item as long as its span
+ * (`offset_end − offset_start`) while the deprecated columns exist, and as
+ * its `duration_min` after 0006 (DYN-21 converts the rows). A legacy
+ * `unscheduled` slot is on the stack like any other.
  */
 
 export type SlotRow = {
   id: string;
   habitId: string;
   timeMode: SlotView["timeMode"];
+  /** DEPRECATED — read only for legacy window spans until 0006. */
   offsetStartMin: number | null;
+  /** DEPRECATED — read only for legacy window spans until 0006. */
   offsetEndMin: number | null;
   durationMin: number;
+  gapBeforeMin: number;
+  pinnedAt: string | null;
+  role: SlotRole;
   priorityOverride: number | null;
   scheduling: SlotView["scheduling"];
   multitaskGroup: string | null;
+  alternatesGroup: string | null;
+  alternatesDefault: boolean;
   sortOrder: number;
   habitTitle: string;
   habitIcon: IconValue;
@@ -40,76 +60,159 @@ function multitaskPosition(
   return "middle";
 }
 
+/** The length the walk counts: a legacy window is as long as its span. */
+export function walkDurationOf(slot: SlotRow): number {
+  if (
+    slot.timeMode === "window" &&
+    slot.offsetStartMin !== null &&
+    slot.offsetEndMin !== null
+  ) {
+    return Math.max(slot.durationMin, slot.offsetEndMin - slot.offsetStartMin);
+  }
+  return slot.durationMin;
+}
+
+/** `HH:mm` or `HH:mm:ss` from the driver → minutes from midnight. */
+function clockToMin(clock: string): number {
+  const [hour = "0", minute = "0"] = clock.split(":");
+  return Number(hour) * 60 + Number(minute);
+}
+
+export function toStackItems(rows: readonly SlotRow[]): StackItem[] {
+  return rows.map((row) => ({
+    id: row.id,
+    durationMin: walkDurationOf(row),
+    gapBeforeMin: row.gapBeforeMin,
+    pinnedAtMin: row.pinnedAt === null ? null : clockToMin(row.pinnedAt),
+    scheduling: row.scheduling,
+    priority: row.priorityOverride ?? row.habitLifePriority,
+    multitaskId: row.multitaskGroup,
+    alternatesId: row.alternatesGroup,
+    alternatesChosen: row.alternatesGroup === null ? undefined : row.alternatesDefault,
+  }));
+}
+
+export type TemplateWalk = {
+  startMinById: ReadonlyMap<string, number>;
+  endMinById: ReadonlyMap<string, number>;
+  totalMin: number;
+  startMin: number;
+  endMin: number;
+};
+
+/**
+ * One walk for the whole template. `anchorMin` null (a placeable kind) yields
+ * no clocks and a total only.
+ */
+export function walkTemplate(
+  rows: readonly SlotRow[],
+  flow: BlockFlow,
+  anchorMin: number | null,
+): TemplateWalk {
+  const result = stackBlock({
+    items: toStackItems(rows),
+    flow,
+    anchorMin: anchorMin ?? 0,
+  });
+  const startMinById = new Map<string, number>();
+  const endMinById = new Map<string, number>();
+  if (anchorMin !== null) {
+    for (const placed of result.placed) {
+      startMinById.set(placed.id, placed.startMin);
+      endMinById.set(placed.id, placed.endMin);
+    }
+  }
+  return {
+    startMinById,
+    endMinById,
+    totalMin: result.totalMin,
+    startMin: result.startMin,
+    endMin: result.endMin,
+  };
+}
+
 export function toSlotViews(
   rows: readonly SlotRow[],
-  anchorTime: string,
+  walk: TemplateWalk,
 ): SlotView[] {
-  const anchorMinutes = clockToMinutes(anchorTime);
-
   const byGroup = new Map<string, SlotRow[]>();
+  const byAlternates = new Map<string, SlotRow[]>();
   for (const row of rows) {
-    if (row.multitaskGroup === null) continue;
-    const members = byGroup.get(row.multitaskGroup) ?? [];
-    members.push(row);
-    byGroup.set(row.multitaskGroup, members);
+    if (row.multitaskGroup !== null) {
+      const members = byGroup.get(row.multitaskGroup) ?? [];
+      members.push(row);
+      byGroup.set(row.multitaskGroup, members);
+    }
+    if (row.alternatesGroup !== null) {
+      const members = byAlternates.get(row.alternatesGroup) ?? [];
+      members.push(row);
+      byAlternates.set(row.alternatesGroup, members);
+    }
   }
   for (const members of byGroup.values()) {
     members.sort((a, b) => a.sortOrder - b.sortOrder);
   }
 
-  return rows.map((row) => ({
-    id: row.id,
-    habitId: row.habitId,
-    title: row.habitTitle,
-    icon: row.habitIcon,
-    timeMode: row.timeMode,
-    startClock:
-      row.offsetStartMin === null
-        ? null
-        : formatClockFromMinutes(anchorMinutes + row.offsetStartMin),
-    endClock:
-      row.offsetEndMin === null
-        ? null
-        : formatClockFromMinutes(anchorMinutes + row.offsetEndMin),
-    durationMin: row.durationMin,
-    priority: row.priorityOverride ?? row.habitLifePriority,
-    overridden: row.priorityOverride !== null,
-    scheduling: row.scheduling,
-    multitask:
-      row.multitaskGroup === null
-        ? "none"
-        : multitaskPosition(row, byGroup.get(row.multitaskGroup) ?? []),
-    // UX v1.1 fields — neutral until DYN-4 reads them from the slot and
-    // derives the clock with `stackBlock` (TD-4).
-    gapBeforeMin: 0,
-    pinnedClock: null,
-    role: "stack",
-    alternates: null,
-  }));
+  return rows.map((row) => {
+    const start = walk.startMinById.get(row.id);
+    const end = walk.endMinById.get(row.id);
+    const other =
+      row.alternatesGroup === null
+        ? undefined
+        : byAlternates
+            .get(row.alternatesGroup)
+            ?.find((member) => member.id !== row.id);
+
+    return {
+      id: row.id,
+      habitId: row.habitId,
+      title: row.habitTitle,
+      icon: row.habitIcon,
+      timeMode: row.timeMode,
+      startClock: start === undefined ? null : formatClockFromMinutes(start),
+      endClock: end === undefined ? null : formatClockFromMinutes(end),
+      durationMin: row.durationMin,
+      priority: row.priorityOverride ?? row.habitLifePriority,
+      overridden: row.priorityOverride !== null,
+      scheduling: row.scheduling,
+      multitask:
+        row.multitaskGroup === null
+          ? "none"
+          : multitaskPosition(row, byGroup.get(row.multitaskGroup) ?? []),
+      gapBeforeMin: row.gapBeforeMin,
+      pinnedClock:
+        row.pinnedAt === null
+          ? null
+          : formatClockFromMinutes(clockToMin(row.pinnedAt)),
+      role: row.role,
+      alternates:
+        row.alternatesGroup === null
+          ? null
+          : {
+              group: row.alternatesGroup,
+              isDefault: row.alternatesDefault,
+              otherTitle: other?.habitTitle ?? "",
+              otherDurationMin: other?.durationMin ?? 0,
+            },
+    };
+  });
 }
 
 /**
- * Time order, with a shared start broken by `sort_order` — which is the only
- * place `sort_order` means anything (Epic 1 TP-02: reorder is "only within a
- * shared start; otherwise order is time order").
- *
- * `unscheduled` slots sort last: they have no time, so they cannot sit between
- * two that do.
+ * Stack order — `sort_order`, dense and owned by the service (v1.1 §11.5).
+ * Inside a bracket or a one-of group members share a position and the same
+ * number breaks the tie by `created_at`, which the caller's query supplies.
  */
 export function compareSlots(a: SlotRow, b: SlotRow): number {
-  const aStart = a.offsetStartMin;
-  const bStart = b.offsetStartMin;
-
-  if (aStart === null && bStart === null) return a.sortOrder - b.sortOrder;
-  if (aStart === null) return 1;
-  if (bStart === null) return -1;
-  if (aStart !== bStart) return aStart - bStart;
   return a.sortOrder - b.sortOrder;
 }
 
 export type TemplateRow = {
   id: string;
   name: string;
+  kind: BlockKind;
+  flow: BlockFlow;
+  structure: BlockStructure;
   /** Nullable since 0004 (v1.1 §11.4); the summary does not read it. */
   anchorTime: string | null;
   weeklyTarget: number | null;
@@ -132,10 +235,8 @@ export function toTemplateSummaryView(
     weeklyTarget: row.weeklyTarget,
     usedThisWeek,
     archived: row.archivedAt !== null,
-    // UX v1.1: every v1.0 template lays out as a morning block until DYN-2
-    // backfills `kind` and DYN-4 reads the three columns (TD-1).
-    kind: "morning",
-    flow: "forward",
-    structure: "stack",
+    kind: row.kind,
+    flow: row.flow,
+    structure: row.structure,
   };
 }
