@@ -30,9 +30,9 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 - [x] **DYN-7** · `@syn/ui` for v1.1: `BlockHeader`, `BlockBand`, `GapBand`, `BudgetLine`, `DragLayer`, `ConfirmYesterdayRows`, the serif `Textarea` variant, `StepFrame` to twelve, `ScheduleBlock`/`ItemRow`/`SlotView` extensions, stories — L · (DYN-1) · **Vesper review of stories in both themes**
 
 ### Phase 3 — Setup (planning mode)
-- [ ] **DYN-8** · The block editor, step one, and Settings → Your day: kind-aware editor with the slot sheet's fallbacks, the library by block, the habit sheet's block chip — L · (DYN-4, DYN-7)
+- [x] **DYN-8** · The block editor, step one, and Settings → Your day: kind-aware editor with the slot sheet's fallbacks, the library by block, the habit sheet's block chip — L · (DYN-4, DYN-7)
 - [ ] **DYN-9** · The block editor, step two: drag to reorder, resize, seam-drag gaps, keyboard equivalents — M · (DYN-8) · does not gate
-- [ ] **DYN-10** · First run 1–6: the shape of the week, work days, work start and what gives, standing commitments, wake, before the day — L · (DYN-7, DYN-4)
+- [x] **DYN-10** · First run 1–6: the shape of the week, work days, work start and what gives, standing commitments, wake, before the day — L · (DYN-7, DYN-4)
 - [ ] **DYN-11** · First run 7–12: before work with *one of*, the landscape, training, closing the day, focuses, the fit; the first week pre-filled — L · (DYN-10, DYN-8, DYN-5)
 - [ ] **DYN-12** · The week build amended: per-block day sheet, shape toggle, the pre-filled week, the training swap confirm — M · (DYN-5, DYN-7)
 

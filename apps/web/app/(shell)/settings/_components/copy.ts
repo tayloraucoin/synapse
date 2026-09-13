@@ -11,10 +11,11 @@ export const SETTINGS_COPY = {
   /* ------------------------------------------------------------ ST-00 -- */
   title: "Settings",
   resumeSetup: "Setup isn't finished — continue",
-  habits: "Habits",
+  /** UX v1.1 §4.14: *Habits* is *Library*; *Templates* is folded into *Your day*. */
+  habits: "Library",
   habitsCount: (n: number) => `${n} ${n === 1 ? "habit" : "habits"}`,
-  templates: "Templates",
-  templatesCount: (n: number) => `${n} ${n === 1 ? "template" : "templates"}`,
+  yourDay: "Your day",
+  yourDayDescription: "The shape of the week, and each block",
   week: "Week",
   weekCount: (n: number) =>
     `This week: ${n} ${n === 1 ? "day" : "days"} planned`,

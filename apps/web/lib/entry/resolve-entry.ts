@@ -23,7 +23,7 @@ export const SETUP_REDIRECT_LAUNCH_LIMIT = 3;
 export type EntryProfile = {
   /** Null until first run is finished. */
   firstRunCompletedAt: Date | string | null;
-  /** Which step to resume at, 1–5. */
+  /** Which step to resume at, 1–12 (UX v1.1 §4). */
   firstRunStep: number | null;
 };
 
@@ -74,8 +74,10 @@ export function resolveEntry({
   return todayRoute();
 }
 
-/** FR-01…05. Anything out of range resumes at the beginning. */
+/** The twelve screens of UX v1.1 §4. Anything out of range resumes at the beginning. */
+export const SETUP_STEP_COUNT = 12;
+
 function clampSetupStep(step: number | null | undefined): number {
-  if (!step || step < 1 || step > 5) return 1;
+  if (!step || step < 1 || step > SETUP_STEP_COUNT) return 1;
   return Math.floor(step);
 }

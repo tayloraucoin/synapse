@@ -10,9 +10,14 @@ export const LIBRARY_COPY = {
   noMatches: (query: string) => `No habits match "${query}"`,
 
   /** The three groups, in this fixed order (Epic 1 LB-01 read 3). */
-  groupHabits: "Habits",
-  groupTasks: "Tasks & appointments",
-  groupDeepWork: "Deep work",
+  /** UX v1.1 §4.15: grouped by block first — the five habit-holding words. */
+  groupMorning: "Morning",
+  groupBeforeWork: "Before work",
+  groupBreak: "Break",
+  groupWindDown: "Wind-down",
+  groupAnywhere: "Anywhere",
+  /** [COPY] The rows in a block with no category, when the person uses them. */
+  groupNoCategory: "No category",
 
   range: (min: number, max: number) => `${min}–${max} min`,
   importance: (value: number) => `importance ${value}`,

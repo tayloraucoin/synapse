@@ -25,7 +25,7 @@ import { formatClock, weekdayForDayKey } from "@syn/utils";
 import { OneOffSheet } from "@/components/one-off-sheet";
 import { SheetHost } from "@/components/page-frame";
 import { useOnline } from "@/lib/hooks/use-online";
-import { settingsTemplatesRoute } from "@/lib/routes";
+import { settingsYourDayRoute } from "@/lib/routes";
 import { trpc } from "@/lib/trpc/client";
 
 import { WEEK_COPY as COPY } from "./copy";
@@ -171,7 +171,7 @@ export function DaySheet({
               noneLabel={COPY.none}
               createLabel={COPY.newTemplate}
               onCreate={() => {
-                router.push(settingsTemplatesRoute());
+                router.push(settingsYourDayRoute());
               }}
               searchLabel={COPY.templateSearchLabel}
               emptyText={COPY.templateEmpty}

@@ -33,14 +33,4 @@ export const STORAGE_KEYS = {
    * password is retyped. A password in browser storage is a password on disk.
    */
   AUTH_PENDING_NAME: "syn:auth-pending-name",
-  /**
-   * The template FR-03 is editing, so returning to step 3 reopens the one that
-   * was started rather than creating a second *Morning* (Epic 1 FR-03).
-   *
-   * `sessionStorage`, and a convenience only: the account carries the step, so
-   * a person who resumes in another browser gets step 3 with a fresh template
-   * rather than a broken one. It is the one piece of first-run state that does
-   * not live on the account, which the ticket permits by name.
-   */
-  SETUP_TEMPLATE_ID: "syn:setup-template-id",
 } as const;

@@ -50,3 +50,16 @@ export const WithError: StoryObj<typeof TimeField> = {
     error: "Pick a time.",
   },
 };
+
+/** UX v1.1 §4, W1 (DYN-10): a pre-filled field shows its value with *Change*; the picker opens on demand. */
+export const Disclosed: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState("09:00");
+    return (
+      <div className="flex max-w-sm flex-col gap-(--space-4)">
+        <TimeField label="Working by" value={value} onChange={setValue} disclosed />
+        <TimeField label="Until about" value="17:30" onChange={() => {}} disclosed />
+      </div>
+    );
+  },
+};

@@ -10,6 +10,7 @@ import {
   HelperText,
   Input,
   Label,
+  QuickChipRow,
   RangeInput,
   ResponsiveSheet,
   Stepper17,
@@ -17,8 +18,10 @@ import {
   Text,
   TextDisclosureButton,
   Textarea,
+  type QuickChip,
   type Stepper17Value,
 } from "@syn/ui";
+import type { BlockKind } from "@syn/types";
 import {
   PREFLIGHT_NOTE_MAX,
   QUANTITY_UNIT_MAX,
@@ -50,6 +53,21 @@ import { useHabitSheet, type UseHabitSheetOptions } from "./use-habit-sheet";
  * fields, all disabled, footer *Restore* · *Close* (SET-4's ruling). A second
  * component would be the fields written twice.
  */
+/** The chip row's *Anywhere* — `blockKind` null, the library's own word. */
+const ANYWHERE = "anywhere";
+
+/**
+ * The six habit-holding kinds (§4.15): training and work are rotations and
+ * are set on the rotation's own sheet, never here.
+ */
+const BLOCK_CHIPS: readonly QuickChip[] = [
+  { label: COPY.blockMorning, value: "morning" },
+  { label: COPY.blockBeforeWork, value: "prep" },
+  { label: COPY.blockBreak, value: "break" },
+  { label: COPY.blockWindDown, value: "wind_down" },
+  { label: COPY.blockAnywhere, value: ANYWHERE },
+];
+
 export interface HabitSheetProps extends UseHabitSheetOptions {
   /** Opens CT-02 stacked, from the chip picker's *+ New category*. */
   onCreateCategory?: () => void;
@@ -165,8 +183,21 @@ export function HabitSheet({
 
           {/*
             UX v1.1 §4.15 (W6): this sheet makes habits, and only habits. The
-            v1.0 type segment is gone; the block chip row arrives with DYN-8.
+            v1.0 type segment is gone; the block chip row (DYN-8) says which
+            block the habit lives in by default — a default, not a fence
+            (§11.3): a slot may still be placed anywhere.
           */}
+          <QuickChipRow
+            label={COPY.block}
+            chips={BLOCK_CHIPS}
+            selected={values.blockKind ?? ANYWHERE}
+            onSelect={(next) => {
+              form.setValue("blockKind", next === ANYWHERE ? null : (next as BlockKind), {
+                shouldDirty: true,
+              });
+            }}
+            disabled={disabled}
+          />
 
           <IconChooser
             value={values.icon}
@@ -183,22 +214,25 @@ export function HabitSheet({
             disabled={disabled}
           />
 
-          <ChipPicker
-            label={COPY.category}
-            options={sheet.categories.map((category) => ({
-              value: category.id,
-              label: category.name,
-              colorKey: category.key,
-            }))}
-            value={values.categoryId}
-            onChange={(next) => {
-              form.setValue("categoryId", next, { shouldDirty: true });
-            }}
-            noneLabel={COPY.noneCategory}
-            createLabel={onCreateCategory ? COPY.newCategory : undefined}
-            onCreate={onCreateCategory}
-            disabled={disabled}
-          />
+          {/* W7: the picker exists only once a category does. */}
+          {sheet.categories.length === 0 ? null : (
+            <ChipPicker
+              label={COPY.category}
+              options={sheet.categories.map((category) => ({
+                value: category.id,
+                label: category.name,
+                colorKey: category.key,
+              }))}
+              value={values.categoryId}
+              onChange={(next) => {
+                form.setValue("categoryId", next, { shouldDirty: true });
+              }}
+              noneLabel={COPY.noneCategory}
+              createLabel={onCreateCategory ? COPY.newCategory : undefined}
+              onCreate={onCreateCategory}
+              disabled={disabled}
+            />
+          )}
 
           <RangeInput
             label={COPY.range}

@@ -127,6 +127,10 @@ const ANNOTATIONS = {
   "apps/web/lib/stores/README.md": "the client-state rule, and why there is no Zustand store yet",
   "apps/web/public/sw.js": "push only. No caching \u2014 Phase 1 has no offline contract",
   "apps/web/app/(shell)/layout.tsx": "THE auth gate",
+  "apps/web/components/block-editor/use-block-editor.ts": "the block editor's state (v1.1 §3.11): the autosave queue, and the client walk — stackBlock over the page's SlotViews, so the footer never fetches",
+  "apps/web/components/block-editor/slot-sheet.tsx": "the editor's one form; the same-position question with three answers lives in its footer",
+  "apps/web/app/(setup)/_components/fact-screen.tsx": "one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)",
+  "apps/web/app/(shell)/settings/your-day/_components/your-day-list.tsx": "the twelve first-run screens as a list (v1.1 §4.14); block-kind rows open the editor for their kind",
   "apps/mobile/README.md": "a deliberate empty seam. Do not scaffold",
 
   // --- delivery ---

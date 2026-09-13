@@ -1,12 +1,13 @@
-import { TemplateEditorScreen } from "@/components/template-editor/template-editor-screen";
+import { notFound, redirect } from "next/navigation";
+
+import { getServerApi } from "@/lib/trpc/server";
+import { settingsYourDayBlockRoute } from "@/lib/routes";
 
 /**
- * TP-02 Template editor — a canvas.
- *
- * It autosaves per change and never prompts to discard (Epic 1 §0.3): there is
- * nothing unsaved to discard. The slot sheet inside it is a form and does have
- * a discard prompt, which is the distinction the document draws between the
- * two shapes.
+ * TP-02 is the block editor under Your day (UX v1.1 §4.14 — DYN-8). The
+ * template's kind is read on the server and the old link lands on the
+ * editor for that kind, on that template; an archived template lands on
+ * the same page, where the list shows it under archived.
  */
 export default async function SettingsTemplatePage({
   params,
@@ -14,6 +15,9 @@ export default async function SettingsTemplatePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const api = await getServerApi();
+  const detail = await api.template.get({ id }).catch(() => null);
+  if (detail === null) notFound();
 
-  return <TemplateEditorScreen templateId={id} />;
+  redirect(settingsYourDayBlockRoute(detail.template.kind, id));
 }

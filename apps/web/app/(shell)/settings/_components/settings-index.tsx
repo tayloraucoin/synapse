@@ -25,8 +25,8 @@ import {
   settingsNotificationsRoute,
   settingsReasonsRoute,
   settingsShareRoute,
-  settingsTemplatesRoute,
   settingsWeekRoute,
+  settingsYourDayRoute,
 } from "@/lib/routes";
 import { beginDeliberateSignOut } from "@/lib/auth/session-expired";
 import { useOnline } from "@/lib/hooks/use-online";
@@ -104,15 +104,16 @@ export function SettingsIndex({
           />
         ) : null}
 
+        {/* UX v1.1 §4.14: *Your day* replaces *Templates*; *Habits* is *Library*. */}
+        <SettingsRow
+          title={COPY.yourDay}
+          description={COPY.yourDayDescription}
+          href={settingsYourDayRoute()}
+        />
         <SettingsRow
           title={COPY.habits}
           description={countText(COPY.habitsCount, counts.data?.habits)}
           href={settingsHabitsRoute()}
-        />
-        <SettingsRow
-          title={COPY.templates}
-          description={countText(COPY.templatesCount, counts.data?.templates)}
-          href={settingsTemplatesRoute()}
         />
         <SettingsRow
           title={COPY.week}

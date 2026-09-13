@@ -21,7 +21,7 @@ This applies to every note below and to the v1.1 spec. The v1.0 spec was written
 
 | # | Note (Taylor) | Severity | Mapping | Lands in |
 |---|---|---|---|---|
-| W1 | The time zone is already assumed, but the input is open — you scroll down only to discover your zone is already selected. Show the **value with an Edit** action; tapping Edit opens the autocomplete with the input already focused. | Should-fix | v1 §4.2 step 1 says "timezone confirmation" — a confirmation, not an entry. The build renders the entry control. Fix is a display state: value + *Change*, control on demand. Same pattern should apply to any pre-filled field in first run (wake time). | v1.0 patch ([`step-1-day.tsx`](../../apps/web/app/(setup)/_components/step-1-day.tsx)); carried into v1.1 as the rule for pre-filled fields. |
+| W1 | The time zone is already assumed, but the input is open — you scroll down only to discover your zone is already selected. Show the **value with an Edit** action; tapping Edit opens the autocomplete with the input already focused. | Should-fix | v1 §4.2 step 1 says "timezone confirmation" — a confirmation, not an entry. The build renders the entry control. Fix is a display state: value + *Change*, control on demand. Same pattern should apply to any pre-filled field in first run (wake time). | v1.0 patch (`step-1-day.tsx`, deleted with the v1.0 sequence in DYN-10); carried into v1.1 as the rule for pre-filled fields — `TimeField disclosed` (DYN-10). |
 
 ## First run · step 2 — Habits (and the starter chooser)
 

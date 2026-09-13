@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1143 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1157 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -68,14 +68,15 @@ apps/
       (setup)/
         _components/
           copy.ts
-          setup-template-id.ts
-          step-1-day.tsx
-          step-2-habits.tsx
-          step-3-template.tsx
-          step-4-week.tsx
-          step-5-ready.tsx
+          fact-screen.tsx  # one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)
+          step-1-shape.tsx
+          step-2-work-days.tsx
+          step-3-work-start.tsx
+          step-4-commitments.tsx
+          step-5-wake.tsx
+          step-6-before-the-day.tsx
+          step-7-ready.tsx
           step-frame.tsx
-          target-week.ts
         setup/
           [step]/
             page.tsx
@@ -178,9 +179,6 @@ apps/
               share-panel.tsx
             page.tsx
           templates/
-            _components/
-              template-list-header.tsx
-              template-list.tsx
             [id]/
               page.tsx
             page.tsx
@@ -188,6 +186,24 @@ apps/
             _components/
               current-week.tsx
             [week]/
+              page.tsx
+            page.tsx
+          your-day/
+            _components/
+              copy.ts
+              your-day-list.tsx  # the twelve first-run screens as a list (v1.1 §4.14); block-kind rows open the editor for their kind
+            [screen]/
+              _components/
+                your-day-screen.tsx
+              page.tsx
+            block/
+              [kind]/
+                _components/
+                  kind-editor.tsx
+                page.tsx
+            order/
+              _components/
+                block-order.tsx
               page.tsx
             page.tsx
           page.tsx
@@ -237,6 +253,16 @@ apps/
       not-found.tsx
       page.tsx  # the landing page when signed out; the §4.2 entry tree when signed in
     components/
+      block-editor/
+        add-sheet.tsx
+        apply-changes-dialog.tsx
+        block-editor.tsx
+        block-strip.tsx
+        copy.ts
+        editor-footer.tsx
+        index.ts
+        slot-sheet.tsx  # the editor's one form; the same-position question with three answers lives in its footer
+        use-block-editor.ts  # the block editor's state (v1.1 §3.11): the autosave queue, and the client walk — stackBlock over the page's SlotViews, so the footer never fetches
       category-sheet/
         category-sheet.tsx
         copy.ts
@@ -253,6 +279,10 @@ apps/
         index.ts
         use-day-list.ts
         use-landing.ts
+      fixture-sheet/
+        copy.ts
+        fixture-sheet.tsx
+        index.ts
       habit-sheet/
         copy.ts
         habit-sheet.tsx
@@ -324,15 +354,6 @@ apps/
         copy.ts
         index.ts
         starter-set-chooser.tsx
-      template-editor/
-        apply-changes-dialog.tsx
-        copy.ts
-        index.ts
-        slot-row.tsx
-        slot-sheet.tsx
-        template-editor-screen.tsx
-        template-editor.tsx
-        use-template-editor.ts
       trim-sheet/
         copy.ts
         index.ts
@@ -546,12 +567,14 @@ docs/
       01-authoring-handoff-remaining-tickets.md
       DEVIATIONS.md
       DYN-1-vocabulary-view-models-and-stack-block.md
+      DYN-10-first-run-1-6.md
       DYN-2-migration-0004-block-templates-and-stacked-slots.md
       DYN-3-migration-0005-profile-fixtures-day-blocks-journal.md
       DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
       DYN-5-materialisation-per-block-and-set-the-day.md
       DYN-6-adjust-do-now-habit-day-edits-and-moves.md
       DYN-7-ui-composites-for-v1-1.md
+      DYN-8-block-editor-step-one-and-your-day.md
       PROGRESS.md
       README.md
       TECHNICAL-DECISIONS.md

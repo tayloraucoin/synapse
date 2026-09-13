@@ -9,10 +9,7 @@ import { useOnline } from "@/lib/hooks/use-online";
 import { setupRoute, todayRoute } from "@/lib/routes";
 import { trpc } from "@/lib/trpc/client";
 
-import { SETUP_COPY as COPY } from "./copy";
-
-/** The v1.0 sequence's length; DYN-10 widens it to twelve (UX v1.1 §4). */
-const TOTAL_STEPS = 5;
+import { SETUP_COPY as COPY, SETUP_TOTAL_STEPS } from "./copy";
 
 /**
  * Move to another step, recording it on the account first.
@@ -69,9 +66,9 @@ export function StepFrame({
   heading: string;
   body?: string;
   children?: React.ReactNode;
-  /** Steps 3 and 4 only (Epic 1 §2). */
+  /** Every screen after the first (UX v1.1 §4). */
   skip?: { label?: string; onSkip: () => void; busy?: boolean };
-  primary: { label: string; onClick: () => void; busy?: boolean };
+  primary: { label: string; onClick: () => void; busy?: boolean; disabled?: boolean };
   error?: string | null;
 }) {
   const online = useOnline();
@@ -79,7 +76,7 @@ export function StepFrame({
 
   const copy: StepFrameViewProps["copy"] = React.useMemo(
     () => ({
-      progress: (current) => COPY.progress(current),
+      progress: (current, total) => COPY.progress(current, total),
       back: COPY.back,
       finishLater: COPY.finishLater,
       skip: COPY.skip,
@@ -91,7 +88,7 @@ export function StepFrame({
   return (
     <StepFrameView
       step={step}
-      total={TOTAL_STEPS}
+      total={SETUP_TOTAL_STEPS}
       heading={heading}
       body={body}
       primary={primary}

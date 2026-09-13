@@ -11,6 +11,8 @@
  * where a bad value can be turned into a 404 rather than a broken link.
  */
 
+import type { BlockKind } from "@syn/types";
+
 /* ---------------------------------------------------------------- entry -- */
 
 export function homeRoute(): string {
@@ -82,7 +84,7 @@ export function assetRoute(storedPath: string): string {
 
 /* ---------------------------------------------------------------- setup -- */
 
-/** FR-01…05. `step` is 1–5; the page 404s on anything else. */
+/** UX v1.1 §4's twelve screens. `step` is 1–12; the page 404s on anything else. */
 export function setupRoute(step: number): string {
   return `/setup/${step}`;
 }
@@ -152,12 +154,54 @@ export function settingsHabitRoute(id: string): string {
   return `/settings/habits/${id}`;
 }
 
+/** Redirects to Your day (UX v1.1 §4.14 — DYN-8); kept so old links land. */
 export function settingsTemplatesRoute(): string {
   return "/settings/templates";
 }
 
+/** Redirects to the template's kind under Your day (DYN-8); kept so old links land. */
 export function settingsTemplateRoute(id: string): string {
   return `/settings/templates/${id}`;
+}
+
+/*
+ * Settings → Your day (UX v1.1 §4.14): the twelve first-run screens without
+ * the frame. The six fact screens are DYN-10's, embedded; the block-kind rows
+ * open the block editor for that kind; *Block order* is its own list.
+ */
+export type YourDayScreen =
+  | "shape"
+  | "work-days"
+  | "work-start"
+  | "commitments"
+  | "wake"
+  | "before-the-day";
+
+export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
+  "shape",
+  "work-days",
+  "work-start",
+  "commitments",
+  "wake",
+  "before-the-day",
+];
+
+export function settingsYourDayRoute(): string {
+  return "/settings/your-day";
+}
+
+export function settingsYourDayScreenRoute(screen: YourDayScreen): string {
+  return `/settings/your-day/${screen}`;
+}
+
+/** With a template id, the editor opens on that template; without, the kind's page decides. */
+export function settingsYourDayBlockRoute(kind: BlockKind, templateId?: string): string {
+  const base = `/settings/your-day/block/${kind}`;
+  return templateId ? `${base}?t=${encodeURIComponent(templateId)}` : base;
+}
+
+export function settingsYourDayOrderRoute(): string {
+  return "/settings/your-day/order";
 }
 
 /** Without a week, the week build opens on the current one. */

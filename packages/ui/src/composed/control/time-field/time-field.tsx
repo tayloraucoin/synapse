@@ -12,13 +12,21 @@
  * The value is "HH:mm" — a wall-clock string, not an instant. A time slot in a
  * template has no date, so it cannot be a `Date`; turning it into one is the
  * caller's job, on the day it belongs to.
+ *
+ * `disclosed` — UX v1.1 §4 (the frame, once), W1: "Pre-filled fields show
+ * **value + Change** and open their control only on demand." The field
+ * renders its value as a labelled line with a ghost *Change* beside it;
+ * tapping opens the picker in place and moves focus into it. A field that
+ * is usually left alone should read as an answer, not as a question.
  */
 "use client";
 
 import * as React from "react";
 
 import { cn } from "../../../lib/cn";
+import { Button } from "../../../primitives/control/button";
 import { Input } from "../../../primitives/control/input";
+import { Text } from "../../../primitives/typography/text";
 
 export interface TimeFieldProps {
   /** "HH:mm", or null for empty. */
@@ -32,7 +40,18 @@ export interface TimeFieldProps {
   max?: string;
   required?: boolean;
   disabled?: boolean;
+  /** Value + *Change*; the picker opens on demand (W1). */
+  disclosed?: boolean;
+  /** The *Change* button's text; the label is read after it. */
+  changeLabel?: string;
+  /** "9:00" — the value as the line shows it; defaults to a plain reading of `HH:mm`. */
+  formatValue?: (value: string) => string;
   className?: string;
+}
+
+function readClock(value: string): string {
+  const [hour = "0", minute = "00"] = value.split(":");
+  return `${Number(hour)}:${minute}`;
 }
 
 export function TimeField({
@@ -45,10 +64,51 @@ export function TimeField({
   max,
   required = false,
   disabled = false,
+  disclosed = false,
+  changeLabel = "Change",
+  formatValue = readClock,
   className,
 }: TimeFieldProps) {
+  const [open, setOpen] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const labelId = React.useId();
+
+  React.useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
+  if (disclosed && !open) {
+    return (
+      <div className={cn("flex flex-col gap-(--space-1)", className)}>
+        <Text as="span" id={labelId} variant="secondary" weight={500}>
+          {label}
+        </Text>
+        <div className="flex min-h-(--target) items-center justify-between gap-(--space-3)">
+          <Text as="span" variant="body" className="tabular-nums" aria-labelledby={labelId}>
+            {value === null || value === "" ? "—" : formatValue(value)}
+          </Text>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={disabled}
+            aria-describedby={labelId}
+            onClick={() => setOpen(true)}
+          >
+            {changeLabel}
+          </Button>
+        </div>
+        {helperText ? (
+          <Text as="span" variant="caption" tone="secondary">
+            {helperText}
+          </Text>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <Input
+      ref={inputRef}
       mode="time"
       label={label}
       helperText={helperText}

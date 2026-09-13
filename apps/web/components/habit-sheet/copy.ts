@@ -18,6 +18,13 @@ export const HABIT_SHEET_COPY = {
   type: "Type",
   icon: "Icon",
   category: "Category",
+  /** UX v1.1 §4.15 — the block chip row: five words, the kinds a habit can live in. */
+  block: "Block",
+  blockMorning: "Morning",
+  blockBeforeWork: "Before work",
+  blockBreak: "Break",
+  blockWindDown: "Wind-down",
+  blockAnywhere: "Anywhere",
   range: "Time it might take",
   importance: "How important is this to your life?",
   importanceHelper:

@@ -34,6 +34,8 @@
 
 ### DYN-8 — The block editor, step one, and Settings → Your day
 
+> **Expanded 2026-09-13** into `DYN-8-block-editor-step-one-and-your-day.md` and built in the same thread (batch 6, with DYN-10). `components/template-editor/` is deleted; `components/block-editor/` replaces it; `/settings/templates*` redirect. Kept here as the record of the dense form.
+
 **Size:** L. **Slice type:** the planning canvas rebuilt around blocks, with tap fallbacks for every gesture DYN-9 adds later. Risk class: *a form* (the editor turning into fields) and *a fork* (two editors coexisting).
 
 **Outcome.** `components/block-editor/` replaces `components/template-editor/` as the one editing surface for any block template: a `ScheduleAxis` strip at 96 px/hour with `ScheduleBlock`s whose height is duration, `GapBand`s between them, pins with the anchor glyph, opener/closer captions, the pool band, one-of groups as one block with two tabs; the sticky footer *7:03 – 8:15 · 72 min · 0 min slack* from `stackBlock` (client-side, over the same `SlotView`s); *Add* opening the library filtered to the block's kind (tap to add at the range midpoint); the slot sheet amended (gap stepper, pin time, role, *one of* with the second member, *Move up / Move down* in the overflow — the fallbacks §13 #4 names); the same-position `InlineQuestionRow` with three answers. **Settings → Your day** (`/settings/your-day`) lists the twelve first-run screens without the frame (v1.1 §4.14); block-kind rows open `/settings/your-day/{kind}` (the template list for that kind above the editor when more than one exists); **Block order** is a sortable list. **The library** (§4.15): grouped by block then category; the habit sheet loses the type segment, gains the block chip row, hides the category picker until one exists (W7). `settingsTemplatesRoute()` and `settingsTemplateRoute(id)` redirect to Your day.
@@ -69,6 +71,8 @@
 ## Batch 5
 
 ### DYN-10 — First run 1–6: the shape of the week, work days, work start and what gives, standing commitments, wake, before the day
+
+> **Expanded 2026-09-13** into `DYN-10-first-run-1-6.md` and built in the same thread (batch 6, with DYN-8). The v1.0 steps are deleted; `/setup/7` is a transitional ready screen until DYN-11; the six screens also mount `embedded` under Settings → Your day. Kept here as the record of the dense form.
 
 **Size:** L. **Slice type:** a sequence, six screens, each capturing one fact. Risk class: *persuasion* (a pre-checked offer, an explanation on the greyed cards) and *a dead end* (a gate on a skippable screen).
 

@@ -77,7 +77,7 @@ is a defect.**
 | `/logout` | `logoutRoute()` | AU-06 (a route handler) |
 | `/auth/callback` | `authCallbackRoute()` | OAuth / PKCE |
 | `/auth/confirm` | `authConfirmRoute()` | email `token_hash` |
-| `/setup/{1–5}` | `setupRoute(step)` | FR-01…05 |
+| `/setup/{1–12}` | `setupRoute(step)` | UX v1.1 §4.1–§4.12 — screens 1–6 (DYN-10); 7–12 arrive with DYN-11, and until then `/setup/7` is the transitional ready screen |
 | `/today` | `todayRoute()` | LS-01 |
 | `/today/schedule` | `todayScheduleRoute()` | SC-01 |
 | `/day/{date}` | `dayRoute(date)` | LS-01, record or plan mode |
@@ -92,8 +92,12 @@ is a defect.**
 | `/settings/account` | `settingsAccountRoute()` | ST-01 |
 | `/settings/habits` | `settingsHabitsRoute()` | LB-01 |
 | `/settings/habits/{id}` | `settingsHabitRoute(id)` | LB-02 |
-| `/settings/templates` | `settingsTemplatesRoute()` | TP-01 |
-| `/settings/templates/{id}` | `settingsTemplateRoute(id)` | TP-02 |
+| `/settings/your-day` | `settingsYourDayRoute()` | UX v1.1 §4.14 — the twelve first-run screens as a list (DYN-8) |
+| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one of DYN-10's six screens, embedded: `shape · work-days · work-start · commitments · wake · before-the-day` |
+| `/settings/your-day/block/{kind}` | `settingsYourDayBlockRoute(kind, templateId?)` | the block editor for a kind (§3.11); the template list above it when more than one |
+| `/settings/your-day/order` | `settingsYourDayOrderRoute()` | Block order (§4.14) |
+| `/settings/templates` | `settingsTemplatesRoute()` | redirects to `/settings/your-day` (DYN-8) |
+| `/settings/templates/{id}` | `settingsTemplateRoute(id)` | redirects to `/settings/your-day/block/{kind}?t={id}` (DYN-8) |
 | `/settings/week` · `/settings/week/{week}` | `settingsWeekRoute(week?)` | WK-01 |
 | `/settings/categories` | `settingsCategoriesRoute()` | CT-01 |
 | `/settings/reasons` | `settingsReasonsRoute()` | ST-06 |

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import type { IconValue } from "@syn/types";
+import type { BlockKind, IconValue } from "@syn/types";
 import { habitFormSchema, type HabitFormInput } from "@syn/validators";
 
 import { useIconUpload } from "@/lib/hooks/use-icon-upload";
@@ -62,8 +62,11 @@ export interface UseHabitSheetOptions {
   open: boolean;
   mode: HabitSheetMode;
   habitId?: string;
-  /** Kept for callers' signatures; the sheet makes habits only (v1.1 §4.15). */
-  defaults?: { type?: string };
+  /**
+   * `blockKind` presets the block chip row (the editor's *Add → New habit*).
+   * `type` is kept for callers' signatures; the sheet makes habits only (v1.1 §4.15).
+   */
+  defaults?: { type?: string; blockKind?: BlockKind | null };
   onSaved?: (habit: { id: string }) => void;
   onOpenChange: (open: boolean) => void;
 }
@@ -163,18 +166,19 @@ export function useHabitSheet({
   /*
    * Reset to a blank form each time the sheet opens in create mode.
    * `discardIcon` is pulled out because `iconUpload` is rebuilt each render
-   * and its callbacks are not. `defaults` is accepted for callers' sake and
-   * read for nothing: the sheet makes habits only.
+   * and its callbacks are not. Of `defaults`, only `blockKind` is read: the
+   * block editor's *Add → New habit* presets the chip row to its own kind
+   * (DYN-8); `type` is accepted for callers' sake, the sheet makes habits only.
    */
-  void defaults;
+  const defaultBlockKind = defaults?.blockKind ?? null;
   const discardIcon = iconUpload.discard;
 
   React.useEffect(() => {
     if (!open || mode !== "create") return;
-    form.reset(emptyValues());
+    form.reset({ ...emptyValues(), blockKind: defaultBlockKind });
     setFormError(null);
     discardIcon();
-  }, [open, mode, form, discardIcon]);
+  }, [open, mode, form, discardIcon, defaultBlockKind]);
 
   const createMutation = trpc.habit.create.useMutation();
   const updateMutation = trpc.habit.update.useMutation();

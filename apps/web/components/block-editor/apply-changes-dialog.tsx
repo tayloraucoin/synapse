@@ -11,9 +11,10 @@ import { trpc } from "@/lib/trpc/client";
 /**
  * TP-04 — after editing a template, what happens to the days already using it.
  *
- * IT LIVES WITH THE EDITOR, NOT THE WEEK. The dialog belongs to leaving TP-02:
- * the editor is what knows a change was made in this session, and the editor's
- * header is what reports *Applied to {n} days.* afterwards.
+ * IT LIVES WITH THE EDITOR, NOT THE WEEK. The dialog belongs to leaving the
+ * block editor (TP-02, now UX v1.1 §3.11 — moved here with DYN-8): the editor
+ * is what knows a change was made in this session, and the editor's header is
+ * what reports *Applied to {n} days.* afterwards.
  *
  * *DON'T APPLY* IS A REAL ANSWER, not a cancel. The template is saved either
  * way; someone editing next month's template should not find this week

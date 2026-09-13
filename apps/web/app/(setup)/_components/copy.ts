@@ -1,78 +1,94 @@
 /**
- * FR-01…05's strings — Epic 1 §2, verbatim.
+ * First run 1–6's strings — UX v1.1 §4, §4.1–§4.6, verbatim where the
+ * document writes them. Anything the document does not write is marked
+ * `[COPY — needs Vesper sign-off]`.
  *
- * The three FR-05 bodies are the whole reason this file is not five inline
- * literals: which one a person reads is a decision about what they actually
- * did, and that decision belongs next to the sentences it chooses between.
+ * The archetype card names are placeholders "to be written around real
+ * people" (§13 #12, P2-16); the three grey ones say only *not yet*.
  */
 export const SETUP_COPY = {
   /* ------------------------------------------------------------ frame -- */
-  progress: (step: number) => `Step ${step} of 5`,
+  /** "3 of 12" — the caption, and the document title (§4). */
+  progress: (step: number, total: number) => `${step} of ${total}`,
   back: "Back",
   finishLater: "Finish later",
   skip: "Skip for now",
   continue: "Continue",
-  /**
-   * A sequence's step-level failure. Epic 1 §11 gives the sheet form-level
-   * line but nothing for a sequence, so this is flagged rather than invented
-   * silently.
-   *
-   * [COPY — needs Vesper sign-off]
-   */
+  save: "Save",
+  /** [COPY — needs Vesper sign-off] */
   saveError: "Couldn't save. Try again.",
   offline: "Offline — you can look, but changes need a connection.",
 
-  /* ------------------------------------------------------------ FR-01 -- */
-  step1Heading: "When does your day usually start?",
-  step1Body: "Templates are built around this time. You can change it any day.",
-  usualWakeTime: "Usual wake time",
-  timezone: "Time zone",
+  /* ------------------------------------------------------- screen 1 -- */
+  step1Heading: "Which is closest?",
+  /** [COPY — placeholders, §13 #12] */
+  shapes: {
+    consistent_shifts: "My shifts are the same every week",
+    varying_shifts: "My shifts change week to week",
+    own_structure_dynamic: "I set my own structure, and it changes",
+    own_structure_dynamicBody: "Work starts around a time, not at one. Mornings bend.",
+    fluid: "My days are fluid",
+  },
+  notYet: "not yet",
 
-  /* ------------------------------------------------------------ FR-02 -- */
-  step2Heading: "What do you want to keep doing?",
-  step2Body:
-    "Add the habits you already have or want. Each one asks for two things: how long it takes, and how much it matters.",
-  addHabit: "Add a habit",
-  startFromSet: "Start from a small set",
-  continueWithoutHabits: "Continue without habits",
-  /** "10–20 min · importance 6" — the row's meta. */
-  habitMeta: (min: number | null, max: number | null, importance: number) =>
-    min === null || max === null
-      ? `importance ${importance}`
-      : `${min}–${max} min · importance ${importance}`,
-  archive: "Archive",
-  archiveTitle: (title: string) => `Archive ${title}?`,
-  keep: "Keep",
+  /* ------------------------------------------------------- screen 2 -- */
+  step2Heading: "Which days do you work?",
+  step2Body: "Tap a day to change it.",
+  always: "Always",
+  sometimes: "Sometimes",
+  never: "Never",
+  sometimesMeans: "Sometimes means the morning asks.",
+  weekdays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const,
 
-  /* ------------------------------------------------------------ FR-03 -- */
-  step3Heading: "Build a typical morning",
-  step3Body:
-    "Put your habits in order and give each a start time. This becomes a template you can apply to any day.",
-  /** The name FR-03 prefills; TP-01 will list it under exactly this. */
-  firstTemplateName: "Morning",
+  /* ------------------------------------------------------- screen 3 -- */
+  step3Heading: "When do you like to be working by?",
+  workingBy: "Working by",
+  untilAbout: "Until about",
+  whatGives: "When your morning runs long, what gives?",
+  gives: {
+    work_waits: "Work waits",
+    work_waitsBody: "I start when the routine is done.",
+    routine_cut: "The routine gets cut",
+    routine_cutBody: "Work starts when it starts.",
+    depends: "Depends on the day",
+    dependsBody: "Ask me in the morning.",
+  },
+  change: "Change",
 
-  /* ------------------------------------------------------------ FR-04 -- */
-  step4Heading: "Which days this week?",
-  step4Body:
-    "Tap a day to apply a template. Days you leave empty stay empty — nothing is missed on an unplanned day.",
-  noTemplatesYet: "No templates yet.",
-  buildOne: "Build one",
-  /**
-   * Returns from the in-place editor to the week. Epic 1 gives no string for
-   * this because the document puts the editor in a sheet, which closes rather
-   * than returns.
-   *
-   * [COPY — needs Vesper sign-off]
-   */
-  backToWeek: "Back to the week",
+  /* ------------------------------------------------------- screen 4 -- */
+  step4Heading: "Anything that happens every week at a set time?",
+  step4Body: "A stand-up, a class, dinner on Thursdays.",
+  nothingYet: "Nothing yet.",
+  addOne: "Add one",
+  addAnother: "Add another",
 
-  /* ------------------------------------------------------------ FR-05 -- */
-  step5Heading: "Your list is ready",
-  readyWithPlan: (days: number) =>
-    `${days} ${days === 1 ? "day" : "days"} this week ${days === 1 ? "is" : "are"} planned. Everything you set up lives in Settings if you want to change it.`,
-  readyWithHabits:
-    "Your habits are saved. Plan a week from Settings, or add one-off items from the List.",
-  readyWithNothing:
-    "You can add habits, templates, and a week from Settings whenever you like.",
+  /* ------------------------------------------------------- screen 5 -- */
+  step5Heading: "When would you like to be up?",
+  upAt: "Up at",
+  addAnEarliest: "Add an earliest",
+  earliest: "Earliest",
+  /** "7:00 to 9:00 · 2 h before work" — the first computed consequence (§4.5). */
+  beforeWork: (wake: string, work: string, span: string) => `${wake} to ${work} · ${span} before work`,
+
+  /* ------------------------------------------------------- screen 6 -- */
+  step6Heading: "What do you want to read before the day starts?",
+  step6Body: "Your own words, a passage, or both. It stays private.",
+  passage: "A passage",
+  passagePlaceholder: "A few lines you want to see every morning.",
+  showLastNight: "Show what I wrote the night before",
+  showLastNightBody: "From the evening journal, if you write one.",
+  askGratitude: "Ask one line of gratitude in the morning",
+
+  /* -------------------------------------- the transitional ready (7) -- */
+  /** [COPY — needs Vesper sign-off; deleted by DYN-11] */
+  readyHeading: "That's the start.",
+  readyBody:
+    "The rest of the setup — your routine, training, the evening — is next. For now, the day is ready with what you've said.",
   openToday: "Open today",
 } as const;
+
+/** The sequence's length under UX v1.1 §4. Screens 7–12 arrive with DYN-11. */
+export const SETUP_TOTAL_STEPS = 12;
+
+/** The last step that renders today; above it the page 404s until DYN-11. */
+export const SETUP_LAST_BUILT_STEP = 7;

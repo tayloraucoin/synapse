@@ -18,7 +18,7 @@ import {
   StatusLine,
   Text,
 } from "@syn/ui";
-import type { HabitSummaryView, ItemType } from "@syn/types";
+import type { BlockKind, HabitSummaryView } from "@syn/types";
 
 import { CategorySheet } from "@/components/category-sheet";
 import { HabitSheet } from "@/components/habit-sheet";
@@ -34,18 +34,55 @@ import { LIBRARY_COPY as COPY } from "./copy";
 /**
  * LB-01 — the habit library.
  *
- * THE GROUPS ARE A FIXED ORDER AND ONLY RENDER WHEN NON-EMPTY (Epic 1 LB-01):
- * a heading over nothing is a promise the screen does not keep.
+ * GROUPED BY BLOCK, THEN BY CATEGORY (UX v1.1 §4.15): *Morning · Before work
+ * · Break · Wind-down · Anywhere*, and within a block by category only when
+ * the person uses categories at all. Groups are a fixed order and only render
+ * when non-empty (Epic 1 LB-01): a heading over nothing is a promise the
+ * screen does not keep.
  *
  * THE SHEET IS URL STATE, so back closes it before it leaves the screen and a
  * link into a habit is shareable. `?sheet=habit&id=…` — SYS-1's `useSheet`.
  */
 
-const GROUPS: ReadonlyArray<{ type: ItemType; heading: string }> = [
-  { type: "habit", heading: COPY.groupHabits },
-  { type: "task_appointment", heading: COPY.groupTasks },
-  { type: "deep_work", heading: COPY.groupDeepWork },
+const GROUPS: ReadonlyArray<{ kind: BlockKind | null; heading: string }> = [
+  { kind: "morning", heading: COPY.groupMorning },
+  { kind: "prep", heading: COPY.groupBeforeWork },
+  { kind: "break", heading: COPY.groupBreak },
+  { kind: "wind_down", heading: COPY.groupWindDown },
+  { kind: null, heading: COPY.groupAnywhere },
 ];
+
+/**
+ * The five words cover every habit: a training or work habit is a rotation
+ * (§4.15) and is listed under *Anywhere* with the block-less ones rather than
+ * given a heading the sheet's chip row cannot set.
+ */
+function groupOf(habit: HabitSummaryView): BlockKind | null {
+  const kind = habit.blockKind;
+  return kind === "morning" || kind === "prep" || kind === "break" || kind === "wind_down"
+    ? kind
+    : null;
+}
+
+/** Within a block: by category, in name order, the uncategorised last. */
+function byCategory(rows: readonly HabitSummaryView[]): Array<{ heading: string | null; rows: HabitSummaryView[] }> {
+  const named = new Map<string, HabitSummaryView[]>();
+  const none: HabitSummaryView[] = [];
+  for (const habit of rows) {
+    if (habit.category === null) {
+      none.push(habit);
+      continue;
+    }
+    const bucket = named.get(habit.category.name) ?? [];
+    bucket.push(habit);
+    named.set(habit.category.name, bucket);
+  }
+  const groups = [...named.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([heading, members]) => ({ heading: heading as string | null, rows: members }));
+  if (none.length > 0) groups.push({ heading: named.size === 0 ? null : COPY.groupNoCategory, rows: none });
+  return groups;
+}
 
 export function Library() {
   const router = useRouter();
@@ -163,64 +200,73 @@ export function Library() {
             </Text>
           ) : (
             GROUPS.map((group) => {
-              const rows = filtered.filter((habit) => habit.type === group.type);
+              const rows = filtered.filter((habit) => groupOf(habit) === group.kind);
               if (rows.length === 0) return null;
 
+              const renderRow = (habit: HabitSummaryView) => (
+                <ListRow
+                  key={habit.id}
+                  as="li"
+                  leading={
+                    <ItemIcon
+                      icon={habit.icon}
+                      size={24}
+                      imageUrl={iconImageUrl(habit.icon)}
+                    />
+                  }
+                  title={habit.title}
+                  chip={
+                    habit.category
+                      ? {
+                          key: habit.category.key,
+                          name: habit.category.name,
+                        }
+                      : undefined
+                  }
+                  meta={describeHabit(habit)}
+                  tag={habit.isWakeAnchor ? COPY.wakeUpTag : undefined}
+                  href={settingsHabitRoute(habit.id)}
+                  trailing={
+                    <EllipsesMenu
+                      label={COPY.rowMenuLabel(habit.title)}
+                      disabled={!online}
+                      items={[
+                        {
+                          label: COPY.duplicate,
+                          onClick: () => {
+                            void duplicate
+                              .mutateAsync({ id: habit.id })
+                              .then(async (copy) => {
+                                await utils.habit.list.invalidate();
+                                sheet.openWith(copy.id);
+                              });
+                          },
+                        },
+                        {
+                          label: COPY.archive,
+                          onClick: () => {
+                            setArchiveTarget(habit);
+                          },
+                        },
+                      ]}
+                    />
+                  }
+                />
+              );
+
               return (
-                <section key={group.type} className="flex flex-col gap-(--space-2)">
+                <section key={group.kind ?? "anywhere"} className="flex flex-col gap-(--space-2)">
                   <GroupHeading>{group.heading}</GroupHeading>
-                  <ul className="flex flex-col">
-                    {rows.map((habit) => (
-                      <ListRow
-                        key={habit.id}
-                        as="li"
-                        leading={
-                          <ItemIcon
-                            icon={habit.icon}
-                            size={24}
-                            imageUrl={iconImageUrl(habit.icon)}
-                          />
-                        }
-                        title={habit.title}
-                        chip={
-                          habit.category
-                            ? {
-                                key: habit.category.key,
-                                name: habit.category.name,
-                              }
-                            : undefined
-                        }
-                        meta={describeHabit(habit)}
-                        tag={habit.isWakeAnchor ? COPY.wakeUpTag : undefined}
-                        href={settingsHabitRoute(habit.id)}
-                        trailing={
-                          <EllipsesMenu
-                            label={COPY.rowMenuLabel(habit.title)}
-                            disabled={!online}
-                            items={[
-                              {
-                                label: COPY.duplicate,
-                                onClick: () => {
-                                  void duplicate
-                                    .mutateAsync({ id: habit.id })
-                                    .then(async (copy) => {
-                                      await utils.habit.list.invalidate();
-                                      sheet.openWith(copy.id);
-                                    });
-                                },
-                              },
-                              {
-                                label: COPY.archive,
-                                onClick: () => {
-                                  setArchiveTarget(habit);
-                                },
-                              },
-                            ]}
-                          />
-                        }
-                      />
-                    ))}
-                  </ul>
+                  {byCategory(rows).map((sub) => (
+                    <React.Fragment key={sub.heading ?? "none"}>
+                      {sub.heading === null ? null : (
+                        <Text as="h3" variant="caption" tone="secondary" className="px-(--space-4)">
+                          {sub.heading}
+                        </Text>
+                      )}
+                      <ul className="flex flex-col">{sub.rows.map(renderRow)}</ul>
+                    </React.Fragment>
+                  ))}
                 </section>
               );
             })

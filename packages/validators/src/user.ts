@@ -52,11 +52,12 @@ export const updatePreferencesInput = z
      * Which first-run step to resume at, or null once the sequence is done.
      *
      * It lives here rather than on a `firstRun` router because it is an account
-     * scalar and this service already writes account scalars. FR-01…05 write it
-     * on every Continue, Skip, back and *Finish later*, so a reload or a second
-     * device resumes where the person actually stopped.
+     * scalar and this service already writes account scalars. The screens
+     * write it on every Continue, Skip, back and *Finish later*, so a reload or
+     * a second device resumes where the person actually stopped. Twelve under
+     * UX v1.1 §4 (DYN-10).
      */
-    firstRunStep: z.number().int().min(1).max(5).nullable().optional(),
+    firstRunStep: z.number().int().min(1).max(12).nullable().optional(),
     /**
      * ST-08's two deferred changes (cross-cutting §7.3, §7.5).
      *
@@ -125,6 +126,17 @@ export const updatePreferencesInput = z
       // [COPY — needs Vesper sign-off: v1.1 §4.10 names the rule, not a sentence.]
       message: "Phone away comes before lights out.",
       path: ["devicesOffTime"],
+    },
+  )
+  .refine(
+    (value) =>
+      !value.earliestWakeTime ||
+      !value.usualWakeTime ||
+      clockLte(value.earliestWakeTime, value.usualWakeTime),
+    {
+      // [COPY — needs Vesper sign-off: v1.1 §4.5 names the range, not a sentence.]
+      message: "Earliest comes before usual.",
+      path: ["earliestWakeTime"],
     },
   );
 

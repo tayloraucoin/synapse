@@ -15,7 +15,7 @@ import {
 import { weekDates } from "@syn/utils";
 
 import { useOnline } from "@/lib/hooks/use-online";
-import { settingsTemplatesRoute } from "@/lib/routes";
+import { settingsYourDayRoute } from "@/lib/routes";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { WEEK_COPY as COPY } from "./copy";
@@ -170,7 +170,7 @@ export function WeekCanvas({
           {embedded ? null : (
             <Button
               variant="ghost"
-              onClick={() => router.push(settingsTemplatesRoute())}
+              onClick={() => router.push(settingsYourDayRoute())}
             >
               {COPY.templatesLink}
             </Button>
