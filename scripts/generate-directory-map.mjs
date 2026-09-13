@@ -136,6 +136,10 @@ const ANNOTATIONS = {
   "apps/web/app/(shell)/settings/your-day/_components/your-day-list.tsx": "the twelve first-run screens as a list (v1.1 §4.14); block-kind rows open the editor for their kind",
   "apps/web/components/landscape-chooser/use-landscape.ts": "the landscape's single commit (W4): ticks are local, Continue writes the habits then the morning template's slots — never a fit number",
   "apps/web/components/week-build/day-sheet.tsx": "one day's plan by block (v1.1 §4.13): every write is assignBlocks with the whole assignment; the sheet never reconciles",
+  "apps/web/components/orient-frame/orient-frame.tsx": "the first screen of the morning (v1.1 §5.2): the person's words, one line to write, one primary — no time, no count, no chrome",
+  "apps/web/components/quick-pick/use-quick-pick.ts": "the quick-pick's answers and the live budget line (v1.1 §5.3); Set the day sends only what changed",
+  "packages/utils/src/day/skip-line.ts": "R18 as code: the one behaviour line, second consecutive skip only, once in seven days",
+  "packages/api/src/services/day/orient.ts": "the frame's read, and the wake stamp that rides in it — once per day (R11)",
   "apps/mobile/README.md": "a deliberate empty seam. Do not scaffold",
 
   // --- delivery ---

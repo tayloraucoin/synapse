@@ -56,11 +56,6 @@ export const HABIT_SHEET_COPY = {
   addAnother: "Add another",
   note: "Note before starting",
   noteHelper: "Optional. Shown on the item before you start.",
-  wakeAnchor: "This is my wake-up habit",
-  wakeAnchorHelper: "Marking it done sets the day's wake time.",
-  /** Shown when another habit currently holds the flag. */
-  wakeAnchorReplaces: (other: string) =>
-    `This replaces ${other} as your wake-up habit.`,
 
   cancel: "Cancel",
   save: "Save",

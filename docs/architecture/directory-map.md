@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1169 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1188 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -106,6 +106,8 @@ apps/
             schedule/
               page.tsx
             page.tsx
+        orient/
+          page.tsx
         review/
           _components/
             review-tab.tsx
@@ -214,6 +216,8 @@ apps/
             page.tsx
           page.tsx
         today/
+          _components/
+            today-screen.tsx
           schedule/
             page.tsx
           page.tsx
@@ -273,6 +277,10 @@ apps/
         category-sheet.tsx
         copy.ts
         index.ts
+      confirm-yesterday/
+        confirm-yesterday-panel.tsx
+        copy.ts
+        index.ts
       day-header-sheet/
         day-header-sheet.tsx
         index.ts
@@ -310,6 +318,11 @@ apps/
       one-off-sheet/
         index.ts
         one-off-sheet.tsx
+      orient-frame/
+        copy.ts
+        index.ts
+        orient-frame.tsx  # the first screen of the morning (v1.1 §5.2): the person's words, one line to write, one primary — no time, no count, no chrome
+        use-orient-frame.ts
       page-frame/
         index.ts
         page-frame.tsx
@@ -320,6 +333,13 @@ apps/
         copy.ts
         index.ts
         platform-steps-sheet.tsx
+      quick-pick/
+        copy.ts
+        index.ts
+        quick-pick.tsx
+        sections.tsx
+        summary-row.tsx
+        use-quick-pick.ts  # the quick-pick's answers and the live budget line (v1.1 §5.3); Set the day sends only what changed
       reminder-prompt/
         copy.ts
         index.ts
@@ -578,6 +598,8 @@ docs/
       DYN-10-first-run-1-6.md
       DYN-11-first-run-7-12-and-the-first-week.md
       DYN-12-week-build-amended.md
+      DYN-13-orient-frame-and-the-wake-moment.md
+      DYN-14-quick-pick-and-set-the-day.md
       DYN-2-migration-0004-block-templates-and-stacked-slots.md
       DYN-3-migration-0005-profile-fixtures-day-blocks-journal.md
       DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
@@ -670,6 +692,7 @@ packages/
           materialize-day.ts  # THE materialiser, by block (v1.1 §11.11). Reconciles, never rebuilds; pooled blocks hold nothing; originals only for fixtures and pins
           move-item.ts
           one-off.ts
+          orient.ts  # the frame's read, and the wake stamp that rides in it — once per day (R11)
           prefill-week.ts
           preview-fit.ts
           quick-pick.ts
@@ -1484,6 +1507,7 @@ packages/
         late-offer.ts
         priority.ts
         shift-fit.ts
+        skip-line.ts  # R18 as code: the one behaviour line, second consecutive skip only, once in seven days
         stack.ts
         trim.ts
         wall-clock.ts

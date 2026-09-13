@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { NOTE_MAX, REFLECTION_AXIS_MAX } from "@syn/constants";
+import { INTENTION_MAX, MORNING_GRATITUDE_MAX, NOTE_MAX, REFLECTION_AXIS_MAX } from "@syn/constants";
 
 import { dateKeySchema } from "./keys";
 
@@ -59,6 +59,22 @@ export const rateItemInput = z.object({
  * DH-02. `wokeAt` null is *Clear*, which returns the day to its planned
  * anchor rather than to nothing.
  */
+/** The orient frame's read (v1.1 §5.2) — today unless a date is given. */
+export const orientInput = z.object({ date: dateKeySchema.optional() }).optional();
+
+/** The frame's two optional lines, autosaved (v1.1 §5.2). Empty clears. */
+export const saveMorningInput = z
+  .object({
+    date: dateKeySchema,
+    gratitude: z.string().trim().max(MORNING_GRATITUDE_MAX).nullable().optional(),
+    intention: z.string().trim().max(INTENTION_MAX).nullable().optional(),
+  })
+  .refine((value) => value.gratitude !== undefined || value.intention !== undefined, {
+    message: "Nothing to save.",
+  });
+
+export type SaveMorningInput = z.infer<typeof saveMorningInput>;
+
 export const setWakeTimeInput = z.object({
   date: dateKeySchema,
   wokeAt: z.coerce.date().nullable(),

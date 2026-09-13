@@ -91,6 +91,11 @@ export function setupRoute(step: number): string {
 
 /* ------------------------------------------------------------ execution -- */
 
+/** The orient frame — the first screen of the morning (UX v1.1 §5.1, DYN-13). */
+export function orientRoute(): string {
+  return "/orient";
+}
+
 export function todayRoute(): string {
   return "/today";
 }

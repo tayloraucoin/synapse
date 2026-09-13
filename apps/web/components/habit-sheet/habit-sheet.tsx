@@ -14,7 +14,6 @@ import {
   RangeInput,
   ResponsiveSheet,
   Stepper17,
-  Switch,
   Text,
   TextDisclosureButton,
   Textarea,
@@ -101,8 +100,7 @@ export function HabitSheet({
   const optionalsSet =
     values.quantityUnit !== null ||
     values.reflectionAxes.length > 0 ||
-    values.defaultNotesPreflight !== null ||
-    values.isWakeAnchor;
+    values.defaultNotesPreflight !== null;
 
   React.useEffect(() => {
     if (options.mode === "edit" && optionalsSet) setMoreOpen(true);
@@ -333,30 +331,7 @@ export function HabitSheet({
                 disabled={disabled}
               />
 
-              {/* Every entry here is a habit; the anchor goes with DYN-13 (v1.1 R11). */}
-              <div className="flex flex-col gap-(--space-2)">
-                  <div className="flex items-center justify-between gap-(--space-3)">
-                    <Label htmlFor="habit-wake-anchor">
-                      {COPY.wakeAnchor}
-                    </Label>
-                    <Switch
-                      id="habit-wake-anchor"
-                      checked={values.isWakeAnchor}
-                      disabled={disabled}
-                      onCheckedChange={(next) => {
-                        form.setValue("isWakeAnchor", next, {
-                          shouldDirty: true,
-                        });
-                      }}
-                    />
-                  </div>
-                  <HelperText>{COPY.wakeAnchorHelper}</HelperText>
-                  {sheet.anchorHolder === null ? null : (
-                    <Text as="p" variant="secondary" tone="secondary">
-                      {COPY.wakeAnchorReplaces(sheet.anchorHolder)}
-                    </Text>
-                  )}
-              </div>
+              {/* The v1.0 wake-anchor switch is gone (v1.1 R11, DYN-13): the orient frame is the wake. */}
             </div>
           )}
 

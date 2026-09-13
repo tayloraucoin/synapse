@@ -1,6 +1,6 @@
 import { sanitizeNextPath } from "@syn/utils";
 
-import { setupRoute, todayRoute, verifyRoute } from "@/lib/routes";
+import { orientRoute, setupRoute, todayRoute, verifyRoute } from "@/lib/routes";
 
 /**
  * The entry decision tree — cross-cutting §4.2, run on every cold open and
@@ -27,6 +27,16 @@ export type EntryProfile = {
   firstRunStep: number | null;
 };
 
+/**
+ * Today's waking state — UX v1.1 §5.1: the orient frame comes before any tab
+ * while the day has no `woke_at` and is not closed. Null when the caller has
+ * no day to ask about (no account row yet).
+ */
+export type EntryToday = {
+  wokeAt: Date | string | null;
+  closed: boolean;
+};
+
 export type ResolveEntryInput = {
   /** False when the session exists but the email is unverified. */
   isEmailVerified: boolean;
@@ -38,6 +48,7 @@ export type ResolveEntryInput = {
    * sign-in redirect remembered. Honoured once setup is not owed.
    */
   intendedRoute?: string | null;
+  today?: EntryToday | null;
 };
 
 /**
@@ -52,6 +63,7 @@ export function resolveEntry({
   profile,
   launchCount,
   intendedRoute,
+  today = null,
 }: ResolveEntryInput): string {
   // §4.2 step 2 — an unverified email blocks everything else.
   if (!isEmailVerified) {
@@ -64,6 +76,14 @@ export function resolveEntry({
   if (setupIncomplete && launchCount <= SETUP_REDIRECT_LAUNCH_LIMIT) {
     const step = clampSetupStep(profile?.firstRunStep);
     return setupRoute(step);
+  }
+
+  // UX v1.1 §5.1 — the orient frame before any tab, once per day: the day has
+  // no wake yet and is not closed. A deep link waits behind it; a closed day
+  // (auto-closed at 03:00 before the frame was ever opened) is skipped, and
+  // the next day's frame is the next open's.
+  if (today !== null && today.wokeAt === null && !today.closed) {
+    return orientRoute();
   }
 
   // §4.2 step 4/5 — a deep link, else today. Pending reviews never redirect;

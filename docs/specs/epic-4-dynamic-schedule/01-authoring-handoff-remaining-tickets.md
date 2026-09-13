@@ -110,6 +110,8 @@
 
 ### DYN-13 — The orient frame and the wake moment
 
+> **Expanded 2026-09-13** into `DYN-13-orient-frame-and-the-wake-moment.md` and built in the same thread (batch 8, with DYN-14). `/orient` is a shell route with the chrome hidden; the stamp rides in `day.orient`; `shouldShowSkipLine` lives in `@syn/utils`. Kept here as the record of the dense form.
+
 **Size:** M. **Slice type:** the waking state's one screen and the entry rule that puts it first. Risk class: *the app's voice on the frame* (any chrome sentence about the person) and *a wake stamped on the wrong day*.
 
 **Outcome.** `/orient` (`orientRoute()`), rendered by `resolveEntry` before any tab whenever today's `woke_at` is null and the day is not closed (§5.1); opening it calls `day.setWakeTime({ source: "orient" })`. The frame per §5.2 verbatim: no header, no tab bar, no time; the *Last night* caption and date; the three journal lines in Newsreader with their prompts as `figcaption`s (*make happen tomorrow* re-tensed to today — the one transformation); the passage under *Every morning* when both exist or alone when no entry; *Nothing to read yet. Tonight's journal shows up here tomorrow.* on the first morning; the optional serif line *Grateful for, this morning* and *Today's intention*, autosaving to `days.morning_gratitude` / `intention`; one primary **Start the morning** → `/today`. The R18 line per its four rules (second consecutive skip only; ≤ once per seven days; no adjective, no question mark; off with the gratitude switch), computed by a pure `shouldShowSkipLine(history)` in `@syn/utils` from the last seven days' `morning_gratitude` nulls. The wake-anchor path is retired: `wake-anchor-switch` removed from the habit sheet, `users.wake_anchor_habit_id` no longer written, `DayView.wakeAnchorItemId` ignored by the List (column and field removed in DYN-21).
@@ -123,6 +125,8 @@
 **Depends on:** DYN-5, DYN-7. **Model:** Opus — the entry rule interacts with day boundaries and auto-close, and the R18 line's four rules are a place a cheaper model writes a nudge.
 
 ### DYN-14 — The quick-pick and *Set the day*
+
+> **Expanded 2026-09-13** into `DYN-14-quick-pick-and-set-the-day.md` and built in the same thread (batch 8, with DYN-13). `components/quick-pick/` and `components/confirm-yesterday/`; `/today` branches on `confirmedAt` in a client screen; the confirmed state is USE-2's list until DYN-15. Kept here as the record of the dense form.
 
 **Size:** L. **Slice type:** the Today tab's unconfirmed state — the second screen of the waking state. Risk class: *a form every morning* (Crucible's first finding) and *a blank open*.
 

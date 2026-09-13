@@ -1,14 +1,14 @@
-import { PageFrame } from "@/components/page-frame";
-import { DayList, DayListHeader } from "@/components/day-list";
 import { getServerApi } from "@/lib/trpc/server";
 
+import { TodayScreen } from "./_components/today-screen";
+
 /**
- * LS-01 — today.
+ * LS-01 — today, in one of two states (UX v1.1 R6, DYN-14).
  *
  * THE DAY IS READ ON THE SERVER and handed to the client as `initialData`, so
  * the first paint is the real day rather than a skeleton that resolves a beat
- * later. The hook then subscribes to the same query and owns every write; the
- * page does no mutation and holds no state.
+ * later. Unconfirmed, the quick-pick is read the same way; the client screen
+ * branches on `confirmedAt` and flips to the list when *Set the day* lands.
  *
  * WHICH DAY "TODAY" IS depends on the person's close time, so it comes from
  * `day.today` rather than from the server's calendar date. At 01:00 under a
@@ -20,10 +20,7 @@ export default async function TodayPage() {
   const api = await getServerApi();
   const { todayKey } = await api.day.today();
   const day = await api.day.get({ date: todayKey });
+  const pick = day.confirmedAt === null ? await api.day.quickPick({ date: todayKey }) : null;
 
-  return (
-    <PageFrame dayKey={todayKey} header={<DayListHeader day={day} />}>
-      <DayList dateKey={todayKey} initial={day} />
-    </PageFrame>
-  );
+  return <TodayScreen dateKey={todayKey} initialDay={day} initialPick={pick} />;
 }

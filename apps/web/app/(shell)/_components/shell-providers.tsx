@@ -1,8 +1,10 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { ResumeGuard } from "@/components/resume-guard";
+import { orientRoute } from "@/lib/routes";
 import { ShortcutsHost } from "@/components/shortcuts-host";
 import {
   SessionExpiredDialog,
@@ -81,12 +83,14 @@ function ShellChrome({
   children: React.ReactNode;
 }) {
   const { sheetOpen } = useShell();
+  const pathname = usePathname();
 
   return (
     <AppShell
       user={user}
       reviewHasPending={reviewHasPending}
       sheetOpen={sheetOpen}
+      bare={pathname === orientRoute()}
     >
       {children}
     </AppShell>

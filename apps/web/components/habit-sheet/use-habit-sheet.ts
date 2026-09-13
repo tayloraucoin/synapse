@@ -159,7 +159,8 @@ export function useHabitSheet({
       quantityUnit: existing.data.quantityUnit,
       reflectionAxes: existing.data.reflectionAxes,
       defaultNotesPreflight: existing.data.defaultNotesPreflight,
-      isWakeAnchor: existing.data.isWakeAnchor,
+      // The anchor is retired (v1.1 R11, DYN-13): never written again.
+      isWakeAnchor: false,
     });
   }, [open, mode, existing.data, form]);
 
@@ -192,7 +193,6 @@ export function useHabitSheet({
   );
 
   const title = form.watch("title");
-  const isWakeAnchor = form.watch("isWakeAnchor");
 
   /** Non-blocking, computed from the list already loaded (SET-4's ruling). */
   const duplicateName = React.useMemo(() => {
@@ -203,15 +203,6 @@ export function useHabitSheet({
         habit.title.toLowerCase() === trimmed && habit.id !== habitId,
     );
   }, [title, habits, habitId]);
-
-  /** Whose flag this would take, when it is not already this habit's. */
-  const anchorHolder = React.useMemo(() => {
-    if (!isWakeAnchor) return null;
-    const holder = habits.find(
-      (habit) => habit.isWakeAnchor && habit.id !== habitId,
-    );
-    return holder?.title ?? null;
-  }, [isWakeAnchor, habits, habitId]);
 
   async function persist(values: HabitFormInput): Promise<void> {
     setFormError(null);
@@ -318,7 +309,6 @@ export function useHabitSheet({
     saving: createMutation.isPending || updateMutation.isPending,
     formError,
     duplicateName,
-    anchorHolder,
     categories,
     habits,
     templateCount: templateCount.data ?? 0,

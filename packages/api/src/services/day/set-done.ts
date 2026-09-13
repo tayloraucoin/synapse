@@ -4,7 +4,6 @@ import {
   dayItems,
   days,
   timerSessions,
-  users,
   type RlsClient,
 } from "@syn/db";
 
@@ -99,41 +98,13 @@ export async function setItemDone(
         );
     }
 
-    // The anchor, resolved from the account rather than from a flag on the row.
-    const [account] = await tx
-      .select({ wakeAnchorHabitId: users.wakeAnchorHabitId })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    const isAnchor =
-      account?.wakeAnchorHabitId !== null &&
-      account?.wakeAnchorHabitId !== undefined &&
-      account.wakeAnchorHabitId === item.habitId;
-
-    let wokeAt = day.wokeAt;
-
-    if (isAnchor) {
-      if (input.done) {
-        wokeAt = input.at;
-        await tx
-          .update(days)
-          .set({
-            wokeAt: input.at,
-            wokeAtSource: "anchor",
-            updatedAt: new Date(),
-          })
-          .where(eq(days.id, day.id));
-      } else if (day.wokeAtSource === "anchor") {
-        // Only an anchor-set wake time is cleared. A manual one is the
-        // person's own answer and outlives a checkbox.
-        wokeAt = null;
-        await tx
-          .update(days)
-          .set({ wokeAt: null, wokeAtSource: null, updatedAt: new Date() })
-          .where(eq(days.id, day.id));
-      }
-    }
+    /*
+     * UX v1.1 R11 (DYN-13): the wake is the orient frame's. The v1.0 anchor
+     * habit no longer stamps or clears `woke_at` from a tick; the column
+     * `users.wake_anchor_habit_id` is read by nothing here and removed in
+     * DYN-21. `wokeAt` is returned unchanged for the caller's shape.
+     */
+    const wokeAt = day.wokeAt;
 
     const reviewEdited = day.closedAt !== null;
     if (reviewEdited) {

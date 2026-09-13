@@ -12,6 +12,7 @@
 export {
   DAY_PART_HOURS,
   LATE_OFFER_THRESHOLD_MIN,
+  SKIP_LINE_WINDOW_DAYS,
   SOON_MINUTES,
   addDays,
   adjustFingerprintOf,
@@ -41,6 +42,7 @@ export {
   mondayOf,
   overMinutes,
   resolveDayKey,
+  shouldShowSkipLine,
   stackBlock,
   wallClockToInstant,
   weekDates,

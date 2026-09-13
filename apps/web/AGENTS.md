@@ -78,7 +78,8 @@ is a defect.**
 | `/auth/callback` | `authCallbackRoute()` | OAuth / PKCE |
 | `/auth/confirm` | `authConfirmRoute()` | email `token_hash` |
 | `/setup/{1–12}` | `setupRoute(step)` | UX v1.1 §4.1–§4.12 — screens 1–6 (DYN-10), 7–12 (DYN-11); 12 completes first run and pre-fills the week |
-| `/today` | `todayRoute()` | LS-01 |
+| `/orient` | `orientRoute()` | UX v1.1 §5.2 — the orient frame; the entry tree puts it before any tab while today has no `woke_at` (DYN-13); no header, no tab bar |
+| `/today` | `todayRoute()` | LS-01 — the quick-pick while `confirmed_at` is null (v1.1 §5.3, DYN-14), the list after |
 | `/today/schedule` | `todayScheduleRoute()` | SC-01 |
 | `/day/{date}` | `dayRoute(date)` | LS-01, record or plan mode |
 | `/day/{date}/schedule` | `dayScheduleRoute(date)` | SC-01, past or future |

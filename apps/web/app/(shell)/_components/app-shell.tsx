@@ -49,6 +49,12 @@ export interface AppShellProps {
   user: { name: string; imageUrl: string | null };
   /** True while a sheet owns the screen — dims and disables the tab bar. */
   sheetOpen?: boolean;
+  /**
+   * The orient frame (UX v1.1 §5.2, DYN-13): "no header, no tab bar". Paper
+   * and the page alone — the rail and the tab bar are not rendered, the skip
+   * link still is (the frame renders `main`).
+   */
+  bare?: boolean;
   /** A page, which renders its own `PageFrame` (header, status line, `main`). */
   children: React.ReactNode;
 }
@@ -57,8 +63,17 @@ export function AppShell({
   reviewHasPending,
   user,
   sheetOpen = false,
+  bare = false,
   children,
 }: AppShellProps) {
+  if (bare) {
+    return (
+      <div className="bg-paper flex min-h-dvh flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-paper flex min-h-dvh flex-col wide:flex-row">
       <a

@@ -5,7 +5,7 @@ import { getRequestUser } from "@/lib/auth/get-request-user";
 import { requireVerifiedEmail } from "@/lib/auth/require-verified-email";
 import { resolveEntryForRequest } from "@/lib/entry/resolve-entry-for-request";
 import { getServerApi } from "@/lib/trpc/server";
-import { signInRoute } from "@/lib/routes";
+import { orientRoute, signInRoute } from "@/lib/routes";
 
 import { ShellProviders } from "./_components/shell-providers";
 
@@ -45,9 +45,14 @@ export default async function ShellLayout({
 
   const entry = await resolveEntryForRequest(nextPath);
   if (entry && nextPath && !nextPath.startsWith(entry)) {
-    // The entry tree only redirects away from here when setup is owed; a
+    // The entry tree redirects away from here when setup is owed, or when
+    // the orient frame is (UX v1.1 §5.1 — before any tab, once per day); a
     // resolved "today" for someone already on a shell route is a no-op.
-    if (entry.startsWith("/setup") || entry.startsWith("/verify")) {
+    if (
+      entry.startsWith("/setup") ||
+      entry.startsWith("/verify") ||
+      entry === orientRoute()
+    ) {
       redirect(entry);
     }
   }

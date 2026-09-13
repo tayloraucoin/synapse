@@ -23,6 +23,7 @@ export {
   type FitResult,
 } from "./budget";
 export { daysBefore, weekdayForDayKey } from "./day-key";
+export { SKIP_LINE_WINDOW_DAYS, shouldShowSkipLine } from "./skip-line";
 export {
   DAY_PART_HOURS,
   dayPartBoundaries,

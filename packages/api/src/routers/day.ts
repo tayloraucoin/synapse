@@ -6,8 +6,10 @@ import {
   confirmDayInput,
   getDayInput,
   moveBlockInput,
+  orientInput,
   previewFitInput,
   quickPickInput,
+  saveMorningInput,
   setWakeTimeInput,
 } from "@syn/validators";
 
@@ -16,7 +18,9 @@ import { backfillBlocks } from "../services/day/backfill-blocks";
 import { ConfirmRuleError, confirmDay } from "../services/day/confirm-day";
 import { getDay } from "../services/day/get-day";
 import { setWakeTime } from "../services/day/item-fields";
+import { readDay } from "../services/day/materialize-day";
 import { moveBlock } from "../services/day/move-item";
+import { readOrient, saveMorning } from "../services/day/orient";
 import { previewFit } from "../services/day/preview-fit";
 import { getQuickPick } from "../services/day/quick-pick";
 import { resolveTodayFor } from "../services/day/today";
@@ -55,13 +59,40 @@ function confirmError(error: ConfirmRuleError): TRPCError {
  * day is what switches their zone, with no job required.
  */
 export const dayRouter = router({
+  /**
+   * Which day today is, and its waking state — `wokeAt`, `closedAt`,
+   * `confirmedAt` — so the entry tree can put the orient frame first (v1.1
+   * §5.1, DYN-13) without a second read.
+   */
   today: protectedProcedure.query(async ({ ctx }) => {
     const today = await resolveTodayFor(ctx.rls, ctx.authContext.userId);
     if (!today) {
       throw new TRPCError({ code: "NOT_FOUND", message: "No account row." });
     }
-    return { todayKey: today.todayKey };
+    const day = await ctx.rls.execute((tx) => readDay(tx, ctx.authContext.userId, today.todayKey));
+    return {
+      todayKey: today.todayKey,
+      wokeAt: day?.wokeAt ?? null,
+      closedAt: day?.closedAt ?? null,
+      confirmedAt: day?.confirmedAt ?? null,
+    };
   }),
+
+  /* ------------------------------------------------- UX v1.1 (DYN-13) -- */
+
+  /** The orient frame's words; opening stamps the wake once (R11). */
+  orient: protectedProcedure.input(orientInput).query(async ({ ctx, input }) => {
+    const today = await resolveTodayFor(ctx.rls, ctx.authContext.userId);
+    if (!today) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "No account row." });
+    }
+    return readOrient(ctx.rls, ctx.authContext.userId, input?.date ?? today.todayKey, new Date());
+  }),
+
+  /** The frame's two optional lines, autosaved. */
+  saveMorning: protectedProcedure
+    .input(saveMorningInput)
+    .mutation(async ({ ctx, input }) => saveMorning(ctx.rls, ctx.authContext.userId, input)),
 
   get: protectedProcedure
     .input(getDayInput)

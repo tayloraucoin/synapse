@@ -37,8 +37,8 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 - [x] **DYN-12** · The week build amended: per-block day sheet, shape toggle, the pre-filled week, the training swap confirm — M · (DYN-5, DYN-7)
 
 ### Phase 4 — The morning (waking state)
-- [ ] **DYN-13** · The orient frame and the wake moment: the entry route, `woke_at` stamping, last night's words, the two optional lines, the R18 line, the wake-anchor path retired — M · (DYN-5, DYN-7) · **Sage line flagged (v1.1 §13 #9)**
-- [ ] **DYN-14** · The quick-pick and *Set the day*: the unconfirmed Today tab, collapsed sections, the budget line, over budget, *Unstructured today*, the *Last night* section — L · (DYN-13, DYN-6)
+- [x] **DYN-13** · The orient frame and the wake moment: the entry route, `woke_at` stamping, last night's words, the two optional lines, the R18 line, the wake-anchor path retired — M · (DYN-5, DYN-7) · **Sage line flagged (v1.1 §13 #9)**
+- [x] **DYN-14** · The quick-pick and *Set the day*: the unconfirmed Today tab, collapsed sections, the budget line, over budget, *Unstructured today*, the *Last night* section — L · (DYN-13, DYN-6)
 
 ### Phase 5 — The day (executing state)
 - [ ] **DYN-15** · Today by block: `BlockHeader` sections, the container work row, the day header with focus and anchor, the day header sheet's rows, the item sheet's *Do now* / *Edit today's* / *one of*, the habit-day sheet — L · (DYN-14)
