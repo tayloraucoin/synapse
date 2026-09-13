@@ -3,7 +3,11 @@ import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
 
 import {
+  BLOCK_MORNING,
+  BLOCK_WORK,
   CATEGORY_SKY,
+  DEVICES_OFF_MARKER,
+  SPLIT_WORK_DAY,
   STORY_TIME_ZONE,
   itemInState,
 } from "../../__fixtures__/view-models";
@@ -110,7 +114,89 @@ const ALL_STATES: readonly ItemState[] = [
   "cut-by-shift",
   "missed",
   "pending-review",
+  "moved",
+  "confirm-later",
+  "not-confirmed",
 ];
+
+/*
+ * ---- UX v1.1 (DYN-7): the container, the pin, the marker, the three faces ----
+ */
+
+/** The work block as one row: the focus as its title, the fixtures nested, no checkbox (§6.1). */
+export const Container: StoryObj = {
+  render: () => {
+    const [focus, ...fixtures] = BLOCK_WORK.items;
+    return (
+      <ItemRow
+        item={focus as (typeof BLOCK_WORK.items)[number]}
+        variant="container"
+        timeZone={STORY_TIME_ZONE}
+        onOpen={() => {}}
+      >
+        {fixtures.map((fixture) => (
+          <ItemRow key={fixture.id} item={fixture} timeZone={STORY_TIME_ZONE} onOpen={() => {}} />
+        ))}
+      </ItemRow>
+    );
+  },
+};
+
+/** Split around training: two container rows with the workout between (§6.1). */
+export const ContainerSplit: StoryObj = {
+  render: () => {
+    const [, , , workA, training, workB] = SPLIT_WORK_DAY;
+    const rows = [workA, training, workB].filter((block) => block !== undefined);
+    return (
+      <>
+        {rows.map((block) =>
+          block.kind === "work" ? (
+            <ItemRow
+              key={block.id}
+              item={block.items[0] as (typeof block.items)[number]}
+              variant="container"
+              timeZone={STORY_TIME_ZONE}
+              onOpen={() => {}}
+            >
+              {block.items.slice(1).map((fixture) => (
+                <ItemRow key={fixture.id} item={fixture} timeZone={STORY_TIME_ZONE} onOpen={() => {}} />
+              ))}
+            </ItemRow>
+          ) : (
+            block.items.map((item) => (
+              <ItemRow key={item.id} item={item} timeZone={STORY_TIME_ZONE} onToggleDone={() => {}} onOpen={() => {}} />
+            ))
+          ),
+        )}
+      </>
+    );
+  },
+};
+
+/** The anchor glyph before the title; the row reads *pinned* (§6.1, §10.1). */
+export const Pinned: Story = {
+  args: { item: itemInState("upcoming", { title: "Stand-up", pinned: true, scheduling: "hard" }) },
+};
+
+/** After devices-off: no checkbox, the caption *confirm in the morning* (§7.1). */
+export const ConfirmLater: Story = {
+  args: { item: itemInState("confirm-later", { title: "Read" }) },
+};
+
+/** Left unticked the next morning: faded, *not confirmed*, still a decision (§7.3). */
+export const NotConfirmed: Story = {
+  args: { item: itemInState("not-confirmed", { title: "Stretch" }) },
+};
+
+/** A re-plan before it happens: the word, the planned time unchanged (§10.1). */
+export const Moved: Story = {
+  args: { item: BLOCK_MORNING.items[4] as (typeof BLOCK_MORNING.items)[number] },
+};
+
+/** The devices-off marker: a hairline row, the glyph, the time, no checkbox (§7.1). */
+export const DevicesOffMarker: Story = {
+  args: { item: DEVICES_OFF_MARKER, marker: true },
+};
 
 /** Every state the view model can hold, in one sheet. */
 export const AllStates: StoryObj = {

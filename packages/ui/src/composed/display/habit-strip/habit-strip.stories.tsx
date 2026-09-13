@@ -57,3 +57,26 @@ export const SquareVocabulary: StoryObj = {
     </div>
   ),
 };
+
+/** UX v1.1 §7.3 (DYN-7): a wind-down item left unticked — blank, labelled *not confirmed*. */
+export const WithNotConfirmed: Story = {
+  args: {
+    days: ["done", "not-confirmed", "done", "not-confirmed", "done", "not-assigned", "pending"],
+    credit: 3,
+    counted: 4,
+  },
+};
+
+/** The eighth square beside the seven. */
+export const NotConfirmedSquare: StoryObj = {
+  render: () => (
+    <div className="flex flex-wrap gap-(--space-4) p-(--space-6)">
+      {([...WEEK, "not-confirmed"] as const).map((state) => (
+        <div key={state} className="flex flex-col items-center gap-(--space-1)">
+          <StripSquare state={state} size={24} label={state} />
+          <Caption as="span">{state}</Caption>
+        </div>
+      ))}
+    </div>
+  ),
+};

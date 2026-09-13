@@ -40,6 +40,14 @@ const SQUARE: Record<StripState, string> = {
   "didnt-do": "border border-edge",
   "not-assigned": "",
   pending: "border border-dashed border-edge",
+  /*
+   * UX v1.1 §7.3, R16: "shown in the Week Review's strip as blank with the
+   * label *not confirmed*". A hairline outline — a blank that is still a
+   * square, told apart from `not-counted`'s edge by the lighter line and
+   * from `pending`'s dashes by being solid. Excluded from the number, never
+   * hidden.
+   */
+  "not-confirmed": "border border-hairline",
 };
 
 /** Words for the label, so the strip reads out loud correctly. */
@@ -51,6 +59,7 @@ const STATE_WORDS: Record<StripState, string> = {
   "didnt-do": "missed",
   "not-assigned": "not assigned",
   pending: "pending",
+  "not-confirmed": "not confirmed",
 };
 
 export interface StripSquareProps {

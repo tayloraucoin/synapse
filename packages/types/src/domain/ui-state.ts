@@ -90,7 +90,9 @@ export type StripState =
   | "half"
   | "didnt-do"
   | "not-assigned"
-  | "pending";
+  | "pending"
+  /** UX v1.1 §7.3, R16 — a wind-down item left unticked: blank, labelled, excluded. */
+  | "not-confirmed";
 
 /**
  * A whole week of squares — Monday to Sunday, always exactly seven.

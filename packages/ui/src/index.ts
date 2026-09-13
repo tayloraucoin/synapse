@@ -346,6 +346,31 @@ export {
   type DayPart,
   type DayPartHeaderProps,
 } from "./composed/display/day-part-header";
+/* ---- UX v1.1 (DYN-7): the block model's composites ---- */
+export {
+  BLOCK_HEADER_COPY,
+  BLOCK_KIND_WORDS,
+  BlockHeader,
+  type BlockHeaderProps,
+} from "./composed/display/block-header";
+export {
+  BlockBand,
+  bandVariants,
+  type BandVariants,
+  type BlockBandProps,
+} from "./composed/display/block-band";
+export { GapBand, type GapBandProps } from "./composed/display/gap-band";
+export {
+  BUDGET_LINE_COPY,
+  BudgetLine,
+  budgetStateFor,
+  type BudgetLineProps,
+} from "./composed/display/budget-line";
+export {
+  SLOT_ROW_COPY,
+  SlotRow,
+  type SlotRowProps,
+} from "./composed/display/slot-row";
 export {
   DecidedLine,
   type DecidedLineProps,
@@ -366,6 +391,7 @@ export {
   ItemRow,
   isDoneState,
   isFadedState,
+  isUntickableState,
   itemRowVariants,
   stateWordFor,
   type ItemRowClasses,
@@ -387,6 +413,7 @@ export {
   type ReviewRegionProps,
 } from "./composed/display/review-region";
 export {
+  SCHEDULE_GUTTER_PX,
   ScheduleAxis,
   type ScheduleAxisProps,
 } from "./composed/display/schedule-axis";
@@ -440,10 +467,12 @@ export {
 export {
   CURATED_GLYPHS,
   ItemIcon,
+  PinGlyph,
   getCuratedGlyph,
   type CuratedGlyph,
   type ItemIconProps,
   type ItemIconSize,
+  type PinGlyphProps,
 } from "./composed/display/item-icon";
 export {
   ListRow,
@@ -489,6 +518,11 @@ export {
   ScreenFrame,
   type ScreenFrameProps,
 } from "./composed/layout/screen-frame";
+export {
+  StepFrame,
+  type StepFrameCopy,
+  type StepFrameProps,
+} from "./composed/layout/step-frame";
 export {
   AppHeader,
   type AppHeaderClasses,
@@ -627,6 +661,20 @@ export {
   type LargeTargetOption,
   type LargeTargetRowProps,
 } from "./composed/control/large-target-row";
+/* ---- UX v1.1 (DYN-7): the drag layer and the confirm rows ---- */
+export {
+  DRAG_LAYER_COPY,
+  DragLayer,
+  type DragIntent,
+  type DragLayerBlock,
+  type DragLayerItem,
+  type DragLayerProps,
+} from "./composed/control/drag-layer";
+export {
+  CONFIRM_YESTERDAY_COPY,
+  ConfirmYesterdayRows,
+  type ConfirmYesterdayRowsProps,
+} from "./composed/control/confirm-yesterday-rows";
 export {
   MINUTES_STEPPER_COPY,
   MinutesStepper,
@@ -715,4 +763,5 @@ export {
   WeekdayChips,
   type Weekday,
   type WeekdayChipsProps,
+  type WeekdayIndexing,
 } from "./composed/control/weekday-chips";

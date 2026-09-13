@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1111 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1143 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -551,6 +551,7 @@ docs/
       DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
       DYN-5-materialisation-per-block-and-set-the-day.md
       DYN-6-adjust-do-now-habit-day-edits-and-moves.md
+      DYN-7-ui-composites-for-v1-1.md
       PROGRESS.md
       README.md
       TECHNICAL-DECISIONS.md
@@ -893,7 +894,7 @@ packages/
         tokens.ts
       composed/
         __fixtures__/
-          view-models.ts
+          view-models.ts  # story fixtures shaped as the app's view models — Taylor's Monday by block lives here
         control/
           chip-picker/
             chip-picker.stories.tsx
@@ -902,6 +903,11 @@ packages/
           color-swatch-row/
             color-swatch-row.stories.tsx
             color-swatch-row.tsx
+            index.ts
+          confirm-yesterday-rows/
+            confirm-yesterday-rows.stories.tsx
+            confirm-yesterday-rows.tsx
+            copy.ts
             index.ts
           count-stepper/
             count-stepper.stories.tsx
@@ -923,6 +929,11 @@ packages/
             copy.ts
             decision-panel.stories.tsx
             decision-panel.tsx
+            index.ts
+          drag-layer/
+            copy.ts
+            drag-layer.stories.tsx
+            drag-layer.tsx  # THE drag layer (v1.1 §6.5, §10.4): owns the gesture, the preview, the keyboard and the live region; emits intents, writes nothing
             index.ts
           ellipses-menu/
             ellipses-menu.stories.tsx
@@ -1039,6 +1050,21 @@ packages/
             big-number.stories.tsx
             big-number.tsx
             index.ts
+          block-band/
+            band.variants.ts  # the bands' skin — bg-surface at rest, no new colour (v1.1 §10.3)
+            block-band.stories.tsx
+            block-band.tsx
+            index.ts
+          block-header/
+            block-header.stories.tsx
+            block-header.tsx
+            copy.ts
+            index.ts
+          budget-line/
+            budget-line.stories.tsx
+            budget-line.tsx
+            copy.ts
+            index.ts
           category-bar/
             category-bar.stories.tsx
             category-bar.tsx
@@ -1068,6 +1094,10 @@ packages/
             expander-section.stories.tsx
             expander-section.tsx
             index.ts
+          gap-band/
+            gap-band.stories.tsx
+            gap-band.tsx
+            index.ts
           group-heading/
             group-heading.stories.tsx
             group-heading.tsx
@@ -1081,6 +1111,7 @@ packages/
             index.ts
             item-icon.stories.tsx
             item-icon.tsx
+            pin-glyph.tsx
           item-row/
             copy.ts
             index.ts
@@ -1129,6 +1160,11 @@ packages/
             index.ts
             settings-row.stories.tsx
             settings-row.tsx
+          slot-row/
+            copy.ts
+            index.ts
+            slot-row.stories.tsx
+            slot-row.tsx
           state-word/
             copy.ts
             index.ts
@@ -1226,6 +1262,10 @@ packages/
             index.ts
             screen-frame.stories.tsx
             screen-frame.tsx
+          step-frame/
+            index.ts
+            step-frame.stories.tsx
+            step-frame.tsx  # the first-run frame, presentational; the app's (setup)/_components/step-frame.tsx binds it
         navigation/
           app-header/
             app-header.stories.tsx

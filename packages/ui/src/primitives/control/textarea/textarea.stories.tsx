@@ -22,3 +22,23 @@ export const Overview: Story = {
     </div>
   ),
 };
+
+/**
+ * The serif variant — UX v1.1 §5.2, §7.2: one row to start, Newsreader at
+ * body size, a hairline underneath; grows with the words, then scrolls.
+ */
+export const Serif: Story = {
+  tags: ["!autodocs"],
+  render: () => (
+    <div className="bg-paper flex max-w-(--content-text) flex-col gap-(--space-6) p-(--space-6)">
+      <Textarea variant="serif" label="Grateful for, this morning" placeholder="" />
+      <Textarea
+        variant="serif"
+        label="Tomorrow, as I see it"
+        defaultValue={
+          "Up at seven, the walk before the light goes.\nThe stand-up is short; the afternoon is the essay.\nPhone away at quarter past ten."
+        }
+      />
+    </div>
+  ),
+};

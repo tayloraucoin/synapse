@@ -25,7 +25,9 @@ import { cn } from "../../../lib/cn";
 import { Button } from "../../../primitives/control/button";
 
 const MIN_PER_BAND = 15;
-const GUTTER_PX = 48;
+/** The hour-label column; bands and gaps start after it (UX v1.1 §6.5). */
+export const SCHEDULE_GUTTER_PX = 48;
+const GUTTER_PX = SCHEDULE_GUTTER_PX;
 
 export interface ScheduleAxisProps {
   /** Minutes from day start. */

@@ -34,3 +34,51 @@ export const Default: StoryObj = {
     );
   },
 };
+
+/**
+ * UX v1.1 §4.1 (DYN-7): the four archetype cards, stacked, one live and
+ * preselected; the other three at `text-text-disabled` with *not yet* on the
+ * right — not tappable, not in the tab order, no explanation.
+ */
+export const Archetypes: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<string | null>("own_structure_dynamic");
+    return (
+      <LargeTargetRow
+        label="Which is closest?"
+        layout="stacked"
+        value={value}
+        onChange={setValue}
+        options={[
+          { value: "consistent_shifts", label: "My shifts are the same every week", disabled: true, caption: "not yet" },
+          { value: "varying_shifts", label: "My shifts change week to week", disabled: true, caption: "not yet" },
+          {
+            value: "own_structure_dynamic",
+            label: "I set my own structure, and it changes",
+            description: "Work starts around a time, not at one. Mornings bend.",
+          },
+          { value: "fluid", label: "My days are fluid", disabled: true, caption: "not yet" },
+        ]}
+      />
+    );
+  },
+};
+
+/** UX v1.1 §6.6 step 2: *what gives*, ordered by anchor direction. */
+export const WhatGives: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<string | null>(null);
+    return (
+      <LargeTargetRow
+        label="What gives?"
+        layout="stacked"
+        value={value}
+        onChange={setValue}
+        options={[
+          { value: "slide", label: "Start work later", description: "Work moves to 9:40; everything slides." },
+          { value: "hold", label: "Keep work at 9:00" },
+        ]}
+      />
+    );
+  },
+};

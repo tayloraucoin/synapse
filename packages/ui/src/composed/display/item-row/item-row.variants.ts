@@ -38,8 +38,23 @@ export const itemRowVariants = cva(
 
 export type ItemRowVariantProps = VariantProps<typeof itemRowVariants>;
 
-/** States that read at 0.55 — the day has moved past them. */
-const FADED: readonly ItemState[] = ["passed", "deferred", "cut-by-shift"];
+/**
+ * States that read at 0.55 — the day has moved past them. `not-confirmed`
+ * (UX v1.1 §7.3) is faded too: it is absent from the Today tab and listed in
+ * Review as a decision still to make.
+ */
+const FADED: readonly ItemState[] = ["passed", "deferred", "cut-by-shift", "not-confirmed"];
+
+/**
+ * States with no checkbox — UX v1.1 §7.1: a wind-down row after devices-off
+ * "renders without a checkbox and with the caption *confirm in the morning*";
+ * it is confirmed after the fact, never ticked live.
+ */
+const UNTICKABLE: readonly ItemState[] = ["confirm-later"];
+
+export function isUntickableState(state: ItemState): boolean {
+  return UNTICKABLE.includes(state);
+}
 
 /** States whose title reads as recorded rather than pending. */
 const DONE: readonly ItemState[] = ["done", "done-off-schedule"];
@@ -80,6 +95,20 @@ export function stateWordFor(state: ItemState): StateWordKind | null {
       return "pending";
     case "not-assigned":
       return "archived";
+    /*
+     * UX v1.1 §10.1. `moved` before it happens is the re-plan's word — the
+     * time text stays the planned time until it is done (then *→ actual*).
+     * `confirm-later` is the caption after devices-off. `not-confirmed` has
+     * no kind of its own: the row says *not confirmed* through `text` under
+     * the pending kind's muted treatment (the one place the word is rendered
+     * outside the Week Review's strip).
+     */
+    case "moved":
+      return "moved";
+    case "confirm-later":
+      return "confirm-later";
+    case "not-confirmed":
+      return "pending";
     default:
       return null;
   }

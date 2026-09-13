@@ -27,3 +27,27 @@ export const Default: StoryObj<typeof QuickChipRow> = {
     ],
   },
 };
+
+/**
+ * States, not actions — UX v1.1 §3.7's placements with the last one
+ * preselected and *Not today* last (DYN-7). One chip pressed at a time.
+ */
+export const Placements: StoryObj = {
+  render: function Render() {
+    const [selected, setSelected] = React.useState<string | null>("after_morning");
+    return (
+      <QuickChipRow
+        label="When"
+        selected={selected}
+        onSelect={setSelected}
+        chips={[
+          { label: "Before the routine", value: "before_morning" },
+          { label: "After the routine", value: "after_morning" },
+          { label: "Inside work", value: "inside_work" },
+          { label: "After work", value: "after_work" },
+          { label: "Not today", value: "not_today" },
+        ]}
+      />
+    );
+  },
+};

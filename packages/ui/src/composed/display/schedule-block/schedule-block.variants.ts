@@ -25,6 +25,15 @@ export const scheduleBlockVariants = cva(
         done: "border border-hairline bg-fill-muted",
         moved:
           "border-[1.5px] border-violet-500 bg-surface",
+        /** UX v1.1 §10.1 *Not confirmed*: "Ghost outline" — a hairline, no fill. */
+        ghost: "border border-dashed border-hairline bg-transparent opacity-55",
+        /** UX v1.1 §6.1: the work container — the band's own fill, a hairline. */
+        container: "border border-hairline bg-transparent",
+      },
+      /** UX v1.1 §6.5 *lifted*: "0.9 opacity, 1.5px `border-accent-mark`". */
+      lifted: {
+        true: "border-[1.5px] border-accent-mark opacity-90",
+        false: "",
       },
       size: {
         full: "px-(--space-2) py-(--space-1)",
@@ -33,7 +42,7 @@ export const scheduleBlockVariants = cva(
         hairline: "border-0 bg-transparent px-0",
       },
     },
-    defaultVariants: { tone: "upcoming", size: "full" },
+    defaultVariants: { tone: "upcoming", size: "full", lifted: false },
   },
 );
 

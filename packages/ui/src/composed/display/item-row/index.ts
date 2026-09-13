@@ -7,6 +7,7 @@ export {
 export {
   isDoneState,
   isFadedState,
+  isUntickableState,
   itemRowVariants,
   stateWordFor,
   type ItemRowVariantProps,

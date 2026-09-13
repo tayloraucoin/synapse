@@ -37,3 +37,19 @@ export const None: StoryObj = {
     return <WeekdayChips label="Runs on" value={value} onChange={setValue} />;
   },
 };
+
+/**
+ * UX v1.1 §4.4 (DYN-7): a fixture picks a set of days, Monday-first — the
+ * value here is `[0, 2, 4]` for Mon/Wed/Fri, as `fixtures.weekdays` stores it.
+ */
+export const FixtureDays: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<Weekday[]>([0, 2, 4]);
+    return (
+      <div className="flex flex-col gap-(--space-3)">
+        <WeekdayChips label="Which days" indexing="monday" value={value} onChange={setValue} />
+        <code className="text-text-secondary text-(length:--fs-caption)">{JSON.stringify(value)}</code>
+      </div>
+    );
+  },
+};

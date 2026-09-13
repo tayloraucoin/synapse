@@ -110,6 +110,10 @@ const ANNOTATIONS = {
   "packages/ui/src/index.ts": "enumerated exports; no \"./*\" wildcard",
   "packages/ui/components.json": "shadcn CLI config; writes to src/_shadcn, which the re-slot empties",
   "packages/ui/src/_shadcn": "the CLI's landing zone. Never ships code \u2014 only .gitkeep",
+  "packages/ui/src/composed/control/drag-layer/drag-layer.tsx": "THE drag layer (v1.1 \u00a76.5, \u00a710.4): owns the gesture, the preview, the keyboard and the live region; emits intents, writes nothing",
+  "packages/ui/src/composed/display/block-band/band.variants.ts": "the bands' skin \u2014 bg-surface at rest, no new colour (v1.1 \u00a710.3)",
+  "packages/ui/src/composed/layout/step-frame/step-frame.tsx": "the first-run frame, presentational; the app's (setup)/_components/step-frame.tsx binds it",
+  "packages/ui/src/composed/__fixtures__/view-models.ts": "story fixtures shaped as the app's view models \u2014 Taylor's Monday by block lives here",
 
   // --- the app ---
   "apps/web/env.ts": "the only process.env reader in the app",

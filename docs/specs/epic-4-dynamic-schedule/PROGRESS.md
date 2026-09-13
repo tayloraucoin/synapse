@@ -10,7 +10,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | DYN-4 | Plan services: block templates by kind, the same-position rule, fixtures, workouts and focuses, the library by block | DYN-3 | Complete (validators, grep, and the four verify commands probed; the database-backed criteria wait for `0004`/`0005` on a tier — see `DEVIATIONS.md`) | 2026-09-12 |
 | DYN-5 | Materialisation per block and *Set the day* | DYN-4 | Complete (the pure layout and state derivations probed; the database-backed criteria wait for `0004`/`0005` on a tier — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-6 | Adjust, *Do now*, habit-day edits, and moves | DYN-5 | Complete (the pure arithmetic and fingerprint probed; undo decision (b) taken; the database-backed and induced-staleness criteria wait for `0004`/`0005` on a tier — see `DEVIATIONS.md`) | 2026-09-13 |
-| DYN-7 | `@syn/ui` for v1.1 | DYN-1 | Not started (ticket to be authored from `01-authoring-handoff-remaining-tickets.md`) | — |
+| DYN-7 | `@syn/ui` for v1.1 | DYN-1 | Complete (authored from the handoff and built in one thread; every composite storied; the Storybook build and the four commands pass — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-8 | The block editor, step one, and Settings → Your day | DYN-4, DYN-7 | Not started (handoff) | — |
 | DYN-9 | The block editor, step two: drag, resize, gaps | DYN-8 | Not started (handoff) · does not gate | — |
 | DYN-10 | First run 1–6 | DYN-7, DYN-4 | Not started (handoff) | — |
@@ -34,7 +34,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] DYN-4
 - [x] DYN-5
 - [x] DYN-6
-- [ ] DYN-7
+- [x] DYN-7
 - [ ] DYN-8
 - [ ] DYN-9 (does not gate)
 - [ ] DYN-10

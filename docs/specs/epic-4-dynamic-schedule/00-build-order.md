@@ -27,7 +27,7 @@ The vocabulary and the arithmetic; the two migrations; the services that write b
 - [x] **DYN-6** · Adjust, *Do now*, habit-day edits, and moves: `adjustDay`, `doNow`, `editHabitDay`, `moveItem`, `moveBlock`, the reflow — L · (DYN-5) · **Mason review; Vigil: induced staleness between preview and apply**
 
 ### Phase 2 — The composites
-- [ ] **DYN-7** · `@syn/ui` for v1.1: `BlockHeader`, `BlockBand`, `GapBand`, `BudgetLine`, `DragLayer`, `ConfirmYesterdayRows`, the serif `Textarea` variant, `StepFrame` to twelve, `ScheduleBlock`/`ItemRow`/`SlotView` extensions, stories — L · (DYN-1) · **Vesper review of stories in both themes**
+- [x] **DYN-7** · `@syn/ui` for v1.1: `BlockHeader`, `BlockBand`, `GapBand`, `BudgetLine`, `DragLayer`, `ConfirmYesterdayRows`, the serif `Textarea` variant, `StepFrame` to twelve, `ScheduleBlock`/`ItemRow`/`SlotView` extensions, stories — L · (DYN-1) · **Vesper review of stories in both themes**
 
 ### Phase 3 — Setup (planning mode)
 - [ ] **DYN-8** · The block editor, step one, and Settings → Your day: kind-aware editor with the slot sheet's fallbacks, the library by block, the habit sheet's block chip — L · (DYN-4, DYN-7)

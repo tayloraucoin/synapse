@@ -1,16 +1,18 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { Button, Heading, HelperText, Text } from "@syn/ui";
+import { StepFrame as StepFrameView, type StepFrameProps as StepFrameViewProps } from "@syn/ui";
 
 import { useOnline } from "@/lib/hooks/use-online";
 import { setupRoute, todayRoute } from "@/lib/routes";
 import { trpc } from "@/lib/trpc/client";
 
 import { SETUP_COPY as COPY } from "./copy";
+
+/** The v1.0 sequence's length; DYN-10 widens it to twelve (UX v1.1 §4). */
+const TOTAL_STEPS = 5;
 
 /**
  * Move to another step, recording it on the account first.
@@ -46,18 +48,13 @@ export function useStepNavigation() {
 }
 
 /**
- * The frame every first-run step shares — Epic 1 §2.
+ * The frame every first-run step shares — Epic 1 §2, bound to this app.
  *
- * BACK NEVER LEAVES THE SEQUENCE (cross-cutting §1.3). In a sequence, back
- * means the previous step; *Finish later* is the exit. Two intentions, two
- * controls — giving them one would make leaving accidental.
- *
- * IT ADDS NO `main`. The setup layout already renders one, and a second would
- * give the sequence two main landmarks and the skip link an ambiguous target.
- *
- * FOCUS MOVES TO THE HEADING ON EVERY STEP CHANGE, found by querying rather
- * than by a ref, exactly as `PageFrame` does: a sequence advancing in place is
- * not a page load, so nothing would announce the new step otherwise.
+ * THE FRAME ITSELF LIVES IN `@syn/ui` (DYN-7): Settings → Your day reuses
+ * the same screens without the sequence (UX v1.1 §4), so the frame takes
+ * callbacks and this file supplies them — the step navigation, the online
+ * hook, the routes, and the copy. The five v1.0 steps render through here
+ * unchanged.
  */
 export function StepFrame({
   step,
@@ -79,75 +76,33 @@ export function StepFrame({
 }) {
   const online = useOnline();
   const goTo = useStepNavigation();
-  const frameRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
-    frameRef.current?.querySelector<HTMLElement>("h1")?.focus();
-  }, [step]);
+  const copy: StepFrameViewProps["copy"] = React.useMemo(
+    () => ({
+      progress: (current) => COPY.progress(current),
+      back: COPY.back,
+      finishLater: COPY.finishLater,
+      skip: COPY.skip,
+      offline: COPY.offline,
+    }),
+    [],
+  );
 
   return (
-    <div ref={frameRef} className="flex min-h-0 flex-1 flex-col gap-(--space-5)">
-      <div className="flex items-center gap-(--space-3)">
-        {step > 1 ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={COPY.back}
-            className="shrink-0"
-            onClick={() => void goTo(step - 1, setupRoute(step - 1))}
-          >
-            <ArrowLeft className="size-5" aria-hidden="true" />
-          </Button>
-        ) : null}
-        <Text as="span" variant="caption" tone="secondary">
-          {COPY.progress(step)}
-        </Text>
-        <Button
-          variant="ghost"
-          className="ml-auto"
-          onClick={() => void goTo(step, todayRoute())}
-        >
-          {COPY.finishLater}
-        </Button>
-      </div>
-
-      {/*
-       * `tabIndex={-1}` so the step change can move focus here without adding
-       * the heading to the tab order (cross-cutting §3.4).
-       */}
-      <Heading tabIndex={-1}>{heading}</Heading>
-
-      {body === undefined ? null : (
-        <Text as="p" tone="secondary">
-          {body}
-        </Text>
-      )}
-
+    <StepFrameView
+      step={step}
+      total={TOTAL_STEPS}
+      heading={heading}
+      body={body}
+      primary={primary}
+      skip={skip}
+      error={error}
+      offline={!online}
+      onBack={step > 1 ? () => void goTo(step - 1, setupRoute(step - 1)) : undefined}
+      onFinishLater={() => void goTo(step, todayRoute())}
+      copy={copy}
+    >
       {children}
-
-      {error ? <HelperText error>{error}</HelperText> : null}
-      {!online ? <HelperText>{COPY.offline}</HelperText> : null}
-
-      {/* The actions are last in the DOM as well as on the screen (§2). */}
-      <div className="mt-auto flex items-center justify-end gap-(--space-3)">
-        {skip === undefined ? null : (
-          <Button
-            variant="secondary"
-            busy={skip.busy}
-            disabled={!online}
-            onClick={skip.onSkip}
-          >
-            {skip.label ?? COPY.skip}
-          </Button>
-        )}
-        <Button
-          busy={primary.busy}
-          disabled={!online}
-          onClick={primary.onClick}
-        >
-          {primary.label}
-        </Button>
-      </div>
-    </div>
+    </StepFrameView>
   );
 }

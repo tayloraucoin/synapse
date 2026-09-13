@@ -35,11 +35,33 @@ const DAYS: readonly { value: Weekday; initial: string; name: string }[] = [
   { value: 0, initial: "S", name: "Sunday" },
 ];
 
+/**
+ * UX v1.1 (DYN-7): `fixtures.weekdays`, `habits.typical_days` and
+ * `users.work_days` count Monday as 0 (`@syn/types` `Weekday`), while this
+ * control has always spoken `Date.getDay()` (Sunday as 0). `indexing="monday"`
+ * makes the value Monday-first in and out, so a caller storing a fixture's
+ * days never carries an offset in its own code — the two conventions meet
+ * here and nowhere else.
+ */
+export type WeekdayIndexing = "date" | "monday";
+
+/** `Date.getDay()` → Monday-first. */
+function toMondayFirst(day: Weekday): Weekday {
+  return ((day + 6) % 7) as Weekday;
+}
+
+/** Monday-first → `Date.getDay()`. */
+function toDateDay(day: Weekday): Weekday {
+  return ((day + 1) % 7) as Weekday;
+}
+
 export interface WeekdayChipsProps {
   value: ReadonlyArray<Weekday>;
   onChange: (next: Weekday[]) => void;
   label: React.ReactNode;
   disabled?: boolean;
+  /** Which convention `value` and `onChange` speak. Default: `Date.getDay()`. */
+  indexing?: WeekdayIndexing;
   className?: string;
 }
 
@@ -48,16 +70,18 @@ export function WeekdayChips({
   onChange,
   label,
   disabled = false,
+  indexing = "date",
   className,
 }: WeekdayChipsProps) {
   const groupLabelId = React.useId();
-  const selected = new Set(value);
+  const selected = new Set(indexing === "monday" ? value.map(toDateDay) : value);
 
   const toggle = (day: Weekday) => {
     const next = new Set(selected);
     if (next.has(day)) next.delete(day);
     else next.add(day);
-    onChange(DAYS.map((d) => d.value).filter((d) => next.has(d)));
+    const ordered = DAYS.map((d) => d.value).filter((d) => next.has(d));
+    onChange(indexing === "monday" ? ordered.map(toMondayFirst) : ordered);
   };
 
   return (

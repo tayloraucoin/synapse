@@ -391,6 +391,38 @@
       "types": "./src/composed/display/day-part-header/index.ts",
       "default": "./src/composed/display/day-part-header/index.ts"
     },
+    "./block-header": {
+      "types": "./src/composed/display/block-header/index.ts",
+      "default": "./src/composed/display/block-header/index.ts"
+    },
+    "./block-band": {
+      "types": "./src/composed/display/block-band/index.ts",
+      "default": "./src/composed/display/block-band/index.ts"
+    },
+    "./gap-band": {
+      "types": "./src/composed/display/gap-band/index.ts",
+      "default": "./src/composed/display/gap-band/index.ts"
+    },
+    "./budget-line": {
+      "types": "./src/composed/display/budget-line/index.ts",
+      "default": "./src/composed/display/budget-line/index.ts"
+    },
+    "./slot-row": {
+      "types": "./src/composed/display/slot-row/index.ts",
+      "default": "./src/composed/display/slot-row/index.ts"
+    },
+    "./drag-layer": {
+      "types": "./src/composed/control/drag-layer/index.ts",
+      "default": "./src/composed/control/drag-layer/index.ts"
+    },
+    "./confirm-yesterday-rows": {
+      "types": "./src/composed/control/confirm-yesterday-rows/index.ts",
+      "default": "./src/composed/control/confirm-yesterday-rows/index.ts"
+    },
+    "./step-frame": {
+      "types": "./src/composed/layout/step-frame/index.ts",
+      "default": "./src/composed/layout/step-frame/index.ts"
+    },
     "./decided-line": {
       "types": "./src/composed/display/decided-line/index.ts",
       "default": "./src/composed/display/decided-line/index.ts"
