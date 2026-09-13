@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-07 · 1052 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-13 · 1073 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -355,6 +355,7 @@ apps/
         icon-url.ts
       auth/
         auth-redirect-response.ts
+        describe-auth-error.ts
         get-request-context.ts
         get-request-user.ts
         require-verified-email.ts
@@ -445,6 +446,12 @@ docs/
     migrations.md
     rls.md
   product/
+    2026-09-11-taylor-ux-review-notes.md
+    2026-09-11-vesper-questions-for-ux-v1.1.md
+    2026-09-12-app-walkthrough-feedback-v1.0.md
+    marketing-changelog.md
+    phase-2-collection.md
+    ux-v1.1-thread-primer.md
     value-proposition.md
   reviews/
     2026-09-06-full-build-review.md
@@ -532,6 +539,21 @@ docs/
       REV-3-traded-up-reflections-edit-mode-and-history.md
       REV-4-week-review.md
       TECHNICAL-DECISIONS.md
+    epic-4-dynamic-schedule/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      01-authoring-handoff-remaining-tickets.md
+      DEVIATIONS.md
+      DYN-1-vocabulary-view-models-and-stack-block.md
+      DYN-2-migration-0004-block-templates-and-stacked-slots.md
+      DYN-3-migration-0005-profile-fixtures-day-blocks-journal.md
+      DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
+      DYN-5-materialisation-per-block-and-set-the-day.md
+      DYN-6-adjust-do-now-habit-day-edits-and-moves.md
+      PROGRESS.md
+      README.md
+      TECHNICAL-DECISIONS.md
     infrastructure/
       _templates/
         slice-spec.md
@@ -558,6 +580,7 @@ docs/
     epic1_setup_ux_architecture.md
     epic2_in_use_ux_architecture.md
     epic3_review_ux_architecture.md
+    habit_tracker_official_ux_spec_v1_1.md
     habit_tracker_official_ux_spec_v1.md
     landing-page-ux.md
     README.md

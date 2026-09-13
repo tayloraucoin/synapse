@@ -12,6 +12,7 @@ Never edited. See [`ux/README.md`](ux/README.md) for what each covers; in short:
 | Document | What |
 |---|---|
 | [`habit_tracker_official_ux_spec_v1.md`](ux/habit_tracker_official_ux_spec_v1.md) | **The authority.** Data model, all three epics, notifications, brand (§9), copy (§10), a11y floor. Its §0.3 rulings are signed. |
+| [`habit_tracker_official_ux_spec_v1_1.md`](ux/habit_tracker_official_ux_spec_v1_1.md) | **v1.1 — accepted 2026-09-12.** Blocks, the twelve-screen first run, the orient frame, the quick-pick, the editable Schedule, Adjust, the evening, Mason's data model, the open-items table. Mobile walk-through per screen. Supersedes v1 for the sections it rewrites; built by `specs/epic-4-dynamic-schedule/`. |
 | [`epic1_setup_ux_architecture.md`](ux/epic1_setup_ux_architecture.md) | Setup: auth, first run, library, templates, week build, settings. |
 | [`epic2_in_use_ux_architecture.md`](ux/epic2_in_use_ux_architecture.md) | In use: the List, the Schedule, sheets, shift, trim. |
 | [`epic3_review_ux_architecture.md`](ux/epic3_review_ux_architecture.md) | Review: the Day Review, the Week Review, history. |
@@ -26,6 +27,12 @@ Never edited. See [`ux/README.md`](ux/README.md) for what each covers; in short:
 | Document | What |
 |---|---|
 | [`value-proposition.md`](product/value-proposition.md) | The job, the value exchange, the benefits ladder, differentiation by refusal, what the product can honestly change (graded), how the brand carries it, messaging architecture, fit signatures. Compass, with Sage and Hearth. Draft for ratification. |
+| [`2026-09-11-taylor-ux-review-notes.md`](product/2026-09-11-taylor-ux-review-notes.md) | Taylor's first-pass notes over the official spec with reflections — schedule archetypes, chunked templates, transition gaps, primary focus, the morning menu. Working notes, not rulings. |
+| [`2026-09-11-vesper-questions-for-ux-v1.1.md`](product/2026-09-11-vesper-questions-for-ux-v1.1.md) | Vesper's intake for UX spec v1.1 — 45 questions over the ledger with Taylor's first-round answers and rulings, eight re-asked plainly in §L. Section K waits on the app walkthrough. |
+| [`2026-09-12-app-walkthrough-feedback-v1.0.md`](product/2026-09-12-app-walkthrough-feedback-v1.0.md) | Taylor's testing notes on the v1.0 build, screen by screen, with severity and whether each lands as a v1.0 patch or is absorbed by v1.1. Fills §K of the Q&A. Standing direction: mobile first. |
+| [`phase-2-collection.md`](product/phase-2-collection.md) | Everything Taylor has said "phase two" to — modules, integrations, content — each with why it waits and what in v1.1 it depends on. Append-only by Taylor's say-so. |
+| [`ux-v1.1-thread-primer.md`](product/ux-v1.1-thread-primer.md) | The paste-in primer for the thread that writes UX spec v1.1 — roles, reading order, code to inspect, working steps, and the per-screen walk-through shape. |
+| [`marketing-changelog.md`](product/marketing-changelog.md) | Running log of what the marketing surface should change as the UX changes; executed in batches when a UX version warrants it. |
 
 ## `architecture/` — how the code is organised
 
@@ -71,6 +78,7 @@ Index: [`ai-guides/README.md`](ai-guides/README.md).
 | [`epic-2-in-use/`](specs/epic-2-in-use/) | `USE-1…8` — the day model, the List, the sheets and timers, the Schedule, shift, trim, notifications: [README](specs/epic-2-in-use/README.md) · [build order](specs/epic-2-in-use/00-build-order.md) · [PROGRESS](specs/epic-2-in-use/PROGRESS.md). |
 | [`epic-3-review/`](specs/epic-3-review/) | `REV-1…4` — the resolver, the Day Review, history, the Week Review: [README](specs/epic-3-review/README.md) · [build order](specs/epic-3-review/00-build-order.md) · [PROGRESS](specs/epic-3-review/PROGRESS.md). |
 | [`cross-cutting-system/`](specs/cross-cutting-system/) | `SYS-1…5` — the shell, time zones, About & feedback, keyboard, PWA install and update: [README](specs/cross-cutting-system/README.md) · [build order](specs/cross-cutting-system/00-build-order.md) · [PROGRESS](specs/cross-cutting-system/PROGRESS.md). |
+| [`epic-4-dynamic-schedule/`](specs/epic-4-dynamic-schedule/) | `DYN-1…21` — UX v1.1: the block model, the block editor, first run, the orient frame, the quick-pick, Today by block, the editable Schedule, Adjust, the evening, the amended Review, notifications, the cleanup: [README](specs/epic-4-dynamic-schedule/README.md) · [build order](specs/epic-4-dynamic-schedule/00-build-order.md) (with the v1.1 coverage matrix) · [PROGRESS](specs/epic-4-dynamic-schedule/PROGRESS.md) · [authoring handoff](specs/epic-4-dynamic-schedule/01-authoring-handoff-remaining-tickets.md) for DYN-7…21. |
 
 ## `reviews/` — what was checked, and what was found
 
