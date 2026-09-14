@@ -121,9 +121,12 @@ export function OneOffSheet({
       return;
     }
 
-    const row = existing.data?.parts
-      .flatMap((part) => part.items)
-      .find((item) => item.id === itemId);
+    // The day by block (v1.1): the row is in its block, or block-less.
+    const row = existing.data
+      ? [...existing.data.blocks.flatMap((block) => block.items), ...existing.data.unblocked].find(
+          (item) => item.id === itemId,
+        )
+      : undefined;
     if (!row) return;
 
     setSource(row.habitId === null ? "title" : "habit");

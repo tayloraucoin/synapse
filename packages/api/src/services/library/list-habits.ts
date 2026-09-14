@@ -1,6 +1,6 @@
 import { asc, eq, inArray, isNull, and } from "drizzle-orm";
 
-import { categories, habits, users, type RlsClient } from "@syn/db";
+import { categories, habits, type RlsClient } from "@syn/db";
 import type {
   BlockKind,
   CategoryView,
@@ -48,12 +48,6 @@ export async function listHabits(
   options: ListHabitsOptions = {},
 ): Promise<HabitListResult> {
   return rls.execute(async (tx) => {
-    const [account] = await tx
-      .select({ wakeAnchorHabitId: users.wakeAnchorHabitId })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
     const categoryRows = await tx
       .select({
         id: categories.id,
@@ -100,7 +94,7 @@ export async function listHabits(
     );
 
     const views = habitRows.map((row) =>
-      toHabitSummaryView(row, byId, account?.wakeAnchorHabitId ?? null),
+      toHabitSummaryView(row, byId),
     );
 
     views.sort(compareForLibrary);

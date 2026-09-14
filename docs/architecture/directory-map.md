@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-13 · 1212 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-14 · 1189 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -26,7 +26,7 @@ apps/
     app/
       _components/
         landing/
-          example-day.ts  # the landing's example day, its day-part arithmetic, and its state derivation — no React
+          example-day.ts  # the landing's example day, its block grouping, and its state derivation — no React
           example-list.tsx
           index.ts
           landing-page.tsx
@@ -187,10 +187,6 @@ apps/
           share/
             _components/
               share-panel.tsx
-            page.tsx
-          templates/
-            [id]/
-              page.tsx
             page.tsx
           week/
             _components/
@@ -393,17 +389,9 @@ apps/
         index.ts
         session-expired-dialog.tsx
         session-watcher.tsx
-      shift-sheet/
-        copy.ts
-        index.ts
-        shift-sheet.tsx
       shortcuts-host/
         index.ts
         shortcuts-host.tsx
-      trim-sheet/
-        copy.ts
-        index.ts
-        trim-sheet.tsx
       week-build/
         copy.ts
         day-sheet.tsx  # one day's plan by block (v1.1 §4.13): every write is assignBlocks with the whole assignment; the sheet never reconciles
@@ -625,6 +613,7 @@ docs/
       DYN-19-review-amended.md
       DYN-2-migration-0004-block-templates-and-stacked-slots.md
       DYN-20-notifications-revised.md
+      DYN-21-migration-0006-and-the-retirements.md
       DYN-3-migration-0005-profile-fixtures-day-blocks-journal.md
       DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
       DYN-5-materialisation-per-block-and-set-the-day.md
@@ -686,7 +675,6 @@ packages/
         reason.ts
         review.ts
         shell.ts
-        shift.ts
         template.ts
         timer.ts
         user.ts
@@ -698,10 +686,7 @@ packages/
         day/
           add-from-library.ts  # Add from the library: a habit-day item at the end of a block, re-flowed; no block on an unstructured day
           adjust-day.ts  # Adjust — scope computed, preview then commit with a fingerprint, one shifts row of the right kind, undo per decision (b)
-          apply-shift.ts
           apply-template-changes.ts
-          apply-trim.ts
-          backfill-blocks.ts  # the one data migration that is not SQL: v1.0 days into one morning block each. Run per account after 0005, before 0006
           bring-back.ts
           carry-item.ts
           choose-alternate.ts  # one of, after the pick (v1.1 §6.3): the row takes the other member; the block re-flows
@@ -725,11 +710,10 @@ packages/
           quick-pick.ts
           reflow-block.ts  # the one re-lay of a set day (v1.1 §6.3–6.5): fixed points as pins, the rest walked forward; two columns written, never the original
           set-done.ts
-          shift-fit.ts
           timer.ts
           today.ts
           trade-workouts.ts  # the week build's training swap (R25): both days' workout items, refused on a set day
-          undo-shift.ts
+          undo-eligibility.ts  # the three refusals an undo of any shifts row meets — ten minutes, a later shift, done anyway; Adjust's undo reads it
           untouched.ts  # the two predicates that decide what materialisation may rewrite — item and block
           week-view.ts
           wind-down.ts
@@ -750,10 +734,9 @@ packages/
           save-habit.ts
           save-reason.ts
           starter-library.ts
-          starter-set.ts
           to-view.ts
         notifications/
-          block-pushes.ts  # the named seam DYN-20 fills; confirmDay calls it and it enqueues nothing yet
+          block-pushes.ts  # the seam confirmDay calls: the scan model is the delivery (v1.1 §9, DYN-20), so it reports the block boundaries ahead and writes nothing
           build-payload.ts
           deliver.ts
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
@@ -843,7 +826,6 @@ packages/
       limits.ts  # Epic 1 §9's bounds, shared by the zod schema and the input's maxLength
       motion.ts
       notification-catalogue.ts
-      starter-habits.ts
       starter-library.ts
       storage-buckets.ts
       storage-keys.ts
@@ -855,8 +837,8 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <6 migration .sql files, 0000–0005 — append-only, human-reviewed before a hosted migrate>
-      meta/ <7 drizzle snapshot files + _journal.json>
+      <7 migration .sql files, 0000–0006 — append-only, human-reviewed before a hosted migrate>
+      meta/ <8 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
@@ -1087,10 +1069,6 @@ packages/
             index.ts
             segmented-control.stories.tsx
             segmented-control.tsx
-          starter-set-chooser/
-            index.ts
-            starter-set-chooser.stories.tsx
-            starter-set-chooser.tsx
           stepper-17/
             index.ts
             stepper-17.stories.tsx
@@ -1167,10 +1145,6 @@ packages/
           day-outcome-row/
             day-outcome-row.stories.tsx
             day-outcome-row.tsx
-            index.ts
-          day-part-header/
-            day-part-header.stories.tsx
-            day-part-header.tsx
             index.ts
           decided-line/
             decided-line.stories.tsx
@@ -1529,15 +1503,12 @@ packages/
         boundaries.ts
         budget.ts
         day-key.ts
-        day-parts.ts
         index.ts
         item-state.ts
         late-offer.ts
         priority.ts
-        shift-fit.ts
         skip-line.ts  # R18 as code: the one behaviour line, second consecutive skip only, once in seven days
         stack.ts
-        trim.ts
         wall-clock.ts
         week.ts
       review/

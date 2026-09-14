@@ -1,4 +1,4 @@
-import { and, eq, gte, or, type SQL } from "drizzle-orm";
+import { and, eq, gte, type SQL } from "drizzle-orm";
 
 import { dayBlocks, days, type RlsClient } from "@syn/db";
 import { addDays } from "@syn/utils";
@@ -18,9 +18,7 @@ import { materializeDay } from "./materialize-day";
  * survives everywhere else.
  *
  * UNDER v1.1 A TEMPLATE IS ON A DAY THROUGH ITS BLOCK (`day_blocks.template_id`,
- * TD-1). `days.template_id` is still read for a day that predates the block
- * backfill (DYN-5's `backfillBlocks`), and never written.
- */
+ * TD-1); the v1.0 `days.template_id` went in `0006` after its backfill. */
 
 export type ApplyScope = "all" | "from_tomorrow" | "none";
 
@@ -38,7 +36,7 @@ export async function appliedDaysFor(
       .where(
         and(
           eq(days.userId, userId),
-          or(eq(dayBlocks.templateId, templateId), eq(days.templateId, templateId)),
+          eq(dayBlocks.templateId, templateId),
           // Today and forward: a past day's record is not re-applied to.
           gte(days.date, todayKey) as SQL,
         ),

@@ -430,13 +430,6 @@ export async function removeTemplateFromDay(
     })),
   });
 
-  await rls.execute((tx) =>
-    tx
-      .update(days)
-      .set({ templateId: null, updatedAt: new Date() })
-      .where(eq(days.id, day.id)),
-  );
-
   return { removed: total - kept, kept };
 }
 

@@ -28,8 +28,15 @@ import {
 
 import { anchorIsHardFor, minutesToClock } from "./materialize-day";
 import { reflowBlock } from "./reflow-block";
-import { DayChangedError } from "./shift-fit";
-import { UndoRefusedError, shiftUndoEligibility } from "./undo-shift";
+import { UndoRefusedError, shiftUndoEligibility } from "./undo-eligibility";
+
+/** The day changed between the preview and *Set* (`CONFLICT`) — the fingerprint's refusal. */
+export class DayChangedError extends Error {
+  constructor() {
+    super("the day changed since the preview");
+    this.name = "DayChangedError";
+  }
+}
 
 /**
  * Adjust — UX v1.1 §6.6, §11.9, R4, R7, TD-6 (DYN-6). The four steps as one
@@ -39,7 +46,7 @@ import { UndoRefusedError, shiftUndoEligibility } from "./undo-shift";
  * proposal; *Set* runs it again on the server against the live rows and
  * refuses (`CONFLICT`) if the scope changed since the sheet looked — an item
  * finished on another device, a reason archived. USE-6's pattern, over the
- * new arithmetic; `computeShiftFit` is not extended, it is retired in DYN-21.
+ * new arithmetic; v1.0's shift-fit left in DYN-21.
  *
  * THE SCOPE IS COMPUTED, NOT CHOSEN: the rest of the day from now to the next
  * hard thing. Before the work anchor that is *the morning* (every block
@@ -61,7 +68,7 @@ import { UndoRefusedError, shiftUndoEligibility } from "./undo-shift";
  * the ticket's `[NEEDS DECISION]`, (b): cuts come back with their misses
  * deleted, a `shift`'s anchor comes back, and the scope re-flows; lengths
  * stay shortened and *choose*'s left-out items return through *Bring back*.
- * Exact positions would need `shifts.undo_snapshot` (0006, DYN-21).
+ * (b) stood at DYN-21, so `0006` carries no `shifts.undo_snapshot`.
  */
 
 export type AdjustScopeLabel = "morning" | "evening" | "day";

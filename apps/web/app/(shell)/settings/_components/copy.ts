@@ -70,11 +70,7 @@ export const SETTINGS_COPY = {
 
   /* ------------------------------------------------------------ ST-08 -- */
   usualWakeTime: "Usual wake time",
-  usualWakeTimeHelper: "Used as the start time for new templates.",
-  wakeUpHabit: "Wake-up habit",
-  wakeUpHabitHelper:
-    "Marking it done sets the day's wake time. Set this on a habit.",
-  none: "None",
+  usualWakeTimeHelper: "Used as the start time for new templates.",  none: "None",
   dayClosesAt: "Day closes at",
   dayClosesAtHelper:
     "Anything undone at this time waits for you to review. Nothing is marked missed on its own.",

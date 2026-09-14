@@ -21,7 +21,6 @@ export const LIBRARY_COPY = {
 
   range: (min: number, max: number) => `${min}–${max} min`,
   importance: (value: number) => `importance ${value}`,
-  wakeUpTag: "wake-up",
 
   rowMenuLabel: (title: string) => `More actions for ${title}`,
   duplicate: "Duplicate",
@@ -36,9 +35,8 @@ export const LIBRARY_COPY = {
    * "Archiving the wake anchor clears the anchor and says so in the body"
    * without giving the sentence.
    *
-   * [COPY — needs Vesper sign-off: the wake-anchor clause.]
    */
-  archiveBody: (templateCount: number, isWakeAnchor: boolean) => {
+  archiveBody: (templateCount: number) => {
     const parts = [
       "It leaves your templates and the library. Past days keep their record.",
     ];
@@ -46,9 +44,6 @@ export const LIBRARY_COPY = {
       parts.push(
         `It's in ${templateCount} ${templateCount === 1 ? "template" : "templates"} and will be removed from them.`,
       );
-    }
-    if (isWakeAnchor) {
-      parts.push("It's your wake-up habit; archiving clears that.");
     }
     return parts.join(" ");
   },
@@ -66,10 +61,6 @@ export const HABIT_DETAIL_COPY = {
   inTemplates: "In templates",
   noTemplates: "Not in any templates yet.",
   recentDays: "Recent days",
-  slot: (offsetStartMin: number | null, durationMin: number) =>
-    offsetStartMin === null
-      ? `${durationMin} min`
-      : `+${offsetStartMin} min · ${durationMin} min`,
-  priority: (value: number) => `priority ${value}`,
+  slot: (durationMin: number) => `${durationMin} min`,  priority: (value: number) => `priority ${value}`,
   overridden: "overridden",
 } as const;

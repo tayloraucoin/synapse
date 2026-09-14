@@ -218,7 +218,6 @@ export function Library() {
                       : undefined
                   }
                   meta={describeHabit(habit)}
-                  tag={habit.isWakeAnchor ? COPY.wakeUpTag : undefined}
                   href={settingsHabitRoute(habit.id)}
                   trailing={
                     <EllipsesMenu
@@ -340,10 +339,7 @@ export function Library() {
           if (!next) setArchiveTarget(null);
         }}
         title={COPY.archiveTitle(archiveTarget?.title ?? "")}
-        description={COPY.archiveBody(
-          templateCount.data ?? 0,
-          archiveTarget?.isWakeAnchor ?? false,
-        )}
+        description={COPY.archiveBody(templateCount.data ?? 0)}
         confirmLabel={COPY.archive}
         cancelLabel={COPY.keep}
         busy={archive.isPending}

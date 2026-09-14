@@ -1,7 +1,8 @@
-import { and, count, eq, inArray, isNotNull, isNull } from "drizzle-orm";
+import { and, count, countDistinct, eq, inArray, isNull } from "drizzle-orm";
 
 import {
   categories,
+  dayBlocks,
   days,
   habits,
   templates,
@@ -54,16 +55,12 @@ export async function readSettingsCounts(
       .from(categories)
       .where(eq(categories.userId, userId));
 
+    // A day is planned once it has a block (v1.1); counted once, however many.
     const [plannedRow] = await tx
-      .select({ value: count() })
-      .from(days)
-      .where(
-        and(
-          eq(days.userId, userId),
-          inArray(days.date, dates),
-          isNotNull(days.templateId),
-        ),
-      );
+      .select({ value: countDistinct(dayBlocks.dayId) })
+      .from(dayBlocks)
+      .innerJoin(days, eq(days.id, dayBlocks.dayId))
+      .where(and(eq(dayBlocks.userId, userId), inArray(days.date, dates)));
 
     return {
       habits: Number(habitRow?.value ?? 0),

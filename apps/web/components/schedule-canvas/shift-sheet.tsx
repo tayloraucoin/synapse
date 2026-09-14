@@ -6,7 +6,6 @@ import { Button, HelperText, ResponsiveSheet, Text } from "@syn/ui";
 import { formatClock } from "@syn/utils";
 
 import { SheetHost } from "@/components/page-frame";
-import { SHIFT_COPY } from "@/components/shift-sheet";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { SCHEDULE_COPY as COPY } from "./copy";
@@ -16,12 +15,13 @@ type DayView = RouterOutputs["day"]["get"];
 /**
  * SC-02 — what one shift did, as a record.
  *
- * NAMED `ShiftRecordSheet`, NOT `ShiftSheet`. USE-6 added a `ShiftSheet` that
- * CREATES a shift (SF-01, `components/shift-sheet/`); two exports with one
- * name in one app is an auto-import that is right half the time. This one
- * reads a shift that already happened, and the name says so.
+ * NAMED `ShiftRecordSheet`: it reads a shift that already happened — a v1.0
+ * shift or an Adjust (`kind: shift | refit`) — and the name says so. The
+ * sheet that made one (USE-6's `ShiftSheet`) left in DYN-21; Adjust makes
+ * them now.
  *
- * *UNDO THIS SHIFT* APPEARS ONLY WHILE IT WOULD BE A TRUE REVERSAL (USE-6).
+ * *UNDO THIS SHIFT* APPEARS ONLY WHILE IT WOULD BE A TRUE REVERSAL
+ * (`adjust.canUndo`).
  * The server decides — within ten minutes, no later shift, and nothing that was
  * cut has since been done anyway — and when it says no, the action is ABSENT
  * rather than disabled. A greyed *Undo* on a record that has settled would
@@ -52,11 +52,11 @@ export function ShiftRecordSheet({
 }) {
   const shift = day.shifts.find((row) => row.id === shiftId) ?? null;
 
-  const eligibility = trpc.shift.canUndo.useQuery(
+  const eligibility = trpc.adjust.canUndo.useQuery(
     { shiftId: shiftId ?? "" },
     { enabled: open && shiftId !== null },
   );
-  const undo = trpc.shift.undo.useMutation();
+  const undo = trpc.adjust.undo.useMutation();
   const [error, setError] = React.useState<string | null>(null);
 
   const canUndo = eligibility.data?.canUndo === true;
@@ -71,7 +71,7 @@ export function ShiftRecordSheet({
     } catch {
       // The window closed, or something was done anyway, while the sheet was
       // open — the record won, which is the correct outcome.
-      setError(SHIFT_COPY.undoRefused);
+      setError(COPY.undoRefused);
     }
   }
 
@@ -94,7 +94,7 @@ export function ShiftRecordSheet({
                 busy={undo.isPending}
                 onClick={() => void runUndo()}
               >
-                {SHIFT_COPY.undoThisShift}
+                {COPY.undoThisShift}
               </Button>
             ) : null}
             <Button onClick={() => onOpenChange(false)}>{COPY.close}</Button>

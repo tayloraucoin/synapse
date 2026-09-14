@@ -341,11 +341,6 @@ export {
   type ShiftRowProps,
   type WeekRowProps,
 } from "./composed/display/day-outcome-row";
-export {
-  DayPartHeader,
-  type DayPart,
-  type DayPartHeaderProps,
-} from "./composed/display/day-part-header";
 /* ---- UX v1.1 (DYN-7): the block model's composites ---- */
 export {
   BLOCK_HEADER_COPY,
@@ -727,11 +722,6 @@ export {
   type SegmentedControlOption,
   type SegmentedControlProps,
 } from "./composed/control/segmented-control";
-export {
-  StarterSetChooser,
-  type StarterSetChooserProps,
-  type StarterSetItem,
-} from "./composed/control/starter-set-chooser";
 export {
   Stepper17,
   stepper17CellVariants,

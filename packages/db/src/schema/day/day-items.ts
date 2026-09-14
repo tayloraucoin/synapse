@@ -26,10 +26,10 @@
  * carries the gap before it (snapshotted from the slot; edited by a seam drag
  * on the day), and may be one member of a *one of* group (`alternates_id`
  * per day like `multitask_id`; `alternates_chosen` marks the live member —
- * the other is `not_assigned`). `day_block_id` is NULLABLE in 0005 and made
- * NOT NULL in 0006, after DYN-5's `backfillBlocks` has put every v1.0 item
- * under a `morning` block; SQL cannot decide which block an item belongs to,
- * the materialiser's rules can.
+ * the other is `not_assigned`). `day_block_id` is NULLABLE and stays so
+ * (DYN-21): a one-off and an unstructured day's add have no block
+ * (`DayView.unblocked`); `0006`'s backfill put every v1.0 item under a
+ * `morning` block before the v1.0 columns went.
  *
  * WHEN `original_scheduled_start` IS WRITTEN changes under v1.1 (R23, TD-5):
  * at week build for fixtures and pins on a structured day, and at *Set the

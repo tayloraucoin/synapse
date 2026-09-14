@@ -45,7 +45,6 @@ export async function getReviewHistory(
       .select({
         id: days.id,
         date: days.date,
-        templateId: days.templateId,
         closedAt: days.closedAt,
         reviewedAt: days.reviewedAt,
       })
@@ -130,7 +129,7 @@ export async function getReviewHistory(
     const dayViews: HistoryDay[] = weekDates(weekKey).map((date) => {
       const row = rowByDate.get(date);
 
-      if (!row || (row.templateId === null && !itemsByDay.has(row.id))) {
+      if (!row || !itemsByDay.has(row.id)) {
         return { date, status: "nothing-assigned", percent: null };
       }
 

@@ -29,7 +29,7 @@ import type {
   ReasonView,
 } from "@syn/types";
 import { detectTimezone } from "@syn/constants";
-import type { DayPart, FormulaTerm } from "@syn/ui";
+import type { FormulaTerm } from "@syn/ui";
 import { minutesFromDayStart } from "@syn/utils";
 
 /** The zone the server and the first client render agree on. */
@@ -298,18 +298,23 @@ export function buildPlannedRows(): readonly DayItemView[] {
   return ["run", "writing", "walk"].map((id) => staticItem(id));
 }
 
-/* ------------------------------------------------------------ day parts -- */
+/* --------------------------------------------------------------- blocks -- */
 
-/** Official spec §6.4, from the fixture anchor. */
-export function dayPartOf(minutesFromMidnight: number): DayPart {
+/**
+ * The example day's three blocks (UX v1.1 §3.1) — a morning, the work block,
+ * an activity block — from the fixture anchor. The landing shows the day the
+ * way the List does: by block, not by v1.0's day parts (DYN-21).
+ */
+export type ExampleBlock = "morning" | "work" | "activity";
+
+export function blockOf(minutesFromMidnight: number): ExampleBlock {
   const fromAnchor = minutesFromMidnight - ANCHOR_MINUTES;
   if (fromAnchor < PART_LENGTH_MINUTES) return "morning";
-  if (fromAnchor < PART_LENGTH_MINUTES * 2) return "afternoon";
-  return "evening";
+  if (fromAnchor < PART_LENGTH_MINUTES * 2) return "work";
+  return "activity";
 }
-
 export interface ExampleGroup {
-  part: DayPart;
+  part: ExampleBlock;
   items: readonly DayItemView[];
 }
 
@@ -320,15 +325,15 @@ export interface ExampleGroup {
  * so the grouping is identical in both clock modes and cannot drift with the
  * device's zone. Keyed by id, not by position, so a caller may pass a subset.
  */
-export function groupByDayPart(
+export function groupByBlock(
   items: readonly DayItemView[],
 ): readonly ExampleGroup[] {
-  const order: readonly DayPart[] = ["morning", "afternoon", "evening"];
+  const order: readonly ExampleBlock[] = ["morning", "work", "activity"];
 
-  const partOf = (id: string): DayPart | null => {
+  const partOf = (id: string): ExampleBlock | null => {
     const spec = EXAMPLE_SPECS.find((candidate) => candidate.id === id);
     if (spec === undefined) return null;
-    return dayPartOf(spec.startHour * 60 + spec.startMinute);
+    return blockOf(spec.startHour * 60 + spec.startMinute);
   };
 
   return order

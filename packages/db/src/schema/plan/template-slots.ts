@@ -9,12 +9,9 @@
  * has an absolute time unless it is PINNED (`pinned_at`), and the stack flows
  * around a pin — the pin never moves (v1.1 R3).
  *
- * `offset_start_min` / `offset_end_min` ARE DEPRECATED since 0004 (TD-4).
- * The backfill in 0004 turned every offset into a gap; the columns are kept,
- * populated, and read by nothing after DYN-4, and dropped in `0006`. Their
- * two-hour-before-anchor allowance (TP-02) has no v1.1 equivalent: orient is
- * the first block, and a before-wake slot's position survives only in the
- * deprecated column (logged in Epic 4's DEVIATIONS).
+ * The v1.0 offsets (`offset_start_min` / `offset_end_min`) are gone since
+ * `0006` (DYN-21): `0004` turned every offset into a gap, nothing read them
+ * after DYN-4, and a stack has no absolute offsets to keep.
  *
  * TWO GROUPS, TWO MEANINGS. `multitask_group` means BOTH happen — members
  * share a position and a start (v1 §5.5). `alternates_group` means EXACTLY
@@ -41,7 +38,6 @@ import {
   boolean,
   check,
   index,
-  integer,
   pgTable,
   smallint,
   text,
@@ -79,10 +75,6 @@ export const templateSlots = pgTable(
     gapBeforeMin: smallint("gap_before_min").notNull().default(0),
     /** A local id within the template (§3.5) — multitask; both happen. */
     multitaskGroup: text("multitask_group"),
-    /** DEPRECATED since 0004 — see the header. Windows only. Dropped in 0006. */
-    offsetEndMin: integer("offset_end_min"),
-    /** DEPRECATED since 0004 — see the header. Dropped in 0006. */
-    offsetStartMin: integer("offset_start_min"),
     /** A clock time when the slot is a pin; the stack flows around it (R3). */
     pinnedAt: time("pinned_at"),
     /** 1–7. Per-template override of the habit's `life_priority` (§3.5). */
@@ -128,10 +120,6 @@ export const templateSlots = pgTable(
     check(
       "template_slots_gap_before_min_check",
       sql`${table.gapBeforeMin} BETWEEN 0 AND 240`,
-    ),
-    check(
-      "template_slots_offset_start_min_check",
-      sql`${table.offsetStartMin} IS NULL OR ${table.offsetStartMin} >= -120`,
     ),
     // A pin has no gap: it starts where it is pinned, not after what precedes it.
     check(

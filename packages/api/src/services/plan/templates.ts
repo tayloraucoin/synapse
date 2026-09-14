@@ -1,7 +1,7 @@
-import { and, asc, count, eq, isNull, isNotNull } from "drizzle-orm";
+import { and, asc, count, countDistinct, eq, isNull, isNotNull } from "drizzle-orm";
 
 import {
-  days,
+  dayBlocks,
   habits,
   templateSlots,
   templates,
@@ -81,8 +81,6 @@ async function readSlotRows(
       id: templateSlots.id,
       habitId: templateSlots.habitId,
       timeMode: templateSlots.timeMode,
-      offsetStartMin: templateSlots.offsetStartMin,
-      offsetEndMin: templateSlots.offsetEndMin,
       durationMin: templateSlots.durationMin,
       gapBeforeMin: templateSlots.gapBeforeMin,
       pinnedAt: templateSlots.pinnedAt,
@@ -159,13 +157,12 @@ export async function listTemplates(
       .where(and(...conditions))
       .orderBy(asc(templates.kind), asc(templates.name));
 
-    // Zero until days carry blocks (DYN-5); the query is here so nothing
-    // changes then. `days.template_id` is deprecated but still the v1.0 link.
+    // A template is on a day through its block (TD-1): one block per day.
     const used = await tx
-      .select({ templateId: days.templateId, value: count() })
-      .from(days)
-      .where(and(eq(days.userId, userId), isNotNull(days.templateId)))
-      .groupBy(days.templateId);
+      .select({ templateId: dayBlocks.templateId, value: countDistinct(dayBlocks.dayId) })
+      .from(dayBlocks)
+      .where(and(eq(dayBlocks.userId, userId), isNotNull(dayBlocks.templateId)))
+      .groupBy(dayBlocks.templateId);
 
     const usedByTemplate = new Map(
       used.map((row) => [row.templateId, Number(row.value)]),
@@ -220,9 +217,9 @@ export async function getTemplate(
     const walk = walkTemplate(slotRows, anchor.flow, anchor.anchorMin);
 
     const [applied] = await tx
-      .select({ value: count() })
-      .from(days)
-      .where(and(eq(days.userId, userId), eq(days.templateId, id)));
+      .select({ value: countDistinct(dayBlocks.dayId) })
+      .from(dayBlocks)
+      .where(and(eq(dayBlocks.userId, userId), eq(dayBlocks.templateId, id)));
 
     const hasClocks = anchor.anchorMin !== null && slotRows.length > 0;
 
@@ -469,8 +466,6 @@ export async function duplicateTemplate(
           templateId: copy.id,
           habitId: slot.habitId,
           timeMode: slot.timeMode,
-          offsetStartMin: slot.offsetStartMin,
-          offsetEndMin: slot.offsetEndMin,
           durationMin: slot.durationMin,
           priorityOverride: slot.priorityOverride,
           scheduling: slot.scheduling,

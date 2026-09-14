@@ -86,7 +86,6 @@ export const HABIT: HabitSummaryView = {
   durationMin: 30,
   durationMax: 45,
   lifePriority: 5,
-  isWakeAnchor: false,
   archived: false,
   blockKind: null,
   weeklyTarget: null,

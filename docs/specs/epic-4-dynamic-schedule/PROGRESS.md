@@ -24,7 +24,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | DYN-18 | The evening | DYN-15, DYN-14 | Complete (authored from the handoff and built in one thread with DYN-19; `/day/{date}/journal` + `components/journal/`, the wind-down *Journal* row's navigation and self-tick (`syncJournalItem`), `review.confirmLastNight` with the panel first in the Day Review, Settings → Your day → *Closing the day* as the embedded screen with the wind-down chooser band and the ghost row; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-19 | Review amended | DYN-18 | Complete (authored and built with DYN-18; the Day Review grouped by `BlockHeader` with the work line, the intention, *planned · done* and *shortened*; the Week Review's counts line, time by block, Reflections; `stripStateFor` reads `not_confirmed`; the export's three new CSVs; the four commands pass; the acceptance walk is blocked at sign-in — see `DEVIATIONS.md`) | 2026-09-13 |
 | DYN-20 | Notifications revised | DYN-14, DYN-18 | Complete (authored and built with DYN-9 and DYN-16; one `notifyStarts` scan over `block_start` · `item_start` (per block) · `fixture_start` · `devices_off`, gated on `confirmed_at` for what the pick derives and grouped by the minute; `claimDelivery` + `sendClaimed`; the three payload builders; `notification.setPref` with `blockKind`; ST-07's *Every item in…* group; the four commands pass; the timing edges are read from the code, not observed — see `DEVIATIONS.md`) | 2026-09-13 |
-| DYN-21 | Migration `0006` and the retirements | DYN-9, DYN-16, DYN-17, DYN-19, DYN-20 | Not started (handoff) | — |
+| DYN-21 | Migration `0006` and the retirements | DYN-9, DYN-16, DYN-17, DYN-19, DYN-20 | Complete (authored from the handoff and built in one thread; `0006_retire_v1_model.sql` — the v1.0 backfill in SQL, the assertion, the drops, `anchor_time` nulled — with its journal entry and snapshot; the v1.0 services, routers, utils, constants, composites, sheets and routes deleted and every reader re-pointed at `day_blocks`; `SCHEMA_REFERENCE.md` and the directory map regenerated; the four commands and the Storybook build pass; **`0006` is not applied to any tier — Taylor runs it after 0004/0005**) | 2026-09-13 |
 
 ## Checklist
 
@@ -48,4 +48,4 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] DYN-18
 - [x] DYN-19
 - [x] DYN-20
-- [ ] DYN-21
+- [x] DYN-21

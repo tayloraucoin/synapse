@@ -11,11 +11,10 @@
  * `avatar`; both are satellite tables (`notification_prefs`, `user_avatars`),
  * because both are lists rather than scalars.
  *
- * THE WAKE ANCHOR HAS ONE HOME (SET-1). `wake_anchor_habit_id` gained its
- * foreign key here, as INF-5 promised. Official §3.3 also lists
- * `habits.is_wake_anchor` "at most one per user"; that column does not exist,
- * because "at most one" is a fact about the person and this column enforces it
- * structurally. `HabitSummaryView.isWakeAnchor` is derived in the view mapper.
+ * THERE IS NO WAKE ANCHOR (UX v1.1 R11). v1.0 kept `wake_anchor_habit_id`
+ * here (SET-1); the orient frame is the wake moment since DYN-13 and the
+ * column is gone since `0006` (DYN-21). `days.woke_at_source = anchor` stays
+ * on rows written under v1.0.
  *
  * THE PENDING PAIR (SET-1). A time-zone switch and a day-close change take
  * effect FROM TOMORROW (cross-cutting §7.3, §7.5), so writing them straight to
@@ -32,9 +31,7 @@
  * (`lights_out_time`, `devices_off_time`), the overflow mode, the orient
  * frame's three settings, the journal's switch and prompts, and the block
  * order. These are the anchors the materialiser lays every block out from;
- * a template no longer carries its own (TD-1). `wake_anchor_habit_id` is
- * DEPRECATED since 0005 (v1.1 R11): the orient frame is the wake moment; the
- * column is not written after DYN-13 and is dropped in 0006.
+ * a template no longer carries its own (TD-1).
  *
  * POLICIES. Select and update are the owner's alone. Insert and delete are
  * denied to the authenticated role outright: the trigger inserts, and deletion
@@ -42,7 +39,6 @@
  */
 import { relations, sql } from "drizzle-orm";
 import {
-  type AnyPgColumn,
   boolean,
   check,
   date,
@@ -211,27 +207,9 @@ export const users = pgTable(
     workEndTime: time("work_end_time"),
     // UX v1.1 §4.3 — the anchor prep flows backward to (0005).
     workStartTime: time("work_start_time"),
-
-    // DEPRECATED since 0005 (UX v1.1 R11): the orient frame is the wake
-    // moment. Not written after DYN-13; dropped in 0006. Until then:
-    //
-    // At most one per person, enforced by there being one column (SET-1).
-    // `set null` because archiving or deleting the habit must not orphan the
-    // reference — the person simply has no anchor until they pick another.
-    //
-    // The `: AnyPgColumn` annotation is required, not decorative: this column
-    // closes a foreign-key cycle (users → habits → categories → users), and
-    // without an explicit return type TypeScript cannot infer any of the three
-    // table types and reports all of them as `any` (TS7022). Annotating this
-    // one back-edge breaks the cycle for all three.
-    wakeAnchorHabitId: uuid("wake_anchor_habit_id").references(
-      (): AnyPgColumn => habits.id,
-      { onDelete: "set null" },
-    ),
   },
   (table) => [
     index("users_email_idx").on(table.email),
-    index("users_wake_anchor_habit_id_idx").on(table.wakeAnchorHabitId),
     check(
       "users_week_build_reminder_weekday_check",
       sql`${table.weekBuildReminderWeekday} BETWEEN 0 AND 6`,

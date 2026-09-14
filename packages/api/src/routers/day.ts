@@ -3,7 +3,6 @@ import { TRPCError } from "@trpc/server";
 import { addDays } from "@syn/utils";
 import {
   addFromLibraryInput,
-  applyTrimInput,
   confirmDayInput,
   getDayInput,
   moveBlockInput,
@@ -15,8 +14,6 @@ import {
 } from "@syn/validators";
 
 import { AddFromLibraryError, addFromLibrary } from "../services/day/add-from-library";
-import { applyTrim, previewTrim } from "../services/day/apply-trim";
-import { backfillBlocks } from "../services/day/backfill-blocks";
 import { ConfirmRuleError, confirmDay } from "../services/day/confirm-day";
 import { getDay } from "../services/day/get-day";
 import { setWakeTime } from "../services/day/item-fields";
@@ -203,18 +200,6 @@ export const dayRouter = router({
       }
     }),
 
-  /**
-   * The one-time move of v1.0 days into blocks (TD-2). Idempotent; run once
-   * per tier after `0005` — see `docs/developer-guides/migrations.md`.
-   */
-  backfillBlocks: protectedProcedure.mutation(async ({ ctx }) => {
-    const today = await resolveTodayFor(ctx.rls, ctx.authContext.userId);
-    if (!today) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "No account row." });
-    }
-    return backfillBlocks(ctx.rls, ctx.authContext.userId, today.todayKey);
-  }),
-
   /* -------------------------------------------------- UX v1.1 (DYN-6) -- */
 
   /** The Schedule's band drag — §6.5. Every movable item and the band, by the same minutes. */
@@ -232,45 +217,4 @@ export const dayRouter = router({
   previewFit: protectedProcedure
     .input(previewFitInput)
     .query(async ({ ctx, input }) => previewFit(ctx.rls, ctx.authContext.userId, input)),
-
-  /* ------------------------------------------------------------- TR-01 -- */
-
-  /**
-   * What a capacity would set aside. Writes nothing.
-   *
-   * TR-01 itself previews CLIENT-SIDE, over the day it already has, so typing a
-   * number does not cost a round trip per keystroke. This exists because the
-   * rule must be reachable from the future mobile client too, and because a
-   * second implementation of the trim order is the one thing that would make
-   * the sheet and the write disagree.
-   */
-  previewTrim: protectedProcedure
-    .input(applyTrimInput)
-    .query(async ({ ctx, input }) => {
-      const result = await previewTrim(ctx.rls, ctx.authContext.userId, input);
-      if (result === null) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "No such day." });
-      }
-      return result;
-    }),
-
-  /** Sets `capacity_min`, trims what no longer fits, returns what came back. */
-  applyTrim: protectedProcedure
-    .input(applyTrimInput)
-    .mutation(async ({ ctx, input }) => {
-      try {
-        return await applyTrim(ctx.rls, ctx.authContext.userId, input);
-      } catch (error) {
-        if (error instanceof Error && /no such day/.test(error.message)) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "No such day." });
-        }
-        if (error instanceof Error && /day is closed/.test(error.message)) {
-          throw new TRPCError({
-            code: "CONFLICT",
-            message: "That day is closed.",
-          });
-        }
-        throw error;
-      }
-    }),
 });

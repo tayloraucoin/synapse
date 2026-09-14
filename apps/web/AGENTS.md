@@ -98,8 +98,6 @@ is a defect.**
 | `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one of DYN-10's six screens, or DYN-18's `closing-the-day` (screen 10), embedded: `shape · work-days · work-start · commitments · wake · before-the-day · closing-the-day` |
 | `/settings/your-day/block/{kind}` | `settingsYourDayBlockRoute(kind, templateId?)` | the block editor for a kind (§3.11); the template list above it when more than one |
 | `/settings/your-day/order` | `settingsYourDayOrderRoute()` | Block order (§4.14) |
-| `/settings/templates` | `settingsTemplatesRoute()` | redirects to `/settings/your-day` (DYN-8) |
-| `/settings/templates/{id}` | `settingsTemplateRoute(id)` | redirects to `/settings/your-day/block/{kind}?t={id}` (DYN-8) |
 | `/settings/week` · `/settings/week/{week}` | `settingsWeekRoute(week?)` | WK-01 |
 | `/settings/categories` | `settingsCategoriesRoute()` | CT-01 |
 | `/settings/reasons` | `settingsReasonsRoute()` | ST-06 |

@@ -52,7 +52,6 @@ function emptyValues(): HabitFormInput {
     quantityUnit: null,
     reflectionAxes: [],
     defaultNotesPreflight: null,
-    isWakeAnchor: false,
   };
 }
 
@@ -159,8 +158,6 @@ export function useHabitSheet({
       quantityUnit: existing.data.quantityUnit,
       reflectionAxes: existing.data.reflectionAxes,
       defaultNotesPreflight: existing.data.defaultNotesPreflight,
-      // The anchor is retired (v1.1 R11, DYN-13): never written again.
-      isWakeAnchor: false,
     });
   }, [open, mode, existing.data, form]);
 

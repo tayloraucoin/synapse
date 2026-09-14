@@ -13,11 +13,10 @@
  * from here only because a hard delete cannot happen through the app, and
  * archiving removes slots through LB-01's service instead.
  *
- * NO `is_wake_anchor` COLUMN. Official §3.3 lists one, but "at most one per
- * user" is a fact about the person: `users.wake_anchor_habit_id` is the single
- * home and `HabitSummaryView.isWakeAnchor` is derived in the view mapper. See
- * the Epic 1 TECHNICAL-DECISIONS entry. (UX v1.1 R11 retires the anchor
- * habit altogether; the column goes in `0006`.)
+ * NO WAKE ANCHOR. Official §3.3 lists `is_wake_anchor`; v1.0 kept the fact
+ * on `users.wake_anchor_habit_id` instead (Epic 1 TECHNICAL-DECISIONS), and
+ * UX v1.1 R11 retired the anchor habit altogether — the orient frame is the
+ * wake moment, and the column went in `0006` (DYN-21).
  *
  * WORKOUTS AND FOCUSES ARE HABITS (UX v1.1 §11.3, TD-3). A workout is
  * `type = workout`; a focus is `type = deep_work`; both carry a rotation —

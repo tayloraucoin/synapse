@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 
-import { habits, users, type RlsClient } from "@syn/db";
+import { habits, type RlsClient } from "@syn/db";
 import type { BlockKind, IconValue, ItemType } from "@syn/types";
 
 /**
@@ -23,7 +23,6 @@ export type EditableHabit = {
   quantityUnit: string | null;
   reflectionAxes: string[];
   defaultNotesPreflight: string | null;
-  isWakeAnchor: boolean;
   archived: boolean;
   /** UX v1.1 §11.3. */
   blockKind: BlockKind | null;
@@ -61,12 +60,6 @@ export async function getHabit(
 
     if (!row) return null;
 
-    const [account] = await tx
-      .select({ wakeAnchorHabitId: users.wakeAnchorHabitId })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
     return {
       id: row.id,
       title: row.title,
@@ -79,7 +72,6 @@ export async function getHabit(
       quantityUnit: row.quantityUnit,
       reflectionAxes: row.reflectionAxes,
       defaultNotesPreflight: row.defaultNotesPreflight,
-      isWakeAnchor: account?.wakeAnchorHabitId === row.id,
       archived: row.archivedAt !== null,
       blockKind: row.blockKind,
       weeklyTarget: row.weeklyTarget,

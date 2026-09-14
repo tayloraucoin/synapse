@@ -2,7 +2,7 @@
 
 | Doc | One line |
 |-----|----------|
-| `habit_tracker_official_ux_spec_v1.md` | **The master spec** — data model (§3), state matrix (§5.9), brand guide (§9, incl. the §9.7 variable map), copy guide (§10). Its §0.3 rulings are signed. |
+| `habit_tracker_official_ux_spec_v1.md` | **The master spec** — data model (§3), state matrix (§5.9), brand guide (§9, incl. the §9.7 variable map), copy guide (§10). Its §0.3 rulings are signed. **Since DYN-21 the v1.0 plan model it describes is gone from the code** — whole-day templates with offsets, day parts, the shift and trim sheets, the wake-anchor habit, the flat starter set; v1.1 (below) is the plan model, and v1 stands for what v1.1 does not rewrite. |
 | `habit_tracker_official_ux_spec_v1_1.md` | **v1.1 — accepted by Taylor 2026-09-12.** The block model (§3), the twelve-screen first run (§4), the orient frame and quick-pick (§5), the editable Schedule and the Adjust sheet (§6), the evening (§7), Mason's data model (§11), the open-items table (§13). Every screen opens with a mobile walk-through. Rewrites the sections of v1 the plan model touches; v1 stands for the rest. Built by `docs/specs/epic-4-dynamic-schedule/`. |
 | `epic1_setup_ux_architecture.md` | Epic 1 — auth, first run, library, categories, templates, week build, settings. Inventory §12. |
 | `epic2_in_use_ux_architecture.md` | Epic 2 — shell, Plain List, day header, item sheet, Schedule, shift, trim, notification landings. Inventory §11. |

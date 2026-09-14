@@ -156,7 +156,6 @@ export function useLandscape(options: { withTemplate: boolean }) {
           quantityUnit: null,
           reflectionAxes: [],
           defaultNotesPreflight: null,
-          isWakeAnchor: false,
         });
         created.push({ id: habit.id, priority: row.priority, durationMin: row.durationMin });
       }

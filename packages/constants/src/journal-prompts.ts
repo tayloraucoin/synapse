@@ -2,7 +2,7 @@
  * The default journal prompts — UX v1.1 §7.2, the six in order, last is the
  * visualisation.
  *
- * WHY PROSE IS ALLOWED HERE. The same exception `STARTER_HABITS` and
+ * WHY PROSE IS ALLOWED HERE. The same exception `STARTER_LIBRARY` and
  * `DEFAULT_REASONS` document: these labels are data the person owns and edits
  * (Settings → Closing the day lets them rename, reorder, remove, and add), not
  * copy the app speaks. A new person's set starts from these rows; from then on

@@ -18,9 +18,9 @@
  * read model. See the Epic 1 TECHNICAL-DECISIONS entry.
  *
  * UNDER UX v1.1 (0005) A DAY IS AN ORDERED SET OF BLOCKS (`day_blocks`, TD-2).
- * `template_id` — the v1.0 whole-day template — is DEPRECATED since 0005: not
- * written after DYN-5, dropped in 0006. `anchor_time` stays as the wake
- * anchor, which is what it always was in practice. The v1.1 columns are the
+ * The v1.0 whole-day `template_id` is gone since `0006` (DYN-21) — a day's
+ * templates are its blocks'. `anchor_time` stays as the wake anchor, which
+ * is what it always was in practice. The v1.1 columns are the
  * day's shape, the moment it was set (`confirmed_at` — nothing derived from
  * the pick exists before it, R23), today's work anchor and its hardness, the
  * focus, and the two lines the orient frame captures.
@@ -52,7 +52,6 @@ import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { dayBlocks } from "./day-blocks";
 import { dayShapeEnum } from "./enums";
-import { templates } from "./templates";
 
 /** One table uses it, so it lives here (drizzle-orm-conventions §3). */
 export const dayCloseReasonEnum = pgEnum(
@@ -117,13 +116,6 @@ export const days = pgTable(
     /** Today's work anchor after any slide (UX v1.1 §6.6, 0005); null until set. */
     workStartTime: time("work_start_time"),
 
-    /**
-     * DEPRECATED since 0005 (TD-1): the v1.0 whole-day template. Not written
-     * after DYN-5; dropped in 0006. A day's templates are its `day_blocks`.
-     */
-    templateId: uuid("template_id").references(() => templates.id, {
-      onDelete: "set null",
-    }),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -132,7 +124,7 @@ export const days = pgTable(
      * because a hard-deleted habit must not take the day with it; an archived
      * one leaves the reference and the item's title snapshot says what it was.
      *
-     * `: AnyPgColumn` for the same reason as `users.wake_anchor_habit_id`: this
+     * `: AnyPgColumn` because this
      * edge closes a cycle (days → habits → categories → users → days) that
      * TypeScript cannot otherwise infer through.
      */
@@ -145,7 +137,6 @@ export const days = pgTable(
     uniqueIndex("days_user_id_date_idx").on(table.userId, table.date),
     index("days_user_id_closed_at_idx").on(table.userId, table.closedAt),
     index("days_user_id_confirmed_at_idx").on(table.userId, table.confirmedAt),
-    index("days_template_id_idx").on(table.templateId),
     index("days_user_id_idx").on(table.userId),
     index("days_work_focus_habit_id_idx").on(table.workFocusHabitId),
     check(
@@ -169,10 +160,6 @@ export const days = pgTable(
 
 export const daysRelations = relations(days, ({ many, one }) => ({
   blocks: many(dayBlocks),
-  template: one(templates, {
-    fields: [days.templateId],
-    references: [templates.id],
-  }),
   user: one(users, {
     fields: [days.userId],
     references: [users.id],

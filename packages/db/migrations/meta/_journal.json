@@ -43,6 +43,13 @@
       "when": 1789278111045,
       "tag": "0005_profile_fixtures_day_blocks_journal",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789357054755,
+      "tag": "0006_retire_v1_model",
+      "breakpoints": true
     }
   ]
 }

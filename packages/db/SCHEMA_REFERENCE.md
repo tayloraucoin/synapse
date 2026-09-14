@@ -13,11 +13,11 @@
 
 **19 tables** in `public`, plus a reference-only mirror of Supabase's `auth.users`. Grouped by domain.
 
-**Group 1 — Auth & Users.** `users` is the shadow of `auth.users` — its primary key **is** the foreign key, and the row is created by the `handle_new_user()` trigger, never by the app. It carries every account scalar: timezone, day-close and review-reminder times, theme, display name, the usual wake time, the week-build reminder's day and time, the first-run resume point, the deferred-settings pending pair, and — since UX v1.1 (0005) — the shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range, lights-out and devices-off, the overflow mode, the orient frame's settings, the journal's switch and prompts, and the block order. `wake_anchor_habit_id` is deprecated (v1.1 R11) and goes in 0006. `user_avatars` is the optional photo, keyed by `user_id` — one per person, no surrogate id. Deleting the auth user cascades through this row to everything.
+**Group 1 — Auth & Users.** `users` is the shadow of `auth.users` — its primary key **is** the foreign key, and the row is created by the `handle_new_user()` trigger, never by the app. It carries every account scalar: timezone, day-close and review-reminder times, theme, display name, the usual wake time, the week-build reminder's day and time, the first-run resume point, the deferred-settings pending pair, and — since UX v1.1 (0005) — the shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range, lights-out and devices-off, the overflow mode, the orient frame's settings, the journal's switch and prompts, and the block order. There is no wake anchor since `0006` (v1.1 R11, DYN-21): the orient frame is the wake moment. `user_avatars` is the optional photo, keyed by `user_id` — one per person, no surrogate id. Deleting the auth user cascades through this row to everything.
 
 **Group 2 — Library.** What a person keeps, independent of any day. `habits` is the reusable definition (type, title, icon, the duration range, the 1–7 life priority, the quantity unit, the reflection axes, and — since 0004 — a default `block_kind` and, for workouts and focuses, a rotation: `weekly_target` and `typical_days`); `categories` group them for reporting only, never for a mechanic; `reasons` is the per-person, editable set a miss is attributed from, seeded from `DEFAULT_REASONS`. Habits, templates and reasons archive; only a category is deleted, and it unassigns.
 
-**Group 3 — Plan.** `templates` is a saved BLOCK (UX v1.1, 0004): a `kind`, a `flow` and a `structure`, whose `template_slots` STACK — each a duration and a `gap_before_min`, offsets derived by `stackBlock` from an anchor the profile supplies; a slot may be pinned to a clock time, and two slots at one position share a `multitask_group` (both happen) or an `alternates_group` (one of). `offset_start_min` / `offset_end_min` are deprecated and go in 0006. `fixtures` are weekday things (a stand-up on Tuesdays) that materialise as pins whatever template the day gets. `days` is one calendar date in the person's stored zone; it snapshots `timezone` and `day_close_time` so a later settings change cannot re-key or re-window a past day, and since 0005 carries its `shape`, `confirmed_at` (*Set the day*), today's anchor and focus, and the morning's two lines. `day_blocks` is one block on one day — the Today tab's section, the Schedule's band — with its own immutable `original_scheduled_start`; `days.template_id` is deprecated and goes in 0006.
+**Group 3 — Plan.** `templates` is a saved BLOCK (UX v1.1, 0004): a `kind`, a `flow` and a `structure`, whose `template_slots` STACK — each a duration and a `gap_before_min`, offsets derived by `stackBlock` from an anchor the profile supplies; a slot may be pinned to a clock time, and two slots at one position share a `multitask_group` (both happen) or an `alternates_group` (one of). The v1.0 offsets went in `0006`. `fixtures` are weekday things (a stand-up on Tuesdays) that materialise as pins whatever template the day gets. `days` is one calendar date in the person's stored zone; it snapshots `timezone` and `day_close_time` so a later settings change cannot re-key or re-window a past day, and since 0005 carries its `shape`, `confirmed_at` (*Set the day*), today's anchor and focus, and the morning's two lines. `day_blocks` is one block on one day — the Today tab's section, the Schedule's band — with its own immutable `original_scheduled_start`.
 
 **Group 4 — Day.** The record, and the part of the schema that is deliberately append-and-annotate. `day_items` snapshots `title`, `icon`, `quantity_unit`, `reflection_axes` and `notes_preflight` at materialisation, belongs to a `day_block` (nullable until 0006), may be `pinned`, and carries its gap and its *one of* group; `original_scheduled_start` is immutable once set, enforced by a trigger, and is written at *Set the day* for items of a pooled or unconfirmed day. `timer_sessions` record time (a manual entry is marked as one), `misses` record how one undone item was attributed, `shifts` record a whole-day move or, since 0005, a `refit` that held the anchor and shortened or cut. `journal_entries` is one row per day, its answers keyed by the person's own prompt keys, merged one key at a time.
 
@@ -25,7 +25,7 @@
 
 **Group 6 — System.** `data_exports` tracks a request to export everything (preparing → ready → expired, with the object path and a 24-hour expiry). `feedback_messages` is the About message: insert-only for its author, no authenticated read, and it holds only the message plus the two optional context fields the switch controls.
 
-**Deliberately not here** (official spec §3.11): no streak, no score cache — the number is computed on read — no social graph, and no coach output table. There is also no `week_plans` table: a week's status is derived from its days. And no `habits.is_wake_anchor`: "at most one per user" is a fact about the person, so `users.wake_anchor_habit_id` is its one home.
+**Deliberately not here** (official spec §3.11): no streak, no score cache — the number is computed on read — no social graph, and no coach output table. There is also no `week_plans` table: a week's status is derived from its days. And no wake anchor at all since UX v1.1 R11 (`0006`).
 
 ---
 
@@ -37,7 +37,7 @@
 
 **The ownership chains** (each child also carries `user_id` directly): `categories` → `habits` → `template_slots` → `day_items`; `templates` → `template_slots` and `templates` → `day_blocks`; `days` → `day_blocks` → `day_items` → { `timer_sessions`, `misses` }; `days` → `shifts` → `misses`; `days` → `journal_entries` (one each).
 
-**References that are not ownership.** `users.wake_anchor_habit_id` → `habits` (deprecated, `set null`), `days.work_focus_habit_id` → `habits` and `fixtures.habit_id` → `habits` (both `set null`), and `day_items.carried_from_item_id` / `misses.traded_up_item_id` → `day_items` (both `set null` — a record points at another record without owning it).
+**References that are not ownership.** `days.work_focus_habit_id` → `habits` and `fixtures.habit_id` → `habits` (both `set null`), and `day_items.carried_from_item_id` / `misses.traded_up_item_id` → `day_items` (both `set null` — a record points at another record without owning it).
 
 **Identity.** `public.users.id` = `auth.users.id`. One identity, two schemas, no drift, no join key to get wrong.
 
@@ -424,11 +424,10 @@ export const scheduleShapeEnum = pgEnum(
  * `avatar`; both are satellite tables (`notification_prefs`, `user_avatars`),
  * because both are lists rather than scalars.
  *
- * THE WAKE ANCHOR HAS ONE HOME (SET-1). `wake_anchor_habit_id` gained its
- * foreign key here, as INF-5 promised. Official §3.3 also lists
- * `habits.is_wake_anchor` "at most one per user"; that column does not exist,
- * because "at most one" is a fact about the person and this column enforces it
- * structurally. `HabitSummaryView.isWakeAnchor` is derived in the view mapper.
+ * THERE IS NO WAKE ANCHOR (UX v1.1 R11). v1.0 kept `wake_anchor_habit_id`
+ * here (SET-1); the orient frame is the wake moment since DYN-13 and the
+ * column is gone since `0006` (DYN-21). `days.woke_at_source = anchor` stays
+ * on rows written under v1.0.
  *
  * THE PENDING PAIR (SET-1). A time-zone switch and a day-close change take
  * effect FROM TOMORROW (cross-cutting §7.3, §7.5), so writing them straight to
@@ -445,9 +444,7 @@ export const scheduleShapeEnum = pgEnum(
  * (`lights_out_time`, `devices_off_time`), the overflow mode, the orient
  * frame's three settings, the journal's switch and prompts, and the block
  * order. These are the anchors the materialiser lays every block out from;
- * a template no longer carries its own (TD-1). `wake_anchor_habit_id` is
- * DEPRECATED since 0005 (v1.1 R11): the orient frame is the wake moment; the
- * column is not written after DYN-13 and is dropped in 0006.
+ * a template no longer carries its own (TD-1).
  *
  * POLICIES. Select and update are the owner's alone. Insert and delete are
  * denied to the authenticated role outright: the trigger inserts, and deletion
@@ -455,7 +452,6 @@ export const scheduleShapeEnum = pgEnum(
  */
 import { relations, sql } from "drizzle-orm";
 import {
-  type AnyPgColumn,
   boolean,
   check,
   date,
@@ -624,27 +620,9 @@ export const users = pgTable(
     workEndTime: time("work_end_time"),
     // UX v1.1 §4.3 — the anchor prep flows backward to (0005).
     workStartTime: time("work_start_time"),
-
-    // DEPRECATED since 0005 (UX v1.1 R11): the orient frame is the wake
-    // moment. Not written after DYN-13; dropped in 0006. Until then:
-    //
-    // At most one per person, enforced by there being one column (SET-1).
-    // `set null` because archiving or deleting the habit must not orphan the
-    // reference — the person simply has no anchor until they pick another.
-    //
-    // The `: AnyPgColumn` annotation is required, not decorative: this column
-    // closes a foreign-key cycle (users → habits → categories → users), and
-    // without an explicit return type TypeScript cannot infer any of the three
-    // table types and reports all of them as `any` (TS7022). Annotating this
-    // one back-edge breaks the cycle for all three.
-    wakeAnchorHabitId: uuid("wake_anchor_habit_id").references(
-      (): AnyPgColumn => habits.id,
-      { onDelete: "set null" },
-    ),
   },
   (table) => [
     index("users_email_idx").on(table.email),
-    index("users_wake_anchor_habit_id_idx").on(table.wakeAnchorHabitId),
     check(
       "users_week_build_reminder_weekday_check",
       sql`${table.weekBuildReminderWeekday} BETWEEN 0 AND 6`,
@@ -761,11 +739,10 @@ export const userAvatarsRelations = relations(userAvatars, ({ one }) => ({
 
 #### `users`
 
-**PURPOSE.** users.ts — the shadow of `auth.users`. Supabase owns `auth.users`. This row is created by the `handle_new_user()` trigger, never by the app, and its primary key IS the foreign key to the auth row: one identity, two schemas, no drift. Deleting the auth user cascades this row away, which is how account deletion (Epic 1 ST-10a) removes everything a person has. WHAT IS NOT HERE. Official spec §3.1 also lists `notification_prefs` and `avatar`; both are satellite tables (`notification_prefs`, `user_avatars`), because both are lists rather than scalars. THE WAKE ANCHOR HAS ONE HOME (SET-1). `wake_anchor_habit_id` gained its foreign key here, as INF-5 promised. Official §3.3 also lists `habits.is_wake_anchor` "at most one per user"; that column does not exist, because "at most one" is a fact about the person and this column enforces it structurally. `HabitSummaryView.isWakeAnchor` is derived in the view mapper. THE PENDING PAIR (SET-1). A time-zone switch and a day-close change take effect FROM TOMORROW (cross-cutting §7.3, §7.5), so writing them straight to `timezone` / `day_close_time` would reclassify "now" the moment they were saved — change the close from 03:00 to 05:00 at 04:00 and today's date flips backwards. The four `pending_*` columns hold the new value and the date it starts; `services/user/preferences.ts` applies and clears the pair on read, and the scheduler's per-user pass does the same so the switch happens even if the app is never opened. THE v1.1 PROFILE (UX v1.1 §11.2, migration 0005). The shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range (`earliest_wake_time`), the evening (`lights_out_time`, `devices_off_time`), the overflow mode, the orient frame's three settings, the journal's switch and prompts, and the block order. These are the anchors the materialiser lays every block out from; a template no longer carries its own (TD-1). `wake_anchor_habit_id` is DEPRECATED since 0005 (v1.1 R11): the orient frame is the wake moment; the column is not written after DYN-13 and is dropped in 0006. POLICIES. Select and update are the owner's alone. Insert and delete are denied to the authenticated role outright: the trigger inserts, and deletion goes through `auth.admin.deleteUser` and cascades. There is no admin read.
+**PURPOSE.** users.ts — the shadow of `auth.users`. Supabase owns `auth.users`. This row is created by the `handle_new_user()` trigger, never by the app, and its primary key IS the foreign key to the auth row: one identity, two schemas, no drift. Deleting the auth user cascades this row away, which is how account deletion (Epic 1 ST-10a) removes everything a person has. WHAT IS NOT HERE. Official spec §3.1 also lists `notification_prefs` and `avatar`; both are satellite tables (`notification_prefs`, `user_avatars`), because both are lists rather than scalars. THERE IS NO WAKE ANCHOR (UX v1.1 R11). v1.0 kept `wake_anchor_habit_id` here (SET-1); the orient frame is the wake moment since DYN-13 and the column is gone since `0006` (DYN-21). `days.woke_at_source = anchor` stays on rows written under v1.0. THE PENDING PAIR (SET-1). A time-zone switch and a day-close change take effect FROM TOMORROW (cross-cutting §7.3, §7.5), so writing them straight to `timezone` / `day_close_time` would reclassify "now" the moment they were saved — change the close from 03:00 to 05:00 at 04:00 and today's date flips backwards. The four `pending_*` columns hold the new value and the date it starts; `services/user/preferences.ts` applies and clears the pair on read, and the scheduler's per-user pass does the same so the switch happens even if the app is never opened. THE v1.1 PROFILE (UX v1.1 §11.2, migration 0005). The shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range (`earliest_wake_time`), the evening (`lights_out_time`, `devices_off_time`), the overflow mode, the orient frame's three settings, the journal's switch and prompts, and the block order. These are the anchors the materialiser lays every block out from; a template no longer carries its own (TD-1). POLICIES. Select and update are the owner's alone. Insert and delete are denied to the authenticated role outright: the trigger inserts, and deletion goes through `auth.admin.deleteUser` and cascades. There is no admin read.
 
 **INDEXES.**
 - `users_email_idx`
-- `users_wake_anchor_habit_id_idx`
 
 **RLS.** Owner read and update. Insert and delete are denied to the authenticated role outright: `handle_new_user()` inserts, and deletion cascades from `auth.admin.deleteUser`.
 
@@ -868,11 +845,10 @@ export const categoriesRelations = relations(categories, ({ many, one }) => ({
  * from here only because a hard delete cannot happen through the app, and
  * archiving removes slots through LB-01's service instead.
  *
- * NO `is_wake_anchor` COLUMN. Official §3.3 lists one, but "at most one per
- * user" is a fact about the person: `users.wake_anchor_habit_id` is the single
- * home and `HabitSummaryView.isWakeAnchor` is derived in the view mapper. See
- * the Epic 1 TECHNICAL-DECISIONS entry. (UX v1.1 R11 retires the anchor
- * habit altogether; the column goes in `0006`.)
+ * NO WAKE ANCHOR. Official §3.3 lists `is_wake_anchor`; v1.0 kept the fact
+ * on `users.wake_anchor_habit_id` instead (Epic 1 TECHNICAL-DECISIONS), and
+ * UX v1.1 R11 retired the anchor habit altogether — the orient frame is the
+ * wake moment, and the column went in `0006` (DYN-21).
  *
  * WORKOUTS AND FOCUSES ARE HABITS (UX v1.1 §11.3, TD-3). A workout is
  * `type = workout`; a focus is `type = deep_work`; both carry a rotation —
@@ -1116,7 +1092,7 @@ export const reasonsRelations = relations(reasons, ({ one }) => ({
 
 #### `habits`
 
-**PURPOSE.** habits — the library entry (official spec §3.3). The reusable definition. It never appears on a day directly; it is slotted into a template (`template_slots`) or placed as a one-off, and what lands on the day is a `day_items` row that SNAPSHOTS this row's title, icon, quantity unit, reflection axes and preflight note. Editing a habit therefore never rewrites the past (cross-cutting §8.1) — and SET-4's re-snapshot rule rewrites only untouched future items, never a started, done, reviewed, or past one. NEVER HARD-DELETED. `archived_at` is the only exit; `template_slots` cascade from here only because a hard delete cannot happen through the app, and archiving removes slots through LB-01's service instead. NO `is_wake_anchor` COLUMN. Official §3.3 lists one, but "at most one per user" is a fact about the person: `users.wake_anchor_habit_id` is the single home and `HabitSummaryView.isWakeAnchor` is derived in the view mapper. See the Epic 1 TECHNICAL-DECISIONS entry. (UX v1.1 R11 retires the anchor habit altogether; the column goes in `0006`.) WORKOUTS AND FOCUSES ARE HABITS (UX v1.1 §11.3, TD-3). A workout is `type = workout`; a focus is `type = deep_work`; both carry a rotation — `weekly_target` and `typical_days` — that no other type uses. `block_kind` is the block a habit lives in by default (null = anywhere) and drives the library's grouping and the block editor's *Add* filter. Since 0004. POLICIES: owner-private CRUD.
+**PURPOSE.** habits — the library entry (official spec §3.3). The reusable definition. It never appears on a day directly; it is slotted into a template (`template_slots`) or placed as a one-off, and what lands on the day is a `day_items` row that SNAPSHOTS this row's title, icon, quantity unit, reflection axes and preflight note. Editing a habit therefore never rewrites the past (cross-cutting §8.1) — and SET-4's re-snapshot rule rewrites only untouched future items, never a started, done, reviewed, or past one. NEVER HARD-DELETED. `archived_at` is the only exit; `template_slots` cascade from here only because a hard delete cannot happen through the app, and archiving removes slots through LB-01's service instead. NO WAKE ANCHOR. Official §3.3 lists `is_wake_anchor`; v1.0 kept the fact on `users.wake_anchor_habit_id` instead (Epic 1 TECHNICAL-DECISIONS), and UX v1.1 R11 retired the anchor habit altogether — the orient frame is the wake moment, and the column went in `0006` (DYN-21). WORKOUTS AND FOCUSES ARE HABITS (UX v1.1 §11.3, TD-3). A workout is `type = workout`; a focus is `type = deep_work`; both carry a rotation — `weekly_target` and `typical_days` — that no other type uses. `block_kind` is the block a habit lives in by default (null = anywhere) and drives the library's grouping and the block editor's *Add* filter. Since 0004. POLICIES: owner-private CRUD.
 
 **INDEXES.**
 - `habits_user_id_archived_at_idx`
@@ -1350,12 +1326,9 @@ export const templatesRelations = relations(templates, ({ many, one }) => ({
  * has an absolute time unless it is PINNED (`pinned_at`), and the stack flows
  * around a pin — the pin never moves (v1.1 R3).
  *
- * `offset_start_min` / `offset_end_min` ARE DEPRECATED since 0004 (TD-4).
- * The backfill in 0004 turned every offset into a gap; the columns are kept,
- * populated, and read by nothing after DYN-4, and dropped in `0006`. Their
- * two-hour-before-anchor allowance (TP-02) has no v1.1 equivalent: orient is
- * the first block, and a before-wake slot's position survives only in the
- * deprecated column (logged in Epic 4's DEVIATIONS).
+ * The v1.0 offsets (`offset_start_min` / `offset_end_min`) are gone since
+ * `0006` (DYN-21): `0004` turned every offset into a gap, nothing read them
+ * after DYN-4, and a stack has no absolute offsets to keep.
  *
  * TWO GROUPS, TWO MEANINGS. `multitask_group` means BOTH happen — members
  * share a position and a start (v1 §5.5). `alternates_group` means EXACTLY
@@ -1382,7 +1355,6 @@ import {
   boolean,
   check,
   index,
-  integer,
   pgTable,
   smallint,
   text,
@@ -1420,10 +1392,6 @@ export const templateSlots = pgTable(
     gapBeforeMin: smallint("gap_before_min").notNull().default(0),
     /** A local id within the template (§3.5) — multitask; both happen. */
     multitaskGroup: text("multitask_group"),
-    /** DEPRECATED since 0004 — see the header. Windows only. Dropped in 0006. */
-    offsetEndMin: integer("offset_end_min"),
-    /** DEPRECATED since 0004 — see the header. Dropped in 0006. */
-    offsetStartMin: integer("offset_start_min"),
     /** A clock time when the slot is a pin; the stack flows around it (R3). */
     pinnedAt: time("pinned_at"),
     /** 1–7. Per-template override of the habit's `life_priority` (§3.5). */
@@ -1469,10 +1437,6 @@ export const templateSlots = pgTable(
     check(
       "template_slots_gap_before_min_check",
       sql`${table.gapBeforeMin} BETWEEN 0 AND 240`,
-    ),
-    check(
-      "template_slots_offset_start_min_check",
-      sql`${table.offsetStartMin} IS NULL OR ${table.offsetStartMin} >= -120`,
     ),
     // A pin has no gap: it starts where it is pinned, not after what precedes it.
     check(
@@ -1637,9 +1601,9 @@ export const fixturesRelations = relations(fixtures, ({ one }) => ({
  * read model. See the Epic 1 TECHNICAL-DECISIONS entry.
  *
  * UNDER UX v1.1 (0005) A DAY IS AN ORDERED SET OF BLOCKS (`day_blocks`, TD-2).
- * `template_id` — the v1.0 whole-day template — is DEPRECATED since 0005: not
- * written after DYN-5, dropped in 0006. `anchor_time` stays as the wake
- * anchor, which is what it always was in practice. The v1.1 columns are the
+ * The v1.0 whole-day `template_id` is gone since `0006` (DYN-21) — a day's
+ * templates are its blocks'. `anchor_time` stays as the wake anchor, which
+ * is what it always was in practice. The v1.1 columns are the
  * day's shape, the moment it was set (`confirmed_at` — nothing derived from
  * the pick exists before it, R23), today's work anchor and its hardness, the
  * focus, and the two lines the orient frame captures.
@@ -1671,7 +1635,6 @@ import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { dayBlocks } from "./day-blocks";
 import { dayShapeEnum } from "./enums";
-import { templates } from "./templates";
 
 /** One table uses it, so it lives here (drizzle-orm-conventions §3). */
 export const dayCloseReasonEnum = pgEnum(
@@ -1736,13 +1699,6 @@ export const days = pgTable(
     /** Today's work anchor after any slide (UX v1.1 §6.6, 0005); null until set. */
     workStartTime: time("work_start_time"),
 
-    /**
-     * DEPRECATED since 0005 (TD-1): the v1.0 whole-day template. Not written
-     * after DYN-5; dropped in 0006. A day's templates are its `day_blocks`.
-     */
-    templateId: uuid("template_id").references(() => templates.id, {
-      onDelete: "set null",
-    }),
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
@@ -1751,7 +1707,7 @@ export const days = pgTable(
      * because a hard-deleted habit must not take the day with it; an archived
      * one leaves the reference and the item's title snapshot says what it was.
      *
-     * `: AnyPgColumn` for the same reason as `users.wake_anchor_habit_id`: this
+     * `: AnyPgColumn` because this
      * edge closes a cycle (days → habits → categories → users → days) that
      * TypeScript cannot otherwise infer through.
      */
@@ -1764,7 +1720,6 @@ export const days = pgTable(
     uniqueIndex("days_user_id_date_idx").on(table.userId, table.date),
     index("days_user_id_closed_at_idx").on(table.userId, table.closedAt),
     index("days_user_id_confirmed_at_idx").on(table.userId, table.confirmedAt),
-    index("days_template_id_idx").on(table.templateId),
     index("days_user_id_idx").on(table.userId),
     index("days_work_focus_habit_id_idx").on(table.workFocusHabitId),
     check(
@@ -1788,10 +1743,6 @@ export const days = pgTable(
 
 export const daysRelations = relations(days, ({ many, one }) => ({
   blocks: many(dayBlocks),
-  template: one(templates, {
-    fields: [days.templateId],
-    references: [templates.id],
-  }),
   user: one(users, {
     fields: [days.userId],
     references: [users.id],
@@ -1939,7 +1890,7 @@ export const dayBlocksRelations = relations(dayBlocks, ({ many, one }) => ({
 
 #### `template_slots`
 
-**PURPOSE.** template_slots — one habit's place in a block template (UX v1.1 §3.2, §3.4, §3.5, §11.5, TD-4; formerly official spec §3.5). SLOTS STACK. Since 0004 a slot stores what it IS — a duration and the gap before it — and its position in the stack (`sort_order`). Where it starts is DERIVED, by `stackBlock` in `@syn/utils`, walking the template in its flow direction from an anchor the profile supplies. Nothing inside a block has an absolute time unless it is PINNED (`pinned_at`), and the stack flows around a pin — the pin never moves (v1.1 R3). `offset_start_min` / `offset_end_min` ARE DEPRECATED since 0004 (TD-4). The backfill in 0004 turned every offset into a gap; the columns are kept, populated, and read by nothing after DYN-4, and dropped in `0006`. Their two-hour-before-anchor allowance (TP-02) has no v1.1 equivalent: orient is the first block, and a before-wake slot's position survives only in the deprecated column (logged in Epic 4's DEVIATIONS). TWO GROUPS, TWO MEANINGS. `multitask_group` means BOTH happen — members share a position and a start (v1 §5.5). `alternates_group` means EXACTLY ONE happens, chosen at the pick (v1.1 §3.5, *one of*): members share a position and differ in duration, and `alternates_default` marks the one the fit arithmetic uses. A slot is never in both. Two slots at one position must share one of the two groups or the save is refused — enforced in `saveSlot` (DYN-4), the one place the position rule is stated. A partial unique index holds "at most one default per group"; the service holds "at least one". `role` is meaningful only under an `opener_pool_closer` template (v1.1 §3.4); the service normalises it to `stack` otherwise. `habit_id` CASCADES because a habit is never hard-deleted through the app; archiving a habit removes its slots through LB-01's service instead, which is a decision the person is shown before it happens. POLICIES: owner-private CRUD, on this table's own `user_id` — the service writes the template's owner, never the caller's claim.
+**PURPOSE.** template_slots — one habit's place in a block template (UX v1.1 §3.2, §3.4, §3.5, §11.5, TD-4; formerly official spec §3.5). SLOTS STACK. Since 0004 a slot stores what it IS — a duration and the gap before it — and its position in the stack (`sort_order`). Where it starts is DERIVED, by `stackBlock` in `@syn/utils`, walking the template in its flow direction from an anchor the profile supplies. Nothing inside a block has an absolute time unless it is PINNED (`pinned_at`), and the stack flows around a pin — the pin never moves (v1.1 R3). The v1.0 offsets (`offset_start_min` / `offset_end_min`) are gone since `0006` (DYN-21): `0004` turned every offset into a gap, nothing read them after DYN-4, and a stack has no absolute offsets to keep. TWO GROUPS, TWO MEANINGS. `multitask_group` means BOTH happen — members share a position and a start (v1 §5.5). `alternates_group` means EXACTLY ONE happens, chosen at the pick (v1.1 §3.5, *one of*): members share a position and differ in duration, and `alternates_default` marks the one the fit arithmetic uses. A slot is never in both. Two slots at one position must share one of the two groups or the save is refused — enforced in `saveSlot` (DYN-4), the one place the position rule is stated. A partial unique index holds "at most one default per group"; the service holds "at least one". `role` is meaningful only under an `opener_pool_closer` template (v1.1 §3.4); the service normalises it to `stack` otherwise. `habit_id` CASCADES because a habit is never hard-deleted through the app; archiving a habit removes its slots through LB-01's service instead, which is a decision the person is shown before it happens. POLICIES: owner-private CRUD, on this table's own `user_id` — the service writes the template's owner, never the caller's claim.
 
 **INDEXES.**
 - `template_slots_alternates_default_idx`
@@ -1962,13 +1913,12 @@ export const dayBlocksRelations = relations(dayBlocks, ({ many, one }) => ({
 
 #### `days`
 
-**PURPOSE.** days — one calendar date in the person's stored zone (official spec §3.6). A Day is keyed by `date` in the person's STORED zone and runs from `day_close_time` to the next `day_close_time` (cross-cutting §7.1). A day with no template is an empty day, which is how a vacation works — nothing is missed on an unplanned day. IT SNAPSHOTS ITS OWN TIME RULES. `timezone` and `day_close_time` are copied from `users` when the day is created and never follow a later settings change. Without them, moving zones or shifting the close time would silently re-key and re-window every past day, and "moved" would stop meaning anything (cross-cutting §7.3, §7.5, §8). The pending-pair on `users` is what defers a change to tomorrow; these two columns are what keep yesterday honest. NO `week_plans` TABLE. Official §3.6 lists one; its only content is a status derivable from the week's days, so `WeekPlanStatus` is computed by the week read model. See the Epic 1 TECHNICAL-DECISIONS entry. UNDER UX v1.1 (0005) A DAY IS AN ORDERED SET OF BLOCKS (`day_blocks`, TD-2). `template_id` — the v1.0 whole-day template — is DEPRECATED since 0005: not written after DYN-5, dropped in 0006. `anchor_time` stays as the wake anchor, which is what it always was in practice. The v1.1 columns are the day's shape, the moment it was set (`confirmed_at` — nothing derived from the pick exists before it, R23), today's work anchor and its hardness, the focus, and the two lines the orient frame captures. POLICIES: owner-private CRUD.
+**PURPOSE.** days — one calendar date in the person's stored zone (official spec §3.6). A Day is keyed by `date` in the person's STORED zone and runs from `day_close_time` to the next `day_close_time` (cross-cutting §7.1). A day with no template is an empty day, which is how a vacation works — nothing is missed on an unplanned day. IT SNAPSHOTS ITS OWN TIME RULES. `timezone` and `day_close_time` are copied from `users` when the day is created and never follow a later settings change. Without them, moving zones or shifting the close time would silently re-key and re-window every past day, and "moved" would stop meaning anything (cross-cutting §7.3, §7.5, §8). The pending-pair on `users` is what defers a change to tomorrow; these two columns are what keep yesterday honest. NO `week_plans` TABLE. Official §3.6 lists one; its only content is a status derivable from the week's days, so `WeekPlanStatus` is computed by the week read model. See the Epic 1 TECHNICAL-DECISIONS entry. UNDER UX v1.1 (0005) A DAY IS AN ORDERED SET OF BLOCKS (`day_blocks`, TD-2). The v1.0 whole-day `template_id` is gone since `0006` (DYN-21) — a day's templates are its blocks'. `anchor_time` stays as the wake anchor, which is what it always was in practice. The v1.1 columns are the day's shape, the moment it was set (`confirmed_at` — nothing derived from the pick exists before it, R23), today's work anchor and its hardness, the focus, and the two lines the orient frame captures. POLICIES: owner-private CRUD.
 
 **INDEXES.**
 - `days_user_id_date_idx`
 - `days_user_id_closed_at_idx`
 - `days_user_id_confirmed_at_idx`
-- `days_template_id_idx`
 - `days_user_id_idx`
 - `days_work_focus_habit_id_idx`
 
@@ -2020,10 +1970,10 @@ The record. `day_items` is the row the execution tabs render, snapshotting its h
  * carries the gap before it (snapshotted from the slot; edited by a seam drag
  * on the day), and may be one member of a *one of* group (`alternates_id`
  * per day like `multitask_id`; `alternates_chosen` marks the live member —
- * the other is `not_assigned`). `day_block_id` is NULLABLE in 0005 and made
- * NOT NULL in 0006, after DYN-5's `backfillBlocks` has put every v1.0 item
- * under a `morning` block; SQL cannot decide which block an item belongs to,
- * the materialiser's rules can.
+ * the other is `not_assigned`). `day_block_id` is NULLABLE and stays so
+ * (DYN-21): a one-off and an unstructured day's add have no block
+ * (`DayView.unblocked`); `0006`'s backfill put every v1.0 item under a
+ * `morning` block before the v1.0 columns went.
  *
  * WHEN `original_scheduled_start` IS WRITTEN changes under v1.1 (R23, TD-5):
  * at week build for fixtures and pins on a structured day, and at *Set the
@@ -2693,7 +2643,7 @@ export const journalEntriesRelations = relations(journalEntries, ({ one }) => ({
 
 #### `day_items`
 
-**PURPOSE.** day_items — the instance (official spec §3.7). The row the two execution tabs render. Materialised from a template slot when the week is built, or created as a one-off. THIS ROW IS THE RECORD. `title`, `icon`, `quantity_unit`, `reflection_axes` and `notes_preflight` are snapshots taken at materialisation, so a past day renders as it was lived even after the habit is renamed, re-iconed or archived (cross-cutting §8.1, §8.3). `original_scheduled_start` NEVER CHANGES after materialisation — the ghost renders here (§3.7). That promise is enforced by a database trigger (`day_items_original_start_immutable`, in `supabase/setup/`), not by the service, for the same reason `handle_new_user` is a trigger: the database guarantees what the app must never do. `scheduled_start` is the one that moves, on a shift or a late start. OFF-SCHEDULE IS DERIVED, NEVER STORED (§3.7, §6.3): it is `done_at` outside `original_scheduled_start .. scheduled_end`, computed on read. A ONE-OFF IS THE ONLY DELETABLE ITEM (cross-cutting §8.4). Everything else on a day is annotated. UNDER UX v1.1 (0005) AN ITEM BELONGS TO A BLOCK (`day_block_id`, TD-2), may be a PIN (`pinned` — the anchor glyph; the stack flows around it, R3), carries the gap before it (snapshotted from the slot; edited by a seam drag on the day), and may be one member of a *one of* group (`alternates_id` per day like `multitask_id`; `alternates_chosen` marks the live member — the other is `not_assigned`). `day_block_id` is NULLABLE in 0005 and made NOT NULL in 0006, after DYN-5's `backfillBlocks` has put every v1.0 item under a `morning` block; SQL cannot decide which block an item belongs to, the materialiser's rules can. WHEN `original_scheduled_start` IS WRITTEN changes under v1.1 (R23, TD-5): at week build for fixtures and pins on a structured day, and at *Set the day* for everything else — null until then. The trigger permits exactly that one `NULL → value` transition and refuses every other write; its body already did, and 0005 arms the same function on `day_blocks`. POLICIES: owner-private CRUD, on this table's own `user_id` — the service writes the day's owner, never the caller's claim.
+**PURPOSE.** day_items — the instance (official spec §3.7). The row the two execution tabs render. Materialised from a template slot when the week is built, or created as a one-off. THIS ROW IS THE RECORD. `title`, `icon`, `quantity_unit`, `reflection_axes` and `notes_preflight` are snapshots taken at materialisation, so a past day renders as it was lived even after the habit is renamed, re-iconed or archived (cross-cutting §8.1, §8.3). `original_scheduled_start` NEVER CHANGES after materialisation — the ghost renders here (§3.7). That promise is enforced by a database trigger (`day_items_original_start_immutable`, in `supabase/setup/`), not by the service, for the same reason `handle_new_user` is a trigger: the database guarantees what the app must never do. `scheduled_start` is the one that moves, on a shift or a late start. OFF-SCHEDULE IS DERIVED, NEVER STORED (§3.7, §6.3): it is `done_at` outside `original_scheduled_start .. scheduled_end`, computed on read. A ONE-OFF IS THE ONLY DELETABLE ITEM (cross-cutting §8.4). Everything else on a day is annotated. UNDER UX v1.1 (0005) AN ITEM BELONGS TO A BLOCK (`day_block_id`, TD-2), may be a PIN (`pinned` — the anchor glyph; the stack flows around it, R3), carries the gap before it (snapshotted from the slot; edited by a seam drag on the day), and may be one member of a *one of* group (`alternates_id` per day like `multitask_id`; `alternates_chosen` marks the live member — the other is `not_assigned`). `day_block_id` is NULLABLE and stays so (DYN-21): a one-off and an unstructured day's add have no block (`DayView.unblocked`); `0006`'s backfill put every v1.0 item under a `morning` block before the v1.0 columns went. WHEN `original_scheduled_start` IS WRITTEN changes under v1.1 (R23, TD-5): at week build for fixtures and pins on a structured day, and at *Set the day* for everything else — null until then. The trigger permits exactly that one `NULL → value` transition and refuses every other write; its body already did, and 0005 arms the same function on `day_blocks`. POLICIES: owner-private CRUD, on this table's own `user_id` — the service writes the day's owner, never the caller's claim.
 
 **INDEXES.**
 - `day_items_day_id_scheduled_start_idx`
@@ -3254,7 +3204,7 @@ Re-running the seed prints zeros across the board, which means idempotent rather
 - **`public.users` is a shadow, not a copy.** Its PK *is* the FK to `auth.users(id)`. One identity, two schemas, no join key to get wrong, and cascade deletion that actually removes everything.
 - **The shadow row is written by a trigger, not by the app.** Signups go through Supabase Auth, often client-side, so there is no reliable server hook. The database guarantees the row exists before any FK needs it.
 - **The whole of official spec §3 landed in one migration** (`0001`, SET-1), because §0.3 R4 says the schema is shaped for every phase from day one. Columns that Epic 2 and Epic 3 fill sit empty until then; that is cheaper than three one-way doors.
-- **`wake_anchor_habit_id` is the wake anchor's one home,** with `REFERENCES habits(id) ON DELETE SET NULL`. Official §3.3's `habits.is_wake_anchor` is not a column: "at most one per user" is a fact about the person, and one column enforces it structurally where two would need syncing.
+- **There is no wake anchor.** v1.0 kept `users.wake_anchor_habit_id` as the one home for "at most one per user"; UX v1.1 R11 retired the anchor habit (the orient frame is the wake moment) and `0006` dropped the column.
 - **No `week_plans` table.** Official §3.6 lists one whose only content is a status derivable from the week's days. `WeekPlanStatus` is computed by the week read model.
 - **No `shifts.cut_item_ids[]`.** A cut item is a `day_items` row with `assignment_state = cut_by_shift` plus a `misses` row pointing at the shift, so changing one attribution in the Day Review edits one row and the shift's own record stays untouched.
 - **`days` snapshots `timezone` and `day_close_time`; `day_items` snapshots `title`, `icon`, `quantity_unit`, `reflection_axes` and `notes_preflight`.** A past day renders as it was lived even after the habit or the settings change.

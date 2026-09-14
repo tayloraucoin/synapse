@@ -1,8 +1,6 @@
 /**
  * BlockHeader — a block's section heading on the Today tab (UX v1.1 §6.1,
- * §10.2). Replaces `DayPartHeader` for v1.1's screens; the two coexist until
- * DYN-21 removes day parts.
- *
+ * §10.2). The day part header it replaced left with v1.0's day parts (DYN-21). *
  * "The block's name and its computed span in muted tabular text — *Morning ·
  * 7:03–8:11*." A quiet divider, not a control: the blocks are how a day
  * reads, not how it is organised.

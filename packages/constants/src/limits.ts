@@ -51,12 +51,6 @@ export const PRIORITY_MAX = 7;
 export const WEEKLY_TARGET_MIN = 1;
 export const WEEKLY_TARGET_MAX = 7;
 
-/**
- * The earliest a template slot may start, in minutes before the anchor —
- * Epic 1 TP-02 ("up to two hours before"). Stored as `offset_start_min >= -120`.
- */
-export const TEMPLATE_OFFSET_MIN = -120;
-
 /** Shift amount, in minutes — official spec §5.6. */
 export const SHIFT_MIN = 5;
 export const SHIFT_MAX = 600;

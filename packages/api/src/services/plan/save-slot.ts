@@ -344,8 +344,6 @@ export async function saveSlot(
       alternatesDefault: alternatesGroup === null ? false : alternatesDefault,
       sortOrder,
       // DEPRECATED columns are never written again (v1.1 §11.5).
-      offsetStartMin: null,
-      offsetEndMin: null,
     };
 
     let savedId: string;

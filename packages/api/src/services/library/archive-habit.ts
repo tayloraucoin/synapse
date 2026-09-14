@@ -1,6 +1,6 @@
 import { and, eq, isNotNull } from "drizzle-orm";
 
-import { habits, templateSlots, users, type RlsClient } from "@syn/db";
+import { habits, templateSlots, type RlsClient } from "@syn/db";
 
 /**
  * Archive, restore, and duplicate.
@@ -39,11 +39,6 @@ export async function archiveHabit(
         and(eq(templateSlots.habitId, id), eq(templateSlots.userId, userId)),
       );
 
-    await tx
-      .update(users)
-      .set({ wakeAnchorHabitId: null, updatedAt: new Date() })
-      .where(and(eq(users.id, userId), eq(users.wakeAnchorHabitId, id)));
-
     return true;
   });
 }
@@ -72,10 +67,6 @@ export async function restoreHabit(
 
 /**
  * "{title} copy", opened in edit (Epic 1 LB-01).
- *
- * The copy is never the wake anchor: the flag is "at most one per user", and
- * silently moving it because someone duplicated a row would be the app making
- * a decision about their morning.
  */
 export async function duplicateHabit(
   rls: RlsClient,

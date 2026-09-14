@@ -119,8 +119,6 @@ export const habitFormSchema = z
       .max(PREFLIGHT_NOTE_MAX)
       .nullable()
       .transform((value) => (value === "" ? null : value)),
-    /** The wake anchor lives on `users`; the form carries the person's intent. */
-    isWakeAnchor: z.boolean(),
   })
   .superRefine((value, ctx) => {
     const missing =
@@ -233,11 +231,3 @@ export const slotsOutsideRangeInput = z.object({
   max: z.number().int().min(DURATION_MIN).max(DURATION_MAX),
 });
 
-/** The starter chooser sends the titles it offered, not rows it invented. */
-export const createFromStarterSetInput = z.object({
-  titles: z.array(z.string().min(1)).min(1),
-});
-
-export type CreateFromStarterSetInput = z.infer<
-  typeof createFromStarterSetInput
->;

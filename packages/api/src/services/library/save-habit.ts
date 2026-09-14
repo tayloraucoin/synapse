@@ -5,7 +5,6 @@ import {
   days,
   habits,
   timerSessions,
-  users,
   type RlsClient,
 } from "@syn/db";
 import { toDateKey } from "@syn/utils";
@@ -49,10 +48,6 @@ export async function createHabit(
       .returning({ id: habits.id });
 
     if (!row) throw new Error("habit insert returned no row");
-
-    if (input.isWakeAnchor) {
-      await setWakeAnchorIn(tx, userId, row.id);
-    }
 
     return { id: row.id };
   });
@@ -100,19 +95,6 @@ export async function updateHabit(
 
     if (identityChanged) {
       await resnapshotUntouchedFutureItems(tx, userId, id, input, timeZone);
-    }
-
-    const [account] = await tx
-      .select({ wakeAnchorHabitId: users.wakeAnchorHabitId })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
-
-    const isCurrentAnchor = account?.wakeAnchorHabitId === id;
-    if (input.isWakeAnchor && !isCurrentAnchor) {
-      await setWakeAnchorIn(tx, userId, id);
-    } else if (!input.isWakeAnchor && isCurrentAnchor) {
-      await setWakeAnchorIn(tx, userId, null);
     }
 
     return { id: row.id };
@@ -275,20 +257,3 @@ async function resnapshotUntouchedFutureItems(
     );
 }
 
-/**
- * The anchor has one home, so moving it is one write and the old holder loses
- * it by definition rather than by a second update that could fail on its own.
- */
-async function setWakeAnchorIn(
-  tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
-  userId: string,
-  habitId: string | null,
-): Promise<void> {
-  await tx
-    .update(users)
-    .set({ wakeAnchorHabitId: habitId, updatedAt: new Date() })
-    .where(eq(users.id, userId));
-}
-
-/** Exported for the archive path, which clears the anchor in its own txn. */
-export { setWakeAnchorIn };

@@ -1,6 +1,6 @@
-import { and, count, desc, eq, gte, isNotNull, lte } from "drizzle-orm";
+import { and, countDistinct, desc, eq, gte, lte } from "drizzle-orm";
 
-import { days, templates, type RlsClient } from "@syn/db";
+import { dayBlocks, days, templates, type RlsClient } from "@syn/db";
 import { addDays } from "@syn/utils";
 
 /**
@@ -30,26 +30,29 @@ export async function mostUsedTemplate(
 ): Promise<MostUsedTemplate | null> {
   const from = addDays(todayKey, -WINDOW_DAYS);
 
+  // The morning block is what the v1.0 whole-day template became (TD-1); a
+  // day is counted once per template, whatever else is on it.
   const rows = await rls.execute((tx) =>
     tx
       .select({
         id: templates.id,
         name: templates.name,
-        used: count(days.id),
+        used: countDistinct(dayBlocks.dayId),
       })
-      .from(days)
-      .innerJoin(templates, eq(templates.id, days.templateId))
+      .from(dayBlocks)
+      .innerJoin(days, eq(days.id, dayBlocks.dayId))
+      .innerJoin(templates, eq(templates.id, dayBlocks.templateId))
       .where(
         and(
-          eq(days.userId, userId),
-          isNotNull(days.templateId),
+          eq(dayBlocks.userId, userId),
+          eq(dayBlocks.kind, "morning"),
           gte(days.date, from),
           // Strictly before today: an unplanned today has no template to count.
           lte(days.date, addDays(todayKey, -1)),
         ),
       )
       .groupBy(templates.id, templates.name)
-      .orderBy(desc(count(days.id)))
+      .orderBy(desc(countDistinct(dayBlocks.dayId)))
       .limit(1),
   );
 

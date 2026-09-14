@@ -20,10 +20,9 @@ import { addDays, weekDates, weekKeyOf, weekdayForDayKey, weekdayIndex } from "@
  * week's status is "does any day have a block or a one-off", which is a
  * question about days. Deriving it means it can never be stale.
  *
- * THE v1.0 FIELDS STAY for the week canvas until DYN-12 replaces it:
  * `templateId`/`templateName` are the MORNING block's — the v1.0 whole-day
- * template was a morning (TD-1) — falling back to `days.template_id` for a
- * day the block backfill has not reached.
+ * template was a morning (TD-1); the v1.0 column went in `0006` after its
+ * backfill (DYN-21).
  */
 
 export type DayPlanView = {
@@ -31,7 +30,7 @@ export type DayPlanView = {
   weekday: string;
   isToday: boolean;
   isPast: boolean;
-  /** DEPRECATED (v1.0): the morning block's template. Read by the v1.0 canvas. */
+  /** The morning block's template. */
   templateId: string | null;
   templateName: string | null;
   anchorTime: string | null;
@@ -82,16 +81,13 @@ export async function getWeek(
       .select({
         id: days.id,
         date: days.date,
-        templateId: days.templateId,
         anchorTime: days.anchorTime,
         shape: days.shape,
         confirmedAt: days.confirmedAt,
         focusId: days.workFocusHabitId,
-        legacyTemplateName: templates.name,
         focusTitle: habits.title,
       })
       .from(days)
-      .leftJoin(templates, eq(templates.id, days.templateId))
       .leftJoin(habits, eq(habits.id, days.workFocusHabitId))
       .where(and(eq(days.userId, userId), inArray(days.date, dates)));
 
@@ -182,8 +178,8 @@ export async function getWeek(
         weekday: weekdayForDayKey(date),
         isToday: date === todayKey,
         isPast: date < todayKey,
-        templateId: morning?.templateId ?? row?.templateId ?? null,
-        templateName: morning?.templateNameSnapshot ?? row?.legacyTemplateName ?? null,
+        templateId: morning?.templateId ?? null,
+        templateName: morning?.templateNameSnapshot ?? null,
         anchorTime: row?.anchorTime ?? null,
         oneOffCount: items.filter((item) => item.origin === "one_off").length,
         shape: row?.shape ?? null,
@@ -192,7 +188,7 @@ export async function getWeek(
         workoutLabel,
         fixtureLabels,
         confirmed: row?.confirmedAt != null,
-        planned: blocks.length > 0 || (row?.templateId ?? null) !== null,
+        planned: blocks.length > 0,
       };
     });
 
@@ -210,14 +206,6 @@ export async function getWeek(
     for (const block of blockRows) {
       if (block.templateId === null) continue;
       usageByTemplate.set(block.templateId, (usageByTemplate.get(block.templateId) ?? 0) + 1);
-    }
-    for (const view of dayViews) {
-      // A day the backfill has not reached counts through its legacy column.
-      const row = byDate.get(view.date);
-      const hasBlocks = row ? blockRows.some((block) => block.dayId === row.id) : false;
-      if (!hasBlocks && row?.templateId) {
-        usageByTemplate.set(row.templateId, (usageByTemplate.get(row.templateId) ?? 0) + 1);
-      }
     }
 
     const withTargets = targeted
@@ -253,7 +241,7 @@ export async function getWeek(
         and(
           eq(days.userId, userId),
           inArray(days.date, lastWeekDates),
-          or(isNotNull(dayBlocks.id), isNotNull(days.templateId)),
+          isNotNull(dayBlocks.id),
         ),
       )
       .limit(1);

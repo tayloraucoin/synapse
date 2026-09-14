@@ -143,12 +143,9 @@ export async function getReviewWeek(
       .select({
         id: days.id,
         date: days.date,
-        templateId: days.templateId,
-        templateName: templates.name,
         reviewedAt: days.reviewedAt,
       })
       .from(days)
-      .leftJoin(templates, eq(templates.id, days.templateId))
       .where(and(eq(days.userId, userId), inArray(days.date, dates)))
       .orderBy(asc(days.date));
 
@@ -357,18 +354,20 @@ export async function getReviewWeek(
     }
   }
 
+  // A template is on a day through its block (TD-1): one day per block row.
   const templateUsage = new Map<string, TemplateUsage>();
-  for (const row of raw.dayRows) {
+  for (const row of raw.blockRows) {
     if (row.templateId === null) continue;
     const existing = templateUsage.get(row.templateId);
     if (existing) existing.days += 1;
     else
       templateUsage.set(row.templateId, {
         id: row.templateId,
-        name: row.templateName ?? "",
+        name: row.templateNameSnapshot ?? "",
         days: 1,
       });
   }
+  const plannedDayIds = new Set(raw.blockRows.map((row) => row.dayId));
 
   /*
    * UX v1.1 §8.2 (DYN-19). TIME BY BLOCK: done items' lengths per block kind —
@@ -566,7 +565,7 @@ export async function getReviewWeek(
   return {
     weekKey,
     timezone,
-    planned: raw.dayRows.filter((row) => row.templateId !== null).length,
+    planned: plannedDayIds.size,
     reviewed: reviewedDayIds.size,
     // The week is open while today is still inside it.
     open: dates.includes(todayKey) || todayKey < (dates[6] ?? ""),

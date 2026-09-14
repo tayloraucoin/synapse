@@ -41,14 +41,14 @@ type DayView = RouterOutputs["day"]["get"];
  * device zone; the browser does not tell the server, so the client computes it
  * from the one hook and falls back to the server's when it has one.
  */
-/** "Viewpoint · Work 9:00" — or the v1.0 template name for a day the backfill has not reached. */
+/** "Viewpoint · Work 9:00" — the day's focus and anchor. */
 function headerLine(day: DayView): string {
-  if (day.blocks.length === 0) return day.templateName ?? COPY.noTemplate;
+  if (day.blocks.length === 0) return COPY.noTemplate;
   if (day.shape === "unstructured") return COPY.unstructured;
   const parts: string[] = [];
   if (day.focusLabel !== null) parts.push(day.focusLabel);
   if (day.anchor !== null) parts.push(COPY.workAt(day.anchor.clock, !day.anchor.isHard));
-  return parts.length === 0 ? (day.templateName ?? COPY.noTemplate) : parts.join(" · ");
+  return parts.length === 0 ? COPY.noTemplate : parts.join(" · ");
 }
 
 export function DayListHeader({ day }: { day: DayView }) {

@@ -68,7 +68,6 @@ export {
   SHIFT_MIN,
   SKIP_LINE_WINDOW_DAYS,
   TEMPLATE_NAME_MAX,
-  TEMPLATE_OFFSET_MIN,
   WEEKLY_TARGET_MAX,
   WEEKLY_TARGET_MIN,
   WORKOUT_TITLE_MAX,
@@ -87,7 +86,6 @@ export {
   NOTIFICATION_CATALOGUE,
   type NotificationCatalogueEntry,
 } from "./notification-catalogue";
-export { STARTER_HABITS, type StarterHabit } from "./starter-habits";
 export { STARTER_LIBRARY, type StarterLibraryEntry } from "./starter-library";
 export {
   ASSET_BUCKET_BY_KIND,

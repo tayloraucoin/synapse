@@ -28,10 +28,6 @@ export type SlotRow = {
   id: string;
   habitId: string;
   timeMode: SlotView["timeMode"];
-  /** DEPRECATED — read only for legacy window spans until 0006. */
-  offsetStartMin: number | null;
-  /** DEPRECATED — read only for legacy window spans until 0006. */
-  offsetEndMin: number | null;
   durationMin: number;
   gapBeforeMin: number;
   pinnedAt: string | null;
@@ -60,15 +56,8 @@ function multitaskPosition(
   return "middle";
 }
 
-/** The length the walk counts: a legacy window is as long as its span. */
+/** The length the walk counts — the slot's own since 0006 (a legacy window's span left with the offsets). */
 export function walkDurationOf(slot: SlotRow): number {
-  if (
-    slot.timeMode === "window" &&
-    slot.offsetStartMin !== null &&
-    slot.offsetEndMin !== null
-  ) {
-    return Math.max(slot.durationMin, slot.offsetEndMin - slot.offsetStartMin);
-  }
   return slot.durationMin;
 }
 

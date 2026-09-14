@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import {
   createFromStarterLibraryInput,
-  createFromStarterSetInput,
   createHabitInput,
   habitIdInput,
   listHabitsInput,
@@ -33,7 +32,6 @@ import {
   updateRotationHabit,
 } from "../services/library/save-habit";
 import { createFromStarterLibrary } from "../services/library/starter-library";
-import { createFromStarterSet } from "../services/library/starter-set";
 import { readPreferences } from "../services/user/preferences";
 import { protectedProcedure, router } from "../trpc";
 
@@ -200,13 +198,6 @@ export const habitRouter = router({
         input.min,
         input.max,
       ),
-    ),
-
-  /** v1.0's flat set — kept until DYN-11 switches first run; removed in DYN-21. */
-  createFromStarterSet: protectedProcedure
-    .input(createFromStarterSetInput)
-    .mutation(async ({ ctx, input }) =>
-      createFromStarterSet(ctx.rls, ctx.authContext.userId, input.titles),
     ),
 
   /** The per-block library (UX v1.1 §12.4). */

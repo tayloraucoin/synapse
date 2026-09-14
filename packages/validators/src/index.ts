@@ -119,7 +119,6 @@ export {
 export {
   categoryKeySchema,
   createFromStarterLibraryInput,
-  createFromStarterSetInput,
   createHabitInput,
   habitFormSchema,
   habitIdInput,
@@ -130,7 +129,6 @@ export {
   slotsOutsideRangeInput,
   updateHabitInput,
   type CreateFromStarterLibraryInput,
-  type CreateFromStarterSetInput,
   type HabitFormInput,
   type HabitTypeInput,
   type IconValueInput,

@@ -25,9 +25,8 @@ type DayView = RouterOutputs["day"]["get"];
  * *Edit today* in record mode. On an unstructured day, *Add from the library*
  * is the primary way the day is built and appears first."
  *
- * THE SHIFT AND TRIM ROWS ARE GONE (DYN-17): Adjust is the day's one
- * reasoned mutation; their sheets stay on disk until DYN-21 deletes them.
- * *Adjust the day* needs a set day that is not closed; *Edit today* opens the
+ * THE SHIFT AND TRIM ROWS ARE GONE (DYN-17, deleted in DYN-21): Adjust is the
+ * day's one reasoned mutation. * *Adjust the day* needs a set day that is not closed; *Edit today* opens the
  * Schedule in move mode — tap to lift, tap to drop — for people who cannot
  * hold a press (§10.4, DYN-16).
  */
@@ -145,7 +144,6 @@ function subtitle(day: DayView): string {
 
   if (day.focusLabel !== null) parts.push(day.focusLabel);
   if (day.anchor !== null) parts.push(`Work ${day.anchor.isHard ? "" : "~"}${day.anchor.clock}`);
-  else if (day.templateName !== null) parts.push(day.templateName);
 
   parts.push(
     day.wokeAt === null

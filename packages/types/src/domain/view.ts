@@ -137,8 +137,6 @@ export interface HabitSummaryView {
   durationMin: number | null;
   durationMax: number | null;
   lifePriority: number;
-  /** v1.0's wake anchor (R5). Superseded by v1.1 R11; removed in DYN-21. */
-  isWakeAnchor: boolean;
   archived: boolean;
 
   /* ---- UX v1.1 (§11.3) ---- */

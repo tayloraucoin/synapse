@@ -3,11 +3,9 @@ import type { CategoryView, HabitSummaryView, IconValue } from "@syn/types";
 /**
  * Rows → view models. `@syn/ui` never sees a row (placement rule 5).
  *
- * `isWakeAnchor` IS DERIVED HERE, not stored. `habits.is_wake_anchor` does not
- * exist: "at most one per user" is a fact about the person, so
- * `users.wake_anchor_habit_id` is its one home (SET-1's ruling). Every list
- * that renders the *wake-up* tag compares against that id, and this is the
- * only place that comparison is written.
+ * There is no wake anchor since UX v1.1 R11 (the orient frame is the wake
+ * moment); v1.0's *wake-up* tag left with `users.wake_anchor_habit_id` in
+ * `0006` (DYN-21).
  */
 
 export type HabitRow = {
@@ -39,7 +37,6 @@ export function toCategoryView(row: CategoryRow): CategoryView {
 export function toHabitSummaryView(
   row: HabitRow,
   categories: ReadonlyMap<string, CategoryRow>,
-  wakeAnchorHabitId: string | null,
 ): HabitSummaryView {
   const category =
     row.categoryId === null ? null : categories.get(row.categoryId);
@@ -53,7 +50,6 @@ export function toHabitSummaryView(
     durationMin: row.durationMinMin,
     durationMax: row.durationMaxMin,
     lifePriority: row.lifePriority,
-    isWakeAnchor: row.id === wakeAnchorHabitId,
     archived: row.archivedAt !== null,
     blockKind: row.blockKind,
     weeklyTarget: row.weeklyTarget,

@@ -25,15 +25,6 @@ export {
 export { daysBefore, weekdayForDayKey } from "./day-key";
 export { SKIP_LINE_WINDOW_DAYS, shouldShowSkipLine } from "./skip-line";
 export {
-  DAY_PART_HOURS,
-  dayPartBoundaries,
-  dayPartOf,
-  dayPartSpans,
-  dayStartInstant,
-  type DayPart,
-  type DayPartAnchors,
-} from "./day-parts";
-export {
   SOON_MINUTES,
   closingThresholdMin,
   deriveItemState,
@@ -43,15 +34,6 @@ export {
 } from "./item-state";
 export { LATE_OFFER_THRESHOLD_MIN, isLateOffer } from "./late-offer";
 export { compareForTrim, type PrioritySortable } from "./priority";
-export { computeTrim, type TrimItem, type TrimResult } from "./trim";
-export {
-  computeShiftFit,
-  freedMinutes,
-  overMinutes,
-  type ShiftFit,
-  type ShiftFitInput,
-  type ShiftItem,
-} from "./shift-fit";
 export {
   stackBlock,
   type PlacedItem,

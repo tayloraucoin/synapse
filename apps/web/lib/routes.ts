@@ -178,16 +178,6 @@ export function settingsHabitRoute(id: string): string {
   return `/settings/habits/${id}`;
 }
 
-/** Redirects to Your day (UX v1.1 §4.14 — DYN-8); kept so old links land. */
-export function settingsTemplatesRoute(): string {
-  return "/settings/templates";
-}
-
-/** Redirects to the template's kind under Your day (DYN-8); kept so old links land. */
-export function settingsTemplateRoute(id: string): string {
-  return `/settings/templates/${id}`;
-}
-
 /*
  * Settings → Your day (UX v1.1 §4.14): the twelve first-run screens without
  * the frame. The six fact screens are DYN-10's, embedded; *Closing the day*

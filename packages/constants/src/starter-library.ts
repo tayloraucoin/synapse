@@ -1,7 +1,7 @@
 /**
  * The starter library, per block — UX v1.1 §12.4, verbatim.
  *
- * WHY PROSE IS ALLOWED HERE. The same exception `STARTER_HABITS` documents:
+ * WHY PROSE IS ALLOWED HERE. The same exception `DEFAULT_REASONS` documents:
  * these titles are candidate library rows the person confirms by ticking, not
  * copy the app speaks. Nothing is pre-checked, ever (v1.1 §4.8: "hospitality,
  * not persuasion").
@@ -23,9 +23,6 @@
  * (official spec R7); every row starts at the middle of the scale except the
  * few a first morning genuinely depends on, and the person changes it on the
  * *Selected* tab.
- *
- * `STARTER_HABITS` (v1.0's flat set) stays until DYN-21 removes it; nothing new
- * reads it.
  */
 
 import type { BlockKindValue } from "./block-kinds";

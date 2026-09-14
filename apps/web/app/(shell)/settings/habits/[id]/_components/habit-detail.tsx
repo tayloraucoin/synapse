@@ -12,7 +12,7 @@ import { CategorySheet } from "@/components/category-sheet";
 import { HabitSheet } from "@/components/habit-sheet";
 import { useSheet } from "@/lib/hooks/use-sheet";
 import { trpc } from "@/lib/trpc/client";
-import { settingsTemplateRoute } from "@/lib/routes";
+import { settingsYourDayBlockRoute } from "@/lib/routes";
 
 import { HABIT_DETAIL_COPY as COPY } from "../../_components/copy";
 
@@ -43,14 +43,14 @@ export function HabitDetail({ habitId }: { habitId: string }) {
           <SkeletonRow />
         ) : usage.data && usage.data.templates.length > 0 ? (
           <ul className="flex flex-col">
-            {usage.data.templates.map((row) => (
+            {usage.data.templates.map((row, index) => (
               <ListRow
-                key={`${row.templateId}-${row.offsetStartMin ?? "none"}`}
+                key={`${row.templateId}-${index}`}
                 as="li"
                 title={row.templateName}
-                meta={`${COPY.slot(row.offsetStartMin, row.durationMin)} · ${COPY.priority(row.priority)}`}
+                meta={`${COPY.slot(row.durationMin)} · ${COPY.priority(row.priority)}`}
                 tag={row.overridden ? COPY.overridden : undefined}
-                href={settingsTemplateRoute(row.templateId)}
+                href={settingsYourDayBlockRoute(row.kind, row.templateId)}
               />
             ))}
           </ul>

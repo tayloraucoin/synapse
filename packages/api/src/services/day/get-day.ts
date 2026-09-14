@@ -10,7 +10,6 @@ import {
   reasons,
   shifts,
   templateSlots,
-  templates,
   timerSessions,
   users,
   type RlsClient,
@@ -26,16 +25,12 @@ import type {
 import {
   addDays,
   dayModeFor,
-  dayPartOf,
-  dayPartSpans,
-  dayStartInstant,
   deriveItemState,
   formatClock,
   formatClockFromMinutes,
   minutesFromDayStart,
   weekdayForDayKey,
   zoneCityLabel,
-  type DayPart,
 } from "@syn/utils";
 
 import { afterDevicesOff, devicesOffInstant } from "./wind-down";
@@ -57,12 +52,6 @@ import { afterDevicesOff, devicesOffInstant } from "./wind-down";
  * answer to it.
  */
 
-export type DayPartView = {
-  part: DayPart;
-  span: { startLabel: string; endLabel: string } | null;
-  items: DayItemView[];
-};
-
 export type DayView = {
   dateKey: string;
   mode: DayMode;
@@ -74,9 +63,7 @@ export type DayView = {
   closedAt: Date | null;
   closeReason: "manual" | "auto" | null;
   capacityMin: number | null;
-  templateName: string | null;
   shiftedMin: number;
-  parts: DayPartView[];
   notAssigned: DayItemView[];
   cutByShift: DayItemView[];
   shifts: Array<{
@@ -91,20 +78,6 @@ export type DayView = {
   /** "times in Vancouver" — only when the caller's device zone differs. */
   zoneLabel: string | null;
   /**
-   * Which of this day's items is the wake anchor, or null — USE-2's addition.
-   *
-   * Marking it done sets the day's `woke_at` (official spec §5.2), and the
-   * List has to know which row that is BEFORE the tap. It is resolved here
-   * rather than carried on `DayItemView` because "is the anchor" is a fact
-   * about the account joined to this day, not about the item: the same habit
-   * is the anchor on every day at once, and putting the flag on each row would
-   * be the same fact written once per row.
-   *
-   * It survives archiving the habit (cross-cutting §8.3): the join is on
-   * `habit_id`, which an archived habit keeps.
-   */
-  wakeAnchorItemId: string | null;
-  /**
    * Which shift cut each cut item — USE-5's SC-02 reads it to list what one
    * shift took.
    *
@@ -117,8 +90,7 @@ export type DayView = {
 
   /*
    * ---- UX v1.1 (§5.4, §6.1, §7.1, §7.3, §11.7) — the day by block (DYN-5).
-   * `parts` above is DEPRECATED: populated until DYN-15 stops reading it,
-   * removed in DYN-21. Both shapes coexist for the window.
+   * The v1.0 day parts and the wake anchor left in DYN-21.
    */
   /** The blocks in `sort_order`, each with its items in time order. */
   blocks: DayBlockView[];
@@ -139,7 +111,6 @@ export type DayView = {
   lastNight: DayItemView[];
 };
 
-const PART_ORDER: DayPart[] = ["morning", "afternoon", "evening", "anytime"];
 
 /** The v1.1 half of a `DayItemView`, before the blocks are known. */
 const NO_BLOCK = {
@@ -179,7 +150,6 @@ export async function getDay(
         closedAt: days.closedAt,
         closeReason: days.closeReason,
         capacityMin: days.capacityMin,
-        templateId: days.templateId,
         shape: days.shape,
         confirmedAt: days.confirmedAt,
         anchorIsHard: days.anchorIsHard,
@@ -218,22 +188,13 @@ export async function getDay(
     // The account's wake anchor, matched to this day's rows below. One scalar.
     const [account] = await tx
       .select({
-        wakeAnchorHabitId: users.wakeAnchorHabitId,
         workStartTime: users.workStartTime,
         anchorDirection: users.anchorDirection,
       })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
-    const anchorHabitId = account?.wakeAnchorHabitId ?? null;
 
-    const [template] = day.templateId
-      ? await tx
-          .select({ name: templates.name })
-          .from(templates)
-          .where(eq(templates.id, day.templateId))
-          .limit(1)
-      : [];
 
     const itemRows = await tx
       .select({
@@ -421,21 +382,8 @@ export async function getDay(
 
     const labelByKey = new Map(reasonRows.map((row) => [row.key, row.label]));
 
-    const anchors = {
-      timeZone: zone,
-      dateKey,
-      startInstant: dayStartInstant({
-        dateKey,
-        timezone: zone,
-        anchorTime: day.anchorTime,
-        wokeAt: day.wokeAt,
-      }),
-    };
-
     const multitaskOrder = buildMultitaskOrder(itemRows);
-
-    const views: Array<{ view: DayItemView; part: DayPart }> = [];
-    let precedingPart: DayPart | null = null;
+    const views: Array<{ view: DayItemView }> = [];
 
     for (const row of itemRows) {
       const state = deriveItemState(
@@ -456,13 +404,9 @@ export async function getDay(
         context.now,
       );
 
-      const part = dayPartOf(row, anchors, precedingPart);
-      if (row.scheduledStart !== null) precedingPart = part;
-
       const startedAt = runningByItem.get(row.id);
 
       views.push({
-        part,
         view: {
           id: row.id,
           habitId: row.habitId,
@@ -581,14 +525,6 @@ export async function getDay(
         entry.view.state !== "cut-by-shift",
     );
 
-    const lastScheduled = assigned
-      .map((entry) => entry.view.scheduledStart)
-      .filter((at): at is Date => at !== null)
-      .sort((a, b) => a.getTime() - b.getTime())
-      .at(-1) ?? null;
-
-    const spans = dayPartSpans(anchors, lastScheduled);
-
     /*
      * Which shift took each cut item. `misses.shift_id` is the link (SET-1's
      * ruling: a cut item is a `day_items` row plus a `misses` row pointing at
@@ -628,15 +564,7 @@ export async function getDay(
       closedAt: day.closedAt,
       closeReason: day.closeReason,
       capacityMin: day.capacityMin,
-      templateName: template?.name ?? null,
       shiftedMin: shiftRows.reduce((sum, row) => sum + row.deltaMin, 0),
-      parts: PART_ORDER.map((part) => ({
-        part,
-        span: spans[part],
-        items: assigned
-          .filter((entry) => entry.part === part)
-          .map((entry) => entry.view),
-      })).filter((group) => group.items.length > 0),
       notAssigned: views
         .filter((entry) => entry.view.state === "not-assigned")
         .map((entry) => entry.view),
@@ -661,10 +589,6 @@ export async function getDay(
       ),
       zoneLabel: zoneLabelFor(zone, context.deviceZone ?? null),
       cutByShiftIds,
-      wakeAnchorItemId:
-        anchorHabitId === null
-          ? null
-          : (itemRows.find((row) => row.habitId === anchorHabitId)?.id ?? null),
       blocks,
       unblocked,
       shape: day.shape,
@@ -835,17 +759,13 @@ function emptyDay(
     closedAt: null,
     closeReason: null,
     capacityMin: null,
-    templateName: null,
     shiftedMin: 0,
-    parts: [],
     notAssigned: [],
     cutByShift: [],
     shifts: [],
     hasUndone: false,
     hasPending: false,
     zoneLabel: zoneLabelFor(context.timeZone, context.deviceZone ?? null),
-    // A day with no items has no anchor row to mark done, and nothing to cut.
-    wakeAnchorItemId: null,
     cutByShiftIds: {},
     blocks: [],
     unblocked: [],

@@ -1,7 +1,7 @@
 import { and, asc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 
 import { TRAINING_PLACEMENTS } from "@syn/constants";
-import { categories, dayBlocks, dayItems, days, habits, users, type RlsClient } from "@syn/db";
+import { categories, dayBlocks, dayItems, days, habits, type RlsClient } from "@syn/db";
 import type {
   HabitSummaryView,
   QuickPickView,
@@ -113,18 +113,13 @@ export async function getQuickPick(
     const day = await readDay(tx, userId, date);
     const weekday = weekdayIndex(date);
 
-    const [account] = await tx
-      .select({ wakeAnchorHabitId: users.wakeAnchorHabitId })
-      .from(users)
-      .where(eq(users.id, userId))
-      .limit(1);
     const categoryRows = await tx
       .select({ id: categories.id, name: categories.name, colorKey: categories.colorKey })
       .from(categories)
       .where(eq(categories.userId, userId));
     const categoriesById = new Map<string, CategoryRow>(categoryRows.map((row) => [row.id, row]));
     const summary = (row: Parameters<typeof toHabitSummaryView>[0]): HabitSummaryView =>
-      toHabitSummaryView(row, categoriesById, account?.wakeAnchorHabitId ?? null);
+      toHabitSummaryView(row, categoriesById);
 
     const habitRows = await tx
       .select({

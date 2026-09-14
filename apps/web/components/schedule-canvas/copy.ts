@@ -15,6 +15,9 @@ export const SCHEDULE_COPY = {
   cut: (titles: string) => `Cut: ${titles}`,
   nothingWasCut: "Nothing was cut.",
   close: "Close",
+  /** The record's one action, while it would be a true reversal (cross-cutting §8.1). */
+  undoThisShift: "Undo this shift",
+  undoRefused: "This shift can't be undone now.",
 
   /** The ST-06 tier headings' phrases — official spec §10.2, verbatim. */
   tierPhrase: {

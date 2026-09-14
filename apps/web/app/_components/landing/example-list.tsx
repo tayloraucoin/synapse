@@ -24,7 +24,7 @@
 
 import { UNDO_SHORT_MS } from "@syn/constants";
 import type { DayItemView } from "@syn/types";
-import { DayPartHeader, ItemRow, NowLine } from "@syn/ui";
+import { BlockHeader, ItemRow, NowLine } from "@syn/ui";
 import { formatClock } from "@syn/utils";
 import * as React from "react";
 
@@ -33,7 +33,7 @@ import {
   buildMovedRows,
   deriveState,
   deviceTimeZone,
-  groupByDayPart,
+  groupByBlock,
   initialDone,
   nowLineAfterIndex,
   nowLineMinutes,
@@ -167,7 +167,7 @@ export function ExampleDay({ className }: { className?: string }) {
     };
   }, []);
 
-  const groups = React.useMemo(() => groupByDayPart(items), [items]);
+  const groups = React.useMemo(() => groupByBlock(items), [items]);
   const flatIndex = React.useMemo(
     () => new Map(items.map((item, index) => [item.id, index])),
     [items],
@@ -206,7 +206,7 @@ export function ExampleDay({ className }: { className?: string }) {
     <div className={className}>
       {groups.map((group) => (
         <React.Fragment key={group.part}>
-          <DayPartHeader part={group.part} />
+          <BlockHeader kind={group.part} name={null} span={null} />
           <ol>
             {group.items.map((item) => {
               const index = flatIndex.get(item.id) ?? 0;

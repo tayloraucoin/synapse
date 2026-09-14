@@ -4,14 +4,14 @@ import { adjustApplyInput, adjustPreviewInput, adjustScopeInput, shiftIdInput } 
 
 import {
   AdjustError,
+  DayChangedError,
   adjustScope,
   adjustUndoEligibility,
   applyAdjust,
   previewAdjust,
   undoAdjust,
 } from "../services/day/adjust-day";
-import { DayChangedError } from "../services/day/shift-fit";
-import { UndoRefusedError } from "../services/day/undo-shift";
+import { UndoRefusedError } from "../services/day/undo-eligibility";
 import { protectedProcedure, router } from "../trpc";
 
 /**

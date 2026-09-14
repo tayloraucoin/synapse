@@ -231,10 +231,6 @@
       "types": "./src/composed/control/segmented-control/index.ts",
       "default": "./src/composed/control/segmented-control/index.ts"
     },
-    "./starter-set-chooser": {
-      "types": "./src/composed/control/starter-set-chooser/index.ts",
-      "default": "./src/composed/control/starter-set-chooser/index.ts"
-    },
     "./stepper-17": {
       "types": "./src/composed/control/stepper-17/index.ts",
       "default": "./src/composed/control/stepper-17/index.ts"
@@ -386,10 +382,6 @@
     "./day-outcome-row": {
       "types": "./src/composed/display/day-outcome-row/index.ts",
       "default": "./src/composed/display/day-outcome-row/index.ts"
-    },
-    "./day-part-header": {
-      "types": "./src/composed/display/day-part-header/index.ts",
-      "default": "./src/composed/display/day-part-header/index.ts"
     },
     "./block-header": {
       "types": "./src/composed/display/block-header/index.ts",

@@ -393,8 +393,6 @@ export type SlotRowFull = {
   id: string;
   habitId: string;
   timeMode: "fixed_time" | "window" | "unscheduled";
-  offsetStartMin: number | null;
-  offsetEndMin: number | null;
   durationMin: number;
   gapBeforeMin: number;
   pinnedAt: string | null;
@@ -444,8 +442,6 @@ export async function readTemplateSlots(
       id: templateSlots.id,
       habitId: templateSlots.habitId,
       timeMode: templateSlots.timeMode,
-      offsetStartMin: templateSlots.offsetStartMin,
-      offsetEndMin: templateSlots.offsetEndMin,
       durationMin: templateSlots.durationMin,
       gapBeforeMin: templateSlots.gapBeforeMin,
       pinnedAt: templateSlots.pinnedAt,

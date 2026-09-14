@@ -8,6 +8,7 @@ import {
   templates,
   type RlsClient,
 } from "@syn/db";
+import type { BlockKind } from "@syn/types";
 
 /**
  * LB-03's two sections, and the counts LB-01's archive dialog needs.
@@ -22,7 +23,7 @@ export type HabitUsage = {
   templates: Array<{
     templateId: string;
     templateName: string;
-    offsetStartMin: number | null;
+    kind: BlockKind;
     durationMin: number;
     priority: number;
     overridden: boolean;
@@ -62,7 +63,7 @@ export async function readHabitUsage(
       .select({
         templateId: templates.id,
         templateName: templates.name,
-        offsetStartMin: templateSlots.offsetStartMin,
+        kind: templates.kind,
         durationMin: templateSlots.durationMin,
         priorityOverride: templateSlots.priorityOverride,
         lifePriority: habits.lifePriority,
@@ -96,7 +97,7 @@ export async function readHabitUsage(
       templates: slotRows.map((row) => ({
         templateId: row.templateId,
         templateName: row.templateName,
-        offsetStartMin: row.offsetStartMin,
+        kind: row.kind,
         durationMin: row.durationMin,
         priority: row.priorityOverride ?? row.lifePriority,
         overridden: row.priorityOverride !== null,

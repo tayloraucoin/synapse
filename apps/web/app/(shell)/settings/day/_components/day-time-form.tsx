@@ -5,7 +5,6 @@ import * as React from "react";
 import {
   Button,
   HelperText,
-  SettingsRow,
   StatusLine,
   TimeField,
   TimezoneSelect,
@@ -15,7 +14,6 @@ import { dayTimeFormSchema, type DayTimeFormInput } from "@syn/validators";
 
 import { useSynapseForm } from "@/lib/forms/use-synapse-form";
 import { useOnline } from "@/lib/hooks/use-online";
-import { settingsHabitsRoute } from "@/lib/routes";
 import { trpc } from "@/lib/trpc/client";
 
 import { SETTINGS_COPY as COPY } from "../../_components/copy";
@@ -44,7 +42,6 @@ export function DayTimeForm() {
   const utils = trpc.useUtils();
 
   const me = trpc.user.me.useQuery();
-  const habits = trpc.habit.list.useQuery({ includeArchived: false });
   const save = trpc.user.updatePreferences.useMutation();
 
   const [error, setError] = React.useState<string | null>(null);
@@ -79,7 +76,6 @@ export function DayTimeForm() {
   const values = form.watch();
   const closeChanged = values.dayCloseTime !== me.data?.dayCloseTime;
   const zoneChanged = values.timezone !== me.data?.timezone;
-  const anchor = habits.data?.habits.find((habit) => habit.isWakeAnchor);
 
   async function onSubmit(input: DayTimeFormInput): Promise<void> {
     setError(null);
@@ -117,15 +113,6 @@ export function DayTimeForm() {
         }
         disabled={!online}
       />
-
-      <div className="flex flex-col gap-(--space-1)">
-        <SettingsRow
-          title={COPY.wakeUpHabit}
-          description={anchor?.title ?? COPY.none}
-          href={`${settingsHabitsRoute()}?type=habit`}
-        />
-        <HelperText>{COPY.wakeUpHabitHelper}</HelperText>
-      </div>
 
       <TimeField
         label={COPY.dayClosesAt}

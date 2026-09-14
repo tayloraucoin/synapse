@@ -103,7 +103,6 @@ export type ReviewDayView = {
   }>;
   result: AdherenceResult | null;
   pendingCount: number;
-  wakeAnchorItemId: string | null;
 
   /* ---- UX v1.1 §8.1, §7.3 (DYN-18, DYN-19) ---- */
   /** The morning's intention, in the person's words, or null. */
@@ -179,7 +178,7 @@ export async function getReviewDay(
   });
 
   if (raw === null) {
-    return emptyReview(dateKey, day.timezone, day.wakeAnchorItemId);
+    return emptyReview(dateKey, day.timezone);
   }
 
   const itemIds = raw.items.map((item) => item.id);
@@ -441,7 +440,6 @@ export async function getReviewDay(
     // The number comes after the decisions.
     result: raw.day.reviewedAt === null ? null : result,
     pendingCount,
-    wakeAnchorItemId: day.wakeAnchorItemId,
     intention: raw.day.intention,
     blocks: day.blocks.map((block) => ({
       id: block.id,
@@ -517,7 +515,6 @@ async function resolveCarriedSince(
 function emptyReview(
   dateKey: string,
   timezone: string,
-  wakeAnchorItemId: string | null,
 ): ReviewDayView {
   return {
     dateKey,
@@ -537,7 +534,6 @@ function emptyReview(
     shifts: [],
     result: null,
     pendingCount: 0,
-    wakeAnchorItemId,
     intention: null,
     blocks: [],
     shortenedIds: [],
