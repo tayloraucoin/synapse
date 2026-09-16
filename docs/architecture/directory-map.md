@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-16 · 1192 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-16 · 1213 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -625,6 +625,29 @@ docs/
       DYN-9-block-editor-step-two.md
       PROGRESS.md
       README.md
+      TECHNICAL-DECISIONS.md
+    epic-5-first-run-rebuilt/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      RUN-1-vocabulary-seeds-and-the-emoji-rule.md
+      RUN-10-screens-7-9-steps-landscape-ranked.md
+      RUN-11-screens-10-12-training-closing-focus.md
+      RUN-12-screen-13-the-day-builder.md
+      RUN-13-screen-14-and-the-morning-modes.md
+      RUN-14-the-quotes-admin-surface.md
+      RUN-15-migration-0008-and-the-retirements.md
+      RUN-2-migration-0007-v1-2-additive.md
+      RUN-3-plan-services-types-kinds-versions.md
+      RUN-4-passages-and-the-quote-bank-services.md
+      RUN-5-day-plans-service-prefill-and-set-from-the-plan.md
+      RUN-6-the-day-travel-versions-working-today-reminder.md
+      RUN-7-ui-composites-for-v1-2.md
+      RUN-8-the-frame-and-screens-1-5.md
+      RUN-9-screen-6-and-the-orient-frame.md
       TECHNICAL-DECISIONS.md
     infrastructure/
       _templates/

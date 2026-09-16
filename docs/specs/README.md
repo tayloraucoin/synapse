@@ -15,7 +15,8 @@
 | [`epic-2-in-use/`](epic-2-in-use/) | `USE-` | The day model, the List, the Schedule, sheets, timers, shift, trim, notifications | `docs/ux/epic2_in_use_ux_architecture.md` | 8 |
 | [`epic-3-review/`](epic-3-review/) | `REV-` | The resolver, the Day Review, the Week Review, history | `docs/ux/epic3_review_ux_architecture.md` | 4 |
 | [`cross-cutting-system/`](cross-cutting-system/) | `SYS-` | The shell, time, About & feedback, error and session states, keyboard, PWA install and update | `docs/ux/synapse_navigation_and_system_ux_architecture.md` | 5 |
-| [`epic-4-dynamic-schedule/`](epic-4-dynamic-schedule/) | `DYN-` | **UX v1.1** — the block model, the block editor, the twelve-screen first run, the orient frame, the quick-pick, the Today tab by block, the editable Schedule, Adjust, the evening, the amended Review, the revised notifications, the cleanup. Cuts across every surface Epics 1–3 built. | `docs/ux/ux-spec-v1.1.md` (accepted 2026-09-12) | 21 (6 full, 15 in the authoring handoff) |
+| [`epic-4-dynamic-schedule/`](epic-4-dynamic-schedule/) | `DYN-` | **UX v1.1** — the block model, the block editor, the twelve-screen first run, the orient frame, the quick-pick, the Today tab by block, the editable Schedule, Adjust, the evening, the amended Review, the revised notifications, the cleanup. Cuts across every surface Epics 1–3 built. **Complete 2026-09-13.** | `docs/ux/ux-spec-v1.1.md` (accepted 2026-09-12) | 21 |
+| [`epic-5-first-run-rebuilt/`](epic-5-first-run-rebuilt/) | `RUN-` | **UX v1.2** — the fourteen-screen first run ending in the day builder and the week; work-day types, steps and versions, travel around a workout, passages and the quote bank, day plans, the two morning modes, the journal reminder, emoji on the person's nouns, optimistic-by-rule and save-as-you-go. | `docs/ux/ux-spec-v1.2.md` (draft 2026-09-16) | 15 (all full) |
 
 Ticket prefixes are three letters so they never collide with the two-letter **screen** IDs the UX documents use (`AU-`, `FR-`, `LB-`, `CT-`, `TP-`, `WK-`, `ST-`, `SH-`, `LS-`, `DH-`, `IT-`, `SC-`, `SF-`, `TR-`, `PN-`, `RV-`, `DR-`, `WR-`, `HS-`, `SY-`). A ticket cites screens by their ID; a screen never cites a ticket.
 
@@ -53,6 +54,10 @@ A wave is a set of tickets that can be built in parallel once every earlier wave
 ### Epic 4 (UX v1.1), added 2026-09-12
 
 Every ticket in Epics 1–3 and the cross-cutting track is Complete, so Epic 4's order is its own: [`epic-4-dynamic-schedule/00-build-order.md`](epic-4-dynamic-schedule/00-build-order.md). Its critical path is `DYN-1 → DYN-2 → DYN-3 → DYN-4 → DYN-5 → DYN-7 → DYN-8 → DYN-11 → DYN-13 → DYN-14 → DYN-15 → DYN-17 → DYN-18 → DYN-20 → DYN-21`. Nothing in Epics 1–3 waits on it; it consumes them all. Its launch-blocking set and what does not gate are in its README.
+
+### Epic 5 (UX v1.2), added 2026-09-16
+
+Epic 4 is Complete, so Epic 5's order is its own: [`epic-5-first-run-rebuilt/00-build-order.md`](epic-5-first-run-rebuilt/00-build-order.md). Its critical path is `RUN-1 → RUN-2 → RUN-3 → RUN-7 → RUN-8 → RUN-10 → RUN-11 → RUN-12 → RUN-13 → RUN-15`. It consumes Epic 4 whole and nothing waits on it. One ticket, RUN-14 (the quotes admin surface), is `[PROVISIONAL — Taylor, D3]` and does not gate. Migrations `0007` and `0008` follow `0004`–`0006`, none applied to a hosted tier by an agent.
 
 ### Launch-blocking set
 
