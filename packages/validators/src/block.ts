@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+import { iconValueSchema } from "./icon";
+import { clockTimeSchema } from "./preferences";
+
 /**
  * The block model's enums, as Zod — UX v1.1 §1.4, §3.1, §3.4, §3.7, §11.
  *
@@ -119,7 +122,26 @@ export const blockOrderSchema = z
  * then; DYN-8's callers always pass it.
  */
 export const createTemplateInput = z
-  .object({ kind: blockKindSchema.default("morning") })
+  .object({
+    kind: blockKindSchema.default("morning"),
+    /** RUN-12: the builder names its lists on arrival (*Getting ready A*). */
+    name: z.string().trim().max(40).optional(),
+    /**
+     * UX v1.2 §3.8 — a work-day type's own fields; refused by the service on
+     * any kind but `work`. Spelled here rather than imported from
+     * `template.ts` (`workDayTypeFieldsSchema`), which imports this file; the
+     * two must stay identical.
+     */
+    workDayType: z
+      .object({
+        anchorTime: clockTimeSchema.nullable().optional(),
+        workEndTime: clockTimeSchema.nullable().optional(),
+        locationKind: workDayKindSchema.nullable().optional(),
+        anchorDirection: anchorDirectionSchema.nullable().optional(),
+        icon: iconValueSchema.nullable().optional(),
+      })
+      .optional(),
+  })
   .default({ kind: "morning" });
 
 export type CreateTemplateInput = z.infer<typeof createTemplateInput>;

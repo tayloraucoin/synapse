@@ -140,6 +140,7 @@ export {
   type CreateFromStarterLibraryInput,
   type CreateStepInput,
   type HabitFormInput,
+  type HabitPatchInput,
   type HabitTypeInput,
   type HabitVersionInput,
   type IconValueInput,
@@ -148,6 +149,7 @@ export {
   type RotationHabitInput,
   type UpdateHabitInput,
   type WorkoutDetailsInput,
+  type WorkoutPatchInput,
 } from "./habit";
 
 export {

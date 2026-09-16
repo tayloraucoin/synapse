@@ -197,6 +197,7 @@ export const habitPatchSchema = z
 export const patchHabitInput = z.object({ id: z.string().uuid(), patch: habitPatchSchema });
 
 export type PatchHabitInput = z.infer<typeof patchHabitInput>;
+export type HabitPatchInput = z.infer<typeof habitPatchSchema>;
 
 /** The workout card's per-control writes: the habit patch plus the where and travel. */
 export const workoutPatchSchema = z
@@ -216,6 +217,7 @@ export const workoutPatchSchema = z
 export const patchWorkoutInput = z.object({ id: z.string().uuid(), patch: workoutPatchSchema });
 
 export type PatchWorkoutInput = z.infer<typeof patchWorkoutInput>;
+export type WorkoutPatchInput = z.infer<typeof workoutPatchSchema>;
 
 /** A step before work — v1.2 R33, §4.7: emoji, name, range, nothing else. */
 export const createStepInput = z

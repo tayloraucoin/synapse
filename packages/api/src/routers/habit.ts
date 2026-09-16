@@ -5,11 +5,16 @@ import { z } from "zod";
 import {
   createFromStarterLibraryInput,
   createHabitInput,
+  createStepInput,
   habitIdInput,
+  iconValueSchema,
   listHabitsInput,
+  patchHabitInput,
+  patchWorkoutInput,
   rotationHabitSchema,
   slotsOutsideRangeInput,
   updateHabitInput,
+  workoutDetailsSchema,
 } from "@syn/validators";
 
 import {
@@ -25,9 +30,13 @@ import {
 } from "../services/library/habit-usage";
 import { listHabits } from "../services/library/list-habits";
 import {
+  HabitRuleError,
   RotationRuleError,
   createHabit,
   createRotationHabit,
+  createStep,
+  patchHabit,
+  patchWorkout,
   updateHabit,
   updateRotationHabit,
 } from "../services/library/save-habit";
@@ -71,12 +80,79 @@ export const habitRouter = router({
       createHabit(ctx.rls, ctx.authContext.userId, input),
     ),
 
-  /** A workout — the training screen (UX v1.1 §3.7, §4.9). */
+  /**
+   * A workout — the training screen (UX v1.1 §3.7, §4.9; UX v1.2 §4.10 adds
+   * its type, where and travel, and lets the card send a glyph).
+   */
   createWorkout: protectedProcedure
-    .input(rotationHabitSchema)
+    .input(
+      rotationHabitSchema.and(
+        z.object({
+          details: workoutDetailsSchema.partial().optional(),
+          icon: iconValueSchema.nullable().optional(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { details, icon, ...rotation } = input;
+      return createRotationHabit(ctx.rls, ctx.authContext.userId, "workout", rotation, {
+        ...(details ?? {}),
+        icon: icon ?? null,
+      });
+    }),
+
+  /** A step before work — UX v1.2 R33, §4.7: a name, a glyph, a range. */
+  createStep: protectedProcedure
+    .input(createStepInput)
     .mutation(async ({ ctx, input }) =>
-      createRotationHabit(ctx.rls, ctx.authContext.userId, "workout", input),
+      createStep(ctx.rls, ctx.authContext.userId, input),
     ),
+
+  /** One fact at a time on a habit — UX v1.2 §4.9 (priority, range, versions, name, glyph). */
+  patch: protectedProcedure
+    .input(patchHabitInput)
+    .mutation(async ({ ctx, input }) => {
+      const prefs = await readPreferences(ctx.rls, ctx.authContext.userId);
+      try {
+        const saved = await patchHabit(
+          ctx.rls,
+          ctx.authContext.userId,
+          input.id,
+          input.patch,
+          prefs?.timezone ?? "UTC",
+        );
+        if (!saved) throw new TRPCError({ code: "NOT_FOUND", message: "No such habit." });
+        return saved;
+      } catch (error) {
+        if (error instanceof HabitRuleError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: error.code, cause: error });
+        }
+        throw error;
+      }
+    }),
+
+  /** One fact at a time on a workout — UX v1.2 §4.10; refused on any other type. */
+  patchWorkout: protectedProcedure
+    .input(patchWorkoutInput)
+    .mutation(async ({ ctx, input }) => {
+      const prefs = await readPreferences(ctx.rls, ctx.authContext.userId);
+      try {
+        const saved = await patchWorkout(
+          ctx.rls,
+          ctx.authContext.userId,
+          input.id,
+          input.patch,
+          prefs?.timezone ?? "UTC",
+        );
+        if (!saved) throw new TRPCError({ code: "NOT_FOUND", message: "No such habit." });
+        return saved;
+      } catch (error) {
+        if (error instanceof HabitRuleError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: error.code, cause: error });
+        }
+        throw error;
+      }
+    }),
 
   /** A focus — the work screen (UX v1.1 §3.8, §4.11). */
   createFocus: protectedProcedure

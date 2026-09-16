@@ -21,7 +21,7 @@ The contract and the seeds; the one additive migration; the plan services; the c
 - [x] **RUN-2** · Migration `0007`: the additive columns, `passages`, `quotes`, `day_plans`, `days.work_template_id`, the `passages` bucket, the `orient_passage` backfill — L · (RUN-1) · **Mason migration review** — authored 2026-09-16; **generated then hand-amended; neither added enum value is used in the file; not applied to any tier — Taylor runs it after `0004`–`0006`**
 
 ### Phase 1 — The services
-- [ ] **RUN-3** · Plan services: work-day types, fixture kinds and icons, habit versions and workout details, `usedBy` on templates, the profile widened — L · (RUN-2)
+- [x] **RUN-3** · Plan services: work-day types, fixture kinds and icons, habit versions and workout details, `usedBy` on templates, the profile widened — L · (RUN-2) — built 2026-09-16; **the retired inputs are ignored, not removed, until their senders go; database-backed criteria unverified**
 - [ ] **RUN-4** · Passages and the quote bank: `passage.*`, the `passage` upload kind, `quote.today`, the orient read model with the carousel and the third line — M · (RUN-2)
 - [ ] **RUN-5** · Day plans: the service, the weekday invariant, duplicate and delete, `week.prefill` reading plans first, *Set from the plan* through `saveMorning` — L · (RUN-3) · **Mason review of the weekday invariant and the confirm path (TD-10, TD-17)**
 - [ ] **RUN-6** · The day under v1.2: travel rows in the materialiser and the layout, version resolution in `confirmDay` and `editHabitDay`, `applyWorkType`, the journal reminder in `notify.ts` — L · (RUN-3) · **Vigil: the reminder's empty-at-send-time rule; travel rows dropped alone**

@@ -19,7 +19,11 @@ import {
   type FitItem,
 } from "@syn/utils";
 
-import { toHabitSummaryView, type CategoryRow } from "../library/to-view";
+import {
+  HABIT_SUMMARY_COLUMNS,
+  toHabitSummaryView,
+  type CategoryRow,
+} from "../library/to-view";
 import { listTemplates } from "../plan/templates";
 import { getDay } from "./get-day";
 import { blockTotalMin } from "./lay-out-day";
@@ -122,20 +126,7 @@ export async function getQuickPick(
       toHabitSummaryView(row, categoriesById);
 
     const habitRows = await tx
-      .select({
-        id: habits.id,
-        title: habits.title,
-        icon: habits.icon,
-        type: habits.type,
-        durationMinMin: habits.durationMinMin,
-        durationMaxMin: habits.durationMaxMin,
-        lifePriority: habits.lifePriority,
-        archivedAt: habits.archivedAt,
-        categoryId: habits.categoryId,
-        blockKind: habits.blockKind,
-        weeklyTarget: habits.weeklyTarget,
-        typicalDays: habits.typicalDays,
-      })
+      .select(HABIT_SUMMARY_COLUMNS)
       .from(habits)
       .where(and(eq(habits.userId, userId), isNull(habits.archivedAt)))
       .orderBy(asc(habits.createdAt));

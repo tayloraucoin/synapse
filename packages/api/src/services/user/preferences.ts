@@ -1,16 +1,18 @@
 import { eq } from "drizzle-orm";
 
+import { DEVICES_OFF_OFFSET_MIN, JOURNAL_REMINDER_OFFSET_MIN } from "@syn/constants";
 import { users, type RlsClient } from "@syn/db";
 import type {
   AnchorDirection,
   BlockKind,
   JournalPrompt,
+  MorningMode,
   OverflowMode,
   ScheduleShape,
   WorkDays,
 } from "@syn/types";
 import type { UpdatePreferencesInput } from "@syn/validators";
-import { addDays, resolveDayKey } from "@syn/utils";
+import { addDays, clockToMinutes, resolveDayKey } from "@syn/utils";
 
 /**
  * The one home for "change my account preferences".
@@ -67,6 +69,28 @@ export type UserPreferencesRow = {
   journalEnabled: boolean;
   journalPrompts: JournalPrompt[];
   blockOrder: BlockKind[];
+
+  /*
+   * ---- UX v1.2 §11.1 (RUN-3). The three v1.1 columns above that v1.2 stops
+   * writing (`earliestWakeTime`, `orientPassage`, `orientShowLastNight`) are
+   * still READ here until `0008` drops them; nothing writes them.
+   */
+  morningMode: MorningMode;
+  quotesOptIn: boolean;
+  orientAskIntention: boolean;
+  orientAskVisualisation: boolean;
+  journalReminderEnabled: boolean;
+  /** The stored value; null = derived. See `journalReminderTimeEffective`. */
+  journalReminderTime: string | null;
+  /**
+   * The two derived defaults (v1.2 §4.11, §13 #25), computed on read so a
+   * person who never touched them always tracks the value they follow:
+   * phone away = lights out − 60 while `devicesOffTime` is null; the
+   * reminder = phone away − 60 while `journalReminderTime` is null. Null only
+   * when the thing followed is itself unset.
+   */
+  devicesOffTimeEffective: string | null;
+  journalReminderTimeEffective: string | null;
 };
 
 const PREFERENCE_COLUMNS = {
@@ -102,7 +126,46 @@ const PREFERENCE_COLUMNS = {
   journalEnabled: users.journalEnabled,
   journalPrompts: users.journalPrompts,
   blockOrder: users.blockOrder,
+  morningMode: users.morningMode,
+  quotesOptIn: users.quotesOptIn,
+  orientAskIntention: users.orientAskIntention,
+  orientAskVisualisation: users.orientAskVisualisation,
+  journalReminderEnabled: users.journalReminderEnabled,
+  journalReminderTime: users.journalReminderTime,
 } as const;
+
+type StoredPreferencesRow = Omit<
+  UserPreferencesRow,
+  "devicesOffTimeEffective" | "journalReminderTimeEffective"
+>;
+
+/** `"HH:mm"` minus `offsetMin`, wrapping past midnight; null when there is nothing to follow. */
+function minusMinutes(clock: string | null, offsetMin: number): string | null {
+  if (clock === null) return null;
+  const total = ((clockToMinutes(clock.slice(0, 5)) - offsetMin) % 1440 + 1440) % 1440;
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
+/**
+ * The two derived evening times — one function, so `preferences.ts` and the
+ * reminder scan (RUN-6) cannot disagree about what "an hour before" means.
+ */
+export function effectiveEveningTimes(row: {
+  lightsOutTime: string | null;
+  devicesOffTime: string | null;
+  journalReminderTime: string | null;
+}): { devicesOffTimeEffective: string | null; journalReminderTimeEffective: string | null } {
+  const devicesOffTimeEffective =
+    row.devicesOffTime ?? minusMinutes(row.lightsOutTime, DEVICES_OFF_OFFSET_MIN);
+  const journalReminderTimeEffective =
+    row.journalReminderTime ??
+    minusMinutes(devicesOffTimeEffective, JOURNAL_REMINDER_OFFSET_MIN);
+  return { devicesOffTimeEffective, journalReminderTimeEffective };
+}
+
+function withEffective(row: StoredPreferencesRow): UserPreferencesRow {
+  return { ...row, ...effectiveEveningTimes(row) };
+}
 
 /** The caller's own row, or null. RLS makes "own" the only reachable answer. */
 export async function readPreferences(
@@ -112,7 +175,8 @@ export async function readPreferences(
   const rows = await rls.execute((tx) =>
     tx.select(PREFERENCE_COLUMNS).from(users).where(eq(users.id, userId)).limit(1),
   );
-  return rows[0] ?? null;
+  const row = rows[0];
+  return row ? withEffective(row) : null;
 }
 
 /**
@@ -175,9 +239,10 @@ export async function updatePreferences(
     ...(input.anchorDirection !== undefined
       ? { anchorDirection: input.anchorDirection }
       : {}),
-    ...(input.earliestWakeTime !== undefined
-      ? { earliestWakeTime: input.earliestWakeTime }
-      : {}),
+    // `earliestWakeTime`, `orientPassage`, `orientShowLastNight` are NOT
+    // written since UX v1.2 (R39, R36, R41; RUN-3): the keys stay accepted
+    // and ignored until RUN-8/RUN-9 remove their senders, and `0008` drops
+    // the columns.
     ...(input.lightsOutTime !== undefined
       ? { lightsOutTime: input.lightsOutTime }
       : {}),
@@ -186,12 +251,6 @@ export async function updatePreferences(
       : {}),
     ...(input.overflowMode !== undefined
       ? { overflowMode: input.overflowMode }
-      : {}),
-    ...(input.orientPassage !== undefined
-      ? { orientPassage: input.orientPassage }
-      : {}),
-    ...(input.orientShowLastNight !== undefined
-      ? { orientShowLastNight: input.orientShowLastNight }
       : {}),
     ...(input.orientAskGratitude !== undefined
       ? { orientAskGratitude: input.orientAskGratitude }
@@ -203,6 +262,21 @@ export async function updatePreferences(
       ? { journalPrompts: input.journalPrompts }
       : {}),
     ...(input.blockOrder !== undefined ? { blockOrder: input.blockOrder } : {}),
+    // UX v1.2 §11.1. Each alone (save as you go, §2 guardrail 5).
+    ...(input.morningMode !== undefined ? { morningMode: input.morningMode } : {}),
+    ...(input.quotesOptIn !== undefined ? { quotesOptIn: input.quotesOptIn } : {}),
+    ...(input.orientAskIntention !== undefined
+      ? { orientAskIntention: input.orientAskIntention }
+      : {}),
+    ...(input.orientAskVisualisation !== undefined
+      ? { orientAskVisualisation: input.orientAskVisualisation }
+      : {}),
+    ...(input.journalReminderEnabled !== undefined
+      ? { journalReminderEnabled: input.journalReminderEnabled }
+      : {}),
+    ...(input.journalReminderTime !== undefined
+      ? { journalReminderTime: input.journalReminderTime }
+      : {}),
     updatedAt: new Date(),
   };
 
@@ -267,5 +341,6 @@ export async function updatePreferences(
       .returning(PREFERENCE_COLUMNS),
   );
 
-  return rows[0] ?? null;
+  const row = rows[0];
+  return row ? withEffective(row) : null;
 }

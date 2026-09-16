@@ -1,7 +1,13 @@
 import { and, eq } from "drizzle-orm";
 
 import { habits, type RlsClient } from "@syn/db";
-import type { BlockKind, IconValue, ItemType } from "@syn/types";
+import type {
+  BlockKind,
+  HabitVersion,
+  IconValue,
+  ItemType,
+  WorkoutLocation,
+} from "@syn/types";
 
 /**
  * One habit, in the shape LB-02 edits.
@@ -28,6 +34,13 @@ export type EditableHabit = {
   blockKind: BlockKind | null;
   weeklyTarget: number | null;
   typicalDays: number[] | null;
+  /** UX v1.2 §3.5, §3.7 (0007). */
+  versions: HabitVersion[] | null;
+  workoutType: string | null;
+  location: WorkoutLocation | null;
+  travelThereMin: number;
+  travelBackMin: number;
+  planTravel: boolean;
 };
 
 export async function getHabit(
@@ -53,6 +66,12 @@ export async function getHabit(
         blockKind: habits.blockKind,
         weeklyTarget: habits.weeklyTarget,
         typicalDays: habits.typicalDays,
+        versions: habits.versions,
+        workoutType: habits.workoutType,
+        location: habits.location,
+        travelThereMin: habits.travelThereMin,
+        travelBackMin: habits.travelBackMin,
+        planTravel: habits.planTravel,
       })
       .from(habits)
       .where(and(eq(habits.id, id), eq(habits.userId, userId)))
@@ -76,6 +95,12 @@ export async function getHabit(
       blockKind: row.blockKind,
       weeklyTarget: row.weeklyTarget,
       typicalDays: row.typicalDays,
+      versions: row.versions && row.versions.length > 0 ? row.versions : null,
+      workoutType: row.workoutType,
+      location: row.location,
+      travelThereMin: row.travelThereMin,
+      travelBackMin: row.travelBackMin,
+      planTravel: row.planTravel,
     };
   });
 }

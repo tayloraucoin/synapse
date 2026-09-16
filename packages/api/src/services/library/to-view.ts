@@ -1,4 +1,11 @@
-import type { CategoryView, HabitSummaryView, IconValue } from "@syn/types";
+import { habits } from "@syn/db";
+import type {
+  CategoryView,
+  HabitSummaryView,
+  HabitVersion,
+  IconValue,
+  WorkoutLocation,
+} from "@syn/types";
 
 /**
  * Rows → view models. `@syn/ui` never sees a row (placement rule 5).
@@ -6,7 +13,32 @@ import type { CategoryView, HabitSummaryView, IconValue } from "@syn/types";
  * There is no wake anchor since UX v1.1 R11 (the orient frame is the wake
  * moment); v1.0's *wake-up* tag left with `users.wake_anchor_habit_id` in
  * `0006` (DYN-21).
+ *
+ * UX v1.2 (RUN-3): the summary carries versions (§3.5) and, for a workout,
+ * its type, location and travel (§3.7). `HABIT_SUMMARY_COLUMNS` is the one
+ * select every list and read uses, so a column added here reaches every view.
  */
+
+export const HABIT_SUMMARY_COLUMNS = {
+  id: habits.id,
+  title: habits.title,
+  icon: habits.icon,
+  type: habits.type,
+  durationMinMin: habits.durationMinMin,
+  durationMaxMin: habits.durationMaxMin,
+  lifePriority: habits.lifePriority,
+  archivedAt: habits.archivedAt,
+  categoryId: habits.categoryId,
+  blockKind: habits.blockKind,
+  weeklyTarget: habits.weeklyTarget,
+  typicalDays: habits.typicalDays,
+  versions: habits.versions,
+  workoutType: habits.workoutType,
+  location: habits.location,
+  travelThereMin: habits.travelThereMin,
+  travelBackMin: habits.travelBackMin,
+  planTravel: habits.planTravel,
+} as const;
 
 export type HabitRow = {
   id: string;
@@ -22,6 +54,13 @@ export type HabitRow = {
   blockKind: HabitSummaryView["blockKind"];
   weeklyTarget: number | null;
   typicalDays: number[] | null;
+  /** UX v1.2 §11.2 (0007). */
+  versions: HabitVersion[] | null;
+  workoutType: string | null;
+  location: WorkoutLocation | null;
+  travelThereMin: number;
+  travelBackMin: number;
+  planTravel: boolean;
 };
 
 export type CategoryRow = {
@@ -40,6 +79,7 @@ export function toHabitSummaryView(
 ): HabitSummaryView {
   const category =
     row.categoryId === null ? null : categories.get(row.categoryId);
+  const isWorkout = row.type === "workout";
 
   return {
     id: row.id,
@@ -57,10 +97,17 @@ export function toHabitSummaryView(
       row.typicalDays === null
         ? null
         : (row.typicalDays as HabitSummaryView["typicalDays"]),
-    // UX v1.2 (RUN-1): neutral until RUN-3 reads `0007`'s columns.
-    versions: null,
-    workoutType: null,
-    location: null,
-    travel: null,
+    versions: row.versions && row.versions.length > 0 ? row.versions : null,
+    // The workout columns are read only off a workout, so a stray value on a
+    // habit (there should be none — the service refuses them) never renders.
+    workoutType: isWorkout ? row.workoutType : null,
+    location: isWorkout ? row.location : null,
+    travel: isWorkout
+      ? {
+          thereMin: row.travelThereMin,
+          backMin: row.travelBackMin,
+          planned: row.planTravel,
+        }
+      : null,
   };
 }

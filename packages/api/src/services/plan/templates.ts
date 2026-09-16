@@ -2,9 +2,11 @@ import { and, asc, count, countDistinct, eq, isNull, isNotNull } from "drizzle-o
 
 import {
   dayBlocks,
+  dayPlans,
   habits,
   templateSlots,
   templates,
+  users,
   type RlsClient,
 } from "@syn/db";
 import type {
@@ -13,8 +15,13 @@ import type {
   BlockStructure,
   SlotView,
   TemplateSummaryView,
+  WorkDayTypeView,
 } from "@syn/types";
-import type { RestoreSlotInput, TemplatePatchInput } from "@syn/validators";
+import type {
+  RestoreSlotInput,
+  TemplatePatchInput,
+  WorkDayTypeFieldsInput,
+} from "@syn/validators";
 
 import { readPreferences } from "../user/preferences";
 import {
@@ -27,9 +34,50 @@ import {
   compareSlots,
   toSlotViews,
   toTemplateSummaryView,
+  toWorkDayTypeView,
   walkTemplate,
   type SlotRow,
+  type TemplateRow,
 } from "./to-view";
+
+/**
+ * The four work-day-type columns are meaningful on `kind = work` alone (UX
+ * v1.2 §3.8, TD-14). The patch schema cannot know the row's kind, so this is
+ * the rule's one home; the router phrases it as a `BAD_REQUEST`.
+ */
+export class NotWorkTemplateError extends Error {
+  constructor() {
+    super("not_work_template");
+    this.name = "NotWorkTemplateError";
+  }
+}
+
+const TEMPLATE_COLUMNS = {
+  id: templates.id,
+  name: templates.name,
+  kind: templates.kind,
+  flow: templates.flow,
+  structure: templates.structure,
+  anchorTime: templates.anchorTime,
+  weeklyTarget: templates.weeklyTarget,
+  typicalDays: templates.typicalDays,
+  archivedAt: templates.archivedAt,
+  workEndTime: templates.workEndTime,
+  locationKind: templates.locationKind,
+  anchorDirection: templates.anchorDirection,
+  icon: templates.icon,
+} as const;
+
+/** Trims Postgres' `HH:mm:ss` to the `HH:mm` every clock in the API speaks. */
+function toRow(row: {
+  [K in keyof TemplateRow]: K extends "anchorTime" | "workEndTime" ? string | null : TemplateRow[K];
+}): TemplateRow {
+  return {
+    ...row,
+    anchorTime: row.anchorTime === null ? null : row.anchorTime.slice(0, 5),
+    workEndTime: row.workEndTime === null ? null : row.workEndTime.slice(0, 5),
+  };
+}
 
 /**
  * Block templates: list, read, create, patch, archive, restore, duplicate, and
@@ -59,6 +107,8 @@ export type TemplateDetail = {
     weeklyTarget: number | null;
     typicalDays: number[];
     archived: boolean;
+    /** UX v1.2 §3.8 — the work-day type's four columns; null for every other kind. */
+    workDayType: WorkDayTypeView | null;
   };
   slots: SlotView[];
   /** The walk's arithmetic, for the sticky footer (v1.1 §3.11). */
@@ -141,21 +191,13 @@ export async function listTemplates(
     if (!includeArchived) conditions.push(isNull(templates.archivedAt));
     if (options.kind) conditions.push(eq(templates.kind, options.kind));
 
-    const rows = await tx
-      .select({
-        id: templates.id,
-        name: templates.name,
-        kind: templates.kind,
-        flow: templates.flow,
-        structure: templates.structure,
-        anchorTime: templates.anchorTime,
-        weeklyTarget: templates.weeklyTarget,
-        typicalDays: templates.typicalDays,
-        archivedAt: templates.archivedAt,
-      })
-      .from(templates)
-      .where(and(...conditions))
-      .orderBy(asc(templates.kind), asc(templates.name));
+    const rows = (
+      await tx
+        .select(TEMPLATE_COLUMNS)
+        .from(templates)
+        .where(and(...conditions))
+        .orderBy(asc(templates.kind), asc(templates.name))
+    ).map(toRow);
 
     // A template is on a day through its block (TD-1): one block per day.
     const used = await tx
@@ -168,6 +210,8 @@ export async function listTemplates(
       used.map((row) => [row.templateId, Number(row.value)]),
     );
 
+    const plansByTemplate = await readUsedBy(tx, userId);
+
     const views: TemplateSummaryView[] = [];
     for (const row of rows) {
       const slotRows = await readSlotRows(tx, userId, row.id);
@@ -179,11 +223,54 @@ export async function listTemplates(
           slotRows.length,
           walk.totalMin,
           usedByTemplate.get(row.id) ?? 0,
+          plansByTemplate.get(row.id) ?? [],
         ),
       );
     }
     return views;
   });
+}
+
+/**
+ * Which day plans reference each template through any of their four
+ * template FKs (UX v1.2 §3.13, TD-10) — *used by Day A, Day B* on the block
+ * editor's template list. One query over `day_plans`, grouped in code; never
+ * a query per template.
+ */
+async function readUsedBy(
+  tx: Tx,
+  userId: string,
+): Promise<Map<string, Array<{ id: string; name: string }>>> {
+  const plans = await tx
+    .select({
+      id: dayPlans.id,
+      name: dayPlans.name,
+      prepTemplateId: dayPlans.prepTemplateId,
+      morningTemplateId: dayPlans.morningTemplateId,
+      windDownTemplateId: dayPlans.windDownTemplateId,
+      workTemplateId: dayPlans.workTemplateId,
+    })
+    .from(dayPlans)
+    .where(eq(dayPlans.userId, userId))
+    .orderBy(asc(dayPlans.sortOrder), asc(dayPlans.createdAt));
+
+  const byTemplate = new Map<string, Array<{ id: string; name: string }>>();
+  for (const plan of plans) {
+    const refs = new Set(
+      [
+        plan.prepTemplateId,
+        plan.morningTemplateId,
+        plan.windDownTemplateId,
+        plan.workTemplateId,
+      ].filter((id): id is string => id !== null),
+    );
+    for (const templateId of refs) {
+      const list = byTemplate.get(templateId) ?? [];
+      list.push({ id: plan.id, name: plan.name });
+      byTemplate.set(templateId, list);
+    }
+  }
+  return byTemplate;
 }
 
 export async function getTemplate(
@@ -194,23 +281,14 @@ export async function getTemplate(
   const profile = await anchorProfileFor(rls, userId);
 
   return rls.execute(async (tx) => {
-    const [row] = await tx
-      .select({
-        id: templates.id,
-        name: templates.name,
-        kind: templates.kind,
-        flow: templates.flow,
-        structure: templates.structure,
-        anchorTime: templates.anchorTime,
-        weeklyTarget: templates.weeklyTarget,
-        typicalDays: templates.typicalDays,
-        archivedAt: templates.archivedAt,
-      })
+    const [raw] = await tx
+      .select(TEMPLATE_COLUMNS)
       .from(templates)
       .where(and(eq(templates.id, id), eq(templates.userId, userId)))
       .limit(1);
 
-    if (!row) return null;
+    if (!raw) return null;
+    const row = toRow(raw);
 
     const slotRows = await readSlotRows(tx, userId, id);
     const anchor = resolveTemplateAnchor(row.kind, row.flow, profile, row.anchorTime);
@@ -235,6 +313,7 @@ export async function getTemplate(
         weeklyTarget: row.weeklyTarget,
         typicalDays: row.typicalDays ?? [],
         archived: row.archivedAt !== null,
+        workDayType: toWorkDayTypeView(row),
       },
       slots: toSlotViews(slotRows, walk),
       footer: {
@@ -258,24 +337,92 @@ export async function createTemplate(
   rls: RlsClient,
   userId: string,
   kind: BlockKind,
+  /** UX v1.2 §3.8 — a work-day type's own hours, kind, anchor rule and glyph; work only. */
+  workDayType: WorkDayTypeFieldsInput = {},
+  /** RUN-12: the builder names its three lists on arrival. */
+  name = "",
 ): Promise<{ id: string }> {
+  if (kind !== "work" && hasWorkDayTypeFields(workDayType)) {
+    throw new NotWorkTemplateError();
+  }
   const profile = await anchorProfileFor(rls, userId);
-  const rows = await rls.execute((tx) =>
-    tx
+  const rows = await rls.execute(async (tx) => {
+    const inserted = await tx
       .insert(templates)
       .values({
         userId,
-        name: "",
+        name,
         kind,
         flow: defaultFlowFor(kind),
         structure: "stack",
-        anchorTime: kind === "work" ? profile.workStartTime : null,
+        anchorTime:
+          kind === "work"
+            ? (workDayType.anchorTime ?? profile.workStartTime)
+            : null,
+        ...(kind === "work"
+          ? {
+              workEndTime: workDayType.workEndTime ?? null,
+              locationKind: workDayType.locationKind ?? null,
+              anchorDirection: workDayType.anchorDirection ?? null,
+              icon: workDayType.icon ?? null,
+            }
+          : {}),
       })
-      .returning({ id: templates.id }),
-  );
+      .returning({ id: templates.id });
+    if (kind === "work") await adoptWorkDefaults(tx, userId, workDayType);
+    return inserted;
+  });
   const row = rows[0];
   if (!row) throw new Error("template insert returned no row");
   return row;
+}
+
+function hasWorkDayTypeFields(fields: WorkDayTypeFieldsInput): boolean {
+  return (
+    fields.workEndTime !== undefined ||
+    fields.locationKind !== undefined ||
+    fields.anchorDirection !== undefined ||
+    fields.icon !== undefined
+  );
+}
+
+/**
+ * Screen 3's *No* path (UX v1.2 §4.3, TD-14): when the profile has no work
+ * start yet, the first type's values become the defaults every other screen
+ * reads. A profile that already has values is left alone — the type is its
+ * own thing and never overwrites what the person set.
+ */
+async function adoptWorkDefaults(
+  tx: Tx,
+  userId: string,
+  fields: WorkDayTypeFieldsInput,
+): Promise<void> {
+  const [current] = await tx
+    .select({
+      workStartTime: users.workStartTime,
+      workEndTime: users.workEndTime,
+      anchorDirection: users.anchorDirection,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (!current || current.workStartTime !== null) return;
+
+  const patch = {
+    ...(fields.anchorTime ? { workStartTime: fields.anchorTime } : {}),
+    ...(fields.workEndTime && current.workEndTime === null
+      ? { workEndTime: fields.workEndTime }
+      : {}),
+    ...(fields.anchorDirection && current.anchorDirection === null
+      ? { anchorDirection: fields.anchorDirection }
+      : {}),
+  };
+  if (Object.keys(patch).length === 0) return;
+
+  await tx
+    .update(users)
+    .set({ ...patch, updatedAt: new Date() })
+    .where(eq(users.id, userId));
 }
 
 export async function updateTemplate(
@@ -299,18 +446,94 @@ export async function updateTemplate(
     ...(input.patch.structure !== undefined
       ? { structure: input.patch.structure }
       : {}),
+    // UX v1.2 §3.8 — the work-day type's columns; the kind rule is checked below.
+    ...(input.patch.workEndTime !== undefined
+      ? { workEndTime: input.patch.workEndTime }
+      : {}),
+    ...(input.patch.locationKind !== undefined
+      ? { locationKind: input.patch.locationKind }
+      : {}),
+    ...(input.patch.anchorDirection !== undefined
+      ? { anchorDirection: input.patch.anchorDirection }
+      : {}),
+    ...(input.patch.icon !== undefined ? { icon: input.patch.icon } : {}),
   };
 
   if (Object.keys(patch).length === 0) return { id: input.id };
 
-  const rows = await rls.execute((tx) =>
-    tx
+  const touchesWorkColumns = hasWorkDayTypeFields(input.patch);
+
+  return rls.execute(async (tx) => {
+    if (touchesWorkColumns) {
+      const [row] = await tx
+        .select({ kind: templates.kind })
+        .from(templates)
+        .where(and(eq(templates.id, input.id), eq(templates.userId, userId)))
+        .limit(1);
+      if (!row) return null;
+      const kindAfter = input.patch.kind ?? row.kind;
+      if (kindAfter !== "work") throw new NotWorkTemplateError();
+    }
+
+    const rows = await tx
       .update(templates)
       .set({ ...patch, updatedAt: new Date() })
       .where(and(eq(templates.id, input.id), eq(templates.userId, userId)))
-      .returning({ id: templates.id }),
-  );
-  return rows[0] ?? null;
+      .returning({ id: templates.id, kind: templates.kind });
+    const row = rows[0];
+    if (!row) return null;
+
+    if (row.kind === "work") await adoptWorkDefaults(tx, userId, input.patch);
+    return { id: row.id };
+  });
+}
+
+/** The name the silently-created work template carries. [COPY — needs Vesper sign-off] */
+const DEFAULT_WORK_TEMPLATE_NAME = "Work";
+
+/**
+ * The person's work templates, creating one from the profile when none exist
+ * (UX v1.2 §4.3's *Yes* path, TD-14) so a day plan always has a type to pick.
+ * Idempotent: a second call finds the first. Read-then-create inside one
+ * transaction; a duplicate *Work* from a genuine race is harmless and
+ * archivable, which is why no unique index guards it.
+ */
+export async function ensureWorkTemplates(
+  rls: RlsClient,
+  userId: string,
+): Promise<TemplateSummaryView[]> {
+  const profile = await anchorProfileFor(rls, userId);
+  const prefs = await readPreferences(rls, userId);
+
+  await rls.execute(async (tx) => {
+    const [existing] = await tx
+      .select({ id: templates.id })
+      .from(templates)
+      .where(
+        and(
+          eq(templates.userId, userId),
+          eq(templates.kind, "work"),
+          isNull(templates.archivedAt),
+        ),
+      )
+      .limit(1);
+    if (existing) return;
+
+    await tx.insert(templates).values({
+      userId,
+      name: DEFAULT_WORK_TEMPLATE_NAME,
+      kind: "work",
+      flow: defaultFlowFor("work"),
+      structure: "stack",
+      anchorTime: profile.workStartTime,
+      workEndTime: profile.workEndTime,
+      anchorDirection: prefs?.anchorDirection ?? null,
+      locationKind: null,
+      icon: null,
+    });
+  });
+
+  return listTemplates(rls, userId, { includeArchived: false, kind: "work" });
 }
 
 /**
@@ -427,6 +650,11 @@ export async function duplicateTemplate(
         kind: source.kind,
         flow: source.flow,
         structure: source.structure,
+        // UX v1.2 §3.8 — a copied work-day type keeps its hours, kind, rule and glyph.
+        workEndTime: source.workEndTime,
+        locationKind: source.locationKind,
+        anchorDirection: source.anchorDirection,
+        icon: source.icon,
       })
       .returning({ id: templates.id });
 

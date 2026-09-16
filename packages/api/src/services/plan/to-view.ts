@@ -1,4 +1,5 @@
 import type {
+  AnchorDirection,
   BlockFlow,
   BlockKind,
   BlockStructure,
@@ -6,6 +7,8 @@ import type {
   SlotRole,
   SlotView,
   TemplateSummaryView,
+  WorkDayKind,
+  WorkDayTypeView,
 } from "@syn/types";
 import { formatClockFromMinutes, stackBlock, type StackItem } from "@syn/utils";
 
@@ -202,18 +205,46 @@ export type TemplateRow = {
   kind: BlockKind;
   flow: BlockFlow;
   structure: BlockStructure;
-  /** Nullable since 0004 (v1.1 §11.4); the summary does not read it. */
+  /** Nullable since 0004 (v1.1 §11.4); a work template's *working by* (v1.2 §3.8). */
   anchorTime: string | null;
   weeklyTarget: number | null;
   typicalDays: number[] | null;
   archivedAt: Date | null;
+  /* ---- UX v1.2 §3.8, TD-14 — the work-day type's four columns (0007). ---- */
+  workEndTime: string | null;
+  locationKind: WorkDayKind | null;
+  anchorDirection: AnchorDirection | null;
+  icon: IconValue | null;
 };
+
+/**
+ * The work-day type a work template is (v1.2 §3.8, TD-14): its own hours,
+ * kind, anchor rule and glyph — each null where the profile's value applies.
+ * Null for every other kind, so a caller never reads hours off a routine.
+ */
+export function toWorkDayTypeView(row: TemplateRow): WorkDayTypeView | null {
+  if (row.kind !== "work") return null;
+  return {
+    startClock:
+      row.anchorTime === null
+        ? null
+        : formatClockFromMinutes(clockToMin(row.anchorTime)),
+    endClock:
+      row.workEndTime === null
+        ? null
+        : formatClockFromMinutes(clockToMin(row.workEndTime)),
+    locationKind: row.locationKind,
+    anchorDirection: row.anchorDirection,
+    icon: row.icon,
+  };
+}
 
 export function toTemplateSummaryView(
   row: TemplateRow,
   itemCount: number,
   totalMin: number,
   usedThisWeek: number,
+  usedBy: ReadonlyArray<{ id: string; name: string }> = [],
 ): TemplateSummaryView {
   return {
     id: row.id,
@@ -227,8 +258,7 @@ export function toTemplateSummaryView(
     kind: row.kind,
     flow: row.flow,
     structure: row.structure,
-    // UX v1.2 (RUN-1): neutral until RUN-3 reads `0007`'s columns and `day_plans`.
-    workDayType: null,
-    usedBy: [],
+    workDayType: toWorkDayTypeView(row),
+    usedBy,
   };
 }

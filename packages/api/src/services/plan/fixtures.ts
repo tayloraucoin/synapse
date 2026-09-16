@@ -27,6 +27,9 @@ type FixtureRow = {
   scheduling: FixtureView["scheduling"];
   habitId: string | null;
   archivedAt: Date | null;
+  /* ---- UX v1.2 §3.6, R42 (0007) ---- */
+  kind: FixtureView["kind"];
+  icon: FixtureView["icon"];
 };
 
 export function toFixtureView(row: FixtureRow): FixtureView {
@@ -40,9 +43,8 @@ export function toFixtureView(row: FixtureRow): FixtureView {
     scheduling: row.scheduling,
     habitId: row.habitId,
     archived: row.archivedAt !== null,
-    // UX v1.2 (RUN-1): the *Other* kind's defaults until RUN-3 reads `0007`'s columns.
-    kind: "other",
-    icon: fixtureKindDefaults("other").icon,
+    kind: row.kind,
+    icon: row.icon,
   };
 }
 
@@ -56,6 +58,8 @@ const COLUMNS = {
   scheduling: fixtures.scheduling,
   habitId: fixtures.habitId,
   archivedAt: fixtures.archivedAt,
+  kind: fixtures.kind,
+  icon: fixtures.icon,
 } as const;
 
 export async function listFixtures(
@@ -82,14 +86,20 @@ export async function saveFixture(
   userId: string,
   input: FixtureFormInput,
 ): Promise<FixtureView | null> {
+  // UX v1.2 §3.6, R42: the kind's glyph and block unless the sheet sent its
+  // own. A kind is a label — the block it implies is a default the person
+  // overrides, and nothing in materialisation reads the kind.
+  const defaults = fixtureKindDefaults(input.kind);
   const values = {
     title: input.title,
     weekdays: [...new Set(input.weekdays)].sort((a, b) => a - b),
     atTime: input.atClock,
     durationMin: input.durationMin,
-    blockKind: input.blockKind,
+    blockKind: input.blockKind ?? defaults.defaultBlockKind,
     scheduling: input.scheduling,
     habitId: input.habitId ?? null,
+    kind: input.kind,
+    icon: input.icon ?? defaults.icon,
   };
 
   const rows = await rls.execute((tx) =>

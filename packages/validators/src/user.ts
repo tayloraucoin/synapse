@@ -93,10 +93,12 @@ export const updatePreferencesInput = z
     workStartTime: clockTimeSchema.nullable().optional(),
     workEndTime: clockTimeSchema.nullable().optional(),
     anchorDirection: anchorDirectionSchema.nullable().optional(),
+    /** @deprecated UX v1.2 R39 — accepted and IGNORED by the service; removed with its sender in RUN-8; dropped in `0008`. */
     earliestWakeTime: clockTimeSchema.nullable().optional(),
     lightsOutTime: clockTimeSchema.nullable().optional(),
     devicesOffTime: clockTimeSchema.nullable().optional(),
     overflowMode: overflowModeSchema.optional(),
+    /** @deprecated UX v1.2 R36 — accepted and IGNORED; `passages` is the home (RUN-4); removed with its sender in RUN-9. */
     orientPassage: z
       .string()
       .trim()
@@ -104,6 +106,7 @@ export const updatePreferencesInput = z
       .nullable()
       .transform((value) => (value === "" ? null : value))
       .optional(),
+    /** @deprecated UX v1.2 R41 — accepted and IGNORED; removed with its sender in RUN-9. */
     orientShowLastNight: z.boolean().optional(),
     orientAskGratitude: z.boolean().optional(),
     journalEnabled: z.boolean().optional(),

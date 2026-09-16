@@ -20,10 +20,12 @@ import {
   saveSlot,
 } from "../services/plan/save-slot";
 import {
+  NotWorkTemplateError,
   archiveTemplate,
   createTemplate,
   discardIfEmpty,
   duplicateTemplate,
+  ensureWorkTemplates,
   getTemplate,
   listTemplates,
   moveSlot,
@@ -32,6 +34,9 @@ import {
   updateTemplate,
 } from "../services/plan/templates";
 import { protectedProcedure, router } from "../trpc";
+
+/** The work-day-type columns on a non-work template (UX v1.2 §3.8, TD-14). */
+const NOT_WORK = "NOT_WORK_TEMPLATE";
 
 /**
  * Block templates and their slots (UX v1.1 §3.11, §11.4, §11.5).
@@ -71,19 +76,51 @@ export const templateRouter = router({
   /** The fit at planning time — first run's last screen (v1.1 §3.10, §4.12). */
   fit: protectedProcedure.query(async ({ ctx }) => planFit(ctx.rls, ctx.authContext.userId)),
 
-  /** A block of the given kind; the anchor comes from the profile (v1.1 §11.4). */
+  /**
+   * A block of the given kind; the anchor comes from the profile (v1.1
+   * §11.4). A work-day type (UX v1.2 §3.8) passes its four fields; on any
+   * other kind they are a `BAD_REQUEST`.
+   */
   create: protectedProcedure
     .input(createTemplateInput)
-    .mutation(async ({ ctx, input }) =>
-      createTemplate(ctx.rls, ctx.authContext.userId, input.kind),
-    ),
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await createTemplate(
+          ctx.rls,
+          ctx.authContext.userId,
+          input.kind,
+          input.workDayType ?? {},
+          input.name ?? "",
+        );
+      } catch (error) {
+        if (error instanceof NotWorkTemplateError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: NOT_WORK, cause: error });
+        }
+        throw error;
+      }
+    }),
+
+  /**
+   * The person's work templates, creating one from the profile when none
+   * exist (UX v1.2 §4.3, TD-14) — so a day plan always has a type to pick.
+   */
+  ensureWork: protectedProcedure.mutation(async ({ ctx }) =>
+    ensureWorkTemplates(ctx.rls, ctx.authContext.userId),
+  ),
 
   update: protectedProcedure
     .input(templatePatchSchema)
     .mutation(async ({ ctx, input }) => {
-      const saved = await updateTemplate(ctx.rls, ctx.authContext.userId, input);
-      if (!saved) throw new TRPCError(NOT_FOUND);
-      return saved;
+      try {
+        const saved = await updateTemplate(ctx.rls, ctx.authContext.userId, input);
+        if (!saved) throw new TRPCError(NOT_FOUND);
+        return saved;
+      } catch (error) {
+        if (error instanceof NotWorkTemplateError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: NOT_WORK, cause: error });
+        }
+        throw error;
+      }
     }),
 
   discardIfEmpty: protectedProcedure

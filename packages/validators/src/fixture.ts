@@ -29,7 +29,8 @@ export const fixtureFormSchema = z.object({
     .max(7),
   atClock: clockTimeSchema,
   durationMin: z.number().int().min(DURATION_MIN).max(DURATION_MAX),
-  blockKind: z.enum(["work", "activity"]).default("activity"),
+  /** Omitted = the kind's default block (`FIXTURE_KINDS`, UX v1.2 R42); the sheet may override. */
+  blockKind: z.enum(["work", "activity"]).optional(),
   scheduling: schedulingSchema.default("hard"),
   habitId: z.string().uuid().nullable().optional(),
   /**

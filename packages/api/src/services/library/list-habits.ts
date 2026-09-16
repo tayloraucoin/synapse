@@ -9,6 +9,7 @@ import type {
 } from "@syn/types";
 
 import {
+  HABIT_SUMMARY_COLUMNS,
   toCategoryView,
   toHabitSummaryView,
   type CategoryRow,
@@ -72,20 +73,7 @@ export async function listHabits(
     }
 
     const habitRows = await tx
-      .select({
-        id: habits.id,
-        title: habits.title,
-        icon: habits.icon,
-        type: habits.type,
-        durationMinMin: habits.durationMinMin,
-        durationMaxMin: habits.durationMaxMin,
-        lifePriority: habits.lifePriority,
-        archivedAt: habits.archivedAt,
-        categoryId: habits.categoryId,
-        blockKind: habits.blockKind,
-        weeklyTarget: habits.weeklyTarget,
-        typicalDays: habits.typicalDays,
-      })
+      .select(HABIT_SUMMARY_COLUMNS)
       .from(habits)
       .where(and(...conditions));
 

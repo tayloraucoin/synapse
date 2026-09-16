@@ -6,7 +6,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 |---|---|---|---|---|
 | RUN-1 | Vocabulary, view models, validators, the seeds with their glyphs, the emoji lint rule | — | Complete (batch 1; 25 probes pasted; the lint rule proven both ways; the four commands pass — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-2 | Migration `0007`: the additive columns, `passages`, `quotes`, `day_plans`, the bucket, the backfill | RUN-1 | Complete (batch 1; authored, journalled, reference regenerated; **not applied to any tier — Taylor runs `0007` after `0004`–`0006`; the database-backed criteria are unverified** — see `DEVIATIONS.md`) | 2026-09-16 |
-| RUN-3 | Plan services: work-day types, fixture kinds, versions and workout details, `usedBy`, the profile widened | RUN-2 | Not started | — |
+| RUN-3 | Plan services: work-day types, fixture kinds, versions and workout details, `usedBy`, the profile widened | RUN-2 | Complete (batch 2; pure probes pasted; the four commands pass; **the database-backed criteria are unverified — no tier touched** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-4 | Passages and the quote bank: services, the upload kind, the orient read model | RUN-2 | Not started | — |
 | RUN-5 | Day plans: the service, the weekday invariant, pre-fill from plans, *Set from the plan* | RUN-3 | Not started | — |
 | RUN-6 | The day under v1.2: travel rows, version resolution, `applyWorkType`, the journal reminder | RUN-3 | Not started | — |
@@ -24,7 +24,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 
 - [x] RUN-1
 - [x] RUN-2
-- [ ] RUN-3
+- [x] RUN-3
 - [ ] RUN-4
 - [ ] RUN-5
 - [ ] RUN-6
