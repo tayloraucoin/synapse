@@ -8,9 +8,24 @@
  */
 import { pgEnum } from "drizzle-orm/pg-core";
 
-import type { AnchorDirection, OverflowMode, ScheduleShape } from "@syn/types";
+import type {
+  AnchorDirection,
+  MorningMode,
+  OverflowMode,
+  ScheduleShape,
+} from "@syn/types";
 
 import { enumValues } from "../enum-values";
+
+/**
+ * How mornings go — UX v1.2 R37, TD-17. The TypeScript side moved in RUN-1;
+ * the `CREATE TYPE` ships in migration `0007` (RUN-2). Nothing writes it
+ * before then.
+ */
+export const morningModeEnum = pgEnum(
+  "morning_mode",
+  enumValues<MorningMode>()(["set_from_plan", "build_each_morning"]),
+);
 
 /** "When your morning runs long, what gives?" — UX v1.1 §3.3, §4.3. */
 export const anchorDirectionEnum = pgEnum(

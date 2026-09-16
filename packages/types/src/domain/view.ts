@@ -13,12 +13,18 @@
  */
 
 import type {
+  AnchorDirection,
   BlockFlow,
   BlockKind,
   BlockStructure,
   CategoryKey,
   DayBlockState,
+  DayPlanBreak,
+  DayPlanState,
+  DayPlanTraining,
   DayShape,
+  FixtureKind,
+  HabitVersion,
   IconValue,
   ItemOrigin,
   ItemType,
@@ -29,6 +35,8 @@ import type {
   SlotRole,
   TimeMode,
   TrainingPlacement,
+  WorkDayKind,
+  WorkoutLocation,
 } from "./domain";
 import type { ItemState, MultitaskPosition } from "./ui-state";
 
@@ -93,6 +101,14 @@ export interface DayItemView {
     otherTitle: string;
     otherDurationMin: number;
   } | null;
+
+  /*
+   * ---- UX v1.2 (§3.5, §3.7; TD-11, TD-12). Neutral until RUN-6 populates them.
+   */
+  /** The chosen version's key, snapshotted; null when hand-set or the habit has none. */
+  versionKey: string | null;
+  /** For a travel row (`origin: travel`): the workout it belongs beside. */
+  parentItemId: string | null;
 }
 
 export interface SlotView {
@@ -146,6 +162,16 @@ export interface HabitSummaryView {
   weeklyTarget: number | null;
   /** Workouts and focuses only — the days it usually falls on. Mon = 0. */
   typicalDays: ReadonlyArray<Weekday> | null;
+
+  /* ---- UX v1.2 (§3.5, §3.7; TD-11, TD-12) ---- */
+  /** Up to three named lengths; the first is the default. Null when none. */
+  versions: ReadonlyArray<HabitVersion> | null;
+  /** Workouts only — the curated type's key, or null for *Other* / none. */
+  workoutType: string | null;
+  /** Workouts only — where it happens. */
+  location: WorkoutLocation | null;
+  /** Workouts only — the minutes there and back, and whether the day plans for them. */
+  travel: { thereMin: number; backMin: number; planned: boolean } | null;
 }
 
 export interface TemplateSummaryView {
@@ -163,6 +189,24 @@ export interface TemplateSummaryView {
   kind: BlockKind;
   flow: BlockFlow;
   structure: BlockStructure;
+
+  /* ---- UX v1.2 (§3.8, §3.13; TD-10, TD-14) ---- */
+  /** Work templates only — a work-day type's own hours, kind, anchor rule, glyph. */
+  workDayType: WorkDayTypeView | null;
+  /** The day plans that reference this template through any of their three list FKs. */
+  usedBy: ReadonlyArray<{ id: string; name: string }>;
+}
+
+/** A work-day type — v1.2 §3.8, R32, TD-14: the four columns on a work template. */
+export interface WorkDayTypeView {
+  /** "9:00" — `anchor_time`, the type's *working by*; null = the profile's. */
+  startClock: string | null;
+  /** "17:30" — `work_end_time`; null = the profile's. */
+  endClock: string | null;
+  locationKind: WorkDayKind | null;
+  /** Null = the profile's answer. */
+  anchorDirection: AnchorDirection | null;
+  icon: IconValue | null;
 }
 
 /*
@@ -205,6 +249,71 @@ export interface FixtureView {
   scheduling: Scheduling;
   habitId: string | null;
   archived: boolean;
+
+  /* ---- UX v1.2 (§3.6, R42) ---- */
+  kind: FixtureKind;
+  icon: IconValue;
+}
+
+/*
+ * ---- UX v1.2 — new view models (§3.12, §3.13; TD-10, TD-13, TD-15) ----
+ */
+
+/** One saved piece of morning reading — v1.2 §3.12. The person's own or chosen. */
+export interface PassageView {
+  id: string;
+  title: string | null;
+  /** Markdown, the storage form (TD-15); rendered through the editor's read-only mode. */
+  bodyMd: string;
+  /** Bucket-qualified paths (`passages/{user_id}/{file}`); the caller resolves URLs. */
+  images: ReadonlyArray<string>;
+  tags: ReadonlyArray<string>;
+  sortOrder: number;
+}
+
+/** One quote from the bank — v1.2 §3.12. Attributed; never keyed to the person. */
+export interface QuoteView {
+  id: string;
+  text: string;
+  attribution: string;
+  source: string | null;
+}
+
+/** A day plan as the list and the week screen read it — v1.2 §4.13, §4.14. */
+export interface DayPlanSummaryView {
+  id: string;
+  name: string;
+  icon: IconValue | null;
+  /** Mon = 0. A weekday belongs to at most one plan. */
+  weekdays: ReadonlyArray<Weekday>;
+  state: DayPlanState;
+  /** The work-day type's name and glyph, or null for *No work on this day*. */
+  work: { templateId: string; name: string; icon: IconValue | null } | null;
+  /** "7:00" — the plan's own or the inherited value, resolved. */
+  wakeClock: string | null;
+  workStartClock: string | null;
+  workEndClock: string | null;
+  lightsOutClock: string | null;
+  /** Each placed workout with its glyph, for the summary line. */
+  training: ReadonlyArray<{ habitId: string; title: string; icon: IconValue; placement: TrainingPlacement }>;
+  /** The three named lists, each with its length, or null when the plan has none. */
+  gettingReady: { templateId: string; name: string; totalMin: number } | null;
+  morning: { templateId: string; name: string; totalMin: number } | null;
+  windDown: { templateId: string; name: string; totalMin: number } | null;
+}
+
+/** A day plan as the builder edits it — v1.2 §3.13, TD-10: references and times, never copies. */
+export interface DayPlanView extends DayPlanSummaryView {
+  /** Null = inherit from the profile / the type; the summary above carries the resolved value. */
+  wakeTime: string | null;
+  workStartTime: string | null;
+  workEndTime: string | null;
+  lightsOutTime: string | null;
+  devicesOffTime: string | null;
+  trainingPlan: ReadonlyArray<DayPlanTraining>;
+  breaks: ReadonlyArray<DayPlanBreak>;
+  excludedFixtureIds: ReadonlyArray<string>;
+  sortOrder: number;
 }
 
 /** A routine variant or a focus/workout with what is left of its weekly count. */

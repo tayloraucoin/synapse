@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { DURATION_MAX, DURATION_MIN, FIXTURE_TITLE_MAX } from "@syn/constants";
 
+import { fixtureKindSchema } from "./block";
+import { iconValueSchema } from "./icon";
 import { clockTimeSchema } from "./preferences";
 import { schedulingSchema, weekdaySchema } from "./template";
 
@@ -30,6 +32,14 @@ export const fixtureFormSchema = z.object({
   blockKind: z.enum(["work", "activity"]).default("activity"),
   scheduling: schedulingSchema.default("hard"),
   habitId: z.string().uuid().nullable().optional(),
+  /**
+   * UX v1.2 §3.6, R42 — a label and a glyph. The kind's default glyph and
+   * default block are `FIXTURE_KINDS`'; the service fills `icon` from the
+   * kind when the sheet sends none, and `blockKind` is the sheet's to
+   * override.
+   */
+  kind: fixtureKindSchema.default("other"),
+  icon: iconValueSchema.optional(),
 });
 
 export type FixtureFormInput = z.infer<typeof fixtureFormSchema>;

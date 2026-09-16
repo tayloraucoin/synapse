@@ -120,20 +120,34 @@ export {
   categoryKeySchema,
   createFromStarterLibraryInput,
   createHabitInput,
+  createStepInput,
   habitFormSchema,
   habitIdInput,
+  habitPatchSchema,
   habitTypeSchema,
+  habitVersionSchema,
+  habitVersionsSchema,
   iconValueSchema,
   listHabitsInput,
+  patchHabitInput,
+  patchWorkoutInput,
   rotationHabitSchema,
   slotsOutsideRangeInput,
   updateHabitInput,
+  versionKeySchema,
+  workoutDetailsSchema,
+  workoutPatchSchema,
   type CreateFromStarterLibraryInput,
+  type CreateStepInput,
   type HabitFormInput,
   type HabitTypeInput,
+  type HabitVersionInput,
   type IconValueInput,
+  type PatchHabitInput,
+  type PatchWorkoutInput,
   type RotationHabitInput,
   type UpdateHabitInput,
+  type WorkoutDetailsInput,
 } from "./habit";
 
 export {
@@ -143,17 +157,44 @@ export {
   blockOrderSchema,
   blockStructureSchema,
   createTemplateInput,
+  dayPlanStateSchema,
   dayShapeSchema,
+  fixtureKindSchema,
+  morningModeSchema,
   overflowModeSchema,
   scheduleShapeSchema,
   slotRoleSchema,
   trainingPlacementSchema,
+  workDayKindSchema,
   workDayModeSchema,
   workDaysSchema,
+  workoutLocationSchema,
   type BlockKindInput,
   type CreateTemplateInput,
   type WorkDaysInput,
 } from "./block";
+
+export {
+  completeDayPlanInput,
+  createDayPlanInput,
+  dayPlanBreakSchema,
+  dayPlanIdInput,
+  dayPlanPatchSchema,
+  dayPlanTrainingSchema,
+  listDayPlansInput,
+  updateDayPlanInput,
+  type CompleteDayPlanInput,
+  type DayPlanPatchInput,
+  type UpdateDayPlanInput,
+} from "./day-plan";
+
+export {
+  passageFormSchema,
+  passageIdInput,
+  reorderPassagesInput,
+  type PassageFormInput,
+  type ReorderPassagesInput,
+} from "./passage";
 
 export {
   fixtureFormSchema,
@@ -221,9 +262,11 @@ export {
   templatePatchSchema,
   timeModeSchema,
   weekdaySchema,
+  workDayTypeFieldsSchema,
   type RestoreSlotInput,
   type SlotFormInput,
   type TemplatePatchInput,
+  type WorkDayTypeFieldsInput,
 } from "./template";
 
 export {

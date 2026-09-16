@@ -108,6 +108,8 @@ function toItemView(slot: SlotView, startMin: number, endMin: number): DayItemVi
             otherTitle: slot.alternates.otherTitle,
             otherDurationMin: slot.alternates.otherDurationMin,
           },
+    versionKey: null,
+    parentItemId: null,
   };
 }
 

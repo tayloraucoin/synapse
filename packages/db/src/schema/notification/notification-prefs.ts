@@ -55,6 +55,9 @@ export const notificationKindEnum = pgEnum(
     "block_start",
     "fixture_start",
     "devices_off",
+    // UX v1.2 §9 N2 (R38) — the journal reminder. Moved in RUN-1; the
+    // `ADD VALUE` ships in `0007`; sent from RUN-6.
+    "journal_reminder",
   ]),
 );
 

@@ -69,8 +69,12 @@ export type AnchorDirection = "work_waits" | "routine_cut" | "depends";
 /** User.overflow_mode — v1.1 §3.10. */
 export type OverflowMode = "daily_menu" | "variants" | "auto_trim";
 
-/** One weekday's answer to "which days do you work?" — v1.1 §4.2. */
-export type WorkDayMode = "always" | "sometimes" | "never";
+/**
+ * One weekday's answer to "which days do you work?" — v1.1 §4.2, plus
+ * `rarely` (UX v1.2 R40, TD-19): planned as a day off, the pick does not ask,
+ * and the day header sheet offers *Working today* to apply a work-day type.
+ */
+export type WorkDayMode = "always" | "sometimes" | "rarely" | "never";
 
 /** User.work_days — Mon = "0" … Sun = "6", matching `typical_days`. */
 export type WorkDays = Record<"0" | "1" | "2" | "3" | "4" | "5" | "6", WorkDayMode>;
@@ -81,6 +85,63 @@ export type ScheduleShape =
   | "consistent_shifts"
   | "varying_shifts"
   | "fluid";
+
+/*
+ * ---- UX v1.2 — the first run rebuilt (§1.4, §3, §11; TD-10…TD-20) ----
+ */
+
+/**
+ * User.morning_mode — v1.2 R37, TD-17. `set_from_plan`: *Start the morning*
+ * sets the day from the day plan and the quick-pick is skipped;
+ * `build_each_morning`: the pick opens after orient, expanded.
+ */
+export type MorningMode = "set_from_plan" | "build_each_morning";
+
+/** Template.location_kind — v1.2 §3.8, TD-14; a work-day type's kind. A label. */
+export type WorkDayKind = "remote" | "coworking" | "office" | "other";
+
+/**
+ * Fixture.kind — v1.2 §3.6, R42. A label and a default glyph; nothing in
+ * materialisation reads it.
+ */
+export type FixtureKind =
+  | "meeting"
+  | "appointment"
+  | "class"
+  | "event"
+  | "social"
+  | "chore"
+  | "other";
+
+/** Habit.location — v1.2 §3.7; workouts only. */
+export type WorkoutLocation = "home" | "gym" | "outside";
+
+/**
+ * One of a habit's versions — v1.2 §3.5, R34, TD-11: a named length. Up to
+ * three per habit; the first is the default the plan uses. Stored as a jsonb on
+ * `habits`; the chosen version is snapshotted on the item as `version_key`.
+ */
+export type HabitVersion = {
+  key: string;
+  label: string;
+  minutes: number;
+};
+
+/** DayPlan.state — v1.2 §3.13, TD-10. A plan left before the review stays a draft. */
+export type DayPlanState = "draft" | "complete";
+
+/** One workout placed by a day plan — v1.2 §4.13c; `training` on `day_plans`. */
+export type DayPlanTraining = {
+  habitId: string;
+  placement: TrainingPlacement;
+};
+
+/** One break placed by a day plan — v1.2 §4.13f; `breaks` on `day_plans`. */
+export type DayPlanBreak = {
+  habitId: string;
+  /** `"midday"`, or a clock time `HH:mm`. */
+  at: "midday" | (string & {});
+};
 
 /** Shift.kind — v1.1 §11.9, TD-6: a slide of the anchor, or a re-fit that holds it. */
 export type ShiftKind = "shift" | "refit";
@@ -138,7 +199,12 @@ export type ItemOrigin =
   | "carried"
   | "calendar_import"
   /** UX v1.1 §3.6, TD-8 — a weekday fixture, materialised as a pin. */
-  | "fixture";
+  | "fixture"
+  /**
+   * UX v1.2 §3.7, TD-12 — the travel there or back around a workout, an item
+   * of its own beside it; `parent_item_id` points at the workout.
+   */
+  | "travel";
 
 /**
  * Category.color_key — the eight category hues of official spec §9.3. Never the
@@ -209,7 +275,12 @@ export type NotificationKind =
   | "calendar_item"
   | "block_start"
   | "fixture_start"
-  | "devices_off";
+  | "devices_off"
+  /**
+   * UX v1.2 §9 N2, R38 — one push at `journal_reminder_time`, sent only when
+   * the journal is on, the reminder is on, and tonight's entry is empty.
+   */
+  | "journal_reminder";
 
 /** DataExport.status — official spec §7.6, Epic 1 ST-10. */
 export type ExportStatus = "preparing" | "ready" | "expired" | "failed";

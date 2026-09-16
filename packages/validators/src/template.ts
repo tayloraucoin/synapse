@@ -12,11 +12,14 @@ import {
 } from "@syn/constants";
 
 import {
+  anchorDirectionSchema,
   blockFlowSchema,
   blockKindSchema,
   blockStructureSchema,
   slotRoleSchema,
+  workDayKindSchema,
 } from "./block";
+import { iconValueSchema } from "./icon";
 import { clockTimeSchema } from "./preferences";
 
 /**
@@ -56,10 +59,32 @@ export const templatePatchSchema = z.object({
     kind: blockKindSchema.optional(),
     flow: blockFlowSchema.optional(),
     structure: blockStructureSchema.optional(),
+
+    /*
+     * ---- UX v1.2 §3.8, R32, TD-14: a work-day type's four columns. Meaningful
+     * only when `kind = work`; the SERVICE refuses them on any other kind (the
+     * patch does not know the row's kind). `anchorTime` above is the type's
+     * *working by*.
+     */
+    workEndTime: clockTimeSchema.nullable().optional(),
+    locationKind: workDayKindSchema.nullable().optional(),
+    anchorDirection: anchorDirectionSchema.nullable().optional(),
+    icon: iconValueSchema.nullable().optional(),
   }),
 });
 
 export type TemplatePatchInput = z.infer<typeof templatePatchSchema>;
+
+/** The four work columns alone — what `template.create({ kind: "work" })` may also carry. */
+export const workDayTypeFieldsSchema = z.object({
+  anchorTime: clockTimeSchema.nullable().optional(),
+  workEndTime: clockTimeSchema.nullable().optional(),
+  locationKind: workDayKindSchema.nullable().optional(),
+  anchorDirection: anchorDirectionSchema.nullable().optional(),
+  icon: iconValueSchema.nullable().optional(),
+});
+
+export type WorkDayTypeFieldsInput = z.infer<typeof workDayTypeFieldsSchema>;
 
 /** The rule that runs when someone tries to leave a named-nothing draft. */
 export const templateLeaveSchema = z.object({

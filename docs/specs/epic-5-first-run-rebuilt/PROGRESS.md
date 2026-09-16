@@ -4,7 +4,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 
 | Ticket | Title | Depends on | Status | Date |
 |---|---|---|---|---|
-| RUN-1 | Vocabulary, view models, validators, the seeds with their glyphs, the emoji lint rule | — | Not started | — |
+| RUN-1 | Vocabulary, view models, validators, the seeds with their glyphs, the emoji lint rule | — | Complete (batch 1; 25 probes pasted; the lint rule proven both ways; the four commands pass — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-2 | Migration `0007`: the additive columns, `passages`, `quotes`, `day_plans`, the bucket, the backfill | RUN-1 | Not started | — |
 | RUN-3 | Plan services: work-day types, fixture kinds, versions and workout details, `usedBy`, the profile widened | RUN-2 | Not started | — |
 | RUN-4 | Passages and the quote bank: services, the upload kind, the orient read model | RUN-2 | Not started | — |
@@ -22,7 +22,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 
 ## Checklist
 
-- [ ] RUN-1
+- [x] RUN-1
 - [ ] RUN-2
 - [ ] RUN-3
 - [ ] RUN-4

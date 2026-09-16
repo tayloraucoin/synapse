@@ -115,6 +115,10 @@ export const itemOriginEnum = pgEnum(
     // UX v1.1 §3.6 (TD-8) — a weekday fixture, materialised as a pin. Moved
     // in DYN-1; the `ADD VALUE` ships in `0004`; written from DYN-5.
     "fixture",
+    // UX v1.2 §3.7 (TD-12) — the travel there or back around a workout, an
+    // item of its own. Moved in RUN-1; the `ADD VALUE` ships in `0007`;
+    // written from RUN-6.
+    "travel",
   ]),
 );
 

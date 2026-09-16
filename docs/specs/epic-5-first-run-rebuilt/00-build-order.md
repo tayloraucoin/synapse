@@ -17,7 +17,7 @@ The contract and the seeds; the one additive migration; the plan services; the c
 ## Build-order checklist
 
 ### Phase 0 — The contract and the migration (no UI)
-- [ ] **RUN-1** · Vocabulary, view models, validators, the seeds with their glyphs, the emoji lint rule, the two guide amendments — M · (none) · **Mason review of the unions and the lint override**
+- [x] **RUN-1** · Vocabulary, view models, validators, the seeds with their glyphs, the emoji lint rule, the two guide amendments — M · (none) · **Mason review of the unions and the lint override** — built 2026-09-16; **six new `pgEnum` tuples and two extended, the icon schema split into `icon.ts`, the rule proven on both literal forms**
 - [ ] **RUN-2** · Migration `0007`: the additive columns, `passages`, `quotes`, `day_plans`, `days.work_template_id`, the `passages` bucket, the `orient_passage` backfill — L · (RUN-1) · **Mason migration review**
 
 ### Phase 1 — The services
@@ -91,6 +91,22 @@ The contract and the seeds; the one additive migration; the plan services; the c
 | 7 | RUN-14, RUN-15 | The provisional surface and the cleanup | **Authored 2026-09-16** |
 
 All fifteen were authored in one thread on 2026-09-16, exceeding the guide's §7.4 ceiling for the same reason Epic 4's batches 1 and 2 did — one data model, and tickets written apart would disagree about it. Logged in `DEVIATIONS.md`.
+
+## Build batches (distinct from authoring batches and from phases)
+
+Taylor's instruction, 2026-09-16: Mason executes the track in batches, one batch per turn, and Taylor advances with **"next batch"**. This relaxes the README's one-ticket-per-thread rule (logged in `DEVIATIONS.md`) and keeps what that rule protects: a **hard checkpoint between tickets** inside a batch — three-place closure, the four verify commands, a five-line report — before the next ticket's attach-list is read. A batch never starts a ticket whose gate is not Complete. Two L tickets is the heaviest batch.
+
+| Batch | Tickets | Gate (Complete in `PROGRESS.md`) | Status |
+|---|---|---|---|
+| 1 | RUN-1 · RUN-2 | — | **In progress 2026-09-16** |
+| 2 | RUN-3 · RUN-4 | RUN-2 | |
+| 3 | RUN-5 · RUN-6 | RUN-3 | |
+| 4 | RUN-7 | RUN-1 | |
+| 5 | RUN-8 · RUN-9 | RUN-3, RUN-4, RUN-7 | |
+| 6 | RUN-10 · RUN-11 | RUN-8, RUN-3, RUN-6 | |
+| 7 | RUN-12 | RUN-5, RUN-10, RUN-11 | |
+| 8 | RUN-13 | RUN-12, RUN-6, RUN-9 | |
+| 9 | RUN-15 (+ RUN-14 only if D3 is ratified in `TECHNICAL-DECISIONS.md`; otherwise RUN-14 is skipped and the report says so) | RUN-9, RUN-10, RUN-11, RUN-13 (· RUN-4, D3) | |
 
 ## Coverage matrix — every section of v1.2 → the ticket that ships it
 

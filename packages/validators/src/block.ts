@@ -47,7 +47,31 @@ export const scheduleShapeSchema = z.enum([
   "varying_shifts",
   "fluid",
 ]);
-export const workDayModeSchema = z.enum(["always", "sometimes", "never"]);
+/** Plus `rarely` — UX v1.2 R40: planned as off, *Working today* one tap away. */
+export const workDayModeSchema = z.enum(["always", "sometimes", "rarely", "never"]);
+
+/*
+ * ---- UX v1.2 §1.4, §3, §11 (RUN-1) ----
+ */
+
+/** User.morning_mode — v1.2 R37. */
+export const morningModeSchema = z.enum(["set_from_plan", "build_each_morning"]);
+/** Template.location_kind — v1.2 §3.8; a work-day type's kind. */
+export const workDayKindSchema = z.enum(["remote", "coworking", "office", "other"]);
+/** Fixture.kind — v1.2 §3.6, R42. */
+export const fixtureKindSchema = z.enum([
+  "meeting",
+  "appointment",
+  "class",
+  "event",
+  "social",
+  "chore",
+  "other",
+]);
+/** Habit.location — v1.2 §3.7; workouts only. */
+export const workoutLocationSchema = z.enum(["home", "gym", "outside"]);
+/** DayPlan.state — v1.2 §3.13. */
+export const dayPlanStateSchema = z.enum(["draft", "complete"]);
 
 /** Mon = "0" … Sun = "6" — the shape `users.work_days` stores (v1.1 §4.2). */
 export const workDaysSchema = z.object({

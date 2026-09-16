@@ -33,9 +33,18 @@ export {
   type DefaultJournalPrompt,
 } from "./journal-prompts";
 export {
+  FIXTURE_KINDS,
+  fixtureKindDefaults,
+  type FixtureKindEntry,
+  type FixtureKindValue,
+} from "./fixture-kinds";
+export {
   CAPACITY_MAX,
   CAPACITY_MIN,
   CATEGORY_NAME_MAX,
+  CYCLE_EPOCH,
+  DAY_PLAN_NAME_MAX,
+  DEVICES_OFF_OFFSET_MIN,
   DISPLAY_NAME_MAX,
   DRAG_SNAP_MIN,
   DURATION_MAX,
@@ -45,10 +54,12 @@ export {
   FOCUS_TITLE_MAX,
   GAP_MAX,
   HABIT_TITLE_MAX,
+  HABIT_VERSIONS_MAX,
   INTENTION_MAX,
   JOURNAL_ANSWER_MAX,
   JOURNAL_PROMPT_MAX,
   JOURNAL_PROMPTS_MAX,
+  JOURNAL_REMINDER_OFFSET_MIN,
   LATE_WAKE_OFFER_MIN,
   LONG_PRESS_MS,
   MISS_NOTE_MAX,
@@ -56,6 +67,11 @@ export {
   NOTE_MAX,
   ORIENT_PASSAGE_MAX,
   OTHER_REASON_MAX,
+  PASSAGE_BODY_MAX,
+  PASSAGE_IMAGES_MAX,
+  PASSAGE_TAGS_MAX,
+  PASSAGE_TAG_MAX,
+  PASSAGE_TITLE_MAX,
   PASSWORD_MIN,
   PREFLIGHT_NOTE_MAX,
   PRIORITY_MAX,
@@ -67,7 +83,11 @@ export {
   SHIFT_MAX,
   SHIFT_MIN,
   SKIP_LINE_WINDOW_DAYS,
+  STEPPER_COMMIT_DEBOUNCE_MS,
   TEMPLATE_NAME_MAX,
+  TRAVEL_MAX,
+  VERSION_LABEL_MAX,
+  VISUALISATION_MAX,
   WEEKLY_TARGET_MAX,
   WEEKLY_TARGET_MIN,
   WORKOUT_TITLE_MAX,
@@ -86,7 +106,23 @@ export {
   NOTIFICATION_CATALOGUE,
   type NotificationCatalogueEntry,
 } from "./notification-catalogue";
-export { STARTER_LIBRARY, type StarterLibraryEntry } from "./starter-library";
+export { PLACED_ROW_ICONS, type PlacedRowKey } from "./placed-rows";
+export { SCHEDULE_SHAPE_ICONS, type ScheduleShapeValue } from "./schedule-shapes";
+export {
+  STARTER_LIBRARY,
+  type EmojiIcon,
+  type StarterLibraryEntry,
+} from "./starter-library";
+export {
+  WORK_DAY_KINDS,
+  type WorkDayKindEntry,
+  type WorkDayKindValue,
+} from "./work-day-kinds";
+export {
+  WORKOUT_TYPES,
+  type WorkoutTypeEntry,
+  type WorkoutTypeKey,
+} from "./workout-types";
 export {
   ASSET_BUCKET_BY_KIND,
   ASSET_FILE_NAME_PATTERN,

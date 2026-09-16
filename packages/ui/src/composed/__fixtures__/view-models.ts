@@ -55,6 +55,8 @@ export const ITEM: DayItemView = {
   pinned: false,
   gapBeforeMin: 0,
   alternates: null,
+  versionKey: null,
+  parentItemId: null,
 };
 
 /** One item in a named state, for the state-matrix stories. */
@@ -90,6 +92,10 @@ export const HABIT: HabitSummaryView = {
   blockKind: null,
   weeklyTarget: null,
   typicalDays: null,
+  versions: null,
+  workoutType: null,
+  location: null,
+  travel: null,
 };
 
 export const REASONS: Readonly<

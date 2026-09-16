@@ -119,6 +119,9 @@ const NO_BLOCK = {
   pinned: false,
   gapBeforeMin: 0,
   alternates: null,
+  // UX v1.2 (RUN-1): neutral until RUN-6 reads `version_key` and `parent_item_id`.
+  versionKey: null,
+  parentItemId: null,
 } as const;
 
 export async function getDay(
@@ -449,6 +452,9 @@ export async function getDay(
           pinned: row.pinned,
           gapBeforeMin: row.gapBeforeMin,
           alternates: otherOf(row),
+          // UX v1.2 (RUN-1): neutral until RUN-6 reads the two columns.
+          versionKey: null,
+          parentItemId: null,
         },
       });
     }

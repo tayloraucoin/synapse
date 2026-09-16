@@ -57,5 +57,10 @@ export function toHabitSummaryView(
       row.typicalDays === null
         ? null
         : (row.typicalDays as HabitSummaryView["typicalDays"]),
+    // UX v1.2 (RUN-1): neutral until RUN-3 reads `0007`'s columns.
+    versions: null,
+    workoutType: null,
+    location: null,
+    travel: null,
   };
 }

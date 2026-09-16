@@ -4,7 +4,7 @@
 **Slice type:** Contract / types / constants — no UI, no schema, no procedure. The risk class is *a second home for a fact* (a glyph in a title string, a kind list spelled twice, a union in a `pgEnum` tuple that disagrees with `@syn/types`) and *a rule that only a reviewer enforces* (the emoji register).
 **Vigil:** none. **Mason review:** the unions and the `pgEnum` tuples move together (as DYN-1 did); the ESLint override's file globs and its exception list.
 
-**Status:** Not started
+**Status:** Complete (2026-09-16 — built in batch 1 with RUN-2; the unions, the six `pgEnum` tuples (two new enums each in `enums.ts`, `plan/enums.ts`, `user/enums.ts`; `item_origin` and `notification_kind` extended), the validators (`icon.ts` split out of `habit.ts` to break a cycle; `habitPatchSchema` / `workoutPatchSchema` strict, one fact at a time; `passage.ts`, `day-plan.ts`), the six seed files with glyphs in `icon.value` only, N2 in the catalogue, the lint rule proven on a string literal in `@syn/constants` and a template literal in a web `copy.ts`, the two guide sections; 25 probes pasted in the closing report; the four commands pass — see `DEVIATIONS.md`)
 
 > **Mason — contract review.** Confirm: every new union in `@syn/types` has its `pgEnum` tuple beside it in `@syn/db`'s enums (the DYN-1 pattern) so RUN-2's migration reads the same list; the lint override fails on a glyph in any `copy.ts` and passes on the five seed files; no seed file carries a glyph anywhere but `icon.value`.
 

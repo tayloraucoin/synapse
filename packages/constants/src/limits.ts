@@ -126,3 +126,34 @@ export const DRAG_SNAP_MIN = 5;
 
 /** A long-press lifts a block (§3.11, §6.5). */
 export const LONG_PRESS_MS = 300;
+
+/*
+ * ---- UX v1.2 — the first run rebuilt (RUN-1) ----
+ */
+
+/** A passage's title — `passages.title` (v1.2 §11.4). */
+export const PASSAGE_TITLE_MAX = 80;
+/** A passage's Markdown body (v1.2 §11.4). */
+export const PASSAGE_BODY_MAX = 8000;
+/** Images per passage (v1.2 §3.12). */
+export const PASSAGE_IMAGES_MAX = 4;
+/** Tags per passage, and a tag's length (v1.2 §11.4). */
+export const PASSAGE_TAGS_MAX = 10;
+export const PASSAGE_TAG_MAX = 24;
+/** Versions per habit (v1.2 R34), and a version's label. */
+export const HABIT_VERSIONS_MAX = 3;
+export const VERSION_LABEL_MAX = 20;
+/** Minutes there or back around a workout (v1.2 §11.2). */
+export const TRAVEL_MAX = 180;
+/** The morning's third line — `days.visualisation` (v1.2 §11.1). */
+export const VISUALISATION_MAX = 280;
+/** A day plan's name — `day_plans.name` (v1.2 §11.5). */
+export const DAY_PLAN_NAME_MAX = 40;
+/** A stepper commits this long after the last tap (v1.2 §2 guardrail 4, TD-18). */
+export const STEPPER_COMMIT_DEBOUNCE_MS = 400;
+/** The journal reminder's derived default: this many minutes before phone away (v1.2 §4.11). */
+export const JOURNAL_REMINDER_OFFSET_MIN = 60;
+/** Phone away's derived default: this many minutes before lights out (v1.2 §13 #25). */
+export const DEVICES_OFF_OFFSET_MIN = 60;
+/** The passage and quote cycles count days from this date (v1.2 §3.12, RUN-4). */
+export const CYCLE_EPOCH = "2026-01-01";

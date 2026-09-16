@@ -252,4 +252,18 @@ User-facing strings follow a dedicated convention — **not** inline in componen
 
 ---
 
+## 10. Optimistic by rule (UX v1.2 §2 guardrail 4, TD-18)
+
+A control's own state changes on the tap, before any request. This is a property of the composite, not a habit of the screen:
+
+- **Steppers** (`MinutesStepper`, `CountStepper`, `Stepper17`) and **`SelectRow`** take `value` and a synchronous `onChange` for the local value, plus `onCommit`, which the composite debounces (`STEPPER_COMMIT_DEBOUNCE_MS`, 400 ms trailing; a tick commits at once). The screen feeds back `committing` and `error`.
+- **Never disabled in flight.** Only a primary that would double-submit disables itself. A committing control shows a hairline pulse, never a spinner and never red.
+- **A failure reverts with one line.** The composite restores the last committed value; the screen shows the sentence (`StatusLine`). A revert must not fire if a newer commit is pending — `useOptimisticValue` in `@syn/hooks` tracks a sequence number for this.
+- **A second tap on a tick is an un-tick, never a duplicate.** Rows are keyed by the thing (a starter's title until the create returns an id, then the id); an un-tick during an in-flight create is queued behind it.
+- **Save as you go** (guardrail 5): every fact writes when entered; *Continue* and *Done* navigate. A sheet's *Save* is its one fact — a half-written passage is not a fact.
+
+`useOptimisticValue<T>({ value, onCommit, debounceMs })` → `{ local, set, committing, error, revert }` is the one implementation; a screen that wraps its own `useDebounce` is the convention eroding (RUN-7 ships the hook and the composites' contract).
+
+---
+
 _End of Component Guidelines. When visual decisions conflict with this file, `branding-design-system.md` wins._

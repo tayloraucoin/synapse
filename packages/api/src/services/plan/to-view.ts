@@ -227,5 +227,8 @@ export function toTemplateSummaryView(
     kind: row.kind,
     flow: row.flow,
     structure: row.structure,
+    // UX v1.2 (RUN-1): neutral until RUN-3 reads `0007`'s columns and `day_plans`.
+    workDayType: null,
+    usedBy: [],
   };
 }

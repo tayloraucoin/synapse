@@ -16,13 +16,43 @@ import { pgEnum } from "drizzle-orm/pg-core";
 import type {
   BlockKind,
   CategoryKey,
+  FixtureKind,
   ItemType,
   MissTier,
   Scheduling,
   TimeMode,
+  WorkoutLocation,
 } from "@syn/types";
 
 import { enumValues } from "./enum-values";
+
+/*
+ * UX v1.2 (RUN-1): the two below arrive with migration `0007` (RUN-2).
+ * `fixture_kind` is on `fixtures` and, for a one-off, `day_items` (v1.2 §3.6,
+ * R42) — two directories, so it lives here. `workout_location` is on `habits`
+ * alone but sits beside it for the same reading. Nothing writes either before
+ * `0007`.
+ */
+
+/** Fixture.kind — v1.2 §3.6. A label and a default glyph; never a mechanic. */
+export const fixtureKindEnum = pgEnum(
+  "fixture_kind",
+  enumValues<FixtureKind>()([
+    "meeting",
+    "appointment",
+    "class",
+    "event",
+    "social",
+    "chore",
+    "other",
+  ]),
+);
+
+/** Habit.location — v1.2 §3.7; workouts only. `habits`. */
+export const workoutLocationEnum = pgEnum(
+  "workout_location",
+  enumValues<WorkoutLocation>()(["home", "gym", "outside"]),
+);
 
 /**
  * Habit.type / DayItem.type — official spec §3.3. `habits`, `day_items`.

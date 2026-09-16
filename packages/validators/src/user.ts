@@ -5,6 +5,7 @@ import { DISPLAY_NAME_MAX, ORIENT_PASSAGE_MAX } from "@syn/constants";
 import {
   anchorDirectionSchema,
   blockOrderSchema,
+  morningModeSchema,
   overflowModeSchema,
   scheduleShapeSchema,
   workDaysSchema,
@@ -108,6 +109,21 @@ export const updatePreferencesInput = z
     journalEnabled: z.boolean().optional(),
     journalPrompts: journalPromptsSchema.optional(),
     blockOrder: blockOrderSchema.optional(),
+
+    /*
+     * ---- UX v1.2 §11.1 (RUN-1). Written from RUN-3 onward; the columns arrive
+     * with `0007`. `earliestWakeTime`, `orientPassage` and `orientShowLastNight`
+     * above are removed from this input in RUN-3 and dropped in `0008`.
+     */
+    /** R37, TD-17 — how mornings go. */
+    morningMode: morningModeSchema.optional(),
+    /** §3.12 — a quote from the bank joins the passage cycle. Off by default. */
+    quotesOptIn: z.boolean().optional(),
+    orientAskIntention: z.boolean().optional(),
+    orientAskVisualisation: z.boolean().optional(),
+    /** §9 N2, R38 — the journal reminder; the time is derived (phone away − 60) while null. */
+    journalReminderEnabled: z.boolean().optional(),
+    journalReminderTime: clockTimeSchema.nullable().optional(),
   })
   .refine(
     (value) => Object.values(value).some((field) => field !== undefined),

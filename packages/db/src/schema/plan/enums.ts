@@ -16,12 +16,32 @@ import type {
   BlockFlow,
   BlockStructure,
   DayBlockState,
+  DayPlanState,
   DayShape,
   SlotRole,
   TrainingPlacement,
+  WorkDayKind,
 } from "@syn/types";
 
 import { enumValues } from "../enum-values";
+
+/*
+ * UX v1.2 (RUN-1): the two below arrive with migration `0007` (RUN-2).
+ * `work_day_kind` is on `templates` (TD-14); `day_plan_state` on `day_plans`
+ * (TD-10). Nothing writes either before `0007`.
+ */
+
+/** A work-day type's kind — v1.2 §3.8. A label and a default glyph. `templates`. */
+export const workDayKindEnum = pgEnum(
+  "work_day_kind",
+  enumValues<WorkDayKind>()(["remote", "coworking", "office", "other"]),
+);
+
+/** DayPlan.state — v1.2 §3.13. A plan left before the review stays a draft. `day_plans`. */
+export const dayPlanStateEnum = pgEnum(
+  "day_plan_state",
+  enumValues<DayPlanState>()(["draft", "complete"]),
+);
 
 /** Day.shape — UX v1.1 §3.9. Unstructured is a first-class shape. `days`. */
 export const dayShapeEnum = pgEnum(

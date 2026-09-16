@@ -23,8 +23,8 @@
  */
 
 export type NotificationCatalogueEntry = {
-  /** N1…N9 — the row in official spec §8.2; 10–12 — UX v1.1 §9.1's additions. */
-  readonly n: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  /** N1…N9 — the row in official spec §8.2; 10–12 — UX v1.1 §9.1's additions; 13 — UX v1.2 §9's N2. */
+  readonly n: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
   readonly kind:
     | "item_start"
     | "window_open"
@@ -37,7 +37,8 @@ export type NotificationCatalogueEntry = {
     | "calendar_item"
     | "block_start"
     | "fixture_start"
-    | "devices_off";
+    | "devices_off"
+    | "journal_reminder";
   readonly defaultEnabled: boolean;
   readonly phase: 1 | 2;
 };
@@ -59,4 +60,9 @@ export const NOTIFICATION_CATALOGUE: ReadonlyArray<NotificationCatalogueEntry> =
   { n: 11, kind: "fixture_start", defaultEnabled: true, phase: 1 },
   // N1d: *Phone away* — a time the person set; off unless they turn it on.
   { n: 12, kind: "devices_off", defaultEnabled: false, phase: 1 },
+  // UX v1.2 §9 N2 (R38): the journal reminder — one push at the person's
+  // time, only when the journal is on and tonight's entry is empty. Reverses
+  // v1.1's "no push for the journal"; qualifies under v1 §8.1 as a time the
+  // person set, in their words, reporting nothing.
+  { n: 13, kind: "journal_reminder", defaultEnabled: true, phase: 1 },
 ] as const;

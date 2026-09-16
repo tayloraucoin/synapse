@@ -1,5 +1,6 @@
 import { and, asc, eq, isNull } from "drizzle-orm";
 
+import { fixtureKindDefaults } from "@syn/constants";
 import { fixtures, type RlsClient } from "@syn/db";
 import type { FixtureView, Weekday } from "@syn/types";
 import type { FixtureFormInput } from "@syn/validators";
@@ -39,6 +40,9 @@ export function toFixtureView(row: FixtureRow): FixtureView {
     scheduling: row.scheduling,
     habitId: row.habitId,
     archived: row.archivedAt !== null,
+    // UX v1.2 (RUN-1): the *Other* kind's defaults until RUN-3 reads `0007`'s columns.
+    kind: "other",
+    icon: fixtureKindDefaults("other").icon,
   };
 }
 

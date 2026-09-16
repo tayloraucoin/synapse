@@ -5,18 +5,22 @@ import {
   DURATION_MIN,
   FOCUS_TITLE_MAX,
   HABIT_TITLE_MAX,
+  HABIT_VERSIONS_MAX,
   PREFLIGHT_NOTE_MAX,
   PRIORITY_MAX,
   PRIORITY_MIN,
   QUANTITY_UNIT_MAX,
   REFLECTION_AXES_MAX,
   REFLECTION_AXIS_MAX,
+  TRAVEL_MAX,
+  VERSION_LABEL_MAX,
   WEEKLY_TARGET_MAX,
   WEEKLY_TARGET_MIN,
   WORKOUT_TITLE_MAX,
 } from "@syn/constants";
 
-import { blockKindSchema } from "./block";
+import { blockKindSchema, workoutLocationSchema } from "./block";
+import { iconValueSchema } from "./icon";
 import { weekdaySchema } from "./template";
 
 /**
@@ -44,33 +48,8 @@ export const habitTypeSchema = z.enum([
 
 export type HabitTypeInput = z.infer<typeof habitTypeSchema>;
 
-export const categoryKeySchema = z.enum([
-  "leaf",
-  "sky",
-  "clay",
-  "rose",
-  "amber",
-  "slate",
-  "plum",
-  "moss",
-]);
-
-/**
- * `IconValue` as a discriminated union — the same three arms `@syn/types`
- * declares. Discriminated rather than a loose object so a caller cannot send
- * `{ kind: "emoji", colorKey: "leaf" }` and have it stored.
- */
-export const iconValueSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("emoji"), value: z.string().min(1).max(16) }),
-  z.object({
-    kind: z.literal("curated"),
-    value: z.string().min(1).max(64),
-    colorKey: categoryKeySchema.nullable(),
-  }),
-  z.object({ kind: z.literal("image"), value: z.string().min(1).max(512) }),
-]);
-
-export type IconValueInput = z.infer<typeof iconValueSchema>;
+/* The icon and the hue moved to `icon.ts` in RUN-1 (see its header); re-exported so no caller changed. */
+export { categoryKeySchema, iconValueSchema, type IconValueInput } from "./icon";
 
 const durationBound = z
   .number()
@@ -148,6 +127,110 @@ export const habitFormSchema = z
   });
 
 export type HabitFormInput = z.infer<typeof habitFormSchema>;
+
+/*
+ * ---- UX v1.2 §3.5, §3.7 (RUN-1; TD-11, TD-12) ----
+ */
+
+/** One named length — v1.2 R34. `key` is a short slug the client generates. */
+export const habitVersionSchema = z.object({
+  key: z.string().trim().min(1).max(32),
+  label: z.string().trim().min(1).max(VERSION_LABEL_MAX),
+  minutes: z.number().int().min(DURATION_MIN).max(DURATION_MAX),
+});
+
+export type HabitVersionInput = z.infer<typeof habitVersionSchema>;
+
+/**
+ * Up to three versions, unique by key; the first is the default the plan
+ * uses. Bounded by `DURATION_MIN…MAX` only — the range is a default, never a
+ * clamp (v1.1 R21).
+ */
+export const habitVersionsSchema = z
+  .array(habitVersionSchema)
+  .min(1)
+  .max(HABIT_VERSIONS_MAX)
+  .refine(
+    (versions) => new Set(versions.map((version) => version.key)).size === versions.length,
+    { message: "Each version needs its own name." },
+  );
+
+/** The key of a version to choose on an item — v1.2 §3.5; resolved server-side. */
+export const versionKeySchema = z.string().trim().min(1).max(32);
+
+/**
+ * A workout's where and travel — v1.2 §3.7, R35. Stored on the habit; the
+ * travel is never added to the length. Refused on any non-workout by the
+ * service (the form never sets `type`, so the row's type is the rule's home).
+ */
+export const workoutDetailsSchema = z.object({
+  /** A key from `WORKOUT_TYPES`, or null for *Other* / none. A label. */
+  workoutType: z.string().trim().min(1).max(32).nullable(),
+  location: workoutLocationSchema.nullable(),
+  travelThereMin: z.number().int().min(0).max(TRAVEL_MAX),
+  travelBackMin: z.number().int().min(0).max(TRAVEL_MAX),
+  planTravel: z.boolean(),
+});
+
+export type WorkoutDetailsInput = z.infer<typeof workoutDetailsSchema>;
+
+/**
+ * One fact at a time — v1.2 §2 guardrail 5 (save as you go). The setup cards
+ * write each control as it changes; a whole-form `updateHabitInput` would
+ * make every stepper resend the sheet. Strict, so a workout field sent for a
+ * habit is refused at the boundary rather than dropped.
+ */
+export const habitPatchSchema = z
+  .object({
+    title: z.string().trim().min(1).max(HABIT_TITLE_MAX).optional(),
+    icon: iconValueSchema.optional(),
+    lifePriority: z.number().int().min(PRIORITY_MIN).max(PRIORITY_MAX).optional(),
+    durationMinMin: z.number().int().min(DURATION_MIN).max(DURATION_MAX).optional(),
+    durationMaxMin: z.number().int().min(DURATION_MIN).max(DURATION_MAX).optional(),
+    versions: habitVersionsSchema.nullable().optional(),
+  })
+  .strict()
+  .refine((patch) => Object.values(patch).some((value) => value !== undefined), {
+    message: "Nothing to update.",
+  });
+
+export const patchHabitInput = z.object({ id: z.string().uuid(), patch: habitPatchSchema });
+
+export type PatchHabitInput = z.infer<typeof patchHabitInput>;
+
+/** The workout card's per-control writes: the habit patch plus the where and travel. */
+export const workoutPatchSchema = z
+  .object({
+    title: z.string().trim().min(1).max(WORKOUT_TITLE_MAX).optional(),
+    icon: iconValueSchema.optional(),
+    weeklyTarget: z.number().int().min(WEEKLY_TARGET_MIN).max(WEEKLY_TARGET_MAX).optional(),
+    typicalDays: z.array(weekdaySchema).max(7).nullable().optional(),
+    durationMin: z.number().int().min(DURATION_MIN).max(DURATION_MAX).optional(),
+  })
+  .merge(workoutDetailsSchema.partial())
+  .strict()
+  .refine((patch) => Object.values(patch).some((value) => value !== undefined), {
+    message: "Nothing to update.",
+  });
+
+export const patchWorkoutInput = z.object({ id: z.string().uuid(), patch: workoutPatchSchema });
+
+export type PatchWorkoutInput = z.infer<typeof patchWorkoutInput>;
+
+/** A step before work — v1.2 R33, §4.7: emoji, name, range, nothing else. */
+export const createStepInput = z
+  .object({
+    title: z.string().trim().min(1, "Give it a name.").max(HABIT_TITLE_MAX, "Give it a name."),
+    icon: iconValueSchema.optional(),
+    rangeMin: z.number().int().min(DURATION_MIN).max(DURATION_MAX),
+    rangeMax: z.number().int().min(DURATION_MIN).max(DURATION_MAX),
+  })
+  .refine((value) => value.rangeMin <= value.rangeMax, {
+    message: '"From" should be less than or equal to "to".',
+    path: ["rangeMax"],
+  });
+
+export type CreateStepInput = z.infer<typeof createStepInput>;
 
 export const createHabitInput = habitFormSchema;
 

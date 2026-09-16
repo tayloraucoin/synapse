@@ -244,6 +244,8 @@ function toItem(spec: ExampleSpec, local: boolean, today: Date): DayItemView {
     pinned: false,
     gapBeforeMin: 0,
     alternates: null,
+    versionKey: null,
+    parentItemId: null,
   };
 }
 

@@ -186,6 +186,8 @@ function WorkContainer({
     pinned: false,
     gapBeforeMin: 0,
     alternates: null,
+    versionKey: null,
+    parentItemId: null,
   };
 
   return (

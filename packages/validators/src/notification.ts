@@ -28,6 +28,8 @@ export const notificationKindSchema = z.enum([
   "block_start",
   "fixture_start",
   "devices_off",
+  // UX v1.2 §9 N2 (R38) — the journal reminder.
+  "journal_reminder",
 ]);
 
 export const setNotificationPrefInput = z.object({
