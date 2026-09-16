@@ -11,19 +11,19 @@
 
 ## 1. ENTITY OVERVIEW
 
-**19 tables** in `public`, plus a reference-only mirror of Supabase's `auth.users`. Grouped by domain.
+**22 tables** in `public`, plus a reference-only mirror of Supabase's `auth.users`. Grouped by domain.
 
-**Group 1 — Auth & Users.** `users` is the shadow of `auth.users` — its primary key **is** the foreign key, and the row is created by the `handle_new_user()` trigger, never by the app. It carries every account scalar: timezone, day-close and review-reminder times, theme, display name, the usual wake time, the week-build reminder's day and time, the first-run resume point, the deferred-settings pending pair, and — since UX v1.1 (0005) — the shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range, lights-out and devices-off, the overflow mode, the orient frame's settings, the journal's switch and prompts, and the block order. There is no wake anchor since `0006` (v1.1 R11, DYN-21): the orient frame is the wake moment. `user_avatars` is the optional photo, keyed by `user_id` — one per person, no surrogate id. Deleting the auth user cascades through this row to everything.
+**Group 1 — Auth & Users.** `users` is the shadow of `auth.users` — its primary key **is** the foreign key, and the row is created by the `handle_new_user()` trigger, never by the app. It carries every account scalar: timezone, day-close and review-reminder times, theme, display name, the usual wake time, the week-build reminder's day and time, the first-run resume point, the deferred-settings pending pair, and — since UX v1.1 (0005) — the shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range, lights-out and devices-off, the overflow mode, the orient frame's settings, the journal's switch and prompts, and the block order — and, since UX v1.2 (0007), how mornings go (`morning_mode`), the quote opt-in, the two further morning lines, and the journal reminder's switch and time. There is no wake anchor since `0006` (v1.1 R11, DYN-21): the orient frame is the wake moment. `user_avatars` is the optional photo, keyed by `user_id` — one per person, no surrogate id. Deleting the auth user cascades through this row to everything.
 
-**Group 2 — Library.** What a person keeps, independent of any day. `habits` is the reusable definition (type, title, icon, the duration range, the 1–7 life priority, the quantity unit, the reflection axes, and — since 0004 — a default `block_kind` and, for workouts and focuses, a rotation: `weekly_target` and `typical_days`); `categories` group them for reporting only, never for a mechanic; `reasons` is the per-person, editable set a miss is attributed from, seeded from `DEFAULT_REASONS`. Habits, templates and reasons archive; only a category is deleted, and it unassigns.
+**Group 2 — Library.** What a person keeps, independent of any day. `habits` is the reusable definition (type, title, icon, the duration range, the 1–7 life priority, the quantity unit, the reflection axes, and — since 0004 — a default `block_kind` and, for workouts and focuses, a rotation: `weekly_target` and `typical_days`; and, since 0007, up to three `versions` and, for a workout, its `workout_type`, `location` and travel there and back — never added to the length); `categories` group them for reporting only, never for a mechanic; `reasons` is the per-person, editable set a miss is attributed from, seeded from `DEFAULT_REASONS`; `passages` (0007) are the morning's reading — a title, a Markdown body, up to four images, tags, in the order the cycle reads them. Habits, templates, reasons and passages archive; only a category is deleted, and it unassigns.
 
-**Group 3 — Plan.** `templates` is a saved BLOCK (UX v1.1, 0004): a `kind`, a `flow` and a `structure`, whose `template_slots` STACK — each a duration and a `gap_before_min`, offsets derived by `stackBlock` from an anchor the profile supplies; a slot may be pinned to a clock time, and two slots at one position share a `multitask_group` (both happen) or an `alternates_group` (one of). The v1.0 offsets went in `0006`. `fixtures` are weekday things (a stand-up on Tuesdays) that materialise as pins whatever template the day gets. `days` is one calendar date in the person's stored zone; it snapshots `timezone` and `day_close_time` so a later settings change cannot re-key or re-window a past day, and since 0005 carries its `shape`, `confirmed_at` (*Set the day*), today's anchor and focus, and the morning's two lines. `day_blocks` is one block on one day — the Today tab's section, the Schedule's band — with its own immutable `original_scheduled_start`.
+**Group 3 — Plan.** `templates` is a saved BLOCK (UX v1.1, 0004): a `kind`, a `flow` and a `structure`, whose `template_slots` STACK — each a duration and a `gap_before_min`, offsets derived by `stackBlock` from an anchor the profile supplies; a slot may be pinned to a clock time, and two slots at one position share a `multitask_group` (both happen) or an `alternates_group` (one of). The v1.0 offsets went in `0006`. A work template may be a work-day type since 0007 (its own `work_end_time`, `location_kind`, `anchor_direction`, `icon`). `fixtures` are weekday things (a stand-up on Tuesdays) that materialise as pins whatever template the day gets; since 0007 each carries a `kind` and an `icon` — a label, never a mechanic. `day_plans` (0007) is a named day composed by reference — weekdays, a work template, four nullable times, three template FKs, the workouts placed, the breaks, the fixtures excluded — that the week build reads first; it copies nothing and materialises through no other path. `days` is one calendar date in the person's stored zone; it snapshots `timezone` and `day_close_time` so a later settings change cannot re-key or re-window a past day, and since 0005 carries its `shape`, `confirmed_at` (*Set the day*), today's anchor and focus, and the morning's lines (three since 0007, with `visualisation`), plus the `work_template_id` applied to it. `day_blocks` is one block on one day — the Today tab's section, the Schedule's band — with its own immutable `original_scheduled_start`.
 
-**Group 4 — Day.** The record, and the part of the schema that is deliberately append-and-annotate. `day_items` snapshots `title`, `icon`, `quantity_unit`, `reflection_axes` and `notes_preflight` at materialisation, belongs to a `day_block` (nullable until 0006), may be `pinned`, and carries its gap and its *one of* group; `original_scheduled_start` is immutable once set, enforced by a trigger, and is written at *Set the day* for items of a pooled or unconfirmed day. `timer_sessions` record time (a manual entry is marked as one), `misses` record how one undone item was attributed, `shifts` record a whole-day move or, since 0005, a `refit` that held the anchor and shortened or cut. `journal_entries` is one row per day, its answers keyed by the person's own prompt keys, merged one key at a time.
+**Group 4 — Day.** The record, and the part of the schema that is deliberately append-and-annotate. `day_items` snapshots `title`, `icon`, `quantity_unit`, `reflection_axes` and `notes_preflight` at materialisation, belongs to a `day_block` (nullable until 0006), may be `pinned`, carries its gap and its *one of* group, and — since 0007 — the `version_key` it came from and, for a travel row (`origin = travel`), the `parent_item_id` of the workout it sits beside; `original_scheduled_start` is immutable once set, enforced by a trigger, and is written at *Set the day* for items of a pooled or unconfirmed day. `timer_sessions` record time (a manual entry is marked as one), `misses` record how one undone item was attributed, `shifts` record a whole-day move or, since 0005, a `refit` that held the anchor and shortened or cut. `journal_entries` is one row per day, its answers keyed by the person's own prompt keys, merged one key at a time.
 
 **Group 5 — Notifications.** `web_push_subscriptions` holds one row per browser that agreed to reminders (endpoint + p256dh + auth, plus platform and revocation); the scheduler reads it. `notification_prefs` holds one row per kind the person has an opinion about — a missing row means the §8.2 default — and, since 0005, one row per block for `item_start` (`block_kind`, unique `NULLS NOT DISTINCT`). `notification_deliveries` is the exactly-once ledger: one row per `(user, kind, target, minute)`, written before a push is sent and unique `NULLS NOT DISTINCT`, so an overlapping or repeated cron scan loses to the constraint rather than to a job's own care. Service-role only — nobody reads their own delivery log.
 
-**Group 6 — System.** `data_exports` tracks a request to export everything (preparing → ready → expired, with the object path and a 24-hour expiry). `feedback_messages` is the About message: insert-only for its author, no authenticated read, and it holds only the message plus the two optional context fields the switch controls.
+**Group 6 — System.** `data_exports` tracks a request to export everything (preparing → ready → expired, with the object path and a 24-hour expiry). `feedback_messages` is the About message: insert-only for its author, no authenticated read, and it holds only the message plus the two optional context fields the switch controls. `quotes` (0007) is the bank a person may opt into for the morning frame — app content with no `user_id`, under `catalogReadPolicies`: every signed-in person reads the published rows, nobody writes through the authenticated role, and nothing about the person decides which quote a day shows.
 
 **Deliberately not here** (official spec §3.11): no streak, no score cache — the number is computed on read — no social graph, and no coach output table. There is also no `week_plans` table: a week's status is derived from its days. And no wake anchor at all since UX v1.1 R11 (`0006`).
 
@@ -33,11 +33,11 @@
 
 **The one central entity.** `users`. Synapse is single-player: there is no couple, no team, no shared row. **Every table hangs directly off this one** and carries its own denormalised `user_id`, so every policy is the same three lines and every table is greppable for its owner — no policy ever subqueries another RLS-guarded table.
 
-**One-to-many from `users`.** `categories`, `habits`, `reasons`, `templates`, `template_slots`, `fixtures`, `days`, `day_blocks`, `day_items`, `timer_sessions`, `shifts`, `misses`, `journal_entries`, `notification_prefs`, `notification_deliveries`, `web_push_subscriptions`, `data_exports`, `feedback_messages`. **One-to-one:** `user_avatars`.
+**One-to-many from `users`.** `categories`, `habits`, `reasons`, `passages`, `templates`, `template_slots`, `fixtures`, `day_plans`, `days`, `day_blocks`, `day_items`, `timer_sessions`, `shifts`, `misses`, `journal_entries`, `notification_prefs`, `notification_deliveries`, `web_push_subscriptions`, `data_exports`, `feedback_messages`. **One-to-one:** `user_avatars`. **Owned by nobody:** `quotes` — the product's catalogue, no `user_id`.
 
 **The ownership chains** (each child also carries `user_id` directly): `categories` → `habits` → `template_slots` → `day_items`; `templates` → `template_slots` and `templates` → `day_blocks`; `days` → `day_blocks` → `day_items` → { `timer_sessions`, `misses` }; `days` → `shifts` → `misses`; `days` → `journal_entries` (one each).
 
-**References that are not ownership.** `days.work_focus_habit_id` → `habits` and `fixtures.habit_id` → `habits` (both `set null`), and `day_items.carried_from_item_id` / `misses.traded_up_item_id` → `day_items` (both `set null` — a record points at another record without owning it).
+**References that are not ownership.** `days.work_focus_habit_id` → `habits` and `fixtures.habit_id` → `habits` (both `set null`), `days.work_template_id` → `templates` and `day_plans`' four template FKs (all `set null` — a plan references, never copies, and an archived list leaves the plan standing), `day_items.carried_from_item_id` / `misses.traded_up_item_id` → `day_items` (both `set null` — a record points at another record without owning it), and `day_items.parent_item_id` → `day_items` (`cascade` — a travel row without its workout is nothing).
 
 **Identity.** `public.users.id` = `auth.users.id`. One identity, two schemas, no drift, no join key to get wrong.
 
@@ -143,13 +143,43 @@ import { pgEnum } from "drizzle-orm/pg-core";
 import type {
   BlockKind,
   CategoryKey,
+  FixtureKind,
   ItemType,
   MissTier,
   Scheduling,
   TimeMode,
+  WorkoutLocation,
 } from "@syn/types";
 
 import { enumValues } from "./enum-values";
+
+/*
+ * UX v1.2 (RUN-1): the two below arrive with migration `0007` (RUN-2).
+ * `fixture_kind` is on `fixtures` and, for a one-off, `day_items` (v1.2 §3.6,
+ * R42) — two directories, so it lives here. `workout_location` is on `habits`
+ * alone but sits beside it for the same reading. Nothing writes either before
+ * `0007`.
+ */
+
+/** Fixture.kind — v1.2 §3.6. A label and a default glyph; never a mechanic. */
+export const fixtureKindEnum = pgEnum(
+  "fixture_kind",
+  enumValues<FixtureKind>()([
+    "meeting",
+    "appointment",
+    "class",
+    "event",
+    "social",
+    "chore",
+    "other",
+  ]),
+);
+
+/** Habit.location — v1.2 §3.7; workouts only. `habits`. */
+export const workoutLocationEnum = pgEnum(
+  "workout_location",
+  enumValues<WorkoutLocation>()(["home", "gym", "outside"]),
+);
 
 /**
  * Habit.type / DayItem.type — official spec §3.3. `habits`, `day_items`.
@@ -286,13 +316,43 @@ import { pgEnum } from "drizzle-orm/pg-core";
 import type {
   BlockKind,
   CategoryKey,
+  FixtureKind,
   ItemType,
   MissTier,
   Scheduling,
   TimeMode,
+  WorkoutLocation,
 } from "@syn/types";
 
 import { enumValues } from "./enum-values";
+
+/*
+ * UX v1.2 (RUN-1): the two below arrive with migration `0007` (RUN-2).
+ * `fixture_kind` is on `fixtures` and, for a one-off, `day_items` (v1.2 §3.6,
+ * R42) — two directories, so it lives here. `workout_location` is on `habits`
+ * alone but sits beside it for the same reading. Nothing writes either before
+ * `0007`.
+ */
+
+/** Fixture.kind — v1.2 §3.6. A label and a default glyph; never a mechanic. */
+export const fixtureKindEnum = pgEnum(
+  "fixture_kind",
+  enumValues<FixtureKind>()([
+    "meeting",
+    "appointment",
+    "class",
+    "event",
+    "social",
+    "chore",
+    "other",
+  ]),
+);
+
+/** Habit.location — v1.2 §3.7; workouts only. `habits`. */
+export const workoutLocationEnum = pgEnum(
+  "workout_location",
+  enumValues<WorkoutLocation>()(["home", "gym", "outside"]),
+);
 
 /**
  * Habit.type / DayItem.type — official spec §3.3. `habits`, `day_items`.
@@ -383,9 +443,24 @@ export const categoryColorKeyEnum = pgEnum(
  */
 import { pgEnum } from "drizzle-orm/pg-core";
 
-import type { AnchorDirection, OverflowMode, ScheduleShape } from "@syn/types";
+import type {
+  AnchorDirection,
+  MorningMode,
+  OverflowMode,
+  ScheduleShape,
+} from "@syn/types";
 
 import { enumValues } from "../enum-values";
+
+/**
+ * How mornings go — UX v1.2 R37, TD-17. The TypeScript side moved in RUN-1;
+ * the `CREATE TYPE` ships in migration `0007` (RUN-2). Nothing writes it
+ * before then.
+ */
+export const morningModeEnum = pgEnum(
+  "morning_mode",
+  enumValues<MorningMode>()(["set_from_plan", "build_each_morning"]),
+);
 
 /** "When your morning runs long, what gives?" — UX v1.1 §3.3, §4.3. */
 export const anchorDirectionEnum = pgEnum(
@@ -446,6 +521,15 @@ export const scheduleShapeEnum = pgEnum(
  * order. These are the anchors the materialiser lays every block out from;
  * a template no longer carries its own (TD-1).
  *
+ * THE v1.2 ADDITIONS (UX v1.2 §11.1, migration 0007). How mornings go
+ * (`morning_mode`, R37), the quote opt-in (`quotes_opt_in`, R36), the two
+ * further morning lines (`orient_ask_intention`, `orient_ask_visualisation`),
+ * and the journal reminder (`journal_reminder_enabled`, `journal_reminder_time`,
+ * R38). Three v1.1 columns stop being written under v1.2 — `earliest_wake_time`
+ * (R39), `orient_passage` (copied into `passages` by 0007) and
+ * `orient_show_last_night` (R41) — and are dropped in `0008`, never in the
+ * migration that adds their replacements.
+ *
  * POLICIES. Select and update are the owner's alone. Insert and delete are
  * denied to the authenticated role outright: the trigger inserts, and deletion
  * goes through `auth.admin.deleteUser` and cascades. There is no admin read.
@@ -481,6 +565,7 @@ import { templates } from "../plan/templates";
 import { denyAuthenticated, isOwner } from "../rls/helpers";
 import {
   anchorDirectionEnum,
+  morningModeEnum,
   overflowModeEnum,
   scheduleShapeEnum,
 } from "./enums";
@@ -561,6 +646,10 @@ export const users = pgTable(
     }),
     // UX v1.1 §7.2 — *A few lines at night* (0005).
     journalEnabled: boolean("journal_enabled").notNull().default(true),
+    // UX v1.2 §9 N2, R38 — the journal reminder's switch; on by default (0007).
+    journalReminderEnabled: boolean("journal_reminder_enabled").notNull().default(true),
+    // UX v1.2 §4.11 — the reminder's time; null = derived, phone away − 60 (0007).
+    journalReminderTime: time("journal_reminder_time"),
     // UX v1.1 §7.2, TD-7 — the person's prompts, ordered, keyed stably (0005).
     // JSON shape: JournalPrompt[] — see @syn/types.
     journalPrompts: jsonb("journal_prompts")
@@ -569,15 +658,23 @@ export const users = pgTable(
       .default(DEFAULT_JOURNAL_PROMPTS_LITERAL),
     // UX v1.1 §7.1 — the wind-down routine flows backward to this (0005).
     lightsOutTime: time("lights_out_time"),
+    // UX v1.2 R37, TD-17 — set from the plan, or build each morning (0007).
+    morningMode: morningModeEnum("morning_mode").notNull().default("set_from_plan"),
     // UX v1.1 §5.2 — the one optional morning line, and with it the R18 line (0005).
     orientAskGratitude: boolean("orient_ask_gratitude").notNull().default(true),
-    // UX v1.1 §4.6 — the passage read every morning; ≤ 2000 (0005).
+    // UX v1.2 §4.6, §5.2 — the second and third optional morning lines (0007).
+    orientAskIntention: boolean("orient_ask_intention").notNull().default(true),
+    orientAskVisualisation: boolean("orient_ask_visualisation").notNull().default(true),
+    // UX v1.1 §4.6 — the passage read every morning; ≤ 2000 (0005). UNWRITTEN
+    // since UX v1.2 (RUN-3): `0007` copied it into `passages`; dropped in `0008`.
     orientPassage: text("orient_passage"),
     // UX v1.1 §4.6 — show last night's journal lines on the orient frame (0005).
+    // UNWRITTEN since UX v1.2 R41 (the *Last night* row); dropped in `0008`.
     orientShowLastNight: boolean("orient_show_last_night")
       .notNull()
       .default(true),
-    // UX v1.1 §3.10 — how the days that do not fit are handled (0005).
+    // UX v1.1 §3.10 — how the days that do not fit are handled (0005). A
+    // Settings preference since UX v1.2 §3.10; no longer asked at first run.
     overflowMode: overflowModeEnum("overflow_mode")
       .notNull()
       .default("daily_menu"),
@@ -588,6 +685,9 @@ export const users = pgTable(
     pendingDayCloseTimeFrom: date("pending_day_close_time_from"),
     pendingTimezone: text("pending_timezone"),
     pendingTimezoneFrom: date("pending_timezone_from"),
+    // UX v1.2 §3.12, R36 — a quote from the bank joins the passage cycle. Off
+    // by default: the app never supplies the words unless asked (0007).
+    quotesOptIn: boolean("quotes_opt_in").notNull().default(false),
     // "*Not now* is remembered" (official spec §8.3, Epic 1 §8.7) — the app
     // never re-prompts for notification permission on its own after this.
     reminderPromptAnsweredAt: timestamp("reminder_prompt_answered_at", {
@@ -739,7 +839,7 @@ export const userAvatarsRelations = relations(userAvatars, ({ one }) => ({
 
 #### `users`
 
-**PURPOSE.** users.ts — the shadow of `auth.users`. Supabase owns `auth.users`. This row is created by the `handle_new_user()` trigger, never by the app, and its primary key IS the foreign key to the auth row: one identity, two schemas, no drift. Deleting the auth user cascades this row away, which is how account deletion (Epic 1 ST-10a) removes everything a person has. WHAT IS NOT HERE. Official spec §3.1 also lists `notification_prefs` and `avatar`; both are satellite tables (`notification_prefs`, `user_avatars`), because both are lists rather than scalars. THERE IS NO WAKE ANCHOR (UX v1.1 R11). v1.0 kept `wake_anchor_habit_id` here (SET-1); the orient frame is the wake moment since DYN-13 and the column is gone since `0006` (DYN-21). `days.woke_at_source = anchor` stays on rows written under v1.0. THE PENDING PAIR (SET-1). A time-zone switch and a day-close change take effect FROM TOMORROW (cross-cutting §7.3, §7.5), so writing them straight to `timezone` / `day_close_time` would reclassify "now" the moment they were saved — change the close from 03:00 to 05:00 at 04:00 and today's date flips backwards. The four `pending_*` columns hold the new value and the date it starts; `services/user/preferences.ts` applies and clears the pair on read, and the scheduler's per-user pass does the same so the switch happens even if the app is never opened. THE v1.1 PROFILE (UX v1.1 §11.2, migration 0005). The shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range (`earliest_wake_time`), the evening (`lights_out_time`, `devices_off_time`), the overflow mode, the orient frame's three settings, the journal's switch and prompts, and the block order. These are the anchors the materialiser lays every block out from; a template no longer carries its own (TD-1). POLICIES. Select and update are the owner's alone. Insert and delete are denied to the authenticated role outright: the trigger inserts, and deletion goes through `auth.admin.deleteUser` and cascades. There is no admin read.
+**PURPOSE.** users.ts — the shadow of `auth.users`. Supabase owns `auth.users`. This row is created by the `handle_new_user()` trigger, never by the app, and its primary key IS the foreign key to the auth row: one identity, two schemas, no drift. Deleting the auth user cascades this row away, which is how account deletion (Epic 1 ST-10a) removes everything a person has. WHAT IS NOT HERE. Official spec §3.1 also lists `notification_prefs` and `avatar`; both are satellite tables (`notification_prefs`, `user_avatars`), because both are lists rather than scalars. THERE IS NO WAKE ANCHOR (UX v1.1 R11). v1.0 kept `wake_anchor_habit_id` here (SET-1); the orient frame is the wake moment since DYN-13 and the column is gone since `0006` (DYN-21). `days.woke_at_source = anchor` stays on rows written under v1.0. THE PENDING PAIR (SET-1). A time-zone switch and a day-close change take effect FROM TOMORROW (cross-cutting §7.3, §7.5), so writing them straight to `timezone` / `day_close_time` would reclassify "now" the moment they were saved — change the close from 03:00 to 05:00 at 04:00 and today's date flips backwards. The four `pending_*` columns hold the new value and the date it starts; `services/user/preferences.ts` applies and clears the pair on read, and the scheduler's per-user pass does the same so the switch happens even if the app is never opened. THE v1.1 PROFILE (UX v1.1 §11.2, migration 0005). The shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range (`earliest_wake_time`), the evening (`lights_out_time`, `devices_off_time`), the overflow mode, the orient frame's three settings, the journal's switch and prompts, and the block order. These are the anchors the materialiser lays every block out from; a template no longer carries its own (TD-1). THE v1.2 ADDITIONS (UX v1.2 §11.1, migration 0007). How mornings go (`morning_mode`, R37), the quote opt-in (`quotes_opt_in`, R36), the two further morning lines (`orient_ask_intention`, `orient_ask_visualisation`), and the journal reminder (`journal_reminder_enabled`, `journal_reminder_time`, R38). Three v1.1 columns stop being written under v1.2 — `earliest_wake_time` (R39), `orient_passage` (copied into `passages` by 0007) and `orient_show_last_night` (R41) — and are dropped in `0008`, never in the migration that adds their replacements. POLICIES. Select and update are the owner's alone. Insert and delete are denied to the authenticated role outright: the trigger inserts, and deletion goes through `auth.admin.deleteUser` and cascades. There is no admin read.
 
 **INDEXES.**
 - `users_email_idx`
@@ -756,7 +856,7 @@ export const userAvatarsRelations = relations(userAvatars, ({ one }) => ({
 
 ### GROUP 2 — LIBRARY
 
-What a person keeps: the habits they might do, the categories those group into, and the reasons a miss can be attributed to. Nothing here is ever hard-deleted except a category, which unassigns.
+What a person keeps: the habits they might do (since UX v1.2 with up to three versions and, for a workout, a type, a location and its travel), the categories those group into, the reasons a miss can be attributed to, and — since UX v1.2 (0007) — the `passages` they read each morning. Nothing here is ever hard-deleted except a category, which unassigns.
 
 ```ts
 // packages/db/src/schema/library/categories.ts
@@ -860,6 +960,7 @@ export const categoriesRelations = relations(categories, ({ many, one }) => ({
  */
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   index,
   jsonb,
@@ -870,9 +971,9 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import type { IconValue } from "@syn/types";
+import type { HabitVersion, IconValue } from "@syn/types";
 
-import { blockKindEnum, itemTypeEnum } from "../enums";
+import { blockKindEnum, itemTypeEnum, workoutLocationEnum } from "../enums";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { categories } from "./categories";
@@ -918,6 +1019,15 @@ export const habits = pgTable(
     icon: jsonb("icon").$type<IconValue>().notNull().default(DEFAULT_HABIT_ICON),
     /** 1–7, 7 highest (official spec §0.3 R7). The default wherever it is slotted. */
     lifePriority: smallint("life_priority").notNull(),
+    /** Workouts only — where it happens (UX v1.2 §3.7, 0007). */
+    location: workoutLocationEnum("location"),
+    /**
+     * Workouts only — whether the day plans for the travel (UX v1.2 R35,
+     * TD-12, 0007). When true and either travel is non-zero, the day carries
+     * two travel rows beside the workout; the workout's own length never
+     * includes them.
+     */
+    planTravel: boolean("plan_travel").notNull().default(true),
     /** ≤ 16, e.g. "pages". Its presence means the item captures a number. */
     quantityUnit: text("quantity_unit"),
     /**
@@ -930,14 +1040,30 @@ export const habits = pgTable(
       .default([]),
     /** 1–60 — Epic 1 §9. */
     title: text("title").notNull(),
+    /** Workouts only — minutes there and back around it (UX v1.2 §3.7, 0007). 0–180; never added to the length. */
+    travelBackMin: smallint("travel_back_min").notNull().default(0),
+    travelThereMin: smallint("travel_there_min").notNull().default(0),
     type: itemTypeEnum("type").notNull(),
     /**
      * Workouts and focuses only — the days the rotation usually falls on.
      * Mon = 0 … Sun = 6, the same shape and check as `templates.typical_days`.
      */
     typicalDays: smallint("typical_days").array(),
+    /**
+     * Up to three named lengths — UX v1.2 §3.5, R34, TD-11 (0007). The first
+     * is the default the plan uses; the chosen one is snapshotted on the item
+     * as `version_key`. A jsonb, not a table: a version is never queried apart
+     * from its habit. JSON shape: HabitVersion[] — see @syn/types.
+     */
+    versions: jsonb("versions").$type<HabitVersion[]>(),
     /** Workouts and focuses only — the rotation's weekly count, 1–7. */
     weeklyTarget: smallint("weekly_target"),
+    /**
+     * Workouts only — the curated type's key (`WORKOUT_TYPES`, UX v1.2 §4.10,
+     * 0007). Text, not an enum, so the list grows without a migration; a
+     * label that fills the name and glyph when they are empty.
+     */
+    workoutType: text("workout_type"),
 
     categoryId: uuid("category_id").references(() => categories.id, {
       onDelete: "set null",
@@ -962,6 +1088,14 @@ export const habits = pgTable(
     check(
       "habits_life_priority_check",
       sql`${table.lifePriority} BETWEEN 1 AND 7`,
+    ),
+    check(
+      "habits_travel_check",
+      sql`${table.travelThereMin} BETWEEN 0 AND 180 AND ${table.travelBackMin} BETWEEN 0 AND 180`,
+    ),
+    check(
+      "habits_workout_type_check",
+      sql`${table.workoutType} IS NULL OR length(${table.workoutType}) BETWEEN 1 AND 32`,
     ),
     check(
       "habits_duration_min_min_check",
@@ -1078,6 +1212,111 @@ export const reasonsRelations = relations(reasons, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// packages/db/src/schema/library/passages.ts
+/**
+ * passages — a saved piece of morning reading, the person's own or chosen
+ * (UX v1.2 §3.12, §4.6, §11.4; R36, TD-15).
+ *
+ * A COLLECTION, NOT A COLUMN. v1.1 kept one passage on `users.orient_passage`;
+ * v1.2 gives passages a title, a rich body, up to four images and tags, and
+ * an order that IS the morning cycle (one per day, by `sort_order`, advancing
+ * at day-open, wrapping — nothing about which one was read is recorded,
+ * §13 #21). Migration 0007 copied every non-blank `orient_passage` into one
+ * row here; the column is dropped in 0008.
+ *
+ * THE BODY IS MARKDOWN (TD-15). Readable in an export, in a row, and by the
+ * future Expo app without the editor; the five controls the editor allows
+ * round-trip losslessly. Never HTML, never the editor's JSON. `images` holds
+ * bucket-qualified paths (`passages/{user_id}/{file}`) in the `passages`
+ * bucket, with the icons' owner-segment policies; the read route serves them
+ * as it serves an icon — a foreign path is a 404, never a 403.
+ *
+ * TAGS ARE THE PERSON'S, FOR THE PERSON. v1.2 reads them for the list's
+ * filter and nothing else; "chosen against the day" (ledger §25) is phase 2
+ * and this is its seam.
+ *
+ * ARCHIVE, NEVER DELETE. An archived passage's images stay in the bucket
+ * (the export may still reference them; orphan reaping is a later concern,
+ * as for icons).
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import {
+  check,
+  index,
+  jsonb,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
+
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+
+export const passages = pgTable(
+  "passages",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    /** Markdown, the storage form; 1–8000. */
+    bodyMd: text("body_md").notNull(),
+    /** JSON shape: string[] — up to four bucket-qualified paths. */
+    images: jsonb("images").$type<string[]>().notNull().default([]),
+    /** The cycle's order (v1.2 §3.12). */
+    sortOrder: smallint("sort_order").notNull().default(0),
+    /** Up to ten, each ≤ 24. */
+    tags: text("tags").array().notNull().default([]),
+    /** ≤ 80; null shows the body's first line as the card's title. */
+    title: text("title"),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("passages_user_id_sort_order_idx").on(table.userId, table.sortOrder),
+    index("passages_user_id_archived_at_idx").on(table.userId, table.archivedAt),
+    index("passages_user_id_idx").on(table.userId),
+    check(
+      "passages_body_md_check",
+      sql`length(${table.bodyMd}) BETWEEN 1 AND 8000`,
+    ),
+    check(
+      "passages_title_check",
+      sql`${table.title} IS NULL OR length(${table.title}) <= 80`,
+    ),
+    check(
+      "passages_images_check",
+      sql`jsonb_typeof(${table.images}) = 'array' AND jsonb_array_length(${table.images}) <= 4`,
+    ),
+    check(
+      "passages_tags_check",
+      sql`cardinality(${table.tags}) <= 10`,
+    ),
+    ...ownerPrivateCrudPolicies({
+      prefix: "passages",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const passagesRelations = relations(passages, ({ one }) => ({
+  user: one(users, {
+    fields: [passages.userId],
+    references: [users.id],
+  }),
+}));
 ```
 
 #### `categories`
@@ -1113,9 +1352,20 @@ export const reasonsRelations = relations(reasons, ({ one }) => ({
 
 **RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
 
+#### `passages`
+
+**PURPOSE.** passages — a saved piece of morning reading, the person's own or chosen (UX v1.2 §3.12, §4.6, §11.4; R36, TD-15). A COLLECTION, NOT A COLUMN. v1.1 kept one passage on `users.orient_passage`; v1.2 gives passages a title, a rich body, up to four images and tags, and an order that IS the morning cycle (one per day, by `sort_order`, advancing at day-open, wrapping — nothing about which one was read is recorded, §13 #21). Migration 0007 copied every non-blank `orient_passage` into one row here; the column is dropped in 0008. THE BODY IS MARKDOWN (TD-15). Readable in an export, in a row, and by the future Expo app without the editor; the five controls the editor allows round-trip losslessly. Never HTML, never the editor's JSON. `images` holds bucket-qualified paths (`passages/{user_id}/{file}`) in the `passages` bucket, with the icons' owner-segment policies; the read route serves them as it serves an icon — a foreign path is a 404, never a 403. TAGS ARE THE PERSON'S, FOR THE PERSON. v1.2 reads them for the list's filter and nothing else; "chosen against the day" (ledger §25) is phase 2 and this is its seam. ARCHIVE, NEVER DELETE. An archived passage's images stay in the bucket (the export may still reference them; orphan reaping is a later concern, as for icons). POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `passages_user_id_sort_order_idx`
+- `passages_user_id_archived_at_idx`
+- `passages_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
 ### GROUP 3 — PLAN
 
-The shapes a day can take. Since UX v1.1 (0004, 0005) a template is a block whose slots stack — a duration and a gap each, offsets derived — and a day is an ordered set of `day_blocks`; `fixtures` are the weekday things every block flows around. A day is one date in the person's stored zone, snapshotting the time rules it was created under. There is no `week_plans` table — week status is derived from the week's days.
+The shapes a day can take. Since UX v1.1 (0004, 0005) a template is a block whose slots stack — a duration and a gap each, offsets derived — and a day is an ordered set of `day_blocks`; `fixtures` are the weekday things every block flows around. Since UX v1.2 (0007) a work template may be a work-day type with its own hours, and `day_plans` is a named day composed by reference — weekdays, a type, four times, three lists, the workouts placed — that the week build reads first. A day is one date in the person's stored zone, snapshotting the time rules it was created under. There is no `week_plans` table — week status is derived from the week's days.
 
 ```ts
 // packages/db/src/schema/plan/enums.ts
@@ -1137,12 +1387,32 @@ import type {
   BlockFlow,
   BlockStructure,
   DayBlockState,
+  DayPlanState,
   DayShape,
   SlotRole,
   TrainingPlacement,
+  WorkDayKind,
 } from "@syn/types";
 
 import { enumValues } from "../enum-values";
+
+/*
+ * UX v1.2 (RUN-1): the two below arrive with migration `0007` (RUN-2).
+ * `work_day_kind` is on `templates` (TD-14); `day_plan_state` on `day_plans`
+ * (TD-10). Nothing writes either before `0007`.
+ */
+
+/** A work-day type's kind — v1.2 §3.8. A label and a default glyph. `templates`. */
+export const workDayKindEnum = pgEnum(
+  "work_day_kind",
+  enumValues<WorkDayKind>()(["remote", "coworking", "office", "other"]),
+);
+
+/** DayPlan.state — v1.2 §3.13. A plan left before the review stays a draft. `day_plans`. */
+export const dayPlanStateEnum = pgEnum(
+  "day_plan_state",
+  enumValues<DayPlanState>()(["draft", "complete"]),
+);
 
 /** Day.shape — UX v1.1 §3.9. Unstructured is a first-class shape. `days`. */
 export const dayShapeEnum = pgEnum(
@@ -1230,6 +1500,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   check,
   index,
+  jsonb,
   pgTable,
   smallint,
   text,
@@ -1238,10 +1509,13 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import type { IconValue } from "@syn/types";
+
 import { blockKindEnum } from "../enums";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { anchorDirectionEnum } from "../user/enums";
 import { users } from "../user/users";
-import { blockFlowEnum, blockStructureEnum } from "./enums";
+import { blockFlowEnum, blockStructureEnum, workDayKindEnum } from "./enums";
 import { templateSlots } from "./template-slots";
 
 export const templates = pgTable(
@@ -1261,11 +1535,21 @@ export const templates = pgTable(
      * materialisation (v1.1 §3.1). Nullable since 0004; see the header.
      */
     anchorTime: time("anchor_time"),
+    /**
+     * Work templates only — the type's own answer to *what gives* (UX v1.2
+     * §3.8, TD-14, 0007); null = the profile's. The service refuses the four
+     * work columns on any other kind.
+     */
+    anchorDirection: anchorDirectionEnum("anchor_direction"),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
     /** Forward from the anchor, or backward to it (v1.1 §3.3). */
     flow: blockFlowEnum("flow").notNull().default("forward"),
+    /** Work templates only — the type's glyph (UX v1.2 §4.3, 0007). JSON shape: IconValue. */
+    icon: jsonb("icon").$type<IconValue>(),
     /** Which block this template is (v1.1 §3.1). Backfilled to `morning` in 0004. */
     kind: blockKindEnum("kind").notNull(),
+    /** Work templates only — remote · coworking · office · other; a label (UX v1.2 §3.8, 0007). */
+    locationKind: workDayKindEnum("location_kind"),
     /** 1–40 — Epic 1 §9. */
     name: text("name").notNull(),
     /** A plain stack, or opener · pool · closer (v1.1 §3.4). */
@@ -1277,6 +1561,13 @@ export const templates = pgTable(
     typicalDays: smallint("typical_days").array(),
     /** 1–7, or null for *none* — shown as "used 1 of 2" during the week build. */
     weeklyTarget: smallint("weekly_target"),
+    /**
+     * Work templates only — the type's *until about* (UX v1.2 §3.8, 0007);
+     * null = the profile's `work_end_time`. `anchor_time` above is the type's
+     * *working by*. DYN-11 declined this column ("until is the same for every
+     * work day"); v1.2 R32 gives each type its own hours.
+     */
+    workEndTime: time("work_end_time"),
 
     userId: uuid("user_id")
       .notNull()
@@ -1498,6 +1789,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   check,
   index,
+  jsonb,
   pgTable,
   smallint,
   text,
@@ -1506,10 +1798,19 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import { blockKindEnum, schedulingEnum } from "../enums";
+import type { IconValue } from "@syn/types";
+
+import { blockKindEnum, fixtureKindEnum, schedulingEnum } from "../enums";
 import { habits } from "../library/habits";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
+
+/**
+ * The *other* kind's glyph — `FIXTURE_KINDS` in `@syn/constants` is the
+ * living copy; this literal is the column default, copied once into 0007 as
+ * history (the same arrangement as `DEFAULT_HABIT_ICON`).
+ */
+export const DEFAULT_FIXTURE_ICON: IconValue = { kind: "emoji", value: "📍" };
 
 export const fixtures = pgTable(
   "fixtures",
@@ -1529,6 +1830,15 @@ export const fixtures = pgTable(
     blockKind: blockKindEnum("block_kind").notNull().default("activity"),
     /** 1–480. */
     durationMin: smallint("duration_min").notNull(),
+    /**
+     * The fixture's glyph (UX v1.2 §3.6, R42, 0007) — the kind's default
+     * unless the person chose one. Not null so `ItemIcon` never branches;
+     * the default is the *other* kind's, the same object `FIXTURE_KINDS`
+     * holds. JSON shape: IconValue.
+     */
+    icon: jsonb("icon").$type<IconValue>().notNull().default(DEFAULT_FIXTURE_ICON),
+    /** A label and a default glyph and block — never a mechanic (UX v1.2 §3.6, 0007). */
+    kind: fixtureKindEnum("kind").notNull().default("other"),
     /** Hard by default: a fixture is an appointment (v1.1 R22). */
     scheduling: schedulingEnum("scheduling").notNull().default("hard"),
     /** 1–60. */
@@ -1577,6 +1887,163 @@ export const fixturesRelations = relations(fixtures, ({ one }) => ({
   user: one(users, {
     fields: [fixtures.userId],
     references: [users.id],
+  }),
+}));
+
+// packages/db/src/schema/plan/day-plans.ts
+/**
+ * day_plans — a named day, composed from the parts first run collected
+ * (UX v1.2 §3.13, §4.13, §11.5; R31, TD-10).
+ *
+ * A ROW OF REFERENCES, NEVER A COPY. A plan points at a work template (the
+ * work-day type, or null for *No work on this day*), at up to three block
+ * templates (the getting-ready list, the morning routine, the wind-down —
+ * `Getting ready A`, `Morning routine A`, `Wind-down A`), carries the four
+ * times a day is anchored from (null = inherit from the profile or the
+ * type), the workouts placed (`training`), the breaks (`breaks`), and which
+ * weekday fixtures this plan leaves out (`excluded_fixture_ids` — fixtures
+ * are matched by weekday; the plan stores only exclusions). A second plan may
+ * point at the first's lists; editing *Getting ready A* edits every plan
+ * that uses it, and the template list says *used by Day A, Day B*. Deleting
+ * a plan deletes references only.
+ *
+ * NOT v1's WHOLE-DAY TEMPLATE. Nothing inside a plan has an absolute time
+ * except its anchors and the pins; every block still stacks in its flow
+ * direction from `stackBlock` (TD-4). A day is an ordered set of blocks
+ * (TD-2), and a plan is what the week build reads first to make them
+ * (`prefillWeek`, RUN-5) — it is never materialised by any other path.
+ *
+ * ONE PLAN PER WEEKDAY, per person. An array column cannot carry that as a
+ * constraint; the service validates it on every write and moves a claimed
+ * weekday with a report (*Thursday moves from Day A.*). A double claim that
+ * slips through is read as the lower `sort_order`'s and logged.
+ *
+ * `state` is `draft` until the builder's review (13i) — a plan left early
+ * shows *unfinished*; `complete` requires a weekday, a wake and a lights-out
+ * (own or inherited), and a work template or an explicit *no work*.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import {
+  check,
+  index,
+  jsonb,
+  pgTable,
+  smallint,
+  text,
+  time,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
+
+import type { DayPlanBreak, DayPlanTraining, IconValue } from "@syn/types";
+
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { dayPlanStateEnum } from "./enums";
+import { templates } from "./templates";
+
+export const dayPlans = pgTable(
+  "day_plans",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    /** JSON shape: DayPlanBreak[] — `{ habitId, at: "midday" | "HH:mm" }`. Up to seven. */
+    breaks: jsonb("breaks").$type<DayPlanBreak[]>().notNull().default([]),
+    /** The plan's own *phone away*; null = the profile's (v1.2 §4.13h). */
+    devicesOffTime: time("devices_off_time"),
+    /** Weekday fixtures this plan leaves out; the rest apply by weekday. */
+    excludedFixtureIds: uuid("excluded_fixture_ids").array().notNull().default([]),
+    /** Optional glyph (v1.2 §4.13a). JSON shape: IconValue. */
+    icon: jsonb("icon").$type<IconValue>(),
+    /** The plan's own *lights out*; null = the profile's. */
+    lightsOutTime: time("lights_out_time"),
+    /** 1–40 — *Day A*, renameable. */
+    name: text("name").notNull(),
+    /** The list's order on *Your days*. */
+    sortOrder: smallint("sort_order").notNull().default(0),
+    state: dayPlanStateEnum("state").notNull().default("draft"),
+    /** JSON shape: DayPlanTraining[] — `{ habitId, placement }`; the enum is `day_blocks.placement`'s. */
+    training: jsonb("training").$type<DayPlanTraining[]>().notNull().default([]),
+    /** The plan's own *up at*; null = the profile's. */
+    wakeTime: time("wake_time"),
+    /** Mon = 0 … Sun = 6; each at most once; at most one plan per weekday (service-enforced). */
+    weekdays: smallint("weekdays").array().notNull().default([]),
+    /** The plan's own *until about*; null = the type's, then the profile's. */
+    workEndTime: time("work_end_time"),
+    /** The plan's own *working by*; null = the type's, then the profile's. */
+    workStartTime: time("work_start_time"),
+
+    /** The morning routine — a `morning` template; `set null` so an archived list leaves the plan standing. */
+    morningTemplateId: uuid("morning_template_id").references(() => templates.id, {
+      onDelete: "set null",
+    }),
+    /** *Getting ready* — a `prep` template. */
+    prepTemplateId: uuid("prep_template_id").references(() => templates.id, {
+      onDelete: "set null",
+    }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** The wind-down — a `wind_down` template. */
+    windDownTemplateId: uuid("wind_down_template_id").references(() => templates.id, {
+      onDelete: "set null",
+    }),
+    /** The work-day type — a `work` template; null = *No work on this day*. */
+    workTemplateId: uuid("work_template_id").references(() => templates.id, {
+      onDelete: "set null",
+    }),
+  },
+  (table) => [
+    index("day_plans_user_id_sort_order_idx").on(table.userId, table.sortOrder),
+    index("day_plans_user_id_idx").on(table.userId),
+    index("day_plans_prep_template_id_idx").on(table.prepTemplateId),
+    index("day_plans_morning_template_id_idx").on(table.morningTemplateId),
+    index("day_plans_wind_down_template_id_idx").on(table.windDownTemplateId),
+    index("day_plans_work_template_id_idx").on(table.workTemplateId),
+    check("day_plans_name_check", sql`length(${table.name}) BETWEEN 1 AND 40`),
+    check(
+      "day_plans_weekdays_check",
+      sql`${table.weekdays} <@ ARRAY[0,1,2,3,4,5,6]::smallint[]`,
+    ),
+    ...ownerPrivateCrudPolicies({
+      prefix: "day_plans",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const dayPlansRelations = relations(dayPlans, ({ one }) => ({
+  morningTemplate: one(templates, {
+    fields: [dayPlans.morningTemplateId],
+    references: [templates.id],
+    relationName: "day_plans_morning",
+  }),
+  prepTemplate: one(templates, {
+    fields: [dayPlans.prepTemplateId],
+    references: [templates.id],
+    relationName: "day_plans_prep",
+  }),
+  user: one(users, {
+    fields: [dayPlans.userId],
+    references: [users.id],
+  }),
+  windDownTemplate: one(templates, {
+    fields: [dayPlans.windDownTemplateId],
+    references: [templates.id],
+    relationName: "day_plans_wind_down",
+  }),
+  workTemplate: one(templates, {
+    fields: [dayPlans.workTemplateId],
+    references: [templates.id],
+    relationName: "day_plans_work",
   }),
 }));
 
@@ -1635,6 +2102,7 @@ import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { dayBlocks } from "./day-blocks";
 import { dayShapeEnum } from "./enums";
+import { templates } from "./templates";
 
 /** One table uses it, so it lives here (drizzle-orm-conventions §3). */
 export const dayCloseReasonEnum = pgEnum(
@@ -1693,6 +2161,8 @@ export const days = pgTable(
     shape: dayShapeEnum("shape").notNull().default("structured"),
     /** Snapshot of `users.timezone` at creation. */
     timezone: text("timezone").notNull(),
+    /** *Today, as I see it* — the third optional morning line, the person's own words; ≤ 280 (UX v1.2 §5.2, 0007). */
+    visualisation: text("visualisation"),
     /** Set by the orient frame (v1.1 R11), the v1.0 anchor habit, or by hand. */
     wokeAt: timestamp("woke_at", { withTimezone: true }),
     wokeAtSource: wokeAtSourceEnum("woke_at_source"),
@@ -1702,6 +2172,16 @@ export const days = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    /**
+     * The work-day type applied to this day (UX v1.2 §3.9, TD-19, 0007) —
+     * written by the week build from the plan's type, and by *Working today*
+     * on a *Rarely* day. `set null` for the same reason as the focus. Null on
+     * a day without a work block.
+     */
+    workTemplateId: uuid("work_template_id").references(
+      (): AnyPgColumn => templates.id,
+      { onDelete: "set null" },
+    ),
     /**
      * Today's focus — a `deep_work` habit (UX v1.1 §3.8, 0005). `set null`
      * because a hard-deleted habit must not take the day with it; an archived
@@ -1722,6 +2202,11 @@ export const days = pgTable(
     index("days_user_id_confirmed_at_idx").on(table.userId, table.confirmedAt),
     index("days_user_id_idx").on(table.userId),
     index("days_work_focus_habit_id_idx").on(table.workFocusHabitId),
+    index("days_work_template_id_idx").on(table.workTemplateId),
+    check(
+      "days_visualisation_check",
+      sql`${table.visualisation} IS NULL OR length(${table.visualisation}) <= 280`,
+    ),
     check(
       "days_capacity_min_check",
       sql`${table.capacityMin} IS NULL OR ${table.capacityMin} BETWEEN 5 AND 1440`,
@@ -1750,6 +2235,10 @@ export const daysRelations = relations(days, ({ many, one }) => ({
   workFocus: one(habits, {
     fields: [days.workFocusHabitId],
     references: [habits.id],
+  }),
+  workTemplate: one(templates, {
+    fields: [days.workTemplateId],
+    references: [templates.id],
   }),
 }));
 
@@ -1911,6 +2400,20 @@ export const dayBlocksRelations = relations(dayBlocks, ({ many, one }) => ({
 
 **RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
 
+#### `day_plans`
+
+**PURPOSE.** day_plans — a named day, composed from the parts first run collected (UX v1.2 §3.13, §4.13, §11.5; R31, TD-10). A ROW OF REFERENCES, NEVER A COPY. A plan points at a work template (the work-day type, or null for *No work on this day*), at up to three block templates (the getting-ready list, the morning routine, the wind-down — `Getting ready A`, `Morning routine A`, `Wind-down A`), carries the four times a day is anchored from (null = inherit from the profile or the type), the workouts placed (`training`), the breaks (`breaks`), and which weekday fixtures this plan leaves out (`excluded_fixture_ids` — fixtures are matched by weekday; the plan stores only exclusions). A second plan may point at the first's lists; editing *Getting ready A* edits every plan that uses it, and the template list says *used by Day A, Day B*. Deleting a plan deletes references only. NOT v1's WHOLE-DAY TEMPLATE. Nothing inside a plan has an absolute time except its anchors and the pins; every block still stacks in its flow direction from `stackBlock` (TD-4). A day is an ordered set of blocks (TD-2), and a plan is what the week build reads first to make them (`prefillWeek`, RUN-5) — it is never materialised by any other path. ONE PLAN PER WEEKDAY, per person. An array column cannot carry that as a constraint; the service validates it on every write and moves a claimed weekday with a report (*Thursday moves from Day A.*). A double claim that slips through is read as the lower `sort_order`'s and logged. `state` is `draft` until the builder's review (13i) — a plan left early shows *unfinished*; `complete` requires a weekday, a wake and a lights-out (own or inherited), and a work template or an explicit *no work*. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `day_plans_user_id_sort_order_idx`
+- `day_plans_user_id_idx`
+- `day_plans_prep_template_id_idx`
+- `day_plans_morning_template_id_idx`
+- `day_plans_wind_down_template_id_idx`
+- `day_plans_work_template_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
 #### `days`
 
 **PURPOSE.** days — one calendar date in the person's stored zone (official spec §3.6). A Day is keyed by `date` in the person's STORED zone and runs from `day_close_time` to the next `day_close_time` (cross-cutting §7.1). A day with no template is an empty day, which is how a vacation works — nothing is missed on an unplanned day. IT SNAPSHOTS ITS OWN TIME RULES. `timezone` and `day_close_time` are copied from `users` when the day is created and never follow a later settings change. Without them, moving zones or shifting the close time would silently re-key and re-window every past day, and "moved" would stop meaning anything (cross-cutting §7.3, §7.5, §8). The pending-pair on `users` is what defers a change to tomorrow; these two columns are what keep yesterday honest. NO `week_plans` TABLE. Official §3.6 lists one; its only content is a status derivable from the week's days, so `WeekPlanStatus` is computed by the week read model. See the Epic 1 TECHNICAL-DECISIONS entry. UNDER UX v1.1 (0005) A DAY IS AN ORDERED SET OF BLOCKS (`day_blocks`, TD-2). The v1.0 whole-day `template_id` is gone since `0006` (DYN-21) — a day's templates are its blocks'. `anchor_time` stays as the wake anchor, which is what it always was in practice. The v1.1 columns are the day's shape, the moment it was set (`confirmed_at` — nothing derived from the pick exists before it, R23), today's work anchor and its hardness, the focus, and the two lines the orient frame captures. POLICIES: owner-private CRUD.
@@ -1921,6 +2424,7 @@ export const dayBlocksRelations = relations(dayBlocks, ({ many, one }) => ({
 - `days_user_id_confirmed_at_idx`
 - `days_user_id_idx`
 - `days_work_focus_habit_id_idx`
+- `days_work_template_id_idx`
 
 **RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
 
@@ -2059,6 +2563,10 @@ export const itemOriginEnum = pgEnum(
     // UX v1.1 §3.6 (TD-8) — a weekday fixture, materialised as a pin. Moved
     // in DYN-1; the `ADD VALUE` ships in `0004`; written from DYN-5.
     "fixture",
+    // UX v1.2 §3.7 (TD-12) — the travel there or back around a workout, an
+    // item of its own. Moved in RUN-1; the `ADD VALUE` ships in `0007`;
+    // written from RUN-6.
+    "travel",
   ]),
 );
 
@@ -2148,6 +2656,13 @@ export const dayItems = pgTable(
     title: text("title").notNull(),
     /** Snapshot; `task_appointment` for a bare title. */
     type: itemTypeEnum("type").notNull(),
+    /**
+     * The chosen version's key, snapshotted (UX v1.2 §3.5, TD-11, 0007). Set
+     * by the pick's choice or the habit's default version; null when the
+     * length was hand-set or the habit has no versions. `duration_min` is
+     * always the live length — this only says which version it came from.
+     */
+    versionKey: text("version_key"),
 
     /** Set when `origin = carried` — the item this one came forward from. */
     carriedFromItemId: uuid("carried_from_item_id").references(
@@ -2170,6 +2685,16 @@ export const dayItems = pgTable(
     habitId: uuid("habit_id").references(() => habits.id, {
       onDelete: "set null",
     }),
+    /**
+     * For a travel row (`origin = travel`, UX v1.2 §3.7, TD-12, 0007): the
+     * workout it belongs beside. Cascades — a travel row without its workout
+     * is nothing — and a one-off delete of the workout takes both ends. Two
+     * more items in the block's stack; `stackBlock` is unchanged.
+     */
+    parentItemId: uuid("parent_item_id").references(
+      (): AnyPgColumn => dayItems.id,
+      { onDelete: "cascade" },
+    ),
     /** What TP-04's re-materialisation matches on. */
     templateSlotId: uuid("template_slot_id").references(() => templateSlots.id, {
       onDelete: "set null",
@@ -2195,6 +2720,7 @@ export const dayItems = pgTable(
       table.sortOrder,
     ),
     index("day_items_alternates_id_idx").on(table.alternatesId),
+    index("day_items_parent_item_id_idx").on(table.parentItemId),
     check("day_items_priority_check", sql`${table.priority} BETWEEN 1 AND 7`),
     check(
       "day_items_duration_min_check",
@@ -2228,6 +2754,11 @@ export const dayItemsRelations = relations(dayItems, ({ one }) => ({
   habit: one(habits, {
     fields: [dayItems.habitId],
     references: [habits.id],
+  }),
+  parentItem: one(dayItems, {
+    fields: [dayItems.parentItemId],
+    references: [dayItems.id],
+    relationName: "day_items_travel_parent",
   }),
   templateSlot: one(templateSlots, {
     fields: [dayItems.templateSlotId],
@@ -2653,6 +3184,7 @@ export const journalEntriesRelations = relations(journalEntries, ({ one }) => ({
 - `day_items_user_id_idx`
 - `day_items_day_block_id_sort_order_idx`
 - `day_items_alternates_id_idx`
+- `day_items_parent_item_id_idx`
 
 **RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
 
@@ -2841,6 +3373,9 @@ export const notificationKindEnum = pgEnum(
     "block_start",
     "fixture_start",
     "devices_off",
+    // UX v1.2 §9 N2 (R38) — the journal reminder. Moved in RUN-1; the
+    // `ADD VALUE` ships in `0007`; sent from RUN-6.
+    "journal_reminder",
   ]),
 );
 
@@ -2916,7 +3451,7 @@ export const notificationPrefsRelations = relations(
 
 ### GROUP 6 — SYSTEM
 
-Bookkeeping a person creates but does not browse: a request to export everything, and a message sent from About. `feedback_messages` is the one table in this schema that is not owner-private — insert-only for its author, readable by nobody through the app.
+Bookkeeping a person creates but does not browse, and the one table the product owns: a request to export everything, a message sent from About, and — since UX v1.2 (0007) — the `quotes` bank. `feedback_messages` is insert-only for its author, readable by nobody through the app; `quotes` is a shipped catalogue (`catalogReadPolicies`) — readable by every signed-in person, written by none.
 
 ```ts
 // packages/db/src/schema/system/data-exports.ts
@@ -3093,6 +3628,75 @@ export const feedbackMessagesRelations = relations(
     }),
   }),
 );
+
+// packages/db/src/schema/system/quotes.ts
+/**
+ * quotes — the bank a person may opt into for the morning frame (UX v1.2
+ * §3.12, §11.6; R36, TD-13).
+ *
+ * APP CONTENT, NOT A PERSON'S. The first table under `catalogReadPolicies`:
+ * every signed-in person may read it, nobody may write it through the
+ * authenticated role, and there is no `user_id` — a quote belongs to the
+ * product, the way the curated icon set does. It changes by migration or seed
+ * (the factory's own rule) or, if RUN-14 ships, through an admin surface that
+ * writes with the service role. It never changes through an RLS policy for
+ * "admins": a role column on `users` is one careless policy away from an
+ * admin-read on user data, which this schema promises never exists.
+ *
+ * NOTHING ABOUT THE PERSON DECIDES THE QUOTE. `quote.today` picks by date
+ * order over the published rows, so two people on the same day see the same
+ * quote and nobody sees one "for them". The read filters `published_at IS NOT
+ * NULL`; a draft is invisible to every person.
+ *
+ * THE APP NEVER SPEAKS IT. The frame renders a quote in quotation marks with
+ * its attribution as a caption, under the neutral chrome caption *A quote*.
+ * The tone rule for whoever curates the bank (v1.2 §13 #24): nothing that
+ * instructs, exhorts, or commands in the second person.
+ *
+ * POLICIES: `catalogReadPolicies` — select for authenticated; insert, update,
+ * delete denied.
+ */
+import { sql } from "drizzle-orm";
+import { check, index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+
+import { catalogReadPolicies } from "../rls/standard-policies";
+
+export const quotes = pgTable(
+  "quotes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    /** 1–120. Always shown; a quote without one is not published. */
+    attribution: text("attribution").notNull(),
+    /** Null = a draft, invisible to every person. The cycle orders by this, then id. */
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    /** ≤ 200, optional — a book, a talk, a letter. */
+    source: text("source"),
+    /** Curator's tags; nothing reads them in v1.2 beyond the admin list. */
+    tags: text("tags").array().notNull().default([]),
+    /** 1–400. */
+    text: text("text").notNull(),
+  },
+  (table) => [
+    index("quotes_published_at_idx").on(table.publishedAt),
+    check("quotes_text_check", sql`length(${table.text}) BETWEEN 1 AND 400`),
+    check(
+      "quotes_attribution_check",
+      sql`length(${table.attribution}) BETWEEN 1 AND 120`,
+    ),
+    check(
+      "quotes_source_check",
+      sql`${table.source} IS NULL OR length(${table.source}) <= 200`,
+    ),
+    ...catalogReadPolicies("quotes"),
+  ],
+);
 ```
 
 #### `data_exports`
@@ -3113,6 +3717,15 @@ export const feedbackMessagesRelations = relations(
 - `feedback_messages_user_id_idx`
 
 **RLS.** **The one table that is not owner-private.** Insert-only for the author (`WITH CHECK` the row's `user_id` is the caller's); select, update and delete are denied to the authenticated role. Nobody reads it through the app.
+
+#### `quotes`
+
+**PURPOSE.** quotes — the bank a person may opt into for the morning frame (UX v1.2 §3.12, §11.6; R36, TD-13). APP CONTENT, NOT A PERSON'S. The first table under `catalogReadPolicies`: every signed-in person may read it, nobody may write it through the authenticated role, and there is no `user_id` — a quote belongs to the product, the way the curated icon set does. It changes by migration or seed (the factory's own rule) or, if RUN-14 ships, through an admin surface that writes with the service role. It never changes through an RLS policy for "admins": a role column on `users` is one careless policy away from an admin-read on user data, which this schema promises never exists. NOTHING ABOUT THE PERSON DECIDES THE QUOTE. `quote.today` picks by date order over the published rows, so two people on the same day see the same quote and nobody sees one "for them". The read filters `published_at IS NOT NULL`; a draft is invisible to every person. THE APP NEVER SPEAKS IT. The frame renders a quote in quotation marks with its attribution as a caption, under the neutral chrome caption *A quote*. The tone rule for whoever curates the bank (v1.2 §13 #24): nothing that instructs, exhorts, or commands in the second person. POLICIES: `catalogReadPolicies` — select for authenticated; insert, update, delete denied.
+
+**INDEXES.**
+- `quotes_published_at_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
 
 
 ---
@@ -3217,7 +3830,7 @@ Re-running the seed prints zeros across the board, which means idempotent rather
 
 ## 10. OPEN QUESTIONS & FLAGGED DECISIONS
 
-- **19 tables is the whole Phase-1 model.** A later ticket that needs a column adds it as a normal migration with a logged deviation, not as a second domain migration by default.
+- **22 tables is the whole Phase-1 model.** A later ticket that needs a column adds it as a normal migration with a logged deviation, not as a second domain migration by default.
 - **`feedback_messages` readability is `[PROVISIONAL — Taylor]`.** The table is insert-only for its author and is read by the builder out of band. Confirm that is what you want; the row deliberately holds nothing from a person's list.
 - **`day_items.calendar_event_id` is a Phase-2 seam.** The column exists so calendar import (official spec §4.7) is not a migration; nothing in Phase 1 writes it.
 - **`template_slots.multitask_group` is enforced in the service, not the schema.** "Two slots sharing a start offset must share a group" cannot be a partial unique index, because the rule is *unless grouped*. SET-5 owns it, in the words TP-02 shows.

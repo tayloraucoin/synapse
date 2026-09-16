@@ -208,6 +208,13 @@ export const dayItems = pgTable(
     title: text("title").notNull(),
     /** Snapshot; `task_appointment` for a bare title. */
     type: itemTypeEnum("type").notNull(),
+    /**
+     * The chosen version's key, snapshotted (UX v1.2 §3.5, TD-11, 0007). Set
+     * by the pick's choice or the habit's default version; null when the
+     * length was hand-set or the habit has no versions. `duration_min` is
+     * always the live length — this only says which version it came from.
+     */
+    versionKey: text("version_key"),
 
     /** Set when `origin = carried` — the item this one came forward from. */
     carriedFromItemId: uuid("carried_from_item_id").references(
@@ -230,6 +237,16 @@ export const dayItems = pgTable(
     habitId: uuid("habit_id").references(() => habits.id, {
       onDelete: "set null",
     }),
+    /**
+     * For a travel row (`origin = travel`, UX v1.2 §3.7, TD-12, 0007): the
+     * workout it belongs beside. Cascades — a travel row without its workout
+     * is nothing — and a one-off delete of the workout takes both ends. Two
+     * more items in the block's stack; `stackBlock` is unchanged.
+     */
+    parentItemId: uuid("parent_item_id").references(
+      (): AnyPgColumn => dayItems.id,
+      { onDelete: "cascade" },
+    ),
     /** What TP-04's re-materialisation matches on. */
     templateSlotId: uuid("template_slot_id").references(() => templateSlots.id, {
       onDelete: "set null",
@@ -255,6 +272,7 @@ export const dayItems = pgTable(
       table.sortOrder,
     ),
     index("day_items_alternates_id_idx").on(table.alternatesId),
+    index("day_items_parent_item_id_idx").on(table.parentItemId),
     check("day_items_priority_check", sql`${table.priority} BETWEEN 1 AND 7`),
     check(
       "day_items_duration_min_check",
@@ -288,6 +306,11 @@ export const dayItemsRelations = relations(dayItems, ({ one }) => ({
   habit: one(habits, {
     fields: [dayItems.habitId],
     references: [habits.id],
+  }),
+  parentItem: one(dayItems, {
+    fields: [dayItems.parentItemId],
+    references: [dayItems.id],
+    relationName: "day_items_travel_parent",
   }),
   templateSlot: one(templateSlots, {
     fields: [dayItems.templateSlotId],

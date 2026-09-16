@@ -52,6 +52,7 @@ import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { dayBlocks } from "./day-blocks";
 import { dayShapeEnum } from "./enums";
+import { templates } from "./templates";
 
 /** One table uses it, so it lives here (drizzle-orm-conventions §3). */
 export const dayCloseReasonEnum = pgEnum(
@@ -110,6 +111,8 @@ export const days = pgTable(
     shape: dayShapeEnum("shape").notNull().default("structured"),
     /** Snapshot of `users.timezone` at creation. */
     timezone: text("timezone").notNull(),
+    /** *Today, as I see it* — the third optional morning line, the person's own words; ≤ 280 (UX v1.2 §5.2, 0007). */
+    visualisation: text("visualisation"),
     /** Set by the orient frame (v1.1 R11), the v1.0 anchor habit, or by hand. */
     wokeAt: timestamp("woke_at", { withTimezone: true }),
     wokeAtSource: wokeAtSourceEnum("woke_at_source"),
@@ -119,6 +122,16 @@ export const days = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    /**
+     * The work-day type applied to this day (UX v1.2 §3.9, TD-19, 0007) —
+     * written by the week build from the plan's type, and by *Working today*
+     * on a *Rarely* day. `set null` for the same reason as the focus. Null on
+     * a day without a work block.
+     */
+    workTemplateId: uuid("work_template_id").references(
+      (): AnyPgColumn => templates.id,
+      { onDelete: "set null" },
+    ),
     /**
      * Today's focus — a `deep_work` habit (UX v1.1 §3.8, 0005). `set null`
      * because a hard-deleted habit must not take the day with it; an archived
@@ -139,6 +152,11 @@ export const days = pgTable(
     index("days_user_id_confirmed_at_idx").on(table.userId, table.confirmedAt),
     index("days_user_id_idx").on(table.userId),
     index("days_work_focus_habit_id_idx").on(table.workFocusHabitId),
+    index("days_work_template_id_idx").on(table.workTemplateId),
+    check(
+      "days_visualisation_check",
+      sql`${table.visualisation} IS NULL OR length(${table.visualisation}) <= 280`,
+    ),
     check(
       "days_capacity_min_check",
       sql`${table.capacityMin} IS NULL OR ${table.capacityMin} BETWEEN 5 AND 1440`,
@@ -167,5 +185,9 @@ export const daysRelations = relations(days, ({ many, one }) => ({
   workFocus: one(habits, {
     fields: [days.workFocusHabitId],
     references: [habits.id],
+  }),
+  workTemplate: one(templates, {
+    fields: [days.workTemplateId],
+    references: [templates.id],
   }),
 }));

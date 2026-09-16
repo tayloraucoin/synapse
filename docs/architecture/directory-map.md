@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-16 · 1213 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-16 · 1225 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -830,6 +830,7 @@ packages/
       base.js
       boundaries.js  # the import matrix. Diverges from CC's copy — see TECHNICAL-DECISIONS
       next.js
+      no-emoji.js  # UX v1.2 R29 as lint: no emoji in any copy.ts; a glyph is IconValue data on the person's nouns (TD-20)
       react-internal.js
       spacing.js
     prettier/
@@ -847,24 +848,29 @@ packages/
       brand.ts
       contact.ts
       default-reasons.ts
+      fixture-kinds.ts
       index.ts
       journal-prompts.ts
       limits.ts  # Epic 1 §9's bounds, shared by the zod schema and the input's maxLength
       motion.ts
       notification-catalogue.ts
+      placed-rows.ts
+      schedule-shapes.ts
       starter-library.ts
       storage-buckets.ts
       storage-keys.ts
       timezones.ts
       user-images.ts
+      work-day-kinds.ts
+      workout-types.ts
     .gitignore
     eslint.config.mjs
     package.json
     tsconfig.json
   db/
     migrations/
-      <7 migration .sql files, 0000–0006 — append-only, human-reviewed before a hosted migrate>
-      meta/ <8 drizzle snapshot files + _journal.json>
+      <8 migration .sql files, 0000–0007 — append-only, human-reviewed before a hosted migrate>
+      meta/ <9 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
@@ -885,6 +891,7 @@ packages/
           categories.ts
           habits.ts
           index.ts
+          passages.ts
           reasons.ts
         notification/
           index.ts
@@ -893,6 +900,7 @@ packages/
           web-push-subscriptions.ts
         plan/
           day-blocks.ts
+          day-plans.ts
           days.ts
           enums.ts
           fixtures.ts
@@ -906,6 +914,7 @@ packages/
           data-exports.ts
           feedback-messages.ts
           index.ts
+          quotes.ts
         user/
           enums.ts
           index.ts
@@ -1559,15 +1568,18 @@ packages/
       block.ts
       category.ts
       confirm.ts
+      day-plan.ts
       day.ts
       feedback.ts
       fixture.ts
       habit.ts
+      icon.ts
       index.ts
       item.ts
       journal.ts
       keys.ts
       notification.ts
+      passage.ts
       preferences.ts
       push.ts
       reason.ts

@@ -24,6 +24,8 @@
 export const ASSET_BUCKET_BY_KIND = {
   icon: "icons",
   avatar: "avatars",
+  // UX v1.2 §3.12 (TD-15, RUN-2): a passage's images, ≤ 4, the icons' grammar.
+  passage: "passages",
 } as const;
 
 export type AssetKind = keyof typeof ASSET_BUCKET_BY_KIND;
@@ -37,6 +39,7 @@ export type AssetBucket = (typeof ASSET_BUCKET_BY_KIND)[AssetKind];
 export const READABLE_ASSET_BUCKETS: ReadonlyArray<AssetBucket> = [
   "icons",
   "avatars",
+  "passages",
 ];
 
 /**

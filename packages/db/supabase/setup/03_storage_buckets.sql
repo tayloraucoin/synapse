@@ -60,6 +60,22 @@ BEGIN
     file_size_limit = EXCLUDED.file_size_limit,
     allowed_mime_types = EXCLUDED.allowed_mime_types;
 
+  -- passages — a passage's images, up to four (UX v1.2 §3.12, TD-15; 0007).
+  -- The icons' limits and pipeline: the same signed upload, the same
+  -- owner-segment read route, so the three image buckets cannot drift.
+  INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+  VALUES (
+    'passages',
+    'passages',
+    false,
+    5242880, -- 5 MB
+    ARRAY['image/jpeg', 'image/png', 'image/webp']
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    public = EXCLUDED.public,
+    file_size_limit = EXCLUDED.file_size_limit,
+    allowed_mime_types = EXCLUDED.allowed_mime_types;
+
   -- exports — the generated data-export bundle (official spec §7.6,
   -- Settings → Your data → Export everything). Private; signed-URL download
   -- with a short TTL enforced in the app. JSON or zip.
@@ -80,6 +96,7 @@ END $storage_buckets$;
 -- Naming conventions (enforced in the app and in the storage policies):
 --   avatars/{user_id}/{uuid}.{ext}
 --   icons/{user_id}/{uuid}.{ext}
+--   passages/{user_id}/{uuid}.{ext}
 --   exports/{user_id}/{request_id}.zip
 -- Keying the first path segment on the owner id is what the storage RLS
 -- policies match against (owner-only read and write).
@@ -127,7 +144,7 @@ BEGIN
     RETURN;
   END IF;
 
-  FOREACH bucket_name IN ARRAY ARRAY['avatars', 'icons', 'exports'] LOOP
+  FOREACH bucket_name IN ARRAY ARRAY['avatars', 'icons', 'passages', 'exports'] LOOP
     FOREACH operation IN ARRAY ARRAY['select', 'insert', 'update', 'delete'] LOOP
       policy_name := format('storage_%s_%s_deny', bucket_name, operation);
 

@@ -28,6 +28,7 @@
  */
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   index,
   jsonb,
@@ -38,9 +39,9 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import type { IconValue } from "@syn/types";
+import type { HabitVersion, IconValue } from "@syn/types";
 
-import { blockKindEnum, itemTypeEnum } from "../enums";
+import { blockKindEnum, itemTypeEnum, workoutLocationEnum } from "../enums";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { categories } from "./categories";
@@ -86,6 +87,15 @@ export const habits = pgTable(
     icon: jsonb("icon").$type<IconValue>().notNull().default(DEFAULT_HABIT_ICON),
     /** 1–7, 7 highest (official spec §0.3 R7). The default wherever it is slotted. */
     lifePriority: smallint("life_priority").notNull(),
+    /** Workouts only — where it happens (UX v1.2 §3.7, 0007). */
+    location: workoutLocationEnum("location"),
+    /**
+     * Workouts only — whether the day plans for the travel (UX v1.2 R35,
+     * TD-12, 0007). When true and either travel is non-zero, the day carries
+     * two travel rows beside the workout; the workout's own length never
+     * includes them.
+     */
+    planTravel: boolean("plan_travel").notNull().default(true),
     /** ≤ 16, e.g. "pages". Its presence means the item captures a number. */
     quantityUnit: text("quantity_unit"),
     /**
@@ -98,14 +108,30 @@ export const habits = pgTable(
       .default([]),
     /** 1–60 — Epic 1 §9. */
     title: text("title").notNull(),
+    /** Workouts only — minutes there and back around it (UX v1.2 §3.7, 0007). 0–180; never added to the length. */
+    travelBackMin: smallint("travel_back_min").notNull().default(0),
+    travelThereMin: smallint("travel_there_min").notNull().default(0),
     type: itemTypeEnum("type").notNull(),
     /**
      * Workouts and focuses only — the days the rotation usually falls on.
      * Mon = 0 … Sun = 6, the same shape and check as `templates.typical_days`.
      */
     typicalDays: smallint("typical_days").array(),
+    /**
+     * Up to three named lengths — UX v1.2 §3.5, R34, TD-11 (0007). The first
+     * is the default the plan uses; the chosen one is snapshotted on the item
+     * as `version_key`. A jsonb, not a table: a version is never queried apart
+     * from its habit. JSON shape: HabitVersion[] — see @syn/types.
+     */
+    versions: jsonb("versions").$type<HabitVersion[]>(),
     /** Workouts and focuses only — the rotation's weekly count, 1–7. */
     weeklyTarget: smallint("weekly_target"),
+    /**
+     * Workouts only — the curated type's key (`WORKOUT_TYPES`, UX v1.2 §4.10,
+     * 0007). Text, not an enum, so the list grows without a migration; a
+     * label that fills the name and glyph when they are empty.
+     */
+    workoutType: text("workout_type"),
 
     categoryId: uuid("category_id").references(() => categories.id, {
       onDelete: "set null",
@@ -130,6 +156,14 @@ export const habits = pgTable(
     check(
       "habits_life_priority_check",
       sql`${table.lifePriority} BETWEEN 1 AND 7`,
+    ),
+    check(
+      "habits_travel_check",
+      sql`${table.travelThereMin} BETWEEN 0 AND 180 AND ${table.travelBackMin} BETWEEN 0 AND 180`,
+    ),
+    check(
+      "habits_workout_type_check",
+      sql`${table.workoutType} IS NULL OR length(${table.workoutType}) BETWEEN 1 AND 32`,
     ),
     check(
       "habits_duration_min_min_check",

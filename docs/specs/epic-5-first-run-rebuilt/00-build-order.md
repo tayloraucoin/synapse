@@ -18,7 +18,7 @@ The contract and the seeds; the one additive migration; the plan services; the c
 
 ### Phase 0 — The contract and the migration (no UI)
 - [x] **RUN-1** · Vocabulary, view models, validators, the seeds with their glyphs, the emoji lint rule, the two guide amendments — M · (none) · **Mason review of the unions and the lint override** — built 2026-09-16; **six new `pgEnum` tuples and two extended, the icon schema split into `icon.ts`, the rule proven on both literal forms**
-- [ ] **RUN-2** · Migration `0007`: the additive columns, `passages`, `quotes`, `day_plans`, `days.work_template_id`, the `passages` bucket, the `orient_passage` backfill — L · (RUN-1) · **Mason migration review**
+- [x] **RUN-2** · Migration `0007`: the additive columns, `passages`, `quotes`, `day_plans`, `days.work_template_id`, the `passages` bucket, the `orient_passage` backfill — L · (RUN-1) · **Mason migration review** — authored 2026-09-16; **generated then hand-amended; neither added enum value is used in the file; not applied to any tier — Taylor runs it after `0004`–`0006`**
 
 ### Phase 1 — The services
 - [ ] **RUN-3** · Plan services: work-day types, fixture kinds and icons, habit versions and workout details, `usedBy` on templates, the profile widened — L · (RUN-2)
@@ -98,8 +98,8 @@ Taylor's instruction, 2026-09-16: Mason executes the track in batches, one batch
 
 | Batch | Tickets | Gate (Complete in `PROGRESS.md`) | Status |
 |---|---|---|---|
-| 1 | RUN-1 · RUN-2 | — | **In progress 2026-09-16** |
-| 2 | RUN-3 · RUN-4 | RUN-2 | |
+| 1 | RUN-1 · RUN-2 | — | **Complete 2026-09-16** |
+| 2 | RUN-3 · RUN-4 | RUN-2 | next |
 | 3 | RUN-5 · RUN-6 | RUN-3 | |
 | 4 | RUN-7 | RUN-1 | |
 | 5 | RUN-8 · RUN-9 | RUN-3, RUN-4, RUN-7 | |

@@ -33,6 +33,15 @@
  * order. These are the anchors the materialiser lays every block out from;
  * a template no longer carries its own (TD-1).
  *
+ * THE v1.2 ADDITIONS (UX v1.2 §11.1, migration 0007). How mornings go
+ * (`morning_mode`, R37), the quote opt-in (`quotes_opt_in`, R36), the two
+ * further morning lines (`orient_ask_intention`, `orient_ask_visualisation`),
+ * and the journal reminder (`journal_reminder_enabled`, `journal_reminder_time`,
+ * R38). Three v1.1 columns stop being written under v1.2 — `earliest_wake_time`
+ * (R39), `orient_passage` (copied into `passages` by 0007) and
+ * `orient_show_last_night` (R41) — and are dropped in `0008`, never in the
+ * migration that adds their replacements.
+ *
  * POLICIES. Select and update are the owner's alone. Insert and delete are
  * denied to the authenticated role outright: the trigger inserts, and deletion
  * goes through `auth.admin.deleteUser` and cascades. There is no admin read.
@@ -68,6 +77,7 @@ import { templates } from "../plan/templates";
 import { denyAuthenticated, isOwner } from "../rls/helpers";
 import {
   anchorDirectionEnum,
+  morningModeEnum,
   overflowModeEnum,
   scheduleShapeEnum,
 } from "./enums";
@@ -148,6 +158,10 @@ export const users = pgTable(
     }),
     // UX v1.1 §7.2 — *A few lines at night* (0005).
     journalEnabled: boolean("journal_enabled").notNull().default(true),
+    // UX v1.2 §9 N2, R38 — the journal reminder's switch; on by default (0007).
+    journalReminderEnabled: boolean("journal_reminder_enabled").notNull().default(true),
+    // UX v1.2 §4.11 — the reminder's time; null = derived, phone away − 60 (0007).
+    journalReminderTime: time("journal_reminder_time"),
     // UX v1.1 §7.2, TD-7 — the person's prompts, ordered, keyed stably (0005).
     // JSON shape: JournalPrompt[] — see @syn/types.
     journalPrompts: jsonb("journal_prompts")
@@ -156,15 +170,23 @@ export const users = pgTable(
       .default(DEFAULT_JOURNAL_PROMPTS_LITERAL),
     // UX v1.1 §7.1 — the wind-down routine flows backward to this (0005).
     lightsOutTime: time("lights_out_time"),
+    // UX v1.2 R37, TD-17 — set from the plan, or build each morning (0007).
+    morningMode: morningModeEnum("morning_mode").notNull().default("set_from_plan"),
     // UX v1.1 §5.2 — the one optional morning line, and with it the R18 line (0005).
     orientAskGratitude: boolean("orient_ask_gratitude").notNull().default(true),
-    // UX v1.1 §4.6 — the passage read every morning; ≤ 2000 (0005).
+    // UX v1.2 §4.6, §5.2 — the second and third optional morning lines (0007).
+    orientAskIntention: boolean("orient_ask_intention").notNull().default(true),
+    orientAskVisualisation: boolean("orient_ask_visualisation").notNull().default(true),
+    // UX v1.1 §4.6 — the passage read every morning; ≤ 2000 (0005). UNWRITTEN
+    // since UX v1.2 (RUN-3): `0007` copied it into `passages`; dropped in `0008`.
     orientPassage: text("orient_passage"),
     // UX v1.1 §4.6 — show last night's journal lines on the orient frame (0005).
+    // UNWRITTEN since UX v1.2 R41 (the *Last night* row); dropped in `0008`.
     orientShowLastNight: boolean("orient_show_last_night")
       .notNull()
       .default(true),
-    // UX v1.1 §3.10 — how the days that do not fit are handled (0005).
+    // UX v1.1 §3.10 — how the days that do not fit are handled (0005). A
+    // Settings preference since UX v1.2 §3.10; no longer asked at first run.
     overflowMode: overflowModeEnum("overflow_mode")
       .notNull()
       .default("daily_menu"),
@@ -175,6 +197,9 @@ export const users = pgTable(
     pendingDayCloseTimeFrom: date("pending_day_close_time_from"),
     pendingTimezone: text("pending_timezone"),
     pendingTimezoneFrom: date("pending_timezone_from"),
+    // UX v1.2 §3.12, R36 — a quote from the bank joins the passage cycle. Off
+    // by default: the app never supplies the words unless asked (0007).
+    quotesOptIn: boolean("quotes_opt_in").notNull().default(false),
     // "*Not now* is remembered" (official spec §8.3, Epic 1 §8.7) — the app
     // never re-prompts for notification permission on its own after this.
     reminderPromptAnsweredAt: timestamp("reminder_prompt_answered_at", {

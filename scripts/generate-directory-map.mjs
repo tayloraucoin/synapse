@@ -66,6 +66,7 @@ const ANNOTATIONS = {
 
   // --- config ---
   "packages/config/eslint/boundaries.js": "the import matrix. Diverges from CC's copy \u2014 see TECHNICAL-DECISIONS",
+  "packages/config/eslint/no-emoji.js": "UX v1.2 R29 as lint: no emoji in any copy.ts; a glyph is IconValue data on the person's nouns (TD-20)",
   "packages/config/tailwind/preset.css": "every design token, and the ONE place a hex may appear",
 
   // --- platform-pure leaves ---

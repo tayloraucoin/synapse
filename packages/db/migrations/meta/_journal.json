@@ -50,6 +50,13 @@
       "when": 1789357054755,
       "tag": "0006_retire_v1_model",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789597195235,
+      "tag": "0007_v1_2_additive",
+      "breakpoints": true
     }
   ]
 }

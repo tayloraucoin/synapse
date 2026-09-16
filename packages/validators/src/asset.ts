@@ -12,7 +12,8 @@ import { USER_IMAGE_MAX_BYTES, USER_IMAGE_MIME_TYPES } from "@syn/constants";
  * to choose is which of the two kinds it is uploading.
  */
 
-export const assetKindSchema = z.enum(["icon", "avatar"]);
+/** Plus `passage` — UX v1.2 §3.12 (TD-15): a passage's images, in their own bucket. */
+export const assetKindSchema = z.enum(["icon", "avatar", "passage"]);
 
 export type AssetKindInput = z.infer<typeof assetKindSchema>;
 

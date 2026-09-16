@@ -26,6 +26,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   check,
   index,
+  jsonb,
   pgTable,
   smallint,
   text,
@@ -34,10 +35,19 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-import { blockKindEnum, schedulingEnum } from "../enums";
+import type { IconValue } from "@syn/types";
+
+import { blockKindEnum, fixtureKindEnum, schedulingEnum } from "../enums";
 import { habits } from "../library/habits";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
+
+/**
+ * The *other* kind's glyph — `FIXTURE_KINDS` in `@syn/constants` is the
+ * living copy; this literal is the column default, copied once into 0007 as
+ * history (the same arrangement as `DEFAULT_HABIT_ICON`).
+ */
+export const DEFAULT_FIXTURE_ICON: IconValue = { kind: "emoji", value: "📍" };
 
 export const fixtures = pgTable(
   "fixtures",
@@ -57,6 +67,15 @@ export const fixtures = pgTable(
     blockKind: blockKindEnum("block_kind").notNull().default("activity"),
     /** 1–480. */
     durationMin: smallint("duration_min").notNull(),
+    /**
+     * The fixture's glyph (UX v1.2 §3.6, R42, 0007) — the kind's default
+     * unless the person chose one. Not null so `ItemIcon` never branches;
+     * the default is the *other* kind's, the same object `FIXTURE_KINDS`
+     * holds. JSON shape: IconValue.
+     */
+    icon: jsonb("icon").$type<IconValue>().notNull().default(DEFAULT_FIXTURE_ICON),
+    /** A label and a default glyph and block — never a mechanic (UX v1.2 §3.6, 0007). */
+    kind: fixtureKindEnum("kind").notNull().default("other"),
     /** Hard by default: a fixture is an appointment (v1.1 R22). */
     scheduling: schedulingEnum("scheduling").notNull().default("hard"),
     /** 1–60. */

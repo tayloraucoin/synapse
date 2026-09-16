@@ -34,6 +34,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   check,
   index,
+  jsonb,
   pgTable,
   smallint,
   text,
@@ -42,10 +43,13 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import type { IconValue } from "@syn/types";
+
 import { blockKindEnum } from "../enums";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { anchorDirectionEnum } from "../user/enums";
 import { users } from "../user/users";
-import { blockFlowEnum, blockStructureEnum } from "./enums";
+import { blockFlowEnum, blockStructureEnum, workDayKindEnum } from "./enums";
 import { templateSlots } from "./template-slots";
 
 export const templates = pgTable(
@@ -65,11 +69,21 @@ export const templates = pgTable(
      * materialisation (v1.1 §3.1). Nullable since 0004; see the header.
      */
     anchorTime: time("anchor_time"),
+    /**
+     * Work templates only — the type's own answer to *what gives* (UX v1.2
+     * §3.8, TD-14, 0007); null = the profile's. The service refuses the four
+     * work columns on any other kind.
+     */
+    anchorDirection: anchorDirectionEnum("anchor_direction"),
     archivedAt: timestamp("archived_at", { withTimezone: true }),
     /** Forward from the anchor, or backward to it (v1.1 §3.3). */
     flow: blockFlowEnum("flow").notNull().default("forward"),
+    /** Work templates only — the type's glyph (UX v1.2 §4.3, 0007). JSON shape: IconValue. */
+    icon: jsonb("icon").$type<IconValue>(),
     /** Which block this template is (v1.1 §3.1). Backfilled to `morning` in 0004. */
     kind: blockKindEnum("kind").notNull(),
+    /** Work templates only — remote · coworking · office · other; a label (UX v1.2 §3.8, 0007). */
+    locationKind: workDayKindEnum("location_kind"),
     /** 1–40 — Epic 1 §9. */
     name: text("name").notNull(),
     /** A plain stack, or opener · pool · closer (v1.1 §3.4). */
@@ -81,6 +95,13 @@ export const templates = pgTable(
     typicalDays: smallint("typical_days").array(),
     /** 1–7, or null for *none* — shown as "used 1 of 2" during the week build. */
     weeklyTarget: smallint("weekly_target"),
+    /**
+     * Work templates only — the type's *until about* (UX v1.2 §3.8, 0007);
+     * null = the profile's `work_end_time`. `anchor_time` above is the type's
+     * *working by*. DYN-11 declined this column ("until is the same for every
+     * work day"); v1.2 R32 gives each type its own hours.
+     */
+    workEndTime: time("work_end_time"),
 
     userId: uuid("user_id")
       .notNull()
