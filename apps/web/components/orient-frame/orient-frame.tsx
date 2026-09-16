@@ -41,7 +41,14 @@ export function OrientFrame({ initial }: { initial: OrientView }) {
     { key: "lookingForward", caption: PROMPT_BY_KEY.get("looking_forward") ?? "", text: initial.lastNight?.lookingForward ?? null },
   ].filter((line) => line.text !== null);
   const hasJournal = lines.length > 0;
-  const hasPassage = initial.passage !== null;
+  // RUN-4 bridge: today's passage from the cycle, as plain text, until RUN-9
+  // mounts the carousel (UX v1.2 §5.2). A migrated textarea passage is its
+  // own Markdown, so the old rendering still reads.
+  const passage =
+    initial.todayIndex === null
+      ? null
+      : (initial.passages[initial.todayIndex]?.bodyMd ?? null);
+  const hasPassage = passage !== null;
 
   const dateLabel = formatCalendarDay(new Date(`${initial.date}T12:00:00Z`), "UTC", "long");
 
@@ -81,7 +88,7 @@ export function OrientFrame({ initial }: { initial: OrientView }) {
                 {COPY.everyMorning}
               </Text>
             ) : null}
-            <p className="font-serif text-(length:--fs-body) leading-relaxed whitespace-pre-wrap">{initial.passage}</p>
+            <p className="font-serif text-(length:--fs-body) leading-relaxed whitespace-pre-wrap">{passage}</p>
           </div>
         ) : null}
 

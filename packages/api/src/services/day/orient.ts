@@ -1,9 +1,17 @@
 import { and, eq, gte, lte } from "drizzle-orm";
 
 import { days, users, type RlsClient } from "@syn/db";
-import { ORIENT_READBACK_KEYS } from "@syn/constants";
-import { SKIP_LINE_WINDOW_DAYS, addDays, shouldShowSkipLine } from "@syn/utils";
+import { CYCLE_EPOCH, ORIENT_READBACK_KEYS } from "@syn/constants";
+import type { MorningMode, PassageView, QuoteView } from "@syn/types";
+import {
+  SKIP_LINE_WINDOW_DAYS,
+  addDays,
+  cycleIndex,
+  shouldShowSkipLine,
+} from "@syn/utils";
 
+import { readActivePassages } from "../library/passages";
+import { readQuoteForDate } from "../system/quotes";
 import { getLastNight } from "./journal";
 import { ensureDayRow, readDayProfile } from "./materialize-day";
 
@@ -18,25 +26,49 @@ import { ensureDayRow, readDayProfile } from "./materialize-day";
  * the first thing that touches a day nobody planned.
  *
  * THE FRAME READS THE PERSON'S WORDS AND NOTHING ELSE. Last night's three
- * answers by key (`ORIENT_READBACK_KEYS`), the passage, whether the gratitude
- * line is asked at all, and the one fact behind the R18 line — computed by
+ * answers by key (`ORIENT_READBACK_KEYS`), the passages in cycle order with
+ * today's index, the day's quote when opted in (UX v1.2 §3.12 — attributed,
+ * never the app's, never keyed to the person), which of the three lines are
+ * asked at all, and the one fact behind the R18 line — computed by
  * `shouldShowSkipLine` from the last eight mornings' `morning_gratitude`
  * (yesterday first; a day with no row is a day nothing was written).
+ *
+ * NOTHING IS WRITTEN BY READING THE FRAME except the wake stamp, once. The
+ * cycle index is arithmetic over the date (`cycleIndex`), not a cursor; which
+ * passage was read is never recorded (§13 #21).
+ *
+ * `users.orient_show_last_night` IS NO LONGER READ (v1.2 R41): last night's
+ * lines are always returned when they exist, and the frame keeps them one
+ * tap away behind a collapsed row. The column is dropped in `0008`.
  */
 
 export type OrientView = {
   date: string;
-  /** Null when there is no entry for last night, or the switch is off. */
+  /** Null when there is no entry for last night. Rendered collapsed (R41). */
   lastNight: {
     makeHappen: string | null;
     visualisation: string | null;
     lookingForward: string | null;
   } | null;
-  passage: string | null;
+  /* ---- UX v1.2 §3.12, §5.2 (RUN-4) ---- */
+  /** The person's passages in cycle order; empty when none. */
+  passages: PassageView[];
+  /**
+   * Which slide the frame opens on: `0…n−1` over the passages, or `n` for the
+   * quote slot when one exists; null when there is nothing to read.
+   */
+  todayIndex: number | null;
+  /** Today's quote, only when opted in and the bank has one. */
+  quote: QuoteView | null;
   askGratitude: boolean;
+  askIntention: boolean;
+  askVisualisation: boolean;
+  morningMode: MorningMode;
   skippedYesterday: boolean;
   gratitude: string | null;
   intention: string | null;
+  /** *Today, as I see it* — written by RUN-9's `saveMorning`. */
+  visualisation: string | null;
 };
 
 const [MAKE_HAPPEN, VISUALISATION, LOOKING_FORWARD] = ORIENT_READBACK_KEYS;
@@ -66,20 +98,32 @@ export async function readOrient(
     }
 
     const [lines] = await tx
-      .select({ gratitude: days.morningGratitude, intention: days.intention })
+      .select({
+        gratitude: days.morningGratitude,
+        intention: days.intention,
+        visualisation: days.visualisation,
+      })
       .from(days)
       .where(eq(days.id, day.id))
       .limit(1);
 
     const [account] = await tx
       .select({
-        passage: users.orientPassage,
         askGratitude: users.orientAskGratitude,
-        showLastNight: users.orientShowLastNight,
+        askIntention: users.orientAskIntention,
+        askVisualisation: users.orientAskVisualisation,
+        quotesOptIn: users.quotesOptIn,
+        morningMode: users.morningMode,
       })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
+
+    // The reading: the passages in cycle order, and the quote when opted in.
+    const passageRows = await readActivePassages(tx, userId);
+    const quote = account?.quotesOptIn ? await readQuoteForDate(tx, date) : null;
+    const slides = passageRows.length + (quote ? 1 : 0);
+    const todayIndex = cycleIndex(slides, date, CYCLE_EPOCH);
 
     // The last eight mornings, yesterday first: the seven-day window plus the
     // day before it, which "second consecutive" needs.
@@ -100,14 +144,19 @@ export async function readOrient(
     return {
       gratitude: lines?.gratitude ?? null,
       intention: lines?.intention ?? null,
-      passage: account?.passage ?? null,
+      visualisation: lines?.visualisation ?? null,
+      passages: passageRows,
+      todayIndex,
+      quote,
       askGratitude: account?.askGratitude ?? true,
-      showLastNight: account?.showLastNight ?? true,
+      askIntention: account?.askIntention ?? true,
+      askVisualisation: account?.askVisualisation ?? true,
+      morningMode: account?.morningMode ?? ("set_from_plan" as const),
       skips,
     };
   });
 
-  const entry = row.showLastNight ? await getLastNight(rls, userId, date) : null;
+  const entry = await getLastNight(rls, userId, date);
   const lastNight =
     entry === null
       ? null
@@ -125,11 +174,17 @@ export async function readOrient(
   return {
     date,
     lastNight: hasAny ? lastNight : null,
-    passage: nonEmpty(row.passage ?? undefined),
+    passages: row.passages,
+    todayIndex: row.todayIndex,
+    quote: row.quote,
     askGratitude: row.askGratitude,
+    askIntention: row.askIntention,
+    askVisualisation: row.askVisualisation,
+    morningMode: row.morningMode,
     skippedYesterday: row.askGratitude && shouldShowSkipLine(row.skips),
     gratitude: row.gratitude,
     intention: row.intention,
+    visualisation: row.visualisation,
   };
 }
 

@@ -20,6 +20,7 @@ export {
   compareForTrim,
   computeAdjust,
   computeBudget,
+  cycleIndex,
   dateKeyIn,
   dayModeFor,
   dayWindow,

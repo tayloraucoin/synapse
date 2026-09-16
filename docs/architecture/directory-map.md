@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-16 · 1225 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-16 · 1230 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -698,6 +698,8 @@ packages/
         item.ts
         journal.ts
         notification.ts
+        passage.ts
+        quote.ts
         reason.ts
         review.ts
         shell.ts
@@ -755,6 +757,7 @@ packages/
           habit-usage.ts
           list-habits.ts
           list-reasons.ts
+          passages.ts
           placed-habits.ts
           save-category.ts
           save-habit.ts
@@ -792,6 +795,7 @@ packages/
           settings-counts.ts
           status.ts
         system/
+          quotes.ts
           send-feedback.ts
         user/
           apply-pending-settings.ts
@@ -1537,6 +1541,7 @@ packages/
         adjust.ts  # Adjust's arithmetic, pure: slide or hold; shorten · cut · choose over fitToBudget and stackBlock
         boundaries.ts
         budget.ts
+        cycle.ts
         day-key.ts
         index.ts
         item-state.ts

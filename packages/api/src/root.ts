@@ -8,6 +8,8 @@ import { habitRouter } from "./routers/habit";
 import { itemRouter } from "./routers/item";
 import { journalRouter } from "./routers/journal";
 import { notificationRouter } from "./routers/notification";
+import { passageRouter } from "./routers/passage";
+import { quoteRouter } from "./routers/quote";
 import { reasonRouter } from "./routers/reason";
 import { reviewRouter } from "./routers/review";
 import { shellRouter } from "./routers/shell";
@@ -36,6 +38,8 @@ export const appRouter = router({
   item: itemRouter,
   journal: journalRouter,
   notification: notificationRouter,
+  passage: passageRouter,
+  quote: quoteRouter,
   reason: reasonRouter,
   review: reviewRouter,
   shell: shellRouter,
