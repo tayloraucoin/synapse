@@ -5,7 +5,7 @@
 **Authors:** Vesper (design) and Cantor (copy, `[HUMAN-HAND]`) lead. Hearth, Compass, and Sage append labelled reviews (§10–§12). Mason appends the placement ruling (§13) and writes the ticket, [`SYS-6-landing-page.md`](../specs/cross-cutting-system/SYS-6-landing-page.md).
 **Date:** 2026-09-05
 **Status:** Handoff for Taylor's mark-up. **Nothing is built.** Copy and layout stop here until approved.
-**Authority above this document:** official spec §2, §9, §10, §11 (`habit_tracker_official_ux_spec_v1.md`); the value proposition §5.5 and §7 (`../product/value-proposition.md`); cross-cutting §2.1 and §3.4. Where this document and those differ, those win. `branding-guide.md` is orientation only and is not cited here.
+**Authority above this document:** official spec §2, §9, §10, §11 (`ux-spec-v1.md`); the value proposition §5.5 and §7 (`../product/value-proposition.md`); cross-cutting §2.1 and §3.4. Where this document and those differ, those win. `branding-guide.md` is orientation only and is not cited here.
 
 > **How to read this.** §0–§8 are Vesper's handoff in the usual shape: frame, IA, the surface section by section, states, motion, accessibility. §9 is Cantor's copy deck, every string final, in the shape of `apps/web/content/landing.ts`. §10–§13 are the seats. §14 is the numbered decision log with status. §15 routes what is still open. A builder holding this document and SYS-6 should not need a call.
 

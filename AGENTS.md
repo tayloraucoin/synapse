@@ -17,7 +17,7 @@
 
 When docs disagree, follow this order:
 
-1. **Product behaviour** → `docs/ux/habit_tracker_official_ux_spec_v1.md` (its **§0.3 rulings are signed**), then the three epic documents and `docs/ux/synapse_navigation_and_system_ux_architecture.md` for their own screens, then `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` for component contracts.
+1. **Product behaviour** → `docs/ux/ux-spec-v1.md` (its **§0.3 rulings are signed**), then the three epic documents and `docs/ux/synapse_navigation_and_system_ux_architecture.md` for their own screens, then `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` for component contracts.
 2. **Architecture & placement** → [`docs/architecture/codebase-conventions.md`](docs/architecture/codebase-conventions.md) (locked). Stack choices: [`docs/architecture/tech-stack.md`](docs/architecture/tech-stack.md).
 3. **Domain guides** → [`docs/ai-guides/`](docs/ai-guides/) govern their domain (tokens, typography, classnames, components, copy, db/RLS, tRPC) and sit **below** the conventions doc but **above** ad-hoc judgment.
 4. **App-specific rules** → the nearest [`AGENTS.md`](apps/web/AGENTS.md). **Wins on conflict** with the conventions doc for that app (route topology, scope).
@@ -57,7 +57,7 @@ Full index, one line per document: [`docs/README.md`](docs/README.md).
 
 | Path | What |
 |------|------|
-| [`docs/ux/habit_tracker_official_ux_spec_v1.md`](docs/ux/habit_tracker_official_ux_spec_v1.md) | Product behaviour — the authority. **§0.3 rulings are signed.** §9 is the brand, §10 the copy. |
+| [`docs/ux/ux-spec-v1.md`](docs/ux/ux-spec-v1.md) | Product behaviour — the authority. **§0.3 rulings are signed.** §9 is the brand, §10 the copy. |
 | [`docs/ux/`](docs/ux/) | The three epic documents, the cross-cutting document, and the v2 component handoff. Read the one that owns your screen. |
 | [`docs/architecture/codebase-conventions.md`](docs/architecture/codebase-conventions.md) | Architecture & placement — the locked contract. |
 | [`docs/architecture/tech-stack.md`](docs/architecture/tech-stack.md) | Canonical stack choices, pinned versions, and what is deliberately absent. |

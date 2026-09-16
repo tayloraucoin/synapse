@@ -3,7 +3,7 @@
 **From:** Vesper
 **To:** Taylor
 **Status:** First round answered 11 Sept 2026 (dictated, fasting, low capacity — answers are terse and I've kept them that way). Nine questions were badly framed; they're re-asked in plain scenario form in §L. Section K still waits on the app walkthrough.
-**Inputs:** [`habit_tracker_official_ux_spec_v1.md`](../ux/habit_tracker_official_ux_spec_v1.md) · the ledger, [`2026-09-11-taylor-ux-review-notes.md`](2026-09-11-taylor-ux-review-notes.md) · the built app as of `b3e439e`.
+**Inputs:** [`ux-spec-v1.md`](../ux/ux-spec-v1.md) · the ledger, [`2026-09-11-taylor-ux-review-notes.md`](2026-09-11-taylor-ux-review-notes.md) · the built app as of `b3e439e`.
 **Companions:** [`phase-2-collection.md`](phase-2-collection.md) (everything Taylor said "phase two" to) · [`marketing-changelog.md`](marketing-changelog.md).
 
 ---

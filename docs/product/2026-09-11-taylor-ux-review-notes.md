@@ -2,7 +2,7 @@
 
 **Author:** Taylor (notes, dictated) · Claude (reflections)
 **Status:** Working notes. Nothing here is a ruling. Points are logged as spoken; each has a reflection beneath it that says what the spec already covers, what would be a model change, and where the tension is.
-**Context:** first pass over [`habit_tracker_official_ux_spec_v1.md`](../ux/habit_tracker_official_ux_spec_v1.md) with the product-as-a-whole in mind, not just the owner's own use. Deeper review to follow.
+**Context:** first pass over [`ux-spec-v1.md`](../ux/ux-spec-v1.md) with the product-as-a-whole in mind, not just the owner's own use. Deeper review to follow.
 
 ---
 

@@ -7,7 +7,7 @@ thing that is wrong.
 
 | The thing | Where it is actually decided |
 |---|---|
-| Colour, type, space, motion, components, the mark | [`habit_tracker_official_ux_spec_v1.md`](habit_tracker_official_ux_spec_v1.md) **§9** |
+| Colour, type, space, motion, components, the mark | [`ux-spec-v1.md`](ux-spec-v1.md) **§9** |
 | Voice and vocabulary | official spec **§10** |
 | Pillars, guardrails, the emotional contract | official spec **§2.3–2.4**, **§9.1–9.2** |
 | The accessibility floor | official spec **§11** |

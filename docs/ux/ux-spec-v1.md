@@ -4,7 +4,7 @@
 **Date:** 4 Sept 2026
 **Status:** Ready to build against, subject to the seven proposed rulings in §0.3 (one pass of yes/no from Taylor).
 **Supersedes:** `habit_tracker_ux_spec_v1.md` (the working draft) and folds in every decision recorded in `habit_tracker_actionable_insights.md`.
-**Superseded by v1.1 for the sections it rewrites** — [`habit_tracker_official_ux_spec_v1_1.md`](habit_tracker_official_ux_spec_v1_1.md) §0.4 lists them (accepted 2026-09-12). This document stands for everything v1.1 does not rewrite.
+**Superseded by v1.1 for the sections it rewrites** — [`ux-spec-v1.1.md`](ux-spec-v1.1.md) §0.4 lists them (accepted 2026-09-12) — and by [`ux-spec-v1.2.md`](ux-spec-v1.2.md) for what that one rewrites in turn (draft, 2026-09-16). This document stands for everything neither rewrites. Renamed from `habit_tracker_official_ux_spec_v1.md` on 2026-09-16.
 
 > **Working name.** Your brief said "user avatar(s) synapse". I've read that as a working product name, which fits the prefrontal-to-cerebellum framing you keep returning to. `[ASSUMPTION: "Synapse" is the working name — confirm or replace; the brand guide in §9 doesn't depend on it.]`
 

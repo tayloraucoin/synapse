@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-14 · 1189 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-16 · 1192 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -504,6 +504,8 @@ docs/
     2026-09-11-taylor-ux-review-notes.md
     2026-09-11-vesper-questions-for-ux-v1.1.md
     2026-09-12-app-walkthrough-feedback-v1.0.md
+    2026-09-16-first-run-walkthrough-feedback-v1.1.md
+    2026-09-16-ux-v1.2-engineering-handoff.md
     marketing-changelog.md
     phase-2-collection.md
     ux-v1.1-thread-primer.md
@@ -650,13 +652,14 @@ docs/
     epic1_setup_ux_architecture.md
     epic2_in_use_ux_architecture.md
     epic3_review_ux_architecture.md
-    habit_tracker_official_ux_spec_v1_1.md
-    habit_tracker_official_ux_spec_v1.md
     landing-page-ux.md
     README.md
     synapse_navigation_and_system_ux_architecture.md
     synapse_ui_component_needs_and_handoff_v2.md
     synapse_ui_component_needs_and_handoff.md
+    ux-spec-v1.1.md
+    ux-spec-v1.2.md
+    ux-spec-v1.md
   README.md
 packages/
   api/

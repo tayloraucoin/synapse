@@ -3,7 +3,7 @@
 **Product:** Synapse
 **Author:** Vesper
 **Date:** 4 Sept 2026
-**Governs:** everything a person sees and touches while moving through a day — the app shell, the Plain List, the Schedule, the item sheet, timers, multitask, late starts, shift-my-day-forward, the capacity trim, closing windows, and where a push notification lands. The official spec (`habit_tracker_official_ux_spec_v1.md` §5, §6, §8, §9.7, §10) is the authority above this document; Epic 1 (`epic1_setup_ux_architecture.md`) owns every screen this one links out to.
+**Governs:** everything a person sees and touches while moving through a day — the app shell, the Plain List, the Schedule, the item sheet, timers, multitask, late starts, shift-my-day-forward, the capacity trim, closing windows, and where a push notification lands. The official spec (`ux-spec-v1.md` §5, §6, §8, §9.7, §10) is the authority above this document; Epic 1 (`epic1_setup_ux_architecture.md`) owns every screen this one links out to.
 **Next consumer:** the UI designer, via the inventory in §11.
 
 ---

@@ -14,12 +14,12 @@ You are **Vesper**, Lead UX/UI Designer — read and adopt `docs/roles/product-d
 
 Write **UX spec v1.1** for Synapse. It is an iteration version, not a rewrite of intent: v1 is the base, v1.1 amends and extends it with everything captured on 11–12 September. Nobody is using the product yet; this is the design-iteration phase, and the founder (Taylor) will read every section manually to iron out details.
 
-**Output file:** `docs/ux/habit_tracker_official_ux_spec_v1_1.md`. Do not edit `habit_tracker_official_ux_spec_v1.md` — add a one-line "Superseded by v1.1 for the sections it rewrites" note only when Taylor says the draft is accepted.
+**Output file:** `docs/ux/ux-spec-v1.1.md`. Do not edit `ux-spec-v1.md` — add a one-line "Superseded by v1.1 for the sections it rewrites" note only when Taylor says the draft is accepted.
 
 ## Read, in this order
 
 1. `AGENTS.md` — the instruction spine. Obey the shell-command conventions (one command per Bash call, no heredocs, no `&&`).
-2. `docs/ux/habit_tracker_official_ux_spec_v1.md` — the base. Its §0.3 rulings, §2.4 guardrails, §3 model, §5.9 state matrix, §9 brand and §10 copy are what v1.1 amends.
+2. `docs/ux/ux-spec-v1.md` — the base. Its §0.3 rulings, §2.4 guardrails, §3 model, §5.9 state matrix, §9 brand and §10 copy are what v1.1 amends.
 3. `docs/product/2026-09-11-taylor-ux-review-notes.md` — **the ledger.** Five passes of Taylor's thinking with reflections. This is the primary source for what v1.1 adds. Read all of it.
 4. `docs/product/2026-09-11-vesper-questions-for-ux-v1.1.md` — **the Q&A.** 45 questions with Taylor's answers and rulings, plus §L (nine re-asked questions, most still unanswered) and "New in this round".
 5. `docs/product/2026-09-12-app-walkthrough-feedback-v1.0.md` — testing notes on the built app (W1–W10) and the standing direction: **mobile first, always.**

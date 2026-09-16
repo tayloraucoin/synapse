@@ -3,7 +3,7 @@
 **Status:** Draft → for Taylor's ratification. Sections marked **Ruled** restate settled law (official spec §0.3, §2, §9, §10); everything else is Compass's recommendation with the case against, and moves to settled only through Taylor.
 **Role:** Compass (product strategist) — the job, the exchange, the benefits, the positioning, the fit signatures. **Support:** Sage (behavioural scientist) — §5, what the product can honestly change and why; Hearth (brand strategist) — §6–§7, how the brand carries the proposition.
 **Date:** 2026-09-05. **Domain:** synapse.day.
-**Sources:** `docs/ux/habit_tracker_official_ux_spec_v1.md` (§0.3 signed rulings, §2 product frame, §7 review, §8 notifications, §9 brand, §10 copy, §12 phasing); `docs/ux/branding-guide.md` (derived; §9 wins where they differ); the three epic documents and the cross-cutting document for the screens cited.
+**Sources:** `docs/ux/ux-spec-v1.md` (§0.3 signed rulings, §2 product frame, §7 review, §8 notifications, §9 brand, §10 copy, §12 phasing); `docs/ux/branding-guide.md` (derived; §9 wins where they differ); the three epic documents and the cross-cutting document for the screens cited.
 
 > **How to read this.** It is written to be said out loud — to a friend you are sending the link to, to yourself when a feature request arrives, to a future thread deciding what Synapse becomes next. Every benefit here is cashed by a product fact with a section number. Where a claim is a bet rather than a fact, it says so and names what would falsify it.
 

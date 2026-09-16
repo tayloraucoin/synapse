@@ -5,7 +5,7 @@
 **Status:** Locked unless a line is flagged `[REVISIT]`.
 **Primary audience:** AI coding agents (Cursor, Claude Code).
 **Secondary audience:** The developer and future contributors.
-**Read alongside:** [`tech-stack.md`](./tech-stack.md) (canonical stack — never contradict it), [`docs/ux/ux-design-handoff-v1.3.md`](../ux/habit_tracker_official_ux_spec_v1.md) (product/IA source of truth), [`drizzle-orm-conventions.md`](./drizzle-orm-conventions.md) (pinned ORM syntax anchor).
+**Read alongside:** [`tech-stack.md`](./tech-stack.md) (canonical stack — never contradict it), [`docs/ux/ux-design-handoff-v1.3.md`](../ux/ux-spec-v1.md) (product/IA source of truth), [`drizzle-orm-conventions.md`](./drizzle-orm-conventions.md) (pinned ORM syntax anchor).
 
 ---
 

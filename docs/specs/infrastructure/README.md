@@ -26,7 +26,7 @@
 
 When documents disagree, follow this order:
 
-1. **Product behaviour** → `docs/ux/habit_tracker_official_ux_spec_v1.md` (its §0.3 rulings are signed), then the three epic documents and the cross-cutting document for their own screens, then `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` for component contracts (its §10 divergences and §12 calls are logged decisions).
+1. **Product behaviour** → `docs/ux/ux-spec-v1.md` (its §0.3 rulings are signed), then the three epic documents and the cross-cutting document for their own screens, then `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` for component contracts (its §10 divergences and §12 calls are logged decisions).
 2. **Architecture & placement** → CC's `docs/architecture/codebase-conventions.md` (locked in CC; adopted verbatim here until INF-11 lands the Synapse copy) and CC's `docs/architecture/tech-stack.md`.
 3. **Domain guides** → CC's `docs/ai-guides/*` (component-guidelines, classnames, copy-conventions, db-and-rls-authoring, typography-guidelines) and `docs/architecture/drizzle-orm-conventions.md`.
 4. **This track's tickets** for foundation-specific rulings, each labelled and logged.

@@ -13,7 +13,7 @@ Yarn 4 + Turborepo monorepo for Synapse — a habit-tracking PWA built on the pr
 | [`AGENTS.md`](AGENTS.md) | Agent spine — precedence, guardrails, workflow |
 | [`docs/specs/infrastructure/README.md`](docs/specs/infrastructure/README.md) | **The foundation track** — process contract, precedence, locked scope, non-negotiables |
 | [`docs/specs/infrastructure/00-build-order.md`](docs/specs/infrastructure/00-build-order.md) | Ordered build queue and critical path |
-| [`docs/ux/habit_tracker_official_ux_spec_v1.md`](docs/ux/habit_tracker_official_ux_spec_v1.md) | Product behaviour source of truth (§0.3 rulings are signed) |
+| [`docs/ux/ux-spec-v1.md`](docs/ux/ux-spec-v1.md) | Product behaviour source of truth (§0.3 rulings are signed) |
 | [`docs/ux/`](docs/ux/) | Epic and cross-cutting UX architecture, component handoff |
 | [`docs/README.md`](docs/README.md) | The documentation index — one line per document |
 | [`docs/architecture/codebase-conventions.md`](docs/architecture/codebase-conventions.md) | The placement/naming/package-graph contract (locked) |

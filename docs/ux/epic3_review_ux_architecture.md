@@ -3,7 +3,7 @@
 **Product:** Synapse
 **Author:** Vesper
 **Date:** 4 Sept 2026
-**Governs:** the Review tab and everything reached from it — the Day Review with tiered miss scoring, the pending-review state, reflections, the Week Review, history, and the number itself. The official spec (`habit_tracker_official_ux_spec_v1.md` §7, §9.4, §10) is the authority above this document; Epic 1 owns Settings (including export) and Epic 2 owns the tabs that hand off here.
+**Governs:** the Review tab and everything reached from it — the Day Review with tiered miss scoring, the pending-review state, reflections, the Week Review, history, and the number itself. The official spec (`ux-spec-v1.md` §7, §9.4, §10) is the authority above this document; Epic 1 owns Settings (including export) and Epic 2 owns the tabs that hand off here.
 **Next consumer:** the UI designer, via the inventory in §9.
 
 ---
