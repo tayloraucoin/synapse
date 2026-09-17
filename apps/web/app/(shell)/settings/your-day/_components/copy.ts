@@ -15,6 +15,8 @@ export const YOUR_DAY_COPY = {
     shape: "Shape of the week",
     workDays: "Work days",
     workStart: "Work start",
+    /** UX v1.2 §4.16 (RUN-8): screen 3's cards, without the radio. */
+    workDayTypes: "Work-day types",
     commitments: "Standing commitments",
     wake: "Wake",
     beforeTheDay: "Before the day",
@@ -48,6 +50,8 @@ export const YOUR_DAY_COPY = {
   both: "both",
   nothing: "Nothing",
   templates: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "template" : "templates"}`),
+  /** [COPY] The *Work-day types* row's value. */
+  types: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "type" : "types"}`),
 
   /* ---------------------------------------------------- the block order -- */
   orderTitle: "Block order",

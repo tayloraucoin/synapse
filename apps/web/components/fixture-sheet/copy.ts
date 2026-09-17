@@ -3,8 +3,12 @@
  * document writes them; the rest `[COPY — needs Vesper sign-off]`.
  */
 export const FIXTURE_SHEET_COPY = {
-  addTitle: "Add one",
+  /** The sheet-scoped noun (UX v1.2 §4, the frame rules). */
+  addTitle: "A fixture",
   editTitle: "Edit",
+  /** UX v1.2 §4.4, R42 — the kind chips and the glyph's control. */
+  kind: "Kind",
+  chooseAnIcon: "Choose an icon",
   title: "What is it",
   titlePlaceholder: "",
   days: "Which days",

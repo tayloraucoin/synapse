@@ -2,21 +2,30 @@
 
 import { useRouter } from "next/navigation";
 
-import type { AnchorDirection, FixtureView, JournalPrompt, ScheduleShape, WorkDays } from "@syn/types";
+import type {
+  AnchorDirection,
+  FixtureView,
+  JournalPrompt,
+  ScheduleShape,
+  TemplateSummaryView,
+  WorkDays,
+} from "@syn/types";
 
 import { Step1Shape } from "@/app/(setup)/_components/step-1-shape";
 import { Step2WorkDays } from "@/app/(setup)/_components/step-2-work-days";
-import { Step3WorkStart } from "@/app/(setup)/_components/step-3-work-start";
+import { Step3WorkShape, WorkDayTypeCards } from "@/app/(setup)/_components/step-3-work-shape";
 import { Step4Commitments } from "@/app/(setup)/_components/step-4-commitments";
 import { Step5Wake } from "@/app/(setup)/_components/step-5-wake";
 import { Step6BeforeTheDay } from "@/app/(setup)/_components/step-6-before-the-day";
-import { Step10Closing } from "@/app/(setup)/_components/step-10-closing";
+import { Step11Closing } from "@/app/(setup)/_components/step-11-closing";
 import { settingsYourDayRoute, type YourDayScreen as ScreenKey } from "@/lib/routes";
 
 /**
- * One of DYN-10's six screens, or DYN-18's *Closing the day*, `embedded` —
- * UX v1.1 §4.14: "The first-run screens, without the frame". The screen's
- * own *Save* returns to the list; there is no sequence to continue.
+ * One of the first-run screens, `embedded` — UX v1.2 §4.16, v1.1 §4.14:
+ * "The first-run screens, without the frame". The screen's own *Save*
+ * returns to the list; there is no sequence to continue. *Work-day types*
+ * (v1.2) mounts screen 3's *No* path's cards without the radio — each card
+ * saves itself, so the page has no *Save* of its own.
  *
  * A client leaf because *Save* is a callback, and the page above is a
  * Server Component that reads the account once so the screen paints with
@@ -29,7 +38,6 @@ export interface YourDayScreenValues {
   workEndTime: string | null;
   anchorDirection: AnchorDirection | null;
   usualWakeTime: string;
-  earliestWakeTime: string | null;
   orientPassage: string | null;
   orientShowLastNight: boolean;
   orientAskGratitude: boolean;
@@ -43,10 +51,12 @@ export function YourDayScreen({
   screen,
   values,
   fixtures,
+  workTypes,
 }: {
   screen: ScreenKey;
   values: YourDayScreenValues;
   fixtures: FixtureView[];
+  workTypes: TemplateSummaryView[];
 }) {
   const router = useRouter();
   const done = () => {
@@ -60,22 +70,25 @@ export function YourDayScreen({
       return <Step2WorkDays initialWorkDays={values.workDays} embedded onSaved={done} />;
     case "work-start":
       return (
-        <Step3WorkStart
+        <Step3WorkShape
           initialWorkStart={values.workStartTime}
           initialWorkEnd={values.workEndTime}
           initialDirection={values.anchorDirection}
+          initialTypes={workTypes}
           embedded
           onSaved={done}
         />
       );
+    case "work-day-types":
+      return <WorkDayTypeCards />;
     case "commitments":
       return <Step4Commitments initialFixtures={fixtures} embedded onSaved={done} />;
     case "wake":
       return (
         <Step5Wake
           initialWake={values.usualWakeTime}
-          initialEarliest={values.earliestWakeTime}
           workStart={values.workStartTime}
+          workTypes={workTypes}
           embedded
           onSaved={done}
         />
@@ -92,7 +105,7 @@ export function YourDayScreen({
       );
     case "closing-the-day":
       return (
-        <Step10Closing
+        <Step11Closing
           initialLightsOut={values.lightsOutTime}
           initialDevicesOff={values.devicesOffTime}
           initialJournalEnabled={values.journalEnabled}

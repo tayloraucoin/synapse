@@ -56,3 +56,26 @@ export const NoneSelected: StoryObj = {
     );
   },
 };
+
+/**
+ * UX v1.2 §4.4 (RUN-8): a vocabulary of kinds — each with its glyph as data,
+ * no *None* chip, nothing chosen until the person chooses.
+ */
+export const KindsWithGlyphs: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<string | null>(null);
+    return (
+      <ChipPicker
+        label="Kind"
+        options={[
+          { value: "meeting", label: "Meeting", icon: { kind: "emoji", value: "🗣️" } },
+          { value: "appointment", label: "Appointment", icon: { kind: "emoji", value: "📌" } },
+          { value: "class", label: "Class", icon: { kind: "emoji", value: "🎓" } },
+          { value: "other", label: "Other", icon: { kind: "emoji", value: "📍" } },
+        ]}
+        value={value}
+        onChange={setValue}
+      />
+    );
+  },
+};

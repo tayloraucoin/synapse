@@ -531,6 +531,10 @@ export {
   type TagInputProps,
 } from "./composed/control/tag-input";
 export {
+  EmojiSlotButton,
+  type EmojiSlotButtonProps,
+} from "./composed/control/emoji-slot-button";
+export {
   SettingsRow,
   type SettingsRowProps,
 } from "./composed/display/settings-row";

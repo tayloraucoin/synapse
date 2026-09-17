@@ -1,27 +1,33 @@
 /**
- * First run 1–6's strings — UX v1.1 §4, §4.1–§4.6, verbatim where the
- * document writes them. Anything the document does not write is marked
+ * First run's strings — UX v1.2 §4 for screens 1–5 (RUN-8), UX v1.1 §4.6–
+ * §4.11 for the screens RUN-9…RUN-11 rebuild, verbatim where the document
+ * writes them. Anything the document does not write is marked
  * `[COPY — needs Vesper sign-off]`.
  *
+ * NO GLYPH IN HERE (v1.2 R29, TD-20 — the lint rule). The archetype cards'
+ * glyphs are `SCHEDULE_SHAPE_ICONS`, the kinds' are `WORK_DAY_KINDS` and
+ * `FIXTURE_KINDS`; a screen reads them as data beside these words.
+ *
  * The archetype card names are placeholders "to be written around real
- * people" (§13 #12, P2-16); the three grey ones say only *not yet*.
+ * people" (v1.1 §13 #12, P2-16); the three grey ones say only *not yet*.
  */
 export const SETUP_COPY = {
   /* ------------------------------------------------------------ frame -- */
-  /** "3 of 12" — the caption, and the document title (§4). */
+  /** "3 of 14" — the caption, and the document title (§4). */
   progress: (step: number, total: number) => `${step} of ${total}`,
   back: "Back",
   finishLater: "Finish later",
   skip: "Skip for now",
   continue: "Continue",
   save: "Save",
+  change: "Change",
   /** [COPY — needs Vesper sign-off] */
   saveError: "Couldn't save. Try again.",
   offline: "Offline — you can look, but changes need a connection.",
 
   /* ------------------------------------------------------- screen 1 -- */
   step1Heading: "Which is closest?",
-  /** [COPY — placeholders, §13 #12] */
+  /** [COPY — placeholders, v1.1 §13 #12] */
   shapes: {
     consistent_shifts: "My shifts are the same every week",
     varying_shifts: "My shifts change week to week",
@@ -33,15 +39,29 @@ export const SETUP_COPY = {
 
   /* ------------------------------------------------------- screen 2 -- */
   step2Heading: "Which days do you work?",
-  step2Body: "Tap a day to change it.",
-  always: "Always",
-  sometimes: "Sometimes",
-  never: "Never",
-  sometimesMeans: "Sometimes means the morning asks.",
+  step2Body: "Most weeks, that is.",
+  workDayModes: {
+    always: "Always",
+    sometimes: "Sometimes",
+    rarely: "Rarely",
+    never: "Never",
+  },
+  whatEachChoiceDoes: "What does each choice do?",
+  /** The four lines, verbatim (v1.2 §4.2). */
+  workDayModeLines: {
+    always: "Always — a work day. The morning is built around it.",
+    sometimes: "Sometimes — the morning asks, “Working today?” and builds from the answer.",
+    rarely:
+      "Rarely — planned as a day off. “Working today” is one tap away in the day’s menu if it turns out otherwise.",
+    never: "Never — a day off. Nothing about work is asked.",
+  },
   weekdays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const,
 
   /* ------------------------------------------------------- screen 3 -- */
-  step3Heading: "When do you like to be working by?",
+  step3Heading: "Do your work days all look the same?",
+  step3Body: "Same hours, same place.",
+  sameShapeYes: "Yes, near enough",
+  sameShapeNo: "No, it depends on the day",
   workingBy: "Working by",
   untilAbout: "Until about",
   whatGives: "When your morning runs long, what gives?",
@@ -53,7 +73,26 @@ export const SETUP_COPY = {
     depends: "Depends on the day",
     dependsBody: "Ask me in the morning.",
   },
-  change: "Change",
+  /** The collapsed card's third word — *work waits* (v1.2 §4.3). */
+  givesShort: {
+    work_waits: "work waits",
+    routine_cut: "routine gets cut",
+    depends: "depends on the day",
+  },
+  addAWorkDayType: "Add a work-day type",
+  /** The sheet-scoped noun (v1.2 §4, the frame rules). */
+  aWorkDayType: "A work-day type",
+  kind: "Kind",
+  typeName: "Name",
+  /** [COPY — needs Vesper sign-off] */
+  typeNamePlaceholder: "Remote, Office, Studio…",
+  chooseAnIcon: "Choose an icon",
+  /** "Remote · 9:00–17:30 · work waits" */
+  typeSummary: (name: string, start: string, end: string, gives: string) =>
+    `${name} · ${start}–${end} · ${gives}`,
+  continueTypes: (n: number) => (n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "type" : "types"}`),
+  /** [COPY — needs Vesper sign-off: the card's own line when a save fails.] */
+  typeSaveError: "Couldn’t save this one. Try Done again.",
 
   /* ------------------------------------------------------- screen 4 -- */
   step4Heading: "Anything that happens every week at a set time?",
@@ -64,11 +103,13 @@ export const SETUP_COPY = {
 
   /* ------------------------------------------------------- screen 5 -- */
   step5Heading: "When would you like to be up?",
+  step5Body: "Most days. Every day can differ.",
   upAt: "Up at",
-  addAnEarliest: "Add an earliest",
-  earliest: "Earliest",
   /** "7:00 to 9:00 · 2 h before work" — the first computed consequence (§4.5). */
   beforeWork: (wake: string, work: string, span: string) => `${wake} to ${work} · ${span} before work`,
+  /** "… · 2 h before work on a remote day" — with several work-day types, the first type's. */
+  beforeWorkOn: (wake: string, work: string, span: string, kind: string) =>
+    `${wake} to ${work} · ${span} before work on a ${kind} day`,
 
   /* ------------------------------------------------------- screen 6 -- */
   step6Heading: "What do you want to read before the day starts?",
@@ -123,7 +164,13 @@ export const SETUP_COPY = {
   alreadyInLibrary: "in your library",
 
   /* ------------------------------------------------------- screen 9 -- */
-  step9Heading: "Do you train?",
+  /** [COPY] The placeholder until RUN-10 — v1.2 §4.9's heading. */
+  step9Heading: "Your routine, ranked",
+  /** [COPY — needs Vesper sign-off: the placeholder's one line.] */
+  step9Placeholder: "The ranking arrives here. Continue for now.",
+
+  /* ------------------------------------------------------ screen 10 -- */
+  step10Heading: "Do you train?",
   trainYes: "Yes",
   trainNo: "Not right now",
   addAWorkout: "Add a workout",
@@ -136,8 +183,8 @@ export const SETUP_COPY = {
     n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "workout" : "workouts"}`,
   add: "Add",
 
-  /* ------------------------------------------------------ screen 10 -- */
-  step10Heading: "How does the day end?",
+  /* ------------------------------------------------------ screen 11 -- */
+  step11Heading: "How does the day end?",
   lightsOut: "Lights out",
   phoneAway: "Phone away",
   /** [COPY — one sentence, cites nothing (§13 #13)] */
@@ -157,9 +204,9 @@ export const SETUP_COPY = {
   /** [COPY] The ghost row's line — where the times and the order are. */
   windDownRoutineMeta: "Order and lengths",
 
-  /* ------------------------------------------------------ screen 11 -- */
-  step11Heading: "What kinds of work day do you have?",
-  step11Body: "One is fine.",
+  /* ------------------------------------------------------ screen 12 -- */
+  step12Heading: "What kinds of work day do you have?",
+  step12Body: "One is fine.",
   addAFocus: "Add a focus",
   focusName: "Focus",
   decideInTheMorning: "decide in the morning",
@@ -175,30 +222,14 @@ export const SETUP_COPY = {
   continueFocuses: (n: number) =>
     n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "focus" : "focuses"}`,
 
-  /* ------------------------------------------------------ screen 12 -- */
-  step12Heading: "Here's the room you have.",
-  /** "Your routine adds up to 140 min. 72 fit before prep on a usual day." */
-  fitSentence: (routine: number, available: number) =>
-    `Your routine adds up to ${routine} min. ${available} fit before prep on a usual day.`,
-  fitsLine: "It all fits on a usual day.",
-  /** [COPY] */
-  noWorkStart: "Set a work start to see the room.",
-  bandOrient: (min: number) => `orient ${min}`,
-  bandRoutine: (min: number) => `routine ${min} available`,
-  bandPrep: (min: number) => `prep ${min}`,
-  bandWork: (clock: string) => `work ${clock}`,
-  overflowQuestion: "How should the days that don't fit go?",
-  modes: {
-    daily_menu: "A daily menu",
-    daily_menuBody: "See the list each morning, tap what fits.",
-    variants: "Different routines on different days",
-    variantsBody: "Morning A, Morning B, with counts.",
-    auto_trim: "Cut the lowest automatically",
-    auto_trimBody: "The list, ranked; the budget cuts from the bottom.",
-  },
+  /* ------------------------------------------------------ screen 13 -- */
+  /** [COPY] The placeholder until RUN-12 — v1.2 §4.13's noun. */
+  step13Heading: "Your days",
+  /** [COPY — needs Vesper sign-off: the placeholder's one line.] */
+  step13Placeholder: "The day builder arrives here. Everything entered so far is kept.",
   openToday: "Open today",
   planWeekFirst: "Plan this week first",
 } as const;
 
-/** The sequence's length under UX v1.1 §4. */
-export const SETUP_TOTAL_STEPS = 12;
+/** The sequence's length under UX v1.2 §4 (RUN-8). */
+export const SETUP_TOTAL_STEPS = 14;

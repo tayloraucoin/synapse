@@ -518,6 +518,10 @@
     "./tag-input": {
       "types": "./src/composed/control/tag-input/index.ts",
       "default": "./src/composed/control/tag-input/index.ts"
+    },
+    "./emoji-slot-button": {
+      "types": "./src/composed/control/emoji-slot-button/index.ts",
+      "default": "./src/composed/control/emoji-slot-button/index.ts"
     }
   },
   "scripts": {

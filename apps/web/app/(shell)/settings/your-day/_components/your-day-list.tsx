@@ -71,6 +71,16 @@ export function YourDayList() {
         )}
         href={settingsYourDayScreenRoute("work-start")}
       />
+      {/* UX v1.2 §4.16 (RUN-8): the types, one row — *2 types* or *Not yet*. */}
+      <SettingsRow
+        title={COPY.rows.workDayTypes}
+        description={value(
+          templates.data === undefined
+            ? undefined
+            : COPY.types(templates.data.filter((template) => template.kind === "work").length),
+        )}
+        href={settingsYourDayScreenRoute("work-day-types")}
+      />
       <SettingsRow
         title={COPY.rows.commitments}
         description={value(fixtures.data === undefined ? undefined : COPY.fixtures(fixtures.data.length))}

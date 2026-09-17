@@ -14,7 +14,7 @@ import { FactScreen } from "./fact-screen";
 import { RotationRows } from "./rotation-rows";
 
 /**
- * Screen 11 — What your work days are about (UX v1.1 §4.11).
+ * Screen 12 — What your work days are about (UX v1.1 §4.11; screen 12 under v1.2 §4 — RUN-8 renumbered the sequence; RUN-11 rebuilds it).
  *
  * "The focuses and their weekly counts." One is fine. The ghost row opens a
  * small sheet for a second work template — a different shape of work day
@@ -23,7 +23,7 @@ import { RotationRows } from "./rotation-rows";
  * profile's `work_end_time` for every work template (there is no end column
  * on the row), and the sheet says so.
  */
-export function Step11Focuses({
+export function Step12Focuses({
   initialWorkStart,
   embedded = false,
   onSaved,
@@ -69,9 +69,9 @@ export function Step11Focuses({
 
   return (
     <FactScreen
-      step={11}
-      heading={COPY.step11Heading}
-      body={COPY.step11Body}
+      step={12}
+      heading={COPY.step12Heading}
+      body={COPY.step12Body}
       save={null}
       primaryLabel={COPY.continueFocuses(count)}
       embedded={embedded}

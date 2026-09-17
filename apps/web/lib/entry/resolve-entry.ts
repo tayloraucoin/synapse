@@ -94,8 +94,8 @@ export function resolveEntry({
   return todayRoute();
 }
 
-/** The twelve screens of UX v1.1 §4. Anything out of range resumes at the beginning. */
-export const SETUP_STEP_COUNT = 12;
+/** The fourteen screens of UX v1.2 §4 (RUN-8). Anything out of range resumes at the beginning. */
+export const SETUP_STEP_COUNT = 14;
 
 function clampSetupStep(step: number | null | undefined): number {
   if (!step || step < 1 || step > SETUP_STEP_COUNT) return 1;

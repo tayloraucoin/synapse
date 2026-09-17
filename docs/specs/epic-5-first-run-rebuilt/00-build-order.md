@@ -30,7 +30,7 @@ The contract and the seeds; the one additive migration; the plan services; the c
 - [x] **RUN-7** · `@syn/ui` for v1.2: `Card`, `SelectRow`, `SortableList`, `RangeEditor`, `RichTextEditor`, `TagInput`, `PassageCarousel`, the optimistic steppers, `StepFrame` sticky, `TimeField` Done and leading, `WeekdayChips` flexible, `BlockBand` in-band labels, `LargeTargetRow` leading, the `font-emoji` stack, stories — L · (RUN-1) · **Vesper review of stories in both themes**
 
 ### Phase 3 — Setup, screens 1–12
-- [ ] **RUN-8** · The frame and screens 1–5: sticky action row, fourteen steps, the archetype glyphs, four-value selects with the disclosure, *Same shape?* and work-day type cards, fixture kinds, one wake time — L · (RUN-3, RUN-7)
+- [x] **RUN-8** · The frame and screens 1–5: sticky action row, fourteen steps, the archetype glyphs, four-value selects with the disclosure, *Same shape?* and work-day type cards, fixture kinds, one wake time — L · (RUN-3, RUN-7)
 - [ ] **RUN-9** · Screen 6 and the orient frame: passages as a list with the sheet, the quote switch, the three morning-line switches; the carousel, the *Last night* row, the visualisation field; Settings → Before the day — L · (RUN-4, RUN-7, RUN-8) · **Sage lens on §5.2; Vesper review**
 - [ ] **RUN-10** · Screens 7–9: steps as `SelectRow`s with the sortable lengths and the step sheet, the landscape's two tabs, the ranked screen with `HabitSetupCard` and versions — L · (RUN-8, RUN-3)
 - [ ] **RUN-11** · Screens 10–12: `WorkoutSetupCard` with type, where and travel; closing the day with the new defaults, wind-down rows, sortable prompts and the reminder; `FocusSetupCard` with *Flexible*; Settings → Notifications gains N2 — L · (RUN-8, RUN-3, RUN-6)

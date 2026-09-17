@@ -58,7 +58,8 @@ export const updatePreferencesInput = z
      * a second device resumes where the person actually stopped. Twelve under
      * UX v1.1 §4 (DYN-10).
      */
-    firstRunStep: z.number().int().min(1).max(12).nullable().optional(),
+    /** 1–14 under UX v1.2 §4 (RUN-8). */
+    firstRunStep: z.number().int().min(1).max(14).nullable().optional(),
     /**
      * ST-08's two deferred changes (cross-cutting §7.3, §7.5).
      *

@@ -84,7 +84,7 @@ export function assetRoute(storedPath: string): string {
 
 /* ---------------------------------------------------------------- setup -- */
 
-/** UX v1.1 §4's twelve screens. `step` is 1–12; the page 404s on anything else. */
+/** UX v1.2 §4's fourteen screens (RUN-8). `step` is 1–14; the page 404s on anything else. */
 export function setupRoute(step: number): string {
   return `/setup/${step}`;
 }
@@ -188,6 +188,8 @@ export type YourDayScreen =
   | "shape"
   | "work-days"
   | "work-start"
+  /** UX v1.2 §4.16 (RUN-8): screen 3's *No* path — the cards, without the radio. */
+  | "work-day-types"
   | "commitments"
   | "wake"
   | "before-the-day"
@@ -197,6 +199,7 @@ export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "shape",
   "work-days",
   "work-start",
+  "work-day-types",
   "commitments",
   "wake",
   "before-the-day",

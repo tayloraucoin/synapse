@@ -13,7 +13,7 @@ import { RotationRows } from "./rotation-rows";
 import { useStepNavigation } from "./step-frame";
 
 /**
- * Screen 9 — Training (UX v1.1 §4.9).
+ * Screen 10 — Training (UX v1.1 §4.9; screen 10 under v1.2 §4 — RUN-8 renumbered the sequence to fourteen; RUN-11 rebuilds it).
  *
  * "The rotation: what, how often, usually when, how long." *Not right now*
  * skips ahead and writes nothing; *Yes* shows the rows and makes sure a
@@ -21,7 +21,7 @@ import { useStepNavigation } from "./step-frame";
  * to open. Nothing here asks for a time — where it fits is decided each
  * morning (§3.7).
  */
-export function Step9Training({
+export function Step10Training({
   embedded = false,
   onSaved,
 }: {
@@ -48,8 +48,8 @@ export function Step9Training({
 
   return (
     <FactScreen
-      step={9}
-      heading={COPY.step9Heading}
+      step={10}
+      heading={COPY.step10Heading}
       save={null}
       primaryLabel={COPY.continueWorkouts(count)}
       embedded={embedded}
@@ -58,13 +58,13 @@ export function Step9Training({
       <div className="flex flex-col gap-(--space-5)">
         {embedded ? null : (
           <LargeTargetRow
-            label={COPY.step9Heading}
+            label={COPY.step10Heading}
             layout="stacked"
             value={trains ? "yes" : answer}
             onChange={(value) => {
               if (value === "no") {
                 setAnswer("no");
-                void goTo(10, setupRoute(10));
+                void goTo(11, setupRoute(11));
                 return;
               }
               setAnswer("yes");

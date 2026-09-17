@@ -4,7 +4,7 @@
 **Slice type:** A sequence — the frame's rules made real once, then five screens rebuilt to them. The risk class is *a dead end* (a step that 404s after renumbering; a `Continue` with nowhere to go) and *persuasion* (a preselected *what gives*; a fixture kind pre-chosen).
 **Vigil:** none. **Vesper review:** each screen against v1.2 §4.1–§4.5 verbatim; the frame rules on every screen; nothing pre-selected that v1.2 does not pre-select.
 
-**Status:** Not started
+**Status:** Complete — 2026-09-16 (batch 5; the signed-in walk at 375px could not be run from this thread — Vesper's screen review pending — see `DEVIATIONS.md`)
 
 > **Vesper — screen review.** Walk `/setup/1` to `/setup/5` on a fresh account at 375px. Confirm: the action row stays pinned while the fixture list scrolls; the four archetype cards carry their glyphs and the three grey ones fade glyph and text together; screen 2's selects show four values and the disclosure opens four lines; screen 3 preselects *Yes, near enough* and, on *No*, a card appends and collapses on Done to *Remote · 9:00–17:30 · work waits*; screen 4's *Add one* is a left-aligned full-width secondary button and the sheet's kind chips are none-selected; screen 5 has one field and no *earliest*; every *Change* has a *Done*; the frame reads *n of 14*. Leave at 3, reopen, land on 3.
 

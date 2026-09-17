@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { Button, EllipsesMenu, EmptyState, ListRow, Text } from "@syn/ui";
+import { Button, EllipsesMenu, ListRow, Text } from "@syn/ui";
 import type { FixtureView } from "@syn/types";
 
 import { FIXTURE_SHEET_COPY, FixtureSheet, fixtureDaysLabel } from "@/components/fixture-sheet";
@@ -12,15 +12,18 @@ import { SETUP_COPY as COPY } from "./copy";
 import { FactScreen } from "./fact-screen";
 
 /**
- * Screen 4 — standing commitments (UX v1.1 §4.4).
+ * Screen 4 — standing commitments (UX v1.2 §4.4; v1.1 §4.4).
  *
  * "Capture the fixtures so the week is honest before any routine is
- * designed." An empty state in two lines, the sheet, and the saved fixtures
- * as rows — *Stand-up · Tue · 9:30 · 20 min*. Each fixture is written as its
- * sheet closes; *Continue* and *Skip for now* write nothing of their own.
+ * designed." The empty state is one muted line in the flow, left-aligned —
+ * *Nothing yet.* — and beneath it *Add one* as a full-width secondary button
+ * (S4.1: never centred, never an illustration). Saved fixtures list with
+ * their glyph — *🗣️ Stand-up · Tue · 9:30 · 20 min* — and *Add another*
+ * sits under the list. Each fixture is written as its sheet closes;
+ * *Continue* and *Skip for now* write nothing of their own.
  *
  * IT SUGGESTS NOTHING. "This is a fact-capture screen; the app has no opinion
- * about what happens on Thursdays."
+ * about what happens on Thursdays." The sheet's kinds are a vocabulary.
  */
 export function Step4Commitments({
   initialFixtures,
@@ -54,11 +57,14 @@ export function Step4Commitments({
       save={null}
     >
       {rows.length === 0 ? (
-        <EmptyState
-          text={COPY.nothingYet}
-          density="inline"
-          actions={[{ label: COPY.addOne, onClick: openNew }]}
-        />
+        <div className="flex flex-col gap-(--space-3)">
+          <Text as="p" variant="secondary" tone="secondary">
+            {COPY.nothingYet}
+          </Text>
+          <Button variant="secondary" onClick={openNew} className="w-full wide:w-auto wide:self-start">
+            {COPY.addOne}
+          </Button>
+        </div>
       ) : (
         <div className="flex flex-col gap-(--space-3)">
           <ul className="divide-hairline flex flex-col divide-y">
@@ -66,6 +72,7 @@ export function Step4Commitments({
               <ListRow
                 key={fixture.id}
                 as="li"
+                leading={fixture.icon}
                 title={fixture.title}
                 meta={
                   <Text as="span" variant="secondary" tone="secondary" className="tabular-nums">
@@ -101,7 +108,7 @@ export function Step4Commitments({
               />
             ))}
           </ul>
-          <Button variant="secondary" onClick={openNew} className="self-start">
+          <Button variant="secondary" onClick={openNew} className="w-full wide:w-auto wide:self-start">
             {COPY.addAnother}
           </Button>
         </div>

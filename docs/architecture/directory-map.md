@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-17 · 1265 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-17 · 1270 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -71,18 +71,20 @@ apps/
           fact-screen.tsx  # one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)
           rotation-rows.tsx
           step-1-shape.tsx
-          step-10-closing.tsx
-          step-11-focuses.tsx
-          step-12-fit.tsx
+          step-10-training.tsx
+          step-11-closing.tsx
+          step-12-focuses.tsx
+          step-13-days.tsx  # PLACEHOLDER until RUN-12/13 — completes first run (Open today / Plan this week first); the fit screen is gone
           step-2-work-days.tsx
-          step-3-work-start.tsx
+          step-3-work-shape.tsx  # screen 3 (v1.2 §4.3): Yes — the anchor, its end, what gives, ensureWork; No — the work-day type cards, each writing itself
           step-4-commitments.tsx
           step-5-wake.tsx
           step-6-before-the-day.tsx
           step-7-before-work.tsx
           step-8-landscape.tsx
-          step-9-training.tsx
+          step-9-ranked.tsx  # PLACEHOLDER until RUN-10 — the heading and Continue, so the sequence never dead-ends
           step-frame.tsx
+          work-day-type-card.tsx  # one kind of work day (v1.2 §4.3, TD-14): kind chips fill name and glyph, Done writes the template and collapses to one line
         setup/
           [step]/
             page.tsx
@@ -1054,6 +1056,10 @@ packages/
           emoji-picker/
             emoji-picker.stories.tsx
             emoji-picker.tsx
+            index.ts
+          emoji-slot-button/
+            emoji-slot-button.stories.tsx
+            emoji-slot-button.tsx
             index.ts
           image-cropper/
             image-cropper.stories.tsx

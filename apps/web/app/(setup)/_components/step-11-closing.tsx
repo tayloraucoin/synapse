@@ -21,7 +21,7 @@ import { SETUP_COPY as COPY } from "./copy";
 import { FactScreen } from "./fact-screen";
 
 /**
- * Screen 10 — Closing the day (UX v1.1 §4.10).
+ * Screen 11 — Closing the day (UX v1.1 §4.10; screen 11 under v1.2 §4 — RUN-8 renumbered the sequence; RUN-11 rebuilds it).
  *
  * "Lights-out, devices-off, and whether a few lines at night are wanted."
  * Phone-away is a time the person set, shown back as such — never framed as
@@ -45,7 +45,7 @@ import { FactScreen } from "./fact-screen";
 
 /** The library's wind-down offers — the two placed rows are never offered. */
 const WIND_DOWN_OFFERS = STARTER_LIBRARY.wind_down.filter((entry) => entry.placed !== true);
-export function Step10Closing({
+export function Step11Closing({
   initialLightsOut,
   initialDevicesOff,
   initialJournalEnabled,
@@ -162,8 +162,8 @@ export function Step10Closing({
 
   return (
     <FactScreen
-      step={10}
-      heading={COPY.step10Heading}
+      step={11}
+      heading={COPY.step11Heading}
       embedded={embedded}
       onSaved={onSaved}
       save={async () => {

@@ -2,112 +2,116 @@
 
 import * as React from "react";
 
-import { Button, Text, TimeField } from "@syn/ui";
+import { Text, TimeField } from "@syn/ui";
+import { WORK_DAY_KINDS } from "@syn/constants";
+import type { TemplateSummaryView } from "@syn/types";
 import { clockToMinutes, formatClockFromMinutes } from "@syn/utils";
 
 import { trpc } from "@/lib/trpc/client";
 
 import { SETUP_COPY as COPY } from "./copy";
 import { FactScreen } from "./fact-screen";
+import { typeStartClock } from "./work-day-type-card";
 
 /**
- * Screen 5 — wake (UX v1.1 §4.5).
+ * Screen 5 — wake (UX v1.2 §4.5, R39).
  *
- * One `TimeField`, *7:00* as value + Change. *Add an earliest* is ghost text
- * that reveals a second field for the person whose wake is a range; the
- * range is informational in v1.1 (§13 #6). Under the field, "the first
- * computed consequence in the flow, muted, tabular: *7:00 to 9:00 · 2 h
- * before work.*" — from the profile's work start, absent when there is none.
+ * ONE `TimeField`, *7:00* as value + Change; *Done* closes it and writes
+ * `usual_wake_time` at once (save as you go). Under it, "muted, tabular, the
+ * first computed consequence: *7:00 to 9:00 · 2 h before work*" — or, with
+ * several work-day types, the first type's hours and *on a remote day*.
+ *
+ * ONE TIME, NOT A RANGE (R39): v1.1's second field "was a question without
+ * a purpose"; its column is neither read nor written here and waits for
+ * `0009`.
  *
  * NEVER *ALARM*. Nothing here sets a notification.
  */
 export function Step5Wake({
   initialWake,
-  initialEarliest,
   workStart,
+  workTypes,
   embedded = false,
   onSaved,
 }: {
   initialWake: string;
-  initialEarliest: string | null;
   /** The profile's `work_start_time`, for the consequence line. */
   workStart: string | null;
+  /** The work-day types; more than one, or one with a kind, names the day. */
+  workTypes: TemplateSummaryView[];
   embedded?: boolean;
   onSaved?: () => void;
 }) {
   const save = trpc.user.updatePreferences.useMutation();
+  const utils = trpc.useUtils();
   const [wake, setWake] = React.useState(initialWake);
-  const [earliest, setEarliest] = React.useState<string | null>(initialEarliest);
-  const [earliestShown, setEarliestShown] = React.useState(initialEarliest !== null);
-  const earliestRef = React.useRef<HTMLDivElement>(null);
+  const [committed, setCommitted] = React.useState(initialWake);
+  const [line, setLine] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (earliestShown && earliest === null) {
-      earliestRef.current?.querySelector<HTMLElement>("button, input")?.focus();
+  // The write follows the picker closing — *Done*, Enter, Escape or blur —
+  // and only when the value moved; a reopen-and-close writes nothing.
+  async function commit(): Promise<void> {
+    if (wake === committed) return;
+    setLine(null);
+    try {
+      await save.mutateAsync({ usualWakeTime: wake });
+      setCommitted(wake);
+      await utils.user.me.invalidate();
+    } catch {
+      setLine(COPY.saveError);
     }
-  }, [earliestShown, earliest]);
+  }
 
   const consequence = React.useMemo(() => {
-    if (workStart === null) return null;
+    const first = workTypes[0] ?? null;
+    const typed = workTypes.length > 1 || first?.workDayType?.locationKind != null;
+    const start = (typed ? typeStartClock(first) : null) ?? workStart;
+    if (start === null) return null;
     const wakeMin = clockToMinutes(wake);
-    let workMin = clockToMinutes(workStart);
+    let workMin = clockToMinutes(start);
     if (workMin < wakeMin) workMin += 24 * 60;
-    return COPY.beforeWork(
-      formatClockFromMinutes(wakeMin),
-      formatClockFromMinutes(workMin % (24 * 60)),
-      spanLabel(workMin - wakeMin),
-    );
-  }, [wake, workStart]);
+    const wakeText = formatClockFromMinutes(wakeMin);
+    const workText = formatClockFromMinutes(workMin % (24 * 60));
+    const span = spanLabel(workMin - wakeMin);
+    const kindKey = first?.workDayType?.locationKind ?? null;
+    const kind = typed && kindKey !== null ? WORK_DAY_KINDS.find((entry) => entry.key === kindKey) : undefined;
+    return kind === undefined
+      ? COPY.beforeWork(wakeText, workText, span)
+      : COPY.beforeWorkOn(wakeText, workText, span, kind.title.toLowerCase());
+  }, [wake, workStart, workTypes]);
 
   return (
     <FactScreen
       step={5}
       heading={COPY.step5Heading}
+      body={COPY.step5Body}
       embedded={embedded}
       onSaved={onSaved}
-      save={async () => {
-        await save.mutateAsync({
-          usualWakeTime: wake,
-          earliestWakeTime: earliestShown ? earliest : null,
-        });
-      }}
+      // Done has written; embedded's *Save* re-sends the same value (harmless), the sequence's Continue nothing.
+      save={embedded ? async () => { await save.mutateAsync({ usualWakeTime: wake }); } : null}
     >
       <div className="flex flex-col gap-(--space-4)">
-        <TimeField
-          label={COPY.upAt}
-          value={wake}
-          onChange={setWake}
-          disclosed
-          changeLabel={COPY.change}
-          required
-        />
-
-        {earliestShown ? (
-          <div ref={earliestRef}>
-            <TimeField
-              label={COPY.earliest}
-              value={earliest ?? "06:30"}
-              onChange={setEarliest}
-              disclosed={earliest !== null}
-              changeLabel={COPY.change}
-            />
-          </div>
-        ) : (
-          <Button
-            variant="ghost"
-            className="self-start"
-            onClick={() => {
-              setEarliestShown(true);
-              setEarliest("06:30");
-            }}
-          >
-            {COPY.addAnEarliest}
-          </Button>
-        )}
+        <div onBlur={() => void commit()}>
+          <TimeField
+            label={COPY.upAt}
+            value={wake}
+            onChange={setWake}
+            disclosed
+            changeLabel={COPY.change}
+            doneLabel={COPY.done}
+            required
+          />
+        </div>
 
         {consequence === null ? null : (
           <Text as="p" variant="secondary" tone="secondary" className="tabular-nums">
             {consequence}
+          </Text>
+        )}
+
+        {line === null ? null : (
+          <Text as="p" variant="secondary">
+            {line}
           </Text>
         )}
       </div>
