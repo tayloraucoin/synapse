@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-16 · 1230 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-17 · 1233 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -691,6 +691,7 @@ packages/
         adjust.ts
         asset.ts
         category.ts
+        day-plan.ts
         day.ts
         feedback.ts
         fixture.ts
@@ -725,6 +726,7 @@ packages/
           edit-habit-day.ts
           get-day.ts
           get-item.ts
+          habit-item.ts
           item-fields.ts
           journal.ts
           lay-out-day.ts  # the whole day's arithmetic — chains stackBlock per kind, forward from wake, backward to work and lights-out. Pure; build and confirm both call it
@@ -773,6 +775,7 @@ packages/
           web-push.ts
         plan/
           anchors.ts  # which profile time a block kind walks from, and in which direction — the only reader of that mapping
+          day-plans.ts
           fit.ts  # the fit at planning time (v1.1 §3.10): computeBudget over the profile and the orient/prep templates — first run's last screen reads it
           fixtures.ts
           most-used-template.ts
@@ -873,8 +876,8 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <8 migration .sql files, 0000–0007 — append-only, human-reviewed before a hosted migrate>
-      meta/ <9 drizzle snapshot files + _journal.json>
+      <9 migration .sql files, 0000–0008 — append-only, human-reviewed before a hosted migrate>
+      meta/ <10 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts

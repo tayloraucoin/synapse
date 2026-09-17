@@ -1,15 +1,20 @@
 import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import { dayBlocks, dayItems, days, habits, templates, type RlsClient } from "@syn/db";
-import type { BlockKind, DayShape, WorkDayMode } from "@syn/types";
+import type { BlockKind, DayShape, TrainingPlacement, WorkDayMode } from "@syn/types";
 import { weekDates, weekdayIndex } from "@syn/utils";
 
+import { plannedDayFor } from "../plan/day-plans";
+import { readPreferencesInTx } from "../user/preferences";
+import { habitItem, readHabits, workoutLength } from "./habit-item";
 import {
   defaultTemplateFor,
   materializeInTx,
   readDayProfile,
   type BlockAssignment,
+  type BlockRow,
   type DayProfile,
+  type DayRow,
   type Tx,
 } from "./materialize-day";
 
@@ -26,7 +31,12 @@ import {
  * second-guessing them.
  */
 
-export type DayPlan = {
+/**
+ * The COMPUTED plan for one weekday from the profile and the rotations —
+ * renamed from `DayPlan` in RUN-5 so the noun is free for the person's saved
+ * `day_plans` (UX v1.2 §3.13), which `plannedDayFor` reads first.
+ */
+export type WeekdayDefaults = {
   shape: DayShape;
   blocks: BlockAssignment[];
   focusHabitId: string | null;
@@ -87,7 +97,7 @@ export async function defaultPlanFor(
   profile: DayProfile,
   date: string,
   weekDatesForCounts: readonly string[] = [],
-): Promise<DayPlan> {
+): Promise<WeekdayDefaults> {
   const weekday = weekdayIndex(date);
   const mode = workModeFor(profile, weekday);
 
@@ -197,6 +207,107 @@ export async function defaultPlanFor(
   return { shape: "structured", blocks, focusHabitId: todaysFocus?.id ?? null };
 }
 
+/**
+ * One date from the person's day plan for its weekday (UX v1.2 §3.13, §4.15,
+ * TD-10, TD-21) — the body `prefillWeek` runs per weekday, and what RUN-13's
+ * `week.applyPlan` exposes for one day. Returns null when no complete plan
+ * claims the weekday, so the caller falls through to `defaultPlanFor`.
+ *
+ * WHAT THE PLAN DECIDES: the blocks (the three named lists; the work-day
+ * type; orient and activity from the defaults), the four anchors and the
+ * exclusions snapshotted onto the day, and the first placed workout. WHAT IT
+ * LEAVES POOLED: the focus (typical days and counts, as before) and any list
+ * the plan does not name (the morning falls to the overflow mode's default).
+ *
+ * ONE WORKOUT PER DAY in RUN-5: the record has one training block per day
+ * (TD-2's unique index allows more; `materializeInTx` and `confirmDay`
+ * assume one), so the plan's first placed workout lands and the rest are
+ * logged as a follow-on. The plan stores them all.
+ */
+export async function applyPlanToDay(
+  tx: Tx,
+  userId: string,
+  profile: DayProfile,
+  date: string,
+  weekDatesForCounts: readonly string[] = [],
+): Promise<"planned" | "no_plan"> {
+  const prefs = await readPreferencesInTx(tx, userId);
+  if (!prefs) return "no_plan";
+  const planned = await plannedDayFor(tx, userId, prefs, weekdayIndex(date));
+  if (!planned) return "no_plan";
+  const { plan, anchors, workout } = planned;
+
+  const orient = await defaultTemplateFor(tx, userId, "orient");
+  const windDown = plan.windDownTemplateId ?? (await defaultTemplateFor(tx, userId, "wind_down"));
+  const morning: string | null | "pool" =
+    plan.morningTemplateId ??
+    (profile.overflowMode === "daily_menu" ? "pool" : await defaultTemplateFor(tx, userId, "morning"));
+  const prep = plan.prepTemplateId ?? (await defaultTemplateFor(tx, userId, "prep"));
+
+  const blocks: BlockAssignment[] = [
+    { kind: "orient", templateId: orient },
+    { kind: "morning", templateId: morning },
+    { kind: "prep", templateId: prep },
+    ...(plan.workTemplateId === null
+      ? []
+      : [{ kind: "work" as const, templateId: plan.workTemplateId }]),
+    { kind: "wind_down", templateId: windDown },
+  ];
+  if (workout) blocks.push({ kind: "training", templateId: null });
+  const activity = await defaultTemplateFor(tx, userId, "activity");
+  if (activity !== null) blocks.push({ kind: "activity", templateId: activity });
+
+  // The focus stays the rotation's (typical days, counts) — a plan does not name one.
+  const defaults = await defaultPlanFor(tx, userId, profile, date, weekDatesForCounts);
+
+  const materialised = await materializeInTx(tx, userId, {
+    date,
+    blocks,
+    shape: "structured",
+    anchorTime: anchors.wake,
+    focusHabitId: defaults.focusHabitId,
+    anchors: {
+      workStartTime: anchors.workStart,
+      workEndTime: anchors.workEnd,
+      lightsOutTime: anchors.lightsOut,
+      devicesOffTime: anchors.devicesOff,
+      workTemplateId: plan.workTemplateId,
+      excludedFixtureIds: plan.excludedFixtureIds,
+    },
+  });
+
+  if (workout) await placePlannedWorkout(tx, userId, materialised.day, materialised.blocks, workout);
+  return "planned";
+}
+
+/** The plan's workout onto the day's training block: its placement and its item, at build. */
+async function placePlannedWorkout(
+  tx: Tx,
+  userId: string,
+  day: DayRow,
+  blocks: readonly BlockRow[],
+  workout: { habitId: string; placement: TrainingPlacement },
+): Promise<void> {
+  const block = blocks.find((row) => row.kind === "training");
+  if (!block) return;
+  const habit = (await readHabits(tx, userId, [workout.habitId])).get(workout.habitId);
+  if (!habit) return;
+
+  await tx
+    .update(dayBlocks)
+    .set({ placement: workout.placement, state: "planned", updatedAt: new Date() })
+    .where(eq(dayBlocks.id, block.id));
+
+  const existing = block.items.find((item) => item.type === "workout");
+  if (existing) return;
+  await tx.insert(dayItems).values({
+    ...habitItem(habit, { durationMin: workoutLength(habit), sortOrder: 0, snapshot: null }),
+    userId,
+    dayId: day.id,
+    dayBlockId: block.id,
+  });
+}
+
 export async function prefillWeek(
   rls: RlsClient,
   userId: string,
@@ -218,6 +329,12 @@ export async function prefillWeek(
         .where(and(eq(dayBlocks.userId, userId), eq(days.date, date)))
         .limit(1);
       if (existing) return "skipped" as const;
+
+      // UX v1.2 §4.15: the weekday's day plan first; the profile's defaults
+      // for a weekday no plan claims.
+      if ((await applyPlanToDay(tx, userId, profile, date, dates)) === "planned") {
+        return "planned" as const;
+      }
 
       const plan = await defaultPlanFor(tx, userId, profile, date, dates);
       await materializeInTx(tx, userId, {

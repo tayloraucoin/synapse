@@ -8,7 +8,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | RUN-2 | Migration `0007`: the additive columns, `passages`, `quotes`, `day_plans`, the bucket, the backfill | RUN-1 | Complete (batch 1; authored, journalled, reference regenerated; **not applied to any tier — Taylor runs `0007` after `0004`–`0006`; the database-backed criteria are unverified** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-3 | Plan services: work-day types, fixture kinds, versions and workout details, `usedBy`, the profile widened | RUN-2 | Complete (batch 2; pure probes pasted; the four commands pass; **the database-backed criteria are unverified — no tier touched** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-4 | Passages and the quote bank: services, the upload kind, the orient read model | RUN-2 | Complete (batch 2; `cycleIndex` and the path guard probed; the four commands pass; **the database-backed and Vigil criteria are unverified — no tier touched** — see `DEVIATIONS.md`) | 2026-09-16 |
-| RUN-5 | Day plans: the service, the weekday invariant, pre-fill from plans, *Set from the plan* | RUN-3 | Not started | — |
+| RUN-5 | Day plans: the service, the weekday invariant, pre-fill from plans, *Set from the plan* | RUN-3 | Complete (batch 3; TD-21 + migration `0008` added; one workout per day for now; pure probes pasted; the four commands pass; **database-backed criteria unverified** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-6 | The day under v1.2: travel rows, version resolution, `applyWorkType`, the journal reminder | RUN-3 | Not started | — |
 | RUN-7 | `@syn/ui` for v1.2 | RUN-1 | Not started | — |
 | RUN-8 | The frame and screens 1–5 | RUN-3, RUN-7 | Not started | — |
@@ -26,7 +26,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] RUN-2
 - [x] RUN-3
 - [x] RUN-4
-- [ ] RUN-5
+- [x] RUN-5
 - [ ] RUN-6
 - [ ] RUN-7
 - [ ] RUN-8

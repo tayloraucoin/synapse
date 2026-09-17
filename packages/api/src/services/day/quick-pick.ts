@@ -8,6 +8,7 @@ import type {
   TrainingPlacement,
   Weekday,
 } from "@syn/types";
+import type { ConfirmDayInput } from "@syn/validators";
 import {
   clockMinutes,
   computeBudget,
@@ -359,6 +360,80 @@ function midpoint(min: number | null, max: number | null): number {
   if (min === null) return max as number;
   if (max === null) return min;
   return Math.round((min + max) / 2);
+}
+
+/**
+ * The pick's own defaults as the input `confirmDay` takes — UX v1.2 R37,
+ * TD-17. *Set from the plan* calls this and then `confirmDay`, so there is
+ * ONE resolver of "what would be preselected" and no second confirm path:
+ * a plan's choices are already the day's blocks after the week build, and
+ * the pick's defaults are therefore the plan's.
+ *
+ * Two questions the pick would have asked are answered by the caller or
+ * refused: a *sometimes* day's *Working today?* (`workingToday`) and, under
+ * *depends on the day*, what gives (`anchorIsHard`). Neither is inferred.
+ */
+export type PickDefaultsBlock = "sometimes_unanswered" | "anchor_unanswered";
+
+export async function resolvePickDefaults(
+  rls: RlsClient,
+  userId: string,
+  date: string,
+  context: { todayKey: string; timeZone: string; dayCloseTime: string; now: Date },
+  answers: { workingToday?: boolean; anchorIsHard?: boolean } = {},
+): Promise<{ input: ConfirmDayInput } | { blocked: PickDefaultsBlock }> {
+  const view = await getQuickPick(rls, userId, date, context);
+
+  if (view.shape?.asked && answers.workingToday === undefined) {
+    return { blocked: "sometimes_unanswered" };
+  }
+  if (view.work?.askAnchor && answers.anchorIsHard === undefined) {
+    return { blocked: "anchor_unanswered" };
+  }
+
+  const routine: ConfirmDayInput["routine"] =
+    view.routine === null
+      ? undefined
+      : view.routine.mode === "daily_menu"
+        ? {
+            menuHabitIds: (view.routine.menu?.items ?? [])
+              .filter((item) => item.ticked)
+              .map((item) => item.id),
+          }
+        : view.routine.mode === "variants"
+          ? {
+              variantTemplateId:
+                view.routine.assignedId ??
+                view.routine.variants?.find((variant) => variant.remaining > 0)?.id ??
+                view.routine.variants?.[0]?.id,
+            }
+          : undefined;
+
+  const training: ConfirmDayInput["training"] =
+    view.training === null
+      ? undefined
+      : view.training.todays === null
+        ? undefined
+        : {
+            workoutHabitId: view.training.todays.id,
+            placement: view.training.lastPlacement,
+            notToday: false,
+          };
+
+  return {
+    input: {
+      date,
+      ...(answers.workingToday !== undefined ? { workingToday: answers.workingToday } : {}),
+      ...(routine ? { routine } : {}),
+      alternates: view.prep?.alternates.map((group) => ({
+        groupId: group.groupId,
+        chosenSlotId: group.chosen,
+      })),
+      ...(training ? { training } : {}),
+      focusHabitId: view.work?.assignedId ?? undefined,
+      ...(answers.anchorIsHard !== undefined ? { anchorIsHard: answers.anchorIsHard } : {}),
+    },
+  };
 }
 
 /** The day's fixture items, read-only under *Already in place*. */

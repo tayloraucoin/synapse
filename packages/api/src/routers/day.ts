@@ -88,10 +88,30 @@ export const dayRouter = router({
     return readOrient(ctx.rls, ctx.authContext.userId, input?.date ?? today.todayKey, new Date());
   }),
 
-  /** The frame's two optional lines, autosaved. */
+  /**
+   * The frame's optional lines, autosaved — and, with `andSetDay`, *Set from
+   * the plan* (UX v1.2 R37, TD-17): the day is set through `confirmDay` with
+   * the pick's own defaults, or the response says which question is open.
+   */
   saveMorning: protectedProcedure
     .input(saveMorningInput)
-    .mutation(async ({ ctx, input }) => saveMorning(ctx.rls, ctx.authContext.userId, input)),
+    .mutation(async ({ ctx, input }) => {
+      const today = await resolveTodayFor(ctx.rls, ctx.authContext.userId);
+      if (!today) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "No account row." });
+      }
+      try {
+        return await saveMorning(ctx.rls, ctx.authContext.userId, input, {
+          todayKey: today.todayKey,
+          timeZone: today.timeZone,
+          dayCloseTime: today.dayCloseTime,
+          now: new Date(),
+        });
+      } catch (error) {
+        if (error instanceof ConfirmRuleError) throw confirmError(error);
+        throw error;
+      }
+    }),
 
   /* ------------------------------------------------- UX v1.1 (DYN-15) -- */
 

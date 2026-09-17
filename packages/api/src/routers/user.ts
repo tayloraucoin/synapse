@@ -71,7 +71,10 @@ export const userRouter = router({
   completeFirstRun: protectedProcedure
     .input(completeFirstRunInput)
     .mutation(async ({ ctx, input }) =>
-      completeFirstRun(ctx.rls, ctx.authContext.userId, input ?? {}),
+      // `overflowMode` is accepted and ignored (UX v1.2 §3.10; removed in RUN-13).
+      completeFirstRun(ctx.rls, ctx.authContext.userId, {
+        morningMode: input?.morningMode,
+      }),
     ),
 
   /** The account photo's stored path, or null. ST-01 and the header read it. */

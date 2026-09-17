@@ -118,6 +118,22 @@ export const days = pgTable(
     wokeAtSource: wokeAtSourceEnum("woke_at_source"),
     /** Today's work anchor after any slide (UX v1.1 §6.6, 0005); null until set. */
     workStartTime: time("work_start_time"),
+    /**
+     * Today's other three anchors (UX v1.2 §3.13, TD-21, 0008) — written at
+     * the week build from the day plan (or the work-day type), read by every
+     * re-lay through `profileForDay`; null = the profile's. A day snapshots
+     * its anchors the way it snapshots its zone: a plan edited tomorrow must
+     * not move an evening already lived.
+     */
+    workEndTime: time("work_end_time"),
+    lightsOutTime: time("lights_out_time"),
+    devicesOffTime: time("devices_off_time"),
+    /**
+     * Weekday fixtures this day leaves out (UX v1.2 §4.13g, TD-21, 0008) —
+     * snapshotted from the day plan at the week build so a re-lay never
+     * brings an excluded fixture back. Empty for a day that excludes nothing.
+     */
+    excludedFixtureIds: uuid("excluded_fixture_ids").array().notNull().default([]),
 
     userId: uuid("user_id")
       .notNull()

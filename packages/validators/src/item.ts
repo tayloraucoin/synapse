@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-import { INTENTION_MAX, MORNING_GRATITUDE_MAX, NOTE_MAX, REFLECTION_AXIS_MAX } from "@syn/constants";
+import {
+  INTENTION_MAX,
+  MORNING_GRATITUDE_MAX,
+  NOTE_MAX,
+  REFLECTION_AXIS_MAX,
+  VISUALISATION_MAX,
+} from "@syn/constants";
 
 import { dateKeySchema } from "./keys";
 
@@ -62,16 +68,30 @@ export const rateItemInput = z.object({
 /** The orient frame's read (v1.1 §5.2) — today unless a date is given. */
 export const orientInput = z.object({ date: dateKeySchema.optional() }).optional();
 
-/** The frame's two optional lines, autosaved (v1.1 §5.2). Empty clears. */
+/**
+ * The frame's optional lines, autosaved (v1.1 §5.2; the third since UX v1.2
+ * §5.2). Empty clears. `andSetDay` is *Set from the plan* (v1.2 R37): the
+ * tap on *Start the morning* sets the day in the same call; `workingToday`
+ * and `anchorIsHard` are the frame's dialog answers, never inferred.
+ */
 export const saveMorningInput = z
   .object({
     date: dateKeySchema,
     gratitude: z.string().trim().max(MORNING_GRATITUDE_MAX).nullable().optional(),
     intention: z.string().trim().max(INTENTION_MAX).nullable().optional(),
+    visualisation: z.string().trim().max(VISUALISATION_MAX).nullable().optional(),
+    andSetDay: z.boolean().optional(),
+    workingToday: z.boolean().optional(),
+    anchorIsHard: z.boolean().optional(),
   })
-  .refine((value) => value.gratitude !== undefined || value.intention !== undefined, {
-    message: "Nothing to save.",
-  });
+  .refine(
+    (value) =>
+      value.gratitude !== undefined ||
+      value.intention !== undefined ||
+      value.visualisation !== undefined ||
+      value.andSetDay === true,
+    { message: "Nothing to save." },
+  );
 
 export type SaveMorningInput = z.infer<typeof saveMorningInput>;
 

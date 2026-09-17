@@ -1,7 +1,7 @@
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 
-import { dayBlocks, dayItems, days, habits, type RlsClient } from "@syn/db";
-import type { DayShape, IconValue, TrainingPlacement } from "@syn/types";
+import { dayBlocks, dayItems, days, type RlsClient } from "@syn/db";
+import type { DayShape, TrainingPlacement } from "@syn/types";
 import type { ConfirmDayInput } from "@syn/validators";
 import {
   addDays,
@@ -10,7 +10,6 @@ import {
   computeBudget,
   fitToBudget,
   weekdayForDayKey,
-  weekdayIndex,
   type FitItem,
 } from "@syn/utils";
 
@@ -41,6 +40,14 @@ import {
   type DesiredItem,
   type Tx,
 } from "./materialize-day";
+import {
+  habitItem,
+  midpoint,
+  readHabits,
+  typicalWorkoutFor,
+  workoutLength,
+  type HabitLite,
+} from "./habit-item";
 import { defaultPlanFor } from "./prefill-week";
 import { isUntouchedItem } from "./untouched";
 import { afterDevicesOff } from "./wind-down";
@@ -92,101 +99,23 @@ export type ConfirmContext = {
   dayCloseTime: string;
   now: Date;
   deviceZone?: string | null;
+  /**
+   * UX v1.2 R37, TD-17 — *Set from the plan* leaves yesterday's after-
+   * devices-off items pending for the Today list's panel (RUN-13) rather than
+   * marking the unticked ones `not_confirmed` here; the pick, which asks,
+   * leaves this unset.
+   */
+  leaveLastNight?: boolean;
 };
 
-/** The rotation's typical length: the range floor, else its midpoint, else an hour. */
-export function workoutLength(habit: { durationMinMin: number | null; durationMaxMin: number | null }): number {
-  if (habit.durationMinMin !== null) return habit.durationMinMin;
-  if (habit.durationMaxMin !== null) return habit.durationMaxMin;
-  return 60;
-}
-
-function midpoint(min: number | null, max: number | null): number {
-  if (min === null && max === null) return 15;
-  if (min === null) return max as number;
-  if (max === null) return min;
-  return Math.round((min + max) / 2);
-}
-
-export type HabitLite = {
-  id: string;
-  title: string;
-  icon: IconValue;
-  type: "habit" | "task_appointment" | "workout" | "deep_work";
-  lifePriority: number;
-  durationMinMin: number | null;
-  durationMaxMin: number | null;
-  quantityUnit: string | null;
-  reflectionAxes: string[];
-  defaultNotesPreflight: string | null;
-  typicalDays: number[] | null;
-  weeklyTarget: number | null;
-};
-
-const HABIT_LITE = {
-  id: habits.id,
-  title: habits.title,
-  icon: habits.icon,
-  type: habits.type,
-  lifePriority: habits.lifePriority,
-  durationMinMin: habits.durationMinMin,
-  durationMaxMin: habits.durationMaxMin,
-  quantityUnit: habits.quantityUnit,
-  reflectionAxes: habits.reflectionAxes,
-  defaultNotesPreflight: habits.defaultNotesPreflight,
-  typicalDays: habits.typicalDays,
-  weeklyTarget: habits.weeklyTarget,
-} as const;
-
-export async function readHabits(tx: Tx, userId: string, ids: readonly string[]): Promise<Map<string, HabitLite>> {
-  if (ids.length === 0) return new Map();
-  const rows = await tx
-    .select(HABIT_LITE)
-    .from(habits)
-    .where(and(eq(habits.userId, userId), inArray(habits.id, [...ids])));
-  return new Map(rows.map((row) => [row.id, row]));
-}
-
-/** Today's workout by the rotation's typical days — the pick's default. */
-export async function typicalWorkoutFor(
-  tx: Tx,
-  userId: string,
-  date: string,
-): Promise<HabitLite | null> {
-  const weekday = weekdayIndex(date);
-  const rows = await tx
-    .select(HABIT_LITE)
-    .from(habits)
-    .where(and(eq(habits.userId, userId), eq(habits.type, "workout"), isNull(habits.archivedAt)))
-    .orderBy(asc(habits.createdAt));
-  return rows.find((row) => (row.typicalDays ?? []).includes(weekday)) ?? null;
-}
-
-/** A habit as a pick-made item: no slot, its own snapshot. */
-export function habitItem(
-  habit: HabitLite,
-  input: { durationMin: number | null; sortOrder: number; snapshot: string | null },
-) {
-  return {
-    title: habit.title,
-    icon: habit.icon,
-    type: habit.type,
-    quantityUnit: habit.quantityUnit,
-    reflectionAxes: habit.reflectionAxes,
-    notesPreflight: habit.defaultNotesPreflight,
-    timeMode: "fixed_time" as const,
-    durationMin: input.durationMin,
-    gapBeforeMin: 0,
-    pinned: false,
-    priority: habit.lifePriority,
-    scheduling: "soft" as const,
-    sortOrder: input.sortOrder,
-    templateNameSnapshot: input.snapshot,
-    habitId: habit.id,
-    templateSlotId: null,
-    origin: "template" as const,
-  };
-}
+/* The habit → item helpers moved to `habit-item.ts` in RUN-5 (see its header); re-exported so no caller changed. */
+export {
+  habitItem,
+  readHabits,
+  typicalWorkoutFor,
+  workoutLength,
+  type HabitLite,
+} from "./habit-item";
 
 /* --------------------------------------------------------- the pools -- */
 
@@ -812,13 +741,15 @@ export async function confirmDay(
 
     /* -- yesterday, and the pushes --------------------------------------- */
 
-    await confirmLastNight(
-      tx,
-      userId,
-      input.date,
-      new Set(input.lastNight?.doneItemIds ?? []),
-      now,
-    );
+    if (!context.leaveLastNight) {
+      await confirmLastNight(
+        tx,
+        userId,
+        input.date,
+        new Set(input.lastNight?.doneItemIds ?? []),
+        now,
+      );
+    }
 
     return { dayId: day.id, changed: true };
   });

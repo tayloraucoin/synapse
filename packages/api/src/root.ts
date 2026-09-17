@@ -2,6 +2,7 @@ import { adjustRouter } from "./routers/adjust";
 import { assetRouter } from "./routers/asset";
 import { categoryRouter } from "./routers/category";
 import { dayRouter } from "./routers/day";
+import { dayPlanRouter } from "./routers/day-plan";
 import { feedbackRouter } from "./routers/feedback";
 import { fixtureRouter } from "./routers/fixture";
 import { habitRouter } from "./routers/habit";
@@ -32,6 +33,7 @@ export const appRouter = router({
   asset: assetRouter,
   category: categoryRouter,
   day: dayRouter,
+  dayPlan: dayPlanRouter,
   feedback: feedbackRouter,
   fixture: fixtureRouter,
   habit: habitRouter,

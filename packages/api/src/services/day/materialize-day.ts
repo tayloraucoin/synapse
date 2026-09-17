@@ -92,6 +92,8 @@ export type MaterializeInput = {
   anchorTime?: string;
   /** The week's focus for a work day. */
   focusHabitId?: string | null;
+  /** The day's own anchors, work-day type and fixture exclusions, from a day plan (TD-21) or *Working today* (TD-19). */
+  anchors?: DayAnchors;
   /**
    * An anchor change is the ONE case that writes to touched rows, and only
    * their two scheduled-time columns (Epic 1 WK-02).
@@ -179,6 +181,12 @@ export type DayRow = {
   anchorIsHard: boolean | null;
   workStartTime: string | null;
   workFocusHabitId: string | null;
+  /* ---- UX v1.2 (TD-19, TD-21; 0007, 0008): the day's own anchors and type. Null = the profile's. ---- */
+  workEndTime: string | null;
+  lightsOutTime: string | null;
+  devicesOffTime: string | null;
+  workTemplateId: string | null;
+  excludedFixtureIds: string[];
 };
 
 const DAY_COLUMNS = {
@@ -193,7 +201,39 @@ const DAY_COLUMNS = {
   anchorIsHard: days.anchorIsHard,
   workStartTime: days.workStartTime,
   workFocusHabitId: days.workFocusHabitId,
+  workEndTime: days.workEndTime,
+  lightsOutTime: days.lightsOutTime,
+  devicesOffTime: days.devicesOffTime,
+  workTemplateId: days.workTemplateId,
+  excludedFixtureIds: days.excludedFixtureIds,
 } as const;
+
+/** The four anchors and the type a day plan or a work-day type sets on a day (TD-19, TD-21). */
+export type DayAnchors = {
+  workStartTime?: string | null;
+  workEndTime?: string | null;
+  lightsOutTime?: string | null;
+  devicesOffTime?: string | null;
+  workTemplateId?: string | null;
+  /** The plan's exclusions, snapshotted so a re-lay never brings one back. */
+  excludedFixtureIds?: readonly string[];
+};
+
+/**
+ * The profile as this day sees it — the day's own anchors where set, the
+ * profile's otherwise (TD-21). EVERY re-lay goes through this: a plan edited
+ * tomorrow must not move an evening already lived, and the profile's value
+ * is only ever the fallback for a day that never had its own.
+ */
+export function profileForDay(profile: DayProfile, day: DayRow): DayProfile {
+  return {
+    ...profile,
+    workStartTime: day.workStartTime ?? profile.workStartTime,
+    workEndTime: day.workEndTime ?? profile.workEndTime,
+    lightsOutTime: day.lightsOutTime ?? profile.lightsOutTime,
+    devicesOffTime: day.devicesOffTime ?? profile.devicesOffTime,
+  };
+}
 
 export async function readDay(
   tx: Tx,
@@ -217,15 +257,30 @@ export async function ensureDayRow(
   tx: Tx,
   userId: string,
   profile: DayProfile,
-  input: { date: string; shape?: DayShape; anchorTime?: string; focusHabitId?: string | null },
+  input: {
+    date: string;
+    shape?: DayShape;
+    anchorTime?: string;
+    focusHabitId?: string | null;
+    anchors?: DayAnchors;
+  },
 ): Promise<DayRow> {
   const existing = await readDay(tx, userId, input.date);
+  const anchors = input.anchors ?? {};
 
   if (existing) {
     const patch: Record<string, unknown> = {};
     if (input.anchorTime !== undefined) patch.anchorTime = input.anchorTime;
     if (input.shape !== undefined) patch.shape = input.shape;
     if (input.focusHabitId !== undefined) patch.workFocusHabitId = input.focusHabitId;
+    if (anchors.workStartTime !== undefined) patch.workStartTime = anchors.workStartTime;
+    if (anchors.workEndTime !== undefined) patch.workEndTime = anchors.workEndTime;
+    if (anchors.lightsOutTime !== undefined) patch.lightsOutTime = anchors.lightsOutTime;
+    if (anchors.devicesOffTime !== undefined) patch.devicesOffTime = anchors.devicesOffTime;
+    if (anchors.workTemplateId !== undefined) patch.workTemplateId = anchors.workTemplateId;
+    if (anchors.excludedFixtureIds !== undefined) {
+      patch.excludedFixtureIds = [...anchors.excludedFixtureIds];
+    }
     if (Object.keys(patch).length > 0) {
       await tx
         .update(days)
@@ -238,6 +293,17 @@ export async function ensureDayRow(
       shape: input.shape ?? existing.shape,
       workFocusHabitId:
         input.focusHabitId === undefined ? existing.workFocusHabitId : input.focusHabitId,
+      workStartTime: anchors.workStartTime === undefined ? existing.workStartTime : anchors.workStartTime,
+      workEndTime: anchors.workEndTime === undefined ? existing.workEndTime : anchors.workEndTime,
+      lightsOutTime: anchors.lightsOutTime === undefined ? existing.lightsOutTime : anchors.lightsOutTime,
+      devicesOffTime:
+        anchors.devicesOffTime === undefined ? existing.devicesOffTime : anchors.devicesOffTime,
+      workTemplateId:
+        anchors.workTemplateId === undefined ? existing.workTemplateId : anchors.workTemplateId,
+      excludedFixtureIds:
+        anchors.excludedFixtureIds === undefined
+          ? existing.excludedFixtureIds
+          : [...anchors.excludedFixtureIds],
     };
   }
 
@@ -251,6 +317,12 @@ export async function ensureDayRow(
       timezone: profile.timezone,
       dayCloseTime: profile.dayCloseTime,
       workFocusHabitId: input.focusHabitId ?? null,
+      workStartTime: anchors.workStartTime ?? null,
+      workEndTime: anchors.workEndTime ?? null,
+      lightsOutTime: anchors.lightsOutTime ?? null,
+      devicesOffTime: anchors.devicesOffTime ?? null,
+      workTemplateId: anchors.workTemplateId ?? null,
+      excludedFixtureIds: [...(anchors.excludedFixtureIds ?? [])],
     })
     .returning(DAY_COLUMNS);
 
@@ -1065,7 +1137,9 @@ export function toLayoutBlocks(
 }
 
 export function layoutFor(blocks: readonly BlockRow[], context: LayoutContext): DayLayout {
-  const { day, profile } = context;
+  const { day } = context;
+  // The day's own anchors first (TD-21); the caller's profile is the fallback.
+  const profile = profileForDay(context.profile, day);
   const minutes = (clock: string | null): number | null =>
     clock === null ? null : clockMinutes(clockOf(clock));
   return layOutDay(toLayoutBlocks(blocks, day), {
@@ -1139,8 +1213,10 @@ export async function materializeInTx(
   userId: string,
   input: MaterializeInput,
 ): Promise<{ result: MaterializeResult; day: DayRow; profile: DayProfile; blocks: BlockRow[] }> {
-  const profile = await readDayProfile(tx, userId);
-  const day = await ensureDayRow(tx, userId, profile, input);
+  const accountProfile = await readDayProfile(tx, userId);
+  const day = await ensureDayRow(tx, userId, accountProfile, input);
+  // From here the profile is the day's (TD-21): its own anchors where set.
+  const profile = profileForDay(accountProfile, day);
   const existing = await readDayBlocks(tx, userId, day.id);
 
   /* -- 1. desired blocks ------------------------------------------------ */
@@ -1192,6 +1268,7 @@ export async function materializeInTx(
       blockKind: fixtures.blockKind,
       scheduling: fixtures.scheduling,
       habitId: fixtures.habitId,
+      icon: fixtures.icon,
       habitTitle: habits.title,
       habitIcon: habits.icon,
       habitType: habits.type,
@@ -1202,7 +1279,14 @@ export async function materializeInTx(
     .from(fixtures)
     .leftJoin(habits, eq(habits.id, fixtures.habitId))
     .where(and(eq(fixtures.userId, userId), isNull(fixtures.archivedAt)));
-  const todaysFixtures = fixtureRows.filter((row) => row.weekdays.includes(weekday));
+  // A day plan may leave a weekday fixture out of its days (UX v1.2 §4.13g,
+  // TD-21) — the fixture stays a fixture; this day simply does not carry it.
+  // The day's own snapshot (written by `ensureDayRow` above) is the source,
+  // so a re-lay never brings an excluded fixture back.
+  const excluded = new Set(day.excludedFixtureIds);
+  const todaysFixtures = fixtureRows.filter(
+    (row) => row.weekdays.includes(weekday) && !excluded.has(row.id),
+  );
   for (const fixture of todaysFixtures) {
     const kind: BlockKind =
       day.shape === "unstructured" && fixture.blockKind === "work"
@@ -1313,7 +1397,10 @@ export async function materializeInTx(
         origin: "fixture",
         habitId: fixture.habitId,
         title: fixture.title,
-        icon: fixture.habitIcon ?? FIXTURE_ICON,
+        // The fixture's own glyph (UX v1.2 §3.6, RUN-3) — its kind's default
+        // unless the person chose one; a linked habit's icon only when the
+        // fixture has none of its own is not a case: `fixtures.icon` is NOT NULL.
+        icon: fixture.icon,
         type: fixture.habitType ?? "task_appointment",
         quantityUnit: fixture.habitQuantityUnit ?? null,
         reflectionAxes: fixture.habitReflectionAxes ?? [],

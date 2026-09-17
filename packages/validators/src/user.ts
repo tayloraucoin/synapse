@@ -167,7 +167,12 @@ export type UpdatePreferencesInput = z.infer<typeof updatePreferencesInput>;
  * when it fit and the screen showed no rows.
  */
 export const completeFirstRunInput = z
-  .object({ overflowMode: overflowModeSchema.optional() })
+  .object({
+    /** @deprecated UX v1.2 §3.10 — accepted and IGNORED; the mode is a Settings preference now. Removed with `step-12-fit` in RUN-13. */
+    overflowMode: overflowModeSchema.optional(),
+    /** UX v1.2 R37, §4.14 — how mornings go; optional until RUN-13 moves completion to screen 14 (default `set_from_plan`). */
+    morningMode: morningModeSchema.optional(),
+  })
   .optional();
 
 export type CompleteFirstRunInput = z.infer<typeof completeFirstRunInput>;

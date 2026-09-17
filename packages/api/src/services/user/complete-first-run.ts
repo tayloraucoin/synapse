@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 
 import { users, type RlsClient } from "@syn/db";
-import type { OverflowMode } from "@syn/types";
+import type { MorningMode } from "@syn/types";
 import { weekKeyOf } from "@syn/utils";
 
 import { prefillWeek } from "../day/prefill-week";
@@ -20,15 +20,16 @@ import { resolveTodayFor } from "../day/today";
  * `first_run_step` nulled are the same fact stated twice; written separately,
  * a failure between them leaves an account that is finished and still owes
  * step 12, and the entry tree would send it back into a sequence it has
- * completed. `overflow_mode` rides in the same write (§4.12: "Stores
- * `users.overflow_mode`") when the screen asked the question.
+ * completed. `morning_mode` rides in the same write (UX v1.2 §4.14, R37)
+ * when the screen asked the question; `overflow_mode` no longer does — it is
+ * a Settings preference since v1.2 §3.10, and the input's field is ignored
+ * until RUN-13 deletes the fit screen that still sends it.
  *
- * THEN THE WEEK IS PRE-FILLED (§4.13: "The first week after first run is
- * pre-filled from typical days and counts, so the week build's first job is
- * reading, not authoring"). `prefillWeek` skips days that already carry a
- * block, so a re-run — a double submit, a retry — plans nothing twice. The
- * week is the person's current one in their own zone (`resolveTodayFor`),
- * never the server's.
+ * THEN THE WEEK IS PRE-FILLED (v1.2 §4.15: the weekday's day plan first,
+ * then typical days and counts for whatever the plan leaves pooled).
+ * `prefillWeek` skips days that already carry a block, so a re-run — a
+ * double submit, a retry — plans nothing twice. The week is the person's
+ * current one in their own zone (`resolveTodayFor`), never the server's.
  *
  * IT IS IDEMPOTENT. `completed_at` is written unconditionally rather than only
  * when null, because a second call means a double submit or a retry, and
@@ -38,7 +39,7 @@ import { resolveTodayFor } from "../day/today";
 export async function completeFirstRun(
   rls: RlsClient,
   userId: string,
-  input: { overflowMode?: OverflowMode } = {},
+  input: { morningMode?: MorningMode } = {},
 ): Promise<{ completedAt: Date; planned: number }> {
   const completedAt = new Date();
 
@@ -48,7 +49,7 @@ export async function completeFirstRun(
       .set({
         firstRunCompletedAt: completedAt,
         firstRunStep: null,
-        ...(input.overflowMode === undefined ? {} : { overflowMode: input.overflowMode }),
+        ...(input.morningMode === undefined ? {} : { morningMode: input.morningMode }),
         updatedAt: completedAt,
       })
       .where(eq(users.id, userId)),

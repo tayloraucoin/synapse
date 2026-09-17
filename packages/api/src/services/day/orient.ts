@@ -8,12 +8,17 @@ import {
   addDays,
   cycleIndex,
   shouldShowSkipLine,
+  weekdayIndex,
 } from "@syn/utils";
 
 import { readActivePassages } from "../library/passages";
+import { plannedDayFor } from "../plan/day-plans";
 import { readQuoteForDate } from "../system/quotes";
+import { readPreferencesInTx } from "../user/preferences";
+import { confirmDay } from "./confirm-day";
 import { getLastNight } from "./journal";
-import { ensureDayRow, readDayProfile } from "./materialize-day";
+import { ensureDayRow, readDay, readDayProfile } from "./materialize-day";
+import { resolvePickDefaults } from "./quick-pick";
 
 /**
  * The orient frame — UX v1.1 §5.1, §5.2 (DYN-13).
@@ -188,23 +193,86 @@ export async function readOrient(
   };
 }
 
-/** The two optional lines, autosaved by the frame — `days.morning_gratitude`, `days.intention`. */
+export type SaveMorningResult = {
+  saved: true;
+  /** UX v1.2 R37 — whether *Set from the plan* set the day in this call. */
+  set: boolean;
+  /** Why not, when it did not. `no_plan` lands the frame on the pick. */
+  reason:
+    | "not_asked"
+    | "no_plan"
+    | "sometimes_unanswered"
+    | "anchor_unanswered"
+    | "already_set"
+    | null;
+};
+
+/**
+ * The frame's optional lines, autosaved — `days.morning_gratitude`,
+ * `days.intention`, and since UX v1.2 `days.visualisation`.
+ *
+ * `andSetDay` (UX v1.2 R37, TD-17): *Start the morning* under *Set from the
+ * plan* sets the day in the same call — through the pick's own resolver and
+ * the same `confirmDay` the pick calls, never a second path. The words are
+ * saved first, in their own transaction, so a failure to set never loses a
+ * line. A *sometimes* day's answer (`workingToday`) and, under *depends*,
+ * what gives (`anchorIsHard`) come from the frame's dialog; when the frame
+ * did not ask, the day is NOT set and the reason says which question is
+ * open — the tap confirms, nothing infers (v1.1 §2.3).
+ */
 export async function saveMorning(
   rls: RlsClient,
   userId: string,
-  input: { date: string; gratitude?: string | null; intention?: string | null },
-): Promise<{ saved: true }> {
+  input: {
+    date: string;
+    gratitude?: string | null;
+    intention?: string | null;
+    visualisation?: string | null;
+    andSetDay?: boolean;
+    workingToday?: boolean;
+    anchorIsHard?: boolean;
+  },
+  context?: { todayKey: string; timeZone: string; dayCloseTime: string; now: Date },
+): Promise<SaveMorningResult> {
   await rls.execute(async (tx) => {
     const profile = await readDayProfile(tx, userId);
     const day = await ensureDayRow(tx, userId, profile, { date: input.date });
-    const patch: { morningGratitude?: string | null; intention?: string | null } = {};
+    const patch: {
+      morningGratitude?: string | null;
+      intention?: string | null;
+      visualisation?: string | null;
+    } = {};
     if (input.gratitude !== undefined) patch.morningGratitude = nonEmpty(input.gratitude ?? undefined);
     if (input.intention !== undefined) patch.intention = nonEmpty(input.intention ?? undefined);
+    if (input.visualisation !== undefined) {
+      patch.visualisation = nonEmpty(input.visualisation ?? undefined);
+    }
     if (Object.keys(patch).length === 0) return;
     await tx
       .update(days)
       .set({ ...patch, updatedAt: new Date() })
       .where(eq(days.id, day.id));
   });
-  return { saved: true };
+
+  if (!input.andSetDay || !context) return { saved: true, set: false, reason: "not_asked" };
+
+  const day = await rls.execute((tx) => readDay(tx, userId, input.date));
+  if (day?.confirmedAt || day?.closedAt) return { saved: true, set: false, reason: "already_set" };
+
+  // A plan-less weekday has no placement for its workout and no lists of its
+  // own — the pick is the honest place for it (v1.2 §5.3's fallback).
+  const planned = await rls.execute(async (tx) => {
+    const prefs = await readPreferencesInTx(tx, userId);
+    return prefs ? plannedDayFor(tx, userId, prefs, weekdayIndex(input.date)) : null;
+  });
+  if (!planned) return { saved: true, set: false, reason: "no_plan" };
+
+  const resolved = await resolvePickDefaults(rls, userId, input.date, context, {
+    workingToday: input.workingToday,
+    anchorIsHard: input.anchorIsHard,
+  });
+  if ("blocked" in resolved) return { saved: true, set: false, reason: resolved.blocked };
+
+  await confirmDay(rls, userId, resolved.input, { ...context, leaveLastNight: true });
+  return { saved: true, set: true, reason: null };
 }

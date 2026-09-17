@@ -167,16 +167,28 @@ function withEffective(row: StoredPreferencesRow): UserPreferencesRow {
   return { ...row, ...effectiveEveningTimes(row) };
 }
 
+type Tx = Parameters<Parameters<RlsClient["execute"]>[0]>[0];
+
+/** The same read inside a caller's transaction (the week build, RUN-5). */
+export async function readPreferencesInTx(
+  tx: Tx,
+  userId: string,
+): Promise<UserPreferencesRow | null> {
+  const rows = await tx
+    .select(PREFERENCE_COLUMNS)
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  const row = rows[0];
+  return row ? withEffective(row) : null;
+}
+
 /** The caller's own row, or null. RLS makes "own" the only reachable answer. */
 export async function readPreferences(
   rls: RlsClient,
   userId: string,
 ): Promise<UserPreferencesRow | null> {
-  const rows = await rls.execute((tx) =>
-    tx.select(PREFERENCE_COLUMNS).from(users).where(eq(users.id, userId)).limit(1),
-  );
-  const row = rows[0];
-  return row ? withEffective(row) : null;
+  return rls.execute((tx) => readPreferencesInTx(tx, userId));
 }
 
 /**
