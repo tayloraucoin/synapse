@@ -254,7 +254,9 @@ export function WeekCanvas({
  */
 function lineParts(day: DayPlanView, sometimes: boolean): string[] {
   const parts: string[] = [];
-  if (day.shape !== null) parts.push(day.shape === "structured" ? COPY.structured : COPY.unstructured);
+  // UX v1.2 §4.15 (RUN-13): the plan first — *Day A · Viewpoint · Push · Stand-up 9:30*.
+  if (day.plan !== null) parts.push(day.plan.name);
+  else if (day.shape !== null) parts.push(day.shape === "structured" ? COPY.structured : COPY.unstructured);
   else if (sometimes) parts.push(COPY.shapeUnknown);
   if (day.morningLabel !== null) parts.push(day.morningLabel);
   if (day.shape === "structured") parts.push(day.focusLabel ?? COPY.decideInTheMorning);

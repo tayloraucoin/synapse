@@ -1,14 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import type { DayPlanSummaryView } from "@syn/types";
 import { Button, HelperText, LoadingText, Text } from "@syn/ui";
 
-import { StepFrame } from "@/app/(setup)/_components/step-frame";
+import { StepFrame, useStepNavigation } from "@/app/(setup)/_components/step-frame";
 import { useOnline } from "@/lib/hooks/use-online";
-import { todayRoute } from "@/lib/routes";
+import { setupRoute } from "@/lib/routes";
 import { trpc } from "@/lib/trpc/client";
 
 import { DAY_BUILDER_COPY as COPY } from "./copy";
@@ -19,16 +18,23 @@ import type { BuilderScreen } from "./use-day-builder";
 /**
  * *Your days* — UX v1.2 §4.13, §4.16 (RUN-12): a card per plan in
  * `sort_order`, *Build another day*, and — in the sequence — *Continue · n
- * days*, which completes first run as RUN-8's placeholder did until RUN-13
- * moves completion to screen 14. Under Settings the same list, embedded,
+ * days*, which moves to screen 14 (RUN-13), where first run completes.
+ * Under Settings the same list, embedded,
  * with no primary.
  *
  * FIRST ARRIVAL OPENS THE BUILDER: with no plans, one is created and 13a
  * shows at once — nobody sees an empty list they have to act on. A draft
  * card resumes at the first screen whose part is still missing.
  */
-export function YourDays({ embedded = false }: { embedded?: boolean }) {
-  const router = useRouter();
+export function YourDays({
+  embedded = false,
+  editPlanId = null,
+}: {
+  embedded?: boolean;
+  /** Screen 14's *Edit Day A*: open the builder on this plan's review at once (RUN-13). */
+  editPlanId?: string | null;
+}) {
+  const goTo = useStepNavigation();
   const online = useOnline();
   const utils = trpc.useUtils();
   const plans = trpc.dayPlan.list.useQuery(undefined);
@@ -36,9 +42,10 @@ export function YourDays({ embedded = false }: { embedded?: boolean }) {
   const create = trpc.dayPlan.create.useMutation();
   const duplicate = trpc.dayPlan.duplicate.useMutation();
   const remove = trpc.dayPlan.delete.useMutation();
-  const completeFirstRun = trpc.user.completeFirstRun.useMutation();
 
-  const [building, setBuilding] = React.useState<{ planId: string; screen: BuilderScreen } | null>(null);
+  const [building, setBuilding] = React.useState<{ planId: string; screen: BuilderScreen } | null>(
+    editPlanId === null ? null : { planId: editPlanId, screen: "i" },
+  );
   const [line, setLine] = React.useState<string | null>(null);
   const [finishing, setFinishing] = React.useState(false);
   const creating = React.useRef(false);
@@ -83,16 +90,11 @@ export function YourDays({ embedded = false }: { embedded?: boolean }) {
   }
 
   const list = plans.data ?? [];
+  // *Continue · n days* only moves; screen 14 completes first run (RUN-13).
   const finish = async () => {
     setLine(null);
     setFinishing(true);
-    try {
-      await completeFirstRun.mutateAsync({});
-      router.replace(todayRoute());
-    } catch {
-      setLine(COPY.saveError);
-      setFinishing(false);
-    }
+    await goTo(14, setupRoute(14));
   };
 
   const cards = (

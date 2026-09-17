@@ -74,6 +74,25 @@ export type OrientView = {
   intention: string | null;
   /** *Today, as I see it* — written by RUN-9's `saveMorning`. */
   visualisation: string | null;
+  /*
+   * ---- UX v1.2 §5.2, R37 (RUN-13): what the primary says under *Set from
+   * the plan*. Read from the plan for this weekday and the profile — the
+   * frame never infers a set; it only knows what the tap will do.
+   */
+  todayAnchor: {
+    /** A plan holds this weekday (else the tap lands on the pick). */
+    hasPlan: boolean;
+    /** The profile says *sometimes* for this weekday: the frame asks first. */
+    sometimes: boolean;
+    /** *depends on the day* — the pick asks what gives; the frame falls back to it. */
+    askAnchor: boolean;
+    /** "9:00" — the plan's *working by*, when the day has work. */
+    workStartClock: string | null;
+    /** Whether that anchor holds (`routine_cut`) — the label carries it only then. */
+    anchorIsHard: boolean;
+    /** The day is already set or closed — the primary only moves. */
+    alreadySet: boolean;
+  };
 };
 
 const [MAKE_HAPPEN, VISUALISATION, LOOKING_FORWARD] = ORIENT_READBACK_KEYS;
@@ -146,6 +165,21 @@ export async function readOrient(
       skips.push(written === undefined || written === null || written.trim() === "");
     }
 
+    // What the tap will do (v1.2 R37, RUN-13): the plan for this weekday,
+    // the profile's word for the day, and whether the anchor holds.
+    const prefs = await readPreferencesInTx(tx, userId);
+    const weekday = weekdayIndex(date);
+    const planned = prefs ? await plannedDayFor(tx, userId, prefs, weekday) : null;
+    const workMode = prefs?.workDays?.[String(weekday) as keyof NonNullable<typeof prefs.workDays>];
+    const todayAnchor: OrientView["todayAnchor"] = {
+      hasPlan: planned !== null,
+      sometimes: workMode === "sometimes",
+      askAnchor: prefs?.anchorDirection === "depends",
+      workStartClock: planned?.anchors.workStart ?? null,
+      anchorIsHard: prefs?.anchorDirection !== "work_waits",
+      alreadySet: day.confirmedAt !== null || day.closedAt !== null,
+    };
+
     return {
       gratitude: lines?.gratitude ?? null,
       intention: lines?.intention ?? null,
@@ -158,6 +192,7 @@ export async function readOrient(
       askVisualisation: account?.askVisualisation ?? true,
       morningMode: account?.morningMode ?? ("set_from_plan" as const),
       skips,
+      todayAnchor,
     };
   });
 
@@ -190,6 +225,7 @@ export async function readOrient(
     gratitude: row.gratitude,
     intention: row.intention,
     visualisation: row.visualisation,
+    todayAnchor: row.todayAnchor,
   };
 }
 

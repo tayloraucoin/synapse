@@ -33,6 +33,12 @@ export const WEEK_COPY = {
   planFromDefaultsDone: (n: number) => `Planned ${n} ${n === 1 ? "day" : "days"}.`,
 
   /* -------------------------------------------- the amended day sheet -- */
+  /* UX v1.2 §4.15 (RUN-13): the *Plan* row. */
+  plan: "Plan",
+  /** [COPY — needs Vesper sign-off] */
+  noPlans: "No days built yet.",
+  planSetAlready: "This day is set — its plan stays.",
+  saveError: "Couldn’t save. Try again.",
   shape: "Shape",
   set: "Set",
   menu: "Menu — decide in the morning",

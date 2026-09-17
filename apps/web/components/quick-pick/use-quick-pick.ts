@@ -33,7 +33,16 @@ import { QUICK_PICK_COPY as COPY } from "./copy";
 export type QuickPickView = RouterOutputs["day"]["quickPick"];
 export type QuickPickSection = "lastNight" | "working" | "routine" | "prep" | "training" | "work";
 
-export function useQuickPick(initial: QuickPickView, options: { onSet: () => Promise<void> | void }) {
+const ALL_SECTIONS: readonly QuickPickSection[] = ["lastNight", "working", "routine", "prep", "training", "work"];
+
+export function useQuickPick(
+  initial: QuickPickView,
+  options: {
+    onSet: () => Promise<void> | void;
+    /** UX v1.2 §5.3 (RUN-13): under *Build each morning* every section opens expanded. Nothing else changes. */
+    defaultExpanded?: boolean;
+  },
+) {
   const utils = trpc.useUtils();
   const query = trpc.day.quickPick.useQuery({ date: initial.date }, { initialData: initial });
   const view = query.data ?? initial;
@@ -43,7 +52,10 @@ export function useQuickPick(initial: QuickPickView, options: { onSet: () => Pro
   /* -- the answers ------------------------------------------------------ */
 
   const [open, setOpen] = React.useState<Set<QuickPickSection>>(
-    () => new Set<QuickPickSection>(initial.lastNight.length > 0 ? ["lastNight"] : []),
+    () =>
+      new Set<QuickPickSection>(
+        options.defaultExpanded ? ALL_SECTIONS : initial.lastNight.length > 0 ? ["lastNight"] : [],
+      ),
   );
   const [working, setWorking] = React.useState<boolean>(initial.shape?.default !== "unstructured");
   const [ticked, setTicked] = React.useState<Set<string>>(
@@ -78,6 +90,9 @@ export function useQuickPick(initial: QuickPickView, options: { onSet: () => Pro
   const menu = view.routine?.menu ?? null;
   const lengthOf = (id: string): number =>
     durations.get(id) ?? menu?.items.find((item) => item.id === id)?.durationMin ?? 0;
+  /** UX v1.2 §3.5 (RUN-13): a version tab sets the row's minutes; `confirmDay` matches them back to the version. */
+  const setLength = (id: string, minutes: number): void =>
+    setDurations((current) => new Map(current).set(id, minutes));
   const chosenMin = [...ticked].reduce((sum, id) => sum + lengthOf(id), 0);
 
   // A shorter one-of member gives the routine the difference.
@@ -218,6 +233,7 @@ export function useQuickPick(initial: QuickPickView, options: { onSet: () => Pro
     ticked,
     setTicked,
     lengthOf,
+    setLength,
     chosenMin,
     availableMin,
     overMin,

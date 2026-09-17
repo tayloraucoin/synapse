@@ -21,6 +21,8 @@ export const QUICK_PICK_COPY = {
     `${count} ${count === 1 ? "thing" : "things"} · ${minutes} min`,
   routineLocked: "As planned",
   shortenToFit: "Shorten to fit",
+  /** UX v1.2 §3.5 (RUN-13): the version tabs' group name. */
+  version: "Version",
   variantLeft: (remaining: number, target: number) => `${remaining} of ${target} left`,
   beforeWork: "Before work",
   /** "Meal-prepped 10" — a one-of member as a segment. */

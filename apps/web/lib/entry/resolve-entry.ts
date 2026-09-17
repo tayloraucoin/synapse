@@ -23,7 +23,7 @@ export const SETUP_REDIRECT_LAUNCH_LIMIT = 3;
 export type EntryProfile = {
   /** Null until first run is finished. */
   firstRunCompletedAt: Date | string | null;
-  /** Which step to resume at, 1–12 (UX v1.1 §4). */
+  /** Which step to resume at, 1–14 (UX v1.2 §4). */
   firstRunStep: number | null;
 };
 

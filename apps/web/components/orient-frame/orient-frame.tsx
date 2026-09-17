@@ -2,10 +2,11 @@
 
 import * as React from "react";
 
-import { Button, PassageCarousel, Text, TextDisclosureButton, Textarea, type PassageSlide } from "@syn/ui";
+import { Button, DialogPanel, HelperText, PassageCarousel, Text, TextDisclosureButton, Textarea, type PassageSlide } from "@syn/ui";
 import { DEFAULT_JOURNAL_PROMPTS, INTENTION_MAX, MORNING_GRATITUDE_MAX, VISUALISATION_MAX } from "@syn/constants";
 import { formatCalendarDay } from "@syn/utils";
 
+import { useOnline } from "@/lib/hooks/use-online";
 import { assetRoute } from "@/lib/routes";
 
 import { ORIENT_COPY as COPY } from "./copy";
@@ -40,6 +41,7 @@ const PROMPT_BY_KEY = new Map(DEFAULT_JOURNAL_PROMPTS.map((prompt) => [prompt.ke
 
 export function OrientFrame({ initial }: { initial: OrientView }) {
   const frame = useOrientFrame(initial);
+  const online = useOnline();
   const firstFieldRef = React.useRef<HTMLTextAreaElement>(null);
   const primaryRef = React.useRef<HTMLButtonElement>(null);
   const [lastNightOpen, setLastNightOpen] = React.useState(false);
@@ -160,12 +162,33 @@ export function OrientFrame({ initial }: { initial: OrientView }) {
           </div>
         )}
 
-        <div className="mt-auto pt-(--space-6) pb-[env(safe-area-inset-bottom)]">
-          <Button ref={primaryRef} className="w-full" busy={frame.starting} onClick={frame.start}>
-            {COPY.start}
+        <div className="mt-auto flex flex-col gap-(--space-3) pt-(--space-6) pb-[env(safe-area-inset-bottom)]">
+          {frame.setError ? <HelperText error>{frame.setError}</HelperText> : null}
+          {/* The set needs the network; the words save whenever they can (§5.2). */}
+          {frame.setsTheDay && !online ? <HelperText>{COPY.offline}</HelperText> : null}
+          <Button
+            ref={primaryRef}
+            className="w-full"
+            busy={frame.starting}
+            disabled={frame.setsTheDay && !online}
+            onClick={frame.start}
+          >
+            {frame.primaryLabel}
           </Button>
         </div>
       </div>
+
+      {/* A *Sometimes* day is asked, never inferred (v1.2 §5.2, v1.1 §2.3). */}
+      <DialogPanel open={frame.askOpen} onOpenChange={frame.setAskOpen} title={COPY.workingTodayTitle}>
+        <div className="flex flex-col gap-(--space-2)">
+          <Button className="w-full" onClick={() => frame.answerWorking(true)}>
+            {COPY.working}
+          </Button>
+          <Button variant="secondary" className="w-full" onClick={() => frame.answerWorking(false)}>
+            {COPY.notToday}
+          </Button>
+        </div>
+      </DialogPanel>
     </main>
   );
 }

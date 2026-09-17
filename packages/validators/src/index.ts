@@ -285,6 +285,7 @@ export {
 export {
   applyChangesInput,
   applyTemplateInput,
+  applyPlanInput,
   assignBlocksInput,
   blockAssignmentSchema,
   changeAnchorInput,

@@ -16,7 +16,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | RUN-10 | Screens 7–9 | RUN-8, RUN-3 | Complete (batch 6; `SelectRow` ticks with a per-row write queue on 7 and 8; the sortable length rows; `HabitSetupCard` with versions on 9; the two quick sheet modes; *Getting ready* in the library; the four commands and the Storybook build pass; **the signed-in walk is unverified — Vesper pending** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-11 | Screens 10–12 | RUN-8, RUN-3, RUN-6 | Complete (batch 6; `WorkoutSetupCard` and `FocusSetupCard` creating on the first fact; closing the day with phone away following, wind-down rows, sortable prompts and the reminder; Settings → Notifications' N2 row; `rotation-rows.tsx` deleted; the four commands pass; **the signed-in walk is unverified — Vesper pending** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-12 | Screen 13 — the day builder | RUN-5, RUN-10, RUN-11 | Complete (batch 7; `components/day-builder/` — the nine screens under a second caption, the three lists created on arrival and reused by reference, the greedy fill to the room, `BudgetLine` with *for the routine* and *runs to*, the client preview through `stackBlock` at 96px/h, `DayPlanCard`, *Your days* in the sequence and under Settings, *used by* on the block editor's list; the four commands and the Storybook build pass; **the signed-in walk is unverified — Vesper pending** — see `DEVIATIONS.md`) | 2026-09-16 |
-| RUN-13 | Screen 14 and the morning modes | RUN-12, RUN-6, RUN-9 | Not started | — |
+| RUN-13 | Screen 14 and the morning modes | RUN-12, RUN-6, RUN-9 | Complete (batch 8; `step-14-week.tsx` owns completion with `morningMode`; the frame's primary sets the day with the *Sometimes* dialog and `todayAnchor` on `OrientView`; the list's *Last night* section; the pick expanded under *build* with version tabs; `week.applyPlan` and the day sheet's *Plan* row; *Working today* on a *Rarely* day; the travel band on the Schedule and the workout's ends deferring with it; the item sheet's version control; the four commands pass; **the Vigil paths and the walk are unverified** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-14 | The quotes admin surface `[PROVISIONAL — Taylor, D3]` | RUN-4 · D3 | Not started | — |
 | RUN-15 | Migration `0008` and the retirements | RUN-9, RUN-10, RUN-11, RUN-13 | Not started | — |
 
@@ -34,6 +34,6 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] RUN-10
 - [x] RUN-11
 - [x] RUN-12
-- [ ] RUN-13
+- [x] RUN-13
 - [ ] RUN-14
 - [ ] RUN-15

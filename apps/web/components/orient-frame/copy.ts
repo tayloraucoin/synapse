@@ -24,4 +24,17 @@ export const ORIENT_COPY = {
   start: "Start the morning",
   /** R18 — one fact, no adjective, no question mark. */
   skippedYesterday: "Skipped yesterday too.",
+  /* ---- UX v1.2 §5.2, R37 (RUN-13): the primary under *Set from the plan* ---- */
+  /** *Start the morning · work 9:00* — the anchor rides on the label when it holds. */
+  startWithAnchor: (clock: string) => `Start the morning · work ${clock}`,
+  /** A *Sometimes* day: the one question mark the frame carries (§5.2, verbatim). */
+  startWorkingToday: "Start the morning · working today?",
+  /** The two-row dialog. */
+  workingTodayTitle: "Working today?",
+  working: "Working",
+  notToday: "Not today",
+  /** [COPY] The words saved, the set refused. */
+  setFailed: "Couldn’t set the day. The words are saved.",
+  /** The standard line; the set needs a connection. */
+  offline: "Offline — you can look, but changes need a connection.",
 } as const;

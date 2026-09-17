@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 
 import {
   applyChangesInput,
+  applyPlanInput,
   applyTemplateInput,
   assignBlocksInput,
   changeAnchorInput,
@@ -36,7 +37,7 @@ import {
   restoreOneOff,
   saveOneOff,
 } from "../services/day/one-off";
-import { defaultPlanFor, prefillWeek } from "../services/day/prefill-week";
+import { ApplyPlanRuleError, applyPlan, defaultPlanFor, prefillWeek } from "../services/day/prefill-week";
 import { resolveTodayFor } from "../services/day/today";
 import { TradeRuleError, tradeWorkouts } from "../services/day/trade-workouts";
 import { getWeek } from "../services/day/week-view";
@@ -105,6 +106,23 @@ export const weekRouter = router({
         });
       } catch (error) {
         throw asNotFound(error);
+      }
+    }),
+
+  /**
+   * The day sheet's *Plan* row — UX v1.2 §4.15 (RUN-13): one date from one
+   * plan, or *Unstructured*. A confirmed day is refused as `already_set`.
+   */
+  applyPlan: protectedProcedure
+    .input(applyPlanInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await applyPlan(ctx.rls, ctx.authContext.userId, input);
+      } catch (error) {
+        if (error instanceof ApplyPlanRuleError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: error.code, cause: error });
+        }
+        throw error;
       }
     }),
 

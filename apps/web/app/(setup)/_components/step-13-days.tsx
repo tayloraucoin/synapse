@@ -7,9 +7,10 @@ import { YourDays } from "@/components/day-builder";
  *
  * The list and the nine-screen builder live in `components/day-builder`,
  * because Settings → Your day → Your days mounts the same list embedded
- * (§4.16). In the sequence, *Continue · n days* completes first run — as
- * RUN-8's placeholder did — until RUN-13 moves completion to screen 14.
+ * (§4.16). *Continue · n days* moves to screen 14, which completes first
+ * run (RUN-13); screen 14's *Edit Day A* returns here with `?edit=` so the
+ * builder opens on that plan's review.
  */
-export function Step13Days() {
-  return <YourDays />;
+export function Step13Days({ editPlanId = null }: { editPlanId?: string | null }) {
+  return <YourDays editPlanId={editPlanId} />;
 }

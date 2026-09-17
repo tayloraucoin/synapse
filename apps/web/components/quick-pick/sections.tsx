@@ -13,6 +13,7 @@ import {
   QuickChipRow,
   SegmentedControl,
   Text,
+  cn,
 } from "@syn/ui";
 import type { TrainingPlacement } from "@syn/types";
 import { formatClock, weekdayForDayKey } from "@syn/utils";
@@ -131,27 +132,55 @@ export function RoutineSection({ pick, disabled }: { pick: QuickPickApi; disable
     >
       <ul className="flex flex-col">
         {menu.items.map((item) => (
-          <li key={item.id} className="flex min-h-11 items-center justify-between gap-(--space-3)">
-            <CheckboxField
-              checked={pick.ticked.has(item.id)}
-              disabled={disabled}
-              onCheckedChange={(next) =>
-                pick.setTicked((current) => {
-                  const after = new Set(current);
-                  if (next === true) after.add(item.id);
-                  else after.delete(item.id);
-                  return after;
-                })
-              }
-            >
-              <span className="flex items-center gap-(--space-2)">
-                <ItemIcon icon={item.icon} size={20} />
-                {item.title}
-              </span>
-            </CheckboxField>
-            <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
-              {`${pick.lengthOf(item.id)} min`}
-            </Text>
+          <li key={item.id} className="flex flex-col gap-(--space-1)">
+            <div className="flex min-h-11 items-center justify-between gap-(--space-3)">
+              <CheckboxField
+                checked={pick.ticked.has(item.id)}
+                disabled={disabled}
+                onCheckedChange={(next) =>
+                  pick.setTicked((current) => {
+                    const after = new Set(current);
+                    if (next === true) after.add(item.id);
+                    else after.delete(item.id);
+                    return after;
+                  })
+                }
+              >
+                <span className="flex items-center gap-(--space-2)">
+                  <ItemIcon icon={item.icon} size={20} />
+                  {item.title}
+                </span>
+              </CheckboxField>
+              <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
+                {`${pick.lengthOf(item.id)} min`}
+              </Text>
+            </div>
+            {/* UX v1.2 §3.5, §5.3 (RUN-13): the versions as tabs under the title; a tap sets the row's minutes. */}
+            {item.versions !== null && item.versions.length >= 2 ? (
+              <div role="tablist" aria-label={COPY.version} className="flex flex-wrap gap-(--space-1) ps-(--space-8)">
+                {item.versions.map((version) => {
+                  const current = pick.lengthOf(item.id) === version.minutes;
+                  return (
+                    <button
+                      key={version.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={current}
+                      disabled={disabled || !pick.ticked.has(item.id)}
+                      onClick={() => pick.setLength(item.id, version.minutes)}
+                      className={cn(
+                        "h-8 rounded-(--radius) border px-(--space-2) text-(length:--fs-caption) tabular-nums",
+                        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
+                        current ? "bg-primary text-primary-foreground border-transparent" : "border-hairline text-text-secondary",
+                        (disabled || !pick.ticked.has(item.id)) && "opacity-40",
+                      )}
+                    >
+                      {`${version.label} · ${version.minutes}`}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
           </li>
         ))}
       </ul>

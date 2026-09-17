@@ -4,7 +4,7 @@ import { dayBlocks, dayItems, days, habits, templates, type RlsClient } from "@s
 import type { BlockKind, DayShape, TrainingPlacement, WorkDayMode } from "@syn/types";
 import { weekDates, weekdayIndex } from "@syn/utils";
 
-import { plannedDayFor } from "../plan/day-plans";
+import { plannedDayById, plannedDayFor } from "../plan/day-plans";
 import { readPreferencesInTx } from "../user/preferences";
 import { readHabits, writeWorkoutRows } from "./habit-item";
 import {
@@ -230,10 +230,15 @@ export async function applyPlanToDay(
   profile: DayProfile,
   date: string,
   weekDatesForCounts: readonly string[] = [],
+  /** RUN-13's `week.applyPlan`: this plan, whatever the weekday says. */
+  planId?: string,
 ): Promise<"planned" | "no_plan"> {
   const prefs = await readPreferencesInTx(tx, userId);
   if (!prefs) return "no_plan";
-  const planned = await plannedDayFor(tx, userId, prefs, weekdayIndex(date));
+  const planned =
+    planId === undefined
+      ? await plannedDayFor(tx, userId, prefs, weekdayIndex(date))
+      : await plannedDayById(tx, userId, prefs, planId);
   if (!planned) return "no_plan";
   const { plan, anchors, workout } = planned;
 
@@ -301,6 +306,66 @@ async function placePlannedWorkout(
   // The workout and, when its travel is planned, the rows beside it (UX v1.2
   // §3.7, TD-12) — the same writer the pick uses.
   await writeWorkoutRows(tx, userId, day.id, block, habit);
+}
+
+/** `week.applyPlan` on a set or closed day — the week build's row says so. */
+export class ApplyPlanRuleError extends Error {
+  constructor(readonly code: "already_set" | "no_plan") {
+    super(code);
+    this.name = "ApplyPlanRuleError";
+  }
+}
+
+/**
+ * The week build's *Plan* row — UX v1.2 §4.15 (RUN-13): one date from one
+ * plan (`applyPlanToDay` for that plan), or *Unstructured* (orient and
+ * wind-down only, the day's own anchors cleared so the profile's apply
+ * again). A confirmed or closed day is refused; the row is disabled with
+ * the line, and a stale tap is refused the same way.
+ */
+export async function applyPlan(
+  rls: RlsClient,
+  userId: string,
+  input: { date: string; planId: string | null },
+): Promise<{ applied: "plan" | "unstructured" }> {
+  return rls.execute(async (tx) => {
+    const profile = await readDayProfile(tx, userId);
+    const [existing] = await tx
+      .select({ confirmedAt: days.confirmedAt, closedAt: days.closedAt })
+      .from(days)
+      .where(and(eq(days.userId, userId), eq(days.date, input.date)))
+      .limit(1);
+    if (existing && (existing.confirmedAt !== null || existing.closedAt !== null)) {
+      throw new ApplyPlanRuleError("already_set");
+    }
+
+    if (input.planId === null) {
+      const orient = await defaultTemplateFor(tx, userId, "orient");
+      const windDown = await defaultTemplateFor(tx, userId, "wind_down");
+      await materializeInTx(tx, userId, {
+        date: input.date,
+        shape: "unstructured",
+        blocks: [
+          { kind: "orient", templateId: orient },
+          { kind: "wind_down", templateId: windDown },
+        ],
+        focusHabitId: null,
+        anchors: {
+          workStartTime: null,
+          workEndTime: null,
+          lightsOutTime: null,
+          devicesOffTime: null,
+          workTemplateId: null,
+          excludedFixtureIds: [],
+        },
+      });
+      return { applied: "unstructured" };
+    }
+
+    const result = await applyPlanToDay(tx, userId, profile, input.date, [], input.planId);
+    if (result === "no_plan") throw new ApplyPlanRuleError("no_plan");
+    return { applied: "plan" };
+  });
 }
 
 export async function prefillWeek(

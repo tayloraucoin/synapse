@@ -37,6 +37,21 @@ async function patchItem(
       .set({ ...patch, updatedAt: at })
       .where(eq(dayItems.id, item.id));
 
+    // UX v1.2 §3.7 (RUN-13): a workout's travel rows go *not today* and come
+    // back with it; an end on its own is only itself.
+    if ("deferredAt" in patch) {
+      await tx
+        .update(dayItems)
+        .set({ deferredAt: patch.deferredAt as Date | null, updatedAt: at })
+        .where(
+          and(
+            eq(dayItems.userId, userId),
+            eq(dayItems.parentItemId, item.id),
+            eq(dayItems.origin, "travel"),
+          ),
+        );
+    }
+
     const [day] = await tx
       .select({ id: days.id, closedAt: days.closedAt })
       .from(days)

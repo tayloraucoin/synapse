@@ -21,6 +21,15 @@ export default async function TodayPage() {
   const { todayKey } = await api.day.today();
   const day = await api.day.get({ date: todayKey });
   const pick = day.confirmedAt === null ? await api.day.quickPick({ date: todayKey }) : null;
+  // UX v1.2 §5.3 (RUN-13): under *Build each morning* the pick opens expanded.
+  const me = pick === null ? null : await api.user.me();
 
-  return <TodayScreen dateKey={todayKey} initialDay={day} initialPick={pick} />;
+  return (
+    <TodayScreen
+      dateKey={todayKey}
+      initialDay={day}
+      initialPick={pick}
+      pickExpanded={me?.morningMode === "build_each_morning"}
+    />
+  );
 }

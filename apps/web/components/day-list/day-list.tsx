@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import {
+  Button,
   DayCompleteAction,
   EmptyState,
   ExpanderSection,
@@ -14,9 +15,11 @@ import {
   toastUndo,
 } from "@syn/ui";
 import { UNDO_LONG_MS } from "@syn/constants";
-import { formatClock } from "@syn/utils";
+import { addDays, formatClock } from "@syn/utils";
+import type { DayItemView } from "@syn/types";
 
 import { AdjustSheet, type AdjustEntry } from "@/components/adjust-sheet";
+import { ConfirmYesterdayPanel } from "@/components/confirm-yesterday";
 import { DaySheet } from "@/components/week-build";
 import { ItemSheet } from "@/components/item-sheet";
 import { OneOffSheet } from "@/components/one-off-sheet";
@@ -200,6 +203,11 @@ export function DayList({
         />
       ) : null}
 
+      {/* UX v1.2 §5.3 (RUN-13): the day set by the frame leaves last night for the list's first section. */}
+      {day.mode === "live" && day.lastNight.length > 0 ? (
+        <LastNightSection dateKey={dateKey} items={day.lastNight} onResolved={() => void list.refresh()} />
+      ) : null}
+
       {/* UX v1.1 §6.1 (R20): sectioned by block, in block order. */}
       {day.blocks.map((block) => (
         <BlockSection
@@ -318,6 +326,64 @@ export function DayList({
         }}
       />
     </ScreenFrame>
+  );
+}
+
+/**
+ * Last night, as the list's first section — UX v1.2 §5.3, v1.1 §7.3, R16
+ * (RUN-13). Under *Set from the plan* the frame set today and left
+ * yesterday's after-phone-away rows unanswered; the same panel the pick and
+ * the review use, collapsible, with its own *Confirm*: ticked rows are
+ * written done, the rest *not confirmed*, and the section is gone. Nothing
+ * is pre-ticked; the section reports no count.
+ */
+function LastNightSection({
+  dateKey,
+  items,
+  onResolved,
+}: {
+  dateKey: string;
+  items: readonly DayItemView[];
+  onResolved: () => void;
+}) {
+  const confirm = trpc.review.confirmLastNight.useMutation();
+  const [ticked, setTicked] = React.useState<Set<string>>(() => new Set());
+  const [error, setError] = React.useState<string | null>(null);
+
+  return (
+    <ExpanderSection heading={COPY.lastNight} explanation={COPY.lastNightExplanation} open>
+      <div className="flex flex-col gap-(--space-3) px-(--space-4) pb-(--space-3)">
+        <ConfirmYesterdayPanel
+          items={items}
+          ticked={ticked}
+          showCaption={false}
+          disabled={confirm.isPending}
+          onToggle={(id, on) =>
+            setTicked((current) => {
+              const next = new Set(current);
+              if (on) next.add(id);
+              else next.delete(id);
+              return next;
+            })
+          }
+        />
+        {error ? <HelperText error>{error}</HelperText> : null}
+        <Button
+          variant="secondary"
+          busy={confirm.isPending}
+          className="w-full wide:w-auto wide:self-start"
+          onClick={() => {
+            setError(null);
+            void confirm
+              .mutateAsync({ date: addDays(dateKey, -1), doneItemIds: Array.from(ticked) })
+              .then(onResolved)
+              .catch(() => setError(COPY.lastNightError));
+          }}
+        >
+          {COPY.confirmLastNight}
+        </Button>
+      </div>
+    </ExpanderSection>
   );
 }
 

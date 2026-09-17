@@ -6,6 +6,8 @@ import * as React from "react";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 import { todayRoute } from "@/lib/routes";
 
+import { ORIENT_COPY as COPY } from "./copy";
+
 /**
  * The frame's behaviour — UX v1.1 §5.2 (DYN-13), amended by v1.2 §5.2 (RUN-9).
  *
@@ -92,10 +94,25 @@ export function useOrientFrame(initial: OrientView) {
     flush(lines);
   }
 
-  function start(): void {
-    if (starting) return;
-    setStarting(true);
-    onBlur();
+  /* ---- UX v1.2 §5.2, R37, TD-17 (RUN-13): *Set from the plan* ---- */
+
+  const anchor = initial.todayAnchor;
+  const setsTheDay = initial.morningMode === "set_from_plan" && anchor.hasPlan && !anchor.alreadySet;
+  /** The primary asks *Working today?* before it sets (a *Sometimes* day). */
+  const asksWorking = setsTheDay && anchor.sometimes;
+  const [askOpen, setAskOpen] = React.useState(false);
+  const [setError, setSetError] = React.useState<string | null>(null);
+
+  /** *Start the morning · work 9:00* when the anchor holds; *· working today?* on a *Sometimes* day. */
+  const primaryLabel: string = !setsTheDay
+    ? COPY.start
+    : asksWorking
+      ? COPY.startWorkingToday
+      : anchor.anchorIsHard && anchor.workStartClock !== null
+        ? COPY.startWithAnchor(displayClock(anchor.workStartClock))
+        : COPY.start;
+
+  function proceed(): void {
     const line = initial.askGratitude && initial.skippedYesterday && lines.gratitude.trim() === "";
     if (line) {
       setShowSkipLine(true);
@@ -105,6 +122,52 @@ export function useOrientFrame(initial: OrientView) {
     router.replace(todayRoute());
   }
 
+  /**
+   * The tap sets the day — one call, the words and the set together, never
+   * an effect or a job (v1.1 §2.3, §13 #27). `no_plan` and the two
+   * unanswered questions the frame did not ask fall to the pick on `/today`;
+   * a failed set keeps the frame with one line, the words already saved.
+   */
+  async function setDay(workingToday?: boolean): Promise<void> {
+    setSetError(null);
+    try {
+      // Set, or not set for a reason the pick handles (`no_plan`,
+      // `anchor_unanswered`, `already_set`): either way `/today` is next —
+      // the list when set, the pick when not.
+      await save.mutateAsync({
+        date: initial.date,
+        andSetDay: true,
+        ...(workingToday === undefined ? {} : { workingToday }),
+      });
+      proceed();
+    } catch {
+      setStarting(false);
+      setSetError(COPY.setFailed);
+    }
+  }
+
+  function start(): void {
+    if (starting) return;
+    onBlur();
+    if (asksWorking) {
+      setAskOpen(true);
+      return;
+    }
+    setStarting(true);
+    if (setsTheDay) {
+      void setDay();
+      return;
+    }
+    proceed();
+  }
+
+  /** The dialog's answer — *Working* or *Not today*; dismissing sets nothing. */
+  function answerWorking(workingToday: boolean): void {
+    setAskOpen(false);
+    setStarting(true);
+    void setDay(workingToday);
+  }
+
   return {
     lines,
     onLine,
@@ -112,5 +175,17 @@ export function useOrientFrame(initial: OrientView) {
     start,
     starting,
     showSkipLine,
+    primaryLabel,
+    setsTheDay,
+    askOpen,
+    setAskOpen,
+    answerWorking,
+    setError,
   };
+}
+
+/** "09:00" → "9:00", as the labels read it. */
+function displayClock(clock: string): string {
+  const [hour = "0", minute = "00"] = clock.split(":");
+  return `${Number(hour)}:${minute.slice(0, 2)}`;
 }

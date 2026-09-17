@@ -107,7 +107,7 @@ export type DayView = {
   focusHabitId: string | null;
   /** The devices-off marker's instant; items from it on read *confirm in the morning*. */
   devicesOffAt: Date | null;
-  /** Yesterday's after-devices-off items still to answer — only while today is unset. */
+  /** Yesterday’s after-devices-off items still to answer — for today, set or not (the frame may set and leave them; RUN-13). */
   lastNight: DayItemView[];
 };
 
@@ -499,9 +499,11 @@ export async function getDay(
       split: block.kind === "work" && workCount >= 2,
     }));
 
-    // Yesterday's after-devices-off items, only while today is unset (§7.3).
+    // Yesterday's after-devices-off items still unanswered (§7.3). Read for
+    // today whether it is set or not: under *Set from the plan* the frame
+    // sets the day and leaves last night for the list's first section (RUN-13).
     const lastNight =
-      dateKey === context.todayKey && day.confirmedAt === null
+      dateKey === context.todayKey
         ? await readLastNight(tx, userId, addDays(dateKey, -1), zone, mode, context.now)
         : [];
 

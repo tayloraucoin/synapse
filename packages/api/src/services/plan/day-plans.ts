@@ -529,7 +529,31 @@ export async function plannedDayFor(
 ): Promise<PlannedDay | null> {
   const plan = await planForWeekday(tx, userId, weekday);
   if (!plan) return null;
+  return plannedDayOf(tx, userId, prefs, plan);
+}
 
+/**
+ * One plan by id, whatever weekday it claims — RUN-13's `week.applyPlan`
+ * (UX v1.2 §4.15): the day sheet's *Plan* row puts any plan on any date.
+ */
+export async function plannedDayById(
+  tx: Tx,
+  userId: string,
+  prefs: UserPreferencesRow,
+  planId: string,
+): Promise<PlannedDay | null> {
+  const rows = await readPlanRows(tx, userId);
+  const plan = rows.find((row) => row.id === planId) ?? null;
+  if (!plan) return null;
+  return plannedDayOf(tx, userId, prefs, plan);
+}
+
+async function plannedDayOf(
+  tx: Tx,
+  userId: string,
+  prefs: UserPreferencesRow,
+  plan: DayPlanRow,
+): Promise<PlannedDay> {
   let type: { startClock: string | null; endClock: string | null } | null = null;
   if (plan.workTemplateId !== null) {
     const [row] = await tx

@@ -10,6 +10,7 @@ import {
   DragLayer,
   EmptyState,
   GapBand,
+  SCHEDULE_GUTTER_PX,
   GhostBlock,
   NowLine,
   ScheduleAxis,
@@ -238,6 +239,17 @@ export function ScheduleCanvas({
           key={`span-${span.key}`}
           topPx={span.topPx}
           heightPx={span.heightPx}
+        />
+      ))}
+
+      {/* UX v1.2 §6.5 (RUN-13): one fill behind a workout and its two travel ends. */}
+      {layout.travelBands.map((band) => (
+        <div
+          key={band.key}
+          aria-hidden="true"
+          data-travel-band
+          style={{ top: `${band.topPx}px`, height: `${band.heightPx}px`, insetInlineStart: `${SCHEDULE_GUTTER_PX}px` }}
+          className="bg-surface border-hairline absolute end-0 z-[5] rounded-(--radius) border"
         />
       ))}
 

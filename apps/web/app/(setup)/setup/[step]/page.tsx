@@ -16,16 +16,16 @@ import { Step10Training } from "../../_components/step-10-training";
 import { Step11Closing } from "../../_components/step-11-closing";
 import { Step12Focuses } from "../../_components/step-12-focuses";
 import { Step13Days } from "../../_components/step-13-days";
+import { Step14Week } from "../../_components/step-14-week";
 
 /**
  * The first-run sequence — UX v1.2 §4, fourteen screens (RUN-8 renumbered
- * v1.1's twelve; screens 1–5 are v1.2's, 6–12 are rebuilt by RUN-9…RUN-11,
- * 13 and 14 by RUN-12 and RUN-13).
+ * v1.1's twelve; 1–12 are v1.2's, 13 is the day builder (RUN-12), 14 is
+ * the week and the mode question, which completes first run (RUN-13)).
  *
  * THE STEP IS THE URL, and the segment is validated: a step outside 1–14 is
  * a 404, because a sequence that renders an empty screen is worse than a
- * 404. Step 14 is a 404 until RUN-13 creates it; step 13 completes first
- * run until then, so the sequence never dead-ends.
+ * 404.
  *
  * THE PAGE IS A SERVER COMPONENT and each screen is a client leaf that
  * receives its current values as props, so a pre-filled field renders as
@@ -39,17 +39,17 @@ import { Step13Days } from "../../_components/step-13-days";
  */
 export default async function SetupStepPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ step: string }>;
+  searchParams: Promise<{ edit?: string | string[] }>;
 }) {
   const { step } = await params;
+  const { edit } = await searchParams;
   const stepNumber = Number(step);
   if (!Number.isInteger(stepNumber) || stepNumber < 1 || stepNumber > SETUP_TOTAL_STEPS) {
     notFound();
   }
-  // RUN-13 creates screen 14 and moves completion there; until then it is not a screen.
-  if (stepNumber === 14) notFound();
-
   const api = await getServerApi();
   const me = await api.user.me();
 
@@ -107,8 +107,10 @@ export default async function SetupStepPage({
       );
     case 12:
       return <Step12Focuses />;
+    case 13:
+      return <Step13Days editPlanId={typeof edit === "string" && edit !== "" ? edit : null} />;
     default:
-      return <Step13Days />;
+      return <Step14Week initialWorkDays={me.workDays} initialMode={me.morningMode} />;
   }
 }
 

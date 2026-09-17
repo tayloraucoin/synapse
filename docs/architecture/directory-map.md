@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-17 · 1302 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-17 · 1303 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -75,7 +75,8 @@ apps/
           step-10-training.tsx
           step-11-closing.tsx  # screen 11 (v1.2 §4.11, R38): phone away follows lights out until touched; wind-down rows; sortable prompts; the reminder in the person's words
           step-12-focuses.tsx
-          step-13-days.tsx  # screen 13 — mounts YourDays (the day builder, components/day-builder); Continue · n days completes first run until RUN-13
+          step-13-days.tsx  # screen 13 — mounts YourDays (the day builder, components/day-builder); Continue · n days moves to 14; ?edit= opens a plan's review
+          step-14-week.tsx  # screen 14 — the seven weekday rows and the mode question (v1.2 §4.14); Open today / Plan this week first complete first run with morning_mode and pre-fill the week from the plans
           step-2-work-days.tsx
           step-3-work-shape.tsx  # screen 3 (v1.2 §4.3): Yes — the anchor, its end, what gives, ensureWork; No — the work-day type cards, each writing itself
           step-4-commitments.tsx

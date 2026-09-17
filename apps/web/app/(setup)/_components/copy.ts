@@ -270,11 +270,26 @@ export const SETUP_COPY = {
   continueFocuses: (n: number) =>
     n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "focus" : "focuses"}`,
 
-  /* ------------------------------------------------------ screen 13 -- */
-  /** [COPY] The placeholder until RUN-12 — v1.2 §4.13's noun. */
-  step13Heading: "Your days",
-  /** [COPY — needs Vesper sign-off: the placeholder's one line.] */
-  step13Placeholder: "The day builder arrives here. Everything entered so far is kept.",
+  /* ------------------------------------------------------ screen 14 -- */
+  /** v1.2 §4.14, verbatim. */
+  step14Heading: "Your usual week.",
+  yourDays: "Your days",
+  unstructured: "Unstructured",
+  off: "Off",
+  /** *Monday, Day A, change* — the row's accessible name. */
+  weekRowLabel: (weekday: string, value: string) => `${weekday}, ${value}, change`,
+  /** [COPY] The sheet's title. */
+  whichPlan: (weekday: string) => weekday,
+  /** *Edit Day A* */
+  editPlan: (name: string) => `Edit ${name}`,
+  searchPlans: "Search",
+  noPlansMatch: "No days match.",
+  /** The mode question — v1.2 §4.14, verbatim. */
+  morningMode: "Each morning",
+  setFromPlan: "Set from the plan",
+  setFromPlanBody: "Each morning opens on the plan for that day. Change anything from the day’s menu.",
+  buildEachMorning: "Build each morning",
+  buildEachMorningBody: "After the orient screen, choose what fits today. The plan is the starting point.",
   openToday: "Open today",
   planWeekFirst: "Plan this week first",
 } as const;

@@ -35,7 +35,12 @@ export type BlockLayout = {
   heightPx: number;
   /** Set only for members of a multitask group sharing a start. */
   multitask?: { index: number; count: number };
+  /** UX v1.2 §3.7 (RUN-13): a workout's travel end — drawn at half height on the workout's band. */
+  travel?: boolean;
 };
+
+/** The one band behind a workout and its two travel ends (v1.2 §6.5). */
+export type TravelBandLayout = { key: string; topPx: number; heightPx: number };
 
 /** The work block: the focus as a container, its fixtures relative to it. */
 export type ContainerLayout = {
@@ -92,6 +97,7 @@ export type ScheduleLayout = {
   shiftBands: ShiftBandLayout[];
   /** Null in record and plan modes, and on a day with no clock to show. */
   nowTopPx: number | null;
+  travelBands: TravelBandLayout[];
 };
 
 /** An hour of padding at each end — official spec §5.3. */
@@ -391,5 +397,37 @@ export function buildLayout(
   const nowAt = input.closedAt ?? input.now;
   const nowTopPx = nowAt === null ? null : topOf(toMin(nowAt));
 
-  return { startMin, endMin, bands, slack, containers, blocks, spans, ghosts, shiftBands, nowTopPx };
+  /* ----------------------------------------------------- travel bands -- */
+
+  /*
+   * UX v1.2 §3.7, §6.5 (RUN-13): a workout with planned travel is three items
+   * — *→ Gym*, the workout, *← Home* — drawn as ONE band with two thin ends.
+   * The band is the span from the first end's start to the last end's end;
+   * each end keeps its own block at half height, so it can be dragged and
+   * opened as any item. Travel is never in the workout's length: the band is
+   * geometry, the workout's block is still its own minutes.
+   */
+  const travelBands: TravelBandLayout[] = [];
+  const endsByParent = new Map<string, BlockLayout[]>();
+  for (const block of blocks) {
+    if (block.item.origin !== "travel" || block.item.parentItemId === null) continue;
+    block.travel = true;
+    block.heightPx = Math.max(MIN_BLOCK_PX, block.heightPx / 2);
+    const bucket = endsByParent.get(block.item.parentItemId);
+    if (bucket) bucket.push(block);
+    else endsByParent.set(block.item.parentItemId, [block]);
+  }
+  for (const [parentId, ends] of endsByParent) {
+    const workout = blocks.find((block) => block.item.id === parentId);
+    const members = workout === undefined ? ends : [...ends, workout];
+    const top = Math.min(...members.map((member) => member.topPx));
+    const bottom = Math.max(
+      ...members.map((member) =>
+        member.travel ? member.topPx + px(member.item.durationMin ?? 0) : member.topPx + member.heightPx,
+      ),
+    );
+    travelBands.push({ key: `travel-${parentId}`, topPx: top, heightPx: Math.max(MIN_BLOCK_PX, bottom - top) });
+  }
+
+  return { startMin, endMin, bands, slack, containers, blocks, spans, ghosts, shiftBands, nowTopPx, travelBands };
 }

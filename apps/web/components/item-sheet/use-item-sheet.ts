@@ -58,6 +58,7 @@ export function useItemSheet(itemId: string | null, dayKey: string) {
   const rate = trpc.item.rate.useMutation();
   const doNow = trpc.item.doNow.useMutation();
   const chooseAlternate = trpc.item.chooseAlternate.useMutation();
+  const editToday = trpc.item.editToday.useMutation();
 
   /**
    * Keep the store in step with the server's answer for THIS item.
@@ -304,6 +305,21 @@ export function useItemSheet(itemId: string | null, dayKey: string) {
     }
   }, [item, chooseAlternate, refresh]);
 
+  /** UX v1.2 §3.5, §6.3 (RUN-13): a version by key — its minutes become today's, and the day re-flows. */
+  const onChooseVersion = React.useCallback(
+    async (versionKey: string): Promise<void> => {
+      if (item === null) return;
+      setError(null);
+      try {
+        await editToday.mutateAsync({ itemId: item.id, versionKey });
+        await refresh();
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : COPY.saveError);
+      }
+    },
+    [item, editToday, refresh],
+  );
+
   return {
     item,
     elapsedSec,
@@ -314,6 +330,8 @@ export function useItemSheet(itemId: string | null, dayKey: string) {
     doingNow: doNow.isPending,
     onChooseAlternate,
     choosing: chooseAlternate.isPending,
+    onChooseVersion,
+    choosingVersion: editToday.isPending,
     refresh,
     /** The store's answer, not the query's — it ticks. */
     running: elapsedSec !== null,

@@ -77,7 +77,7 @@ is a defect.**
 | `/logout` | `logoutRoute()` | AU-06 (a route handler) |
 | `/auth/callback` | `authCallbackRoute()` | OAuth / PKCE |
 | `/auth/confirm` | `authConfirmRoute()` | email `token_hash` |
-| `/setup/{1–14}` | `setupRoute(step)` | UX v1.2 §4.1–§4.14 — fourteen screens (RUN-8 renumbered): 1–12 are v1.2's (RUN-8…RUN-11); 13 is *Your days* and the nine-screen day builder (RUN-12, `components/day-builder/`), whose *Continue · n days* completes first run until RUN-13; 14 is a 404 until RUN-13 |
+| `/setup/{1–14}` | `setupRoute(step, { edit? })` | UX v1.2 §4.1–§4.14 — fourteen screens (RUN-8 renumbered): 1–12 are v1.2's (RUN-8…RUN-11); 13 is *Your days* and the nine-screen day builder (RUN-12, `components/day-builder/`; `?edit={planId}` opens the builder on that plan's review); 14 is *Your usual week* and the mode question (RUN-13) — *Open today* / *Plan this week first* write `morning_mode`, complete first run and pre-fill the week from the plans |
 | `/orient` | `orientRoute()` | UX v1.1 §5.2 — the orient frame; the entry tree puts it before any tab while today has no `woke_at` (DYN-13); no header, no tab bar |
 | `/today` | `todayRoute()` | LS-01 — the quick-pick while `confirmed_at` is null (v1.1 §5.3, DYN-14), the list after |
 | `/today/schedule` | `todayScheduleRoute(options?)` | SC-01, editable (UX v1.1 §6.5, DYN-16); `{ move: true }` → `?mode=move`, the tap-to-lift fallback the day header sheet's *Edit today* opens |

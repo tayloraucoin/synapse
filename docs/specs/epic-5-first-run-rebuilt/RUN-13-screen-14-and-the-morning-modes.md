@@ -4,7 +4,7 @@
 **Slice type:** The last first-run screen and the four day-side surfaces that read what the epic built. The risk class is *detection* (a day set without the tap), *a form every morning* (the pick expanded under the wrong mode), and *a dead end* (a plan-less day under *set_from_plan* with nowhere to go).
 **Vigil:** the *Sometimes* dialog on the frame's primary; a plan-less weekday under `set_from_plan`; travel rows dropped alone on Today; *Working today* then *Not working after all*.
 
-**Status:** Not started
+**Status:** Complete — 2026-09-16 (batch 8; the Vigil paths and the signed-in walk are unverified from the build thread — Vigil and Vesper are the gate; see `DEVIATIONS.md`)
 
 > **Vigil — induce.** On a *Sometimes* Saturday with a plan: tap *Start the morning* → the dialog; *Not today* sets unstructured; *Working* sets from the plan. On a weekday with no plan under `set_from_plan`: the tap lands on the pick, not a blank list. On a *Rarely* day: *Working today* → the work block appears; *Not working after all* → it goes. On Today: *Not today* on *← Home* leaves the workout; *Not today* on the workout takes both ends. Under `build_each_morning`: the pick opens with every section expanded and the plan's choices preselected. State which ran.
 

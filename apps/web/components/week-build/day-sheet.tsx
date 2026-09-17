@@ -23,6 +23,7 @@ import {
 import type { BlockKind, DayItemView, DayShape, HabitSummaryView, TemplateSummaryView } from "@syn/types";
 import { formatClock, weekDates, weekKeyOf, weekdayForDayKey } from "@syn/utils";
 
+import { WEEKDAY_SHORT } from "@/components/day-builder";
 import { OneOffSheet } from "@/components/one-off-sheet";
 import { SheetHost } from "@/components/page-frame";
 import { useOnline } from "@/lib/hooks/use-online";
@@ -84,6 +85,20 @@ export function DaySheet({
   const focuses = trpc.habit.list.useQuery({ includeArchived: false, types: ["deep_work"] }, { enabled: open });
   const assign = trpc.week.assignBlocks.useMutation();
   const trade = trpc.week.tradeWorkouts.useMutation();
+  const plans = trpc.dayPlan.list.useQuery({ state: "complete" }, { enabled: open });
+  const applyPlan = trpc.week.applyPlan.useMutation();
+  const [planError, setPlanError] = React.useState<string | null>(null);
+
+  async function applyPlanTo(planId: string | null): Promise<void> {
+    setPlanError(null);
+    try {
+      await applyPlan.mutateAsync({ date, planId });
+      await refresh();
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "";
+      setPlanError(code === "already_set" ? COPY.planSetAlready : COPY.saveError);
+    }
+  }
 
   const day: DayView | undefined = preview.data;
   const isPast = day?.mode === "record";
@@ -184,6 +199,46 @@ export function DaySheet({
               <SkeletonRow />
             </div>
           ) : null}
+
+          {/*
+           * UX v1.2 §4.15 (RUN-13): the *Plan* row at the top — the day from
+           * one of the person's plans, or *Unstructured*; `week.applyPlan`
+           * lays the blocks out the way the pre-fill did. A set day is
+           * refused (`already_set`) and reads the line.
+           */}
+          {day === undefined || (plans.data ?? []).length === 0 ? null : (
+            <section className="flex flex-col gap-(--space-2)">
+              <Text as="h3" variant="row-title">
+                {COPY.plan}
+              </Text>
+              <PickerList
+                groups={[
+                  {
+                    heading: COPY.plan,
+                    items: (plans.data ?? []).map((plan) => ({
+                      id: plan.id,
+                      title: plan.name,
+                      icon: plan.icon ?? undefined,
+                      meta: plan.weekdays.map((weekday) => WEEKDAY_SHORT[weekday]).join(" · "),
+                    })),
+                  },
+                ]}
+                value={thisDay?.plan?.id ?? null}
+                onSelect={(id) => void applyPlanTo(id === "" ? null : id)}
+                noneLabel={COPY.unstructured}
+                searchLabel={COPY.plan}
+                emptyText={COPY.noPlans}
+                presentation="inline"
+                className={readOnly || applyPlan.isPending ? "pointer-events-none opacity-50" : undefined}
+              />
+              {confirmed ? (
+                <Text as="p" variant="caption" tone="secondary">
+                  {COPY.planSetAlready}
+                </Text>
+              ) : null}
+              {planError ? <HelperText error>{planError}</HelperText> : null}
+            </section>
+          )}
 
           {day === undefined ? null : (
             <SegmentedControl

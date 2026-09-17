@@ -3,14 +3,16 @@
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-import { ActionRowSheet } from "@syn/ui";
-import { formatCalendarDay, formatClock } from "@syn/utils";
+import { ActionRowSheet, PickerList, ResponsiveSheet } from "@syn/ui";
+import type { WorkDayMode, WorkDays } from "@syn/types";
+import { formatCalendarDay, formatClock, weekdayIndex } from "@syn/utils";
 
 import { AdjustSheet } from "@/components/adjust-sheet";
 import { ITEM_COPY } from "@/components/item-sheet";
 import { OneOffSheet } from "@/components/one-off-sheet";
+import { SheetHost } from "@/components/page-frame";
 import { dayScheduleRoute, todayScheduleRoute } from "@/lib/routes";
-import type { RouterOutputs } from "@/lib/trpc/client";
+import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { DAY_HEADER_SHEET_COPY as COPY } from "./copy";
 import { LibraryPickSheet } from "./library-pick-sheet";
@@ -46,6 +48,16 @@ export function DayHeaderSheet({
   const [oneOffOpen, setOneOffOpen] = React.useState(false);
   const [libraryOpen, setLibraryOpen] = React.useState(false);
   const [adjustOpen, setAdjustOpen] = React.useState(false);
+  const [typeOpen, setTypeOpen] = React.useState(false);
+  const me = trpc.user.me.useQuery(undefined, { enabled: open });
+  const workTypes = trpc.template.list.useQuery({ includeArchived: false, kind: "work" }, { enabled: open || typeOpen });
+  const applyWorkType = trpc.day.applyWorkType.useMutation();
+  const removeType = trpc.day.removeWorkType.useMutation();
+  const applyType = async (templateId: string) => {
+    await applyWorkType.mutateAsync({ date: day.dateKey, templateId });
+    setTypeOpen(false);
+    onChanged?.();
+  };
 
   const closed = day.closedAt !== null;
   const live = day.mode === "live";
@@ -83,6 +95,33 @@ export function DayHeaderSheet({
     },
     hidden: closed,
   };
+  /*
+   * UX v1.2 §3.9, R40, TD-19 (RUN-13): *Working today* on a *Rarely* day
+   * — the work-day type onto a day that has none, and the reverse. Only on
+   * a weekday the profile calls *rarely*; the weekday row is the account's.
+   */
+  const rarely = workModeFor(me.data?.workDays ?? null, day.dateKey) === "rarely";
+  const hasWork = day.blocks.some((block) => block.kind === "work");
+  const workingRow = {
+    label: COPY.workingToday,
+    onSelect: () => {
+      onOpenChange(false);
+      const types = workTypes.data ?? [];
+      const only = types[0];
+      if (types.length <= 1 && only !== undefined) void applyType(only.id);
+      else setTypeOpen(true);
+    },
+    hidden: closed || !rarely || hasWork || day.mode === "record",
+  };
+  const notWorkingRow = {
+    label: COPY.notWorkingAfterAll,
+    onSelect: () => {
+      onOpenChange(false);
+      void removeType.mutateAsync({ date: day.dateKey }).then(() => onChanged?.());
+    },
+    hidden: closed || !rarely || !hasWork || day.mode === "record",
+  };
+
   // §10.4's long-press fallback: the Schedule in move mode (DYN-16).
   const editRow = {
     label: COPY.editToday,
@@ -104,10 +143,38 @@ export function DayHeaderSheet({
         closeLabel={COPY.close}
         rows={
           unstructured
-            ? [libraryRow, adjustRow, wakeRow, oneOffRow, editRow]
-            : [adjustRow, wakeRow, libraryRow, oneOffRow, editRow]
+            ? [libraryRow, workingRow, notWorkingRow, adjustRow, wakeRow, oneOffRow, editRow]
+            : [workingRow, notWorkingRow, adjustRow, wakeRow, libraryRow, oneOffRow, editRow]
         }
       />
+
+      {/* More than one work-day type: which one (v1.2 §3.9). */}
+      <SheetHost open={typeOpen}>
+        <ResponsiveSheet open={typeOpen} onOpenChange={setTypeOpen} title={COPY.workingToday}>
+          <PickerList
+            groups={[
+              {
+                heading: COPY.whichType,
+                items: (workTypes.data ?? []).map((type) => ({
+                  id: type.id,
+                  title: type.name,
+                  icon: type.workDayType?.icon ?? undefined,
+                  meta:
+                    type.workDayType?.startClock && type.workDayType.endClock
+                      ? `${type.workDayType.startClock}–${type.workDayType.endClock}`
+                      : undefined,
+                })),
+              },
+            ]}
+            value={null}
+            onSelect={(id) => void applyType(id)}
+            searchLabel={COPY.whichType}
+            emptyText={COPY.noTypes}
+            presentation="inline"
+            className={applyWorkType.isPending ? "pointer-events-none opacity-50" : undefined}
+          />
+        </ResponsiveSheet>
+      </SheetHost>
 
       <AdjustSheet
         open={adjustOpen}
@@ -136,6 +203,12 @@ export function DayHeaderSheet({
       />
     </>
   );
+}
+
+/** The profile's word for a date's weekday — Mon = "0". */
+function workModeFor(workDays: WorkDays | null, dateKey: string): WorkDayMode {
+  const weekday = weekdayIndex(dateKey);
+  return workDays?.[String(weekday) as keyof WorkDays] ?? (weekday < 5 ? "always" : "never");
 }
 
 /** "Viewpoint · Work 9:00 · Woke 7:04" — and the close time when closed. */

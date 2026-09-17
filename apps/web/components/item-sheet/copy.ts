@@ -31,6 +31,8 @@ export const ITEM_COPY = {
   adjustInstead: "Adjust instead",
   editTodays: "Edit today's",
   oneOf: "One of",
+  /** UX v1.2 §3.5 (RUN-13): the version control's name. */
+  version: "Version",
   backInTheList: "Back in the list",
   done: "Done",
   undoDone: "Undo done",

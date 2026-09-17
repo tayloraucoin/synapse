@@ -74,4 +74,11 @@ export const DAY_LIST_COPY = {
    * [COPY — needs Vesper sign-off]
    */
   refreshing: "Refreshing…",
+
+  /* ---- UX v1.2 §5.3 (RUN-13): last night as the list's first section ---- */
+  lastNight: "Last night",
+  /** [COPY — needs Vesper sign-off] */
+  lastNightExplanation: "After the phone went away. Tick what happened.",
+  confirmLastNight: "Confirm",
+  lastNightError: "Couldn't save. Try again.",
 } as const;

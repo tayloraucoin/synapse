@@ -85,8 +85,10 @@ export function assetRoute(storedPath: string): string {
 /* ---------------------------------------------------------------- setup -- */
 
 /** UX v1.2 §4's fourteen screens (RUN-8). `step` is 1–14; the page 404s on anything else. */
-export function setupRoute(step: number): string {
-  return `/setup/${step}`;
+export function setupRoute(step: number, options?: { edit?: string }): string {
+  const base = `/setup/${step}`;
+  // UX v1.2 §4.14 (RUN-13): *Edit Day A* opens screen 13's builder on that plan's review.
+  return options?.edit ? `${base}?edit=${encodeURIComponent(options.edit)}` : base;
 }
 
 /* ------------------------------------------------------------ execution -- */

@@ -12,6 +12,8 @@ import {
 import type { DayShape, WeekPlanStatus } from "@syn/types";
 import { addDays, weekDates, weekKeyOf, weekdayForDayKey, weekdayIndex } from "@syn/utils";
 
+import { readPlanRows } from "../plan/day-plans";
+
 /**
  * WK-01's seven rows, plus the target line — under v1.1, one line per day
  * (§4.13): the shape, the morning, the focus, the workout, the fixtures.
@@ -43,6 +45,8 @@ export type DayPlanView = {
   focusLabel: string | null;
   workoutLabel: string | null;
   fixtureLabels: string[];
+  /** UX v1.2 §4.15 (RUN-13): the day plan that claims this weekday, or null. */
+  plan: { id: string; name: string } | null;
   confirmed: boolean;
   /** True once the day has any block — "planned" under v1.1. */
   planned: boolean;
@@ -145,6 +149,9 @@ export async function getWeek(
       .from(fixtures)
       .where(and(eq(fixtures.userId, userId), isNull(fixtures.archivedAt)));
 
+    // UX v1.2 §4.15 (RUN-13): the plan that claims each weekday leads the row's line.
+    const planRows = (await readPlanRows(tx, userId)).filter((plan) => plan.state === "complete");
+
     const dayViews: DayPlanView[] = dates.map((date) => {
       const row = byDate.get(date);
       const blocks = row ? blockRows.filter((block) => block.dayId === row.id) : [];
@@ -188,6 +195,10 @@ export async function getWeek(
         workoutLabel,
         fixtureLabels,
         confirmed: row?.confirmedAt != null,
+        plan: (() => {
+          const claimed = planRows.find((plan) => plan.weekdays.includes(weekday));
+          return claimed === undefined ? null : { id: claimed.id, name: claimed.name };
+        })(),
         planned: blocks.length > 0,
       };
     });

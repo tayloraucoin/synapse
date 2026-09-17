@@ -157,6 +157,23 @@ export function ItemSheet({
                * §6.3 (3) — *One of*: the choice can be changed after the
                * pick; choosing the other re-flows prep.
                */}
+              {/*
+               * UX v1.2 §3.5, §6.3 (RUN-13) — a habit with versions: the
+               * labels as a segmented control, like *one of*; a pick writes
+               * `version_key` and the version's minutes, and the day re-flows.
+               * A hand-set *Takes* (the habit-day sheet) clears the key.
+               */}
+              {item.versions === null || item.versions.length < 2 || recordMode || done ? null : (
+                <SegmentedControl
+                  label={COPY.version}
+                  value={item.versionKey ?? item.versions.find((version) => version.minutes === item.durationMin)?.key ?? ""}
+                  onChange={(next) => {
+                    if (next !== "" && next !== item.versionKey) void sheet.onChooseVersion(next);
+                  }}
+                  options={item.versions.map((version) => ({ value: version.key, label: version.label }))}
+                  disabled={sheet.choosingVersion}
+                />
+              )}
               {item.alternates === null || recordMode || done ? null : (
                 <SegmentedControl
                   label={COPY.oneOf}

@@ -22,10 +22,13 @@ export function TodayScreen({
   dateKey,
   initialDay,
   initialPick,
+  pickExpanded = false,
 }: {
   dateKey: string;
   initialDay: DayView;
   initialPick: QuickPickView | null;
+  /** UX v1.2 §5.3 (RUN-13): *Build each morning* opens the pick expanded. */
+  pickExpanded?: boolean;
 }) {
   const router = useRouter();
   const day = trpc.day.get.useQuery({ date: dateKey }, { initialData: initialDay });
@@ -36,6 +39,7 @@ export function TodayScreen({
       <PageFrame dayKey={dateKey} header={<QuickPickHeader date={dateKey} />}>
         <QuickPick
           initial={initialPick}
+          defaultExpanded={pickExpanded}
           timeZone={view.timezone}
           onSet={async () => {
             await day.refetch();

@@ -45,13 +45,16 @@ export function QuickPick({
   initial,
   timeZone,
   onSet,
+  defaultExpanded = false,
 }: {
   initial: QuickPickView;
   timeZone: string;
   onSet: () => Promise<void> | void;
+  /** UX v1.2 §5.3 (RUN-13): *Build each morning* — every section open, the plan's choices preselected by the service. */
+  defaultExpanded?: boolean;
 }) {
   const online = useOnline();
-  const pick = useQuickPick(initial, { onSet });
+  const pick = useQuickPick(initial, { onSet, defaultExpanded });
   const disabled = !online || pick.setting;
   const { view } = pick;
 

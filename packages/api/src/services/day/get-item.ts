@@ -11,6 +11,7 @@ import {
 } from "@syn/db";
 import type {
   DayMode,
+  HabitVersion,
   ItemState,
   TimerSessionSource,
 } from "@syn/types";
@@ -92,6 +93,9 @@ export type ItemDetailView = {
   habitRange: { min: number; max: number } | null;
   /** The *one of* group, with the other member named for the two-segment control. */
   alternates: { otherTitle: string; otherDurationMin: number } | null;
+  /* ---- UX v1.2 §3.5, §6.3 (RUN-13): the habit's versions and today's choice ---- */
+  versions: HabitVersion[] | null;
+  versionKey: string | null;
   dayBlockId: string | null;
   assignmentState: string;
 };
@@ -138,6 +142,8 @@ export async function getItem(
         habitArchivedAt: habits.archivedAt,
         habitMin: habits.durationMinMin,
         habitMax: habits.durationMaxMin,
+        habitVersions: habits.versions,
+        versionKey: dayItems.versionKey,
         categoryName: categories.name,
         categoryKey: categories.colorKey,
         dayDate: days.date,
@@ -248,6 +254,8 @@ export async function getItem(
           ? null
           : { min: row.habitMin, max: row.habitMax },
       alternates: await otherMemberOf(tx, userId, row.templateSlotId, row.alternatesId),
+      versions: row.habitVersions ?? null,
+      versionKey: row.versionKey,
       dayBlockId: row.dayBlockId,
       assignmentState: row.assignmentState,
     };

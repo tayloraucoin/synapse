@@ -56,6 +56,11 @@ export type TradeWorkoutsInput = z.infer<typeof tradeWorkoutsInput>;
 /** The profile's default plan for a date — the *Structured* toggle's read (DYN-12). */
 export const defaultPlanInput = z.object({ date: dateKeySchema });
 
+/** The day sheet's *Plan* row — UX v1.2 §4.15 (RUN-13): a plan on a date, or `null` for *Unstructured*. */
+export const applyPlanInput = z.object({ date: dateKeySchema, planId: z.string().uuid().nullable() });
+
+export type ApplyPlanInput = z.infer<typeof applyPlanInput>;
+
 export const applyTemplateInput = z.object({
   date: dateKeySchema,
   templateId: z.string().uuid(),
