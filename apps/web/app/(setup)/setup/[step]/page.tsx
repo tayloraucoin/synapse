@@ -101,10 +101,12 @@ export default async function SetupStepPage({
           initialDevicesOff={me.devicesOffTime}
           initialJournalEnabled={me.journalEnabled}
           initialPrompts={me.journalPrompts}
+          initialReminderTime={me.journalReminderTime}
+          initialReminderEnabled={me.journalReminderEnabled}
         />
       );
     case 12:
-      return <Step12Focuses initialWorkStart={me.workStartTime} />;
+      return <Step12Focuses />;
     default:
       return <Step13Days />;
   }

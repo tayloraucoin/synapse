@@ -177,6 +177,37 @@ export function NotificationsScreen() {
         />
       </section>
 
+      {/* UX v1.2 §9 N2 (RUN-11): the journal reminder — the time is a profile fact, the switch is both the pref and the profile's own. */}
+      {data?.journalEnabled ? (
+        <section className="flex flex-col gap-(--space-2)">
+          <GroupHeading>{COPY.theJournal}</GroupHeading>
+          <NotificationRow
+            id="journal_reminder"
+            label={COPY.journalReminder}
+            checked={enabled("journal_reminder") && data.journalReminderEnabled}
+            disabled={!online}
+            onCheckedChange={(next) => {
+              toggle("journal_reminder", next);
+              void savePrefs
+                .mutateAsync({ journalReminderEnabled: next })
+                .then(() => utils.user.me.invalidate());
+            }}
+            value={{
+              kind: "time",
+              value: data.journalReminderTime ?? "20:45",
+              onChange: (value) => {
+                void savePrefs
+                  .mutateAsync({ journalReminderTime: value })
+                  .then(async () => {
+                    await utils.notification.prefs.invalidate();
+                    await utils.user.me.invalidate();
+                  });
+              },
+            }}
+          />
+        </section>
+      ) : null}
+
       <section className="flex flex-col gap-(--space-2)">
         <GroupHeading>{COPY.planning}</GroupHeading>
         <NotificationRow

@@ -17,7 +17,9 @@ import { Step3WorkShape, WorkDayTypeCards } from "@/app/(setup)/_components/step
 import { Step4Commitments } from "@/app/(setup)/_components/step-4-commitments";
 import { Step5Wake } from "@/app/(setup)/_components/step-5-wake";
 import { Step6BeforeTheDay } from "@/app/(setup)/_components/step-6-before-the-day";
+import { Step10Training } from "@/app/(setup)/_components/step-10-training";
 import { Step11Closing } from "@/app/(setup)/_components/step-11-closing";
+import { Step12Focuses } from "@/app/(setup)/_components/step-12-focuses";
 import { settingsYourDayRoute, type YourDayScreen as ScreenKey } from "@/lib/routes";
 
 /**
@@ -46,6 +48,8 @@ export interface YourDayScreenValues {
   devicesOffTime: string | null;
   journalEnabled: boolean;
   journalPrompts: JournalPrompt[];
+  journalReminderTime: string | null;
+  journalReminderEnabled: boolean;
 }
 
 export function YourDayScreen({
@@ -105,6 +109,10 @@ export function YourDayScreen({
           onSaved={done}
         />
       );
+    case "training":
+      return <Step10Training embedded onSaved={done} />;
+    case "focuses":
+      return <Step12Focuses embedded onSaved={done} />;
     case "closing-the-day":
       return (
         <Step11Closing
@@ -112,6 +120,8 @@ export function YourDayScreen({
           initialDevicesOff={values.devicesOffTime}
           initialJournalEnabled={values.journalEnabled}
           initialPrompts={values.journalPrompts}
+          initialReminderTime={values.journalReminderTime}
+          initialReminderEnabled={values.journalReminderEnabled}
           embedded
           onSaved={done}
         />

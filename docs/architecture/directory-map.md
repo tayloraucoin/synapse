@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-17 · 1280 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-17 · 1281 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -69,11 +69,11 @@ apps/
         _components/
           copy.ts
           fact-screen.tsx  # one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)
+          focus-setup-card.tsx  # one focus (v1.2 §4.12): a blank glyph by default, a week count, usual days with Flexible; creates on the first fact
           habit-setup-card.tsx  # one habit ranked (v1.2 §4.9, TD-11): matters, usually (the slot's length), up to three versions; every control writes its own fact
-          rotation-rows.tsx
           step-1-shape.tsx
           step-10-training.tsx
-          step-11-closing.tsx
+          step-11-closing.tsx  # screen 11 (v1.2 §4.11, R38): phone away follows lights out until touched; wind-down rows; sortable prompts; the reminder in the person's words
           step-12-focuses.tsx
           step-13-days.tsx  # PLACEHOLDER until RUN-12/13 — completes first run (Open today / Plan this week first); the fit screen is gone
           step-2-work-days.tsx
@@ -87,6 +87,7 @@ apps/
           step-frame.tsx
           use-prep-steps.ts  # screen 7's writes: a tick creates the step and its prep slot at once, queued per row so a second tap is never a second create (S7.5)
           work-day-type-card.tsx  # one kind of work day (v1.2 §4.3, TD-14): kind chips fill name and glyph, Done writes the template and collapses to one line
+          workout-setup-card.tsx  # one workout of the rotation (v1.2 §4.10, TD-12): type chips fill name and glyph when empty; where, and the travel beside the length; creates on the first fact
         setup/
           [step]/
             page.tsx
@@ -315,7 +316,7 @@ apps/
         habit-sheet.tsx
         icon-chooser.tsx
         index.ts
-        quick-habit-sheet.tsx  # the habit sheet's two quick modes (v1.2 S7.3): emoji, name, range — a step before work, a morning habit
+        quick-habit-sheet.tsx  # the habit sheet's quick modes (v1.2 S7.3): emoji, name, range — a step before work, a morning habit, a wind-down habit
         use-habit-sheet.ts
       item-sheet/
         copy.ts

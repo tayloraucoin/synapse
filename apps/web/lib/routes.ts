@@ -190,6 +190,9 @@ export type YourDayScreen =
   | "work-start"
   /** UX v1.2 §4.16 (RUN-8): screen 3's *No* path — the cards, without the radio. */
   | "work-day-types"
+  /** UX v1.2 §4.16 (RUN-11): screens 10 and 12 embedded — the workouts and the focuses. */
+  | "training"
+  | "focuses"
   | "commitments"
   | "wake"
   | "before-the-day"
@@ -200,6 +203,8 @@ export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "work-days",
   "work-start",
   "work-day-types",
+  "training",
+  "focuses",
   "commitments",
   "wake",
   "before-the-day",

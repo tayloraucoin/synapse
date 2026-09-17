@@ -13,6 +13,7 @@ export const HABIT_SHEET_COPY = {
   /** UX v1.2 §4, the frame rules — the sheet names the noun (RUN-10). */
   stepTitle: "A step before work",
   morningHabitTitle: "A morning habit",
+  windDownHabitTitle: "A wind-down habit",
   chooseAnIcon: "Choose an icon",
   /** [COPY — needs Vesper sign-off] */
   quickSaveError: "Couldn’t save. Try again.",

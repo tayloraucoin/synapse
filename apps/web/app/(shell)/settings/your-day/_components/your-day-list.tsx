@@ -118,7 +118,7 @@ export function YourDayList() {
       <SettingsRow
         title={COPY.rows.training}
         description={value(countOf("training"))}
-        href={settingsYourDayBlockRoute("training")}
+        href={settingsYourDayScreenRoute("training")}
       />
       {/* DYN-18: the screen, not the editor — its ghost row reaches the editor. */}
       <SettingsRow
@@ -135,7 +135,7 @@ export function YourDayList() {
       <SettingsRow
         title={COPY.rows.workFocuses}
         description={value(countOf("work"))}
-        href={settingsYourDayBlockRoute("work")}
+        href={settingsYourDayScreenRoute("focuses")}
       />
       <SettingsRow title={COPY.rows.blockOrder} href={settingsYourDayOrderRoute()} />
     </ul>

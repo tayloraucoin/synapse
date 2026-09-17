@@ -4,7 +4,7 @@
 **Slice type:** Three screens — two of them cards over the rotation and the focuses, one the evening's facts. The risk class is *a time asked where placement belongs* (a workout's time on screen 10), *the travel folded into the length*, and *a reminder framed as a nag*.
 **Vigil:** none. **Vesper review:** the cards against §4.10 and §4.12; screen 11's defaults and the reminder's caption; the prompt list's truncation and handle; the wind-down rows.
 
-**Status:** Not started
+**Status:** Complete — 2026-09-16 (batch 6; the signed-in walk could not be run from this thread — Vesper's screen review pending — see `DEVIATIONS.md`)
 
 > **Vesper — screen review.** Walk `/setup/10`, `/setup/11`, `/setup/12` at 375px. Confirm: a new workout card appends **below** and opens; picking a type fills the name and glyph; *Gym or studio* reveals two travel steppers and the switch with its line; *Done* collapses to *🏋️ Upper body · 2 a week · Mon Thu · 60 min · gym +15/+15*; screen 11's phone away defaults to lights out − 60 and follows lights out until touched; the wind-down rows are `SelectRow`s with glyphs and no lengths; the prompt list truncates and has handles; the reminder field reads *20:45* with the caption *In your words: "A few lines · 20:45"*; the ghost row *Order and lengths* is gone; screen 12's heading is *What is your work about?* and the first card's *Flexible* chip is preselected.
 

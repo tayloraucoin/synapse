@@ -62,6 +62,9 @@ export const REMINDER_COPY = {
   weekBuild: "Next week isn't planned yet",
   weekBuildDay: "Next week isn't planned yet, day",
   weekBuildTime: "Next week isn't planned yet, time",
+  /** UX v1.2 §9 N2 (RUN-11) — the journal reminder's group and row; the row's words are the push's. */
+  theJournal: "The journal",
+  journalReminder: "A few lines, at the time you set",
 
   /** §8.5, verbatim — the closing line, not a control. */
   closingLine:

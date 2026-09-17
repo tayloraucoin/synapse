@@ -4,6 +4,8 @@ import { notificationPrefs, users, type RlsClient } from "@syn/db";
 import { BLOCK_KINDS, NOTIFICATION_CATALOGUE } from "@syn/constants";
 import type { BlockKind, NotificationKind } from "@syn/types";
 
+import { effectiveEveningTimes } from "../user/preferences";
+
 /**
  * ST-07's rows — the catalogue merged with whatever the person has said.
  *
@@ -39,6 +41,10 @@ export type NotificationPrefs = {
   /** *Every item in…* — one switch per block kind with items; orient has none. */
   itemStartBlocks: Array<{ blockKind: BlockKind; enabled: boolean }>;
   reviewReminderTime: string;
+  /** UX v1.2 §9 N2 (RUN-11): the effective time (the person's, or an hour before phone away) and the profile switch. */
+  journalReminderTime: string | null;
+  journalReminderEnabled: boolean;
+  journalEnabled: boolean;
   weekBuildReminderWeekday: number;
   weekBuildReminderTime: string;
 };
@@ -77,6 +83,11 @@ export async function listNotificationPrefs(
         reviewReminderTime: users.reviewReminderTime,
         weekBuildReminderWeekday: users.weekBuildReminderWeekday,
         weekBuildReminderTime: users.weekBuildReminderTime,
+        journalReminderTime: users.journalReminderTime,
+        journalReminderEnabled: users.journalReminderEnabled,
+        journalEnabled: users.journalEnabled,
+        devicesOffTime: users.devicesOffTime,
+        lightsOutTime: users.lightsOutTime,
       })
       .from(users)
       .where(eq(users.id, userId))
@@ -98,6 +109,9 @@ export async function listNotificationPrefs(
       reviewReminderTime: account?.reviewReminderTime ?? "21:00",
       weekBuildReminderWeekday: account?.weekBuildReminderWeekday ?? 6,
       weekBuildReminderTime: account?.weekBuildReminderTime ?? "18:00",
+      journalReminderTime: account ? effectiveEveningTimes(account).journalReminderTimeEffective : null,
+      journalReminderEnabled: account?.journalReminderEnabled ?? true,
+      journalEnabled: account?.journalEnabled ?? true,
     };
   });
 }

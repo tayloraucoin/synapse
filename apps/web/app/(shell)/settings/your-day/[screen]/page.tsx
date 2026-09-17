@@ -20,6 +20,8 @@ const TITLES: Record<ScreenKey, string> = {
   "work-days": YOUR_DAY_COPY.rows.workDays,
   "work-start": YOUR_DAY_COPY.rows.workStart,
   "work-day-types": YOUR_DAY_COPY.rows.workDayTypes,
+  training: YOUR_DAY_COPY.rows.training,
+  focuses: YOUR_DAY_COPY.rows.workFocuses,
   commitments: YOUR_DAY_COPY.rows.commitments,
   wake: YOUR_DAY_COPY.rows.wake,
   "before-the-day": YOUR_DAY_COPY.rows.beforeTheDay,
@@ -68,6 +70,8 @@ export default async function SettingsYourDayScreenPage({
           devicesOffTime: me.devicesOffTime,
           journalEnabled: me.journalEnabled,
           journalPrompts: me.journalPrompts,
+          journalReminderTime: me.journalReminderTime,
+          journalReminderEnabled: me.journalReminderEnabled,
         }}
         fixtures={fixtures}
         workTypes={workTypes}

@@ -191,49 +191,81 @@ export const SETUP_COPY = {
   trainNo: "Not right now",
   addAWorkout: "Add a workout",
   workoutName: "Workout",
+  /** [COPY] The unnamed card's accessible name and the name field's placeholder. */
+  newWorkout: "New workout",
+  workoutType: "Type",
   timesAWeek: "a week",
   usualDays: "Usual days",
-  typicalLength: "Typical length",
-  whereItFits: "Where it fits is decided each morning.",
+  flexible: "Flexible",
+  where: "Where",
+  whereHome: "Home",
+  whereGym: "Gym or studio",
+  whereOutside: "Outside",
+  /** The summary's word for the where — *gym +15/+15*. */
+  whereShort: { home: "home", gym: "gym", outside: "outside" } as Record<"home" | "gym" | "outside", string>,
+  gettingThere: "Getting there",
+  gettingBack: "Getting back",
+  planForTheTravel: "Plan for the travel",
+  planForTheTravelLine: "Kept beside the workout, never added to it. Either trip can be dropped on the day.",
+  /** "Upper body · 2 a week · Mon Thu · 60 min · gym +15/+15" — the travel never in the length. */
+  workoutSummary: (
+    name: string,
+    weekly: number,
+    days: string,
+    minutes: number,
+    where: string | null,
+    travel: { there: number; back: number } | null,
+  ) =>
+    [
+      name,
+      `${weekly} a week`,
+      days,
+      `${minutes} min`,
+      where === null ? null : travel === null ? where : `${where} +${travel.there}/+${travel.back}`,
+    ]
+      .filter((part): part is string => part !== null)
+      .join(" · "),
+  whereItFits: "Where it fits on the day is set when you build one.",
   continueWorkouts: (n: number) =>
     n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "workout" : "workouts"}`,
   add: "Add",
 
   /* ------------------------------------------------------ screen 11 -- */
   step11Heading: "How does the day end?",
+  step11Body: "The evening stacks back from lights out.",
   lightsOut: "Lights out",
   phoneAway: "Phone away",
-  /** [COPY — one sentence, cites nothing (§13 #13)] */
-  phoneAwayLine: "Half an hour before lights out is a common choice.",
+  /** One sentence, cites nothing (v1.1 §13 #13; v1.2 §4.11). */
+  phoneAwayLine: "An hour before lights out is a common choice.",
   fewLines: "A few lines at night",
   fewLinesBody: "Around 10 minutes, before the phone goes away.",
+  promptsLabel: "Prompts",
   addAPrompt: "Add a prompt",
   promptLabel: "Prompt",
   edit: "Edit",
   moveUp: "Move up",
   moveDown: "Move down",
   done: "Done",
-  /* The wind-down starters (§7.1, DYN-18) — a chooser band, nothing checked. */
+  aReminder: "A reminder",
+  /** [COPY] The reminder switch's label. */
+  remindMe: "Remind me",
+  /** In the person's words (v1.2 §4.11, R38) — the push's own two words. */
+  reminderCaption: (clock: string) => `In your words: “A few lines · ${clock}”.`,
+  /* The wind-down starters (§4.11, §7.1) — rows, nothing pre-selected. */
   windDownBand: "Wind-down",
   inYourLibrary: "in your library",
-  windDownRoutine: "Wind-down routine",
-  /** [COPY] The ghost row's line — where the times and the order are. */
-  windDownRoutineMeta: "Order and lengths",
 
   /* ------------------------------------------------------ screen 12 -- */
-  step12Heading: "What kinds of work day do you have?",
-  step12Body: "One is fine.",
+  step12Heading: "What is your work about?",
+  step12Body: "One is fine. Each gets a rough share of the week.",
   addAFocus: "Add a focus",
   focusName: "Focus",
-  decideInTheMorning: "decide in the morning",
-  differentHours: "I have days with different hours",
-  secondWorkTitle: "A second kind of work day",
-  secondWorkName: "Name",
-  secondWorkStart: "Working by",
-  /** [COPY] */
-  secondWorkUntil: "Until about is the same for every work day.",
-  secondWorkDone: (name: string) => `${name} added.`,
-  secondWorkNameRequired: "Give it a name.",
+  focusPlaceholder: "The main thing",
+  focusLine: "A name for the work itself — a project, a client, a kind of work.",
+  /** [COPY] The unnamed card's accessible name. */
+  newFocus: "New focus",
+  /** "Viewpoint · 2 a week · flexible" */
+  focusSummary: (name: string, weekly: number, days: string) => `${name} · ${weekly} a week · ${days}`,
   cancel: "Cancel",
   continueFocuses: (n: number) =>
     n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "focus" : "focuses"}`,
