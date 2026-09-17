@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-17 · 1270 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-17 · 1277 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -345,6 +345,14 @@ apps/
         sheet-host.tsx
         shell-page-header.tsx
         shell-status-line.tsx
+      passages/
+        copy.ts
+        excerpt.ts  # the card's decorative excerpt — Markdown stripped to text; the body itself is only ever rendered by the read-only editor
+        index.ts
+        passage-card.tsx
+        passage-list.tsx  # the passages in cycle order — sortable cards, an archive with a five-second undo; screen 6 and Settings mount the same list
+        passage-sheet.tsx  # a passage's sheet (v1.2 §4.6, TD-15): title, the five-control editor, four image tiles uploaded on add, tags; writes on Save
+        use-passages.ts  # the list's writes at once: reorder on drop, archive with undo through restore
       platform-steps-sheet/
         copy.ts
         index.ts

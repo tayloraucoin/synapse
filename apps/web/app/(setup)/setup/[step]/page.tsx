@@ -80,9 +80,10 @@ export default async function SetupStepPage({
     case 6:
       return (
         <Step6BeforeTheDay
-          initialPassage={me.orientPassage}
-          initialShowLastNight={me.orientShowLastNight}
+          initialQuotesOptIn={me.quotesOptIn}
           initialAskGratitude={me.orientAskGratitude}
+          initialAskIntention={me.orientAskIntention}
+          initialAskVisualisation={me.orientAskVisualisation}
         />
       );
     case 7:

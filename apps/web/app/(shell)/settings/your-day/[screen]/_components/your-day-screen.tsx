@@ -38,9 +38,10 @@ export interface YourDayScreenValues {
   workEndTime: string | null;
   anchorDirection: AnchorDirection | null;
   usualWakeTime: string;
-  orientPassage: string | null;
-  orientShowLastNight: boolean;
+  quotesOptIn: boolean;
   orientAskGratitude: boolean;
+  orientAskIntention: boolean;
+  orientAskVisualisation: boolean;
   lightsOutTime: string | null;
   devicesOffTime: string | null;
   journalEnabled: boolean;
@@ -96,9 +97,10 @@ export function YourDayScreen({
     case "before-the-day":
       return (
         <Step6BeforeTheDay
-          initialPassage={values.orientPassage}
-          initialShowLastNight={values.orientShowLastNight}
+          initialQuotesOptIn={values.quotesOptIn}
           initialAskGratitude={values.orientAskGratitude}
+          initialAskIntention={values.orientAskIntention}
+          initialAskVisualisation={values.orientAskVisualisation}
           embedded
           onSaved={done}
         />

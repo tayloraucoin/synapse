@@ -34,6 +34,7 @@ export function YourDayList() {
   const me = trpc.user.me.useQuery();
   const fixtures = trpc.fixture.list.useQuery({ includeArchived: false });
   const templates = trpc.template.list.useQuery({ includeArchived: false });
+  const passages = trpc.passage.list.useQuery();
 
   const value = (text: string | null | undefined): React.ReactNode =>
     text === undefined ? <SkeletonBlock heightPx={16} className="max-w-32" /> : (text ?? undefined);
@@ -94,9 +95,13 @@ export function YourDayList() {
       <SettingsRow
         title={COPY.rows.beforeTheDay}
         description={value(
-          data === undefined
+          data === undefined || passages.data === undefined
             ? undefined
-            : orientLabel(data.orientPassage, data.orientShowLastNight, data.orientAskGratitude),
+            : orientLabel(passages.data.length, data.quotesOptIn, [
+                data.orientAskGratitude,
+                data.orientAskIntention,
+                data.orientAskVisualisation,
+              ]),
         )}
         href={settingsYourDayScreenRoute("before-the-day")}
       />
@@ -169,11 +174,12 @@ function workDaysLabel(days: WorkDays | null): string | null {
 }
 
 /** "passage · both" — what the morning shows before the day. */
-function orientLabel(passage: string | null, lastNight: boolean, gratitude: boolean): string {
+/** UX v1.2 (RUN-9): "2 passages · a quote · 3 lines" — what the morning opens on. */
+function orientLabel(passages: number, quote: boolean, lines: readonly boolean[]): string {
   const parts: string[] = [];
-  if (passage !== null && passage.trim() !== "") parts.push(COPY.passage);
-  if (lastNight && gratitude) parts.push(COPY.both);
-  else if (lastNight) parts.push(COPY.lastNight);
-  else if (gratitude) parts.push(COPY.gratitude);
+  if (passages > 0) parts.push(COPY.passages(passages));
+  if (quote) parts.push(COPY.aQuote);
+  const on = lines.filter(Boolean).length;
+  if (on > 0) parts.push(COPY.lines(on));
   return parts.length === 0 ? COPY.nothing : parts.join(" · ");
 }

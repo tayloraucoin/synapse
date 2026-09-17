@@ -42,9 +42,10 @@ export const YOUR_DAY_COPY = {
     depends: "depends on the day",
   },
   fixtures: (n: number) => (n === 0 ? "None" : `${n} ${n === 1 ? "fixture" : "fixtures"}`),
-  passage: "passage",
-  lastNight: "last night",
-  gratitude: "gratitude",
+  /** [COPY] The *Before the day* row's value under v1.2 (RUN-9). */
+  passages: (n: number) => `${n} ${n === 1 ? "passage" : "passages"}`,
+  aQuote: "a quote",
+  lines: (n: number) => `${n} ${n === 1 ? "line" : "lines"}`,
   /** [COPY] The *Closing the day* row's value: "22:45 · journal". */
   journalOn: "journal",
   both: "both",

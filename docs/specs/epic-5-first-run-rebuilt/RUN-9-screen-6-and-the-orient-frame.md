@@ -4,7 +4,7 @@
 **Slice type:** One setup screen that is a small CRUD manager, and the one waking-state surface it feeds. The risk class is *the frame growing* (a fourth thing on the one screen designed for zero bandwidth) and *the app speaking* (a quote in the chrome's voice; a starter passage).
 **Vigil:** none. **Vesper review and Sage's lens:** the frame stays one read, three optional lines and one button; the *Last night* row's default; the quote's rendering; no example passage anywhere.
 
-**Status:** Not started
+**Status:** Complete — 2026-09-16 (batch 5; the signed-in walk could not be run from this thread — Vesper's screen review and Sage's endorsement test pending — see `DEVIATIONS.md`)
 
 > **Vesper — screen review; Sage — endorsement test.** Walk `/setup/6` and `/orient` on an account with two passages and the quote on. Confirm: the passage list is left-aligned with a full-width *Add a passage*; the sheet's editor has five controls and is serif; a saved passage shows a two-line serif excerpt and its tags; the quote switch is off by default and its line reads as written; the three switches show their prompts as captions; on the frame the carousel opens on today's passage with dots beneath, swipe and arrows move, the quote day is attributed in quotation marks under *A quote*; *Last night* is collapsed and expands to the three lines; the third field reads *Today, as I see it*; nothing about the person is written by reading the frame. Sage: the four switches pass because each produces the person's words or an attributed, un-keyed quote.
 

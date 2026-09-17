@@ -7,12 +7,13 @@ import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 import { todayRoute } from "@/lib/routes";
 
 /**
- * The frame's behaviour — UX v1.1 §5.2 (DYN-13).
+ * The frame's behaviour — UX v1.1 §5.2 (DYN-13), amended by v1.2 §5.2 (RUN-9).
  *
  * THE WAKE IS ALREADY STAMPED by the time this runs: `day.orient` wrote it
- * on the server read. This owns the two optional lines' autosave (a debounce
- * and the blur), and *Start the morning* — which writes nothing of its own
- * and, for one tap only, shows the R18 line when its rules say so.
+ * on the server read. This owns the three optional lines' autosave (a
+ * debounce and the blur) — gratitude, intention, and since v1.2 *Today, as I
+ * see it* — and *Start the morning*, which writes nothing of its own and,
+ * for one tap only, shows the R18 line when its rules say so.
  *
  * THE LINE IS A BEAT, THEN THE MORNING. "It then proceeds": the caption
  * shows, the navigation follows after `SKIP_LINE_BEAT_MS`. Nothing is written
@@ -21,6 +22,8 @@ import { todayRoute } from "@/lib/routes";
 
 export type OrientView = RouterOutputs["day"]["orient"];
 
+type Lines = { gratitude: string; intention: string; visualisation: string };
+
 const AUTOSAVE_MS = 600;
 export const SKIP_LINE_BEAT_MS = 1500;
 
@@ -28,19 +31,27 @@ export function useOrientFrame(initial: OrientView) {
   const router = useRouter();
   const save = trpc.day.saveMorning.useMutation();
 
-  const [gratitude, setGratitude] = React.useState(initial.gratitude ?? "");
-  const [intention, setIntention] = React.useState(initial.intention ?? "");
+  const [lines, setLines] = React.useState<Lines>({
+    gratitude: initial.gratitude ?? "",
+    intention: initial.intention ?? "",
+    visualisation: initial.visualisation ?? "",
+  });
   const [showSkipLine, setShowSkipLine] = React.useState(false);
   const [starting, setStarting] = React.useState(false);
 
-  const saved = React.useRef({ gratitude: initial.gratitude ?? "", intention: initial.intention ?? "" });
+  const saved = React.useRef<Lines>({
+    gratitude: initial.gratitude ?? "",
+    intention: initial.intention ?? "",
+    visualisation: initial.visualisation ?? "",
+  });
   const timer = React.useRef<number | null>(null);
 
   const flush = React.useCallback(
-    (next: { gratitude: string; intention: string }) => {
-      const patch: { gratitude?: string; intention?: string } = {};
+    (next: Lines) => {
+      const patch: Partial<Lines> = {};
       if (next.gratitude !== saved.current.gratitude) patch.gratitude = next.gratitude;
       if (next.intention !== saved.current.intention) patch.intention = next.intention;
+      if (next.visualisation !== saved.current.visualisation) patch.visualisation = next.visualisation;
       if (Object.keys(patch).length === 0) return;
       saved.current = next;
       // A failed save keeps the text on screen; the primary still works.
@@ -50,7 +61,7 @@ export function useOrientFrame(initial: OrientView) {
   );
 
   const schedule = React.useCallback(
-    (next: { gratitude: string; intention: string }) => {
+    (next: Lines) => {
       if (timer.current !== null) window.clearTimeout(timer.current);
       timer.current = window.setTimeout(() => {
         timer.current = null;
@@ -67,14 +78,10 @@ export function useOrientFrame(initial: OrientView) {
     [],
   );
 
-  function onGratitude(value: string): void {
-    setGratitude(value);
-    schedule({ gratitude: value, intention });
-  }
-
-  function onIntention(value: string): void {
-    setIntention(value);
-    schedule({ gratitude, intention: value });
+  function onLine(key: keyof Lines, value: string): void {
+    const next = { ...lines, [key]: value };
+    setLines(next);
+    schedule(next);
   }
 
   function onBlur(): void {
@@ -82,14 +89,14 @@ export function useOrientFrame(initial: OrientView) {
       window.clearTimeout(timer.current);
       timer.current = null;
     }
-    flush({ gratitude, intention });
+    flush(lines);
   }
 
   function start(): void {
     if (starting) return;
     setStarting(true);
     onBlur();
-    const line = initial.askGratitude && initial.skippedYesterday && gratitude.trim() === "";
+    const line = initial.askGratitude && initial.skippedYesterday && lines.gratitude.trim() === "";
     if (line) {
       setShowSkipLine(true);
       window.setTimeout(() => router.replace(todayRoute()), SKIP_LINE_BEAT_MS);
@@ -99,10 +106,8 @@ export function useOrientFrame(initial: OrientView) {
   }
 
   return {
-    gratitude,
-    intention,
-    onGratitude,
-    onIntention,
+    lines,
+    onLine,
     onBlur,
     start,
     starting,

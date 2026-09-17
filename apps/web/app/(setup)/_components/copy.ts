@@ -112,13 +112,23 @@ export const SETUP_COPY = {
     `${wake} to ${work} · ${span} before work on a ${kind} day`,
 
   /* ------------------------------------------------------- screen 6 -- */
-  step6Heading: "What do you want to read before the day starts?",
-  step6Body: "Your own words, a passage, or both. It stays private.",
-  passage: "A passage",
-  passagePlaceholder: "A few lines you want to see every morning.",
-  showLastNight: "Show what I wrote the night before",
-  showLastNightBody: "From the evening journal, if you write one.",
-  askGratitude: "Ask one line of gratitude in the morning",
+  step6Heading: "What do you want to hear first thing?",
+  step6Body:
+    "Your own words, a passage you love, a quote you chose. The morning opens on it, before anything else gets in.",
+  passages: "Passages",
+  aQuoteEachDay: "A quote each day",
+  quoteSwitch: "A quote from the bank, some mornings",
+  /** [COPY §13 #29] */
+  quoteLine: "One a day, from a set we keep. Attributed, never ours.",
+  inTheMorning: "In the morning",
+  askGratitude: "Ask one line of gratitude",
+  gratitudeCaption: "Grateful for, this morning",
+  askIntention: "Ask one line of intention",
+  intentionCaption: "Today’s intention",
+  askVisualisation: "Ask one line of visualisation",
+  visualisationCaption: "Today, as I see it",
+  continuePassages: (n: number) =>
+    n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "passage" : "passages"}`,
 
   /* ------------------------------------------------------- screen 7 -- */
   step7Heading: "What has to happen before you can start?",
