@@ -14,6 +14,8 @@ export const HABIT_SHEET_COPY = {
   stepTitle: "A step before work",
   morningHabitTitle: "A morning habit",
   windDownHabitTitle: "A wind-down habit",
+  /** [COPY — needs Vesper sign-off] UX v1.2 §4.13f (RUN-12). */
+  breakTitle: "A break",
   chooseAnIcon: "Choose an icon",
   /** [COPY — needs Vesper sign-off] */
   quickSaveError: "Couldn’t save. Try again.",

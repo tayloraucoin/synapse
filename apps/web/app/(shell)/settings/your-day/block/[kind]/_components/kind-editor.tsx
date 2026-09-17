@@ -119,6 +119,12 @@ export function KindEditor({ kind }: { kind: BlockKind }) {
                           {COPY.usedThisWeek(template.usedThisWeek)}
                         </Text>
                       ) : null}
+                      {/* UX v1.2 §4.16 (RUN-12): the day plans that reference this list. */}
+                      {template.usedBy.length > 0 ? (
+                        <Text as="span" variant="caption" tone="secondary">
+                          {COPY.usedBy(template.usedBy.map((plan) => plan.name))}
+                        </Text>
+                      ) : null}
                     </span>
                   }
                   href={settingsYourDayBlockRoute(kind, template.id)}

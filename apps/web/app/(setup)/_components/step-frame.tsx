@@ -61,6 +61,8 @@ export function StepFrame({
   skip,
   primary,
   error,
+  caption,
+  onBack,
 }: {
   step: number;
   heading: string;
@@ -70,6 +72,10 @@ export function StepFrame({
   skip?: { label?: string; onSkip: () => void; busy?: boolean };
   primary: { label: string; onClick: () => void; busy?: boolean; disabled?: boolean };
   error?: string | null;
+  /** The day builder's *Day A · 3 of 9* (v1.2 §4.13, RUN-12). */
+  caption?: React.ReactNode;
+  /** A screen with sub-screens owns its back; the sequence's is the default. */
+  onBack?: () => void;
 }) {
   const online = useOnline();
   const goTo = useStepNavigation();
@@ -95,9 +101,10 @@ export function StepFrame({
       skip={skip}
       error={error}
       offline={!online}
-      onBack={step > 1 ? () => void goTo(step - 1, setupRoute(step - 1)) : undefined}
+      onBack={onBack ?? (step > 1 ? () => void goTo(step - 1, setupRoute(step - 1)) : undefined)}
       onFinishLater={() => void goTo(step, todayRoute())}
       copy={copy}
+      caption={caption}
     >
       {children}
     </StepFrameView>

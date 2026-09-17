@@ -70,8 +70,8 @@ export interface BlockStripProps {
   disabled?: boolean;
 }
 
-/** A slot as the block composite reads it: minutes into instants on a fixed day. */
-function toItemView(slot: SlotView, startMin: number, endMin: number): DayItemView {
+/** A slot as the block composite reads it: minutes into instants on a fixed day. Shared with the day builder's review (RUN-12). */
+export function toItemView(slot: SlotView, startMin: number, endMin: number): DayItemView {
   const at = (minutes: number): Date => new Date(Date.UTC(2000, 0, 1, 0, minutes));
   return {
     id: slot.id,

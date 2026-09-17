@@ -20,6 +20,7 @@ import { Step6BeforeTheDay } from "@/app/(setup)/_components/step-6-before-the-d
 import { Step10Training } from "@/app/(setup)/_components/step-10-training";
 import { Step11Closing } from "@/app/(setup)/_components/step-11-closing";
 import { Step12Focuses } from "@/app/(setup)/_components/step-12-focuses";
+import { YourDays } from "@/components/day-builder";
 import { settingsYourDayRoute, type YourDayScreen as ScreenKey } from "@/lib/routes";
 
 /**
@@ -113,6 +114,8 @@ export function YourDayScreen({
       return <Step10Training embedded onSaved={done} />;
     case "focuses":
       return <Step12Focuses embedded onSaved={done} />;
+    case "your-days":
+      return <YourDays embedded />;
     case "closing-the-day":
       return (
         <Step11Closing

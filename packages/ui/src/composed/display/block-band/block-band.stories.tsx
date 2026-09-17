@@ -139,6 +139,23 @@ export const GutterLabelsAtFourHours: StoryObj = {
   ),
 };
 
+/** UX v1.2 §4.13i (RUN-12): the review's read-only strip — the band's label is a button to its screen. */
+export const TapToEdit: StoryObj = {
+  decorators: [
+    (Story) => (
+      <ScheduleAxis startMin={7 * 60} endMin={9 * 60} pxPerHour={96} timeZone={STORY_TIME_ZONE} className="h-[220px]">
+        <Story />
+      </ScheduleAxis>
+    ),
+  ],
+  render: () => (
+    <>
+      <BlockBand kind="morning" name="Morning routine A" topPx={16} heightPx={88} labelPlacement="inside" span="7:10–8:05" editLabel="Morning routine A, 7:10–8:05, edit" onEdit={() => {}} />
+      <BlockBand kind="prep" name="Getting ready A" topPx={112} heightPx={72} labelPlacement="inside" span="8:15–9:00" editLabel="Getting ready A, 8:15–9:00, edit" onEdit={() => {}} />
+    </>
+  ),
+};
+
 function minutesOf(date: Date): number {
   return ((date.getUTCHours() - 7 + 24) % 24) * 60 + date.getUTCMinutes();
 }

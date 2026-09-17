@@ -47,3 +47,13 @@ export const Debounced: StoryObj = {
     );
   },
 };
+
+/** UX v1.2 §4.13e (RUN-12): the builder's words — *for the routine*, and over, *runs to 9:12* in the same colour. */
+export const ForTheRoutine: StoryObj = {
+  render: () => (
+    <div className="flex flex-col gap-(--space-3)">
+      <BudgetLine chosenMin={45} availableMin={72} availableLabel="for the routine" />
+      <BudgetLine chosenMin={84} availableMin={72} availableLabel="for the routine" trailing="runs to 9:12" />
+    </div>
+  ),
+};

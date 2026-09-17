@@ -7,6 +7,6 @@ export const BUDGET_LINE_COPY = {
   chosen: "chosen",
   available: "available",
   /** The live region's sentence; the numbers, then the words. */
-  sentence: (chosenMin: number, availableMin: number) =>
-    `${chosenMin} chosen, ${availableMin} available`,
+  sentence: (chosenMin: number, availableMin: number, availableLabel: string = "available") =>
+    `${chosenMin} chosen, ${availableMin} ${availableLabel}`,
 } as const;

@@ -10,8 +10,9 @@ import { YourDayScreen } from "./_components/your-day-screen";
 /**
  * `/settings/your-day/{screen}` — one of the first-run screens embedded
  * (UX v1.2 §4.16, v1.1 §4.14): DYN-10's six, DYN-18's *Closing the day*
- * (screen 11 under v1.2), and v1.2's *Work-day types* (RUN-8). The segment
- * is one of eight words; anything else is a 404. The block-kind rows live
+ * (screen 11 under v1.2), v1.2's *Work-day types* (RUN-8), *Training* and
+ * *Work focuses* (RUN-11), and *Your days* (RUN-12). The segment is one of
+ * the listed words; anything else is a 404. The block-kind rows live
  * under `block/{kind}` and *Block order* under `order`, so they never reach
  * this route.
  */
@@ -26,6 +27,7 @@ const TITLES: Record<ScreenKey, string> = {
   wake: YOUR_DAY_COPY.rows.wake,
   "before-the-day": YOUR_DAY_COPY.rows.beforeTheDay,
   "closing-the-day": YOUR_DAY_COPY.rows.closingTheDay,
+  "your-days": YOUR_DAY_COPY.rows.yourDays,
 };
 
 function isScreen(value: string): value is ScreenKey {

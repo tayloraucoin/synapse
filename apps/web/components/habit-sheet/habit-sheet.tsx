@@ -85,7 +85,7 @@ export interface QuickHabitSheetProps {
 export type HabitSheetProps = FullHabitSheetProps | QuickHabitSheetProps;
 
 function isQuick(props: HabitSheetProps): props is QuickHabitSheetProps {
-  return props.mode === "step" || props.mode === "morning-habit" || props.mode === "wind-down-habit";
+  return props.mode === "step" || props.mode === "morning-habit" || props.mode === "wind-down-habit" || props.mode === "break";
 }
 
 /**

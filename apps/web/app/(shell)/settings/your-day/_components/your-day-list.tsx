@@ -35,6 +35,7 @@ export function YourDayList() {
   const fixtures = trpc.fixture.list.useQuery({ includeArchived: false });
   const templates = trpc.template.list.useQuery({ includeArchived: false });
   const passages = trpc.passage.list.useQuery();
+  const plans = trpc.dayPlan.list.useQuery(undefined);
 
   const value = (text: string | null | undefined): React.ReactNode =>
     text === undefined ? <SkeletonBlock heightPx={16} className="max-w-32" /> : (text ?? undefined);
@@ -136,6 +137,12 @@ export function YourDayList() {
         title={COPY.rows.workFocuses}
         description={value(countOf("work"))}
         href={settingsYourDayScreenRoute("focuses")}
+      />
+      {/* RUN-12: screen 13's list — the day plans and the builder, embedded. */}
+      <SettingsRow
+        title={COPY.rows.yourDays}
+        description={value(plans.data === undefined ? undefined : COPY.days(plans.data.length))}
+        href={settingsYourDayScreenRoute("your-days")}
       />
       <SettingsRow title={COPY.rows.blockOrder} href={settingsYourDayOrderRoute()} />
     </ul>

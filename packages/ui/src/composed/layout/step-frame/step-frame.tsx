@@ -65,6 +65,12 @@ export interface StepFrameProps {
   copy: StepFrameCopy;
   /** The action row pinned above the safe area (v1.2 §4). Default true. */
   stickyActions?: boolean;
+  /**
+   * A second caption under the progress line — the day builder's *Day A ·
+   * 3 of 9* (v1.2 §4.13). Read as it changes: the caller passes a node with
+   * its own `aria-live`, or a string, which the frame announces politely.
+   */
+  caption?: React.ReactNode;
   className?: string;
 }
 
@@ -82,6 +88,7 @@ export function StepFrame({
   error,
   copy,
   stickyActions = true,
+  caption,
   className,
 }: StepFrameProps) {
   const frameRef = React.useRef<HTMLDivElement>(null);
@@ -115,6 +122,14 @@ export function StepFrame({
           {copy.finishLater}
         </Button>
       </div>
+
+      {caption === undefined || caption === null ? null : typeof caption === "string" ? (
+        <Text as="p" variant="caption" tone="secondary" aria-live="polite" className="-mt-(--space-3) tabular-nums">
+          {caption}
+        </Text>
+      ) : (
+        caption
+      )}
 
       {/* `tabIndex={-1}`: focusable by the step change, not in the tab order. */}
       <Heading tabIndex={-1}>{heading}</Heading>

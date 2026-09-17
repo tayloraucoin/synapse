@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-17 · 1281 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-17 · 1302 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -75,7 +75,7 @@ apps/
           step-10-training.tsx
           step-11-closing.tsx  # screen 11 (v1.2 §4.11, R38): phone away follows lights out until touched; wind-down rows; sortable prompts; the reminder in the person's words
           step-12-focuses.tsx
-          step-13-days.tsx  # PLACEHOLDER until RUN-12/13 — completes first run (Open today / Plan this week first); the fit screen is gone
+          step-13-days.tsx  # screen 13 — mounts YourDays (the day builder, components/day-builder); Continue · n days completes first run until RUN-13
           step-2-work-days.tsx
           step-3-work-shape.tsx  # screen 3 (v1.2 §4.3): Yes — the anchor, its end, what gives, ensureWork; No — the work-day type cards, each writing itself
           step-4-commitments.tsx
@@ -289,6 +289,29 @@ apps/
         confirm-yesterday-panel.tsx
         copy.ts
         index.ts
+      day-builder/
+        screens/
+          13a-name-days.tsx
+          13b-shape-times.tsx
+          13c-training.tsx
+          13d-getting-ready.tsx
+          13e-morning.tsx  # the routine against the room: computeBudget's number stated as room, the greedy fill by rank, BudgetLine with 'for the routine' and 'runs to'
+          13f-breaks.tsx
+          13g-evening.tsx
+          13h-wind-down.tsx
+          13i-review.tsx
+        builder-frame.tsx
+        clock.ts
+        copy.ts
+        day-builder.tsx  # the nine-screen builder (v1.2 §4.13): one plan held by useDayBuilder, every screen writes as it goes, Next moves, Save Day A completes
+        day-plan-card.tsx
+        index.ts
+        list-header.tsx
+        preview.ts  # 13i's client preview — the whole day through stackBlock, the one arithmetic; nothing here writes a block or an item
+        slot-rows.tsx
+        use-day-builder.ts  # the builder's state — the plan from the service's response (TD-21 clocks), the templates with usedBy, the habits, the fixtures; a chained patch
+        use-list-screen.ts  # 13d/13e/13h's writes: a list created on arrival once per plan and kind, chosen by FK never copied, slots saved per change
+        your-days.tsx  # the list of plans (sequence and Settings): DayPlanCards, Build another day, first arrival opens the builder at once
       day-header-sheet/
         copy.ts
         day-header-sheet.tsx

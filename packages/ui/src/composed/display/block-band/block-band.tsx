@@ -65,6 +65,13 @@ export interface BlockBandProps {
   labelPlacement?: BandLabelPlacement;
   /** *7:00–9:00* — read beside the name when the label is inside the band. */
   span?: string;
+  /**
+   * UX v1.2 §4.13i (RUN-12) — a read-only strip where the band is the way
+   * to its screen: the label becomes a button named `editLabel`
+   * (*Morning, 7:45–8:40, edit*). Ignored when `draggable`.
+   */
+  onEdit?: () => void;
+  editLabel?: string;
   className?: string;
 }
 
@@ -82,6 +89,8 @@ export function BlockBand({
   children,
   labelPlacement,
   span,
+  onEdit,
+  editLabel,
   className,
 }: BlockBandProps) {
   const label = name ?? BLOCK_KIND_WORDS[kind];
@@ -122,6 +131,22 @@ export function BlockBand({
             labelClass,
             "z-10 cursor-grab touch-none",
             "min-h-(--target)",
+            "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none",
+          )}
+        >
+          <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
+            {labelText}
+          </Text>
+        </button>
+      ) : onEdit !== undefined ? (
+        <button
+          type="button"
+          aria-label={editLabel ?? labelText}
+          onClick={onEdit}
+          style={labelStyle}
+          className={cn(
+            labelClass,
+            "z-10 min-h-(--target) cursor-pointer",
             "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none",
           )}
         >

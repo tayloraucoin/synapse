@@ -31,6 +31,13 @@ export interface BudgetLineProps {
   state?: BudgetState;
   /** Sticks to the foot of its section (§5.3). */
   sticky?: boolean;
+  /**
+   * UX v1.2 §4.13e (RUN-12) — the second number's word: *available* by
+   * default; the builder says *for the routine*.
+   */
+  availableLabel?: string;
+  /** Over: *· runs to 9:12* — the third part, muted, in the same colour as the rest. */
+  trailing?: string;
   className?: string;
 }
 
@@ -44,10 +51,13 @@ export function BudgetLine({
   availableMin,
   state,
   sticky = false,
+  availableLabel = BUDGET_LINE_COPY.available,
+  trailing,
   className,
 }: BudgetLineProps) {
   const resolved = state ?? budgetStateFor(chosenMin, availableMin);
-  const sentence = BUDGET_LINE_COPY.sentence(chosenMin, availableMin);
+  const sentence =
+    BUDGET_LINE_COPY.sentence(chosenMin, availableMin, availableLabel) + (trailing === undefined ? "" : `, ${trailing}`);
 
   // The live region lags the numbers by the debounce, so a burst of ticks
   // announces once.
@@ -77,8 +87,18 @@ export function BudgetLine({
         </Text>
         <Text as="span" variant="secondary" className="tabular-nums">
           <span className="text-ink font-medium">{availableMin}</span>{" "}
-          <span className="text-text-secondary">{BUDGET_LINE_COPY.available}</span>
+          <span className="text-text-secondary">{availableLabel}</span>
         </Text>
+        {trailing === undefined ? null : (
+          <>
+            <Text as="span" variant="secondary" tone="secondary">
+              ·
+            </Text>
+            <Text as="span" variant="secondary" tone="secondary" className="tabular-nums">
+              {trailing}
+            </Text>
+          </>
+        )}
       </span>
       <span aria-live="polite" aria-atomic="true" className="sr-only">
         {announced}

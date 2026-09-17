@@ -30,7 +30,7 @@ import { HABIT_SHEET_COPY as COPY } from "./copy";
  * THE RANGE NEVER CLAMPS anything (R21); it is the default the plan reads.
  */
 
-export type QuickHabitMode = "step" | "morning-habit" | "wind-down-habit";
+export type QuickHabitMode = "step" | "morning-habit" | "wind-down-habit" | "break";
 
 const STEP_DEFAULT_ICON: IconValue = { kind: "emoji", value: "📌" };
 const MORNING_DEFAULT_PRIORITY = 4;
@@ -88,7 +88,7 @@ export function QuickHabitSheet({
               title: name.trim(),
               icon: icon ?? STEP_DEFAULT_ICON,
               categoryId: null,
-              blockKind: mode === "wind-down-habit" ? "wind_down" : "morning",
+              blockKind: mode === "wind-down-habit" ? "wind_down" : mode === "break" ? "break" : "morning",
               durationMinMin: from,
               durationMaxMin: to,
               lifePriority: MORNING_DEFAULT_PRIORITY,
@@ -115,7 +115,7 @@ export function QuickHabitSheet({
           }
           onOpenChange(next);
         }}
-        title={mode === "step" ? COPY.stepTitle : mode === "wind-down-habit" ? COPY.windDownHabitTitle : COPY.morningHabitTitle}
+        title={mode === "step" ? COPY.stepTitle : mode === "wind-down-habit" ? COPY.windDownHabitTitle : mode === "break" ? COPY.breakTitle : COPY.morningHabitTitle}
         dirty={dirty}
         onDiscardRequest={() => setDiscardOpen(true)}
         initialFocus="first-field"

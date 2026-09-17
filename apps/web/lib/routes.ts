@@ -196,7 +196,9 @@ export type YourDayScreen =
   | "commitments"
   | "wake"
   | "before-the-day"
-  | "closing-the-day";
+  | "closing-the-day"
+  /** UX v1.2 §4.16 (RUN-12): screen 13's list — the day plans and the builder, embedded. */
+  | "your-days";
 
 export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "shape",
@@ -209,6 +211,7 @@ export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "wake",
   "before-the-day",
   "closing-the-day",
+  "your-days",
 ];
 
 export function settingsYourDayRoute(): string {

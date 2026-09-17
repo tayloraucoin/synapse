@@ -25,8 +25,12 @@ export const YOUR_DAY_COPY = {
     training: "Training",
     closingTheDay: "Closing the day",
     workFocuses: "Work focuses",
+    /** UX v1.2 §4.16 (RUN-12): screen 13's list, embedded. */
+    yourDays: "Your days",
     blockOrder: "Block order",
   },
+  /** [COPY] The *Your days* row's value. */
+  days: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "day" : "days"}`),
 
   /* ---------------------------------------------------- the row values -- */
   /** [COPY] "Mon–Fri · Sat sometimes" */
@@ -68,6 +72,8 @@ export const YOUR_DAY_COPY = {
   itemsAndMinutes: (items: number, total: number) =>
     `${items} ${items === 1 ? "item" : "items"} · ${total} min`,
   usedThisWeek: (k: number) => `Used ${k} days this week`,
+  /** UX v1.2 §4.16 (RUN-12): *used by Day A, Day B*. */
+  usedBy: (names: readonly string[]) => `used by ${names.join(", ")}`,
   duplicate: "Duplicate",
   archive: "Archive",
   restore: "Restore",

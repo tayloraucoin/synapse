@@ -92,3 +92,8 @@ export const StickyActionsWithLongContent: Story = {
 
 /** The row in flow, for a screen whose layout pins its own. */
 export const ActionsInFlow: Story = { args: { stickyActions: false } };
+
+/** UX v1.2 §4.13 (RUN-12): the day builder's second caption under the progress line. */
+export const WithCaption: Story = {
+  args: { step: 13, total: 14, caption: "Day A · 3 of 9", heading: "Train on this day?" },
+};

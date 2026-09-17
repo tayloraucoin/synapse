@@ -1,5 +1,5 @@
 export { BlockEditor, type BlockEditorProps } from "./block-editor";
-export { BlockStrip, type BlockStripProps } from "./block-strip";
+export { BlockStrip, toItemView, type BlockStripProps } from "./block-strip";
 export { EditorFooter, type EditorFooterProps } from "./editor-footer";
 export { AddSheet, midpoint, type AddSheetProps } from "./add-sheet";
 export { SlotSheet, type SlotSheetProps } from "./slot-sheet";

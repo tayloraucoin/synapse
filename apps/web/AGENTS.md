@@ -77,7 +77,7 @@ is a defect.**
 | `/logout` | `logoutRoute()` | AU-06 (a route handler) |
 | `/auth/callback` | `authCallbackRoute()` | OAuth / PKCE |
 | `/auth/confirm` | `authConfirmRoute()` | email `token_hash` |
-| `/setup/{1–14}` | `setupRoute(step)` | UX v1.2 §4.1–§4.14 — fourteen screens (RUN-8 renumbered): 1–5 are v1.2's (RUN-8); 6–12 render v1.1's screens until RUN-9…RUN-11 rebuild them (9 is a placeholder); 13 is a placeholder that completes first run until RUN-12/RUN-13; 14 is a 404 until RUN-13 |
+| `/setup/{1–14}` | `setupRoute(step)` | UX v1.2 §4.1–§4.14 — fourteen screens (RUN-8 renumbered): 1–12 are v1.2's (RUN-8…RUN-11); 13 is *Your days* and the nine-screen day builder (RUN-12, `components/day-builder/`), whose *Continue · n days* completes first run until RUN-13; 14 is a 404 until RUN-13 |
 | `/orient` | `orientRoute()` | UX v1.1 §5.2 — the orient frame; the entry tree puts it before any tab while today has no `woke_at` (DYN-13); no header, no tab bar |
 | `/today` | `todayRoute()` | LS-01 — the quick-pick while `confirmed_at` is null (v1.1 §5.3, DYN-14), the list after |
 | `/today/schedule` | `todayScheduleRoute(options?)` | SC-01, editable (UX v1.1 §6.5, DYN-16); `{ move: true }` → `?mode=move`, the tap-to-lift fallback the day header sheet's *Edit today* opens |
@@ -95,7 +95,7 @@ is a defect.**
 | `/settings/habits` | `settingsHabitsRoute()` | LB-01 |
 | `/settings/habits/{id}` | `settingsHabitRoute(id)` | LB-02 |
 | `/settings/your-day` | `settingsYourDayRoute()` | UX v1.1 §4.14 — the twelve first-run screens as a list (DYN-8) |
-| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one of DYN-10's six screens, DYN-18's `closing-the-day` (screen 11 under v1.2), or v1.2's `work-day-types` (RUN-8), embedded: `shape · work-days · work-start · work-day-types · commitments · wake · before-the-day · closing-the-day` |
+| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one of DYN-10's six screens, DYN-18's `closing-the-day` (screen 11 under v1.2), or v1.2's `work-day-types` (RUN-8), `training` / `focuses` (RUN-11), `your-days` (RUN-12), embedded: `shape · work-days · work-start · work-day-types · training · focuses · commitments · wake · before-the-day · closing-the-day · your-days` |
 | `/settings/your-day/block/{kind}` | `settingsYourDayBlockRoute(kind, templateId?)` | the block editor for a kind (§3.11); the template list above it when more than one |
 | `/settings/your-day/order` | `settingsYourDayOrderRoute()` | Block order (§4.14) |
 | `/settings/week` · `/settings/week/{week}` | `settingsWeekRoute(week?)` | WK-01 |

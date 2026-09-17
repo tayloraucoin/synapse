@@ -79,3 +79,19 @@ export const Flexible: StoryObj = {
     );
   },
 };
+
+/** UX v1.2 §4.13a (RUN-12): a day another plan holds says so beneath the chip — *Day A’s* — and in its name. */
+export const HeldByAnotherPlan: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<Weekday[]>([0, 1, 2]);
+    return (
+      <WeekdayChips
+        label="Which days"
+        indexing="monday"
+        value={value}
+        onChange={setValue}
+        notes={{ 3: "Day A’s", 4: "Day A’s" }}
+      />
+    );
+  },
+};

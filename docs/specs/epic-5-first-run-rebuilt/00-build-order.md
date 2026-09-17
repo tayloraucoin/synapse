@@ -36,7 +36,7 @@ The contract and the seeds; the one additive migration; the plan services; the c
 - [x] **RUN-11** · Screens 10–12: `WorkoutSetupCard` with type, where and travel; closing the day with the new defaults, wind-down rows, sortable prompts and the reminder; `FocusSetupCard` with *Flexible*; Settings → Notifications gains N2 — L · (RUN-8, RUN-3, RUN-6)
 
 ### Phase 4 — The day builder, the week, the morning
-- [ ] **RUN-12** · Screen 13 — the day builder: nine sub-screens, the three named lists, the review at 96px/h, `DayPlanCard`, *Build another day*; Settings → Your days; the block editor's template list with *used by* — L · (RUN-5, RUN-10, RUN-11) · **Vesper review of 13e's room line and 13i**
+- [x] **RUN-12** · Screen 13 — the day builder: nine sub-screens, the three named lists, the review at 96px/h, `DayPlanCard`, *Build another day*; Settings → Your days; the block editor's template list with *used by* — L · (RUN-5, RUN-10, RUN-11) · **Vesper review of 13e's room line and 13i**
 - [ ] **RUN-13** · Screen 14 and the morning modes: the week rows and the question, completion from plans, the week build's *Plan* row, the pick expanded under *build*, *Set from the plan* on the frame, *Working today* on a *Rarely* day, travel rows on Today and the Schedule; `step-12-fit` deleted — L · (RUN-12, RUN-6, RUN-9) · **Vigil: the Sometimes-day dialog; a plan-less day under set_from_plan**
 
 ### Phase 5 — Provisional and cleanup
@@ -104,8 +104,8 @@ Taylor's instruction, 2026-09-16: Mason executes the track in batches, one batch
 | 4 | RUN-7 | RUN-1 | **Complete 2026-09-16** |
 | 5 | RUN-8 · RUN-9 | RUN-3, RUN-4, RUN-7 | **Complete 2026-09-16** |
 | 6 | RUN-10 · RUN-11 | RUN-8, RUN-3, RUN-6 | **Complete 2026-09-16** |
-| 7 | RUN-12 | RUN-5, RUN-10, RUN-11 | next |
-| 8 | RUN-13 | RUN-12, RUN-6, RUN-9 | |
+| 7 | RUN-12 | RUN-5, RUN-10, RUN-11 | **Complete 2026-09-16** |
+| 8 | RUN-13 | RUN-12, RUN-6, RUN-9 | next |
 | 9 | RUN-15 (+ RUN-14 only if D3 is ratified in `TECHNICAL-DECISIONS.md`; otherwise RUN-14 is skipped and the report says so) | RUN-9, RUN-10, RUN-11, RUN-13 (· RUN-4, D3) | |
 
 ## Coverage matrix — every section of v1.2 → the ticket that ships it
