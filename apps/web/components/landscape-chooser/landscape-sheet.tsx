@@ -14,19 +14,19 @@ import { useLandscape } from "./use-landscape";
  * folds the v1.0 starter set into the per-block library). Habits only: the
  * library is not the place to build a routine, so no template is written
  * here; Settings → Your day → Morning routine is.
+ *
+ * Under v1.2 (RUN-10) a tick creates at once, so the footer is *Done* — the
+ * ticks have already happened.
  */
 export function LandscapeSheet({
   open,
   onOpenChange,
-  onAdded,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAdded?: (created: number) => void;
 }) {
   const online = useOnline();
   const landscape = useLandscape({ withTemplate: false });
-  const pending = landscape.ticked.size;
 
   return (
     <SheetHost open={open}>
@@ -37,21 +37,7 @@ export function LandscapeSheet({
         size="tall"
         footer={
           <div className="flex justify-end gap-(--space-2)">
-            <Button variant="ghost" onClick={() => onOpenChange(false)}>
-              {COPY.cancel}
-            </Button>
-            <Button
-              disabled={!online || pending === 0}
-              busy={landscape.committing}
-              onClick={() => {
-                void landscape.commit().then((result) => {
-                  onAdded?.(result.created);
-                  onOpenChange(false);
-                });
-              }}
-            >
-              {COPY.add(pending)}
-            </Button>
+            <Button onClick={() => onOpenChange(false)}>{COPY.done}</Button>
           </div>
         }
       >

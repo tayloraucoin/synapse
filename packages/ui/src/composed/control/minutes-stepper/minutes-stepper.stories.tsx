@@ -64,6 +64,24 @@ export const WithError: StoryObj<typeof MinutesStepper> = {
   },
 };
 
+/** UX v1.2 §4.7 (RUN-10): the length row's stepper — 56px field, no suffix; the unit is in the name. */
+export const Compact: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<number | null>(20);
+    return (
+      <MinutesStepper
+        label="Length, Breakfast"
+        value={value}
+        onChange={setValue}
+        min={1}
+        max={480}
+        compact
+        className="[&>label]:sr-only"
+      />
+    );
+  },
+};
+
 type OptimisticArgs = { slowNetwork: boolean; failCommits: boolean };
 
 /**

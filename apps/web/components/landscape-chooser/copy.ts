@@ -1,14 +1,14 @@
 /**
- * The landscape chooser's strings — UX v1.1 §4.8, verbatim where the
- * document writes them; the rest `[COPY — needs Vesper sign-off]`.
+ * The landscape chooser's strings — UX v1.2 §4.8 (RUN-10), v1.1 §4.8,
+ * verbatim where the document writes them; the rest `[COPY — needs Vesper
+ * sign-off]`. No glyph in here (R29): the rows' glyphs are the seeds'.
  *
  * No minutes total, no fit, no "of 72" — by rule. The screen is the data
- * bank; the fit is screen 12's job.
+ * bank; the ranking is screen 9's job.
  */
 export const LANDSCAPE_COPY = {
   tabRecommended: "Recommended",
   tabAll: "All",
-  tabSelected: (n: number) => `Selected (${n})`,
   groupBody: "Body",
   groupMind: "Mind",
   range: (min: number, max: number) => `${min}–${max} min`,
@@ -16,12 +16,10 @@ export const LANDSCAPE_COPY = {
   searchLabel: "Search",
   searchPlaceholder: "Search the list",
   noMatches: (query: string) => `No habits match "${query}"`,
-  nothingSelected: "Nothing yet — tick what you do, or want to.",
-  priority: "Priority",
-  length: "Length",
   inLibrary: "in your library",
+  /** [COPY] The one line after a rejected tick: *Couldn't save Breakfast. Try again.* */
+  saveError: (title: string) => (title === "" ? "Couldn’t save. Try again." : `Couldn’t save ${title}. Try again.`),
   /** The library's sheet (LB-01's empty state). */
   sheetTitle: "Start with what you do",
-  add: (n: number) => (n === 0 ? "Add" : `Add ${n}`),
-  cancel: "Cancel",
+  done: "Done",
 } as const;

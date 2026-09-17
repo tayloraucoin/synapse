@@ -4,7 +4,7 @@
 **Slice type:** Three screens over the library's write path, one fact per tap. The risk class is *the duplicate row* (S7.5 — a tick that creates twice), *persuasion* (a pre-ticked starter), and *the clamp* (a *usually* bounded by the range).
 **Vigil:** none. **Vesper review:** the three screens against v1.2 §4.7–§4.9 verbatim; the tick on a slow network; the card's collapse; no fit number anywhere.
 
-**Status:** Not started
+**Status:** Complete — 2026-09-16 (batch 6; the signed-in *Slow 3G* walk could not be run from this thread — Vesper's screen review pending — see `DEVIATIONS.md`)
 
 > **Vesper — screen review.** Walk `/setup/7`, `/setup/8`, `/setup/9` at 375px on a fresh account with DevTools throttled to *Slow 3G*. Confirm: a tap on 🍳 Breakfast ticks at once and a second tap un-ticks — never two rows; the two parts of screen 7 are under headings with a hairline; the length rows are emoji · title · stepper · menu on one line, centred; the stepper changes on the tap and writes once after a pause; screen 8 has two tabs and no arithmetic; screen 9's cards show *matters* as seven squares, *usually* at the midpoint, *Add a shorter version*, and *Done* collapses to one line; nothing is pre-selected anywhere; *Add something else* and *Add your own* open a sheet with no block and no priority.
 

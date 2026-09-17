@@ -7,12 +7,12 @@ import { SETUP_COPY as COPY } from "./copy";
 import { FactScreen } from "./fact-screen";
 
 /**
- * Screen 8 — Your routine, the whole landscape (UX v1.1 §4.8).
+ * Screen 8 — Your routine, the whole landscape (UX v1.2 §4.8; RUN-10).
  *
- * "Everything. It doesn't have to fit." The chooser holds the ticks; *Continue
- * · n habits* is the single commit (W4): the habits, then the morning
- * template's slots in priority order. No footer arithmetic on this screen,
- * by rule — the fit is screen 12's.
+ * "Everything. It doesn't have to fit." Two tabs, every row a `SelectRow`
+ * with its glyph; a tick creates the habit and its morning slot at once
+ * (R30), a second tap un-ticks. *Continue · n habits* only navigates. No
+ * arithmetic on this screen, by rule — the ranking is screen 9's.
  */
 export function Step8Landscape({
   embedded = false,
@@ -29,13 +29,8 @@ export function Step8Landscape({
       step={8}
       heading={COPY.step8Heading}
       body={COPY.step8Body}
-      save={landscape.ticked.size === 0 && !landscape.selected.some((row) => row.existing)
-        ? null
-        : async () => {
-            await landscape.commit();
-          }}
+      save={null}
       primaryLabel={COPY.continueHabits(landscape.count)}
-      disabled={landscape.committing}
       embedded={embedded}
       onSaved={onSaved}
     >

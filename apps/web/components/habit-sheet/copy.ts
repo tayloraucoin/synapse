@@ -10,6 +10,12 @@
 export const HABIT_SHEET_COPY = {
   createTitle: "New habit",
   editTitle: "Edit habit",
+  /** UX v1.2 §4, the frame rules — the sheet names the noun (RUN-10). */
+  stepTitle: "A step before work",
+  morningHabitTitle: "A morning habit",
+  chooseAnIcon: "Choose an icon",
+  /** [COPY — needs Vesper sign-off] */
+  quickSaveError: "Couldn’t save. Try again.",
   /** Edit mode, under the title, linking to LB-03. */
   usageLink: (count: number) =>
     `In ${count} ${count === 1 ? "template" : "templates"}`,

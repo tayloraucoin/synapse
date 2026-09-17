@@ -7,35 +7,41 @@ import type { HabitSummaryView, IconValue } from "@syn/types";
 
 import { trpc } from "@/lib/trpc/client";
 
+import { LANDSCAPE_COPY as COPY } from "./copy";
+
 /**
- * The landscape's state — UX v1.1 §4.8 (DYN-11).
+ * The landscape's state — UX v1.2 §4.8 (R30, TD-18; RUN-10), on DYN-11.
  *
- * SELECTION IS A SINGLE COMMIT (W4). Ticks are local; the two facts the rest
- * of the system needs — a priority and a rough length — are edited on the
- * *Selected* tab; *Continue* (or the library's *Add*) writes everything at
- * once: one `habit.create` per ticked starter with the entry's range and the
- * chosen priority (the person's edit wins over the library's number), then,
- * when a morning template exists or is made, one slot per selected habit in
- * priority order at the chosen length. A habit already in the library with
- * `block_kind = morning` is listed as selected and cannot be un-ticked here
- * (the library archives).
+ * A TICK CREATES THE HABIT AT ONCE. The row shows its tick on the tap;
+ * `habit.createFromStarterLibrary` runs for that one title (with the entry's
+ * glyph and range), and — on first run, `withTemplate` — the morning
+ * template gets a slot at the range's midpoint in tick order. A second tap
+ * un-ticks: the slot goes, and the habit is archived if it has never been
+ * used on a day (`habit.usage`); a used one stays in the library.
  *
- * NOTHING IS PRE-CHECKED. The library's habits are not "checked" — they are
- * already the person's; the starters begin unticked, every one.
+ * NEVER A DUPLICATE (S7.5). Every row keys its in-flight create by the
+ * starter's title in a promise map; an un-tick during the create awaits it
+ * and then removes what it made, and a second tick during an in-flight
+ * create is the same promise, not a second one. A rejected create puts the
+ * tick back and says one line.
+ *
+ * NOTHING IS PRE-CHECKED. The library's own morning habits show as selected
+ * because they are already the person's; the starters begin unticked.
+ * No number about minutes leaves this hook — the fit is nobody's job here.
  */
 
-const DEFAULT_ICON: IconValue = { kind: "curated", value: "dot", colorKey: null };
-
 export type LandscapeRow = {
-  /** The starter's title, or the habit's id when it is already the person's. */
+  /** The starter's title. */
   key: string;
   title: string;
-  rangeMin: number | null;
-  rangeMax: number | null;
-  priority: number;
-  durationMin: number;
-  /** In the library already: shown as selected, not un-tickable. */
-  existing: boolean;
+  icon: IconValue;
+  rangeMin: number;
+  rangeMax: number;
+  selected: boolean;
+  /** A write is out for this row. */
+  committing: boolean;
+  /** In the library and used on a day — shown selected, not un-tickable. */
+  locked: boolean;
 };
 
 export function midpointOf(min: number | null, max: number | null): number {
@@ -46,142 +52,100 @@ export function midpointOf(min: number | null, max: number | null): number {
 export function useLandscape(options: { withTemplate: boolean }) {
   const utils = trpc.useUtils();
   const habits = trpc.habit.list.useQuery({ includeArchived: false, blockKind: "morning" });
-  const templates = trpc.template.list.useQuery({ includeArchived: false, kind: "morning" });
-  const createHabit = trpc.habit.create.useMutation();
+  const templates = trpc.template.list.useQuery(
+    { includeArchived: false, kind: "morning" },
+    { enabled: options.withTemplate },
+  );
+  const templateId = templates.data?.[0]?.id ?? null;
+  const detail = trpc.template.get.useQuery(
+    { id: templateId ?? "" },
+    { enabled: options.withTemplate && templateId !== null },
+  );
+  const fromLibrary = trpc.habit.createFromStarterLibrary.useMutation();
   const createTemplate = trpc.template.create.useMutation();
   const saveSlot = trpc.template.saveSlot.useMutation();
+  const removeSlot = trpc.template.removeSlot.useMutation();
+  const archive = trpc.habit.archive.useMutation();
 
-  /** Ticked starters, by title, with their edited facts. */
-  const [ticked, setTicked] = React.useState<Map<string, { priority: number; durationMin: number }>>(new Map());
-  /** Edits to existing habits' length (their priority is the library's). */
-  const [lengths, setLengths] = React.useState<Map<string, number>>(new Map());
+  /** Rows whose tick is ahead of the record: on (create out) or off (removal out). */
+  const [pending, setPending] = React.useState<Map<string, boolean>>(new Map());
+  const [locked, setLocked] = React.useState<Set<string>>(new Set());
+  const [line, setLine] = React.useState<string | null>(null);
+  const inFlight = React.useRef<Map<string, Promise<void>>>(new Map());
 
   const existing = React.useMemo(
     () => (habits.data?.habits ?? []).filter((habit) => habit.type === "habit"),
     [habits.data?.habits],
   );
-  const existingTitles = React.useMemo(
-    () => new Set(existing.map((habit) => habit.title.toLowerCase())),
+  const byTitle = React.useMemo(
+    () => new Map(existing.map((habit) => [habit.title.toLowerCase(), habit])),
     [existing],
   );
+  const slots = React.useMemo(() => detail.data?.slots ?? [], [detail.data?.slots]);
+  const slotByHabit = React.useMemo(() => new Map(slots.map((slot) => [slot.habitId, slot])), [slots]);
 
   const entries = STARTER_LIBRARY.morning;
 
-  const toggle = React.useCallback(
-    (entry: StarterLibraryEntry, on: boolean) => {
-      setTicked((current) => {
-        const next = new Map(current);
-        if (on) {
-          next.set(entry.title, {
-            priority: entry.importance,
-            durationMin: midpointOf(entry.rangeMin, entry.rangeMax),
-          });
-        } else {
-          next.delete(entry.title);
-        }
-        return next;
-      });
+  const isSelected = React.useCallback(
+    (title: string): boolean => {
+      const ahead = pending.get(title);
+      if (ahead !== undefined) return ahead;
+      const habit = byTitle.get(title.toLowerCase());
+      if (!habit) return false;
+      // On first run the selection is the morning template's slot; in the library, the row itself.
+      return options.withTemplate ? slotByHabit.has(habit.id) : true;
     },
-    [],
+    [pending, byTitle, options.withTemplate, slotByHabit],
   );
 
-  const setPriority = React.useCallback((title: string, priority: number) => {
-    setTicked((current) => {
-      const row = current.get(title);
-      if (!row) return current;
-      const next = new Map(current);
-      next.set(title, { ...row, priority });
-      return next;
-    });
-  }, []);
-
-  const setLength = React.useCallback((key: string, durationMin: number, isExisting: boolean) => {
-    if (isExisting) {
-      setLengths((current) => new Map(current).set(key, durationMin));
-      return;
+  const refresh = React.useCallback(async () => {
+    await utils.habit.list.invalidate();
+    if (options.withTemplate) {
+      await utils.template.list.invalidate();
+      if (templateId !== null) await utils.template.get.invalidate({ id: templateId });
     }
-    setTicked((current) => {
-      const row = current.get(key);
-      if (!row) return current;
+  }, [utils, options.withTemplate, templateId]);
+
+  const ensureTemplate = React.useCallback(async (): Promise<string> => {
+    if (templateId !== null) return templateId;
+    const created = await createTemplate.mutateAsync({ kind: "morning" });
+    await utils.template.list.invalidate();
+    return created.id;
+  }, [templateId, createTemplate, utils]);
+
+  const setPendingFor = (title: string, value: boolean | null) =>
+    setPending((current) => {
       const next = new Map(current);
-      next.set(key, { ...row, durationMin });
+      if (value === null) next.delete(title);
+      else next.set(title, value);
       return next;
     });
-  }, []);
 
-  /** The *Selected* tab's rows: the library's morning habits, then the ticks. */
-  const selected: LandscapeRow[] = React.useMemo(() => {
-    const own: LandscapeRow[] = existing.map((habit: HabitSummaryView) => ({
-      key: habit.id,
-      title: habit.title,
-      rangeMin: habit.durationMin,
-      rangeMax: habit.durationMax,
-      priority: habit.lifePriority,
-      durationMin: lengths.get(habit.id) ?? midpointOf(habit.durationMin, habit.durationMax),
-      existing: true,
-    }));
-    const starters: LandscapeRow[] = [...ticked.entries()].map(([title, row]) => {
-      const entry = entries.find((candidate) => candidate.title === title);
-      return {
-        key: title,
-        title,
-        rangeMin: entry?.rangeMin ?? null,
-        rangeMax: entry?.rangeMax ?? null,
-        priority: row.priority,
-        durationMin: row.durationMin,
-        existing: false,
-      };
-    });
-    return [...own, ...starters];
-  }, [existing, ticked, entries, lengths]);
-
-  const [committing, setCommitting] = React.useState(false);
-
-  /** Everything at once: habits, then the template's slots. */
-  const commit = React.useCallback(async (): Promise<{ created: number }> => {
-    setCommitting(true);
-    try {
-      const created: Array<{ id: string; priority: number; durationMin: number }> = [];
-      for (const [title, row] of ticked) {
-        const entry = entries.find((candidate) => candidate.title === title);
-        if (!entry) continue;
-        const habit = await createHabit.mutateAsync({
-          title,
-          icon: DEFAULT_ICON,
-          categoryId: null,
-          blockKind: "morning",
-          durationMinMin: entry.rangeMin,
-          durationMaxMin: entry.rangeMax,
-          lifePriority: row.priority,
-          quantityUnit: null,
-          reflectionAxes: [],
-          defaultNotesPreflight: null,
-        });
-        created.push({ id: habit.id, priority: row.priority, durationMin: row.durationMin });
-      }
-
-      if (options.withTemplate) {
-        let templateId = templates.data?.[0]?.id ?? null;
-        if (templateId === null) {
-          templateId = (await createTemplate.mutateAsync({ kind: "morning" })).id;
+  const doTick = React.useCallback(
+    async (entry: StarterLibraryEntry): Promise<void> => {
+      // Read the record, not the render: a queued tick after an un-tick must see the archive.
+      const before = await utils.habit.list.fetch({ includeArchived: false, blockKind: "morning" });
+      let habit: HabitSummaryView | { id: string; title: string } | undefined = before.habits.find(
+        (row) => row.title.toLowerCase() === entry.title.toLowerCase(),
+      );
+      if (!habit) {
+        const made = await fromLibrary.mutateAsync({ blockKind: "morning", titles: [entry.title] });
+        habit = made.rows[0];
+        if (!habit) {
+          // Already there under this title (a race with a refetch) — read it back.
+          const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind: "morning" });
+          habit = fresh.habits.find((row) => row.title.toLowerCase() === entry.title.toLowerCase());
         }
-        const detail = await utils.template.get.fetch({ id: templateId });
-        const placed = new Set(detail.slots.map((slot) => slot.habitId));
-        const wanted = [
-          ...existing.map((habit) => ({
-            id: habit.id,
-            priority: habit.lifePriority,
-            durationMin: lengths.get(habit.id) ?? midpointOf(habit.durationMin, habit.durationMax),
-          })),
-          ...created,
-        ]
-          .filter((row) => !placed.has(row.id))
-          .sort((a, b) => b.priority - a.priority);
-        for (const row of wanted) {
+      }
+      if (!habit) throw new Error("no_habit");
+      if (options.withTemplate) {
+        const id = await ensureTemplate();
+        const current = await utils.template.get.fetch({ id });
+        if (!current.slots.some((slot) => slot.habitId === habit.id)) {
           await saveSlot.mutateAsync({
-            templateId,
-            habitId: row.id,
-            durationMin: row.durationMin,
+            templateId: id,
+            habitId: habit.id,
+            durationMin: midpointOf(entry.rangeMin, entry.rangeMax),
             gapBeforeMin: 0,
             pinnedClock: null,
             role: "stack",
@@ -190,30 +154,115 @@ export function useLandscape(options: { withTemplate: boolean }) {
           });
         }
       }
+    },
+    [fromLibrary, utils, options.withTemplate, ensureTemplate, saveSlot],
+  );
 
-      setTicked(new Map());
-      setLengths(new Map());
-      await utils.habit.list.invalidate();
-      await utils.template.list.invalidate();
-      return { created: created.length };
-    } finally {
-      setCommitting(false);
-    }
-  }, [ticked, entries, createHabit, options.withTemplate, templates.data, createTemplate, utils, existing, lengths, saveSlot]);
+  const doUntick = React.useCallback(
+    async (entry: StarterLibraryEntry): Promise<void> => {
+      const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind: "morning" });
+      const habit = fresh.habits.find((row) => row.title.toLowerCase() === entry.title.toLowerCase());
+      if (!habit) return;
+      if (options.withTemplate && templateId !== null) {
+        const current = await utils.template.get.fetch({ id: templateId });
+        for (const slot of current.slots.filter((row) => row.habitId === habit.id)) {
+          await removeSlot.mutateAsync({ id: slot.id });
+        }
+      }
+      // Archived only if it has never been used on a day; a used one is a record.
+      const usage = await utils.habit.usage.fetch({ id: habit.id });
+      if (usage.recentDays.length === 0) {
+        await archive.mutateAsync({ id: habit.id });
+      } else {
+        setLocked((current) => new Set(current).add(entry.title));
+      }
+    },
+    [utils, options.withTemplate, templateId, removeSlot, archive],
+  );
+
+  /** The tap. The tick moves at once; the write follows, one per row, in order. */
+  const toggle = React.useCallback(
+    (entry: StarterLibraryEntry, on: boolean) => {
+      const title = entry.title;
+      setLine(null);
+      setPendingFor(title, on);
+      // Queue behind whatever this row already has out — never two creates.
+      const previous = inFlight.current.get(title) ?? Promise.resolve();
+      const run = previous
+        .catch(() => undefined)
+        .then(() => (on ? doTick(entry) : doUntick(entry)))
+        .then(async () => {
+          await refresh();
+        })
+        .catch(() => {
+          setLine(COPY.saveError(title));
+        })
+        .finally(() => {
+          if (inFlight.current.get(title) === run) {
+            inFlight.current.delete(title);
+            setPendingFor(title, null);
+          }
+        });
+      inFlight.current.set(title, run);
+    },
+    [doTick, doUntick, refresh],
+  );
+
+  /** *Add your own*: the sheet made the habit; on first run it also takes a slot at its midpoint. */
+  const adopt = React.useCallback(
+    async (habitId: string) => {
+      try {
+        if (options.withTemplate) {
+          const id = await ensureTemplate();
+          const habit = await utils.habit.get.fetch({ id: habitId });
+          await saveSlot.mutateAsync({
+            templateId: id,
+            habitId,
+            durationMin: midpointOf(habit.durationMinMin, habit.durationMaxMin),
+            gapBeforeMin: 0,
+            pinnedClock: null,
+            role: "stack",
+            priorityOverride: null,
+            scheduling: "soft",
+          });
+        }
+      } catch {
+        setLine(COPY.saveError(""));
+      } finally {
+        await refresh();
+      }
+    },
+    [options.withTemplate, ensureTemplate, utils, saveSlot, refresh],
+  );
+
+  const rows: LandscapeRow[] = React.useMemo(
+    () =>
+      entries.map((entry) => ({
+        key: entry.title,
+        title: entry.title,
+        icon: entry.icon,
+        rangeMin: entry.rangeMin,
+        rangeMax: entry.rangeMax,
+        selected: isSelected(entry.title),
+        committing: pending.has(entry.title),
+        locked: locked.has(entry.title),
+      })),
+    [entries, isSelected, pending, locked],
+  );
+
+  const count = options.withTemplate
+    ? slots.length + [...pending.entries()].filter(([title, on]) => on && !byTitle.has(title.toLowerCase())).length
+    : existing.length + [...pending.entries()].filter(([title, on]) => on && !byTitle.has(title.toLowerCase())).length;
 
   return {
-    loading: habits.isLoading,
+    loading: habits.isLoading || (options.withTemplate && templates.isLoading),
     entries,
-    existingTitles,
-    ticked,
-    selected,
-    count: selected.length,
+    rows,
+    count,
     toggle,
-    setPriority,
-    setLength,
-    commit,
-    committing,
-    refresh: () => utils.habit.list.invalidate(),
+    adopt,
+    line,
+    refresh,
   };
 }
 

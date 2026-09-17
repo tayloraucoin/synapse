@@ -4,39 +4,54 @@ import * as React from "react";
 
 import {
   Button,
-  CheckboxField,
   EllipsesMenu,
-  ListRow,
+  EmojiSlot,
+  GroupHeading,
   MinutesStepper,
   PickerList,
+  SelectRow,
+  SelectRowList,
   SkeletonRow,
+  SortableHandle,
+  SortableList,
+  StatusLine,
   Text,
   type PickerListGroup,
 } from "@syn/ui";
 import { DURATION_MAX, DURATION_MIN } from "@syn/constants";
-import type { SlotView } from "@syn/types";
-import { clockFromMinutes, clockToMinutes, computeBudget, formatClockFromMinutes } from "@syn/utils";
+import { clockToMinutes, computeBudget, formatClockFromMinutes } from "@syn/utils";
 
-import { midpoint, parseClock, walkSlots } from "@/components/block-editor";
+import { midpoint, walkSlots } from "@/components/block-editor";
 import { HabitSheet } from "@/components/habit-sheet";
 import { useOnline } from "@/lib/hooks/use-online";
 import { trpc } from "@/lib/trpc/client";
 
 import { SETUP_COPY as COPY } from "./copy";
 import { FactScreen } from "./fact-screen";
+import { usePrepSteps } from "./use-prep-steps";
 
 /**
- * Screen 7 — Before work (UX v1.1 §4.7).
+ * Screen 7 — Before work (UX v1.2 §4.7; RUN-10), on DYN-11.
  *
- * "The prep list with a length each, so the morning's budget can be
- * computed." Items here only have lengths — the stack is computed backward
- * from work (§3.3) — so nothing on this screen asks for a time. Each tick or
- * stepper change writes a slot on the prep template at once (`priority` 7,
- * `hard`: prep is mandatory, §4.7); *Continue* has nothing left to save.
+ * Two parts under `GroupHeading`s with a hairline between (S7.7):
  *
- * The footer is `computeBudget` over the profile's wake and work start, the
- * orient template's total and this list's walk — the same arithmetic the
- * fit screen and the block editor show (§3.10).
+ * WHAT'S INCLUDED — the ten starter steps as `SelectRow`s with their glyphs
+ * and ranges, plus the person's own; nothing pre-selected. A tap ticks at
+ * once and creates the step and its slot; a second tap un-ticks (R30, never
+ * a duplicate). *Add something else* opens *A step before work* — emoji,
+ * name, a compact range, and nothing else.
+ *
+ * HOW LONG EACH TAKES — one row per included step, in order: handle · glyph
+ * · title · `MinutesStepper` · menu, centred on the stepper's 44px (S7.6).
+ * The stepper's accessible name is *Length, Breakfast*; nothing visible says
+ * *Takes*. The menu offers *Make it one of two* (the inline second row, as
+ * v1.1) and *Remove*. The list reorders by handle — the getting-ready order
+ * the day builder starts from.
+ *
+ * Nothing here asks for a time — the stack is computed backward from work
+ * (§3.3). The sticky line is `computeBudget` over the profile's wake and
+ * work start, the orient template's total and this list's walk — the same
+ * arithmetic the block editor shows. *Continue · n steps* only navigates.
  */
 
 const ORIENT_FALLBACK_MIN = 0;
@@ -54,103 +69,17 @@ export function Step7BeforeWork({
 }) {
   const online = useOnline();
   const utils = trpc.useUtils();
-
-  const prepList = trpc.template.list.useQuery({ includeArchived: false, kind: "prep" });
+  const steps = usePrepSteps();
   const orientList = trpc.template.list.useQuery({ includeArchived: false, kind: "orient" });
-  const create = trpc.template.create.useMutation();
-  const templateId = prepList.data?.[0]?.id ?? null;
-
-  // The prep template exists from the first visit: the list is its slots.
-  const creating = React.useRef(false);
-  React.useEffect(() => {
-    if (!prepList.isSuccess || templateId !== null || creating.current) return;
-    creating.current = true;
-    void create.mutateAsync({ kind: "prep" }).then(() => utils.template.list.invalidate());
-  }, [prepList.isSuccess, templateId, create, utils]);
-
-  const detail = trpc.template.get.useQuery({ id: templateId ?? "" }, { enabled: templateId !== null });
-  const prepHabits = trpc.habit.list.useQuery({ includeArchived: false, blockKind: "prep" });
-  const saveSlot = trpc.template.saveSlot.useMutation();
-  const removeSlot = trpc.template.removeSlot.useMutation();
-  const fromLibrary = trpc.habit.createFromStarterLibrary.useMutation();
 
   const [oneOfOpen, setOneOfOpen] = React.useState<{ slotId: string; habitId: string | null; minutes: number } | null>(null);
-  const [habitSheetOpen, setHabitSheetOpen] = React.useState(false);
+  const [stepSheetOpen, setStepSheetOpen] = React.useState(false);
 
-  const slots = React.useMemo(() => detail.data?.slots ?? [], [detail.data?.slots]);
-  const habits = React.useMemo(() => prepHabits.data?.habits ?? [], [prepHabits.data?.habits]);
-  const busy = saveSlot.isPending || removeSlot.isPending || fromLibrary.isPending;
-  const disabled = !online || busy || templateId === null;
-
-  async function refresh(): Promise<void> {
-    if (templateId !== null) await utils.template.get.invalidate({ id: templateId });
-    await utils.template.list.invalidate();
-    await utils.habit.list.invalidate();
-  }
-
-  async function addSlot(habitId: string, durationMin: number, partnerId?: string): Promise<void> {
-    if (templateId === null) return;
-    await saveSlot.mutateAsync({
-      templateId,
-      habitId,
-      durationMin,
-      gapBeforeMin: 0,
-      pinnedClock: null,
-      role: "stack",
-      priorityOverride: 7,
-      scheduling: "hard",
-      ...(partnerId === undefined ? {} : { alternatesWith: partnerId, alternatesDefault: false }),
-    });
-    await refresh();
-  }
-
-  /** A tick: the starter row, then a slot at the offer's length. */
-  async function tick(title: string, minutes: number, on: boolean): Promise<void> {
-    if (templateId === null) return;
-    const slot = slots.find((row) => row.title === title);
-    if (!on) {
-      if (slot) {
-        await removeSlot.mutateAsync({ id: slot.id });
-        await refresh();
-      }
-      return;
-    }
-    let habit = habits.find((row) => row.title === title) ?? null;
-    if (habit === null) {
-      await fromLibrary.mutateAsync({ blockKind: "prep", titles: [title] });
-      const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind: "prep" });
-      habit = fresh.habits.find((row) => row.title === title) ?? null;
-    }
-    if (habit === null) return;
-    await addSlot(habit.id, minutes);
-  }
-
-  async function setLength(slot: SlotView, durationMin: number): Promise<void> {
-    if (templateId === null) return;
-    await saveSlot.mutateAsync({
-      templateId,
-      slotId: slot.id,
-      habitId: slot.habitId,
-      durationMin,
-      gapBeforeMin: slot.gapBeforeMin,
-      pinnedClock: toInputClock(slot.pinnedClock),
-      role: slot.role,
-      priorityOverride: slot.overridden ? slot.priority : null,
-      scheduling: slot.scheduling,
-    });
-    await refresh();
-  }
-
-  async function remove(slot: SlotView): Promise<void> {
-    await removeSlot.mutateAsync({ id: slot.id });
-    await refresh();
-  }
+  const disabled = !online || steps.templateId === null;
+  const { slots, habits } = steps;
 
   // The footer: this list's walk against the profile and the orient total.
-  const walk = React.useMemo(
-    () => walkSlots(slots, "prep", "backward", null, null),
-    [slots],
-  );
+  const walk = React.useMemo(() => walkSlots(slots, "prep", "backward", null, null), [slots]);
   const totalMin = walk.totalMin;
   const orientMin = orientList.data?.[0]?.totalMin ?? ORIENT_FALLBACK_MIN;
   const wakeMin = clockToMinutes(initialWake.slice(0, 5));
@@ -160,7 +89,6 @@ export function Step7BeforeWork({
       ? null
       : computeBudget({ wakeMin, workStartMin: workMin, orientMin, prepTotalMin: totalMin }).availableMin;
 
-  const ticked = new Set(slots.map((slot) => slot.title));
   const groupsFor = (excludeHabitId: string | null): PickerListGroup[] => {
     const items = habits
       .filter((habit) => habit.id !== excludeHabitId)
@@ -168,6 +96,7 @@ export function Step7BeforeWork({
     return items.length === 0 ? [] : [{ heading: COPY.addSomethingElse, items }];
   };
   const onWalk = slots.filter((slot) => slot.alternates === null || slot.alternates.isDefault);
+  const stepCount = onWalk.length;
 
   return (
     <FactScreen
@@ -175,155 +104,177 @@ export function Step7BeforeWork({
       heading={COPY.step7Heading}
       body={COPY.step7Body}
       save={null}
+      primaryLabel={COPY.continueSteps(stepCount)}
       embedded={embedded}
       onSaved={onSaved}
     >
-      <div className="flex flex-col gap-(--space-5)">
-        {/* The chooser band: six offers, nothing checked (§4.7). */}
-        <div role="group" aria-label={COPY.step7Heading} className="flex flex-wrap gap-x-(--space-4) gap-y-(--space-2)">
-          {COPY.prepOffers.map((offer) => (
-            <CheckboxField
-              key={offer.title}
-              checked={ticked.has(offer.title)}
-              disabled={disabled}
-              onCheckedChange={(next) => {
-                void tick(offer.title, offer.minutes, next === true);
-              }}
-            >
-              {offer.title}
-            </CheckboxField>
-          ))}
-        </div>
+      <div className="flex flex-col gap-(--space-6)">
+        {/* What's included: the starters and the person's own, nothing pre-selected (§4.7). */}
+        <section className="flex flex-col gap-(--space-3)">
+          <GroupHeading>{COPY.whatsIncluded}</GroupHeading>
+          <SelectRowList columns={2}>
+            {steps.rows.map((row) => (
+              <SelectRow
+                key={row.key}
+                icon={row.icon}
+                title={row.title}
+                detail={COPY.rangeLabel(row.rangeMin, row.rangeMax)}
+                selected={row.selected}
+                committing={row.committing}
+                disabled={disabled || row.locked}
+                disabledCaption={row.locked ? COPY.alreadyInLibrary : undefined}
+                onToggle={(next) => steps.toggle(row, next)}
+              />
+            ))}
+          </SelectRowList>
+          <Button
+            variant="secondary"
+            className="w-full wide:w-auto wide:self-start"
+            disabled={disabled}
+            onClick={() => setStepSheetOpen(true)}
+          >
+            {COPY.addSomethingElse}
+          </Button>
+          {steps.line === null ? null : <StatusLine variant="sync-issues" text={steps.line} placement="inline" />}
+        </section>
 
-        {detail.isLoading || (prepList.isSuccess && templateId === null) ? (
-          <div className="flex flex-col gap-(--space-2)">
-            <SkeletonRow />
-            <SkeletonRow />
-          </div>
-        ) : onWalk.length === 0 ? (
-          <Text as="p" tone="secondary">
-            {COPY.nothingYetPrep}
-          </Text>
-        ) : (
-          <ul className="flex flex-col">
-            {onWalk.map((slot) => {
-              const other =
-                slot.alternates === null
-                  ? null
-                  : (slots.find((row) => row.id !== slot.id && row.alternates?.group === slot.alternates?.group) ?? null);
-              return (
-                <React.Fragment key={slot.id}>
-                  <ListRow
-                    as="li"
-                    title={slot.title}
-                    meta={
-                      other === null
-                        ? undefined
-                        : `${COPY.oneOf} · ${COPY.or} ${other.title} · ${other.durationMin} min`
-                    }
-                    trailing={
-                      <span className="flex items-center gap-(--space-2)">
-                        <MinutesStepper
-                          label={`${COPY.takes}: ${slot.title}`}
-                          value={slot.durationMin}
-                          // UX v1.2 (RUN-7): the tap moves the value; the write is debounced.
-                          onCommit={(next) => setLength(slot, next)}
-                          min={DURATION_MIN}
-                          max={DURATION_MAX}
-                          step={5}
-                          disabled={disabled}
-                        />
-                        <EllipsesMenu
-                          label={slot.title}
-                          disabled={disabled}
-                          items={[
-                            other === null
-                              ? {
-                                  label: COPY.makeOneOf,
-                                  onClick: () => setOneOfOpen({ slotId: slot.id, habitId: null, minutes: 15 }),
-                                }
-                              : { label: COPY.justThisOne, onClick: () => void remove(other) },
-                            { label: COPY.remove, onClick: () => void remove(slot) },
-                          ]}
-                        />
+        <hr className="border-hairline m-0 border-t" />
+
+        {/* How long each takes: handle · glyph · title · stepper · menu, one line (§4.7). */}
+        <section className="flex flex-col gap-(--space-3)">
+          <GroupHeading>{COPY.howLongEachTakes}</GroupHeading>
+          {!steps.ready ? (
+            <div className="flex flex-col gap-(--space-2)">
+              <SkeletonRow />
+              <SkeletonRow />
+            </div>
+          ) : onWalk.length === 0 ? (
+            <Text as="p" variant="secondary" tone="secondary">
+              {COPY.nothingYetPrep}
+            </Text>
+          ) : (
+            <SortableList
+              label={COPY.howLongEachTakes}
+              items={onWalk.map((slot) => ({ id: slot.id, title: slot.title, slot }))}
+              disabled={disabled}
+              onReorder={(ids) => void steps.reorder(onWalk.map((slot) => slot.id), ids)}
+              renderItem={(item, { handleProps }) => {
+                const slot = item.slot;
+                const other =
+                  slot.alternates === null
+                    ? null
+                    : (slots.find((row) => row.id !== slot.id && row.alternates?.group === slot.alternates?.group) ?? null);
+                return (
+                  <div className="flex min-w-0 flex-1 flex-col gap-(--space-2)">
+                    <div className="flex min-w-0 items-center gap-(--space-2)">
+                      <SortableHandle {...handleProps} />
+                      <EmojiSlot icon={slot.icon} />
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <Text as="span" variant="row-title" weight={500} truncate>
+                          {slot.title}
+                        </Text>
+                        {other === null ? null : (
+                          <Text as="span" variant="caption" tone="secondary" truncate>
+                            {`${COPY.oneOf} · ${COPY.or} ${other.title} · ${other.durationMin} min`}
+                          </Text>
+                        )}
                       </span>
-                    }
-                  />
-                  {oneOfOpen?.slotId === slot.id ? (
-                    <li className="bg-surface/60 flex flex-col gap-(--space-3) rounded-(--radius) p-(--space-3)">
-                      <Text as="span" variant="caption" tone="secondary">
-                        {COPY.or}
-                      </Text>
-                      <PickerList
-                        groups={groupsFor(slot.habitId)}
-                        value={oneOfOpen.habitId}
-                        onSelect={(id) => {
-                          const chosen = habits.find((row) => row.id === id);
-                          setOneOfOpen({ slotId: slot.id, habitId: id, minutes: chosen ? midpoint(chosen) : 15 });
-                        }}
-                        createLabel={COPY.addSomethingElse}
-                        onCreate={() => setHabitSheetOpen(true)}
-                        searchLabel={COPY.searchHabits}
-                        emptyText={COPY.nothingYetPrep}
-                        presentation="inline"
-                      />
                       <MinutesStepper
-                        label={COPY.takes}
-                        value={oneOfOpen.minutes}
-                        onChange={(next) => setOneOfOpen({ ...oneOfOpen, minutes: next })}
+                        label={COPY.lengthOf(slot.title)}
+                        value={slot.durationMin}
+                        onCommit={(next) => steps.setLength(slot, next)}
                         min={DURATION_MIN}
                         max={DURATION_MAX}
                         step={5}
-                        disabled={disabled || oneOfOpen.habitId === null}
+                        disabled={disabled}
+                        compact
+                        className="shrink-0 [&>label]:sr-only"
                       />
-                      <div className="flex justify-end gap-(--space-2)">
-                        <Button variant="ghost" size="sm" onClick={() => setOneOfOpen(null)}>
-                          {COPY.justThisOne}
-                        </Button>
-                        <Button
-                          size="sm"
-                          disabled={disabled || oneOfOpen.habitId === null}
-                          busy={saveSlot.isPending}
-                          onClick={() => {
-                            if (oneOfOpen.habitId === null) return;
-                            void addSlot(oneOfOpen.habitId, oneOfOpen.minutes, slot.id).then(() => setOneOfOpen(null));
-                          }}
-                        >
-                          {COPY.add}
-                        </Button>
-                      </div>
-                    </li>
-                  ) : null}
-                </React.Fragment>
-              );
-            })}
-          </ul>
-        )}
+                      <EllipsesMenu
+                        label={slot.title}
+                        disabled={disabled}
+                        items={[
+                          other === null
+                            ? {
+                                label: COPY.makeOneOf,
+                                onClick: () => setOneOfOpen({ slotId: slot.id, habitId: null, minutes: 15 }),
+                              }
+                            : { label: COPY.justThisOne, onClick: () => void steps.remove(other) },
+                          { label: COPY.remove, onClick: () => void steps.remove(slot) },
+                        ]}
+                      />
+                    </div>
 
-        <Button
-          variant="ghost"
-          className="self-start"
-          disabled={disabled}
-          onClick={() => setHabitSheetOpen(true)}
-        >
-          {COPY.addSomethingElse}
-        </Button>
+                    {oneOfOpen?.slotId === slot.id ? (
+                      <div className="bg-surface/60 flex flex-col gap-(--space-3) rounded-(--radius) p-(--space-3)">
+                        <Text as="span" variant="caption" tone="secondary">
+                          {COPY.or}
+                        </Text>
+                        <PickerList
+                          groups={groupsFor(slot.habitId)}
+                          value={oneOfOpen.habitId}
+                          onSelect={(id) => {
+                            const chosen = habits.find((row) => row.id === id);
+                            setOneOfOpen({ slotId: slot.id, habitId: id, minutes: chosen ? midpoint(chosen) : 15 });
+                          }}
+                          createLabel={COPY.addSomethingElse}
+                          onCreate={() => setStepSheetOpen(true)}
+                          searchLabel={COPY.searchHabits}
+                          emptyText={COPY.nothingYetPrep}
+                          presentation="inline"
+                        />
+                        <MinutesStepper
+                          label={COPY.lengthOf(COPY.or)}
+                          value={oneOfOpen.minutes}
+                          onChange={(next) => setOneOfOpen({ ...oneOfOpen, minutes: next })}
+                          min={DURATION_MIN}
+                          max={DURATION_MAX}
+                          step={5}
+                          disabled={disabled || oneOfOpen.habitId === null}
+                          className="[&>label]:sr-only"
+                        />
+                        <div className="flex justify-end gap-(--space-2)">
+                          <Button variant="ghost" size="sm" onClick={() => setOneOfOpen(null)}>
+                            {COPY.justThisOne}
+                          </Button>
+                          <Button
+                            size="sm"
+                            disabled={disabled || oneOfOpen.habitId === null}
+                            busy={steps.busy}
+                            onClick={() => {
+                              if (oneOfOpen.habitId === null) return;
+                              void steps
+                                .addSlot(oneOfOpen.habitId, oneOfOpen.minutes, slot.id)
+                                .then(() => steps.refresh())
+                                .then(() => setOneOfOpen(null));
+                            }}
+                          >
+                            {COPY.add}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              }}
+            />
+          )}
+        </section>
 
         {/* Sticky, tabular — the budget the morning will have (§4.7). */}
-        <div className="bg-paper sticky bottom-0 border-t border-hairline pt-(--space-3)">
+        <div className="bg-paper border-hairline sticky bottom-[calc(var(--target)+2*var(--space-3)+env(safe-area-inset-bottom))] border-t pt-(--space-3)">
           <Text as="p" variant="caption" tone="secondary" className="tabular-nums">
             {left === null || workMin === null
               ? COPY.prepFooterNoWork(totalMin)
-              : COPY.prepFooter(totalMin, formatClockFromMinutes(workMin), formatClockFromMinutes(wakeMin), left)}
+              : COPY.prepFooter(totalMin, formatClockFromMinutes(wakeMin), formatClockFromMinutes(workMin), left)}
           </Text>
         </div>
       </div>
 
       <HabitSheet
-        open={habitSheetOpen}
-        mode="create"
-        defaults={{ blockKind: "prep" }}
-        onOpenChange={setHabitSheetOpen}
+        open={stepSheetOpen}
+        mode="step"
+        onOpenChange={setStepSheetOpen}
         onSaved={(created) => {
           void utils.habit.list.invalidate().then(async () => {
             const fresh = await utils.habit.get.fetch({ id: created.id });
@@ -332,16 +283,11 @@ export function Step7BeforeWork({
               setOneOfOpen({ ...oneOfOpen, habitId: created.id, minutes });
               return;
             }
-            await addSlot(created.id, minutes);
+            await steps.addSlot(created.id, minutes);
+            await steps.refresh();
           });
         }}
       />
     </FactScreen>
   );
-}
-
-/** "07:20" for the validator from the view's "7:20" / "7:20 AM". */
-function toInputClock(clock: string | null): string | null {
-  const minutes = parseClock(clock);
-  return minutes === null ? null : clockFromMinutes(minutes);
 }

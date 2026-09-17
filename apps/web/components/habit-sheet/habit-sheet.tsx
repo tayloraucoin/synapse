@@ -37,6 +37,7 @@ import { useOnline } from "@/lib/hooks/use-online";
 
 import { HABIT_SHEET_COPY as COPY } from "./copy";
 import { IconChooser } from "./icon-chooser";
+import { QuickHabitSheet, type QuickHabitMode } from "./quick-habit-sheet";
 import { useHabitSheet, type UseHabitSheetOptions } from "./use-habit-sheet";
 
 /**
@@ -67,17 +68,40 @@ const BLOCK_CHIPS: readonly QuickChip[] = [
   { label: COPY.blockAnywhere, value: ANYWHERE },
 ];
 
-export interface HabitSheetProps extends UseHabitSheetOptions {
+export interface FullHabitSheetProps extends UseHabitSheetOptions {
   /** Opens CT-02 stacked, from the chip picker's *+ New category*. */
   onCreateCategory?: () => void;
   onRestore?: () => void;
 }
 
-export function HabitSheet({
+/** UX v1.2 §4.7, §4.8 (RUN-10): the two quick modes — emoji, name, range, nothing else. */
+export interface QuickHabitSheetProps {
+  open: boolean;
+  mode: QuickHabitMode;
+  onOpenChange: (open: boolean) => void;
+  onSaved?: (habit: { id: string }) => void;
+}
+
+export type HabitSheetProps = FullHabitSheetProps | QuickHabitSheetProps;
+
+function isQuick(props: HabitSheetProps): props is QuickHabitSheetProps {
+  return props.mode === "step" || props.mode === "morning-habit";
+}
+
+/**
+ * The one door. `mode: "step" | "morning-habit"` opens the three-field sheet
+ * (UX v1.2 S7.3); `"create" | "edit"` opens LB-02's thirteen fields.
+ */
+export function HabitSheet(props: HabitSheetProps) {
+  if (isQuick(props)) return <QuickHabitSheet {...props} />;
+  return <FullHabitSheet {...props} />;
+}
+
+function FullHabitSheet({
   onCreateCategory,
   onRestore,
   ...options
-}: HabitSheetProps) {
+}: FullHabitSheetProps) {
   const online = useOnline();
   const sheet = useHabitSheet(options);
 

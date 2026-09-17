@@ -12,7 +12,9 @@ export const LIBRARY_COPY = {
   /** The three groups, in this fixed order (Epic 1 LB-01 read 3). */
   /** UX v1.1 §4.15: grouped by block first — the five habit-holding words. */
   groupMorning: "Morning",
-  groupBeforeWork: "Before work",
+  /** UX v1.2 §1.4, R33 (RUN-10): the group is *Getting ready* and its rows are steps. */
+  groupBeforeWork: "Getting ready",
+  addAStep: "Add a step",
   groupBreak: "Break",
   groupWindDown: "Wind-down",
   groupAnywhere: "Anywhere",

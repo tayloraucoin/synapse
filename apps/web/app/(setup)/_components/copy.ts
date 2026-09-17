@@ -132,52 +132,58 @@ export const SETUP_COPY = {
 
   /* ------------------------------------------------------- screen 7 -- */
   step7Heading: "What has to happen before you can start?",
-  step7Body: "Breakfast, coffee, the walk, the drive. Each with a rough length.",
-  /** The six offers and their default lengths (§4.7). */
-  prepOffers: [
-    { title: "Breakfast", minutes: 20 },
-    { title: "Coffee", minutes: 5 },
-    { title: "Shower", minutes: 10 },
-    { title: "Walk", minutes: 15 },
-    { title: "Transit", minutes: 30 },
-    { title: "Walk the dog", minutes: 20 },
-  ] as const,
+  step7Body: "Breakfast, coffee, the walk, the drive.",
+  /** The two parts (v1.2 §4.7). The starters themselves are `STARTER_LIBRARY.prep`. */
+  whatsIncluded: "What’s included",
+  howLongEachTakes: "How long each takes",
   addSomethingElse: "Add something else",
   makeOneOf: "Make it one of two",
   justThisOne: "Just this one",
   remove: "Remove",
   oneOf: "one of",
   or: "or…",
-  takes: "Takes",
-  /** "Adds up to 45 min · work by 9:00 · up at 7:00 · 72 min left for the routine" */
-  prepFooter: (total: number, work: string, wake: string, left: number) =>
-    `Adds up to ${total} min · work by ${work} · up at ${wake} · ${left} min left for the routine`,
+  /** The stepper's accessible name — *Length, Breakfast*; nothing visible says it. */
+  lengthOf: (title: string) => `Length, ${title}`,
+  /** "Adds up to 45 min · up at 7:00 · work by 9:00 · 72 min for the routine" */
+  prepFooter: (total: number, wake: string, work: string, left: number) =>
+    `Adds up to ${total} min · up at ${wake} · work by ${work} · ${left} min for the routine`,
   prepFooterNoWork: (total: number) => `Adds up to ${total} min`,
-  nothingYetPrep: "Nothing yet — tick what applies.",
+  /** [COPY] */
+  nothingYetPrep: "Nothing yet — tap what applies.",
+  continueSteps: (n: number) => (n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "step" : "steps"}`),
+  /** [COPY] *Couldn't save Breakfast. Try again.* */
+  stepSaveError: (title: string) => `Couldn’t save ${title}. Try again.`,
 
   /* ------------------------------------------------------- screen 8 -- */
   step8Heading: "What do you do, or want to do, to start the day well?",
   step8Body: "Everything. It doesn't have to fit.",
-  tabRecommended: "Recommended",
-  tabAll: "All",
-  tabSelected: (n: number) => `Selected (${n})`,
-  groupBody: "Body",
-  groupMind: "Mind",
+  /** The chooser's own words are `LANDSCAPE_COPY`; these are the screen's. */
   rangeLabel: (min: number, max: number) => `${min}–${max} min`,
-  addYourOwn: "Add your own",
   searchHabits: "Search",
-  noMatches: (query: string) => `No habits match "${query}"`,
-  nothingSelected: "Nothing yet — tick what you do, or want to.",
-  priority: "Priority",
-  length: "Length",
   continueHabits: (n: number) => (n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "habit" : "habits"}`),
   alreadyInLibrary: "in your library",
 
   /* ------------------------------------------------------- screen 9 -- */
-  /** [COPY] The placeholder until RUN-10 — v1.2 §4.9's heading. */
-  step9Heading: "Your routine, ranked",
-  /** [COPY — needs Vesper sign-off: the placeholder's one line.] */
-  step9Placeholder: "The ranking arrives here. Continue for now.",
+  step9Heading: "How much does each one matter, and how long does it take?",
+  step9Body: "Rough is fine. The morning is built from these.",
+  howMuchItMatters: "How much it matters",
+  usuallyTakes: "Usually takes",
+  addAShorterVersion: "Add a shorter version",
+  addALongerVersion: "Add a longer version",
+  /** The version row's label field, and its two placeholders (v1.2 §4.9). */
+  versionLabel: "Version",
+  versionQuick: "Quick",
+  versionFull: "Full",
+  /** [COPY] The default version's name, seeded from *usually* (TD-11). */
+  versionUsual: "Usual",
+  /** The pencil's accessible name. */
+  editRange: "Edit the range",
+  rangeEditorLabel: "Range",
+  /** "Breath work · matters 5 · usually 8 · quick 5" */
+  rankedSummary: (title: string, matters: number, usually: number, versions: readonly string[]) =>
+    [title, `matters ${matters}`, `usually ${usually}`, ...versions].join(" · "),
+  /** [COPY] */
+  nothingToRank: "Nothing to rank yet.",
 
   /* ------------------------------------------------------ screen 10 -- */
   step10Heading: "Do you train?",

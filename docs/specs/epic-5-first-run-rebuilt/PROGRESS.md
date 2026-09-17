@@ -13,7 +13,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | RUN-7 | `@syn/ui` for v1.2 | RUN-1 | Complete (batch 4; `Card`, `EmojiSlot`, `SelectRow`/`SelectRowList`, `SortableList`, `RangeEditor`, `RichTextEditor`, `TagInput`, `PassageCarousel`, `useOptimisticValue`, the ten extensions; every state a story; key paths verified in the browser; the Storybook build and the four commands pass; **Vesper's story review pending** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-8 | The frame and screens 1–5 | RUN-3, RUN-7 | Complete (batch 5; fourteen steps, 9 and 13 as placeholders, 14 a 404; screens 1–5 rebuilt; `WorkDayTypeCard`; the fixture sheet's kinds and glyph; *Work-day types* under Settings; the four commands and the Storybook build pass; **the signed-in walk is unverified — no session in this thread; Vesper's review pending** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-9 | Screen 6 and the orient frame | RUN-4, RUN-7, RUN-8 | Complete (batch 5; `components/passages/` with the sheet, uploads, undo and reorder; screen 6 with the quote and the three switches writing at once; the frame's carousel, *Last night* disclosure and third field; the four commands pass; **the signed-in walk is unverified — no session in this thread; Vesper and Sage pending** — see `DEVIATIONS.md`) | 2026-09-16 |
-| RUN-10 | Screens 7–9 | RUN-8, RUN-3 | Not started | — |
+| RUN-10 | Screens 7–9 | RUN-8, RUN-3 | Complete (batch 6; `SelectRow` ticks with a per-row write queue on 7 and 8; the sortable length rows; `HabitSetupCard` with versions on 9; the two quick sheet modes; *Getting ready* in the library; the four commands and the Storybook build pass; **the signed-in walk is unverified — Vesper pending** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-11 | Screens 10–12 | RUN-8, RUN-3, RUN-6 | Not started | — |
 | RUN-12 | Screen 13 — the day builder | RUN-5, RUN-10, RUN-11 | Not started | — |
 | RUN-13 | Screen 14 and the morning modes | RUN-12, RUN-6, RUN-9 | Not started | — |
@@ -31,7 +31,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] RUN-7
 - [x] RUN-8
 - [x] RUN-9
-- [ ] RUN-10
+- [x] RUN-10
 - [ ] RUN-11
 - [ ] RUN-12
 - [ ] RUN-13

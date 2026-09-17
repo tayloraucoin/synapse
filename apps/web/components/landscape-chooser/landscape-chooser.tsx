@@ -4,40 +4,38 @@ import * as React from "react";
 
 import {
   Button,
-  CheckboxField,
   GroupHeading,
-  ListRow,
-  MinutesStepper,
   SearchField,
+  SelectRow,
+  SelectRowList,
   SkeletonRow,
-  Stepper17,
+  StatusLine,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
   Text,
-  type Stepper17Value,
 } from "@syn/ui";
-import { DURATION_MAX, DURATION_MIN } from "@syn/constants";
-import type { StarterLibraryEntry } from "@syn/constants";
 
 import { HabitSheet } from "@/components/habit-sheet";
 
 import { LANDSCAPE_COPY as COPY } from "./copy";
-import type { LandscapeApi } from "./use-landscape";
+import type { LandscapeApi, LandscapeRow } from "./use-landscape";
 
 /**
- * The landscape — UX v1.1 §4.8: "Capture everything the person does or wants
- * to do to start the day well, ranked — without asking any of it to fit."
+ * The landscape — UX v1.2 §4.8 (RUN-10), on v1.1 §4.8: "Capture everything
+ * the person does or wants to do to start the day well — without ranking or
+ * fitting any of it yet."
  *
- * THREE WORD TABS. *Recommended* is the library's dozen under *Body · Mind*;
- * *All* is the whole morning library with a search; *Selected (n)* is what is
- * ticked, each with the two facts the rest of the system needs — a
- * `Stepper17` and a `MinutesStepper`. *Add your own* on every tab opens the
- * habit sheet, shortened by its own rules (no type; the block preset).
+ * TWO WORD TABS. *Recommended* is the library's dozen under *Body · Mind*;
+ * *All* is the whole morning library with a search. *Selected* is gone —
+ * screen 9 is where the ranking happens. Every row is a `SelectRow` with its
+ * glyph and range; a tap ticks at once and creates the habit; a second tap
+ * un-ticks. *Add your own* on each tab opens *A morning habit* — emoji,
+ * name, range, nothing else.
  *
  * NO FIT NUMBER, NO MINUTES TOTAL, NOTHING PRE-CHECKED — "hospitality, not
- * persuasion". The screen is the data bank; the fit is screen 12's job.
+ * persuasion". The screen is the data bank.
  */
 
 const BODY = new Set(["Breath work", "Cold shower", "Stretch", "Walk", "Sunlight", "Water", "Make the bed"]);
@@ -51,37 +49,36 @@ export function LandscapeChooser({ landscape, disabled = false }: LandscapeChoos
   const [query, setQuery] = React.useState("");
   const [habitSheetOpen, setHabitSheetOpen] = React.useState(false);
 
-  const recommended = landscape.entries.filter((entry) => entry.recommended);
+  const recommended = landscape.rows.filter((row) => landscape.entries.find((entry) => entry.title === row.title)?.recommended);
   const trimmed = query.trim().toLowerCase();
-  const all = landscape.entries.filter(
-    (entry) => trimmed === "" || entry.title.toLowerCase().includes(trimmed),
-  );
+  const all = landscape.rows.filter((row) => trimmed === "" || row.title.toLowerCase().includes(trimmed));
 
-  const row = (entry: StarterLibraryEntry) => {
-    const inLibrary = landscape.existingTitles.has(entry.title.toLowerCase());
+  const select = (row: LandscapeRow) => {
+    const entry = landscape.entries.find((candidate) => candidate.title === row.title);
     return (
-      <li key={entry.title} className="flex items-center justify-between gap-(--space-3) py-(--space-2)">
-        <CheckboxField
-          checked={inLibrary || landscape.ticked.has(entry.title)}
-          disabled={disabled || inLibrary}
-          onCheckedChange={(next) => landscape.toggle(entry, next === true)}
-        >
-          {entry.title}
-          {inLibrary ? (
-            <Text as="span" variant="caption" tone="secondary" className="ms-(--space-2)">
-              {COPY.inLibrary}
-            </Text>
-          ) : null}
-        </CheckboxField>
-        <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
-          {COPY.range(entry.rangeMin, entry.rangeMax)}
-        </Text>
-      </li>
+      <SelectRow
+        key={row.key}
+        icon={row.icon}
+        title={row.title}
+        detail={COPY.range(row.rangeMin, row.rangeMax)}
+        selected={row.selected}
+        committing={row.committing}
+        disabled={disabled || row.locked}
+        disabledCaption={row.locked ? COPY.inLibrary : undefined}
+        onToggle={(next) => {
+          if (entry) landscape.toggle(entry, next);
+        }}
+      />
     );
   };
 
   const addYourOwn = (
-    <Button variant="ghost" className="self-start" disabled={disabled} onClick={() => setHabitSheetOpen(true)}>
+    <Button
+      variant="secondary"
+      className="w-full wide:w-auto wide:self-start"
+      disabled={disabled}
+      onClick={() => setHabitSheetOpen(true)}
+    >
       {COPY.addYourOwn}
     </Button>
   );
@@ -101,17 +98,18 @@ export function LandscapeChooser({ landscape, disabled = false }: LandscapeChoos
       <TabsList>
         <TabsTrigger value="recommended">{COPY.tabRecommended}</TabsTrigger>
         <TabsTrigger value="all">{COPY.tabAll}</TabsTrigger>
-        <TabsTrigger value="selected">{COPY.tabSelected(landscape.count)}</TabsTrigger>
       </TabsList>
 
+      {landscape.line === null ? null : <StatusLine variant="sync-issues" text={landscape.line} placement="inline" />}
+
       <TabsContent value="recommended" className="flex flex-col gap-(--space-4)">
-        <section className="flex flex-col gap-(--space-1)">
+        <section className="flex flex-col gap-(--space-2)">
           <GroupHeading>{COPY.groupBody}</GroupHeading>
-          <ul className="flex flex-col">{recommended.filter((entry) => BODY.has(entry.title)).map(row)}</ul>
+          <SelectRowList columns={2}>{recommended.filter((row) => BODY.has(row.title)).map(select)}</SelectRowList>
         </section>
-        <section className="flex flex-col gap-(--space-1)">
+        <section className="flex flex-col gap-(--space-2)">
           <GroupHeading>{COPY.groupMind}</GroupHeading>
-          <ul className="flex flex-col">{recommended.filter((entry) => !BODY.has(entry.title)).map(row)}</ul>
+          <SelectRowList columns={2}>{recommended.filter((row) => !BODY.has(row.title)).map(select)}</SelectRowList>
         </section>
         {addYourOwn}
       </TabsContent>
@@ -130,58 +128,16 @@ export function LandscapeChooser({ landscape, disabled = false }: LandscapeChoos
             {COPY.noMatches(query.trim())}
           </Text>
         ) : (
-          <ul className="flex flex-col">{all.map(row)}</ul>
-        )}
-        {addYourOwn}
-      </TabsContent>
-
-      <TabsContent value="selected" className="flex flex-col gap-(--space-3)">
-        {landscape.selected.length === 0 ? (
-          <Text as="p" tone="secondary">
-            {COPY.nothingSelected}
-          </Text>
-        ) : (
-          <ul className="flex flex-col">
-            {landscape.selected.map((item) => (
-              <ListRow
-                key={item.key}
-                as="li"
-                layout="wide"
-                title={item.title}
-                meta={item.rangeMin === null || item.rangeMax === null ? undefined : COPY.range(item.rangeMin, item.rangeMax)}
-                trailing={
-                  <span className="flex flex-col gap-(--space-2)">
-                    <Stepper17
-                      label={`${COPY.priority}: ${item.title}`}
-                      value={item.priority as Stepper17Value}
-                      onChange={(next) => landscape.setPriority(item.key, next)}
-                      disabled={disabled || item.existing}
-                      classes={{ label: "sr-only" }}
-                    />
-                    <MinutesStepper
-                      label={`${COPY.length}: ${item.title}`}
-                      value={item.durationMin}
-                      onChange={(next) => landscape.setLength(item.key, next, item.existing)}
-                      min={DURATION_MIN}
-                      max={DURATION_MAX}
-                      step={5}
-                      disabled={disabled}
-                    />
-                  </span>
-                }
-              />
-            ))}
-          </ul>
+          <SelectRowList columns={2}>{all.map(select)}</SelectRowList>
         )}
         {addYourOwn}
       </TabsContent>
 
       <HabitSheet
         open={habitSheetOpen}
-        mode="create"
-        defaults={{ blockKind: "morning" }}
+        mode="morning-habit"
         onOpenChange={setHabitSheetOpen}
-        onSaved={() => void landscape.refresh()}
+        onSaved={(habit) => void landscape.adopt(habit.id)}
       />
     </Tabs>
   );

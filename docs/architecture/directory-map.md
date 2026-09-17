@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-17 · 1277 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-17 · 1280 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -69,6 +69,7 @@ apps/
         _components/
           copy.ts
           fact-screen.tsx  # one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)
+          habit-setup-card.tsx  # one habit ranked (v1.2 §4.9, TD-11): matters, usually (the slot's length), up to three versions; every control writes its own fact
           rotation-rows.tsx
           step-1-shape.tsx
           step-10-training.tsx
@@ -82,8 +83,9 @@ apps/
           step-6-before-the-day.tsx
           step-7-before-work.tsx
           step-8-landscape.tsx
-          step-9-ranked.tsx  # PLACEHOLDER until RUN-10 — the heading and Continue, so the sequence never dead-ends
+          step-9-ranked.tsx  # screen 9 (v1.2 §4.9): one HabitSetupCard per morning slot in tick order; collapsed cards sink; nothing reorders here
           step-frame.tsx
+          use-prep-steps.ts  # screen 7's writes: a tick creates the step and its prep slot at once, queued per row so a second tap is never a second create (S7.5)
           work-day-type-card.tsx  # one kind of work day (v1.2 §4.3, TD-14): kind chips fill name and glyph, Done writes the template and collapses to one line
         setup/
           [step]/
@@ -313,6 +315,7 @@ apps/
         habit-sheet.tsx
         icon-chooser.tsx
         index.ts
+        quick-habit-sheet.tsx  # the habit sheet's two quick modes (v1.2 S7.3): emoji, name, range — a step before work, a morning habit
         use-habit-sheet.ts
       item-sheet/
         copy.ts

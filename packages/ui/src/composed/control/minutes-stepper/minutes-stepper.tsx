@@ -62,6 +62,12 @@ export interface MinutesStepperProps {
   error?: React.ReactNode;
   /** Show the snap note for two seconds after a clamp. */
   boundedNote?: boolean;
+  /**
+   * UX v1.2 §4.7 (RUN-10) — the length row: a 56px field and no *min* suffix,
+   * so handle · glyph · title · stepper · menu fit one 375px line. The unit
+   * is in the accessible name (*Length, Breakfast*) and the row's meaning.
+   */
+  compact?: boolean;
   disabled?: boolean;
   className?: string;
 }
@@ -79,6 +85,7 @@ export function MinutesStepper({
   helperText,
   error,
   boundedNote = true,
+  compact = false,
   disabled = false,
   className,
 }: MinutesStepperProps) {
@@ -165,11 +172,11 @@ export function MinutesStepper({
             const parsed = Number.parseInt(event.target.value, 10);
             commit(Number.isNaN(parsed) ? min : parsed);
           }}
-          className="w-[88px] text-center tabular-nums"
+          className={cn("text-center tabular-nums", compact ? "w-14" : "w-[88px]")}
         />
 
         <InputGroupAddon align="inline-end" className="gap-0 p-0">
-          <InputGroupText className="px-(--space-2)">min</InputGroupText>
+          {compact ? null : <InputGroupText className="px-(--space-2)">min</InputGroupText>}
           <InputGroupButton
             aria-label="More minutes"
             disabled={disabled || current >= max}

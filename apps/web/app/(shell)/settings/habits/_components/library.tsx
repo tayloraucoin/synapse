@@ -94,6 +94,7 @@ export function Library() {
 
   const [query, setQuery] = React.useState("");
   const [starterOpen, setStarterOpen] = React.useState(false);
+  const [stepSheetOpen, setStepSheetOpen] = React.useState(false);
   const [archiveTarget, setArchiveTarget] =
     React.useState<HabitSummaryView | null>(null);
 
@@ -260,10 +261,23 @@ export function Library() {
                       <ul className="flex flex-col">{sub.rows.map(renderRow)}</ul>
                     </React.Fragment>
                   ))}
+                  {/* UX v1.2 §4.17 (RUN-10): a step is added on the step sheet — emoji, name, range. */}
+                  {group.kind === "prep" ? (
+                    <Button variant="ghost" className="self-start" onClick={() => setStepSheetOpen(true)}>
+                      {COPY.addAStep}
+                    </Button>
+                  ) : null}
                 </section>
               );
             })
           )}
+
+          <HabitSheet
+            open={stepSheetOpen}
+            mode="step"
+            onOpenChange={setStepSheetOpen}
+            onSaved={() => void utils.habit.list.invalidate()}
+          />
 
           {archived.length === 0 ? null : (
             <ArchivedSection count={archived.length}>
