@@ -62,6 +62,13 @@ export interface WeekdayChipsProps {
   disabled?: boolean;
   /** Which convention `value` and `onChange` speak. Default: `Date.getDay()`. */
   indexing?: WeekdayIndexing;
+  /**
+   * UX v1.2 §4.11 (RUN-7) — a leading *Flexible* chip: set, it clears every
+   * day and renders ink; picking a day clears it. `undefined` hides the chip.
+   */
+  flexible?: boolean;
+  onFlexible?: (flexible: boolean) => void;
+  flexibleLabel?: string;
   className?: string;
 }
 
@@ -71,10 +78,14 @@ export function WeekdayChips({
   label,
   disabled = false,
   indexing = "date",
+  flexible,
+  onFlexible,
+  flexibleLabel = "Flexible",
   className,
 }: WeekdayChipsProps) {
   const groupLabelId = React.useId();
   const selected = new Set(indexing === "monday" ? value.map(toDateDay) : value);
+  const showFlexible = flexible !== undefined;
 
   const toggle = (day: Weekday) => {
     const next = new Set(selected);
@@ -82,6 +93,15 @@ export function WeekdayChips({
     else next.add(day);
     const ordered = DAYS.map((d) => d.value).filter((d) => next.has(d));
     onChange(indexing === "monday" ? ordered.map(toMondayFirst) : ordered);
+    // A day is a day; the week is no longer flexible.
+    if (flexible) onFlexible?.(false);
+  };
+
+  const toggleFlexible = () => {
+    const next = !flexible;
+    onFlexible?.(next);
+    // Flexible clears the days — the two are one answer.
+    if (next && value.length > 0) onChange([]);
   };
 
   return (
@@ -95,6 +115,29 @@ export function WeekdayChips({
       </Text>
 
       <div className="flex flex-wrap gap-(--space-1)">
+        {showFlexible ? (
+          <label
+            className={cn(
+              "inline-flex h-(--target) cursor-pointer items-center justify-center px-(--space-3)",
+              "rounded-(--radius) text-(length:--fs-body) font-medium",
+              "transition-colors duration-(--dur-state) ease-(--ease-settle)",
+              "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+              flexible
+                ? "bg-primary text-primary-foreground border border-transparent"
+                : "border-edge text-ink border hover:bg-surface",
+              disabled && "pointer-events-none opacity-40",
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={flexible}
+              disabled={disabled}
+              onChange={toggleFlexible}
+              className="sr-only"
+            />
+            <span>{flexibleLabel}</span>
+          </label>
+        ) : null}
         {DAYS.map((day) => {
           const isOn = selected.has(day.value);
 

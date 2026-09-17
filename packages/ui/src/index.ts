@@ -249,6 +249,15 @@ export {
   Separator,
 } from "./primitives/layout/separator";
 export {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./primitives/layout/card";
+export {
   Sheet,
   SheetClose,
   SheetContent,
@@ -408,8 +417,10 @@ export {
   type ReviewRegionProps,
 } from "./composed/display/review-region";
 export {
+  BandLabelPlacementContext,
   SCHEDULE_GUTTER_PX,
   ScheduleAxis,
+  type BandLabelPlacement,
   type ScheduleAxisProps,
 } from "./composed/display/schedule-axis";
 export {
@@ -476,6 +487,49 @@ export {
   type ListRowProps,
   type ListRowSurfaceVariants,
 } from "./composed/display/list-row";
+export {
+  EmojiSlot,
+  isIconValue,
+  type EmojiSlotProps,
+  type EmojiSlotSize,
+} from "./composed/display/emoji-slot";
+export {
+  PASSAGE_CAROUSEL_COPY,
+  PassageCarousel,
+  type PassageCarouselProps,
+  type PassageSlide,
+} from "./composed/display/passage-carousel";
+export {
+  SelectRow,
+  SelectRowList,
+  type SelectRowListProps,
+  type SelectRowProps,
+} from "./composed/control/select-row";
+export {
+  SORTABLE_LIST_COPY,
+  SortableHandle,
+  SortableList,
+  type SortableHandleProps,
+  type SortableItem,
+  type SortableListProps,
+  type SortableRenderState,
+} from "./composed/control/sortable-list";
+export {
+  RANGE_EDITOR_COPY,
+  RangeEditor,
+  type RangeEditorProps,
+  type RangeEditorValue,
+} from "./composed/control/range-editor";
+export {
+  RICH_TEXT_EDITOR_COPY,
+  RichTextEditor,
+  type RichTextEditorProps,
+} from "./composed/control/rich-text-editor";
+export {
+  TAG_INPUT_COPY,
+  TagInput,
+  type TagInputProps,
+} from "./composed/control/tag-input";
 export {
   SettingsRow,
   type SettingsRowProps,

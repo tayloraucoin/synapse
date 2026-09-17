@@ -21,13 +21,14 @@
  */
 "use client";
 
-import type { CategoryKey, Layout } from "@syn/types";
+import type { CategoryKey, IconValue, Layout } from "@syn/types";
 import Link from "next/link";
 import * as React from "react";
 
 import { cn } from "../../../lib/cn";
 import { Text } from "../../../primitives/typography/text";
 import { CategoryChip } from "../category-chip";
+import { EmojiSlot, isIconValue } from "../emoji-slot";
 import { Tag } from "../tag";
 import { listRowSurfaceVariants } from "./list-row.variants";
 
@@ -40,8 +41,8 @@ export interface ListRowClasses {
 }
 
 export interface ListRowProps {
-  /** An `ItemIcon` or a swatch. */
-  leading?: React.ReactNode;
+  /** An `ItemIcon` or a swatch — or, under v1.2, an `IconValue` rendered through `EmojiSlot` (RUN-7). */
+  leading?: React.ReactNode | IconValue;
   title: React.ReactNode;
   /** "10–20 min · importance 6" */
   meta?: React.ReactNode;
@@ -130,7 +131,7 @@ export function ListRow({
     <>
       {leading === undefined ? null : (
         <span className={cn("flex shrink-0 items-center", classes?.leading)}>
-          {leading}
+          {isIconValue(leading) ? <EmojiSlot icon={leading} /> : leading}
         </span>
       )}
       {identity}

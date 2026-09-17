@@ -4,7 +4,7 @@
 **Slice type:** Storybook-first component work — no route, no data, no procedure. The risk class is *a fork of the design system* (a second sortable beside `DragLayer` that shares its code; a second row beside `SelectRow`; a card with a shadow) and *a control that waits* (a stepper whose value follows the request rather than the tap).
 **Vesper review:** every story in both themes, reduced-motion, and 200% text; the optimistic stories under a slow network; the editor's five controls; the sortable driven by keyboard alone.
 
-**Status:** Not started
+**Status:** Complete — 2026-09-16 (batch 4; Vesper's story review pending — see `DEVIATIONS.md`)
 
 > **Vesper — story review.** Open `yarn ui:storybook`. For every composite below confirm: (1) each state in v1.2 §10.2's row is its own story; (2) light and dark read the same (tokens flip; no `dark:` classes); (3) the *slow network* control on `MinutesStepper`, `CountStepper`, `Stepper17` and `SelectRow` shows the value change on the tap and the hairline pulse after, never a disabled control; (4) `SortableList` can be driven by keyboard alone — Alt+↑/↓ — with the live region announcing; (5) `RichTextEditor` has exactly five toolbar controls and round-trips the sample Markdown; (6) `Card` has a hairline and no shadow; (7) `StepFrame`'s action row stays pinned with 3× viewport content; (8) at 200% text every target stays ≥ 44px and nothing scrolls sideways at 375px; (9) emoji slots are 44px squares, `aria-hidden`. State which stories were opened in which theme.
 

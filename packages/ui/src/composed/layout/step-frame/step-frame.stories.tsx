@@ -60,3 +60,35 @@ export const WithError: Story = { args: { error: "Couldn't save. Nothing changed
 export const Busy: Story = {
   args: { primary: { label: "Continue · 6 habits", onClick: () => {}, busy: true } },
 };
+
+/**
+ * UX v1.2 §4, R43 (RUN-7): three viewports of content; the action row stays
+ * pinned above the safe area with a hairline and paper behind it, and the
+ * last row is reachable above it. Scroll the story's frame.
+ */
+export const StickyActionsWithLongContent: Story = {
+  decorators: [
+    (Story) => (
+      <div className="flex h-[480px] max-w-(--content-text) flex-col overflow-y-auto p-(--space-4)">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    total: 14,
+    children: (
+      <ol className="m-0 flex list-decimal flex-col gap-(--space-3) ps-(--space-5)">
+        {Array.from({ length: 40 }, (_, index) => (
+          <li key={index}>
+            <Text as="span" tone="secondary">
+              Row {index + 1} of the screen&rsquo;s content
+            </Text>
+          </li>
+        ))}
+      </ol>
+    ),
+  },
+};
+
+/** The row in flow, for a screen whose layout pins its own. */
+export const ActionsInFlow: Story = { args: { stickyActions: false } };

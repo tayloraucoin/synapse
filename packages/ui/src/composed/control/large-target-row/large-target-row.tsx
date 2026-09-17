@@ -16,13 +16,19 @@
  * `text-text-disabled` with a caption *not yet* on the right, not tappable,
  * no explanation" — honest scope, in the quietest treatment. A disabled
  * option is not in the tab order and announces its caption.
+ *
+ * UX v1.2 §4 (RUN-7): an option may carry a `leading` slot — an `IconValue`
+ * renders through `EmojiSlot` (the 44px square, `aria-hidden`); any node
+ * renders as given. A disabled option fades its glyph to 0.4 with the rest.
  */
 "use client";
 
+import type { IconValue } from "@syn/types";
 import * as React from "react";
 
 import { cn } from "../../../lib/cn";
 import { Text } from "../../../primitives/typography/text";
+import { EmojiSlot, isIconValue } from "../../display/emoji-slot";
 
 export interface LargeTargetOption {
   value: string;
@@ -32,6 +38,8 @@ export interface LargeTargetOption {
   /** Not tappable; the caption says why in one word (§4.1). */
   disabled?: boolean;
   caption?: string;
+  /** An `IconValue` through `EmojiSlot`, or any node (v1.2). */
+  leading?: React.ReactNode | IconValue;
 }
 
 export interface LargeTargetRowProps {
@@ -72,6 +80,14 @@ export function LargeTargetRow({
         {options.map((option) => {
           const selected = option.value === value;
           const off = disabled || option.disabled === true;
+          const leading =
+            option.leading === undefined ? null : isIconValue(option.leading) ? (
+              <EmojiSlot icon={option.leading} className={cn(option.disabled && "opacity-40")} />
+            ) : (
+              <span className={cn("flex shrink-0 items-center", option.disabled && "opacity-40")}>
+                {option.leading}
+              </span>
+            );
 
           return (
             <label
@@ -103,6 +119,7 @@ export function LargeTargetRow({
                 onChange={() => onChange(option.value)}
                 className="sr-only"
               />
+              {leading}
               {stacked ? (
                 <span className="flex min-w-0 flex-1 flex-col gap-(--space-1)">
                   <Text

@@ -63,3 +63,47 @@ export const Disclosed: StoryObj = {
     );
   },
 };
+
+/**
+ * UX v1.2 §4 (RUN-7): *Change* opens the picker with *Done* beside it; *Done*,
+ * Enter, Escape or leaving the field returns it to the value line, and focus
+ * lands back on *Change*. `leading` is the person's emoji through `EmojiSlot`.
+ */
+export const DisclosedWithDone: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState("07:00");
+    return (
+      <div className="flex max-w-sm flex-col gap-(--space-4)">
+        <TimeField
+          label="Wake"
+          value={value}
+          onChange={setValue}
+          disclosed
+          leading={{ kind: "emoji", value: "🌅" }}
+        />
+      </div>
+    );
+  },
+};
+
+/** The open state, for the review: the picker, *Done*, the leading slot. */
+export const DisclosedOpen: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState("07:00");
+    const ref = React.useRef<HTMLDivElement>(null);
+    React.useEffect(() => {
+      ref.current?.querySelector("button")?.click();
+    }, []);
+    return (
+      <div ref={ref} className="flex max-w-sm flex-col gap-(--space-4)">
+        <TimeField
+          label="Wake"
+          value={value}
+          onChange={setValue}
+          disclosed
+          leading={{ kind: "emoji", value: "🌅" }}
+        />
+      </div>
+    );
+  },
+};

@@ -21,6 +21,13 @@
  * A POOLED BLOCK is the band with nothing in it and the caption *decide in
  * the morning* (§3.11, §4.13) — a dashed hairline, not a tint, so "nothing
  * here yet" is a shape, not a colour (§10.3).
+ *
+ * UX v1.2 §4.13i, S12.1 (RUN-7): `labelPlacement="inside"` draws the name
+ * and span inside the band's top edge — caption size, `text-text-secondary`,
+ * 8px from the band's top-left — for the day builder's short axis, where the
+ * gutter labels would collide. Left unset, the band takes the axis's word
+ * (`BandLabelPlacementContext`): *inside* under three hours, the gutter
+ * otherwise. `span` is the *7:00–9:00* the inside label carries.
  */
 "use client";
 
@@ -30,7 +37,7 @@ import * as React from "react";
 import { cn } from "../../../lib/cn";
 import { Text } from "../../../primitives/typography/text";
 import { BLOCK_HEADER_COPY, BLOCK_KIND_WORDS } from "../block-header/copy";
-import { SCHEDULE_GUTTER_PX } from "../schedule-axis";
+import { BandLabelPlacementContext, SCHEDULE_GUTTER_PX, type BandLabelPlacement } from "../schedule-axis";
 import { bandVariants } from "./band.variants";
 
 /** §10.3: "the block band's gutter label sits at 8px from the band's top." */
@@ -54,6 +61,10 @@ export interface BlockBandProps {
   onHeaderKeyDown?: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
   /** The `ScheduleBlock`s, positioned by the caller. */
   children?: React.ReactNode;
+  /** Where the name goes; the axis decides when unset (v1.2 §4.13i). */
+  labelPlacement?: BandLabelPlacement;
+  /** *7:00–9:00* — read beside the name when the label is inside the band. */
+  span?: string;
   className?: string;
 }
 
@@ -69,9 +80,20 @@ export function BlockBand({
   onHeaderPointerDown,
   onHeaderKeyDown,
   children,
+  labelPlacement,
+  span,
   className,
 }: BlockBandProps) {
   const label = name ?? BLOCK_KIND_WORDS[kind];
+  const axisPlacement = React.useContext(BandLabelPlacementContext);
+  const inside = (labelPlacement ?? axisPlacement) === "inside";
+  const labelText = inside && span !== undefined ? `${label} · ${span}` : label;
+
+  // Inside: the label sits in the band, 8px from its top-left, past the gutter.
+  const labelStyle: React.CSSProperties = inside
+    ? { top: `${LABEL_TOP_PX}px`, insetInlineStart: `${gutterPx + LABEL_TOP_PX}px` }
+    : { top: `${LABEL_TOP_PX}px`, width: `${gutterPx}px` };
+  const labelClass = inside ? "absolute z-10 text-start" : "absolute start-0 pe-(--space-2) text-end";
 
   return (
     <div
@@ -95,25 +117,22 @@ export function BlockBand({
           aria-label={`Move ${label}`}
           onPointerDown={onHeaderPointerDown}
           onKeyDown={onHeaderKeyDown}
-          style={{ top: `${LABEL_TOP_PX}px`, width: `${gutterPx}px` }}
+          style={labelStyle}
           className={cn(
-            "absolute start-0 z-10 cursor-grab touch-none pe-(--space-2) text-end",
+            labelClass,
+            "z-10 cursor-grab touch-none",
             "min-h-(--target)",
             "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none",
           )}
         >
           <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
-            {label}
+            {labelText}
           </Text>
         </button>
       ) : (
-        <span
-          aria-hidden="true"
-          style={{ top: `${LABEL_TOP_PX}px`, width: `${gutterPx}px` }}
-          className="absolute start-0 pe-(--space-2) text-end"
-        >
+        <span aria-hidden="true" style={labelStyle} className={labelClass}>
           <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
-            {label}
+            {labelText}
           </Text>
         </span>
       )}

@@ -24,3 +24,9 @@ export {
   type DerivableItem,
   type DerivedDayInput,
 } from "./use-derived-items";
+
+export {
+  useOptimisticValue,
+  type UseOptimisticValueOptions,
+  type UseOptimisticValueResult,
+} from "./use-optimistic-value";

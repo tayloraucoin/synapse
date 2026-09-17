@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-17 · 1234 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-17 · 1265 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -963,6 +963,7 @@ packages/
     src/
       index.ts
       use-derived-items.ts
+      use-optimistic-value.ts  # the optimistic contract (v1.2 TD-18): the value moves on the tap, the write follows on a debounce, a rejection reverts unless a newer tap is pending; platform-pure
       use-zod-form.ts
     .gitignore
     eslint.config.mjs
@@ -1092,6 +1093,11 @@ packages/
             index.ts
             quick-chip-row.stories.tsx
             quick-chip-row.tsx
+          range-editor/
+            copy.ts
+            index.ts
+            range-editor.stories.tsx
+            range-editor.tsx  # from · to · min on one 44px line; never clamps (R21); the one sentence when to < from
           range-input/
             index.ts
             range-input.stories.tsx
@@ -1104,6 +1110,11 @@ packages/
             index.ts
             reflection-block.stories.tsx
             reflection-block.tsx
+          rich-text-editor/
+            copy.ts
+            index.ts
+            rich-text-editor.stories.tsx
+            rich-text-editor.tsx  # the passage editor over tiptap (v1.2 TD-15): five controls, Markdown at the boundary, one renderer for editing and reading
           search-field/
             index.ts
             search-field.stories.tsx
@@ -1112,11 +1123,25 @@ packages/
             index.ts
             segmented-control.stories.tsx
             segmented-control.tsx
+          select-row/
+            index.ts
+            select-row.stories.tsx
+            select-row.tsx  # the row that is the selection (v1.2 §4): button[aria-pressed], tick on the tap, optimistic
+          sortable-list/
+            copy.ts
+            index.ts
+            sortable-list.stories.tsx
+            sortable-list.tsx  # reorder by handle, pointer and keyboard over dnd-kit (v1.2 TD-16); Alt+arrows and a live region; shares no code with drag-layer
           stepper-17/
             index.ts
             stepper-17.stories.tsx
             stepper-17.tsx
             stepper-17.variants.ts
+          tag-input/
+            copy.ts
+            index.ts
+            tag-input.stories.tsx
+            tag-input.tsx  # chips from Enter or a comma, a 44px × each, Backspace takes the last, a cap with a count
           text-disclosure-button/
             index.ts
             text-disclosure-button.stories.tsx
@@ -1193,6 +1218,10 @@ packages/
             decided-line.stories.tsx
             decided-line.tsx
             index.ts
+          emoji-slot/
+            emoji-slot.stories.tsx
+            emoji-slot.tsx  # the one home for the emoji rule (v1.2 §10.2): a 44px square, font-emoji, aria-hidden; every row and card header renders through it
+            index.ts
           expander-section/
             expander-section.stories.tsx
             expander-section.tsx
@@ -1234,6 +1263,11 @@ packages/
             index.ts
             now-line.stories.tsx
             now-line.tsx
+          passage-carousel/
+            copy.ts
+            index.ts
+            passage-carousel.stories.tsx
+            passage-carousel.tsx  # the orient frame's reading (v1.2 §5.2): one slide, dots as tabs, swipe or arrows, crossfade under reduced motion
           preflight-note/
             index.ts
             preflight-note.stories.tsx
@@ -1380,6 +1414,7 @@ packages/
         use-theme.ts
       lib/
         cn.ts
+        committing.ts  # the committing face, one string: a hairline pulse, never a disabled control (v1.2 guardrail 4)
         use-media-query.ts
       primitives/
         control/
@@ -1494,6 +1529,10 @@ packages/
             tooltip.stories.tsx
             tooltip.tsx
         layout/
+          card/
+            card.stories.tsx
+            card.tsx  # the setup card's base (v1.2 §4): surface, hairline, 16px, flat; feature folders compose it
+            index.ts
           collapsible/
             collapsible.stories.tsx
             collapsible.tsx

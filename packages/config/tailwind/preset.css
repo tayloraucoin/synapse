@@ -120,6 +120,8 @@
   /* ---- TYPOGRAPHY ---- */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-newsreader), Georgia, serif;
+  /* UX v1.2 §10.2 — every emoji slot renders through one stack (RUN-7). */
+  --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   --fs-caption: 0.75rem;   --lh-caption: 1.2;
   --fs-secondary: 0.875rem; --lh-secondary: 1.4;
   --fs-body: 1rem;         --lh-body: 1.5;
@@ -323,6 +325,7 @@
   /* type, radius, motion → utilities */
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
+  --font-emoji: var(--font-emoji);
   --radius-sm: var(--radius); --radius-md: var(--radius); --radius-lg: var(--radius); --radius-xl: var(--radius-sheet);
   --ease-settle: var(--ease-settle);
   --breakpoint-wide: 768px;                    /* the one break: `wide:` variant */

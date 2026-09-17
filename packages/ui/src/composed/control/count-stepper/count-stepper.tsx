@@ -10,12 +10,19 @@
  * `zeroLabel` renders "none" in place of 0 — a target of zero is a real
  * choice (a habit kept in the library but not aimed at this week), and the
  * word says that where the digit reads like an empty field.
+ *
+ * OPTIMISTIC BY RULE (UX v1.2 §2 guardrail 4, TD-18; RUN-7): the value moves
+ * on the tap, `onChange` hears it at once, `onCommit` fires once after the
+ * debounce, the edge pulses while the write is out, and a rejection reverts.
+ * See `MinutesStepper` for the contract in full.
  */
 "use client";
 
+import { useOptimisticValue } from "@syn/hooks/use-optimistic-value";
 import * as React from "react";
 
 import { cn } from "../../../lib/cn";
+import { COMMITTING_PULSE } from "../../../lib/committing";
 import {
   InputGroup,
   InputGroupAddon,
@@ -27,7 +34,12 @@ import { Text } from "../../../primitives/typography/text";
 
 export interface CountStepperProps {
   value: number;
-  onChange: (value: number) => void;
+  /** Every local change, at once — for a form's own state. */
+  onChange?: (value: number) => void;
+  /** The write, debounced by the control; reject to revert. */
+  onCommit?: (value: number) => Promise<void> | void;
+  committing?: boolean;
+  onCommitError?: (error: unknown) => void;
   min: number;
   max: number;
   label: React.ReactNode;
@@ -41,6 +53,9 @@ export interface CountStepperProps {
 export function CountStepper({
   value,
   onChange,
+  onCommit,
+  committing: committingProp = false,
+  onCommitError,
   min,
   max,
   label,
@@ -52,8 +67,20 @@ export function CountStepper({
   const inputId = React.useId();
   const helperId = React.useId();
 
+  const { local, set, committing: writing } = useOptimisticValue<number>({
+    value,
+    onCommit,
+    onError: onCommitError,
+  });
+  const committing = committingProp || writing;
+
   const clamp = (next: number) => Math.min(max, Math.max(min, next));
-  const showZeroWord = zeroLabel !== undefined && value === 0;
+  const change = (next: number) => {
+    const clamped = clamp(next);
+    set(clamped);
+    onChange?.(clamped);
+  };
+  const showZeroWord = zeroLabel !== undefined && local === 0;
 
   return (
     <div className={cn("flex flex-col gap-(--space-2)", className)}>
@@ -61,12 +88,15 @@ export function CountStepper({
         {label}
       </Text>
 
-      <InputGroup className="border-hairline h-(--target) w-fit">
+      <InputGroup
+        data-committing={committing || undefined}
+        className={cn("border-hairline h-(--target) w-fit", committing && COMMITTING_PULSE)}
+      >
         <InputGroupAddon align="inline-start" className="p-0">
           <InputGroupButton
             aria-label="One fewer"
-            disabled={disabled || value <= min}
-            onClick={() => onChange(clamp(value - 1))}
+            disabled={disabled || local <= min}
+            onClick={() => change(local - 1)}
             className="size-(--target) rounded-none text-(length:--fs-body)"
           >
             −
@@ -86,19 +116,19 @@ export function CountStepper({
           id={inputId}
           type="number"
           inputMode="numeric"
-          value={value}
+          value={local}
           min={min}
           max={max}
           step={1}
           disabled={disabled}
           aria-valuemin={min}
           aria-valuemax={max}
-          aria-valuenow={value}
+          aria-valuenow={local}
           aria-valuetext={showZeroWord ? zeroLabel : undefined}
           aria-describedby={helperText === undefined ? undefined : helperId}
           onChange={(event) => {
             const parsed = Number.parseInt(event.target.value, 10);
-            onChange(clamp(Number.isNaN(parsed) ? min : parsed));
+            change(Number.isNaN(parsed) ? min : parsed);
           }}
           className={cn(
             "w-14 text-center tabular-nums",
@@ -109,8 +139,8 @@ export function CountStepper({
         <InputGroupAddon align="inline-end" className="p-0">
           <InputGroupButton
             aria-label="One more"
-            disabled={disabled || value >= max}
-            onClick={() => onChange(clamp(value + 1))}
+            disabled={disabled || local >= max}
+            onClick={() => change(local + 1)}
             className="size-(--target) rounded-none text-(length:--fs-body)"
           >
             +

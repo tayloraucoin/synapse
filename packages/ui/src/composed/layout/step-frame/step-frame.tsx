@@ -20,6 +20,13 @@
  * is not a page load, so nothing would announce the new step otherwise.
  *
  * IT ADDS NO `main`; the layout around it does.
+ *
+ * UX v1.2 §4, R43 (RUN-7): `stickyActions` (default true) pins the action row
+ * "above the safe area at every scroll position — a hairline above it,
+ * `bg-paper` behind it"; the content scrolls beneath it with 96px of bottom
+ * padding so the last row is reachable. The row is `position: sticky` inside
+ * the frame, so the layout's own scroll container is the one that scrolls
+ * and nothing here reads the viewport.
  */
 "use client";
 
@@ -56,6 +63,8 @@ export interface StepFrameProps {
   offline?: boolean;
   error?: string | null;
   copy: StepFrameCopy;
+  /** The action row pinned above the safe area (v1.2 §4). Default true. */
+  stickyActions?: boolean;
   className?: string;
 }
 
@@ -72,6 +81,7 @@ export function StepFrame({
   offline = false,
   error,
   copy,
+  stickyActions = true,
   className,
 }: StepFrameProps) {
   const frameRef = React.useRef<HTMLDivElement>(null);
@@ -121,7 +131,15 @@ export function StepFrame({
       {offline ? <HelperText>{copy.offline}</HelperText> : null}
 
       {/* The actions are last in the DOM as well as on the screen (§2). */}
-      <div className="mt-auto flex items-center justify-end gap-(--space-3)">
+      <div
+        data-step-actions
+        className={cn(
+          "mt-auto flex items-center justify-end gap-(--space-3)",
+          stickyActions &&
+            // Pinned: a hairline above, paper behind, the safe area below (v1.2 §4).
+            "bg-paper border-hairline sticky bottom-0 z-10 -mx-(--space-4) border-t px-(--space-4) py-(--space-3) pb-[max(var(--space-3),env(safe-area-inset-bottom))]",
+        )}
+      >
         {skip === undefined ? null : (
           <Button variant="ghost" busy={skip.busy} disabled={offline} onClick={skip.onSkip}>
             {skip.label ?? copy.skip}

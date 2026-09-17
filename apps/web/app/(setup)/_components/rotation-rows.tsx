@@ -133,7 +133,8 @@ export function RotationRows({ kind }: RotationRowsProps) {
                   <CountStepper
                     label={`${habit.title} · ${COPY.timesAWeek}`}
                     value={habit.weeklyTarget ?? 2}
-                    onChange={(next) => void patch(habit, { weeklyTarget: next })}
+                    // UX v1.2 (RUN-7): the tap moves the value; the write is debounced.
+                    onCommit={(next) => patch(habit, { weeklyTarget: next })}
                     min={WEEKLY_TARGET_MIN}
                     max={WEEKLY_TARGET_MAX}
                     disabled={disabled}
@@ -154,7 +155,7 @@ export function RotationRows({ kind }: RotationRowsProps) {
                     <MinutesStepper
                       label={`${COPY.typicalLength}: ${habit.title}`}
                       value={habit.durationMin ?? 60}
-                      onChange={(next) => void patch(habit, { durationMin: next })}
+                      onCommit={(next) => patch(habit, { durationMin: next })}
                       min={DURATION_MIN}
                       max={DURATION_MAX}
                       step={5}

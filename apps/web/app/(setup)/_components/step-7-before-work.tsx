@@ -226,7 +226,8 @@ export function Step7BeforeWork({
                         <MinutesStepper
                           label={`${COPY.takes}: ${slot.title}`}
                           value={slot.durationMin}
-                          onChange={(next) => void setLength(slot, next)}
+                          // UX v1.2 (RUN-7): the tap moves the value; the write is debounced.
+                          onCommit={(next) => setLength(slot, next)}
                           min={DURATION_MIN}
                           max={DURATION_MAX}
                           step={5}

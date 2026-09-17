@@ -29,6 +29,18 @@ const MIN_PER_BAND = 15;
 export const SCHEDULE_GUTTER_PX = 48;
 const GUTTER_PX = SCHEDULE_GUTTER_PX;
 
+/**
+ * UX v1.2 §4.13i, S12.1 (RUN-7): where a `BlockBand` puts its label. Under
+ * three hours of axis the gutter is too short for the labels to clear each
+ * other — "labels never in the gutter below 3 hours of height" — so the axis
+ * says *inside* and every band on it draws its name inside its own top edge.
+ * A band given `labelPlacement` explicitly ignores the axis.
+ */
+export type BandLabelPlacement = "gutter" | "inside";
+const INSIDE_UNDER_MIN = 3 * 60;
+
+export const BandLabelPlacementContext = React.createContext<BandLabelPlacement>("gutter");
+
 export interface ScheduleAxisProps {
   /** Minutes from day start. */
   startMin: number;
@@ -69,6 +81,7 @@ export function ScheduleAxis({
   const spanMin = Math.max(0, endMin - startMin);
   const bandCount = Math.ceil(spanMin / MIN_PER_BAND);
   const heightPx = (spanMin / 60) * pxPerHour;
+  const labelPlacement: BandLabelPlacement = spanMin < INSIDE_UNDER_MIN ? "inside" : "gutter";
 
   const hours = React.useMemo(() => {
     const first = Math.ceil(startMin / 60) * 60;
@@ -146,7 +159,7 @@ export function ScheduleAxis({
           </span>
         ))}
 
-        {children}
+        <BandLabelPlacementContext.Provider value={labelPlacement}>{children}</BandLabelPlacementContext.Provider>
       </div>
 
       {onExtend === undefined ? null : (

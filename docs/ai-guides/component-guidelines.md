@@ -262,7 +262,7 @@ A control's own state changes on the tap, before any request. This is a property
 - **A second tap on a tick is an un-tick, never a duplicate.** Rows are keyed by the thing (a starter's title until the create returns an id, then the id); an un-tick during an in-flight create is queued behind it.
 - **Save as you go** (guardrail 5): every fact writes when entered; *Continue* and *Done* navigate. A sheet's *Save* is its one fact — a half-written passage is not a fact.
 
-`useOptimisticValue<T>({ value, onCommit, debounceMs })` → `{ local, set, committing, error, revert }` is the one implementation; a screen that wraps its own `useDebounce` is the convention eroding (RUN-7 ships the hook and the composites' contract).
+`useOptimisticValue<T>({ value, onCommit, debounceMs, onError })` → `{ local, set, hold, committing, error, revert }` (`@syn/hooks`, imported by `@syn/ui` through `@syn/hooks/use-optimistic-value` — TD-22) is the one implementation; a screen that wraps its own `useDebounce` is the convention eroding. `set` moves the value and schedules the commit; `hold` moves it without one (a number mid-typing, committed on blur). The composites expose the contract as `value` · `onChange?` (sync) · `onCommit?` · `committing?` (the screen's, OR-ed with the control's own) · `onCommitError?` (after the revert; the screen's `StatusLine` says the line). The committing face is `COMMITTING_PULSE` in `@syn/ui/src/lib/committing.ts` — a hairline pulse, one string.
 
 ---
 

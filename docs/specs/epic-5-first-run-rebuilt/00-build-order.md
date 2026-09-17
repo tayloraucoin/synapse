@@ -27,7 +27,7 @@ The contract and the seeds; the one additive migration; the plan services; the c
 - [x] **RUN-6** · The day under v1.2: travel rows in the materialiser and the layout, version resolution in `confirmDay` and `editHabitDay`, `applyWorkType`, the journal reminder in `notify.ts` — L · (RUN-3) · **Vigil: the reminder's empty-at-send-time rule; travel rows dropped alone**
 
 ### Phase 2 — The composites
-- [ ] **RUN-7** · `@syn/ui` for v1.2: `Card`, `SelectRow`, `SortableList`, `RangeEditor`, `RichTextEditor`, `TagInput`, `PassageCarousel`, the optimistic steppers, `StepFrame` sticky, `TimeField` Done and leading, `WeekdayChips` flexible, `BlockBand` in-band labels, `LargeTargetRow` leading, the `font-emoji` stack, stories — L · (RUN-1) · **Vesper review of stories in both themes**
+- [x] **RUN-7** · `@syn/ui` for v1.2: `Card`, `SelectRow`, `SortableList`, `RangeEditor`, `RichTextEditor`, `TagInput`, `PassageCarousel`, the optimistic steppers, `StepFrame` sticky, `TimeField` Done and leading, `WeekdayChips` flexible, `BlockBand` in-band labels, `LargeTargetRow` leading, the `font-emoji` stack, stories — L · (RUN-1) · **Vesper review of stories in both themes**
 
 ### Phase 3 — Setup, screens 1–12
 - [ ] **RUN-8** · The frame and screens 1–5: sticky action row, fourteen steps, the archetype glyphs, four-value selects with the disclosure, *Same shape?* and work-day type cards, fixture kinds, one wake time — L · (RUN-3, RUN-7)
@@ -101,8 +101,8 @@ Taylor's instruction, 2026-09-16: Mason executes the track in batches, one batch
 | 1 | RUN-1 · RUN-2 | — | **Complete 2026-09-16** |
 | 2 | RUN-3 · RUN-4 | RUN-2 | **Complete 2026-09-16** |
 | 3 | RUN-5 · RUN-6 | RUN-3 | **Complete 2026-09-16** |
-| 4 | RUN-7 | RUN-1 | next |
-| 5 | RUN-8 · RUN-9 | RUN-3, RUN-4, RUN-7 | |
+| 4 | RUN-7 | RUN-1 | **Complete 2026-09-16** |
+| 5 | RUN-8 · RUN-9 | RUN-3, RUN-4, RUN-7 | next |
 | 6 | RUN-10 · RUN-11 | RUN-8, RUN-3, RUN-6 | |
 | 7 | RUN-12 | RUN-5, RUN-10, RUN-11 | |
 | 8 | RUN-13 | RUN-12, RUN-6, RUN-9 | |

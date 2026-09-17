@@ -82,3 +82,27 @@ export const WhatGives: StoryObj = {
     );
   },
 };
+
+/**
+ * UX v1.2 (RUN-7): `leading` — the person's emoji through `EmojiSlot`, in the
+ * 44px square. A disabled option fades its glyph with the rest.
+ */
+export const WithLeading: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<string | null>("gym");
+    return (
+      <LargeTargetRow
+        label="Where"
+        layout="stacked"
+        value={value}
+        onChange={setValue}
+        options={[
+          { value: "gym", label: "Gym", description: "Travel there and back.", leading: { kind: "emoji", value: "🏋️" } },
+          { value: "home", label: "Home", leading: { kind: "emoji", value: "🏠" } },
+          { value: "outside", label: "Outside", leading: { kind: "emoji", value: "🌳" } },
+          { value: "pool", label: "Pool", disabled: true, caption: "not yet", leading: { kind: "emoji", value: "🏊" } },
+        ]}
+      />
+    );
+  },
+};

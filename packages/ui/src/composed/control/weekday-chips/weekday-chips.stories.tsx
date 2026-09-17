@@ -53,3 +53,29 @@ export const FixtureDays: StoryObj = {
     );
   },
 };
+
+/**
+ * UX v1.2 §4.11 (RUN-7): *Flexible* leads the row. Set, it clears every day
+ * and renders ink; picking a day clears it — the two are one answer.
+ */
+export const Flexible: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<Weekday[]>([0, 2]);
+    const [flexible, setFlexible] = React.useState(false);
+    return (
+      <div className="flex flex-col gap-(--space-3)">
+        <WeekdayChips
+          label="Typical days"
+          indexing="monday"
+          value={value}
+          onChange={setValue}
+          flexible={flexible}
+          onFlexible={setFlexible}
+        />
+        <code className="text-text-secondary text-(length:--fs-caption)">
+          {flexible ? "flexible" : JSON.stringify(value)}
+        </code>
+      </div>
+    );
+  },
+};

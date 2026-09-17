@@ -74,7 +74,8 @@ export function ItemIcon({
 
   if (icon?.kind === "emoji") {
     return (
-      <span aria-hidden="true" className={cn(box, EMOJI_TEXT[size], "leading-none")}>
+      // `font-emoji` — one stack for every emoji slot (UX v1.2 §10.2, RUN-7).
+      <span aria-hidden="true" className={cn(box, EMOJI_TEXT[size], "font-emoji leading-none")}>
         {icon.value}
       </span>
     );

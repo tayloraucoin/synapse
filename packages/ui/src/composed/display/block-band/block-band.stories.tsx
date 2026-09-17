@@ -98,6 +98,47 @@ export const Pooled: Story = {
   },
 };
 
+/**
+ * UX v1.2 §4.13i (RUN-7): a two-hour axis — the day builder's — puts every
+ * label inside its band, 8px from the top-left, with the span beside the name;
+ * nothing sits in the gutter and no label overlaps another.
+ */
+export const InsideLabelsUnderThreeHours: StoryObj = {
+  decorators: [
+    (Story) => (
+      <ScheduleAxis startMin={7 * 60} endMin={9 * 60} pxPerHour={96} timeZone={STORY_TIME_ZONE} className="h-[240px]">
+        <Story />
+      </ScheduleAxis>
+    ),
+  ],
+  render: () => (
+    <>
+      <BlockBand kind="orient" name={null} span="7:00–7:15" topPx={0} heightPx={24} />
+      <BlockBand kind="prep" name="Getting ready" span="7:15–7:45" topPx={24} heightPx={48} />
+      <BlockBand kind="morning" name="Morning" span="7:45–8:40" topPx={72} heightPx={88} />
+      <BlockBand kind="training" name={null} span="8:40–9:00" topPx={160} heightPx={32} />
+    </>
+  ),
+};
+
+/** Four hours: the gutter, as before — the axis's word is *gutter* from three hours up. */
+export const GutterLabelsAtFourHours: StoryObj = {
+  decorators: [
+    (Story) => (
+      <ScheduleAxis startMin={7 * 60} endMin={11 * 60} pxPerHour={64} timeZone={STORY_TIME_ZONE} className="h-[300px]">
+        <Story />
+      </ScheduleAxis>
+    ),
+  ],
+  render: () => (
+    <>
+      <BlockBand kind="prep" name="Getting ready" topPx={16} heightPx={40} />
+      <BlockBand kind="morning" name="Morning" topPx={64} heightPx={72} />
+      <BlockBand kind="work" name="Work" topPx={144} heightPx={112} />
+    </>
+  ),
+};
+
 function minutesOf(date: Date): number {
   return ((date.getUTCHours() - 7 + 24) % 24) * 60 + date.getUTCMinutes();
 }
