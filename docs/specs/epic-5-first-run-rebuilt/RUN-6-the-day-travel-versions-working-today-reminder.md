@@ -4,7 +4,7 @@
 **Slice type:** Day-side services — four mechanisms over the record. The risk class is *the record rewritten* (a travel row that moves the workout's original start; a version change that touches the habit) and *a notification that reports* (a reminder sent about an entry's absence).
 **Vigil:** the reminder — induce: journal disabled; reminder off; tonight's entry non-empty at send time; the minute already claimed; two subscriptions. The travel rows — drop the ride home alone; Adjust with a travel row in the morning.
 
-**Status:** Not started
+**Status:** Complete — 2026-09-16 (batch 3; database-backed criteria unverified, no tier touched — see `DEVIATIONS.md`)
 
 > **Vigil — full review.** State which paths were exercised: reminder sent · reminder suppressed (entry non-empty) · reminder suppressed (disabled) · reminder suppressed (off) · reminder not doubled on a second scan · travel there dropped, workout untouched · travel back shortened, workout untouched · workout *Not today* cascades both travel rows to not assigned · `applyWorkType` on a *Rarely* day then reversed.
 

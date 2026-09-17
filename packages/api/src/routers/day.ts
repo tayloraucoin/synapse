@@ -3,17 +3,20 @@ import { TRPCError } from "@trpc/server";
 import { addDays } from "@syn/utils";
 import {
   addFromLibraryInput,
+  applyWorkTypeInput,
   confirmDayInput,
   getDayInput,
   moveBlockInput,
   orientInput,
   previewFitInput,
   quickPickInput,
+  removeWorkTypeInput,
   saveMorningInput,
   setWakeTimeInput,
 } from "@syn/validators";
 
 import { AddFromLibraryError, addFromLibrary } from "../services/day/add-from-library";
+import { WorkTypeError, applyWorkType, removeWorkType } from "../services/day/apply-work-type";
 import { ConfirmRuleError, confirmDay } from "../services/day/confirm-day";
 import { getDay } from "../services/day/get-day";
 import { setWakeTime } from "../services/day/item-fields";
@@ -47,6 +50,24 @@ function confirmError(error: ConfirmRuleError): TRPCError {
       });
     case "no_such_habit":
       return new TRPCError({ code: "NOT_FOUND", message: "No such habit.", cause: error });
+  }
+}
+
+/** *Working today*'s refusals, as sentences (UX v1.2 §3.9, TD-19). [COPY — needs Vesper sign-off] */
+function workTypeError(error: WorkTypeError): TRPCError {
+  switch (error.code) {
+    case "closed":
+      return new TRPCError({ code: "CONFLICT", message: "That day is closed.", cause: error });
+    case "past":
+      return new TRPCError({ code: "CONFLICT", message: "That day has been.", cause: error });
+    case "already_working":
+      return new TRPCError({ code: "CONFLICT", message: "That day already has work.", cause: error });
+    case "not_working":
+      return new TRPCError({ code: "CONFLICT", message: "That day has no work to remove.", cause: error });
+    case "no_such_template":
+      return new TRPCError({ code: "NOT_FOUND", message: "No such work-day type.", cause: error });
+    case "not_work_type":
+      return new TRPCError({ code: "BAD_REQUEST", message: "That is not a work-day type.", cause: error });
   }
 }
 
@@ -109,6 +130,44 @@ export const dayRouter = router({
         });
       } catch (error) {
         if (error instanceof ConfirmRuleError) throw confirmError(error);
+        throw error;
+      }
+    }),
+
+  /* -------------------------------------------------- UX v1.2 (RUN-6) -- */
+
+  /** *Working today* — a work-day type onto a day that has none (§3.9, R40, TD-19). */
+  applyWorkType: protectedProcedure
+    .input(applyWorkTypeInput)
+    .mutation(async ({ ctx, input }) => {
+      const today = await resolveTodayFor(ctx.rls, ctx.authContext.userId);
+      if (!today) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "No account row." });
+      }
+      try {
+        return await applyWorkType(ctx.rls, ctx.authContext.userId, input, {
+          todayKey: today.todayKey,
+        });
+      } catch (error) {
+        if (error instanceof WorkTypeError) throw workTypeError(error);
+        throw error;
+      }
+    }),
+
+  /** The reverse: the work block *not today*, its items parked, the day's own work anchors cleared. */
+  removeWorkType: protectedProcedure
+    .input(removeWorkTypeInput)
+    .mutation(async ({ ctx, input }) => {
+      const today = await resolveTodayFor(ctx.rls, ctx.authContext.userId);
+      if (!today) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "No account row." });
+      }
+      try {
+        return await removeWorkType(ctx.rls, ctx.authContext.userId, input, {
+          todayKey: today.todayKey,
+        });
+      } catch (error) {
+        if (error instanceof WorkTypeError) throw workTypeError(error);
         throw error;
       }
     }),

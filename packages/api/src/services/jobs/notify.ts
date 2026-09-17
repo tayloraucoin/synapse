@@ -7,6 +7,7 @@ import {
   dayItems,
   days,
   db,
+  journalEntries,
   notificationPrefs,
   users,
 } from "@syn/db";
@@ -29,10 +30,12 @@ import {
   fixtureStartPayload,
   groupedStartPayload,
   itemStartPayload,
+  journalReminderPayload,
   pendingReviewPayload,
   reviewReminderPayload,
   weekBuildPayload,
 } from "../notifications/build-payload";
+import { effectiveEveningTimes } from "../user/preferences";
 import { atMinute, claimDelivery, deliverOnce, dueSnoozed, sendClaimed } from "../notifications/deliver";
 import type { ScheduledJob } from "./run-scheduled-jobs";
 
@@ -656,6 +659,101 @@ export async function notifyWeekBuild(now = new Date()): Promise<number> {
   });
 }
 
+/* --------------------------------------------------------------- N2 ---- */
+
+/**
+ * The journal reminder — UX v1.2 §9 N2, R38 (RUN-6).
+ *
+ * THREE SWITCHES AND ONE FACT. The journal must be on, the reminder must be
+ * on (the catalogue row AND the person's own `journal_reminder_enabled`),
+ * and tonight's entry must be empty at send time — an entry with any line
+ * in it means the person is already there, and a reminder would be the
+ * product talking over them. The time is the person's, or an hour before
+ * phone-away by the same derivation the settings screen shows
+ * (`effectiveEveningTimes`), so the two never disagree.
+ *
+ * ONCE PER (PERSON, DAY). The claim is on the day's row and the kind, so a
+ * second scan in the same window finds the row and stops. A time that has
+ * already passed when the switch is turned on is not back-filled (v1.1
+ * §9.2's rule): it fires at the next matching minute, tomorrow.
+ */
+export async function notifyJournalReminder(now = new Date()): Promise<number> {
+  return forEachUser(now, async (context) => {
+    if (!(await isEnabled(context, "journal_reminder"))) return 0;
+
+    const [account] = await context.rls.execute((tx) =>
+      tx
+        .select({
+          journalEnabled: users.journalEnabled,
+          journalReminderEnabled: users.journalReminderEnabled,
+          journalReminderTime: users.journalReminderTime,
+          devicesOffTime: users.devicesOffTime,
+          lightsOutTime: users.lightsOutTime,
+        })
+        .from(users)
+        .where(eq(users.id, context.userId))
+        .limit(1),
+    );
+    if (!account) return 0;
+    if (!account.journalEnabled || !account.journalReminderEnabled) return 0;
+
+    const { journalReminderTimeEffective } = effectiveEveningTimes(account);
+    if (journalReminderTimeEffective === null) return 0;
+
+    const dueAt = wallClockToInstant(context.todayKey, journalReminderTimeEffective, context.timeZone);
+    if (dueAt.getTime() < context.from.getTime() || dueAt.getTime() >= context.to.getTime()) {
+      return 0;
+    }
+
+    const [day] = await context.rls.execute((tx) =>
+      tx
+        .select({ id: days.id })
+        .from(days)
+        .where(
+          and(
+            eq(days.userId, context.userId),
+            eq(days.date, context.todayKey),
+            // Quiet after Day Complete (§8.4).
+            isNull(days.closedAt),
+          ),
+        )
+        .limit(1),
+    );
+    if (!day) return 0;
+
+    // Tonight's entry, if any: a single non-blank line suppresses the push.
+    const [entry] = await context.rls.execute((tx) =>
+      tx
+        .select({ answers: journalEntries.answers })
+        .from(journalEntries)
+        .where(and(eq(journalEntries.dayId, day.id), eq(journalEntries.userId, context.userId)))
+        .limit(1),
+    );
+    const written = Object.values(entry?.answers ?? {}).some((line) => line.trim().length > 0);
+    if (written) return 0;
+
+    const outcome = await deliverOnce(
+      context.rls,
+      context.userId,
+      {
+        kind: "journal_reminder",
+        targetId: day.id,
+        targetKey: null,
+        scheduledFor: dueAt,
+      },
+      journalReminderPayload({
+        dueAt,
+        timeZone: context.timeZone,
+        // The journal's own page (`journalRoute` in `apps/web/lib/routes.ts`).
+        journalUrl: `/day/${context.todayKey}/journal`,
+      }),
+      context.now,
+    );
+
+    return outcome === "sent" ? 1 : 0;
+  });
+}
+
 /** N1a–N1d in one scan (DYN-20); replaces v1.0's `notify-item-start`. */
 export const notifyStartsJob: ScheduledJob = {
   name: "notify-starts",
@@ -675,4 +773,10 @@ export const notifyPendingReviewJob: ScheduledJob = {
 export const notifyWeekBuildJob: ScheduledJob = {
   name: "notify-week-build",
   run: () => notifyWeekBuild(),
+};
+
+/** N2 — the journal reminder (UX v1.2 §9, RUN-6). */
+export const notifyJournalReminderJob: ScheduledJob = {
+  name: "notify-journal-reminder",
+  run: () => notifyJournalReminder(),
 };

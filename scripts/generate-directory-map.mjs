@@ -143,6 +143,8 @@ const ANNOTATIONS = {
   "packages/api/src/services/day/orient.ts": "the frame's read, and the wake stamp that rides in it — once per day (R11)",
   "packages/api/src/services/day/choose-alternate.ts": "one of, after the pick (v1.1 §6.3): the row takes the other member; the block re-flows",
   "packages/api/src/services/day/add-from-library.ts": "Add from the library: a habit-day item at the end of a block, re-flowed; no block on an unstructured day",
+  "packages/api/src/services/day/habit-item.ts": "a habit as a pick- or plan-made item, its version resolved (v1.2 §3.5), and the workout with its two travel rows — one writer for the pick, the trade and the week build (v1.2 §3.7)",
+  "packages/api/src/services/day/apply-work-type.ts": "Working today (v1.2 §3.9): a work-day type onto a Rarely day through the materialiser, and the reverse — not_today, items parked, the day's work anchors cleared; nothing scored",
   "apps/web/components/day-list/block-section.tsx": "one block's rows (v1.1 §6.1): the work container with nested fixtures, the devices-off marker, the confirm-in-the-morning rows",
   "apps/web/components/adjust-sheet/use-adjust.ts": "Adjust's four answers feeding one server preview (v1.1 §6.6); Set sends the fingerprint; nothing is inferred",
   "apps/web/components/habit-day-sheet/habit-day-sheet.tsx": "Edit today's (v1.1 §6.4): the day, never the habit; no clamp on Takes",

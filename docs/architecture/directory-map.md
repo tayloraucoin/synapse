@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-17 · 1233 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-17 · 1234 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -716,6 +716,7 @@ packages/
           add-from-library.ts  # Add from the library: a habit-day item at the end of a block, re-flowed; no block on an unstructured day
           adjust-day.ts  # Adjust — scope computed, preview then commit with a fingerprint, one shifts row of the right kind, undo per decision (b)
           apply-template-changes.ts
+          apply-work-type.ts  # Working today (v1.2 §3.9): a work-day type onto a Rarely day through the materialiser, and the reverse — not_today, items parked, the day's work anchors cleared; nothing scored
           bring-back.ts
           carry-item.ts
           choose-alternate.ts  # one of, after the pick (v1.1 §6.3): the row takes the other member; the block re-flows
@@ -726,7 +727,7 @@ packages/
           edit-habit-day.ts
           get-day.ts
           get-item.ts
-          habit-item.ts
+          habit-item.ts  # a habit as a pick- or plan-made item, its version resolved (v1.2 §3.5), and the workout with its two travel rows — one writer for the pick, the trade and the week build (v1.2 §3.7)
           item-fields.ts
           journal.ts
           lay-out-day.ts  # the whole day's arithmetic — chains stackBlock per kind, forward from wake, backward to work and lights-out. Pure; build and confirm both call it

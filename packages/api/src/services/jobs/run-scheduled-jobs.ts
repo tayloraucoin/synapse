@@ -3,6 +3,7 @@ import { createLogger } from "@syn/observability";
 import { autoCloseDaysJob } from "./auto-close-days";
 import { expireExportsJob } from "./expire-exports";
 import {
+  notifyJournalReminderJob,
   notifyStartsJob,
   notifyPendingReviewJob,
   notifyReviewReminderJob,
@@ -55,6 +56,8 @@ export const SCHEDULED_JOBS: readonly ScheduledJob[] = [
   notifyReviewReminderJob,
   notifyPendingReviewJob,
   notifyWeekBuildJob,
+  // UX v1.2 §9 N2 (RUN-6) — order-independent; it reads the journal alone.
+  notifyJournalReminderJob,
   expireExportsJob,
 ];
 

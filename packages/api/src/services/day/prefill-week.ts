@@ -6,7 +6,7 @@ import { weekDates, weekdayIndex } from "@syn/utils";
 
 import { plannedDayFor } from "../plan/day-plans";
 import { readPreferencesInTx } from "../user/preferences";
-import { habitItem, readHabits, workoutLength } from "./habit-item";
+import { readHabits, writeWorkoutRows } from "./habit-item";
 import {
   defaultTemplateFor,
   materializeInTx,
@@ -298,14 +298,9 @@ async function placePlannedWorkout(
     .set({ placement: workout.placement, state: "planned", updatedAt: new Date() })
     .where(eq(dayBlocks.id, block.id));
 
-  const existing = block.items.find((item) => item.type === "workout");
-  if (existing) return;
-  await tx.insert(dayItems).values({
-    ...habitItem(habit, { durationMin: workoutLength(habit), sortOrder: 0, snapshot: null }),
-    userId,
-    dayId: day.id,
-    dayBlockId: block.id,
-  });
+  // The workout and, when its travel is planned, the rows beside it (UX v1.2
+  // §3.7, TD-12) — the same writer the pick uses.
+  await writeWorkoutRows(tx, userId, day.id, block, habit);
 }
 
 export async function prefillWeek(

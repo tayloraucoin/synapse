@@ -181,11 +181,25 @@ export const itemRouter = router({
               throw new TRPCError({ code: "NOT_FOUND", message: "No such item.", cause: error });
             case "fixture":
               throw new TRPCError({ code: "BAD_REQUEST", message: FIXED_MESSAGE, cause: error });
+            case "travel":
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                // [COPY — needs Vesper sign-off: UX v1.2 §3.7, the travel row is the workout's.]
+                message: "The travel goes with the workout; edit that.",
+                cause: error,
+              });
             case "done":
               throw new TRPCError({
                 code: "BAD_REQUEST",
                 // [COPY — needs Vesper sign-off.]
                 message: "That one has happened; its length and time are the record.",
+                cause: error,
+              });
+            case "unknown_version":
+              throw new TRPCError({
+                code: "BAD_REQUEST",
+                // [COPY — needs Vesper sign-off: UX v1.2 §3.5.]
+                message: "That version is not on this habit.",
                 cause: error,
               });
             case "closed":

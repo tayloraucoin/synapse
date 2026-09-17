@@ -1,9 +1,10 @@
 import { and, eq } from "drizzle-orm";
 
-import { dayItems, days, type RlsClient } from "@syn/db";
+import { dayItems, days, habits, type RlsClient } from "@syn/db";
 import type { HabitDayEditInput } from "@syn/validators";
 import { wallClockToInstant } from "@syn/utils";
 
+import { resolveVersion } from "./habit-item";
 import { reflowBlock, type ReflowOverflow } from "./reflow-block";
 
 /**
@@ -20,9 +21,23 @@ import { reflowBlock, type ReflowOverflow } from "./reflow-block";
  * THE HABIT IS NEVER WRITTEN. A fixture is not a habit's day and is refused;
  * a done or running item's length and time are the record and are refused
  * too — its priority and leaving it out are still the person's to change.
+ *
+ * UX v1.2 (RUN-6). *Takes* may name one of the habit's versions instead
+ * (§3.5, TD-11): the key is resolved on the habit, `duration_min` and
+ * `version_key` are written together, and an unknown key is refused. A
+ * hand-set `durationMin` in the same call wins and clears the key — a
+ * hand-set length is not a version. A workout's *Leave out today* takes its
+ * travel rows with it and *Bring back* returns them (§3.7, TD-12); a travel
+ * row is the app's row and is not edited on its own.
  */
 
-export type EditHabitDayCode = "not_found" | "fixture" | "done" | "closed";
+export type EditHabitDayCode =
+  | "not_found"
+  | "fixture"
+  | "travel"
+  | "done"
+  | "closed"
+  | "unknown_version";
 
 export class EditHabitDayError extends Error {
   readonly code: EditHabitDayCode;
@@ -45,6 +60,8 @@ export async function editHabitDay(
         id: dayItems.id,
         dayBlockId: dayItems.dayBlockId,
         origin: dayItems.origin,
+        type: dayItems.type,
+        habitId: dayItems.habitId,
         pinned: dayItems.pinned,
         durationMin: dayItems.durationMin,
         scheduledStart: dayItems.scheduledStart,
@@ -61,19 +78,44 @@ export async function editHabitDay(
 
     if (!item) throw new EditHabitDayError("not_found");
     if (item.origin === "fixture") throw new EditHabitDayError("fixture");
+    if (item.origin === "travel") throw new EditHabitDayError("travel");
     if (item.closedAt !== null) throw new EditHabitDayError("closed");
 
+    const lengthChange = input.durationMin !== undefined || input.versionKey !== undefined;
     const settled = item.doneAt !== null || item.completionState === "active";
-    if (settled && (input.durationMin !== undefined || input.at !== undefined)) {
+    if (settled && (lengthChange || input.at !== undefined)) {
       throw new EditHabitDayError("done");
     }
 
     const patch: Record<string, unknown> = { updatedAt: now };
-    const durationMin = input.durationMin ?? item.durationMin ?? 0;
-    if (input.durationMin !== undefined) patch.durationMin = input.durationMin;
+    let durationMin = input.durationMin ?? item.durationMin ?? 0;
+    if (input.durationMin !== undefined) {
+      patch.durationMin = input.durationMin;
+      patch.versionKey = null;
+    } else if (input.versionKey !== undefined) {
+      const [habit] = item.habitId
+        ? await tx
+            .select({ versions: habits.versions })
+            .from(habits)
+            .where(and(eq(habits.id, item.habitId), eq(habits.userId, userId)))
+            .limit(1)
+        : [];
+      const version = habit ? resolveVersion(habit, input.versionKey) : null;
+      if (!version) throw new EditHabitDayError("unknown_version");
+      durationMin = version.minutes;
+      patch.durationMin = version.minutes;
+      patch.versionKey = version.key;
+    }
     if (input.priority !== undefined) patch.priority = input.priority;
     if (input.leaveOut !== undefined) {
       patch.assignmentState = input.leaveOut ? "not_assigned" : "assigned";
+      // A workout's travel rows go and come back with it (UX v1.2 §3.7).
+      if (item.type === "workout") {
+        await tx
+          .update(dayItems)
+          .set({ assignmentState: patch.assignmentState as "not_assigned" | "assigned", updatedAt: now })
+          .where(and(eq(dayItems.parentItemId, item.id), eq(dayItems.origin, "travel")));
+      }
     }
 
     let start = item.scheduledStart;
@@ -84,7 +126,7 @@ export async function editHabitDay(
     } else if (input.at?.kind === "stack") {
       patch.pinned = false;
     }
-    if (start !== null && (input.durationMin !== undefined || input.at?.kind === "clock")) {
+    if (start !== null && (lengthChange || input.at?.kind === "clock")) {
       patch.scheduledEnd = new Date(start.getTime() + durationMin * 60_000);
     }
 

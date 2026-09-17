@@ -3,6 +3,7 @@ import { z } from "zod";
 import { DURATION_MAX, DURATION_MIN, PRIORITY_MAX, PRIORITY_MIN } from "@syn/constants";
 
 import { blockKindSchema } from "./block";
+import { versionKeySchema } from "./habit";
 import { dateKeySchema } from "./keys";
 import { clockTimeSchema } from "./preferences";
 
@@ -60,6 +61,12 @@ export const habitDayEditInput = z
     itemId: z.string().uuid(),
     /** Today's length. Bounded by the day, not by the range (R21). */
     durationMin: z.number().int().min(DURATION_MIN).max(DURATION_MAX).optional(),
+    /**
+     * UX v1.2 §3.5, TD-11 — one of the habit's versions by key; its minutes
+     * become today's length and `version_key` is written with it. A
+     * `durationMin` in the same call wins and clears the key.
+     */
+    versionKey: versionKeySchema.optional(),
     /** *At*: in the stack, or a clock — which pins it for today. */
     at: z
       .discriminatedUnion("kind", [
@@ -74,6 +81,7 @@ export const habitDayEditInput = z
   .refine(
     (value) =>
       value.durationMin !== undefined ||
+      value.versionKey !== undefined ||
       value.at !== undefined ||
       value.priority !== undefined ||
       value.leaveOut !== undefined,

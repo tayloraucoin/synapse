@@ -215,6 +215,8 @@ export type DayAnchors = {
   lightsOutTime?: string | null;
   devicesOffTime?: string | null;
   workTemplateId?: string | null;
+  /** *Working today* (TD-19) sets the anchor's hardness from the type's direction. */
+  anchorIsHard?: boolean | null;
   /** The plan's exclusions, snapshotted so a re-lay never brings one back. */
   excludedFixtureIds?: readonly string[];
 };
@@ -278,6 +280,7 @@ export async function ensureDayRow(
     if (anchors.lightsOutTime !== undefined) patch.lightsOutTime = anchors.lightsOutTime;
     if (anchors.devicesOffTime !== undefined) patch.devicesOffTime = anchors.devicesOffTime;
     if (anchors.workTemplateId !== undefined) patch.workTemplateId = anchors.workTemplateId;
+    if (anchors.anchorIsHard !== undefined) patch.anchorIsHard = anchors.anchorIsHard;
     if (anchors.excludedFixtureIds !== undefined) {
       patch.excludedFixtureIds = [...anchors.excludedFixtureIds];
     }
@@ -300,6 +303,7 @@ export async function ensureDayRow(
         anchors.devicesOffTime === undefined ? existing.devicesOffTime : anchors.devicesOffTime,
       workTemplateId:
         anchors.workTemplateId === undefined ? existing.workTemplateId : anchors.workTemplateId,
+      anchorIsHard: anchors.anchorIsHard === undefined ? existing.anchorIsHard : anchors.anchorIsHard,
       excludedFixtureIds:
         anchors.excludedFixtureIds === undefined
           ? existing.excludedFixtureIds
@@ -322,6 +326,7 @@ export async function ensureDayRow(
       lightsOutTime: anchors.lightsOutTime ?? null,
       devicesOffTime: anchors.devicesOffTime ?? null,
       workTemplateId: anchors.workTemplateId ?? null,
+      anchorIsHard: anchors.anchorIsHard ?? null,
       excludedFixtureIds: [...(anchors.excludedFixtureIds ?? [])],
     })
     .returning(DAY_COLUMNS);
@@ -353,6 +358,9 @@ export type ItemRow = TouchableRow & {
   alternatesChosen: boolean | null;
   scheduling: Scheduling;
   priority: number;
+  /* ---- UX v1.2 (TD-11, TD-12; 0007) ---- */
+  versionKey: string | null;
+  parentItemId: string | null;
 };
 
 export type BlockRow = {
@@ -390,6 +398,8 @@ const ITEM_COLUMNS = {
   alternatesChosen: dayItems.alternatesChosen,
   scheduling: dayItems.scheduling,
   priority: dayItems.priority,
+  versionKey: dayItems.versionKey,
+  parentItemId: dayItems.parentItemId,
   assignmentState: dayItems.assignmentState,
   completionState: dayItems.completionState,
   deferredAt: dayItems.deferredAt,

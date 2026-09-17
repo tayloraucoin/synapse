@@ -44,8 +44,9 @@ import {
   habitItem,
   midpoint,
   readHabits,
+  resolveVersion,
   typicalWorkoutFor,
-  workoutLength,
+  writeWorkoutRows,
   type HabitLite,
 } from "./habit-item";
 import { defaultPlanFor } from "./prefill-week";
@@ -187,13 +188,18 @@ async function resolveMorning(
       sortOrder += 1;
     }
     for (const habit of chosen) {
+      // UX v1.2 §3.5 (TD-11): a chosen habit with versions lands at its
+      // DEFAULT version; a hand-set menu duration wins and carries no key.
+      const menuDuration = routine.menuDurations?.[habit.id];
+      const version = menuDuration === undefined ? resolveVersion(habit, null) : null;
       await tx.insert(dayItems).values({
         ...habitItem(habit, {
           durationMin:
-            routine.menuDurations?.[habit.id] ?? midpoint(habit.durationMinMin, habit.durationMaxMin),
+            menuDuration ?? version?.minutes ?? midpoint(habit.durationMinMin, habit.durationMaxMin),
           sortOrder,
           // [COPY — needs Vesper sign-off: the snapshot for a menu morning.]
           snapshot: "Menu",
+          versionKey: version?.key ?? null,
         }),
         userId,
         dayId: day.id,
@@ -374,6 +380,8 @@ async function resolveTraining(
         .update(dayBlocks)
         .set({ state: "not_today", updatedAt: new Date() })
         .where(eq(dayBlocks.id, block.id));
+      // The workout's travel rows are in this block and go with it (UX v1.2
+      // §3.7) — untouched ones removed here, a touched one kept as a record.
       const removable = block.items.filter(isUntouchedItem).map((item) => item.id);
       if (removable.length > 0) {
         await tx.delete(dayItems).where(inArray(dayItems.id, removable));
@@ -429,21 +437,9 @@ async function resolveTraining(
     block.state = "planned";
   }
 
-  // The workout item: one per training block.
-  const existing = block.items.find((item) => item.type === "workout");
-  const values = habitItem(workout, {
-    durationMin: workoutLength(workout),
-    sortOrder: 0,
-    snapshot: null,
-  });
-  if (existing && isUntouchedItem(existing)) {
-    await tx
-      .update(dayItems)
-      .set({ ...values, updatedAt: new Date() })
-      .where(eq(dayItems.id, existing.id));
-  } else if (!existing) {
-    await tx.insert(dayItems).values({ ...values, userId, dayId: day.id, dayBlockId: block.id });
-  }
+  // The workout item — one per training block — and its travel rows when the
+  // travel is planned (UX v1.2 §3.7, TD-12).
+  await writeWorkoutRows(tx, userId, day.id, block, workout);
 
   // *Inside work* splits the container (§3.7): a second work row after it.
   if (placement === "inside_work") {
@@ -490,29 +486,9 @@ async function resolveTraining(
     }
     const otherBlocks = await ensureTrainingBlock(tx, userId, profile, training.tradeWithDate);
     const otherTraining = otherBlocks.find((row) => row.kind === "training");
-    if (otherTraining) {
-      const theirs = otherTraining.items.find((item) => item.type === "workout");
-      const traded = habitItem(typical, {
-        durationMin: workoutLength(typical),
-        sortOrder: 0,
-        snapshot: null,
-      });
-      if (theirs && isUntouchedItem(theirs)) {
-        await tx
-          .update(dayItems)
-          .set({ ...traded, updatedAt: new Date() })
-          .where(eq(dayItems.id, theirs.id));
-      } else if (!theirs) {
-        const otherDay = await readDay(tx, userId, training.tradeWithDate);
-        if (otherDay) {
-          await tx.insert(dayItems).values({
-            ...traded,
-            userId,
-            dayId: otherDay.id,
-            dayBlockId: otherTraining.id,
-          });
-        }
-      }
+    const otherDay = otherTraining ? await readDay(tx, userId, training.tradeWithDate) : null;
+    if (otherTraining && otherDay) {
+      await writeWorkoutRows(tx, userId, otherDay.id, otherTraining, typical);
     }
   }
 

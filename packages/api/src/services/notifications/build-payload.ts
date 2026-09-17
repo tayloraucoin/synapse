@@ -58,6 +58,8 @@ export const TTL_SECONDS = {
   pending_review: 6 * 60 * 60,
   /** The evening and the night after it. */
   week_build: 12 * 60 * 60,
+  /** UX v1.2 §9 N2 — the evening it belongs to; by lights-out it is moot. */
+  journal_reminder: 2 * 60 * 60,
 } as const;
 
 /**
@@ -222,5 +224,29 @@ export function weekBuildPayload(input: { weekUrl: string }): BuiltPayload {
     actions: [{ action: "plan", title: "Plan" }],
     actionUrls: { plan: input.weekUrl },
     ttlSeconds: TTL_SECONDS.week_build,
+  };
+}
+
+/**
+ * N2 — the journal reminder, at the person's time, only while tonight's
+ * entry is empty (UX v1.2 §9, R38; RUN-6).
+ *
+ * *A few lines* is an invitation, not a task: it names nothing owed and
+ * counts nothing. The body is the time alone, so the push reads as a moment
+ * rather than a nudge; it never arrives once a line has been written.
+ * [COPY — needs Vesper sign-off]
+ */
+export function journalReminderPayload(input: {
+  dueAt: Date;
+  timeZone: string;
+  journalUrl: string;
+}): BuiltPayload {
+  return {
+    title: "A few lines",
+    body: formatClock(input.dueAt, input.timeZone),
+    url: input.journalUrl,
+    actions: [{ action: "write", title: "Write" }],
+    actionUrls: { write: input.journalUrl },
+    ttlSeconds: TTL_SECONDS.journal_reminder,
   };
 }

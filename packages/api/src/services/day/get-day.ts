@@ -119,7 +119,7 @@ const NO_BLOCK = {
   pinned: false,
   gapBeforeMin: 0,
   alternates: null,
-  // UX v1.2 (RUN-1): neutral until RUN-6 reads `version_key` and `parent_item_id`.
+  // UX v1.2: a wind-down row is neither a version's nor a travel row's (RUN-6).
   versionKey: null,
   parentItemId: null,
 } as const;
@@ -234,6 +234,8 @@ export async function getDay(
         alternatesChosen: dayItems.alternatesChosen,
         slotAlternatesGroup: templateSlots.alternatesGroup,
         slotTemplateId: templateSlots.templateId,
+        versionKey: dayItems.versionKey,
+        parentItemId: dayItems.parentItemId,
       })
       .from(dayItems)
       .leftJoin(habits, eq(habits.id, dayItems.habitId))
@@ -452,9 +454,9 @@ export async function getDay(
           pinned: row.pinned,
           gapBeforeMin: row.gapBeforeMin,
           alternates: otherOf(row),
-          // UX v1.2 (RUN-1): neutral until RUN-6 reads the two columns.
-          versionKey: null,
-          parentItemId: null,
+          // UX v1.2 (TD-11, TD-12): the version today, and the workout a travel row belongs to.
+          versionKey: row.versionKey,
+          parentItemId: row.parentItemId,
         },
       });
     }

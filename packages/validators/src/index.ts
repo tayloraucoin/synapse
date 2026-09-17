@@ -216,9 +216,13 @@ export {
 
 export {
   applyTrimInput,
+  applyWorkTypeInput,
   getDayInput,
+  removeWorkTypeInput,
   type ApplyTrimInput,
+  type ApplyWorkTypeInput,
   type GetDayInput,
+  type RemoveWorkTypeInput,
 } from "./day";
 
 export {

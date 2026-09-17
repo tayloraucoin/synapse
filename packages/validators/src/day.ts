@@ -40,3 +40,18 @@ export const applyTrimInput = z.object({
 });
 
 export type ApplyTrimInput = z.infer<typeof applyTrimInput>;
+
+/**
+ * *Working today* — UX v1.2 §3.9, R40, TD-19 (RUN-6). One of the person's
+ * work-day types onto a day that has none; the reverse takes the date alone.
+ */
+export const applyWorkTypeInput = z.object({
+  date: dateKeySchema,
+  templateId: z.string().uuid(),
+});
+
+export type ApplyWorkTypeInput = z.infer<typeof applyWorkTypeInput>;
+
+export const removeWorkTypeInput = z.object({ date: dateKeySchema });
+
+export type RemoveWorkTypeInput = z.infer<typeof removeWorkTypeInput>;
