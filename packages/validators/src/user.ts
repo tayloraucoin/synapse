@@ -128,6 +128,13 @@ export const updatePreferencesInput = z
     /** §9 N2, R38 — the journal reminder; the time is derived (phone away − 60) while null. */
     journalReminderEnabled: z.boolean().optional(),
     journalReminderTime: clockTimeSchema.nullable().optional(),
+
+    /*
+     * ---- UX v1.3 §11.1 (DAY-3). The column arrives with `0009` (DAY-4);
+     * DAY-5's service writes it.
+     */
+    /** R61 — *Same routine every day?*, asked once; null = not yet asked. */
+    sameMorningRoutine: z.boolean().nullable().optional(),
   })
   .refine(
     (value) => Object.values(value).some((field) => field !== undefined),

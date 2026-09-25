@@ -10,7 +10,9 @@ import { clockToMinutes } from "@syn/utils";
  *   prep .................. backward to work start
  *   work .................. forward from work start (or the template's own
  *                            `anchor_time`, the one override v1.1 R5 allows)
- *   activity .............. forward from work end
+ *   transition · activity . forward from work end (v1.3 TD-25; the
+ *                            materialiser stacks free time after the
+ *                            transition — DAY-6)
  *   wind_down ............. backward to lights-out
  *   training · break ...... placed each morning — no anchor at planning time
  *
@@ -58,6 +60,8 @@ export function resolveTemplateAnchor(
         flow,
         anchorMin: minutes(templateAnchorTime ?? profile.workStartTime),
       };
+    // UX v1.3 TD-25: after work flows forward from the end of work; free time follows it.
+    case "transition":
     case "activity":
       return { flow, anchorMin: minutes(profile.workEndTime) };
     case "wind_down":

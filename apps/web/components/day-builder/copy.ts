@@ -224,7 +224,7 @@ export const DAY_BUILDER_COPY = {
     travelBack: "←",
   },
 
-  /** The block words, for bands and captions. */
+  /** The block words, for bands and captions — v1.3 §1, §3.1 (*After work*, *Free time*; DAY-3). */
   blocks: {
     orient: "Orient",
     prep: "Getting ready",
@@ -232,7 +232,8 @@ export const DAY_BUILDER_COPY = {
     training: "Training",
     work: "Work",
     break: "Break",
-    activity: "Evening",
+    transition: "After work",
+    activity: "Free time",
     wind_down: "Wind-down",
   } as Record<string, string>,
 } as const;

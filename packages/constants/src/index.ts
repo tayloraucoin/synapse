@@ -50,6 +50,7 @@ export {
   DURATION_MAX,
   DURATION_MIN,
   FEEDBACK_MAX,
+  FIXTURE_LOCATION_MAX,
   FIXTURE_TITLE_MAX,
   FOCUS_TITLE_MAX,
   GAP_MAX,
@@ -61,6 +62,8 @@ export {
   JOURNAL_PROMPTS_MAX,
   JOURNAL_REMINDER_OFFSET_MIN,
   LATE_WAKE_OFFER_MIN,
+  LINK_TITLE_MAX,
+  LINK_URL_MAX,
   LONG_PRESS_MS,
   MISS_NOTE_MAX,
   MORNING_GRATITUDE_MAX,
@@ -109,10 +112,21 @@ export {
 export { PLACED_ROW_ICONS, type PlacedRowKey } from "./placed-rows";
 export { SCHEDULE_SHAPE_ICONS, type ScheduleShapeValue } from "./schedule-shapes";
 export {
+  ACTIVITY_GROUPS,
+  MORNING_GROUPS,
   STARTER_LIBRARY,
+  type ActivityGroup,
   type EmojiIcon,
+  type MorningGroup,
   type StarterLibraryEntry,
 } from "./starter-library";
+export { EXAMPLE_DAY, type ExampleDaySpan } from "./example-day";
+export {
+  LINK_KINDS,
+  SPOTIFY_LINK_HOSTS,
+  SPOTIFY_LINK_SCHEME,
+  type LinkKindValue,
+} from "./link-hosts";
 export {
   WORK_DAY_KINDS,
   type WorkDayKindEntry,

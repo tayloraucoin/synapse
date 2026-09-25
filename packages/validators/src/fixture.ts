@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-import { DURATION_MAX, DURATION_MIN, FIXTURE_TITLE_MAX } from "@syn/constants";
+import {
+  DURATION_MAX,
+  DURATION_MIN,
+  FIXTURE_LOCATION_MAX,
+  FIXTURE_TITLE_MAX,
+  TRAVEL_MAX,
+} from "@syn/constants";
 
 import { fixtureKindSchema } from "./block";
 import { iconValueSchema } from "./icon";
@@ -41,6 +47,23 @@ export const fixtureFormSchema = z.object({
    */
   kind: fixtureKindSchema.default("other"),
   icon: iconValueSchema.optional(),
+  /**
+   * UX v1.3 R51, §3.14, §11.3 (TD-27) — a place and travel. *Here* is no
+   * location and no travel; *Away* reveals the three. The location is a fact
+   * the sheet shows (nothing reads it); the travel rows sit beside the
+   * fixture on the day and are never added to `durationMin`. All four are
+   * optional so a v1.2 sheet still saves; DAY-5's service writes them.
+   */
+  location: z
+    .string()
+    .trim()
+    .max(FIXTURE_LOCATION_MAX)
+    .nullable()
+    .transform((value) => (value === "" ? null : value))
+    .optional(),
+  travelThereMin: z.number().int().min(0).max(TRAVEL_MAX).default(0),
+  travelBackMin: z.number().int().min(0).max(TRAVEL_MAX).default(0),
+  planTravel: z.boolean().default(true),
 });
 
 export type FixtureFormInput = z.infer<typeof fixtureFormSchema>;

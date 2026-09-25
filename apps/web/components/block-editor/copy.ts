@@ -22,6 +22,8 @@ export const BLOCK_EDITOR_COPY = {
         return clock === null ? "backward to work" : `backward to work · ${clock}`;
       case "work":
         return clock === null ? "forward from work start" : `forward from work · ${clock}`;
+      // UX v1.3 TD-25: after work flows forward from the end of work, as free time did.
+      case "transition":
       case "activity":
         return clock === null ? "forward from work end" : `forward from work end · ${clock}`;
       case "wind_down":

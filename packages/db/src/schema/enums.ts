@@ -71,6 +71,10 @@ export const itemTypeEnum = pgEnum(
  * then `fixtures`, `day_blocks`, `notification_prefs` (0005) — three
  * directories, so it lives here. The order is the default a day reads in;
  * `DEFAULT_BLOCK_ORDER` in `@syn/constants` is the person-editable subset.
+ *
+ * `transition` is UX v1.3 R48, TD-25. The TypeScript side moved in DAY-3 to
+ * keep the workspace building; the `ALTER TYPE … ADD VALUE` ships in
+ * migration `0009` (DAY-4). Nothing writes the value before then.
  */
 export const blockKindEnum = pgEnum(
   "block_kind",
@@ -81,6 +85,7 @@ export const blockKindEnum = pgEnum(
     "prep",
     "work",
     "break",
+    "transition",
     "activity",
     "wind_down",
   ]),

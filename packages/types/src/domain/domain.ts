@@ -29,7 +29,12 @@ export type ItemType = "habit" | "task_appointment" | "deep_work" | "workout";
  * error, not a value nobody can store.
  */
 
-/** Block.kind — v1.1 §3.1, the eight kinds in their default order. */
+/**
+ * Block.kind — v1.1 §3.1, the eight kinds in their default order, plus
+ * `transition` (UX v1.3 R48, §3.1, TD-25): the after-work hand-off, one per
+ * day, forward from the end of work. The Postgres value arrives with `0009`
+ * (DAY-4); nothing writes it before then.
+ */
 export type BlockKind =
   | "orient"
   | "morning"
@@ -37,6 +42,7 @@ export type BlockKind =
   | "prep"
   | "work"
   | "break"
+  | "transition"
   | "activity"
   | "wind_down";
 
@@ -73,8 +79,10 @@ export type OverflowMode = "daily_menu" | "variants" | "auto_trim";
  * One weekday's answer to "which days do you work?" — v1.1 §4.2, plus
  * `rarely` (UX v1.2 R40, TD-19): planned as a day off, the pick does not ask,
  * and the day header sheet offers *Working today* to apply a work-day type.
+ * Plus `usually` (UX v1.3 R49, §3.9): planned as a work day, never asked, and
+ * the day's menu offers *Not working today*.
  */
-export type WorkDayMode = "always" | "sometimes" | "rarely" | "never";
+export type WorkDayMode = "always" | "usually" | "sometimes" | "rarely" | "never";
 
 /** User.work_days — Mon = "0" … Sun = "6", matching `typical_days`. */
 export type WorkDays = Record<"0" | "1" | "2" | "3" | "4" | "5" | "6", WorkDayMode>;
@@ -115,6 +123,12 @@ export type FixtureKind =
 
 /** Habit.location — v1.2 §3.7; workouts only. */
 export type WorkoutLocation = "home" | "gym" | "outside";
+
+/**
+ * Link.kind — UX v1.3 R53, §3.17, TD-28. Derived by the service from the
+ * host (`deriveLinkKind`), never chosen; stored so the frame does not parse.
+ */
+export type LinkKind = "spotify" | "other";
 
 /**
  * One of a habit's versions — v1.2 §3.5, R34, TD-11: a named length. Up to

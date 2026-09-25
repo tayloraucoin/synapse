@@ -59,6 +59,7 @@ export {
   type PrioritySortable,
 } from "./day";
 export { AppError, isAppError } from "./errors";
+export { deriveLinkKind } from "./link";
 export { clamp, formatBytes, roundToStep } from "./number";
 export { sanitizeNextPath } from "./path";
 export {

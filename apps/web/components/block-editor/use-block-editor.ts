@@ -109,6 +109,8 @@ function boundFor(kind: BlockKind, profile: Profile): number | null {
       return minutes(profile.usualWakeTime);
     case "work":
       return minutes(profile.workEndTime);
+    // UX v1.3 TD-25: after work walks forward from work end, as free time does.
+    case "transition":
     case "activity":
       return minutes(profile.lightsOutTime);
     case "wind_down":

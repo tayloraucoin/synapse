@@ -53,6 +53,13 @@ export const dayPlanPatchSchema = z
     prepTemplateId: z.string().uuid().nullable().optional(),
     morningTemplateId: z.string().uuid().nullable().optional(),
     windDownTemplateId: z.string().uuid().nullable().optional(),
+    /**
+     * UX v1.3 §3.13, §11.2 (TD-25, TD-26) — the after-work list (kind
+     * `transition`) and the free-time pool (kind `activity`, structure
+     * `pool`); null = none. The kind check is the service's (DAY-5).
+     */
+    afterWorkTemplateId: z.string().uuid().nullable().optional(),
+    activityTemplateId: z.string().uuid().nullable().optional(),
     training: z.array(dayPlanTrainingSchema).max(7).optional(),
     breaks: z.array(dayPlanBreakSchema).max(7).optional(),
     excludedFixtureIds: z.array(z.string().uuid()).max(50).optional(),

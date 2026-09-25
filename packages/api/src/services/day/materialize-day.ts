@@ -586,6 +586,10 @@ export function orderBlocks<T extends { kind: BlockKind; placement: TrainingPlac
 ): T[] {
   const rank = new Map<BlockKind, number>();
   blockOrder.forEach((kind, index) => rank.set(kind, index * 10));
+  // UX v1.3 (DAY-3): an order saved before `transition` existed lacks it — after work,
+  // past the split container's second half (`work + 6`), before whatever follows.
+  const workRank = rank.get("work");
+  if (!rank.has("transition") && workRank !== undefined) rank.set("transition", workRank + 8);
   for (const kind of DEFAULT_BLOCK_ORDER) {
     if (!rank.has(kind)) rank.set(kind, rank.size * 10);
   }

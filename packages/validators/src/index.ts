@@ -197,6 +197,12 @@ export {
   type PassageFormInput,
   type ReorderPassagesInput,
 } from "./passage";
+export {
+  linkFormSchema,
+  linkIdInput,
+  listLinksInput,
+  type LinkFormInput,
+} from "./link";
 
 export {
   fixtureFormSchema,

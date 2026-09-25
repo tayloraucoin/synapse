@@ -28,6 +28,7 @@ import type {
   IconValue,
   ItemOrigin,
   ItemType,
+  LinkKind,
   JournalPrompt,
   MissTier,
   OverflowMode,
@@ -253,6 +254,15 @@ export interface FixtureView {
   /* ---- UX v1.2 (§3.6, R42) ---- */
   kind: FixtureKind;
   icon: IconValue;
+
+  /*
+   * ---- UX v1.3 (§3.14, R51, TD-27) — a place and travel. Optional until
+   * DAY-5's `toFixtureView` reads `0009`'s columns; required from then.
+   */
+  /** Free text, ≤ 80; a fact the sheet shows — nothing reads it. */
+  location?: string | null;
+  /** Minutes there and back and whether the day plans them; never added to `durationMin`. */
+  travel?: { thereMin: number; backMin: number; planned: boolean };
 }
 
 /*
@@ -268,6 +278,18 @@ export interface PassageView {
   /** Bucket-qualified paths (`passages/{user_id}/{file}`); the caller resolves URLs. */
   images: ReadonlyArray<string>;
   tags: ReadonlyArray<string>;
+  sortOrder: number;
+}
+
+/**
+ * A thing to open from the morning — UX v1.3 R53, §3.17, TD-28: a title and
+ * a URL; the kind is derived from the host and stored. Opened, never fetched.
+ */
+export interface LinkView {
+  id: string;
+  title: string;
+  url: string;
+  kind: LinkKind;
   sortOrder: number;
 }
 
@@ -300,6 +322,13 @@ export interface DayPlanSummaryView {
   gettingReady: { templateId: string; name: string; totalMin: number } | null;
   morning: { templateId: string; name: string; totalMin: number } | null;
   windDown: { templateId: string; name: string; totalMin: number } | null;
+  /*
+   * UX v1.3 §3.13, §11.2 (TD-25, TD-26): the after-work list (*After work A*)
+   * and the free-time pool (*Evenings A*). Optional until DAY-5 reads `0009`'s
+   * two columns; required from then.
+   */
+  afterWork?: { templateId: string; name: string; totalMin: number } | null;
+  evenings?: { templateId: string; name: string; totalMin: number } | null;
 }
 
 /** A day plan as the builder edits it — v1.2 §3.13, TD-10: references and times, never copies. */

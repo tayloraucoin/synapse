@@ -21,6 +21,8 @@ export const blockKindSchema = z.enum([
   "prep",
   "work",
   "break",
+  /** UX v1.3 R48, TD-25 — the after-work hand-off; the Postgres value is `0009`'s. */
+  "transition",
   "activity",
   "wind_down",
 ]);
@@ -50,8 +52,12 @@ export const scheduleShapeSchema = z.enum([
   "varying_shifts",
   "fluid",
 ]);
-/** Plus `rarely` — UX v1.2 R40: planned as off, *Working today* one tap away. */
-export const workDayModeSchema = z.enum(["always", "sometimes", "rarely", "never"]);
+/**
+ * Plus `rarely` — UX v1.2 R40: planned as off, *Working today* one tap away.
+ * Plus `usually` — UX v1.3 R49: planned as work, *Not working today* one tap
+ * away. `work_days` is a jsonb, so this union is the whole change.
+ */
+export const workDayModeSchema = z.enum(["always", "usually", "sometimes", "rarely", "never"]);
 
 /*
  * ---- UX v1.2 §1.4, §3, §11 (RUN-1) ----
@@ -93,6 +99,9 @@ export type WorkDaysInput = z.infer<typeof workDaysSchema>;
  * The kinds a person orders in Settings → Block order (v1.1 §3.1). Every
  * non-placeable kind exactly once; the two placeable kinds never — they are
  * placed each morning, not ordered.
+ *
+ * `transition` (UX v1.3, DAY-3) at most once: an order saved before the kind
+ * existed lacks it, and `orderBlocks` puts it after work, so both are valid.
  */
 export const blockOrderSchema = z
   .array(blockKindSchema)
@@ -106,7 +115,9 @@ export const blockOrderSchema = z
         "activity",
         "wind_down",
       ];
-      if (order.length !== required.length) return false;
+      const transitions = order.filter((kind) => kind === "transition").length;
+      if (transitions > 1) return false;
+      if (order.length !== required.length + transitions) return false;
       if (order.some((kind) => kind === "training" || kind === "break")) {
         return false;
       }

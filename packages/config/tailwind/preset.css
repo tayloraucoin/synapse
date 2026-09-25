@@ -117,6 +117,29 @@
   --chip-plum-bg:  var(--syn-cat-plum-100);  --chip-plum-fg:  var(--syn-cat-plum-700);
   --chip-moss-bg:  var(--syn-cat-moss-100);  --chip-moss-fg:  var(--syn-cat-moss-700);
 
+  /*
+   * ---- BLOCK HUES — UX v1.3 R47, §3.1, §10.2, TD-29 (DAY-3) ----
+   * A band's wash and its label, keyed by kind onto the category scales, so
+   * no new colour enters the palette: the wash is the 100 step, the label the
+   * 700 on it (the chip pairing, AA at caption size); dark swaps to 800 / 200
+   * as the chips do. PLANNING SURFACES ONLY — the primer, the builder's B7,
+   * B13, B14, B17, screen 5 — never `/today` or the Schedule, which keep
+   * their monochrome bands. Sleep is not a kind: the quiet band at both ends.
+   * [PROPOSED — needs sign-off, v1.3 §13 #31] the kind-to-hue mapping:
+   * orient slate · morning leaf · training clay · prep amber · transition
+   * amber · work sky · break moss · activity plum · wind-down rose.
+   */
+  --block-orient:     var(--syn-cat-slate-100); --block-orient-label:     var(--syn-cat-slate-700);
+  --block-morning:    var(--syn-cat-leaf-100);  --block-morning-label:    var(--syn-cat-leaf-700);
+  --block-training:   var(--syn-cat-clay-100);  --block-training-label:   var(--syn-cat-clay-700);
+  --block-prep:       var(--syn-cat-amber-100); --block-prep-label:       var(--syn-cat-amber-700);
+  --block-work:       var(--syn-cat-sky-100);   --block-work-label:       var(--syn-cat-sky-700);
+  --block-break:      var(--syn-cat-moss-100);  --block-break-label:      var(--syn-cat-moss-700);
+  --block-transition: var(--syn-cat-amber-100); --block-transition-label: var(--syn-cat-amber-700);
+  --block-activity:   var(--syn-cat-plum-100);  --block-activity-label:   var(--syn-cat-plum-700);
+  --block-wind-down:  var(--syn-cat-rose-100);  --block-wind-down-label:  var(--syn-cat-rose-700);
+  --block-sleep:      var(--syn-neutral-200);   --block-sleep-label:      var(--text-secondary);
+
   /* ---- TYPOGRAPHY ---- */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-newsreader), Georgia, serif;
@@ -212,6 +235,18 @@
   --chip-plum-bg:  var(--syn-cat-plum-800);  --chip-plum-fg:  var(--syn-cat-plum-200);
   --chip-moss-bg:  var(--syn-cat-moss-800);  --chip-moss-fg:  var(--syn-cat-moss-200);
 
+  /* Block hues, dark — the chips' 800 / 200 pairing (DAY-3, TD-29). */
+  --block-orient:     var(--syn-cat-slate-800); --block-orient-label:     var(--syn-cat-slate-200);
+  --block-morning:    var(--syn-cat-leaf-800);  --block-morning-label:    var(--syn-cat-leaf-200);
+  --block-training:   var(--syn-cat-clay-800);  --block-training-label:   var(--syn-cat-clay-200);
+  --block-prep:       var(--syn-cat-amber-800); --block-prep-label:       var(--syn-cat-amber-200);
+  --block-work:       var(--syn-cat-sky-800);   --block-work-label:       var(--syn-cat-sky-200);
+  --block-break:      var(--syn-cat-moss-800);  --block-break-label:      var(--syn-cat-moss-200);
+  --block-transition: var(--syn-cat-amber-800); --block-transition-label: var(--syn-cat-amber-200);
+  --block-activity:   var(--syn-cat-plum-800);  --block-activity-label:   var(--syn-cat-plum-200);
+  --block-wind-down:  var(--syn-cat-rose-800);  --block-wind-down-label:  var(--syn-cat-rose-200);
+  --block-sleep:      var(--syn-neutral-700);   --block-sleep-label:      var(--text-secondary);
+
   --background: var(--syn-neutral-900);
   --foreground: var(--syn-neutral-100);
   --card: var(--syn-neutral-800);
@@ -288,6 +323,17 @@
   --color-chip-slate-bg: var(--chip-slate-bg); --color-chip-slate-fg: var(--chip-slate-fg);
   --color-chip-plum-bg: var(--chip-plum-bg);   --color-chip-plum-fg: var(--chip-plum-fg);
   --color-chip-moss-bg: var(--chip-moss-bg);   --color-chip-moss-fg: var(--chip-moss-fg);
+  /* `bg-block-<kind>` · `text-block-<kind>-label` — planning surfaces only (TD-29). */
+  --color-block-orient: var(--block-orient);         --color-block-orient-label: var(--block-orient-label);
+  --color-block-morning: var(--block-morning);       --color-block-morning-label: var(--block-morning-label);
+  --color-block-training: var(--block-training);     --color-block-training-label: var(--block-training-label);
+  --color-block-prep: var(--block-prep);             --color-block-prep-label: var(--block-prep-label);
+  --color-block-work: var(--block-work);             --color-block-work-label: var(--block-work-label);
+  --color-block-break: var(--block-break);           --color-block-break-label: var(--block-break-label);
+  --color-block-transition: var(--block-transition); --color-block-transition-label: var(--block-transition-label);
+  --color-block-activity: var(--block-activity);     --color-block-activity-label: var(--block-activity-label);
+  --color-block-wind-down: var(--block-wind-down);   --color-block-wind-down-label: var(--block-wind-down-label);
+  --color-block-sleep: var(--block-sleep);           --color-block-sleep-label: var(--block-sleep-label);
   --color-text-body: var(--text-body);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);

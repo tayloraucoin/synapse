@@ -157,3 +157,14 @@ export const JOURNAL_REMINDER_OFFSET_MIN = 60;
 export const DEVICES_OFF_OFFSET_MIN = 60;
 /** The passage and quote cycles count days from this date (v1.2 §3.12, RUN-4). */
 export const CYCLE_EPOCH = "2026-01-01";
+
+/*
+ * ---- UX v1.3 — the first run built day-first (DAY-3) ----
+ */
+
+/** A link's title — `links.title` (v1.3 §3.17, §11.4). */
+export const LINK_TITLE_MAX = 80;
+/** A link's URL — `links.url` (v1.3 §11.4). */
+export const LINK_URL_MAX = 2048;
+/** A fixture's place — `fixtures.location`, free text (v1.3 §3.14, §11.3). */
+export const FIXTURE_LOCATION_MAX = 80;

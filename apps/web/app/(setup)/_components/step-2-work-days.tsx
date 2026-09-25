@@ -56,7 +56,8 @@ const DEFAULT_WORK_DAYS: WorkDays = {
 };
 
 const KEYS = ["0", "1", "2", "3", "4", "5", "6"] as const;
-const MODES: readonly WorkDayMode[] = ["always", "sometimes", "rarely", "never"];
+// The four v1.2 values; *Usually* (v1.3 R49) joins with its copy in DAY-8.
+const MODES = ["always", "sometimes", "rarely", "never"] as const satisfies readonly WorkDayMode[];
 
 export function Step2WorkDays({
   initialWorkDays,

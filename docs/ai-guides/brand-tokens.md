@@ -48,6 +48,7 @@ theme-independent (a category hue's 500, the accent mark).
 | A shift band | `bg-violet-band` `text-violet-band-text` | | violet-100 / violet-800 |
 | An ink-filled button | `bg-primary text-primary-foreground` | `--primary` | ink, **never the accent** |
 | Delete account, and nothing else | `bg-destructive` | `--destructive` | `#B4463C` |
+| **A block's hue — planning surfaces only** (the primer, the builder's B7 · B13 · B14 · B17, screen 5; **never `/today` or the Schedule**) | `bg-block-<kind>` `text-block-<kind>-label` | `--block-<kind>`, `--block-<kind>-label` | the kind's category 100 / 700; dark 800 / 200 (UX v1.3 R47, TD-29; mapping `[PROPOSED]` §13 #31) |
 | The focus ring | (automatic) | `--ring` | accent-500 / accent-400 |
 
 ### One trap, named
