@@ -72,6 +72,12 @@ export interface StepFrameProps {
    * its own `aria-live`, or a string, which the frame announces politely.
    */
   caption?: React.ReactNode;
+  /**
+   * UX v1.3 R63 (DAY-2): the header control whose move is out. *Back* dims
+   * and carries `aria-busy`; *Finish later* shows the button's own pending.
+   * The primary and *Skip* take theirs through `busy`.
+   */
+  pending?: "back" | "finishLater" | null;
   className?: string;
 }
 
@@ -90,6 +96,7 @@ export function StepFrame({
   copy,
   stickyActions = true,
   caption,
+  pending = null,
   className,
 }: StepFrameProps) {
   const frameRef = React.useRef<HTMLDivElement>(null);
@@ -110,7 +117,8 @@ export function StepFrame({
             variant="ghost"
             size="icon"
             aria-label={copy.back}
-            className="shrink-0"
+            aria-busy={pending === "back" || undefined}
+            className={cn("shrink-0", pending === "back" && "opacity-60")}
             onClick={onBack}
           >
             <ArrowLeft className="size-5" aria-hidden="true" />
@@ -119,7 +127,7 @@ export function StepFrame({
         <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
           {copy.progress(step, total)}
         </Text>
-        <Button variant="ghost" className="ml-auto" onClick={onFinishLater}>
+        <Button variant="ghost" className="ml-auto" busy={pending === "finishLater"} onClick={onFinishLater}>
           {copy.finishLater}
         </Button>
       </div>

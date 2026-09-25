@@ -171,7 +171,7 @@ export function Step14Week({
               <Button
                 variant="ghost"
                 className="w-full"
-                onClick={() => void goTo(13, setupRoute(13, { edit: openPlan.id }))}
+                onClick={() => void goTo(13, setupRoute(13, { edit: openPlan.id }), "other")}
               >
                 {COPY.editPlan(openPlan.name)}
               </Button>

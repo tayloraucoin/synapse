@@ -16,9 +16,14 @@ import { HabitSetupCard } from "./habit-setup-card";
  * "For each habit: how much it matters, how long it usually takes, and —
  * optionally — a shorter or longer version." One `HabitSetupCard` per
  * morning habit with a slot in the morning template, in slot order — the
- * order they were ticked on screen 8. Collapsed cards sink beneath open
- * ones (the frame rules). *Continue* carries no count; nothing here changes
- * it. Nothing here reorders — the builder does.
+ * order they were ticked on screen 8. *Continue* carries no count; nothing
+ * here changes it. Nothing here reorders — the builder does.
+ *
+ * CARDS KEEP THEIR ORDER (UX v1.3 R58; T9.2; DAY-2). *Done* collapses a card
+ * where it is and focus moves to its own *Edit*, so the window does not
+ * scroll because nothing moved. (v1.2 sank collapsed cards beneath open ones;
+ * the focus move to the sunk card's *Edit* was the jump.) `collapsed` is read
+ * for `initiallyOpen` only — the list is the slots, as fetched.
  */
 export function Step9Ranked({
   embedded = false,
@@ -39,8 +44,6 @@ export function Step9Ranked({
     const habit = habitById.get(slot.habitId);
     return habit ? [{ slot, habit }] : [];
   });
-  const open = cards.filter(({ slot }) => !collapsed.has(slot.id));
-  const done = cards.filter(({ slot }) => collapsed.has(slot.id));
 
   return (
     <FactScreen
@@ -62,7 +65,7 @@ export function Step9Ranked({
         </Text>
       ) : (
         <div className="flex flex-col gap-(--space-3)">
-          {[...open, ...done].map(({ slot, habit }) => (
+          {cards.map(({ slot, habit }) => (
             <HabitSetupCard
               key={slot.id}
               habit={habit}

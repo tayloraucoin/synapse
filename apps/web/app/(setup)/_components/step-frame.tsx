@@ -12,6 +12,17 @@ import { trpc } from "@/lib/trpc/client";
 import { SETUP_COPY as COPY, SETUP_TOTAL_STEPS } from "./copy";
 
 /**
+ * Which of the frame's four controls started the move — the one that shows
+ * pending. `other` is a move from inside the content (a radio, a link) that
+ * none of the four reflects; the skeleton still shows.
+ */
+export type StepAction = "primary" | "skip" | "back" | "finishLater" | "other";
+
+type StepGo = (nextStep: number | null, path: string, action?: StepAction) => Promise<void>;
+
+const StepNavigationContext = React.createContext<{ go: StepGo; pending: StepAction | null } | null>(null);
+
+/**
  * Move to another step, recording it on the account first.
  *
  * EVERY TRANSITION WRITES `first_run_step`. Continue, Skip, back and *Finish
@@ -26,13 +37,22 @@ import { SETUP_COPY as COPY, SETUP_TOTAL_STEPS } from "./copy";
  * It is a hook rather than a prop on `StepFrame` because the steps that write
  * something of their own — FR-01's preferences, FR-05's completion — must
  * sequence that write before the move, and they need the same function.
+ *
+ * THE TAP SHOWS PENDING (UX v1.3 R63, §2 guardrail 6; DAY-2). Inside the
+ * sequence the move runs through `StepNavigationProvider`: one transition
+ * for the screen, and the `action` that started it, so the tapped control —
+ * the primary, *Skip for now*, *Back* or *Finish later* — shows pending
+ * until the route's `loading.tsx` skeleton (or the screen) arrives. Outside
+ * the sequence (Settings → Your day mounts the same screens) there is no
+ * provider and the move is a plain replace.
  */
-export function useStepNavigation() {
+export function useStepNavigation(): StepGo {
+  const context = React.useContext(StepNavigationContext);
   const router = useRouter();
   const save = trpc.user.updatePreferences.useMutation();
 
-  return React.useCallback(
-    async (nextStep: number | null, path: string): Promise<void> => {
+  const plain = React.useCallback<StepGo>(
+    async (nextStep, path) => {
       try {
         await save.mutateAsync({ firstRunStep: nextStep });
       } catch {
@@ -42,6 +62,45 @@ export function useStepNavigation() {
     },
     [router, save],
   );
+
+  return context?.go ?? plain;
+}
+
+/** The control whose move is out, or null — read by the frame. */
+export function useStepPending(): StepAction | null {
+  return React.useContext(StepNavigationContext)?.pending ?? null;
+}
+
+/** The sequence's one navigation: the write, then the replace inside a transition. */
+export function StepNavigationProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+  const save = trpc.user.updatePreferences.useMutation();
+  const [transitioning, startTransition] = React.useTransition();
+  const [saving, setSaving] = React.useState(false);
+  const [action, setAction] = React.useState<StepAction | null>(null);
+
+  const go = React.useCallback<StepGo>(
+    async (nextStep, path, tapped = "primary") => {
+      setAction(tapped);
+      setSaving(true);
+      try {
+        await save.mutateAsync({ firstRunStep: nextStep });
+      } catch {
+        // Deliberately swallowed — see `useStepNavigation`.
+      } finally {
+        setSaving(false);
+      }
+      startTransition(() => router.replace(path));
+    },
+    [router, save],
+  );
+
+  const value = React.useMemo(
+    () => ({ go, pending: saving || transitioning ? action : null }),
+    [action, go, saving, transitioning],
+  );
+
+  return <StepNavigationContext.Provider value={value}>{children}</StepNavigationContext.Provider>;
 }
 
 /**
@@ -79,6 +138,7 @@ export function StepFrame({
 }) {
   const online = useOnline();
   const goTo = useStepNavigation();
+  const pending = useStepPending();
 
   const copy: StepFrameViewProps["copy"] = React.useMemo(
     () => ({
@@ -97,12 +157,14 @@ export function StepFrame({
       total={SETUP_TOTAL_STEPS}
       heading={heading}
       body={body}
-      primary={primary}
-      skip={skip}
+      // The tapped control shows pending while the next screen loads (R63).
+      primary={{ ...primary, busy: primary.busy === true || pending === "primary" }}
+      skip={skip === undefined ? undefined : { ...skip, busy: skip.busy === true || pending === "skip" }}
+      pending={pending === "back" || pending === "finishLater" ? pending : null}
       error={error}
       offline={!online}
-      onBack={onBack ?? (step > 1 ? () => void goTo(step - 1, setupRoute(step - 1)) : undefined)}
-      onFinishLater={() => void goTo(step, todayRoute())}
+      onBack={onBack ?? (step > 1 ? () => void goTo(step - 1, setupRoute(step - 1), "back") : undefined)}
+      onFinishLater={() => void goTo(step, todayRoute(), "finishLater")}
       copy={copy}
       caption={caption}
     >

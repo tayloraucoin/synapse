@@ -4,6 +4,8 @@ import { getRequestUser } from "@/lib/auth/get-request-user";
 import { requireVerifiedEmail } from "@/lib/auth/require-verified-email";
 import { signInRoute } from "@/lib/routes";
 
+import { StepNavigationProvider } from "./_components/step-frame";
+
 /**
  * The setup group — no shell, a sequence (Epic 1 §0.4, FR-01…05).
  *
@@ -27,7 +29,8 @@ export default async function SetupLayout({
       id="main"
       className="mx-auto flex min-h-screen-safe w-full max-w-(--content-text) flex-col gap-(--space-5) p-(--space-4)"
     >
-      {children}
+      {/* One navigation for the sequence: the tapped control shows pending (UX v1.3 R63; DAY-2). */}
+      <StepNavigationProvider>{children}</StepNavigationProvider>
     </main>
   );
 }

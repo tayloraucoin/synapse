@@ -9,7 +9,7 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardSummary,
   ChipPicker,
   CountStepper,
   EmojiSlot,
@@ -48,8 +48,15 @@ import { SETUP_COPY as COPY } from "./copy";
  * person typed (`nameTouched`) or a glyph they picked (`iconTouched`).
  * **How often** · **Usual days** with *Flexible* · **Length** · **Where**;
  * for *Gym or studio* and *Outside*, **Getting there** · **Getting back** and
- * *Plan for the travel* with its line. **Done** collapses to *🏋️ Upper body ·
- * 2 a week · Mon Thu · 60 min · gym +15/+15*.
+ * *Plan for the travel* with its line. **Done** collapses in place to two
+ * lines (v1.3 R57, R58): the glyph · *Upper body* · *Edit*, then *2 a week ·
+ * Mon Thu · 60 min · gym +15/+15*.
+ *
+ * IT NEVER REMOUNTS ON ITS FIRST WRITE (v1.3 §10.2; DAY-2). The list keeps
+ * this instance through the create (`useCardEntries`); a `habit` prop going
+ * from null to the row is ignored by design — `draftFrom` runs once, and
+ * `idRef` is already set by the create — so the open state and *Usual days*
+ * stay what the person set.
  *
  * CREATE ON THE FIRST FACT (logged). A card appended by *Add a workout* is
  * unsaved and creates nothing; the first thing that makes it a workout — a
@@ -190,8 +197,7 @@ export function WorkoutSetupCard({
   };
 
   const away = draft.where !== "home";
-  const summary = COPY.workoutSummary(
-    draft.name.trim() || COPY.newWorkout,
+  const caption = COPY.workoutCaption(
     draft.weekly,
     draft.flexible || draft.days.length === 0 ? COPY.flexible.toLowerCase() : draft.days.map((day) => DAY_SHORT[day]).join(" "),
     draft.minutes,
@@ -214,19 +220,19 @@ export function WorkoutSetupCard({
   }
 
   if (!open) {
+    // Two lines, in place (v1.3 R57, R58): glyph · name · *Edit*, then the facts.
     return (
-      <Card role="group" aria-labelledby={groupId} className="py-(--space-2)">
-        <CardHeader>
-          <EmojiSlot icon={draft.icon} size="card" />
-          <CardTitle id={groupId} className="truncate text-(length:--fs-body)">
-            {summary}
-          </CardTitle>
-          <CardAction>
+      <Card className="py-(--space-2)">
+        <CardSummary
+          leading={<EmojiSlot icon={draft.icon} size="card" />}
+          title={draft.name.trim() || COPY.newWorkout}
+          caption={caption}
+          action={
             <Button ref={editRef} variant="ghost" size="sm" onClick={() => setOpen(true)}>
               {COPY.edit}
             </Button>
-          </CardAction>
-        </CardHeader>
+          }
+        />
       </Card>
     );
   }

@@ -27,7 +27,8 @@ export function Step12Focuses({
   onSaved?: () => void;
 }) {
   const online = useOnline();
-  const focuses = trpc.habit.list.useQuery({ includeArchived: false, types: ["deep_work"] });
+  // Created order (UX v1.3 R65).
+  const focuses = trpc.habit.list.useQuery({ includeArchived: false, types: ["deep_work"], order: "created" });
   const rows = React.useMemo(
     () => (focuses.data?.habits ?? []).filter((habit) => habit.type === "deep_work"),
     [focuses.data?.habits],
@@ -48,12 +49,11 @@ export function Step12Focuses({
         loading={focuses.isLoading}
         addLabel={COPY.addAFocus}
         disabled={!online}
-        renderCard={(habit, draft, callbacks) => (
+        renderCard={({ habit, added, index }, callbacks) => (
           <FocusSetupCard
-            key={habit?.id ?? `draft-${draft}`}
             habit={habit}
-            first={habit === null ? rows.length === 0 && draft === 0 : rows[0]?.id === habit.id}
-            initiallyOpen={habit === null}
+            first={index === 0}
+            initiallyOpen={added}
             onCreated={callbacks.onCreated}
             onRemoved={callbacks.onRemoved}
             onDiscard={callbacks.onDiscard}

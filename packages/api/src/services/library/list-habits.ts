@@ -25,7 +25,8 @@ import {
  * already loaded rather than a query per keystroke.
  *
  * SORTING IS THE DOCUMENT'S: within a group, by category name then title, with
- * uncategorised last (Epic 1 LB-01). It is done here rather than in SQL
+ * uncategorised last (Epic 1 LB-01) — unless the caller asks for `created`
+ * order, which the first run's setup lists do (UX v1.3 R65). It is done here rather than in SQL
  * because "uncategorised last" is a rule about a null, and expressing it in
  * `ORDER BY` costs a `CASE` that reads worse than the sentence it implements.
  */
@@ -41,6 +42,12 @@ export type ListHabitsOptions = {
   blockKind?: BlockKind | null;
   /** Only these types — the block screens ask for workouts or focuses. */
   types?: readonly ItemType[];
+  /**
+   * `library` (the default) — category name, then title; `created` — the
+   * order the person made them, oldest first (UX v1.3 R65, DAY-2). The setup
+   * lists ask for `created`; the library and every other caller do not.
+   */
+  order?: "library" | "created";
 };
 
 export async function listHabits(
@@ -73,7 +80,7 @@ export async function listHabits(
     }
 
     const habitRows = await tx
-      .select(HABIT_SUMMARY_COLUMNS)
+      .select({ ...HABIT_SUMMARY_COLUMNS, createdAt: habits.createdAt })
       .from(habits)
       .where(and(...conditions));
 
@@ -81,11 +88,15 @@ export async function listHabits(
       categoryRows.map((row) => [row.id, row]),
     );
 
+    if (options.order === "created") {
+      habitRows.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    }
+
     const views = habitRows.map((row) =>
       toHabitSummaryView(row, byId),
     );
 
-    views.sort(compareForLibrary);
+    if (options.order !== "created") views.sort(compareForLibrary);
 
     const habitCounts = new Map<string, number>();
     for (const row of habitRows) {

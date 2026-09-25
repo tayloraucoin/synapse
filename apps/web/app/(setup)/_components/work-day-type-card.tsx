@@ -8,6 +8,7 @@ import {
   CardAction,
   CardContent,
   CardHeader,
+  CardSummary,
   CardTitle,
   ChipPicker,
   EmojiSlot,
@@ -35,7 +36,12 @@ import { SETUP_COPY as COPY } from "./copy";
  * one (*Other* fills neither); then *Working by*, *Until about*, the *what
  * gives* radio, and **Done**. Done writes the work template — `create` for
  * a card the screen appended, `update` for one that exists — and collapses
- * the card to *Remote · 9:00–17:30 · work waits* with *Edit*.
+ * the card in place to two lines (v1.3 R57): *Remote* · *Edit*, then
+ * *9:00–17:30 · work waits*.
+ *
+ * A `template` prop going from null to the saved row on the same instance is
+ * the create landing (DAY-2): the list keeps this card, and the next Done is
+ * an `update`.
  *
  * SAVE AS YOU GO, PER CARD. The card is the unit: a type is not a fact
  * until its anchor and its answer are together, so Done is the write and
@@ -123,13 +129,11 @@ export function WorkDayTypeCard({
   const editRef = React.useRef<HTMLButtonElement>(null);
   const groupId = React.useId();
 
-  const summary = (): string =>
-    COPY.typeSummary(
-      draft.name.trim() || COPY.aWorkDayType,
-      display(draft.workStart),
-      display(draft.workEnd),
-      draft.direction === null ? "" : COPY.givesShort[draft.direction],
-    ).replace(/ · $/, "");
+  const caption = COPY.typeCaption(
+    display(draft.workStart),
+    display(draft.workEnd),
+    draft.direction === null ? null : COPY.givesShort[draft.direction],
+  );
 
   const pickKind = (value: string | null) => {
     const kind = value as WorkDayKind | null;
@@ -195,19 +199,19 @@ export function WorkDayTypeCard({
   const busy = create.isPending || update.isPending;
 
   if (!open) {
+    // Two lines, in place (v1.3 R57, R58): glyph · name · *Edit*, then the hours and what gives.
     return (
-      <Card role="group" aria-labelledby={groupId} className="py-(--space-2)">
-        <CardHeader>
-          <EmojiSlot icon={draft.icon} size="card" />
-          <CardTitle id={groupId} className="truncate text-(length:--fs-body)">
-            {summary()}
-          </CardTitle>
-          <CardAction>
+      <Card className="py-(--space-2)">
+        <CardSummary
+          leading={<EmojiSlot icon={draft.icon} size="card" />}
+          title={draft.name.trim() || COPY.aWorkDayType}
+          caption={caption}
+          action={
             <Button ref={editRef} variant="ghost" size="sm" onClick={() => setOpen(true)}>
               {COPY.edit}
             </Button>
-          </CardAction>
-        </CardHeader>
+          }
+        />
       </Card>
     );
   }

@@ -10,14 +10,17 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
+  CardSummary,
   CardTitle,
   EmojiSlot,
   HelperText,
   Input,
   MinutesStepper,
+  PriorityMark,
   RangeEditor,
   Stepper17,
   Text,
+  type PriorityMarkValue,
   type Stepper17Value,
 } from "@syn/ui";
 import { DURATION_MAX, DURATION_MIN, HABIT_VERSIONS_MAX, VERSION_LABEL_MAX } from "@syn/constants";
@@ -35,8 +38,9 @@ import { SETUP_COPY as COPY } from "./copy";
  * editor inline. **Matters:** the seven squares. **Usually:** a stepper at the
  * midpoint — the length the plan uses. **Versions:** *Add a shorter version*,
  * then *Add a longer version*, each a label and a stepper, three at most.
- * **Done** collapses to one line — *🌬️ Breath work · matters 5 · usually 8 ·
- * quick 5* — with *Edit*.
+ * **Done** collapses in place to two lines (v1.3 R57–R59, §4.4 B10): the
+ * glyph · the matters cell (`PriorityMark`) · *Breath work* · *Edit*, then
+ * *usually 8 min · quick 5*. The number is the mark's, never bare text.
  *
  * EVERY CONTROL WRITES ITS OWN FACT on its own debounce (TD-18): *matters* is
  * `habit.patch({ lifePriority })`; *usually* is the morning slot's
@@ -179,27 +183,30 @@ export function HabitSetupCard({
 
   const others = versions.filter((version) => version.key !== USUAL_KEY);
   const hasShorter = others.some((version) => version.minutes < usually);
-  const summary = COPY.rankedSummary(
-    habit.title,
-    matters,
+  const caption = COPY.rankedCaption(
     usually,
     others.map((version) => `${version.label.toLowerCase()} ${version.minutes}`),
   );
 
   if (!open) {
+    // Two lines, in place (v1.3 R57–R59): glyph · the matters cell · title · *Edit*, then the lengths.
     return (
-      <Card role="group" aria-labelledby={groupId} className="py-(--space-2)">
-        <CardHeader>
-          <EmojiSlot icon={habit.icon} size="card" />
-          <CardTitle id={groupId} className="truncate text-(length:--fs-body)">
-            {summary}
-          </CardTitle>
-          <CardAction>
+      <Card className="py-(--space-2)">
+        <CardSummary
+          leading={
+            <>
+              <EmojiSlot icon={habit.icon} size="card" />
+              <PriorityMark value={matters as PriorityMarkValue} />
+            </>
+          }
+          title={habit.title}
+          caption={caption}
+          action={
             <Button ref={editRef} variant="ghost" size="sm" onClick={() => { setOpen(true); onExpand?.(); }}>
               {COPY.edit}
             </Button>
-          </CardAction>
-        </CardHeader>
+          }
+        />
       </Card>
     );
   }

@@ -2,7 +2,16 @@
 
 import * as React from "react";
 
-import { ListRow, NativeSelect, NativeSelectOption, StatusLine, Text, TextDisclosureButton } from "@syn/ui";
+import {
+  InfoDisclosure,
+  ListRow,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  StatusLine,
+} from "@syn/ui";
 import type { WorkDayMode, WorkDays } from "@syn/types";
 
 import { useOnline } from "@/lib/hooks/use-online";
@@ -19,6 +28,12 @@ import { FactScreen } from "./fact-screen";
  * words do not fit a segment at 375px" (W5). Mon–Fri *Always*, Sat and Sun
  * *Never* (S2.2). Beneath, the disclosure *What does each choice do?* opens
  * the four lines, verbatim.
+ *
+ * UX v1.3 §4.3 (DAY-2): the control is the `Select` primitive, its menu
+ * anchored under the trigger (`position="popper"`) — the native menu opened
+ * where the OS put it (T2.1); the disclosure is an `InfoDisclosure` (R60,
+ * T2.3), the value in weight 500 and the definition after it. Four values
+ * until DAY-8 brings *Usually*.
  *
  * EVERY CHANGE WRITES AT ONCE (§4, R30; TD-18). A select is a fact the
  * moment it changes: the row shows the new value, the write goes, and a
@@ -58,7 +73,6 @@ export function Step2WorkDays({
   const [workDays, setWorkDays] = React.useState<WorkDays>(initialWorkDays ?? DEFAULT_WORK_DAYS);
   const [open, setOpen] = React.useState(false);
   const [line, setLine] = React.useState<string | null>(null);
-  const linesId = React.useId();
 
   async function change(key: (typeof KEYS)[number], mode: WorkDayMode): Promise<void> {
     const previous = workDays;
@@ -98,18 +112,19 @@ export function Step2WorkDays({
               as="li"
               title={COPY.weekdays[index]}
               trailing={
-                <NativeSelect
-                  aria-label={COPY.weekdays[index]}
-                  value={workDays[key]}
-                  onChange={(event) => void change(key, event.target.value as WorkDayMode)}
-                  className="h-(--target) w-40 truncate rounded-(--radius) border-input bg-paper text-ink shadow-none text-(length:--fs-body)"
-                >
-                  {MODES.map((mode) => (
-                    <NativeSelectOption key={mode} value={mode}>
-                      {COPY.workDayModes[mode]}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                // The anchored `Select` (v1.3 §4.3, T2.1): the menu opens under its trigger, not where the OS puts it.
+                <Select value={workDays[key]} onValueChange={(value) => void change(key, value as WorkDayMode)}>
+                  <SelectTrigger aria-label={COPY.weekdays[index]} className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper" align="end">
+                    {MODES.map((mode) => (
+                      <SelectItem key={mode} value={mode}>
+                        {COPY.workDayModes[mode]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               }
             />
           ))}
@@ -117,24 +132,12 @@ export function Step2WorkDays({
 
         {line === null ? null : <StatusLine variant="sync-issues" text={line} placement="inline" />}
 
-        <TextDisclosureButton
+        <InfoDisclosure
+          label={COPY.whatEachChoiceDoes}
           expanded={open}
-          collapsedLabel={COPY.whatEachChoiceDoes}
-          expandedLabel={COPY.whatEachChoiceDoes}
-          aria-controls={linesId}
-          onClick={() => setOpen((current) => !current)}
+          onToggle={setOpen}
+          items={MODES.map((mode) => ({ term: COPY.workDayModes[mode], text: COPY.workDayModeDefinitions[mode] }))}
         />
-        {open ? (
-          <ul id={linesId} className="m-0 flex list-none flex-col gap-(--space-2) p-0">
-            {MODES.map((mode) => (
-              <li key={mode}>
-                <Text as="span" variant="caption" tone="secondary">
-                  {COPY.workDayModeLines[mode]}
-                </Text>
-              </li>
-            ))}
-          </ul>
-        ) : null}
       </div>
     </FactScreen>
   );

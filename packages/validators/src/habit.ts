@@ -253,6 +253,8 @@ export const listHabitsInput = z
     blockKind: blockKindSchema.nullable().optional(),
     /** Only these types — the block screens ask for workouts or focuses. */
     types: z.array(habitTypeSchema).min(1).optional(),
+    /** `library` (default) — category, then title; `created` — oldest first (UX v1.3 R65). */
+    order: z.enum(["library", "created"]).optional(),
   })
   .optional();
 

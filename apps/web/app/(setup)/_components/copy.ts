@@ -47,13 +47,16 @@ export const SETUP_COPY = {
     never: "Never",
   },
   whatEachChoiceDoes: "What does each choice do?",
-  /** The four lines, verbatim (v1.2 §4.2). */
-  workDayModeLines: {
-    always: "Always — a work day. The morning is built around it.",
-    sometimes: "Sometimes — the morning asks, “Working today?” and builds from the answer.",
-    rarely:
-      "Rarely — planned as a day off. “Working today” is one tap away in the day’s menu if it turns out otherwise.",
-    never: "Never — a day off. Nothing about work is asked.",
+  /**
+   * The four lines' definitions, verbatim (v1.2 §4.2), after the term —
+   * `InfoDisclosure` sets the term (`workDayModes`) in weight 500 and the
+   * dash between (v1.3 R60, §4.3; DAY-2). *Usually* arrives with DAY-8.
+   */
+  workDayModeDefinitions: {
+    always: "a work day. The morning is built around it.",
+    sometimes: "the morning asks, “Working today?” and builds from the answer.",
+    rarely: "planned as a day off. “Working today” is one tap away in the day’s menu if it turns out otherwise.",
+    never: "a day off. Nothing about work is asked.",
   },
   weekdays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const,
 
@@ -87,9 +90,9 @@ export const SETUP_COPY = {
   /** [COPY — needs Vesper sign-off] */
   typeNamePlaceholder: "Remote, Office, Studio…",
   chooseAnIcon: "Choose an icon",
-  /** "Remote · 9:00–17:30 · work waits" */
-  typeSummary: (name: string, start: string, end: string, gives: string) =>
-    `${name} · ${start}–${end} · ${gives}`,
+  /** The collapsed card's caption under the name — "9:00–17:30 · work waits" (v1.3 R57). */
+  typeCaption: (start: string, end: string, gives: string | null) =>
+    gives === null ? `${start}–${end}` : `${start}–${end} · ${gives}`,
   continueTypes: (n: number) => (n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "type" : "types"}`),
   /** [COPY — needs Vesper sign-off: the card's own line when a save fails.] */
   typeSaveError: "Couldn’t save this one. Try Done again.",
@@ -179,9 +182,12 @@ export const SETUP_COPY = {
   /** The pencil's accessible name. */
   editRange: "Edit the range",
   rangeEditorLabel: "Range",
-  /** "Breath work · matters 5 · usually 8 · quick 5" */
-  rankedSummary: (title: string, matters: number, usually: number, versions: readonly string[]) =>
-    [title, `matters ${matters}`, `usually ${usually}`, ...versions].join(" · "),
+  /**
+   * The collapsed card's caption — "usually 12 min · quick 5" (v1.3 §4.4 B10,
+   * R57, R59). *matters n* leaves the text: the `PriorityMark` carries it.
+   */
+  rankedCaption: (usually: number, versions: readonly string[]) =>
+    [`usually ${usually} min`, ...versions].join(" · "),
   /** [COPY] */
   nothingToRank: "Nothing to rank yet.",
 
@@ -207,9 +213,11 @@ export const SETUP_COPY = {
   gettingBack: "Getting back",
   planForTheTravel: "Plan for the travel",
   planForTheTravelLine: "Kept beside the workout, never added to it. Either trip can be dropped on the day.",
-  /** "Upper body · 2 a week · Mon Thu · 60 min · gym +15/+15" — the travel never in the length. */
-  workoutSummary: (
-    name: string,
+  /**
+   * The collapsed card's caption under the name — "2 a week · Mon Thu · 60 min
+   * · gym +15/+15" (v1.3 R57); the travel never in the length.
+   */
+  workoutCaption: (
     weekly: number,
     days: string,
     minutes: number,
@@ -217,7 +225,6 @@ export const SETUP_COPY = {
     travel: { there: number; back: number } | null,
   ) =>
     [
-      name,
       `${weekly} a week`,
       days,
       `${minutes} min`,
@@ -264,8 +271,8 @@ export const SETUP_COPY = {
   focusLine: "A name for the work itself — a project, a client, a kind of work.",
   /** [COPY] The unnamed card's accessible name. */
   newFocus: "New focus",
-  /** "Viewpoint · 2 a week · flexible" */
-  focusSummary: (name: string, weekly: number, days: string) => `${name} · ${weekly} a week · ${days}`,
+  /** The collapsed card's caption under the name — "2 a week · flexible" (v1.3 R57). */
+  focusCaption: (weekly: number, days: string) => `${weekly} a week · ${days}`,
   cancel: "Cancel",
   continueFocuses: (n: number) =>
     n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "focus" : "focuses"}`,

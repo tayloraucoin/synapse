@@ -12,6 +12,7 @@ import { setupRoute } from "@/lib/routes";
 import { SETUP_COPY as COPY } from "./copy";
 import { FactScreen } from "./fact-screen";
 import { useStepNavigation } from "./step-frame";
+import { useCardEntries } from "./use-card-entries";
 import { WorkoutSetupCard } from "./workout-setup-card";
 
 /**
@@ -37,7 +38,8 @@ export function Step10Training({
   const online = useOnline();
   const goTo = useStepNavigation();
   const utils = trpc.useUtils();
-  const workouts = trpc.habit.list.useQuery({ includeArchived: false, types: ["workout"] });
+  // Created order (UX v1.3 R65): the rotation reads as the person built it.
+  const workouts = trpc.habit.list.useQuery({ includeArchived: false, types: ["workout"], order: "created" });
   const templates = trpc.template.list.useQuery({ includeArchived: false, kind: "training" });
   const create = trpc.template.create.useMutation();
 
@@ -73,7 +75,7 @@ export function Step10Training({
             onChange={(value) => {
               if (value === "no") {
                 setAnswer("no");
-                void goTo(11, setupRoute(11));
+                void goTo(11, setupRoute(11), "other");
                 return;
               }
               setAnswer("yes");
@@ -92,11 +94,10 @@ export function Step10Training({
             loading={workouts.isLoading}
             addLabel={COPY.addAWorkout}
             disabled={!online}
-            renderCard={(habit, draft, callbacks) => (
+            renderCard={({ habit, added }, callbacks) => (
               <WorkoutSetupCard
-                key={habit?.id ?? `draft-${draft}`}
                 habit={habit}
-                initiallyOpen={habit === null}
+                initiallyOpen={added}
                 onCreated={callbacks.onCreated}
                 onRemoved={callbacks.onRemoved}
                 onDiscard={callbacks.onDiscard}
@@ -115,9 +116,15 @@ export function Step10Training({
 }
 
 /**
- * The cards as a list that appends — shared by screens 10 and 12. A draft is
- * an appended card without a row; once it creates one, the list keeps the
- * draft's card until the refetch carries the row, so nothing flashes.
+ * The cards as a list that appends — shared by screens 10 and 12.
+ *
+ * A CARD NEVER REMOUNTS ON ITS FIRST WRITE (UX v1.3 §10.2; DAY-2). Every
+ * card — a row the list had, or one added here — is one entry of
+ * `useCardEntries` with one key for its life; when an added card's create
+ * lands, the entry's `habit` goes from null to the row on the same
+ * instance. The card treats that as nothing: its draft, its open state and
+ * its `idRef` are its own. `data-draft` carries the key, so the same DOM
+ * node can be checked across the create.
  */
 export function SetupCards({
   rows,
@@ -132,64 +139,46 @@ export function SetupCards({
   addLabel: string;
   disabled: boolean;
   renderCard: (
-    habit: HabitSummaryView | null,
-    draft: number,
+    entry: { habit: HabitSummaryView | null; added: boolean; index: number },
     callbacks: { onCreated: (id: string) => void; onRemoved: () => void; onDiscard: () => void },
   ) => React.ReactNode;
   footer?: React.ReactNode;
 }) {
   const utils = trpc.useUtils();
-  const [drafts, setDrafts] = React.useState<number[]>([]);
-  const [createdByDraft, setCreatedByDraft] = React.useState<ReadonlyMap<number, string>>(new Map());
-  const nextDraft = React.useRef(0);
-
-  // Once the list carries a draft's row, the draft's card is the list's card.
-  React.useEffect(() => {
-    const landed = [...createdByDraft.entries()].filter(([, id]) => rows.some((row) => row.id === id));
-    if (landed.length === 0) return;
-    setDrafts((current) => current.filter((draft) => !landed.some(([id]) => id === draft)));
-    setCreatedByDraft((current) => {
-      const next = new Map(current);
-      for (const [id] of landed) next.delete(id);
-      return next;
-    });
-  }, [rows, createdByDraft]);
-
-  const dropDraft = (draft: number) => setDrafts((current) => current.filter((id) => id !== draft));
-  const created = new Set(createdByDraft.values());
-  const shown = rows.filter((row) => !created.has(row.id));
+  const { entries, add, created, removed } = useCardEntries(rows);
   const refresh = () => void utils.habit.list.invalidate();
 
   return (
     <div className="flex flex-col gap-(--space-3)">
       {loading ? (
         <SkeletonRow />
-      ) : shown.length === 0 && drafts.length === 0 ? (
+      ) : entries.length === 0 ? (
         <Text as="p" variant="secondary" tone="secondary">
           {COPY.nothingYet}
         </Text>
       ) : null}
 
-      {shown.map((habit) =>
-        renderCard(habit, -1, { onCreated: () => undefined, onRemoved: refresh, onDiscard: () => undefined }),
-      )}
-
-      {drafts.map((draft) =>
-        renderCard(null, draft, {
-          onCreated: (id) => setCreatedByDraft((current) => new Map(current).set(draft, id)),
-          onRemoved: () => {
-            dropDraft(draft);
-            refresh();
-          },
-          onDiscard: () => dropDraft(draft),
-        }),
-      )}
+      {entries.map((entry, index) => (
+        <div key={entry.key} data-draft={entry.key}>
+          {renderCard(
+            { habit: entry.row, added: entry.added, index },
+            {
+              onCreated: (id) => created(entry.key, id),
+              onRemoved: () => {
+                removed(entry.key);
+                refresh();
+              },
+              onDiscard: () => removed(entry.key),
+            },
+          )}
+        </div>
+      ))}
 
       <Button
         variant="secondary"
         className="w-full wide:w-auto wide:self-start"
         disabled={disabled}
-        onClick={() => setDrafts((current) => [...current, nextDraft.current++])}
+        onClick={add}
       >
         {addLabel}
       </Button>

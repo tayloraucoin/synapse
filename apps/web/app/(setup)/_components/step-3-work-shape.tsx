@@ -9,6 +9,7 @@ import { trpc } from "@/lib/trpc/client";
 
 import { SETUP_COPY as COPY } from "./copy";
 import { FactScreen } from "./fact-screen";
+import { useCardEntries } from "./use-card-entries";
 import { WorkDayTypeCard, type WorkDayTypeSeed } from "./work-day-type-card";
 
 /**
@@ -169,35 +170,19 @@ export function WorkDayTypeCards({
 }) {
   const utils = trpc.useUtils();
   const types = trpc.template.list.useQuery({ includeArchived: false, kind: "work" });
-  const [drafts, setDrafts] = React.useState<number[]>([]);
-  // A draft that has been written keeps its card until the list carries the row.
-  const [savedDrafts, setSavedDrafts] = React.useState<ReadonlyMap<number, WorkDayTypeSeed>>(new Map());
-  const nextDraft = React.useRef(0);
 
   const rows = React.useMemo(() => types.data ?? [], [types.data]);
-  const openDrafts = drafts.filter((draft) => !savedDrafts.has(draft));
+  // One entry, one key, per card for the life of the screen (DAY-2): Done's create never remounts it.
+  const { entries, add, created, removed, pending } = useCardEntries<TemplateSummaryView, WorkDayTypeSeed>(rows);
 
   React.useEffect(() => {
-    onOpenDraftsChange?.(openDrafts.length);
-  }, [openDrafts.length, onOpenDraftsChange]);
-
-  // Once the list has the row, the draft's card is the list's card.
-  React.useEffect(() => {
-    if (savedDrafts.size === 0) return;
-    const landed = [...savedDrafts.entries()].filter(([, saved]) => rows.some((row) => row.id === saved.id));
-    if (landed.length === 0) return;
-    setDrafts((current) => current.filter((draft) => !landed.some(([id]) => id === draft)));
-    setSavedDrafts((current) => {
-      const next = new Map(current);
-      for (const [id] of landed) next.delete(id);
-      return next;
-    });
-  }, [rows, savedDrafts]);
+    onOpenDraftsChange?.(pending);
+  }, [pending, onOpenDraftsChange]);
 
   const refresh = () => utils.template.list.invalidate();
 
   const addButton = (
-    <Button variant="secondary" className="w-full wide:w-auto wide:self-start" onClick={() => setDrafts((current) => [...current, nextDraft.current++])}>
+    <Button variant="secondary" className="w-full wide:w-auto wide:self-start" onClick={add}>
       {COPY.addAWorkDayType}
     </Button>
   );
@@ -212,43 +197,29 @@ export function WorkDayTypeCards({
 
   return (
     <div className="flex flex-col gap-(--space-3)">
-      {rows.length === 0 && drafts.length === 0 ? (
+      {entries.length === 0 ? (
         <Text as="p" variant="secondary" tone="secondary">
           {COPY.nothingYet}
         </Text>
       ) : null}
 
-      {rows
-        .filter((type) => ![...savedDrafts.values()].some((saved) => saved.id === type.id))
-        .map((type) => (
+      {entries.map((entry) => (
+        <div key={entry.key} data-draft={entry.key}>
           <WorkDayTypeCard
-            key={type.id}
-            template={type}
-            initiallyOpen={false}
-            onSaved={() => void refresh()}
-            onRemoved={() => void refresh()}
-          />
-        ))}
-
-      {drafts.map((draft) => {
-        const saved = savedDrafts.get(draft) ?? null;
-        return (
-          <WorkDayTypeCard
-            key={`draft-${draft}`}
-            template={saved}
-            initiallyOpen={saved === null}
+            template={entry.row}
+            initiallyOpen={entry.added}
             onSaved={(row) => {
-              setSavedDrafts((current) => new Map(current).set(draft, row));
+              if (entry.added) created(entry.key, row.id, row);
               void refresh();
             }}
             onRemoved={() => {
-              setDrafts((current) => current.filter((id) => id !== draft));
+              removed(entry.key);
               void refresh();
             }}
-            onDiscard={() => setDrafts((current) => current.filter((id) => id !== draft))}
+            onDiscard={() => removed(entry.key)}
           />
-        );
-      })}
+        </div>
+      ))}
 
       {addButton}
     </div>

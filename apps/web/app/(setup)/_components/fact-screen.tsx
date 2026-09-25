@@ -127,7 +127,7 @@ export function FactScreen({
       }}
       skip={
         skippable
-          ? { onSkip: () => void goTo(step + 1, setupRoute(step + 1)) }
+          ? { onSkip: () => void goTo(step + 1, setupRoute(step + 1), "skip") }
           : undefined
       }
     >

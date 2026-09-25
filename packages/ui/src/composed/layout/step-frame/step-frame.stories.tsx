@@ -61,6 +61,12 @@ export const Busy: Story = {
   args: { primary: { label: "Continue · 6 habits", onClick: () => {}, busy: true } },
 };
 
+/** UX v1.3 R63 (DAY-2): *Back* tapped — the arrow dims and is `aria-busy` while the previous screen loads. */
+export const PendingBack: Story = { args: { pending: "back" } };
+
+/** *Finish later* tapped — the ghost button shows its pending state. */
+export const PendingFinishLater: Story = { args: { pending: "finishLater" } };
+
 /**
  * UX v1.2 §4, R43 (RUN-7): three viewports of content; the action row stays
  * pinned above the safe area with a hairline and paper behind it, and the

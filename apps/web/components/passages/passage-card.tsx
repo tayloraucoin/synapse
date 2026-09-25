@@ -51,10 +51,17 @@ export function PassageCard({
           className="border-hairline size-(--target) shrink-0 rounded-(--radius) border object-cover"
         />
       )}
-      <div className="flex min-w-0 flex-1 flex-col gap-(--space-1) py-(--space-1)">
-        <Text as="span" variant="row-title" weight={500} truncate>
-          {name || COPY.untitled}
-        </Text>
+      <div className="flex min-w-0 flex-1 flex-col gap-(--space-1)">
+        {/*
+         * T6.1 (DAY-2): the title's line is the 44px row the handle, the
+         * thumbnail and the menu sit on, so all four share one centre however
+         * many lines the excerpt and the tags add beneath.
+         */}
+        <span className="flex min-h-(--target) min-w-0 items-center">
+          <Text as="span" variant="row-title" weight={500} truncate>
+            {name || COPY.untitled}
+          </Text>
+        </span>
         {excerpt === "" ? null : (
           <p className="tabular-off text-text-secondary m-0 line-clamp-2 font-serif text-(length:--fs-secondary) leading-(--lh-secondary)">
             {excerpt}

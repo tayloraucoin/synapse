@@ -62,6 +62,7 @@ export const habitRouter = router({
         includeArchived: input?.includeArchived ?? true,
         blockKind: input?.blockKind,
         types: input?.types,
+        order: input?.order,
       }),
     ),
 

@@ -9,7 +9,7 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
+  CardSummary,
   CountStepper,
   EmojiSlot,
   EmojiSlotButton,
@@ -32,8 +32,11 @@ import { SETUP_COPY as COPY } from "./copy";
  * An optional glyph (blank by default — "a focus is the one noun where a
  * blank is the honest default") · the name (*Focus*, placeholder *The main
  * thing*; the first card carries the one muted line) · **a week** · **Usual
- * days** with *Flexible* preselected. **Done** collapses to *Viewpoint · 2 a
- * week · flexible*.
+ * days** with *Flexible* preselected. **Done** collapses in place to two
+ * lines (v1.3 R57): *Viewpoint* · *Edit*, then *2 a week · flexible*.
+ *
+ * IT NEVER REMOUNTS ON ITS FIRST WRITE (v1.3 §10.2; DAY-2) — as the workout
+ * card: the list keeps the instance and the row arriving changes nothing.
  *
  * CREATE ON THE FIRST FACT, as the workout card: the typed name is
  * `habit.createFocus`; every control after it is `habit.updateRotation`
@@ -67,6 +70,7 @@ export function FocusSetupCard({
   const patch = trpc.habit.patch.useMutation();
   const archive = trpc.habit.archive.useMutation();
   const groupId = React.useId();
+  const lineId = React.useId();
   const editRef = React.useRef<HTMLButtonElement>(null);
 
   const [open, setOpen] = React.useState(initiallyOpen);
@@ -120,8 +124,7 @@ export function FocusSetupCard({
     write(next, icon);
   };
 
-  const summary = COPY.focusSummary(
-    draft.name.trim() || COPY.newFocus,
+  const caption = COPY.focusCaption(
     draft.weekly,
     draft.flexible || draft.days.length === 0 ? COPY.flexible.toLowerCase() : draft.days.map((day) => DAY_SHORT[day]).join(" "),
   );
@@ -141,59 +144,69 @@ export function FocusSetupCard({
   }
 
   if (!open) {
+    // Two lines, in place (v1.3 R57, R58): glyph · name · *Edit*, then the facts.
     return (
-      <Card role="group" aria-labelledby={groupId} className="py-(--space-2)">
-        <CardHeader>
-          <EmojiSlot icon={draft.icon} size="card" />
-          <CardTitle id={groupId} className="truncate text-(length:--fs-body)">
-            {summary}
-          </CardTitle>
-          <CardAction>
+      <Card className="py-(--space-2)">
+        <CardSummary
+          leading={<EmojiSlot icon={draft.icon} size="card" />}
+          title={draft.name.trim() || COPY.newFocus}
+          caption={caption}
+          action={
             <Button ref={editRef} variant="ghost" size="sm" onClick={() => setOpen(true)}>
               {COPY.edit}
             </Button>
-          </CardAction>
-        </CardHeader>
+          }
+        />
       </Card>
     );
   }
 
   return (
     <Card role="group" aria-labelledby={groupId}>
-      <CardHeader className="items-end">
-        <EmojiSlotButton
-          icon={draft.icon}
-          label={COPY.chooseAnIcon}
-          onChange={(icon) => change({ icon }, icon)}
-          className="mb-px"
-        />
-        <div className="flex min-w-0 flex-1 flex-col gap-(--space-1)">
-          <Input
-            label={COPY.focusName}
-            placeholder={COPY.focusPlaceholder}
-            value={draft.name}
-            maxLength={FOCUS_TITLE_MAX}
-            onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
-            onBlur={() => {
-              const name = draft.name.trim();
-              if (name !== "") change({ name });
-            }}
+      {/*
+       * T12.1 (DAY-2): the glyph sits on the input's box. The header row is
+       * glyph · field · Remove, bottom-aligned, with nothing under the field;
+       * the first card's muted line is the row beneath, so it can no longer
+       * push the input up past the glyph.
+       */}
+      <div className="flex flex-col gap-(--space-1)">
+        <CardHeader className="items-end">
+          <EmojiSlotButton
+            icon={draft.icon}
+            label={COPY.chooseAnIcon}
+            onChange={(icon) => change({ icon }, icon)}
+            className="mb-px"
           />
-          {first ? (
-            <Text as="span" variant="caption" tone="secondary">
-              {COPY.focusLine}
-            </Text>
-          ) : null}
-          <span id={groupId} className="sr-only">
-            {draft.name.trim() || COPY.newFocus}
-          </span>
-        </div>
-        <CardAction>
-          <Button variant="ghost" size="sm" onClick={() => void remove()}>
-            {COPY.remove}
-          </Button>
-        </CardAction>
-      </CardHeader>
+          <div className="min-w-0 flex-1">
+            <Input
+              label={COPY.focusName}
+              placeholder={COPY.focusPlaceholder}
+              value={draft.name}
+              maxLength={FOCUS_TITLE_MAX}
+              aria-describedby={first ? lineId : undefined}
+              onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))}
+              onBlur={() => {
+                const name = draft.name.trim();
+                if (name !== "") change({ name });
+              }}
+            />
+            <span id={groupId} className="sr-only">
+              {draft.name.trim() || COPY.newFocus}
+            </span>
+          </div>
+          <CardAction>
+            <Button variant="ghost" size="sm" onClick={() => void remove()}>
+              {COPY.remove}
+            </Button>
+          </CardAction>
+        </CardHeader>
+        {first ? (
+          // Under the field, past the glyph's 44px slot and the header's gap.
+          <Text as="span" id={lineId} variant="caption" tone="secondary" className="ps-14">
+            {COPY.focusLine}
+          </Text>
+        ) : null}
+      </div>
 
       <CardContent>
         <CountStepper
