@@ -152,6 +152,11 @@ export const createTemplateInput = z
         icon: iconValueSchema.nullable().optional(),
       })
       .optional(),
+    /**
+     * UX v1.3 R50, TD-26 (DAY-5): free time's pool is an `activity` template of
+     * structure `opener_pool_closer` (its slots `pool` members). Omitted = `stack`.
+     */
+    structure: blockStructureSchema.optional(),
   })
   .default({ kind: "morning" });
 

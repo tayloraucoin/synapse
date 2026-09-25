@@ -201,6 +201,7 @@ export {
   linkFormSchema,
   linkIdInput,
   listLinksInput,
+  reorderLinksInput,
   type LinkFormInput,
 } from "./link";
 

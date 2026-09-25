@@ -49,9 +49,17 @@ export const dayPlanRouter = router({
   update: protectedProcedure
     .input(updateDayPlanInput)
     .mutation(async ({ ctx, input }) => {
-      const result = await updateDayPlan(ctx.rls, ctx.authContext.userId, input.id, input.patch);
-      if (!result) throw new TRPCError(NOT_FOUND);
-      return result;
+      try {
+        const result = await updateDayPlan(ctx.rls, ctx.authContext.userId, input.id, input.patch);
+        if (!result) throw new TRPCError(NOT_FOUND);
+        return result;
+      } catch (error) {
+        // v1.3 (DAY-5): `wrong_kind` — a list FK of the wrong kind or shape.
+        if (error instanceof DayPlanRuleError) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: error.code, cause: error });
+        }
+        throw error;
+      }
     }),
 
   complete: protectedProcedure

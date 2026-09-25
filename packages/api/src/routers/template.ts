@@ -58,6 +58,7 @@ export const templateRouter = router({
       listTemplates(ctx.rls, ctx.authContext.userId, {
         includeArchived: input?.includeArchived ?? true,
         kind: input?.kind,
+        order: input?.order,
       }),
     ),
 
@@ -91,6 +92,7 @@ export const templateRouter = router({
           input.kind,
           input.workDayType ?? {},
           input.name ?? "",
+          input.structure ?? "stack",
         );
       } catch (error) {
         if (error instanceof NotWorkTemplateError) {

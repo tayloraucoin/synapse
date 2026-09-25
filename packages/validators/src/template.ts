@@ -180,6 +180,8 @@ export const listTemplatesInput = z
     includeArchived: z.boolean().optional(),
     /** Only this block kind — the editor's list for one kind (v1.1 §4.14). */
     kind: blockKindSchema.optional(),
+    /** `name` (default) or `created`, oldest first — the builder's pickers (v1.3 R65, DAY-5). */
+    order: z.enum(["name", "created"]).optional(),
   })
   .optional();
 

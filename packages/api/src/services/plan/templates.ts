@@ -181,7 +181,12 @@ function clock(min: number | null): string | null {
 export async function listTemplates(
   rls: RlsClient,
   userId: string,
-  options: { includeArchived?: boolean; kind?: BlockKind } = {},
+  options: {
+    includeArchived?: boolean;
+    kind?: BlockKind;
+    /** `name` (default — kind, then name) or `created`, oldest first: the builder's pickers (v1.3 R65). */
+    order?: "name" | "created";
+  } = {},
 ): Promise<TemplateSummaryView[]> {
   const includeArchived = options.includeArchived ?? true;
   const profile = await anchorProfileFor(rls, userId);
@@ -196,7 +201,11 @@ export async function listTemplates(
         .select(TEMPLATE_COLUMNS)
         .from(templates)
         .where(and(...conditions))
-        .orderBy(asc(templates.kind), asc(templates.name))
+        .orderBy(
+          ...(options.order === "created"
+            ? [asc(templates.createdAt), asc(templates.id)]
+            : [asc(templates.kind), asc(templates.name)]),
+        )
     ).map(toRow);
 
     // A template is on a day through its block (TD-1): one block per day.
@@ -232,8 +241,9 @@ export async function listTemplates(
 }
 
 /**
- * Which day plans reference each template through any of their four
- * template FKs (UX v1.2 §3.13, TD-10) — *used by Day A, Day B* on the block
+ * Which day plans reference each template through any of their six
+ * template FKs (UX v1.2 §3.13, TD-10; v1.3 adds the after-work list and the
+ * free-time pool) — *used by Day A, Day B* on the block
  * editor's template list. One query over `day_plans`, grouped in code; never
  * a query per template.
  */
@@ -249,6 +259,8 @@ async function readUsedBy(
       morningTemplateId: dayPlans.morningTemplateId,
       windDownTemplateId: dayPlans.windDownTemplateId,
       workTemplateId: dayPlans.workTemplateId,
+      afterWorkTemplateId: dayPlans.afterWorkTemplateId,
+      activityTemplateId: dayPlans.activityTemplateId,
     })
     .from(dayPlans)
     .where(eq(dayPlans.userId, userId))
@@ -262,6 +274,8 @@ async function readUsedBy(
         plan.morningTemplateId,
         plan.windDownTemplateId,
         plan.workTemplateId,
+        plan.afterWorkTemplateId,
+        plan.activityTemplateId,
       ].filter((id): id is string => id !== null),
     );
     for (const templateId of refs) {
@@ -341,6 +355,13 @@ export async function createTemplate(
   workDayType: WorkDayTypeFieldsInput = {},
   /** RUN-12: the builder names its three lists on arrival. */
   name = "",
+  /**
+   * UX v1.3 R50, TD-26 (DAY-5): free time is a pool — an `activity` template
+   * of structure `opener_pool_closer` whose slots are `pool` members. Every
+   * other list stacks. `transition` needs nothing here: its flow is forward
+   * by kind (`defaultFlowFor`).
+   */
+  structure: BlockStructure = "stack",
 ): Promise<{ id: string }> {
   if (kind !== "work" && hasWorkDayTypeFields(workDayType)) {
     throw new NotWorkTemplateError();
@@ -354,7 +375,7 @@ export async function createTemplate(
         name,
         kind,
         flow: defaultFlowFor(kind),
-        structure: "stack",
+        structure,
         anchorTime:
           kind === "work"
             ? (workDayType.anchorTime ?? profile.workStartTime)

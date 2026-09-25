@@ -255,14 +255,11 @@ export interface FixtureView {
   kind: FixtureKind;
   icon: IconValue;
 
-  /*
-   * ---- UX v1.3 (§3.14, R51, TD-27) — a place and travel. Optional until
-   * DAY-5's `toFixtureView` reads `0009`'s columns; required from then.
-   */
+  /* ---- UX v1.3 (§3.14, R51, TD-27; 0009, DAY-5) — a place and travel. ---- */
   /** Free text, ≤ 80; a fact the sheet shows — nothing reads it. */
-  location?: string | null;
+  location: string | null;
   /** Minutes there and back and whether the day plans them; never added to `durationMin`. */
-  travel?: { thereMin: number; backMin: number; planned: boolean };
+  travel: { thereMin: number; backMin: number; planned: boolean };
 }
 
 /*
@@ -323,12 +320,26 @@ export interface DayPlanSummaryView {
   morning: { templateId: string; name: string; totalMin: number } | null;
   windDown: { templateId: string; name: string; totalMin: number } | null;
   /*
-   * UX v1.3 §3.13, §11.2 (TD-25, TD-26): the after-work list (*After work A*)
-   * and the free-time pool (*Evenings A*). Optional until DAY-5 reads `0009`'s
-   * two columns; required from then.
+   * UX v1.3 §3.13, §11.2 (TD-25, TD-26; 0009, DAY-5): the after-work list
+   * (*After work A*) and the free-time pool (*Evenings A*).
    */
-  afterWork?: { templateId: string; name: string; totalMin: number } | null;
-  evenings?: { templateId: string; name: string; totalMin: number } | null;
+  afterWork: { templateId: string; name: string; totalMin: number } | null;
+  evenings: { templateId: string; name: string; totalMin: number } | null;
+}
+
+/**
+ * A plan with work, for *Working today · as Day A* on a *Rarely* day (UX v1.3
+ * §3.8, TD-23) — the plan's name and its own work template's hours.
+ */
+export interface WorkPlanView {
+  planId: string;
+  name: string;
+  icon: IconValue | null;
+  /** The plan's work template — what `day.applyWorkType` takes. */
+  templateId: string;
+  /** "9:00" — the template's *working by* and *until about*, displayed. */
+  startClock: string | null;
+  endClock: string | null;
 }
 
 /** A day plan as the builder edits it — v1.2 §3.13, TD-10: references and times, never copies. */

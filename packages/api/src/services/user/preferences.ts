@@ -82,6 +82,8 @@ export type UserPreferencesRow = {
   journalReminderEnabled: boolean;
   /** The stored value; null = derived. See `journalReminderTimeEffective`. */
   journalReminderTime: string | null;
+  /** UX v1.3 R61 (0009) — *Same routine every day?*; null = not yet asked. */
+  sameMorningRoutine: boolean | null;
   /**
    * The two derived defaults (v1.2 §4.11, §13 #25), computed on read so a
    * person who never touched them always tracks the value they follow:
@@ -132,6 +134,7 @@ const PREFERENCE_COLUMNS = {
   orientAskVisualisation: users.orientAskVisualisation,
   journalReminderEnabled: users.journalReminderEnabled,
   journalReminderTime: users.journalReminderTime,
+  sameMorningRoutine: users.sameMorningRoutine,
 } as const;
 
 type StoredPreferencesRow = Omit<
@@ -288,6 +291,10 @@ export async function updatePreferences(
       : {}),
     ...(input.journalReminderTime !== undefined
       ? { journalReminderTime: input.journalReminderTime }
+      : {}),
+    // UX v1.3 R61 (DAY-5). `null` is a real value — not yet asked — so the guard is `undefined`.
+    ...(input.sameMorningRoutine !== undefined
+      ? { sameMorningRoutine: input.sameMorningRoutine }
       : {}),
     updatedAt: new Date(),
   };

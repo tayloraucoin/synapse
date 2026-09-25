@@ -2,7 +2,12 @@ import { z } from "zod";
 
 import { DAY_PLAN_NAME_MAX } from "@syn/constants";
 
-import { dayPlanStateSchema, trainingPlacementSchema } from "./block";
+import {
+  anchorDirectionSchema,
+  dayPlanStateSchema,
+  trainingPlacementSchema,
+  workDayKindSchema,
+} from "./block";
 import { iconValueSchema } from "./icon";
 import { clockTimeSchema } from "./preferences";
 import { weekdaySchema } from "./template";
@@ -42,8 +47,27 @@ export const dayPlanPatchSchema = z
     name: z.string().trim().min(1).max(DAY_PLAN_NAME_MAX).optional(),
     icon: iconValueSchema.nullable().optional(),
     weekdays: weekdaysSchema.optional(),
-    /** Null = *No work on this day*. */
+    /**
+     * Null = *No work on this day*. v1.2's type picker; under v1.3 the plan
+     * owns its work and the builder writes `work` below (TD-23).
+     */
     workTemplateId: z.string().uuid().nullable().optional(),
+    /**
+     * UX v1.3 R46, §3.8, TD-23 (DAY-5) — the plan's own work: kind, *working
+     * by*, *until about*, *what gives*. Each fact is optional because the
+     * builder writes one per tap; the service creates the plan's work template
+     * on the first and patches it after. `null` = *No work on this day*: the
+     * reference goes and the plan's own template is archived.
+     */
+    work: z
+      .object({
+        kind: workDayKindSchema.nullable().optional(),
+        workStart: clockTimeSchema.nullable().optional(),
+        workEnd: clockTimeSchema.nullable().optional(),
+        direction: anchorDirectionSchema.nullable().optional(),
+      })
+      .nullable()
+      .optional(),
     /** Null = inherit from the profile / the type. */
     wakeTime: clockTimeSchema.nullable().optional(),
     workStartTime: clockTimeSchema.nullable().optional(),

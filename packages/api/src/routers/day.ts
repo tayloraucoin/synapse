@@ -26,6 +26,7 @@ import { readOrient, saveMorning } from "../services/day/orient";
 import { previewFit } from "../services/day/preview-fit";
 import { getQuickPick } from "../services/day/quick-pick";
 import { resolveTodayFor } from "../services/day/today";
+import { listWorkPlans } from "../services/plan/day-plans";
 import { protectedProcedure, router } from "../trpc";
 import { asMoveError } from "./item";
 
@@ -137,6 +138,15 @@ export const dayRouter = router({
   /* -------------------------------------------------- UX v1.2 (RUN-6) -- */
 
   /** *Working today* — a work-day type onto a day that has none (§3.9, R40, TD-19). */
+  /**
+   * *Working today · as Day A* (UX v1.3 §3.8, TD-23; DAY-5): the complete
+   * plans with work, by the plan's name. The header sheet passes the chosen
+   * plan's `templateId` to `applyWorkType`, which is unchanged.
+   */
+  listWorkPlans: protectedProcedure.query(async ({ ctx }) =>
+    listWorkPlans(ctx.rls, ctx.authContext.userId),
+  ),
+
   applyWorkType: protectedProcedure
     .input(applyWorkTypeInput)
     .mutation(async ({ ctx, input }) => {

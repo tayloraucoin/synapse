@@ -13,6 +13,10 @@ import { formatClockFromMinutes, clockToMinutes } from "@syn/utils";
  * row on every planned instance of their weekdays, whatever template the day
  * gets.
  *
+ * UX v1.3 (DAY-5): a fixture carries a place and travel — `location`, and the
+ * three travel columns a workout has (TD-27). The view exposes them as
+ * `location` and `travel { thereMin, backMin, planned }`.
+ *
  * ARCHIVE, NEVER DELETE — a past day's pin snapshots the title, and a fixture
  * that vanished would leave that pin pointing at nothing it could explain.
  */
@@ -30,6 +34,11 @@ type FixtureRow = {
   /* ---- UX v1.2 §3.6, R42 (0007) ---- */
   kind: FixtureView["kind"];
   icon: FixtureView["icon"];
+  /* ---- UX v1.3 §3.14, R51, TD-27 (0009) ---- */
+  location: string | null;
+  travelThereMin: number;
+  travelBackMin: number;
+  planTravel: boolean;
 };
 
 export function toFixtureView(row: FixtureRow): FixtureView {
@@ -45,6 +54,8 @@ export function toFixtureView(row: FixtureRow): FixtureView {
     archived: row.archivedAt !== null,
     kind: row.kind,
     icon: row.icon,
+    location: row.location,
+    travel: { thereMin: row.travelThereMin, backMin: row.travelBackMin, planned: row.planTravel },
   };
 }
 
@@ -60,6 +71,10 @@ const COLUMNS = {
   archivedAt: fixtures.archivedAt,
   kind: fixtures.kind,
   icon: fixtures.icon,
+  location: fixtures.location,
+  travelThereMin: fixtures.travelThereMin,
+  travelBackMin: fixtures.travelBackMin,
+  planTravel: fixtures.planTravel,
 } as const;
 
 export async function listFixtures(
@@ -100,6 +115,13 @@ export async function saveFixture(
     habitId: input.habitId ?? null,
     kind: input.kind,
     icon: input.icon ?? defaults.icon,
+    // UX v1.3 R51, TD-27: a place and travel. The travel sits beside the pin
+    // on the day (DAY-6's `writeTravelRows`), never in `duration_min`. A sheet
+    // that sends no location leaves the stored one alone on an edit.
+    ...(input.location !== undefined ? { location: input.location } : {}),
+    travelThereMin: input.travelThereMin,
+    travelBackMin: input.travelBackMin,
+    planTravel: input.planTravel,
   };
 
   const rows = await rls.execute((tx) =>

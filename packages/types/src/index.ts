@@ -98,4 +98,5 @@ export type {
   TemplateSummaryView,
   Weekday,
   WorkDayTypeView,
+  WorkPlanView,
 } from "./domain/view";

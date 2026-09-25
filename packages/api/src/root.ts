@@ -9,6 +9,7 @@ import { habitRouter } from "./routers/habit";
 import { itemRouter } from "./routers/item";
 import { journalRouter } from "./routers/journal";
 import { notificationRouter } from "./routers/notification";
+import { linkRouter } from "./routers/link";
 import { passageRouter } from "./routers/passage";
 import { quoteRouter } from "./routers/quote";
 import { reasonRouter } from "./routers/reason";
@@ -41,6 +42,7 @@ export const appRouter = router({
   journal: journalRouter,
   notification: notificationRouter,
   passage: passageRouter,
+  link: linkRouter,
   quote: quoteRouter,
   reason: reasonRouter,
   review: reviewRouter,

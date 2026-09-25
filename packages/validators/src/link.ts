@@ -52,3 +52,8 @@ export const linkIdInput = z.object({ id: z.string().uuid() });
 export const listLinksInput = z
   .object({ includeArchived: z.boolean().optional() })
   .optional();
+
+/** The full ordered id list; the service refuses one that omits an active row (as passages). */
+export const reorderLinksInput = z.object({
+  ids: z.array(z.string().uuid()).min(1),
+});
