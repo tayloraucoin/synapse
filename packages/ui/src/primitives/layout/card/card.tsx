@@ -13,7 +13,8 @@
  * this primitive existing; the List stays rows with hairlines between them.
  *
  * "CARDS COLLAPSE" is the feature folder's: a collapsed card is this `Card`
- * with one line and an *Edit* text button, and the fold is theirs to keep.
+ * around a `CardSummary` — two lines under v1.3 R57 (glyph · title · *Edit*,
+ * then the facts as a caption) — and the fold is theirs to keep.
  */
 import * as React from "react";
 

@@ -1,12 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
 
+import { Button } from "../../../primitives/control/button";
 import { LargeTargetRow } from "./large-target-row";
 
 /**
  * SF-01 step 1, answered while running late, one-handed, probably walking:
- * four 56px targets, no scrolling, no typing. The selected one fills so the
- * answer is visible from arm's length.
+ * four 56px targets, no scrolling, no typing.
+ *
+ * UX v1.3 R56 (DAY-1): the chosen option is surface, a 1.5px ink border and a
+ * check (stacked) — the grammar `SelectRow` has. The ink fill is the primary
+ * button's alone; *Stacked, one selected, beside a primary* is the canvas
+ * that proves it.
  */
 const meta: Meta<typeof LargeTargetRow> = {
   title: "Composed/Control/LargeTargetRow",
@@ -103,6 +108,83 @@ export const WithLeading: StoryObj = {
           { value: "pool", label: "Pool", disabled: true, caption: "not yet", leading: { kind: "emoji", value: "🏊" } },
         ]}
       />
+    );
+  },
+};
+
+/**
+ * UX v1.3 R56 (DAY-1): one option chosen, with the screen's primary under the
+ * rows. The primary is the only ink fill on the canvas; the chosen card reads
+ * as a choice — surface, a 1.5px ink border, the check in the trailing slot.
+ */
+export const StackedOneSelectedBesideAPrimary: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<string | null>("slide");
+    return (
+      <div className="flex flex-col gap-(--space-5)">
+        <LargeTargetRow
+          label="What gives?"
+          layout="stacked"
+          value={value}
+          onChange={setValue}
+          options={[
+            { value: "slide", label: "Work waits", description: "Work starts when the routine is done." },
+            { value: "cut", label: "The routine gets cut", description: "Work starts on time; the routine shortens." },
+            { value: "depends", label: "Depends on the day", description: "The morning asks." },
+          ]}
+        />
+        <div className="flex justify-end">
+          <Button>Continue</Button>
+        </div>
+      </div>
+    );
+  },
+};
+
+/** The row layout: border and surface carry the choice; no check — four cells have no trailing slot. */
+export const RowOneSelected: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<string | null>("30");
+    return (
+      <div className="max-w-[375px]">
+        <LargeTargetRow
+          label="How far behind?"
+          value={value}
+          onChange={setValue}
+          options={[
+            { value: "15", label: "15 min" },
+            { value: "30", label: "30 min" },
+            { value: "60", label: "1 h" },
+            { value: "custom", label: "Other" },
+          ]}
+        />
+      </div>
+    );
+  },
+};
+
+/** Tab to the group: the ring sits on the focused option. */
+export const FocusVisible: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<string | null>("cut");
+    const ref = React.useRef<HTMLDivElement>(null);
+    React.useEffect(() => {
+      ref.current?.querySelector<HTMLInputElement>("input:checked")?.focus();
+    }, []);
+    return (
+      <div ref={ref}>
+        <LargeTargetRow
+          label="What gives?"
+          layout="stacked"
+          value={value}
+          onChange={setValue}
+          options={[
+            { value: "slide", label: "Work waits" },
+            { value: "cut", label: "The routine gets cut" },
+            { value: "depends", label: "Depends on the day" },
+          ]}
+        />
+      </div>
     );
   },
 };

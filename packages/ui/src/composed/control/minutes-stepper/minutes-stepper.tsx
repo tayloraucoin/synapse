@@ -2,8 +2,16 @@
  * MinutesStepper — a bounded minutes field (v2 handoff §5.4).
  *
  * Over `input-group`: a number input, a *min* suffix, and −/+ addon buttons at
- * 44px. The buttons move by 5 and typing allows 1, which is the difference
- * between adjusting and specifying.
+ * 44px.
+ *
+ * BY ONE, EMPTY ALLOWED, WRITTEN ON BLUR (UX v1.3 R62; DAY-1). The buttons
+ * move by one — the handoff's *by 5* is amended (T9.1). The field can be
+ * emptied: it holds `null` and shows *0* as its placeholder, so a person can
+ * delete *9* and type *7* without the control putting a number back
+ * mid-word. Nothing snaps before blur. On blur an empty field commits `min`
+ * (a length of nothing is not a length); a typed value inside the bounds
+ * commits as typed; outside them it clamps with the note. A `null` value
+ * reads as the placeholder, and the first tap on *+* gives `min`.
  *
  * THE SNAP NOTE. When a typed value falls outside the habit's range it is
  * clamped, and the note says so for two seconds. Silently rewriting a person's
@@ -55,8 +63,6 @@ export interface MinutesStepperProps {
   onCommitError?: (error: unknown) => void;
   min: number;
   max: number;
-  /** 5 by button; typing always allows 1. */
-  step?: 5 | 1;
   label: React.ReactNode;
   helperText?: React.ReactNode;
   error?: React.ReactNode;
@@ -80,7 +86,6 @@ export function MinutesStepper({
   onCommitError,
   min,
   max,
-  step = 5,
   label,
   helperText,
   error,
@@ -93,6 +98,7 @@ export function MinutesStepper({
   const helperId = React.useId();
   const [snapped, setSnapped] = React.useState(false);
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typed = React.useRef(false);
 
   const { local, set, hold, committing: writing } = useOptimisticValue<number | null>({
     value,
@@ -123,6 +129,8 @@ export function MinutesStepper({
   );
 
   const current = local ?? min;
+  // An empty field steps to `min` first — the placeholder is not a value to step from.
+  const stepBy = (delta: -1 | 1) => commit(local === null ? min : local + delta);
   const invalid = error !== undefined && error !== null;
   const message = error ?? (snapped ? MINUTES_STEPPER_COPY.boundedNote : helperText);
 
@@ -140,7 +148,7 @@ export function MinutesStepper({
           <InputGroupButton
             aria-label="Fewer minutes"
             disabled={disabled || current <= min}
-            onClick={() => commit(current - step)}
+            onClick={() => stepBy(-1)}
             className="size-(--target) rounded-none text-(length:--fs-body)"
           >
             −
@@ -152,6 +160,7 @@ export function MinutesStepper({
           type="number"
           inputMode="numeric"
           value={local ?? ""}
+          placeholder="0"
           min={min}
           max={max}
           step={1}
@@ -162,6 +171,12 @@ export function MinutesStepper({
           aria-invalid={invalid || undefined}
           aria-describedby={message === undefined ? undefined : helperId}
           onChange={(event) => {
+            typed.current = true;
+            // Emptied: the field holds nothing and shows the placeholder; blur decides.
+            if (event.target.value === "") {
+              hold(null);
+              return;
+            }
             const parsed = Number.parseInt(event.target.value, 10);
             if (Number.isNaN(parsed)) return;
             // Mid-typing: the control shows it, the form hears it, the write waits for blur.
@@ -169,10 +184,16 @@ export function MinutesStepper({
             onChange?.(parsed);
           }}
           onBlur={(event) => {
+            // A field focused and left untouched writes nothing.
+            if (!typed.current) return;
+            typed.current = false;
             const parsed = Number.parseInt(event.target.value, 10);
             commit(Number.isNaN(parsed) ? min : parsed);
           }}
-          className={cn("text-center tabular-nums", compact ? "w-14" : "w-[88px]")}
+          className={cn(
+            "placeholder:text-text-disabled text-center tabular-nums",
+            compact ? "w-14" : "w-[88px]",
+          )}
         />
 
         <InputGroupAddon align="inline-end" className="gap-0 p-0">
@@ -180,7 +201,7 @@ export function MinutesStepper({
           <InputGroupButton
             aria-label="More minutes"
             disabled={disabled || current >= max}
-            onClick={() => commit(current + step)}
+            onClick={() => stepBy(1)}
             className="size-(--target) rounded-none text-(length:--fs-body)"
           >
             +

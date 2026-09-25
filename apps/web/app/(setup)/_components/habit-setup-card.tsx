@@ -248,7 +248,6 @@ export function HabitSetupCard({
           onCommitError={fail}
           min={DURATION_MIN}
           max={DURATION_MAX}
-          step={5}
         />
 
         {others.length === 0 ? null : (
@@ -271,7 +270,6 @@ export function HabitSetupCard({
                   onCommitError={fail}
                   min={DURATION_MIN}
                   max={DURATION_MAX}
-                  step={5}
                   className="[&>label]:sr-only"
                 />
                 <Button variant="ghost" size="sm" onClick={() => void removeVersion(version.key)}>

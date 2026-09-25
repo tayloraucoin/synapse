@@ -321,7 +321,6 @@ export function OneOffSheet({
             onChange={setDuration}
             min={habit?.durationMin ?? DURATION_MIN}
             max={habit?.durationMax ?? DURATION_MAX}
-            step={5}
             boundedNote={habit !== null}
           />
 

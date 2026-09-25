@@ -4,10 +4,17 @@
  * SF-01 step 1: "how far behind are you?", answered while running late, one
  * handed, probably walking. Four 56px targets, no scrolling, no typing.
  *
- * The selected option becomes `default` (ink fill) and the rest stay
- * `secondary`, so the answer is visible from arm's length. Native radios, as
- * everywhere else in this package, for arrow-key movement and a real
- * radiogroup.
+ * Native radios, as everywhere else in this package, for arrow-key movement
+ * and a real radiogroup.
+ *
+ * ONE SELECTION GRAMMAR (UX v1.3 R56; DAY-1). The chosen option is
+ * `bg-surface`, a 1.5px ink border and a check in the trailing slot — the
+ * grammar `SelectRow` has, from one string in `lib/selection.ts`. It was an
+ * ink fill; beside the sticky primary that read as a second button (T1.1).
+ * The `row` layout (Adjust's four 56px cells) takes the border and the
+ * surface but no check: four cells at 375px have no trailing slot, and the
+ * cell's text is its label. The check is `aria-hidden`; the radio announces
+ * *checked*.
  *
  * UNDER v1.1 THE ROW ALSO STACKS (`layout="stacked"`): the first-run
  * archetype cards (§4.1) and Adjust's *what gives* rows (§6.6) are full-width
@@ -24,9 +31,11 @@
 "use client";
 
 import type { IconValue } from "@syn/types";
+import { Check } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "../../../lib/cn";
+import { SELECTION_CHOSEN, SELECTION_UNCHOSEN } from "../../../lib/selection";
 import { Text } from "../../../primitives/typography/text";
 import { EmojiSlot, isIconValue } from "../../display/emoji-slot";
 
@@ -101,9 +110,7 @@ export function LargeTargetRow({
                 "text-(length:--fs-body) font-medium",
                 "transition-colors duration-(--dur-state) ease-(--ease-settle)",
                 "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
-                selected
-                  ? "bg-primary text-primary-foreground border border-transparent"
-                  : "border-hairline text-ink border hover:bg-surface",
+                selected ? SELECTION_CHOSEN : SELECTION_UNCHOSEN,
                 disabled && "pointer-events-none opacity-40",
                 option.disabled &&
                   "text-text-disabled hover:bg-transparent pointer-events-none cursor-default border-hairline",
@@ -126,10 +133,7 @@ export function LargeTargetRow({
                     as="span"
                     variant="row-title"
                     weight={500}
-                    className={cn(
-                      option.disabled && "text-text-disabled",
-                      selected && !option.disabled && "text-primary-foreground",
-                    )}
+                    className={cn(option.disabled && "text-text-disabled")}
                   >
                     {option.label}
                   </Text>
@@ -138,10 +142,7 @@ export function LargeTargetRow({
                       as="span"
                       variant="secondary"
                       tone="secondary"
-                      className={cn(
-                        option.disabled && "text-text-disabled",
-                        selected && !option.disabled && "text-primary-foreground",
-                      )}
+                      className={cn(option.disabled && "text-text-disabled")}
                     >
                       {option.description}
                     </Text>
@@ -155,6 +156,15 @@ export function LargeTargetRow({
                   {option.caption}
                 </Text>
               )}
+              {/* The trailing slot is always there, so nothing shifts when the check lands. */}
+              {stacked && option.caption === undefined ? (
+                <span
+                  aria-hidden="true"
+                  className="-me-(--space-2) inline-flex size-(--target) shrink-0 items-center justify-center"
+                >
+                  {selected ? <Check className="size-5" strokeWidth={2} /> : null}
+                </span>
+              ) : null}
             </label>
           );
         })}

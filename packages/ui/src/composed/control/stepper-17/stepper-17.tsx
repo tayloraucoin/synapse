@@ -172,6 +172,8 @@ export function Stepper17({
               key={option}
               className={cn(
                 stepper17CellVariants({
+                  // The row layout: 40px squares, 4px gaps — 304px, one line at 375px.
+                  size: layout === "row" ? "row" : "cell",
                   state: selected
                     ? "selected"
                     : isResting
@@ -179,8 +181,6 @@ export function Stepper17({
                       : "unselected",
                   disabled,
                 }),
-                // The row layout: 40px squares, 4px gaps — 304px, one line at 375px.
-                layout === "row" && "size-10",
                 "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
                 classes?.cell,
               )}

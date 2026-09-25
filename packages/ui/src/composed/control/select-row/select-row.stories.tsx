@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
 
+import { Button } from "../../../primitives/control/button";
 import { SelectRow, SelectRowList } from "./select-row";
 
 /**
@@ -30,6 +31,25 @@ type Story = StoryObj<typeof SelectRow>;
 export const Default: Story = { args: { selected: false } };
 
 export const Selected: Story = { args: { selected: true } };
+
+/**
+ * UX v1.3 R56 (DAY-1): the one selection grammar beside the screen's primary
+ * — a chosen row is surface, a 1.5px ink border and the check; the primary is
+ * the only ink fill on the canvas. `LargeTargetRow` draws the same string.
+ */
+export const SelectedBesideAPrimary: Story = {
+  render: (args) => (
+    <div className="flex flex-col gap-(--space-5)">
+      <SelectRowList>
+        <SelectRow {...args} selected />
+        <SelectRow {...args} icon={{ kind: "emoji", value: "☕" }} title="Coffee" selected={false} />
+      </SelectRowList>
+      <div className="flex justify-end">
+        <Button>Continue · 1 habit</Button>
+      </div>
+    </div>
+  ),
+};
 
 /** The write is out: the border pulses, the row stays tappable. */
 export const Saving: Story = { args: { selected: true, committing: true } };

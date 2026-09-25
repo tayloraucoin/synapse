@@ -133,7 +133,6 @@ export function SlotRows({
                       onCommit={(next) => list.setMinutes(slot, next)}
                       min={DURATION_MIN}
                       max={DURATION_MAX}
-                      step={5}
                       disabled={disabled}
                       compact
                       className="shrink-0 [&>label]:sr-only"

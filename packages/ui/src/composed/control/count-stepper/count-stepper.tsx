@@ -15,6 +15,12 @@
  * on the tap, `onChange` hears it at once, `onCommit` fires once after the
  * debounce, the edge pulses while the write is out, and a rejection reverts.
  * See `MinutesStepper` for the contract in full.
+ *
+ * BY ONE, EMPTY ALLOWED, WRITTEN ON BLUR (UX v1.3 R62; DAY-1). Typing holds
+ * the value and writes nothing until blur — it used to commit every
+ * keystroke. An emptied field holds `null` and shows *0* as its placeholder;
+ * blur on empty commits `min`; a typed value outside the bounds clamps on
+ * blur. A `null` value reads as the placeholder and the first *+* gives `min`.
  */
 "use client";
 
@@ -33,7 +39,8 @@ import { HelperText } from "../../../primitives/display/helper-text";
 import { Text } from "../../../primitives/typography/text";
 
 export interface CountStepperProps {
-  value: number;
+  /** `null` — nothing yet; the field shows the *0* placeholder. */
+  value: number | null;
   /** Every local change, at once — for a form's own state. */
   onChange?: (value: number) => void;
   /** The write, debounced by the control; reject to revert. */
@@ -67,9 +74,11 @@ export function CountStepper({
   const inputId = React.useId();
   const helperId = React.useId();
 
-  const { local, set, committing: writing } = useOptimisticValue<number>({
+  const typed = React.useRef(false);
+
+  const { local, set, hold, committing: writing } = useOptimisticValue<number | null>({
     value,
-    onCommit,
+    onCommit: onCommit === undefined ? undefined : (next) => (next === null ? undefined : onCommit(next)),
     onError: onCommitError,
   });
   const committing = committingProp || writing;
@@ -80,6 +89,9 @@ export function CountStepper({
     set(clamped);
     onChange?.(clamped);
   };
+  const current = local ?? min;
+  // An empty field steps to `min` first — the placeholder is not a value to step from.
+  const stepBy = (delta: -1 | 1) => change(local === null ? min : local + delta);
   const showZeroWord = zeroLabel !== undefined && local === 0;
 
   return (
@@ -95,8 +107,8 @@ export function CountStepper({
         <InputGroupAddon align="inline-start" className="p-0">
           <InputGroupButton
             aria-label="One fewer"
-            disabled={disabled || local <= min}
-            onClick={() => change(local - 1)}
+            disabled={disabled || current <= min}
+            onClick={() => stepBy(-1)}
             className="size-(--target) rounded-none text-(length:--fs-body)"
           >
             −
@@ -116,22 +128,39 @@ export function CountStepper({
           id={inputId}
           type="number"
           inputMode="numeric"
-          value={local}
+          value={local ?? ""}
+          placeholder="0"
           min={min}
           max={max}
           step={1}
           disabled={disabled}
           aria-valuemin={min}
           aria-valuemax={max}
-          aria-valuenow={local}
+          aria-valuenow={local ?? undefined}
           aria-valuetext={showZeroWord ? zeroLabel : undefined}
           aria-describedby={helperText === undefined ? undefined : helperId}
           onChange={(event) => {
+            typed.current = true;
+            // Emptied: the field holds nothing and shows the placeholder; blur decides.
+            if (event.target.value === "") {
+              hold(null);
+              return;
+            }
+            const parsed = Number.parseInt(event.target.value, 10);
+            if (Number.isNaN(parsed)) return;
+            // Mid-typing: the control shows it, the form hears it, the write waits for blur.
+            hold(parsed);
+            onChange?.(parsed);
+          }}
+          onBlur={(event) => {
+            // A field focused and left untouched writes nothing.
+            if (!typed.current) return;
+            typed.current = false;
             const parsed = Number.parseInt(event.target.value, 10);
             change(Number.isNaN(parsed) ? min : parsed);
           }}
           className={cn(
-            "w-14 text-center tabular-nums",
+            "placeholder:text-text-disabled w-14 text-center tabular-nums",
             showZeroWord && "sr-only",
           )}
         />
@@ -139,8 +168,8 @@ export function CountStepper({
         <InputGroupAddon align="inline-end" className="p-0">
           <InputGroupButton
             aria-label="One more"
-            disabled={disabled || local >= max}
-            onClick={() => change(local + 1)}
+            disabled={disabled || current >= max}
+            onClick={() => stepBy(1)}
             className="size-(--target) rounded-none text-(length:--fs-body)"
           >
             +

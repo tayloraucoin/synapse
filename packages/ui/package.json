@@ -239,6 +239,10 @@
       "types": "./src/composed/control/text-disclosure-button/index.ts",
       "default": "./src/composed/control/text-disclosure-button/index.ts"
     },
+    "./info-disclosure": {
+      "types": "./src/composed/control/info-disclosure/index.ts",
+      "default": "./src/composed/control/info-disclosure/index.ts"
+    },
     "./tier-radio-rows": {
       "types": "./src/composed/control/tier-radio-rows/index.ts",
       "default": "./src/composed/control/tier-radio-rows/index.ts"
@@ -494,6 +498,10 @@
     "./emoji-slot": {
       "types": "./src/composed/display/emoji-slot/index.ts",
       "default": "./src/composed/display/emoji-slot/index.ts"
+    },
+    "./priority-mark": {
+      "types": "./src/composed/display/priority-mark/index.ts",
+      "default": "./src/composed/display/priority-mark/index.ts"
     },
     "./passage-carousel": {
       "types": "./src/composed/display/passage-carousel/index.ts",

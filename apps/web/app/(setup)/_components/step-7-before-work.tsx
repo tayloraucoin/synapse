@@ -185,7 +185,6 @@ export function Step7BeforeWork({
                         onCommit={(next) => steps.setLength(slot, next)}
                         min={DURATION_MIN}
                         max={DURATION_MAX}
-                        step={5}
                         disabled={disabled}
                         compact
                         className="shrink-0 [&>label]:sr-only"
@@ -229,7 +228,6 @@ export function Step7BeforeWork({
                           onChange={(next) => setOneOfOpen({ ...oneOfOpen, minutes: next })}
                           min={DURATION_MIN}
                           max={DURATION_MAX}
-                          step={5}
                           disabled={disabled || oneOfOpen.habitId === null}
                           className="[&>label]:sr-only"
                         />

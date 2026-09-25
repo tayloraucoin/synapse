@@ -37,6 +37,7 @@ import { cn } from "../../../lib/cn";
 import { Button } from "../../../primitives/control/button";
 import { HelperText } from "../../../primitives/display/helper-text";
 import { Heading, Text } from "../../../primitives/typography/text";
+import { STEP_FRAME_ACTIONS, STEP_FRAME_ACTIONS_STICKY, STEP_FRAME_ROOT } from "./step-frame.classes";
 
 export interface StepFrameCopy {
   /** "3 of 12" */
@@ -101,7 +102,7 @@ export function StepFrame({
     <div
       ref={frameRef}
       data-step-frame
-      className={cn("flex min-h-0 flex-1 flex-col gap-(--space-5)", className)}
+      className={cn(STEP_FRAME_ROOT, className)}
     >
       <div className="flex items-center gap-(--space-3)">
         {onBack === undefined ? null : (
@@ -148,12 +149,7 @@ export function StepFrame({
       {/* The actions are last in the DOM as well as on the screen (§2). */}
       <div
         data-step-actions
-        className={cn(
-          "mt-auto flex items-center justify-end gap-(--space-3)",
-          stickyActions &&
-            // Pinned: a hairline above, paper behind, the safe area below (v1.2 §4).
-            "bg-paper border-hairline sticky bottom-0 z-10 -mx-(--space-4) border-t px-(--space-4) py-(--space-3) pb-[max(var(--space-3),env(safe-area-inset-bottom))]",
-        )}
+        className={cn(STEP_FRAME_ACTIONS, stickyActions && STEP_FRAME_ACTIONS_STICKY)}
       >
         {skip === undefined ? null : (
           <Button variant="ghost" busy={skip.busy} disabled={offline} onClick={skip.onSkip}>

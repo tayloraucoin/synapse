@@ -31,6 +31,7 @@ export const Default: StoryObj = {
   },
 };
 
+/** T13.2 (DAY-1): the value sits `--space-3` clear of the glyph's slot and never touches the border. */
 export const WithValue: StoryObj = {
   render: function Render() {
     const [value, setValue] = React.useState("morning");

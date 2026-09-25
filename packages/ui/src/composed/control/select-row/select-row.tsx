@@ -29,6 +29,7 @@ import * as React from "react";
 
 import { cn } from "../../../lib/cn";
 import { COMMITTING_PULSE } from "../../../lib/committing";
+import { SELECTION_CHOSEN, SELECTION_UNCHOSEN } from "../../../lib/selection";
 import { Text } from "../../../primitives/typography/text";
 import { EmojiSlot } from "../../display/emoji-slot";
 
@@ -88,11 +89,12 @@ export function SelectRow({
         data-committing={committing || undefined}
         onClick={() => set(!local)}
         className={cn(
-          "flex min-h-(--row-min) w-full items-center gap-(--space-3) rounded-(--radius) border text-left",
+          "flex min-h-(--row-min) w-full items-center gap-(--space-3) rounded-(--radius) text-left",
           "px-(--space-2) py-(--space-1)",
           "transition-colors duration-(--dur-state) ease-(--ease-settle)",
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",
-          local ? "border-ink" : "border-hairline hover:bg-surface",
+          // UX v1.3 R56 (DAY-1): surface, a 1.5px ink border, the check — one string with `LargeTargetRow`.
+          local ? SELECTION_CHOSEN : SELECTION_UNCHOSEN,
           committing && COMMITTING_PULSE,
           disabled && "text-text-disabled cursor-default hover:bg-transparent",
         )}

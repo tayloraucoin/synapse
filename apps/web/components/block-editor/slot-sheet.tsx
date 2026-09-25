@@ -398,7 +398,6 @@ export function SlotSheet({
             onChange={setDuration}
             min={DURATION_MIN}
             max={DURATION_MAX}
-            step={5}
             helperText={range ?? undefined}
             disabled={disabled}
           />
@@ -410,7 +409,6 @@ export function SlotSheet({
               onChange={setGap}
               min={0}
               max={GAP_MAX}
-              step={5}
               helperText={pinned ? COPY.gapPinned : undefined}
               disabled={disabled || pinned}
             />
@@ -553,7 +551,6 @@ export function SlotSheet({
                   onChange={(next) => setOther({ habitId: other.habitId, duration: next })}
                   min={DURATION_MIN}
                   max={DURATION_MAX}
-                  step={5}
                   disabled={disabled || other.habitId === null}
                 />
                 <SegmentedControl

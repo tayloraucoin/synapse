@@ -296,7 +296,6 @@ export function WorkoutSetupCard({
           value={draft.minutes}
           min={DURATION_MIN}
           max={DURATION_MAX}
-          step={5}
           onCommit={(next) => change({ minutes: next }, { durationMin: next })}
           onCommitError={fail}
         />
@@ -319,7 +318,6 @@ export function WorkoutSetupCard({
               value={draft.there}
               min={0}
               max={TRAVEL_MAX}
-              step={5}
               onCommit={(next) => change({ there: next }, { travelThereMin: next })}
               onCommitError={fail}
             />
@@ -328,7 +326,6 @@ export function WorkoutSetupCard({
               value={draft.back}
               min={0}
               max={TRAVEL_MAX}
-              step={5}
               onCommit={(next) => change({ back: next }, { travelBackMin: next })}
               onCommitError={fail}
             />

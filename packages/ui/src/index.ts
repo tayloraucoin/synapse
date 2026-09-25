@@ -255,7 +255,10 @@ export {
   CardDescription,
   CardFooter,
   CardHeader,
+  CardSummary,
   CardTitle,
+  type CardSummaryClasses,
+  type CardSummaryProps,
 } from "./primitives/layout/card";
 export {
   Sheet,
@@ -494,6 +497,12 @@ export {
   type EmojiSlotSize,
 } from "./composed/display/emoji-slot";
 export {
+  PRIORITY_MARK_COPY,
+  PriorityMark,
+  type PriorityMarkProps,
+  type PriorityMarkValue,
+} from "./composed/display/priority-mark";
+export {
   PASSAGE_CAROUSEL_COPY,
   PassageCarousel,
   type PassageCarouselProps,
@@ -572,9 +581,12 @@ export {
   type ScreenFrameProps,
 } from "./composed/layout/screen-frame";
 export {
+  STEP_FRAME_SKELETON_COPY,
   StepFrame,
+  StepFrameSkeleton,
   type StepFrameCopy,
   type StepFrameProps,
+  type StepFrameSkeletonProps,
 } from "./composed/layout/step-frame";
 export {
   AppHeader,
@@ -792,6 +804,12 @@ export {
   type TextDisclosureButtonClasses,
   type TextDisclosureButtonProps,
 } from "./composed/control/text-disclosure-button";
+export {
+  InfoDisclosure,
+  type InfoDisclosureClasses,
+  type InfoDisclosureItem,
+  type InfoDisclosureProps,
+} from "./composed/control/info-disclosure";
 export {
   TIERS_WITH_REASONS,
   TIER_RADIO_ROWS_COPY,

@@ -211,7 +211,6 @@ export function FixtureSheet({
             onChange={setDurationMin}
             min={DURATION_MIN}
             max={DURATION_MAX}
-            step={5}
           />
           <SegmentedControl
             label={COPY.where}
