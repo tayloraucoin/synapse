@@ -11,7 +11,7 @@
 
 ## 1. ENTITY OVERVIEW
 
-**22 tables** in `public`, plus a reference-only mirror of Supabase's `auth.users`. Grouped by domain.
+**23 tables** in `public`, plus a reference-only mirror of Supabase's `auth.users`. Grouped by domain.
 
 **Group 1 — Auth & Users.** `users` is the shadow of `auth.users` — its primary key **is** the foreign key, and the row is created by the `handle_new_user()` trigger, never by the app. It carries every account scalar: timezone, day-close and review-reminder times, theme, display name, the usual wake time, the week-build reminder's day and time, the first-run resume point, the deferred-settings pending pair, and — since UX v1.1 (0005) — the shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range, lights-out and devices-off, the overflow mode, the orient frame's settings, the journal's switch and prompts, and the block order — and, since UX v1.2 (0007), how mornings go (`morning_mode`), the quote opt-in, the two further morning lines, and the journal reminder's switch and time. There is no wake anchor since `0006` (v1.1 R11, DYN-21): the orient frame is the wake moment. `user_avatars` is the optional photo, keyed by `user_id` — one per person, no surrogate id. Deleting the auth user cascades through this row to everything.
 
@@ -198,6 +198,10 @@ export const itemTypeEnum = pgEnum(
  * then `fixtures`, `day_blocks`, `notification_prefs` (0005) — three
  * directories, so it lives here. The order is the default a day reads in;
  * `DEFAULT_BLOCK_ORDER` in `@syn/constants` is the person-editable subset.
+ *
+ * `transition` is UX v1.3 R48, TD-25. The TypeScript side moved in DAY-3 to
+ * keep the workspace building; the `ALTER TYPE … ADD VALUE` ships in
+ * migration `0009` (DAY-4). Nothing writes the value before then.
  */
 export const blockKindEnum = pgEnum(
   "block_kind",
@@ -208,6 +212,7 @@ export const blockKindEnum = pgEnum(
     "prep",
     "work",
     "break",
+    "transition",
     "activity",
     "wind_down",
   ]),
@@ -371,6 +376,10 @@ export const itemTypeEnum = pgEnum(
  * then `fixtures`, `day_blocks`, `notification_prefs` (0005) — three
  * directories, so it lives here. The order is the default a day reads in;
  * `DEFAULT_BLOCK_ORDER` in `@syn/constants` is the person-editable subset.
+ *
+ * `transition` is UX v1.3 R48, TD-25. The TypeScript side moved in DAY-3 to
+ * keep the workspace building; the `ALTER TYPE … ADD VALUE` ships in
+ * migration `0009` (DAY-4). Nothing writes the value before then.
  */
 export const blockKindEnum = pgEnum(
   "block_kind",
@@ -381,6 +390,7 @@ export const blockKindEnum = pgEnum(
     "prep",
     "work",
     "break",
+    "transition",
     "activity",
     "wind_down",
   ]),
@@ -695,6 +705,10 @@ export const users = pgTable(
     }),
     // The review reminder's time (§8.2 N4). Default 21:00.
     reviewReminderTime: time("review_reminder_time").notNull().default("21:00"),
+    // UX v1.3 R61 — *Same routine every day?*, asked once after the first
+    // ranking: true = one morning template every plan references; false = each
+    // day picks or builds its own; null = not yet asked (0009).
+    sameMorningRoutine: boolean("same_morning_routine"),
     // UX v1.1 §4.1 — which archetype; only the first is live (0005).
     scheduleShape: scheduleShapeEnum("schedule_shape"),
     theme: themePreferenceEnum("theme").notNull().default("system"),
@@ -856,7 +870,7 @@ export const userAvatarsRelations = relations(userAvatars, ({ one }) => ({
 
 ### GROUP 2 — LIBRARY
 
-What a person keeps: the habits they might do (since UX v1.2 with up to three versions and, for a workout, a type, a location and its travel), the categories those group into, the reasons a miss can be attributed to, and — since UX v1.2 (0007) — the `passages` they read each morning. Nothing here is ever hard-deleted except a category, which unassigns.
+What a person keeps: the habits they might do (since UX v1.2 with up to three versions and, for a workout, a type, a location and its travel), the categories those group into, the reasons a miss can be attributed to, and — since UX v1.2 (0007) — the `passages` they read each morning, and — since UX v1.3 (0009) — the `links` they open from it (a playlist, a track, a page; the kind derived from the host, nothing fetched). Nothing here is ever hard-deleted except a category, which unassigns.
 
 ```ts
 // packages/db/src/schema/library/categories.ts
@@ -1317,6 +1331,98 @@ export const passagesRelations = relations(passages, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// packages/db/src/schema/library/links.ts
+/**
+ * links — a thing to open from the morning: a playlist, a track, a page
+ * (UX v1.3 R53, §3.17, §11.4; TD-28).
+ *
+ * A TITLE AND A URL, THE PERSON'S. The orient frame shows each as a callout
+ * under the reading; a tap opens it in a new tab (the Spotify app intercepts
+ * its own links on a phone). Settings lists them. Nothing else reads them.
+ *
+ * THE KIND IS DERIVED, NEVER CHOSEN. `kind` is `spotify` for `open.spotify.com`,
+ * `spotify.link` and the `spotify:` scheme, `other` for anything else — the
+ * service computes it on every save (`deriveLinkKind`) and stores it, so the
+ * frame never parses a URL. The default `other` keeps a row valid if a path
+ * ever inserts without it.
+ *
+ * NOTHING IS FETCHED. The app never requests a link on the person's behalf —
+ * no preview, no title lookup, no favicon. The URL is `https:` or `spotify:`
+ * (the validator's rule); the column bounds its length.
+ *
+ * NO UNIQUE URL. The same playlist saved twice under two names is the
+ * person's list, not a mistake.
+ *
+ * ARCHIVE, NEVER DELETE, as passages. `sort_order` is the frame's order.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import {
+  check,
+  index,
+  pgEnum,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
+
+import type { LinkKind } from "@syn/types";
+
+import { enumValues } from "../enum-values";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+
+/** Link.kind — v1.3 §3.17. One table, so it lives in this file (drizzle-orm-conventions §3). */
+export const linkKindEnum = pgEnum("link_kind", enumValues<LinkKind>()(["spotify", "other"]));
+
+export const links = pgTable(
+  "links",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    /** Derived from the host by the service; stored so the frame does not parse. */
+    kind: linkKindEnum("kind").notNull().default("other"),
+    /** The frame's order. */
+    sortOrder: smallint("sort_order").notNull().default(0),
+    /** 1–80 — the callout's words. */
+    title: text("title").notNull(),
+    /** ≤ 2048; `https:` or `spotify:` (the validator's rule). */
+    url: text("url").notNull(),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("links_user_id_sort_order_idx").on(table.userId, table.sortOrder),
+    index("links_user_id_archived_at_idx").on(table.userId, table.archivedAt),
+    index("links_user_id_idx").on(table.userId),
+    check("links_title_check", sql`length(${table.title}) BETWEEN 1 AND 80`),
+    check("links_url_check", sql`length(${table.url}) BETWEEN 1 AND 2048`),
+    ...ownerPrivateCrudPolicies({
+      prefix: "links",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const linksRelations = relations(links, ({ one }) => ({
+  user: one(users, {
+    fields: [links.userId],
+    references: [users.id],
+  }),
+}));
 ```
 
 #### `categories`
@@ -1363,9 +1469,20 @@ export const passagesRelations = relations(passages, ({ one }) => ({
 
 **RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
 
+#### `links`
+
+**PURPOSE.** links — a thing to open from the morning: a playlist, a track, a page (UX v1.3 R53, §3.17, §11.4; TD-28). A TITLE AND A URL, THE PERSON'S. The orient frame shows each as a callout under the reading; a tap opens it in a new tab (the Spotify app intercepts its own links on a phone). Settings lists them. Nothing else reads them. THE KIND IS DERIVED, NEVER CHOSEN. `kind` is `spotify` for `open.spotify.com`, `spotify.link` and the `spotify:` scheme, `other` for anything else — the service computes it on every save (`deriveLinkKind`) and stores it, so the frame never parses a URL. The default `other` keeps a row valid if a path ever inserts without it. NOTHING IS FETCHED. The app never requests a link on the person's behalf — no preview, no title lookup, no favicon. The URL is `https:` or `spotify:` (the validator's rule); the column bounds its length. NO UNIQUE URL. The same playlist saved twice under two names is the person's list, not a mistake. ARCHIVE, NEVER DELETE, as passages. `sort_order` is the frame's order. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `links_user_id_sort_order_idx`
+- `links_user_id_archived_at_idx`
+- `links_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
 ### GROUP 3 — PLAN
 
-The shapes a day can take. Since UX v1.1 (0004, 0005) a template is a block whose slots stack — a duration and a gap each, offsets derived — and a day is an ordered set of `day_blocks`; `fixtures` are the weekday things every block flows around. Since UX v1.2 (0007) a work template may be a work-day type with its own hours, and `day_plans` is a named day composed by reference — weekdays, a type, four times, three lists, the workouts placed — that the week build reads first. A day is one date in the person's stored zone, snapshotting the time rules it was created under. There is no `week_plans` table — week status is derived from the week's days.
+The shapes a day can take. Since UX v1.1 (0004, 0005) a template is a block whose slots stack — a duration and a gap each, offsets derived — and a day is an ordered set of `day_blocks`; `fixtures` are the weekday things every block flows around. Since UX v1.2 (0007) a work template may be a work-day type with its own hours, and `day_plans` is a named day composed by reference — weekdays, a type, four times, three lists, the workouts placed — that the week build reads first; since UX v1.3 (0009) a plan also points at an after-work list and a free-time pool, and a fixture carries a place and its travel. A day is one date in the person's stored zone, snapshotting the time rules it was created under. There is no `week_plans` table — week status is derived from the week's days.
 
 ```ts
 // packages/db/src/schema/plan/enums.ts
@@ -1781,12 +1898,18 @@ export const templateSlotsRelations = relations(templateSlots, ({ one }) => ({
  * THIS IS WHERE CALENDAR IMPORT LANDS (phase 2, P2-7): an imported event is a
  * fixture-shaped row with a `calendar_event_id`, added then.
  *
+ * A PLACE AND TRAVEL (UX v1.3 R51, §3.14, TD-27; 0009). *Away* gives a
+ * fixture a `location` line and the three travel columns a workout has; the
+ * day then carries *→ Clinic · 20* and *← Home · 20* beside the pinned item
+ * (`day_items.origin = travel`, `parent_item_id` — TD-12 reused whole).
+ *
  * ARCHIVE, NEVER DELETE. A past day's pinned item snapshots the title.
  *
  * POLICIES: owner-private CRUD.
  */
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   index,
   jsonb,
@@ -1839,10 +1962,26 @@ export const fixtures = pgTable(
     icon: jsonb("icon").$type<IconValue>().notNull().default(DEFAULT_FIXTURE_ICON),
     /** A label and a default glyph and block — never a mechanic (UX v1.2 §3.6, 0007). */
     kind: fixtureKindEnum("kind").notNull().default("other"),
+    /**
+     * Where it is, for *Away* (UX v1.3 R51, §3.14; 0009) — free text ≤ 80,
+     * null for *Here* or an unnamed place. A fact the sheet shows; nothing
+     * reads it (Google Places is phase 2, P2-19).
+     */
+    location: text("location"),
+    /**
+     * Whether the day plans the travel (UX v1.3 R51, TD-27; 0009) — the same
+     * three columns a workout has (TD-12). When true and either trip is
+     * non-zero, the day carries two travel rows beside the fixture, never
+     * added to its length.
+     */
+    planTravel: boolean("plan_travel").notNull().default(true),
     /** Hard by default: a fixture is an appointment (v1.1 R22). */
     scheduling: schedulingEnum("scheduling").notNull().default("hard"),
     /** 1–60. */
     title: text("title").notNull(),
+    /** Minutes there and back around it (UX v1.3 §3.14, 0009). 0–180; never added to the length. */
+    travelBackMin: smallint("travel_back_min").notNull().default(0),
+    travelThereMin: smallint("travel_there_min").notNull().default(0),
     /** Mon = 0 … Sun = 6; at least one. */
     weekdays: smallint("weekdays").array().notNull(),
 
@@ -1867,6 +2006,14 @@ export const fixtures = pgTable(
     check(
       "fixtures_title_check",
       sql`length(${table.title}) BETWEEN 1 AND 60`,
+    ),
+    check(
+      "fixtures_location_check",
+      sql`${table.location} IS NULL OR length(${table.location}) <= 80`,
+    ),
+    check(
+      "fixtures_travel_check",
+      sql`${table.travelThereMin} BETWEEN 0 AND 180 AND ${table.travelBackMin} BETWEEN 0 AND 180`,
     ),
     check(
       "fixtures_weekdays_check",
@@ -1917,6 +2064,12 @@ export const fixturesRelations = relations(fixtures, ({ one }) => ({
  * constraint; the service validates it on every write and moves a claimed
  * weekday with a report (*Thursday moves from Day A.*). A double claim that
  * slips through is read as the lower `sort_order`'s and logged.
+ *
+ * UX v1.3 (0009, TD-25, TD-26) adds two more references: the after-work list
+ * (a `transition` template, *After work A*) and the free-time pool (an
+ * `activity` template of structure `pool`, *Evenings A*). The work template
+ * is the plan's own under v1.3 (TD-23) — an ownership rule of the service,
+ * not a column.
  *
  * `state` is `draft` until the builder's review (13i) — a plan left early
  * shows *unfinished*; `complete` requires a weekday, a wake and a lights-out
@@ -1981,6 +2134,21 @@ export const dayPlans = pgTable(
     /** The plan's own *working by*; null = the type's, then the profile's. */
     workStartTime: time("work_start_time"),
 
+    /**
+     * Free time — an `activity` template of structure `pool` (*Evenings A*),
+     * the activities this day chooses from; the day's block materialises
+     * pooled (UX v1.3 R50, §3.16, TD-26; 0009). Null = none.
+     */
+    activityTemplateId: uuid("activity_template_id").references(() => templates.id, {
+      onDelete: "set null",
+    }),
+    /**
+     * *After work* — a `transition` template, the hand-off between work and
+     * the evening, one per plan (UX v1.3 R48, §3.13, TD-25; 0009). Null = none.
+     */
+    afterWorkTemplateId: uuid("after_work_template_id").references(() => templates.id, {
+      onDelete: "set null",
+    }),
     /** The morning routine — a `morning` template; `set null` so an archived list leaves the plan standing. */
     morningTemplateId: uuid("morning_template_id").references(() => templates.id, {
       onDelete: "set null",
@@ -2008,6 +2176,8 @@ export const dayPlans = pgTable(
     index("day_plans_morning_template_id_idx").on(table.morningTemplateId),
     index("day_plans_wind_down_template_id_idx").on(table.windDownTemplateId),
     index("day_plans_work_template_id_idx").on(table.workTemplateId),
+    index("day_plans_after_work_template_id_idx").on(table.afterWorkTemplateId),
+    index("day_plans_activity_template_id_idx").on(table.activityTemplateId),
     check("day_plans_name_check", sql`length(${table.name}) BETWEEN 1 AND 40`),
     check(
       "day_plans_weekdays_check",
@@ -2021,6 +2191,16 @@ export const dayPlans = pgTable(
 );
 
 export const dayPlansRelations = relations(dayPlans, ({ one }) => ({
+  activityTemplate: one(templates, {
+    fields: [dayPlans.activityTemplateId],
+    references: [templates.id],
+    relationName: "day_plans_activity",
+  }),
+  afterWorkTemplate: one(templates, {
+    fields: [dayPlans.afterWorkTemplateId],
+    references: [templates.id],
+    relationName: "day_plans_after_work",
+  }),
   morningTemplate: one(templates, {
     fields: [dayPlans.morningTemplateId],
     references: [templates.id],
@@ -2407,7 +2587,7 @@ export const dayBlocksRelations = relations(dayBlocks, ({ many, one }) => ({
 
 #### `fixtures`
 
-**PURPOSE.** fixtures — something that happens every week on set days at a set time (UX v1.1 §3.6, §11.6, R27, TD-8). A stand-up on Tuesdays, football on Thursdays. A FIXTURE BELONGS TO A WEEKDAY, NOT A TEMPLATE. It materialises on every planned instance of its weekdays whatever template the day gets, as a `day_items` row with `origin = fixture` and `pinned = true` in the block its `block_kind` names; the quick-pick cannot remove it and the stack flows around it. That is the whole reason it is not a template slot: a Tuesday stand-up tied to whichever template Tuesday happens to get is the bug R27 exists to prevent. `weekdays` is a set, so a Mon/Wed/Fri class is one fixture. Mon = 0, as everywhere. `habit_id` is optional — a fixture may point at a library habit for its icon and category, and usually does not. THIS IS WHERE CALENDAR IMPORT LANDS (phase 2, P2-7): an imported event is a fixture-shaped row with a `calendar_event_id`, added then. ARCHIVE, NEVER DELETE. A past day's pinned item snapshots the title. POLICIES: owner-private CRUD.
+**PURPOSE.** fixtures — something that happens every week on set days at a set time (UX v1.1 §3.6, §11.6, R27, TD-8). A stand-up on Tuesdays, football on Thursdays. A FIXTURE BELONGS TO A WEEKDAY, NOT A TEMPLATE. It materialises on every planned instance of its weekdays whatever template the day gets, as a `day_items` row with `origin = fixture` and `pinned = true` in the block its `block_kind` names; the quick-pick cannot remove it and the stack flows around it. That is the whole reason it is not a template slot: a Tuesday stand-up tied to whichever template Tuesday happens to get is the bug R27 exists to prevent. `weekdays` is a set, so a Mon/Wed/Fri class is one fixture. Mon = 0, as everywhere. `habit_id` is optional — a fixture may point at a library habit for its icon and category, and usually does not. THIS IS WHERE CALENDAR IMPORT LANDS (phase 2, P2-7): an imported event is a fixture-shaped row with a `calendar_event_id`, added then. A PLACE AND TRAVEL (UX v1.3 R51, §3.14, TD-27; 0009). *Away* gives a fixture a `location` line and the three travel columns a workout has; the day then carries *→ Clinic · 20* and *← Home · 20* beside the pinned item (`day_items.origin = travel`, `parent_item_id` — TD-12 reused whole). ARCHIVE, NEVER DELETE. A past day's pinned item snapshots the title. POLICIES: owner-private CRUD.
 
 **INDEXES.**
 - `fixtures_user_id_archived_at_idx`
@@ -2418,7 +2598,7 @@ export const dayBlocksRelations = relations(dayBlocks, ({ many, one }) => ({
 
 #### `day_plans`
 
-**PURPOSE.** day_plans — a named day, composed from the parts first run collected (UX v1.2 §3.13, §4.13, §11.5; R31, TD-10). A ROW OF REFERENCES, NEVER A COPY. A plan points at a work template (the work-day type, or null for *No work on this day*), at up to three block templates (the getting-ready list, the morning routine, the wind-down — `Getting ready A`, `Morning routine A`, `Wind-down A`), carries the four times a day is anchored from (null = inherit from the profile or the type), the workouts placed (`training`), the breaks (`breaks`), and which weekday fixtures this plan leaves out (`excluded_fixture_ids` — fixtures are matched by weekday; the plan stores only exclusions). A second plan may point at the first's lists; editing *Getting ready A* edits every plan that uses it, and the template list says *used by Day A, Day B*. Deleting a plan deletes references only. NOT v1's WHOLE-DAY TEMPLATE. Nothing inside a plan has an absolute time except its anchors and the pins; every block still stacks in its flow direction from `stackBlock` (TD-4). A day is an ordered set of blocks (TD-2), and a plan is what the week build reads first to make them (`prefillWeek`, RUN-5) — it is never materialised by any other path. ONE PLAN PER WEEKDAY, per person. An array column cannot carry that as a constraint; the service validates it on every write and moves a claimed weekday with a report (*Thursday moves from Day A.*). A double claim that slips through is read as the lower `sort_order`'s and logged. `state` is `draft` until the builder's review (13i) — a plan left early shows *unfinished*; `complete` requires a weekday, a wake and a lights-out (own or inherited), and a work template or an explicit *no work*. POLICIES: owner-private CRUD.
+**PURPOSE.** day_plans — a named day, composed from the parts first run collected (UX v1.2 §3.13, §4.13, §11.5; R31, TD-10). A ROW OF REFERENCES, NEVER A COPY. A plan points at a work template (the work-day type, or null for *No work on this day*), at up to three block templates (the getting-ready list, the morning routine, the wind-down — `Getting ready A`, `Morning routine A`, `Wind-down A`), carries the four times a day is anchored from (null = inherit from the profile or the type), the workouts placed (`training`), the breaks (`breaks`), and which weekday fixtures this plan leaves out (`excluded_fixture_ids` — fixtures are matched by weekday; the plan stores only exclusions). A second plan may point at the first's lists; editing *Getting ready A* edits every plan that uses it, and the template list says *used by Day A, Day B*. Deleting a plan deletes references only. NOT v1's WHOLE-DAY TEMPLATE. Nothing inside a plan has an absolute time except its anchors and the pins; every block still stacks in its flow direction from `stackBlock` (TD-4). A day is an ordered set of blocks (TD-2), and a plan is what the week build reads first to make them (`prefillWeek`, RUN-5) — it is never materialised by any other path. ONE PLAN PER WEEKDAY, per person. An array column cannot carry that as a constraint; the service validates it on every write and moves a claimed weekday with a report (*Thursday moves from Day A.*). A double claim that slips through is read as the lower `sort_order`'s and logged. UX v1.3 (0009, TD-25, TD-26) adds two more references: the after-work list (a `transition` template, *After work A*) and the free-time pool (an `activity` template of structure `pool`, *Evenings A*). The work template is the plan's own under v1.3 (TD-23) — an ownership rule of the service, not a column. `state` is `draft` until the builder's review (13i) — a plan left early shows *unfinished*; `complete` requires a weekday, a wake and a lights-out (own or inherited), and a work template or an explicit *no work*. POLICIES: owner-private CRUD.
 
 **INDEXES.**
 - `day_plans_user_id_sort_order_idx`
@@ -2427,6 +2607,8 @@ export const dayBlocksRelations = relations(dayBlocks, ({ many, one }) => ({
 - `day_plans_morning_template_id_idx`
 - `day_plans_wind_down_template_id_idx`
 - `day_plans_work_template_id_idx`
+- `day_plans_after_work_template_id_idx`
+- `day_plans_activity_template_id_idx`
 
 **RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
 
@@ -3846,7 +4028,7 @@ Re-running the seed prints zeros across the board, which means idempotent rather
 
 ## 10. OPEN QUESTIONS & FLAGGED DECISIONS
 
-- **22 tables is the whole Phase-1 model.** A later ticket that needs a column adds it as a normal migration with a logged deviation, not as a second domain migration by default.
+- **23 tables is the whole Phase-1 model.** A later ticket that needs a column adds it as a normal migration with a logged deviation, not as a second domain migration by default.
 - **`feedback_messages` readability is `[PROVISIONAL — Taylor]`.** The table is insert-only for its author and is read by the builder out of band. Confirm that is what you want; the row deliberately holds nothing from a person's list.
 - **`day_items.calendar_event_id` is a Phase-2 seam.** The column exists so calendar import (official spec §4.7) is not a migration; nothing in Phase 1 writes it.
 - **`template_slots.multitask_group` is enforced in the service, not the schema.** "Two slots sharing a start offset must share a group" cannot be a partial unique index, because the rule is *unless grouped*. SET-5 owns it, in the words TP-02 shows.

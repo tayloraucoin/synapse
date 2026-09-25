@@ -207,6 +207,10 @@ export const users = pgTable(
     }),
     // The review reminder's time (§8.2 N4). Default 21:00.
     reviewReminderTime: time("review_reminder_time").notNull().default("21:00"),
+    // UX v1.3 R61 — *Same routine every day?*, asked once after the first
+    // ranking: true = one morning template every plan references; false = each
+    // day picks or builds its own; null = not yet asked (0009).
+    sameMorningRoutine: boolean("same_morning_routine"),
     // UX v1.1 §4.1 — which archetype; only the first is live (0005).
     scheduleShape: scheduleShapeEnum("schedule_shape"),
     theme: themePreferenceEnum("theme").notNull().default("system"),

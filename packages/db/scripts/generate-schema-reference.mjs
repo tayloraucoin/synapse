@@ -31,18 +31,19 @@ const GROUPS = [
   {
     title: "GROUP 2 — LIBRARY",
     intro:
-      "What a person keeps: the habits they might do (since UX v1.2 with up to three versions and, for a workout, a type, a location and its travel), the categories those group into, the reasons a miss can be attributed to, and — since UX v1.2 (0007) — the `passages` they read each morning. Nothing here is ever hard-deleted except a category, which unassigns.",
+      "What a person keeps: the habits they might do (since UX v1.2 with up to three versions and, for a workout, a type, a location and its travel), the categories those group into, the reasons a miss can be attributed to, and — since UX v1.2 (0007) — the `passages` they read each morning, and — since UX v1.3 (0009) — the `links` they open from it (a playlist, a track, a page; the kind derived from the host, nothing fetched). Nothing here is ever hard-deleted except a category, which unassigns.",
     files: [
       "library/categories.ts",
       "library/habits.ts",
       "library/reasons.ts",
       "library/passages.ts",
+      "library/links.ts",
     ],
   },
   {
     title: "GROUP 3 — PLAN",
     intro:
-      "The shapes a day can take. Since UX v1.1 (0004, 0005) a template is a block whose slots stack — a duration and a gap each, offsets derived — and a day is an ordered set of `day_blocks`; `fixtures` are the weekday things every block flows around. Since UX v1.2 (0007) a work template may be a work-day type with its own hours, and `day_plans` is a named day composed by reference — weekdays, a type, four times, three lists, the workouts placed — that the week build reads first. A day is one date in the person's stored zone, snapshotting the time rules it was created under. There is no `week_plans` table — week status is derived from the week's days.",
+      "The shapes a day can take. Since UX v1.1 (0004, 0005) a template is a block whose slots stack — a duration and a gap each, offsets derived — and a day is an ordered set of `day_blocks`; `fixtures` are the weekday things every block flows around. Since UX v1.2 (0007) a work template may be a work-day type with its own hours, and `day_plans` is a named day composed by reference — weekdays, a type, four times, three lists, the workouts placed — that the week build reads first; since UX v1.3 (0009) a plan also points at an after-work list and a free-time pool, and a fixture carries a place and its travel. A day is one date in the person's stored zone, snapshotting the time rules it was created under. There is no `week_plans` table — week status is derived from the week's days.",
     files: [
       "plan/enums.ts",
       "plan/templates.ts",

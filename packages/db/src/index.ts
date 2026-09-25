@@ -45,6 +45,7 @@ import {
   fixtures,
   habits,
   journalEntries,
+  links,
   misses,
   notificationPrefs,
   reasons,
@@ -84,6 +85,8 @@ export type Habit = typeof habits.$inferSelect;
 export type NewHabit = typeof habits.$inferInsert;
 export type JournalEntry = typeof journalEntries.$inferSelect;
 export type NewJournalEntry = typeof journalEntries.$inferInsert;
+export type Link = typeof links.$inferSelect;
+export type NewLink = typeof links.$inferInsert;
 export type Miss = typeof misses.$inferSelect;
 export type NewMiss = typeof misses.$inferInsert;
 export type NotificationPref = typeof notificationPrefs.$inferSelect;

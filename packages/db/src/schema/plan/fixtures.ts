@@ -18,12 +18,18 @@
  * THIS IS WHERE CALENDAR IMPORT LANDS (phase 2, P2-7): an imported event is a
  * fixture-shaped row with a `calendar_event_id`, added then.
  *
+ * A PLACE AND TRAVEL (UX v1.3 R51, §3.14, TD-27; 0009). *Away* gives a
+ * fixture a `location` line and the three travel columns a workout has; the
+ * day then carries *→ Clinic · 20* and *← Home · 20* beside the pinned item
+ * (`day_items.origin = travel`, `parent_item_id` — TD-12 reused whole).
+ *
  * ARCHIVE, NEVER DELETE. A past day's pinned item snapshots the title.
  *
  * POLICIES: owner-private CRUD.
  */
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   index,
   jsonb,
@@ -76,10 +82,26 @@ export const fixtures = pgTable(
     icon: jsonb("icon").$type<IconValue>().notNull().default(DEFAULT_FIXTURE_ICON),
     /** A label and a default glyph and block — never a mechanic (UX v1.2 §3.6, 0007). */
     kind: fixtureKindEnum("kind").notNull().default("other"),
+    /**
+     * Where it is, for *Away* (UX v1.3 R51, §3.14; 0009) — free text ≤ 80,
+     * null for *Here* or an unnamed place. A fact the sheet shows; nothing
+     * reads it (Google Places is phase 2, P2-19).
+     */
+    location: text("location"),
+    /**
+     * Whether the day plans the travel (UX v1.3 R51, TD-27; 0009) — the same
+     * three columns a workout has (TD-12). When true and either trip is
+     * non-zero, the day carries two travel rows beside the fixture, never
+     * added to its length.
+     */
+    planTravel: boolean("plan_travel").notNull().default(true),
     /** Hard by default: a fixture is an appointment (v1.1 R22). */
     scheduling: schedulingEnum("scheduling").notNull().default("hard"),
     /** 1–60. */
     title: text("title").notNull(),
+    /** Minutes there and back around it (UX v1.3 §3.14, 0009). 0–180; never added to the length. */
+    travelBackMin: smallint("travel_back_min").notNull().default(0),
+    travelThereMin: smallint("travel_there_min").notNull().default(0),
     /** Mon = 0 … Sun = 6; at least one. */
     weekdays: smallint("weekdays").array().notNull(),
 
@@ -104,6 +126,14 @@ export const fixtures = pgTable(
     check(
       "fixtures_title_check",
       sql`length(${table.title}) BETWEEN 1 AND 60`,
+    ),
+    check(
+      "fixtures_location_check",
+      sql`${table.location} IS NULL OR length(${table.location}) <= 80`,
+    ),
+    check(
+      "fixtures_travel_check",
+      sql`${table.travelThereMin} BETWEEN 0 AND 180 AND ${table.travelBackMin} BETWEEN 0 AND 180`,
     ),
     check(
       "fixtures_weekdays_check",

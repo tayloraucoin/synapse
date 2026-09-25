@@ -25,6 +25,12 @@
  * weekday with a report (*Thursday moves from Day A.*). A double claim that
  * slips through is read as the lower `sort_order`'s and logged.
  *
+ * UX v1.3 (0009, TD-25, TD-26) adds two more references: the after-work list
+ * (a `transition` template, *After work A*) and the free-time pool (an
+ * `activity` template of structure `pool`, *Evenings A*). The work template
+ * is the plan's own under v1.3 (TD-23) — an ownership rule of the service,
+ * not a column.
+ *
  * `state` is `draft` until the builder's review (13i) — a plan left early
  * shows *unfinished*; `complete` requires a weekday, a wake and a lights-out
  * (own or inherited), and a work template or an explicit *no work*.
@@ -88,6 +94,21 @@ export const dayPlans = pgTable(
     /** The plan's own *working by*; null = the type's, then the profile's. */
     workStartTime: time("work_start_time"),
 
+    /**
+     * Free time — an `activity` template of structure `pool` (*Evenings A*),
+     * the activities this day chooses from; the day's block materialises
+     * pooled (UX v1.3 R50, §3.16, TD-26; 0009). Null = none.
+     */
+    activityTemplateId: uuid("activity_template_id").references(() => templates.id, {
+      onDelete: "set null",
+    }),
+    /**
+     * *After work* — a `transition` template, the hand-off between work and
+     * the evening, one per plan (UX v1.3 R48, §3.13, TD-25; 0009). Null = none.
+     */
+    afterWorkTemplateId: uuid("after_work_template_id").references(() => templates.id, {
+      onDelete: "set null",
+    }),
     /** The morning routine — a `morning` template; `set null` so an archived list leaves the plan standing. */
     morningTemplateId: uuid("morning_template_id").references(() => templates.id, {
       onDelete: "set null",
@@ -115,6 +136,8 @@ export const dayPlans = pgTable(
     index("day_plans_morning_template_id_idx").on(table.morningTemplateId),
     index("day_plans_wind_down_template_id_idx").on(table.windDownTemplateId),
     index("day_plans_work_template_id_idx").on(table.workTemplateId),
+    index("day_plans_after_work_template_id_idx").on(table.afterWorkTemplateId),
+    index("day_plans_activity_template_id_idx").on(table.activityTemplateId),
     check("day_plans_name_check", sql`length(${table.name}) BETWEEN 1 AND 40`),
     check(
       "day_plans_weekdays_check",
@@ -128,6 +151,16 @@ export const dayPlans = pgTable(
 );
 
 export const dayPlansRelations = relations(dayPlans, ({ one }) => ({
+  activityTemplate: one(templates, {
+    fields: [dayPlans.activityTemplateId],
+    references: [templates.id],
+    relationName: "day_plans_activity",
+  }),
+  afterWorkTemplate: one(templates, {
+    fields: [dayPlans.afterWorkTemplateId],
+    references: [templates.id],
+    relationName: "day_plans_after_work",
+  }),
   morningTemplate: one(templates, {
     fields: [dayPlans.morningTemplateId],
     references: [templates.id],
