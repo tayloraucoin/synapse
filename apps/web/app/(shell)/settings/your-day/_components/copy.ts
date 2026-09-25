@@ -37,10 +37,6 @@ export const YOUR_DAY_COPY = {
     evenings: "Evenings",
     windDown: "Wind-down",
     blockOrder: "Block order",
-    /** RETIRED by v1.3 §4.6: the titles of the three redirecting routes until DAY-13. */
-    workStart: "Work start",
-    workDayTypes: "Work-day types",
-    wake: "Wake",
   },
   /** [COPY] The *Your days* row's value. */
   days: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "day" : "days"}`),

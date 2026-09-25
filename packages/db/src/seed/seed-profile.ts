@@ -28,7 +28,6 @@ const PROFILE = {
   workEndTime: "17:30",
   lightsOutTime: "22:45",
   devicesOffTime: "22:15",
-  earliestWakeTime: "06:30",
   scheduleShape: "own_structure_dynamic" as const,
   anchorDirection: "routine_cut" as const,
   overflowMode: "daily_menu" as const,

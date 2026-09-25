@@ -2,7 +2,10 @@
  * First run's strings — UX v1.2 §4 for screens 1–5 (RUN-8), UX v1.1 §4.6–
  * §4.11 for the screens RUN-9…RUN-11 rebuild, verbatim where the document
  * writes them. Anything the document does not write is marked
- * `[COPY — needs Vesper sign-off]`.
+ * `[COPY — needs Vesper sign-off]`. DAY-13 pruned the strings of the
+ * retired v1.2 screens (3, 5, 7) and every key nothing read any more; the
+ * screen-numbered sections name v1.2's screens, whose bodies now live in
+ * the builder and Settings.
  *
  * NO GLYPH IN HERE (v1.2 R29, TD-20 — the lint rule). The archetype cards'
  * glyphs are `SCHEDULE_SHAPE_ICONS`, the kinds' are `WORK_DAY_KINDS` and
@@ -63,11 +66,7 @@ export const SETUP_COPY = {
   },
   weekdays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const,
 
-  /* ------------------------------------------------------- screen 3 -- */
-  step3Heading: "Do your work days all look the same?",
-  step3Body: "Same hours, same place.",
-  sameShapeYes: "Yes, near enough",
-  sameShapeNo: "No, it depends on the day",
+  /* --------------------------- the work's facts (B3's `WorkFields`) -- */
   workingBy: "Working by",
   untilAbout: "Until about",
   whatGives: "When your morning runs long, what gives?",
@@ -79,26 +78,8 @@ export const SETUP_COPY = {
     depends: "Depends on the day",
     dependsBody: "Ask me in the morning.",
   },
-  /** The collapsed card's third word — *work waits* (v1.2 §4.3). */
-  givesShort: {
-    work_waits: "work waits",
-    routine_cut: "routine gets cut",
-    depends: "depends on the day",
-  },
-  addAWorkDayType: "Add a work-day type",
-  /** The sheet-scoped noun (v1.2 §4, the frame rules). */
-  aWorkDayType: "A work-day type",
   kind: "Kind",
-  typeName: "Name",
-  /** [COPY — needs Vesper sign-off] */
-  typeNamePlaceholder: "Remote, Office, Studio…",
   chooseAnIcon: "Choose an icon",
-  /** The collapsed card's caption under the name — "9:00–17:30 · work waits" (v1.3 R57). */
-  typeCaption: (start: string, end: string, gives: string | null) =>
-    gives === null ? `${start}–${end}` : `${start}–${end} · ${gives}`,
-  continueTypes: (n: number) => (n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "type" : "types"}`),
-  /** [COPY — needs Vesper sign-off: the card's own line when a save fails.] */
-  typeSaveError: "Couldn’t save this one. Try Done again.",
 
   /* ------------------------------------------------------- screen 4 -- */
   step4Heading: "Anything that happens every week at a set time?",
@@ -106,16 +87,6 @@ export const SETUP_COPY = {
   nothingYet: "Nothing yet.",
   addOne: "Add one",
   addAnother: "Add another",
-
-  /* ------------------------------------------------------- screen 5 -- */
-  step5Heading: "When would you like to be up?",
-  step5Body: "Most days. Every day can differ.",
-  upAt: "Up at",
-  /** "7:00 to 9:00 · 2 h before work" — the first computed consequence (§4.5). */
-  beforeWork: (wake: string, work: string, span: string) => `${wake} to ${work} · ${span} before work`,
-  /** "… · 2 h before work on a remote day" — with several work-day types, the first type's. */
-  beforeWorkOn: (wake: string, work: string, span: string, kind: string) =>
-    `${wake} to ${work} · ${span} before work on a ${kind} day`,
 
   /* ------------------------------------------------------- screen 6 -- */
   step6Heading: "What do you want to hear first thing?",
@@ -138,27 +109,11 @@ export const SETUP_COPY = {
   continuePassages: (n: number) =>
     n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "passage" : "passages"}`,
 
-  /* ------------------------------------------------------- screen 7 -- */
-  step7Heading: "What has to happen before you can start?",
-  step7Body: "Breakfast, coffee, the walk, the drive.",
-  /** The two parts (v1.2 §4.7). The starters themselves are `STARTER_LIBRARY.prep`. */
-  whatsIncluded: "What’s included",
-  howLongEachTakes: "How long each takes",
+  /* ------------------------ the step lists (`usePrepSteps`, the rows) -- */
   addSomethingElse: "Add something else",
-  makeOneOf: "Make it one of two",
-  justThisOne: "Just this one",
   remove: "Remove",
-  oneOf: "one of",
-  or: "or…",
   /** The stepper's accessible name — *Length, Breakfast*; nothing visible says it. */
   lengthOf: (title: string) => `Length, ${title}`,
-  /** "Adds up to 45 min · up at 7:00 · work by 9:00 · 72 min for the routine" */
-  prepFooter: (total: number, wake: string, work: string, left: number) =>
-    `Adds up to ${total} min · up at ${wake} · work by ${work} · ${left} min for the routine`,
-  prepFooterNoWork: (total: number) => `Adds up to ${total} min`,
-  /** [COPY] */
-  nothingYetPrep: "Nothing yet — tap what applies.",
-  continueSteps: (n: number) => (n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "step" : "steps"}`),
   /** [COPY] *Couldn't save Breakfast. Try again.* */
   stepSaveError: (title: string) => `Couldn’t save ${title}. Try again.`,
 
@@ -167,9 +122,7 @@ export const SETUP_COPY = {
   step8Body: "Everything. It doesn't have to fit.",
   /** The chooser's own words are `LANDSCAPE_COPY`; these are the screen's. */
   rangeLabel: (min: number, max: number) => `${min}–${max} min`,
-  searchHabits: "Search",
   continueHabits: (n: number) => (n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "habit" : "habits"}`),
-  alreadyInLibrary: "in your library",
 
   /* ------------------------------------------------------- screen 9 -- */
   step9Heading: "How much does each one matter, and how long does it take?",
@@ -198,8 +151,6 @@ export const SETUP_COPY = {
 
   /* ------------------------------------------------------ screen 10 -- */
   step10Heading: "Do you train?",
-  trainYes: "Yes",
-  trainNo: "Not right now",
   addAWorkout: "Add a workout",
   workoutName: "Workout",
   /** [COPY] The unnamed card's accessible name and the name field's placeholder. */
@@ -238,8 +189,6 @@ export const SETUP_COPY = {
       .filter((part): part is string => part !== null)
       .join(" · "),
   whereItFits: "Where it fits on the day is set when you build one.",
-  continueWorkouts: (n: number) =>
-    n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "workout" : "workouts"}`,
   add: "Add",
 
   /* ------------------------------------------------------ screen 11 -- */
@@ -247,8 +196,6 @@ export const SETUP_COPY = {
   step11Body: "The evening stacks back from lights out.",
   lightsOut: "Lights out",
   phoneAway: "Phone away",
-  /** One sentence, cites nothing (v1.1 §13 #13; v1.2 §4.11). */
-  phoneAwayLine: "An hour before lights out is a common choice.",
   /** [COPY — needs Vesper sign-off] v1.3 R64 (DAY-10): the times are each day plan's now. */
   timesAreEachDays: "Each day sets its own — change them under Your days.",
   fewLines: "A few lines at night",
@@ -267,7 +214,6 @@ export const SETUP_COPY = {
   reminderCaption: (clock: string) => `In your words: “A few lines · ${clock}”.`,
   /* The wind-down starters (§4.11, §7.1) — rows, nothing pre-selected. */
   windDownBand: "Wind-down",
-  inYourLibrary: "in your library",
 
   /* ------------------------------------------------------ screen 12 -- */
   step12Heading: "What is your work about?",
@@ -280,9 +226,6 @@ export const SETUP_COPY = {
   newFocus: "New focus",
   /** The collapsed card's caption under the name — "2 a week · flexible" (v1.3 R57). */
   focusCaption: (weekly: number, days: string) => `${weekly} a week · ${days}`,
-  cancel: "Cancel",
-  continueFocuses: (n: number) =>
-    n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "focus" : "focuses"}`,
 
   /* ------------------------------ screen 5 (v1.3 §4.5; was 14 — DAY-8) -- */
   /** v1.2 §4.14, verbatim. */

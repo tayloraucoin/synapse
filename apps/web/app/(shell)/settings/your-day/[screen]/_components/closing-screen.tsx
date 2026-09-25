@@ -7,17 +7,17 @@ import { DEVICES_OFF_OFFSET_MIN, PLACED_ROW_ICONS, STARTER_LIBRARY } from "@syn/
 import type { IconValue, JournalPrompt } from "@syn/types";
 import { clockFromMinutes, clockToMinutes, formatClockFromMinutes } from "@syn/utils";
 
+import { SETUP_COPY as COPY } from "@/app/(setup)/_components/copy";
+import { FactScreen } from "@/app/(setup)/_components/fact-screen";
 import { HabitSheet } from "@/components/habit-sheet";
+import { JournalSettings } from "@/components/journal-settings";
 import { useOnline } from "@/lib/hooks/use-online";
 import { trpc } from "@/lib/trpc/client";
 
-import { SETUP_COPY as COPY } from "./copy";
-import { FactScreen } from "./fact-screen";
-import { JournalSettings } from "./journal-settings";
-
 /**
- * Screen 11 — Closing the day (UX v1.2 §4.11, R38; RUN-11), on DYN-11/18 —
- * mounted by Settings → Your day → Closing the day until DAY-12 re-points it.
+ * Settings → Your day → *Closing the day* (UX v1.3 §4.6) — v1.2's screen 11
+ * (§4.11, R38; RUN-11, on DYN-11/18), moved here by DAY-13 when the step
+ * files were retired.
  *
  * UX v1.3 R64 (DAY-10): THE TIMES ARE EACH DAY PLAN'S. Lights out and phone
  * away are set per day in the builder (B2); here they read as the profile's
@@ -38,14 +38,13 @@ function minus(clock: string, offsetMin: number): string {
   return clockFromMinutes(clockToMinutes(clock) - offsetMin);
 }
 
-export function Step11Closing({
+export function ClosingScreen({
   initialLightsOut,
   initialDevicesOff,
   initialJournalEnabled,
   initialPrompts,
   initialReminderTime,
   initialReminderEnabled,
-  embedded = false,
   onSaved,
 }: {
   initialLightsOut: string | null;
@@ -56,7 +55,6 @@ export function Step11Closing({
   /** The stored value; null = following phone away. */
   initialReminderTime: string | null;
   initialReminderEnabled: boolean;
-  embedded?: boolean;
   onSaved?: () => void;
 }) {
   const online = useOnline();
@@ -115,7 +113,7 @@ export function Step11Closing({
       step={11}
       heading={COPY.step11Heading}
       body={COPY.step11Body}
-      embedded={embedded}
+      embedded
       onSaved={onSaved}
       save={null}
     >

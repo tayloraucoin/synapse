@@ -25,7 +25,6 @@ import {
   createTemplate,
   discardIfEmpty,
   duplicateTemplate,
-  ensureWorkTemplates,
   getTemplate,
   listTemplates,
   moveSlot,
@@ -101,14 +100,6 @@ export const templateRouter = router({
         throw error;
       }
     }),
-
-  /**
-   * The person's work templates, creating one from the profile when none
-   * exist (UX v1.2 §4.3, TD-14) — so a day plan always has a type to pick.
-   */
-  ensureWork: protectedProcedure.mutation(async ({ ctx }) =>
-    ensureWorkTemplates(ctx.rls, ctx.authContext.userId),
-  ),
 
   update: protectedProcedure
     .input(templatePatchSchema)

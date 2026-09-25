@@ -59,21 +59,17 @@ export type UserPreferencesRow = {
   workStartTime: string | null;
   workEndTime: string | null;
   anchorDirection: AnchorDirection | null;
-  earliestWakeTime: string | null;
   lightsOutTime: string | null;
   devicesOffTime: string | null;
   overflowMode: OverflowMode;
-  orientPassage: string | null;
-  orientShowLastNight: boolean;
   orientAskGratitude: boolean;
   journalEnabled: boolean;
   journalPrompts: JournalPrompt[];
   blockOrder: BlockKind[];
 
   /*
-   * ---- UX v1.2 §11.1 (RUN-3). The three v1.1 columns above that v1.2 stops
-   * writing (`earliestWakeTime`, `orientPassage`, `orientShowLastNight`) are
-   * still READ here until `0008` drops them; nothing writes them.
+   * ---- UX v1.2 §11.1 (RUN-3). The three v1.1 columns v1.2 stopped writing
+   * are dropped by `0010_retirements` (DAY-13) and no longer read.
    */
   morningMode: MorningMode;
   quotesOptIn: boolean;
@@ -118,12 +114,9 @@ const PREFERENCE_COLUMNS = {
   workStartTime: users.workStartTime,
   workEndTime: users.workEndTime,
   anchorDirection: users.anchorDirection,
-  earliestWakeTime: users.earliestWakeTime,
   lightsOutTime: users.lightsOutTime,
   devicesOffTime: users.devicesOffTime,
   overflowMode: users.overflowMode,
-  orientPassage: users.orientPassage,
-  orientShowLastNight: users.orientShowLastNight,
   orientAskGratitude: users.orientAskGratitude,
   journalEnabled: users.journalEnabled,
   journalPrompts: users.journalPrompts,
@@ -254,10 +247,6 @@ export async function updatePreferences(
     ...(input.anchorDirection !== undefined
       ? { anchorDirection: input.anchorDirection }
       : {}),
-    // `earliestWakeTime`, `orientPassage`, `orientShowLastNight` are NOT
-    // written since UX v1.2 (R39, R36, R41; RUN-3): the keys stay accepted
-    // and ignored until RUN-8/RUN-9 remove their senders, and `0008` drops
-    // the columns.
     ...(input.lightsOutTime !== undefined
       ? { lightsOutTime: input.lightsOutTime }
       : {}),

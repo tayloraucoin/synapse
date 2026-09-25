@@ -41,9 +41,9 @@ import { quoteSlotFor } from "./reading";
  * cycle index is arithmetic over the date (`cycleIndex`), not a cursor; which
  * passage was read is never recorded (§13 #21).
  *
- * `users.orient_show_last_night` IS NO LONGER READ (v1.2 R41): last night's
- * lines are always returned when they exist, and the frame keeps them one
- * tap away behind a collapsed row. The column is dropped in `0008`.
+ * THE LAST-NIGHT SWITCH IS GONE (v1.2 R41): last night's lines are always
+ * returned when they exist, and the frame keeps them one tap away behind a
+ * collapsed row. Its column is dropped by `0010_retirements` (DAY-13).
  */
 
 export type OrientView = {

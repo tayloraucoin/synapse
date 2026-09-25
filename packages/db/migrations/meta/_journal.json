@@ -71,6 +71,13 @@
       "when": 1790363591592,
       "tag": "0009_v1_3_additive",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790372580647,
+      "tag": "0010_retirements",
+      "breakpoints": true
     }
   ]
 }

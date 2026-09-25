@@ -204,16 +204,7 @@ export type YourDayScreen =
   | "closing-the-day"
   | "focuses"
   /** UX v1.3 §4.6 (DAY-12): the mode question, alone. */
-  | "each-morning"
-  /** RETIRED by v1.3 §4.6 — each redirects to `your-days`; DAY-13 removes the keys. */
-  | "work-start"
-  | "work-day-types"
-  | "wake"
-  /** Superseded by `first-thing` (DAY-12) — redirects there; DAY-13 removes the key. */
-  | "before-the-day";
-
-/** The three v1.3 §4.6 retired: a bookmark or a back-stack entry lands on *Your days*. */
-export const RETIRED_YOUR_DAY_SCREENS: readonly YourDayScreen[] = ["work-start", "work-day-types", "wake"];
+  | "each-morning";
 
 export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "shape",
@@ -228,8 +219,6 @@ export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "closing-the-day",
   "focuses",
   "each-morning",
-  ...RETIRED_YOUR_DAY_SCREENS,
-  "before-the-day",
 ];
 
 export function settingsYourDayRoute(): string {

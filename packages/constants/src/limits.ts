@@ -81,9 +81,6 @@ export const OTHER_REASON_MAX = 80;
 /** A gap before a slot, in minutes — `template_slots.gap_before_min`, 0–240 (§11.5). */
 export const GAP_MAX = 240;
 
-/** The passage read before the day — `users.orient_passage` (§11.2). */
-export const ORIENT_PASSAGE_MAX = 2000;
-
 /** *Today's intention* — `days.intention` (§11.7). */
 export const INTENTION_MAX = 140;
 

@@ -14,7 +14,7 @@
  * `task_appointment` the devices-off marker points at. One extra row the
  * library does not carry: *Orient*, the three-minute item the orient block
  * holds (§3.1 — "one item and it is the person's own words"; the words are
- * `users.orient_passage`, the minutes are this habit's).
+ * the person's passages, the minutes are this habit's).
  *
  * Idempotent by "already has habits → do nothing": the rows are a unit, and
  * `habits` has no natural key to conflict on (two habits may share a title).

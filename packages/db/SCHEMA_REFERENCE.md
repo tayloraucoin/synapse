@@ -525,20 +525,20 @@ export const scheduleShapeEnum = pgEnum(
  *
  * THE v1.1 PROFILE (UX v1.1 §11.2, migration 0005). The shape of the week
  * (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`,
- * `anchor_direction`), the wake range (`earliest_wake_time`), the evening
- * (`lights_out_time`, `devices_off_time`), the overflow mode, the orient
- * frame's three settings, the journal's switch and prompts, and the block
- * order. These are the anchors the materialiser lays every block out from;
+ * `anchor_direction`), the evening (`lights_out_time`, `devices_off_time`),
+ * the overflow mode, the orient frame's settings, the journal's switch and
+ * prompts, and the block order. These are the anchors the materialiser lays every block out from;
  * a template no longer carries its own (TD-1).
  *
  * THE v1.2 ADDITIONS (UX v1.2 §11.1, migration 0007). How mornings go
  * (`morning_mode`, R37), the quote opt-in (`quotes_opt_in`, R36), the two
  * further morning lines (`orient_ask_intention`, `orient_ask_visualisation`),
  * and the journal reminder (`journal_reminder_enabled`, `journal_reminder_time`,
- * R38). Three v1.1 columns stop being written under v1.2 — `earliest_wake_time`
- * (R39), `orient_passage` (copied into `passages` by 0007) and
- * `orient_show_last_night` (R41) — and are dropped in `0008`, never in the
- * migration that adds their replacements.
+ * R38). Three v1.1 columns stopped being written under v1.2 — the wake
+ * range's early end (R39), the one morning passage (copied into `passages`
+ * by 0007) and the last-night switch (R41) — and are dropped by
+ * `0010_retirements` (UX v1.3 TD-30; DAY-13), never in the migration that
+ * added their replacements.
  *
  * POLICIES. Select and update are the owner's alone. Insert and delete are
  * denied to the authenticated role outright: the trigger inserts, and deletion
@@ -645,8 +645,6 @@ export const users = pgTable(
     devicesOffTime: time("devices_off_time"),
     // What the app calls you. 1–40 (Epic 1 §9).
     displayName: text("display_name"),
-    // UX v1.1 §4.5 — the wake range's early end; informational in v1.1 (0005).
-    earliestWakeTime: time("earliest_wake_time"),
     // Mirrored from auth.users by handle_user_email_sync().
     email: text("email"),
     // Which first-run step to resume at; null once first run is done.
@@ -675,14 +673,6 @@ export const users = pgTable(
     // UX v1.2 §4.6, §5.2 — the second and third optional morning lines (0007).
     orientAskIntention: boolean("orient_ask_intention").notNull().default(true),
     orientAskVisualisation: boolean("orient_ask_visualisation").notNull().default(true),
-    // UX v1.1 §4.6 — the passage read every morning; ≤ 2000 (0005). UNWRITTEN
-    // since UX v1.2 (RUN-3): `0007` copied it into `passages`; dropped in `0008`.
-    orientPassage: text("orient_passage"),
-    // UX v1.1 §4.6 — show last night's journal lines on the orient frame (0005).
-    // UNWRITTEN since UX v1.2 R41 (the *Last night* row); dropped in `0008`.
-    orientShowLastNight: boolean("orient_show_last_night")
-      .notNull()
-      .default(true),
     // UX v1.1 §3.10 — how the days that do not fit are handled (0005). A
     // Settings preference since UX v1.2 §3.10; no longer asked at first run.
     overflowMode: overflowModeEnum("overflow_mode")
@@ -740,10 +730,6 @@ export const users = pgTable(
     check(
       "users_week_build_reminder_weekday_check",
       sql`${table.weekBuildReminderWeekday} BETWEEN 0 AND 6`,
-    ),
-    check(
-      "users_orient_passage_check",
-      sql`${table.orientPassage} IS NULL OR length(${table.orientPassage}) <= 2000`,
     ),
     pgPolicy("users_select", {
       for: "select",
@@ -853,7 +839,7 @@ export const userAvatarsRelations = relations(userAvatars, ({ one }) => ({
 
 #### `users`
 
-**PURPOSE.** users.ts — the shadow of `auth.users`. Supabase owns `auth.users`. This row is created by the `handle_new_user()` trigger, never by the app, and its primary key IS the foreign key to the auth row: one identity, two schemas, no drift. Deleting the auth user cascades this row away, which is how account deletion (Epic 1 ST-10a) removes everything a person has. WHAT IS NOT HERE. Official spec §3.1 also lists `notification_prefs` and `avatar`; both are satellite tables (`notification_prefs`, `user_avatars`), because both are lists rather than scalars. THERE IS NO WAKE ANCHOR (UX v1.1 R11). v1.0 kept `wake_anchor_habit_id` here (SET-1); the orient frame is the wake moment since DYN-13 and the column is gone since `0006` (DYN-21). `days.woke_at_source = anchor` stays on rows written under v1.0. THE PENDING PAIR (SET-1). A time-zone switch and a day-close change take effect FROM TOMORROW (cross-cutting §7.3, §7.5), so writing them straight to `timezone` / `day_close_time` would reclassify "now" the moment they were saved — change the close from 03:00 to 05:00 at 04:00 and today's date flips backwards. The four `pending_*` columns hold the new value and the date it starts; `services/user/preferences.ts` applies and clears the pair on read, and the scheduler's per-user pass does the same so the switch happens even if the app is never opened. THE v1.1 PROFILE (UX v1.1 §11.2, migration 0005). The shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range (`earliest_wake_time`), the evening (`lights_out_time`, `devices_off_time`), the overflow mode, the orient frame's three settings, the journal's switch and prompts, and the block order. These are the anchors the materialiser lays every block out from; a template no longer carries its own (TD-1). THE v1.2 ADDITIONS (UX v1.2 §11.1, migration 0007). How mornings go (`morning_mode`, R37), the quote opt-in (`quotes_opt_in`, R36), the two further morning lines (`orient_ask_intention`, `orient_ask_visualisation`), and the journal reminder (`journal_reminder_enabled`, `journal_reminder_time`, R38). Three v1.1 columns stop being written under v1.2 — `earliest_wake_time` (R39), `orient_passage` (copied into `passages` by 0007) and `orient_show_last_night` (R41) — and are dropped in `0008`, never in the migration that adds their replacements. POLICIES. Select and update are the owner's alone. Insert and delete are denied to the authenticated role outright: the trigger inserts, and deletion goes through `auth.admin.deleteUser` and cascades. There is no admin read.
+**PURPOSE.** users.ts — the shadow of `auth.users`. Supabase owns `auth.users`. This row is created by the `handle_new_user()` trigger, never by the app, and its primary key IS the foreign key to the auth row: one identity, two schemas, no drift. Deleting the auth user cascades this row away, which is how account deletion (Epic 1 ST-10a) removes everything a person has. WHAT IS NOT HERE. Official spec §3.1 also lists `notification_prefs` and `avatar`; both are satellite tables (`notification_prefs`, `user_avatars`), because both are lists rather than scalars. THERE IS NO WAKE ANCHOR (UX v1.1 R11). v1.0 kept `wake_anchor_habit_id` here (SET-1); the orient frame is the wake moment since DYN-13 and the column is gone since `0006` (DYN-21). `days.woke_at_source = anchor` stays on rows written under v1.0. THE PENDING PAIR (SET-1). A time-zone switch and a day-close change take effect FROM TOMORROW (cross-cutting §7.3, §7.5), so writing them straight to `timezone` / `day_close_time` would reclassify "now" the moment they were saved — change the close from 03:00 to 05:00 at 04:00 and today's date flips backwards. The four `pending_*` columns hold the new value and the date it starts; `services/user/preferences.ts` applies and clears the pair on read, and the scheduler's per-user pass does the same so the switch happens even if the app is never opened. THE v1.1 PROFILE (UX v1.1 §11.2, migration 0005). The shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the evening (`lights_out_time`, `devices_off_time`), the overflow mode, the orient frame's settings, the journal's switch and prompts, and the block order. These are the anchors the materialiser lays every block out from; a template no longer carries its own (TD-1). THE v1.2 ADDITIONS (UX v1.2 §11.1, migration 0007). How mornings go (`morning_mode`, R37), the quote opt-in (`quotes_opt_in`, R36), the two further morning lines (`orient_ask_intention`, `orient_ask_visualisation`), and the journal reminder (`journal_reminder_enabled`, `journal_reminder_time`, R38). Three v1.1 columns stopped being written under v1.2 — the wake range's early end (R39), the one morning passage (copied into `passages` by 0007) and the last-night switch (R41) — and are dropped by `0010_retirements` (UX v1.3 TD-30; DAY-13), never in the migration that added their replacements. POLICIES. Select and update are the owner's alone. Insert and delete are denied to the authenticated role outright: the trigger inserts, and deletion goes through `auth.admin.deleteUser` and cascades. There is no admin read.
 
 **INDEXES.**
 - `users_email_idx`
@@ -1232,12 +1218,12 @@ export const reasonsRelations = relations(reasons, ({ one }) => ({
  * passages — a saved piece of morning reading, the person's own or chosen
  * (UX v1.2 §3.12, §4.6, §11.4; R36, TD-15).
  *
- * A COLLECTION, NOT A COLUMN. v1.1 kept one passage on `users.orient_passage`;
+ * A COLLECTION, NOT A COLUMN. v1.1 kept one passage on a column of `users`;
  * v1.2 gives passages a title, a rich body, up to four images and tags, and
  * an order that IS the morning cycle (one per day, by `sort_order`, advancing
  * at day-open, wrapping — nothing about which one was read is recorded,
- * §13 #21). Migration 0007 copied every non-blank `orient_passage` into one
- * row here; the column is dropped in 0008.
+ * §13 #21). Migration 0007 copied every non-blank one into a row here; the
+ * old column is dropped by `0010_retirements` (DAY-13).
  *
  * THE BODY IS MARKDOWN (TD-15). Readable in an export, in a row, and by the
  * future Expo app without the editor; the five controls the editor allows
@@ -1460,7 +1446,7 @@ export const linksRelations = relations(links, ({ one }) => ({
 
 #### `passages`
 
-**PURPOSE.** passages — a saved piece of morning reading, the person's own or chosen (UX v1.2 §3.12, §4.6, §11.4; R36, TD-15). A COLLECTION, NOT A COLUMN. v1.1 kept one passage on `users.orient_passage`; v1.2 gives passages a title, a rich body, up to four images and tags, and an order that IS the morning cycle (one per day, by `sort_order`, advancing at day-open, wrapping — nothing about which one was read is recorded, §13 #21). Migration 0007 copied every non-blank `orient_passage` into one row here; the column is dropped in 0008. THE BODY IS MARKDOWN (TD-15). Readable in an export, in a row, and by the future Expo app without the editor; the five controls the editor allows round-trip losslessly. Never HTML, never the editor's JSON. `images` holds bucket-qualified paths (`passages/{user_id}/{file}`) in the `passages` bucket, with the icons' owner-segment policies; the read route serves them as it serves an icon — a foreign path is a 404, never a 403. TAGS ARE THE PERSON'S, FOR THE PERSON. v1.2 reads them for the list's filter and nothing else; "chosen against the day" (ledger §25) is phase 2 and this is its seam. ARCHIVE, NEVER DELETE. An archived passage's images stay in the bucket (the export may still reference them; orphan reaping is a later concern, as for icons). POLICIES: owner-private CRUD.
+**PURPOSE.** passages — a saved piece of morning reading, the person's own or chosen (UX v1.2 §3.12, §4.6, §11.4; R36, TD-15). A COLLECTION, NOT A COLUMN. v1.1 kept one passage on a column of `users`; v1.2 gives passages a title, a rich body, up to four images and tags, and an order that IS the morning cycle (one per day, by `sort_order`, advancing at day-open, wrapping — nothing about which one was read is recorded, §13 #21). Migration 0007 copied every non-blank one into a row here; the old column is dropped by `0010_retirements` (DAY-13). THE BODY IS MARKDOWN (TD-15). Readable in an export, in a row, and by the future Expo app without the editor; the five controls the editor allows round-trip losslessly. Never HTML, never the editor's JSON. `images` holds bucket-qualified paths (`passages/{user_id}/{file}`) in the `passages` bucket, with the icons' owner-segment policies; the read route serves them as it serves an icon — a foreign path is a 404, never a 403. TAGS ARE THE PERSON'S, FOR THE PERSON. v1.2 reads them for the list's filter and nothing else; "chosen against the day" (ledger §25) is phase 2 and this is its seam. ARCHIVE, NEVER DELETE. An archived passage's images stay in the bucket (the export may still reference them; orphan reaping is a later concern, as for icons). POLICIES: owner-private CRUD.
 
 **INDEXES.**
 - `passages_user_id_sort_order_idx`

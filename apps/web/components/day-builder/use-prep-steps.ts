@@ -8,7 +8,7 @@ import type { HabitSummaryView, IconValue, SlotView } from "@syn/types";
 import { midpointOf } from "@/components/landscape-chooser";
 import { trpc } from "@/lib/trpc/client";
 
-import { SETUP_COPY as COPY } from "./copy";
+import { SETUP_COPY as COPY } from "@/app/(setup)/_components/copy";
 
 /**
  * Screen 7's writes — UX v1.2 §4.7 (R30, S7.5, TD-18; RUN-10), on DYN-11.

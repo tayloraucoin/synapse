@@ -95,7 +95,7 @@ is a defect.**
 | `/settings/habits` | `settingsHabitsRoute()` | LB-01 |
 | `/settings/habits/{id}` | `settingsHabitRoute(id)` | LB-02 |
 | `/settings/your-day` | `settingsYourDayRoute()` | UX v1.3 §4.6 — the first run's screens and the builder's parts as a list, in the document's order (DYN-8; DAY-8) |
-| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one screen, embedded: `shape · work-days · your-days · first-thing` (B8: passages, links, the quote, the three lines) `· morning-habits · ranked · free-time` (B15a + B15b) `· training · commitments · closing-the-day` (the journal; the two times read-only) `· focuses · each-morning` (the mode question alone; *Save* writes `morning_mode`). Retired by v1.3 §4.6 — `work-start · work-day-types · wake` each **redirects to your-days until DAY-13**; `before-the-day` **redirects to first-thing until DAY-13** |
+| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one screen, embedded: `shape · work-days · your-days · first-thing` (B8: passages, links, the quote, the three lines) `· morning-habits · ranked · free-time` (B15a + B15b) `· training · commitments · closing-the-day` (the journal; the two times read-only) `· focuses · each-morning` (the mode question alone; *Save* writes `morning_mode`). Any other word is a 404 |
 | `/settings/your-day/block/{kind}` | `settingsYourDayBlockRoute(kind, templateId?)` | the block editor for a kind (§3.11); the template list above it when more than one |
 | `/settings/your-day/order` | `settingsYourDayOrderRoute()` | Block order (§4.14) |
 | `/settings/week` · `/settings/week/{week}` | `settingsWeekRoute(week?)` | WK-01 |

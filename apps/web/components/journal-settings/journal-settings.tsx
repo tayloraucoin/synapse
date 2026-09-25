@@ -25,7 +25,7 @@ import { clockFromMinutes, clockToMinutes, formatClockFromMinutes } from "@syn/u
 
 import { trpc } from "@/lib/trpc/client";
 
-import { SETUP_COPY as COPY } from "./copy";
+import { SETUP_COPY as COPY } from "@/app/(setup)/_components/copy";
 
 /**
  * The journal's settings — the switch, the prompts, the reminder (UX v1.2

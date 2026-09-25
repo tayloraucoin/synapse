@@ -27,20 +27,20 @@
  *
  * THE v1.1 PROFILE (UX v1.1 §11.2, migration 0005). The shape of the week
  * (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`,
- * `anchor_direction`), the wake range (`earliest_wake_time`), the evening
- * (`lights_out_time`, `devices_off_time`), the overflow mode, the orient
- * frame's three settings, the journal's switch and prompts, and the block
- * order. These are the anchors the materialiser lays every block out from;
+ * `anchor_direction`), the evening (`lights_out_time`, `devices_off_time`),
+ * the overflow mode, the orient frame's settings, the journal's switch and
+ * prompts, and the block order. These are the anchors the materialiser lays every block out from;
  * a template no longer carries its own (TD-1).
  *
  * THE v1.2 ADDITIONS (UX v1.2 §11.1, migration 0007). How mornings go
  * (`morning_mode`, R37), the quote opt-in (`quotes_opt_in`, R36), the two
  * further morning lines (`orient_ask_intention`, `orient_ask_visualisation`),
  * and the journal reminder (`journal_reminder_enabled`, `journal_reminder_time`,
- * R38). Three v1.1 columns stop being written under v1.2 — `earliest_wake_time`
- * (R39), `orient_passage` (copied into `passages` by 0007) and
- * `orient_show_last_night` (R41) — and are dropped in `0008`, never in the
- * migration that adds their replacements.
+ * R38). Three v1.1 columns stopped being written under v1.2 — the wake
+ * range's early end (R39), the one morning passage (copied into `passages`
+ * by 0007) and the last-night switch (R41) — and are dropped by
+ * `0010_retirements` (UX v1.3 TD-30; DAY-13), never in the migration that
+ * added their replacements.
  *
  * POLICIES. Select and update are the owner's alone. Insert and delete are
  * denied to the authenticated role outright: the trigger inserts, and deletion
@@ -147,8 +147,6 @@ export const users = pgTable(
     devicesOffTime: time("devices_off_time"),
     // What the app calls you. 1–40 (Epic 1 §9).
     displayName: text("display_name"),
-    // UX v1.1 §4.5 — the wake range's early end; informational in v1.1 (0005).
-    earliestWakeTime: time("earliest_wake_time"),
     // Mirrored from auth.users by handle_user_email_sync().
     email: text("email"),
     // Which first-run step to resume at; null once first run is done.
@@ -177,14 +175,6 @@ export const users = pgTable(
     // UX v1.2 §4.6, §5.2 — the second and third optional morning lines (0007).
     orientAskIntention: boolean("orient_ask_intention").notNull().default(true),
     orientAskVisualisation: boolean("orient_ask_visualisation").notNull().default(true),
-    // UX v1.1 §4.6 — the passage read every morning; ≤ 2000 (0005). UNWRITTEN
-    // since UX v1.2 (RUN-3): `0007` copied it into `passages`; dropped in `0008`.
-    orientPassage: text("orient_passage"),
-    // UX v1.1 §4.6 — show last night's journal lines on the orient frame (0005).
-    // UNWRITTEN since UX v1.2 R41 (the *Last night* row); dropped in `0008`.
-    orientShowLastNight: boolean("orient_show_last_night")
-      .notNull()
-      .default(true),
     // UX v1.1 §3.10 — how the days that do not fit are handled (0005). A
     // Settings preference since UX v1.2 §3.10; no longer asked at first run.
     overflowMode: overflowModeEnum("overflow_mode")
@@ -242,10 +232,6 @@ export const users = pgTable(
     check(
       "users_week_build_reminder_weekday_check",
       sql`${table.weekBuildReminderWeekday} BETWEEN 0 AND 6`,
-    ),
-    check(
-      "users_orient_passage_check",
-      sql`${table.orientPassage} IS NULL OR length(${table.orientPassage}) <= 2000`,
     ),
     pgPolicy("users_select", {
       for: "select",

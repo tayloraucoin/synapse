@@ -5,7 +5,7 @@ import * as React from "react";
 import type { AnchorDirection, WorkDayKind, WorkDays } from "@syn/types";
 import { LargeTargetRow, Text } from "@syn/ui";
 
-import { WorkFields } from "@/app/(setup)/_components/work-day-type-card";
+import { WorkFields } from "../work-fields";
 import { trpc } from "@/lib/trpc/client";
 
 import { spanLabel, toInputClock } from "../clock";

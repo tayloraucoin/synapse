@@ -509,54 +509,6 @@ export async function updateTemplate(
   });
 }
 
-/** The name the silently-created work template carries. [COPY — needs Vesper sign-off] */
-const DEFAULT_WORK_TEMPLATE_NAME = "Work";
-
-/**
- * The person's work templates, creating one from the profile when none exist
- * (UX v1.2 §4.3's *Yes* path, TD-14) so a day plan always has a type to pick.
- * Idempotent: a second call finds the first. Read-then-create inside one
- * transaction; a duplicate *Work* from a genuine race is harmless and
- * archivable, which is why no unique index guards it.
- */
-export async function ensureWorkTemplates(
-  rls: RlsClient,
-  userId: string,
-): Promise<TemplateSummaryView[]> {
-  const profile = await anchorProfileFor(rls, userId);
-  const prefs = await readPreferences(rls, userId);
-
-  await rls.execute(async (tx) => {
-    const [existing] = await tx
-      .select({ id: templates.id })
-      .from(templates)
-      .where(
-        and(
-          eq(templates.userId, userId),
-          eq(templates.kind, "work"),
-          isNull(templates.archivedAt),
-        ),
-      )
-      .limit(1);
-    if (existing) return;
-
-    await tx.insert(templates).values({
-      userId,
-      name: DEFAULT_WORK_TEMPLATE_NAME,
-      kind: "work",
-      flow: defaultFlowFor("work"),
-      structure: "stack",
-      anchorTime: profile.workStartTime,
-      workEndTime: profile.workEndTime,
-      anchorDirection: prefs?.anchorDirection ?? null,
-      locationKind: null,
-      icon: null,
-    });
-  });
-
-  return listTemplates(rls, userId, { includeArchived: false, kind: "work" });
-}
-
 /**
  * Delete a template nobody has put anything in.
  *

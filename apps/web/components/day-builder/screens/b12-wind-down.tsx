@@ -6,8 +6,8 @@ import { PLACED_ROW_ICONS, STARTER_LIBRARY } from "@syn/constants";
 import type { HabitSummaryView, SlotView } from "@syn/types";
 import { Button, GroupHeading, ListRow, SelectRow, SelectRowList, StatusLine, Text } from "@syn/ui";
 
-import { JournalSettings } from "@/app/(setup)/_components/journal-settings";
-import { usePrepSteps } from "@/app/(setup)/_components/use-prep-steps";
+import { JournalSettings } from "@/components/journal-settings";
+import { usePrepSteps } from "../use-prep-steps";
 import { QuickHabitSheet } from "@/components/habit-sheet";
 import { useOnline } from "@/lib/hooks/use-online";
 import { trpc } from "@/lib/trpc/client";

@@ -16,7 +16,7 @@ import {
   Text,
 } from "@syn/ui";
 
-import { SetupCards } from "@/app/(setup)/_components/step-10-training";
+import { SetupCards } from "@/app/(setup)/_components/setup-cards";
 import { WorkoutSetupCard } from "@/app/(setup)/_components/workout-setup-card";
 import { trpc } from "@/lib/trpc/client";
 

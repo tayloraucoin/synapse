@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { DISPLAY_NAME_MAX, ORIENT_PASSAGE_MAX } from "@syn/constants";
+import { DISPLAY_NAME_MAX } from "@syn/constants";
 
 import {
   anchorDirectionSchema,
@@ -94,21 +94,9 @@ export const updatePreferencesInput = z
     workStartTime: clockTimeSchema.nullable().optional(),
     workEndTime: clockTimeSchema.nullable().optional(),
     anchorDirection: anchorDirectionSchema.nullable().optional(),
-    /** @deprecated UX v1.2 R39 — accepted and IGNORED by the service; removed with its sender in RUN-8; dropped in `0008`. */
-    earliestWakeTime: clockTimeSchema.nullable().optional(),
     lightsOutTime: clockTimeSchema.nullable().optional(),
     devicesOffTime: clockTimeSchema.nullable().optional(),
     overflowMode: overflowModeSchema.optional(),
-    /** @deprecated UX v1.2 R36 — accepted and IGNORED; `passages` is the home (RUN-4); removed with its sender in RUN-9. */
-    orientPassage: z
-      .string()
-      .trim()
-      .max(ORIENT_PASSAGE_MAX)
-      .nullable()
-      .transform((value) => (value === "" ? null : value))
-      .optional(),
-    /** @deprecated UX v1.2 R41 — accepted and IGNORED; removed with its sender in RUN-9. */
-    orientShowLastNight: z.boolean().optional(),
     orientAskGratitude: z.boolean().optional(),
     journalEnabled: z.boolean().optional(),
     journalPrompts: journalPromptsSchema.optional(),
@@ -116,8 +104,8 @@ export const updatePreferencesInput = z
 
     /*
      * ---- UX v1.2 §11.1 (RUN-1). Written from RUN-3 onward; the columns arrive
-     * with `0007`. `earliestWakeTime`, `orientPassage` and `orientShowLastNight`
-     * above are removed from this input in RUN-3 and dropped in `0008`.
+     * with `0007`. The three v1.1 keys they replaced are gone from this input,
+     * and their columns dropped by `0010_retirements` (DAY-13).
      */
     /** R37, TD-17 — how mornings go. */
     morningMode: morningModeSchema.optional(),
@@ -153,17 +141,6 @@ export const updatePreferencesInput = z
       // [COPY — needs Vesper sign-off: v1.1 §4.10 names the rule, not a sentence.]
       message: "Phone away comes before lights out.",
       path: ["devicesOffTime"],
-    },
-  )
-  .refine(
-    (value) =>
-      !value.earliestWakeTime ||
-      !value.usualWakeTime ||
-      clockLte(value.earliestWakeTime, value.usualWakeTime),
-    {
-      // [COPY — needs Vesper sign-off: v1.1 §4.5 names the range, not a sentence.]
-      message: "Earliest comes before usual.",
-      path: ["earliestWakeTime"],
     },
   );
 

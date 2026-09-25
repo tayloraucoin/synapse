@@ -8,11 +8,13 @@ import type { FixtureView } from "@syn/types";
 import { FIXTURE_SHEET_COPY, FixtureSheet, fixtureDaysLabel } from "@/components/fixture-sheet";
 import { trpc } from "@/lib/trpc/client";
 
-import { SETUP_COPY as COPY } from "./copy";
-import { FactScreen } from "./fact-screen";
+import { SETUP_COPY as COPY } from "@/app/(setup)/_components/copy";
+import { FactScreen } from "@/app/(setup)/_components/fact-screen";
 
 /**
- * Screen 4 — standing commitments (UX v1.2 §4.4; v1.1 §4.4).
+ * Settings → Your day → *Standing commitments* (UX v1.3 §4.6) — v1.2's
+ * screen 4 (§4.4; v1.1 §4.4), moved here by DAY-13 when the first run's
+ * step files were retired; the builder meets fixtures per plan on B6.
  *
  * "Capture the fixtures so the week is honest before any routine is
  * designed." The empty state is one muted line in the flow, left-aligned —
@@ -25,13 +27,11 @@ import { FactScreen } from "./fact-screen";
  * IT SUGGESTS NOTHING. "This is a fact-capture screen; the app has no opinion
  * about what happens on Thursdays." The sheet's kinds are a vocabulary.
  */
-export function Step4Commitments({
+export function CommitmentsScreen({
   initialFixtures,
-  embedded = false,
   onSaved,
 }: {
   initialFixtures: FixtureView[];
-  embedded?: boolean;
   onSaved?: () => void;
 }) {
   const fixtures = trpc.fixture.list.useQuery(undefined, { initialData: initialFixtures });
@@ -52,7 +52,7 @@ export function Step4Commitments({
       step={4}
       heading={COPY.step4Heading}
       body={COPY.step4Body}
-      embedded={embedded}
+      embedded
       onSaved={onSaved}
       save={null}
     >

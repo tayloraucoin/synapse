@@ -2,12 +2,12 @@
  * passages — a saved piece of morning reading, the person's own or chosen
  * (UX v1.2 §3.12, §4.6, §11.4; R36, TD-15).
  *
- * A COLLECTION, NOT A COLUMN. v1.1 kept one passage on `users.orient_passage`;
+ * A COLLECTION, NOT A COLUMN. v1.1 kept one passage on a column of `users`;
  * v1.2 gives passages a title, a rich body, up to four images and tags, and
  * an order that IS the morning cycle (one per day, by `sort_order`, advancing
  * at day-open, wrapping — nothing about which one was read is recorded,
- * §13 #21). Migration 0007 copied every non-blank `orient_passage` into one
- * row here; the column is dropped in 0008.
+ * §13 #21). Migration 0007 copied every non-blank one into a row here; the
+ * old column is dropped by `0010_retirements` (DAY-13).
  *
  * THE BODY IS MARKDOWN (TD-15). Readable in an export, in a row, and by the
  * future Expo app without the editor; the five controls the editor allows

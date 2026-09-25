@@ -18,7 +18,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | RUN-12 | Screen 13 — the day builder | RUN-5, RUN-10, RUN-11 | Complete (batch 7; `components/day-builder/` — the nine screens under a second caption, the three lists created on arrival and reused by reference, the greedy fill to the room, `BudgetLine` with *for the routine* and *runs to*, the client preview through `stackBlock` at 96px/h, `DayPlanCard`, *Your days* in the sequence and under Settings, *used by* on the block editor's list; the four commands and the Storybook build pass; **the signed-in walk is unverified — Vesper pending** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-13 | Screen 14 and the morning modes | RUN-12, RUN-6, RUN-9 | Complete (batch 8; `step-14-week.tsx` owns completion with `morningMode`; the frame's primary sets the day with the *Sometimes* dialog and `todayAnchor` on `OrientView`; the list's *Last night* section; the pick expanded under *build* with version tabs; `week.applyPlan` and the day sheet's *Plan* row; *Working today* on a *Rarely* day; the travel band on the Schedule and the workout's ends deferring with it; the item sheet's version control; the four commands pass; **the Vigil paths and the walk are unverified** — see `DEVIATIONS.md`) | 2026-09-16 |
 | RUN-14 | The quotes admin surface `[PROVISIONAL — Taylor, D3]` | RUN-4 · D3 | Not started | — |
-| RUN-15 | Migration `0008` and the retirements | RUN-9, RUN-10, RUN-11, RUN-13 | Not started | — |
+| RUN-15 | Migration `0008` and the retirements | RUN-9, RUN-10, RUN-11, RUN-13 | Superseded by Epic 6's DAY-13 (TD-30; the three drops carried into `0010_retirements`) | 2026-09-25 |
 
 ## Checklist
 
@@ -36,4 +36,4 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] RUN-12
 - [x] RUN-13
 - [ ] RUN-14
-- [ ] RUN-15
+- [x] RUN-15 — superseded by DAY-13 (`../epic-6-day-first-first-run/PROGRESS.md`)

@@ -6,7 +6,7 @@ import { STARTER_LIBRARY } from "@syn/constants";
 import type { HabitSummaryView, SlotView } from "@syn/types";
 import { Button, GroupHeading, PickerList, SelectRow, SelectRowList, StatusLine, Text } from "@syn/ui";
 
-import { usePrepSteps } from "@/app/(setup)/_components/use-prep-steps";
+import { usePrepSteps } from "../use-prep-steps";
 import { QuickHabitSheet } from "@/components/habit-sheet";
 import { trpc } from "@/lib/trpc/client";
 
