@@ -9,21 +9,39 @@ import { Button, QuickChipRow, SelectRow, SelectRowList, Text, TimeField } from 
 import { QuickHabitSheet } from "@/components/habit-sheet";
 import { trpc } from "@/lib/trpc/client";
 
+import { BuilderSkeleton } from "../builder-skeleton";
 import { DAY_BUILDER_COPY as COPY } from "../copy";
-import type { DayBuilderApi } from "../use-day-builder";
+import { workOnly } from "../preview";
+import { PreviewStrip } from "../preview-strip";
+import type { BuilderScreen, DayBuilderApi } from "../use-day-builder";
+import { usePlanPreview } from "../use-plan-preview";
 
 /**
- * 13f — during the day (UX v1.2 §4.13f).
+ * B13 — during work (UX v1.3 §4.4 B13; v1.2 §4.13f, 13f renamed by DAY-11).
+ * A *No work* plan never shows it.
  *
- * THE STARTERS ARE ROWS; a tick makes the habit if the library does not
- * have it yet (`createFromStarterLibrary`, the break block's list) and
- * writes `breaks` with *midday*. *At a time* opens a clock and writes it.
+ * THE WORK BAND FIRST, so a break can be seen landing: `buildPreview` cut to
+ * the work block (`workOnly`), hued, with its fixtures pinned and any midday
+ * training inside `[DEFAULT — the same preview, one band]`. Then the break
+ * starters (DAY-3's eight) as rows; a tick makes the habit if the library
+ * does not have it yet (`createFromStarterLibrary`, the break block's list)
+ * and writes `breaks` with *midday*. *At a time* opens a clock and writes it.
  * *Skip for now* writes an empty list, so the plan says it was asked.
  */
-export function ScreenBreaks({ api, disabled }: { api: DayBuilderApi; disabled: boolean }) {
+export function ScreenBreaks({
+  api,
+  disabled,
+  onGo,
+}: {
+  api: DayBuilderApi;
+  disabled: boolean;
+  onGo: (screen: BuilderScreen) => void;
+}) {
   const utils = trpc.useUtils();
   const fromLibrary = trpc.habit.createFromStarterLibrary.useMutation();
   const plan = api.plan;
+  const { preview, loading } = usePlanPreview(api);
+  const band = preview === null ? null : workOnly(preview);
   const [adding, setAdding] = React.useState(false);
   const [sheetOpen, setSheetOpen] = React.useState(false);
   const [line, setLine] = React.useState<string | null>(null);
@@ -62,13 +80,15 @@ export function ScreenBreaks({ api, disabled }: { api: DayBuilderApi; disabled: 
 
   return (
     <div className="flex flex-col gap-(--space-5)">
+      {loading ? <BuilderSkeleton /> : band === null ? null : <PreviewStrip preview={band} hue disabled={disabled} onGo={onGo} />}
+
       {!showRows ? (
         <div className="flex flex-col gap-(--space-3)">
           <Text as="p" variant="secondary" tone="secondary">
-            {COPY.f.nothingYet}
+            {COPY.b13.nothingYet}
           </Text>
           <Button variant="secondary" disabled={disabled} onClick={() => setAdding(true)} className="w-full wide:w-auto wide:self-start">
-            {COPY.f.addABreak}
+            {COPY.b13.addABreak}
           </Button>
         </div>
       ) : (
@@ -99,7 +119,7 @@ export function ScreenBreaks({ api, disabled }: { api: DayBuilderApi; disabled: 
                 {entry === null ? null : (
                   <div className="flex flex-col gap-(--space-3) ps-(--space-4)">
                     <QuickChipRow
-                      label={COPY.f.when}
+                      label={COPY.b13.when}
                       selected={entry.at === "midday" ? "midday" : "at"}
                       disabled={disabled}
                       onSelect={(value) =>
@@ -112,13 +132,13 @@ export function ScreenBreaks({ api, disabled }: { api: DayBuilderApi; disabled: 
                         )
                       }
                       chips={[
-                        { label: COPY.f.midday, value: "midday" },
-                        { label: COPY.f.atATime, value: "at" },
+                        { label: COPY.b13.midday, value: "midday" },
+                        { label: COPY.b13.atATime, value: "at" },
                       ]}
                     />
                     {entry.at === "midday" ? null : (
                       <TimeField
-                        label={COPY.f.at}
+                        label={COPY.b13.at}
                         value={entry.at}
                         disclosed
                         doneLabel={COPY.done}
@@ -138,7 +158,7 @@ export function ScreenBreaks({ api, disabled }: { api: DayBuilderApi; disabled: 
 
       {showRows ? (
         <Button variant="ghost" disabled={disabled} onClick={() => setSheetOpen(true)} className="w-full wide:w-auto wide:self-start">
-          {COPY.f.somethingElse}
+          {COPY.b13.somethingElse}
         </Button>
       ) : null}
 

@@ -1,10 +1,9 @@
 import { EXAMPLE_DAY } from "@syn/constants";
-import { BlockBand, ScheduleAxis, Text } from "@syn/ui";
+import { BlockBand, ScheduleAxis, SleepBand, Text } from "@syn/ui";
 import { formatClockFromMinutes } from "@syn/utils";
 
 import { BlockLegend } from "./block-legend";
 import { BLOCKS_PRIMER_COPY as COPY } from "./copy";
-import { SleepBand } from "./sleep-band";
 
 /**
  * The blocks primer — UX v1.3 §4.2 (R47, G2; DAY-8): Taylor's example day
@@ -110,7 +109,7 @@ export function BlocksPrimer() {
               />
             ))}
           </ScheduleAxis>
-          <SleepBand heightPx={PX_PER_HOUR} />
+          <SleepBand label={COPY.sleep} heightPx={PX_PER_HOUR} />
 
           {/* The bands' labels are decoration to assistive tech; the day, read in order. */}
           <ol className="sr-only">

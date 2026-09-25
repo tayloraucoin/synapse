@@ -30,7 +30,25 @@ import { HABIT_SHEET_COPY as COPY } from "./copy";
  * THE RANGE NEVER CLAMPS anything (R21); it is the default the plan reads.
  */
 
-export type QuickHabitMode = "step" | "morning-habit" | "wind-down-habit" | "break";
+/** UX v1.3 (DAY-11): `activity` — *A free-time activity* (B15a); `after-work-step` — a step after work (B14). */
+export type QuickHabitMode = "step" | "morning-habit" | "wind-down-habit" | "break" | "activity" | "after-work-step";
+
+const BLOCK_OF: Record<Exclude<QuickHabitMode, "step">, "morning" | "wind_down" | "break" | "activity" | "transition"> = {
+  "morning-habit": "morning",
+  "wind-down-habit": "wind_down",
+  break: "break",
+  activity: "activity",
+  "after-work-step": "transition",
+};
+
+const TITLE_OF: Record<QuickHabitMode, string> = {
+  step: COPY.stepTitle,
+  "morning-habit": COPY.morningHabitTitle,
+  "wind-down-habit": COPY.windDownHabitTitle,
+  break: COPY.breakTitle,
+  activity: COPY.activityTitle,
+  "after-work-step": COPY.afterWorkStepTitle,
+};
 
 const STEP_DEFAULT_ICON: IconValue = { kind: "emoji", value: "📌" };
 const MORNING_DEFAULT_PRIORITY = 4;
@@ -88,7 +106,7 @@ export function QuickHabitSheet({
               title: name.trim(),
               icon: icon ?? STEP_DEFAULT_ICON,
               categoryId: null,
-              blockKind: mode === "wind-down-habit" ? "wind_down" : mode === "break" ? "break" : "morning",
+              blockKind: BLOCK_OF[mode],
               durationMinMin: from,
               durationMaxMin: to,
               lifePriority: MORNING_DEFAULT_PRIORITY,
@@ -115,7 +133,7 @@ export function QuickHabitSheet({
           }
           onOpenChange(next);
         }}
-        title={mode === "step" ? COPY.stepTitle : mode === "wind-down-habit" ? COPY.windDownHabitTitle : mode === "break" ? COPY.breakTitle : COPY.morningHabitTitle}
+        title={TITLE_OF[mode]}
         dirty={dirty}
         onDiscardRequest={() => setDiscardOpen(true)}
         initialFocus="first-field"

@@ -407,6 +407,10 @@
       "types": "./src/composed/display/week-hue-strip/index.ts",
       "default": "./src/composed/display/week-hue-strip/index.ts"
     },
+    "./sleep-band": {
+      "types": "./src/composed/display/sleep-band/index.ts",
+      "default": "./src/composed/display/sleep-band/index.ts"
+    },
     "./gap-band": {
       "types": "./src/composed/display/gap-band/index.ts",
       "default": "./src/composed/display/gap-band/index.ts"

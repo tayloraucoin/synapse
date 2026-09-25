@@ -24,7 +24,7 @@ import { DAY_BUILDER_COPY as COPY } from "./copy";
  * `DayPlanCard` — UX v1.2 §4.13, §10.2 (collapsed · expanded · draft ·
  * deleting). The one-line summary as §4.13 writes it: the type with its
  * glyph, *up 7:00*, *work 9:00–17:30*, each placed workout with its glyph
- * and placement, *lights out 22:45*. The chevron opens the three lists
+ * and placement, *lights out 22:45*. The chevron opens the five lists (v1.3; DAY-11 added after work and free time)
  * with their lengths and, where another plan references the same
  * template, *shared with Day B*.
  */
@@ -53,11 +53,19 @@ export function DayPlanCard({
   const draft = plan.state === "draft";
 
   const summary = summaryOf(plan);
-  const lists: Array<{ label: string; ref: DayPlanSummaryView["gettingReady"] }> = [
+  // The five lists (v1.3 §4.4 Your days; DAY-11) — after work and free time joined the three.
+  const lists: Array<{ label: string; ref: DayPlanSummaryView["gettingReady"]; pool?: boolean }> = [
     { label: COPY.gettingReady, ref: plan.gettingReady },
     { label: COPY.morningRoutine, ref: plan.morning },
+    { label: COPY.afterWork, ref: plan.afterWork },
+    { label: COPY.freeTime, ref: plan.evenings, pool: true },
     { label: COPY.windDown, ref: plan.windDown },
   ];
+  /** *Evenings A · 5 to choose from* — a pool offers, it takes no minutes. */
+  const detailOf = (ref: NonNullable<DayPlanSummaryView["gettingReady"]>, pool: boolean) =>
+    pool
+      ? `${ref.name} · ${COPY.b16.toChooseFrom(templates.find((template) => template.id === ref.templateId)?.itemCount ?? 0)}`
+      : `${ref.name} · ${ref.totalMin} min`;
   const sharedWith = (templateId: string) =>
     templates
       .find((template) => template.id === templateId)
@@ -125,7 +133,7 @@ export function DayPlanCard({
         </button>
         {open ? (
           <ul id={listsId} className="m-0 flex list-none flex-col gap-(--space-1) p-0">
-            {lists.map(({ label, ref }) => {
+            {lists.map(({ label, ref, pool }) => {
               const shared = ref === null ? [] : sharedWith(ref.templateId);
               return (
                 <li key={label} className="flex flex-wrap items-baseline gap-x-(--space-2)">
@@ -133,7 +141,7 @@ export function DayPlanCard({
                     {label}
                   </Text>
                   <Text as="span" variant="secondary" className="tabular-nums">
-                    {ref === null ? COPY.noList : `${ref.name} · ${ref.totalMin} min`}
+                    {ref === null ? COPY.noList : detailOf(ref, pool === true)}
                   </Text>
                   {shared.length === 0 ? null : (
                     <Text as="span" variant="caption" tone="secondary">

@@ -28,6 +28,11 @@ export const DAY_BUILDER_COPY = {
   gettingReady: "Getting ready",
   morningRoutine: "Morning routine",
   windDown: "Wind-down",
+  /** UX v1.3 §4.4 Your days (DAY-11): the two new lists in the disclosure. */
+  afterWork: "After work",
+  freeTime: "Free time",
+  /** [COPY] *Day B, from Day A* — the polite status when another day opens from the last. */
+  fromLast: (name: string, from: string) => `${name}, from ${from}`,
   /** [COPY] *shared with Day B* */
   sharedWith: (names: string) => `shared with ${names}`,
   noList: "none",
@@ -262,10 +267,10 @@ export const DAY_BUILDER_COPY = {
     sameQuestion: "Same routine every day?",
   },
 
-  /* ------------------------------------------------------------- 13f -- */
-  f: {
-    heading: "Anything during the day?",
-    body: "A break, a walk, ten minutes away from the desk.",
+  /* ------------------------------------- B13 — during work (v1.3 §4.4) -- */
+  b13: {
+    heading: "Anything during work?",
+    body: "A break, a meal, ten minutes away from the desk.",
     nothingYet: "Nothing yet.",
     addABreak: "Add a break",
     somethingElse: "Something else",
@@ -312,6 +317,79 @@ export const DAY_BUILDER_COPY = {
     nothingYet: "Nothing yet.",
   },
 
+  /* ---------------------------------------- B14 — after work (R48, TD-25) -- */
+  b14: {
+    heading: "After work.",
+    body: "The hand-off between work and the evening — the drive, the cooking, dinner.",
+    listName: "List name",
+    newList: "New list",
+    /** "After work A" — the letter from the plan's name. */
+    defaultName: (letter: string) => `After work ${letter}`,
+    inOrder: "In order",
+    range: (min: number, max: number) => `${min}–${max} min`,
+    somethingElse: "Something else",
+    leaveOut: "Leave out on this day",
+    notOnThisDay: "Not on this day",
+    include: "Include",
+    /** *After work A · 40 min · 17:30 to 18:10.* */
+    sticky: (name: string, minutes: number, from: string | null, to: string | null) =>
+      from === null || to === null ? `${name} · ${minutes} min` : `${name} · ${minutes} min · ${from} to ${to}.`,
+    nothingAfterWork: "Nothing after work",
+  },
+
+  /* ------------------------- B15a/b — free time (profile; R50, TD-26) -- */
+  b15a: {
+    heading: "What do you like to do with free time?",
+    body: "A menu for the evening, so the default isn't the default.",
+    /** *Next · 7 activities* */
+    next: (n: number) => (n === 0 ? "Next" : `Next · ${n} ${n === 1 ? "activity" : "activities"}`),
+    skip: "Skip for now",
+  },
+  b15b: {
+    heading: "How much does each one matter?",
+    body: "For the nights you have to choose.",
+    /** [COPY] Nothing was ticked on B15a. */
+    nothingToRank: "Nothing to rank yet.",
+  },
+
+  /* ----------------------------------- B16 — free time on this day (R50) -- */
+  b16: {
+    heading: "Free time on this day.",
+    /** *2 h 15 between after work and wind-down.* — the room, stated as room. */
+    roomAfterTransition: (span: string) => `${span} between after work and wind-down.`,
+    /** *The evening, after 17:30.* — no after-work list. */
+    roomAfterWork: (clock: string) => `The evening, after ${clock}.`,
+    /** *No work* (v1.3 §4.4 edge states). */
+    roomAfterRoutine: "The day, after the routine.",
+    poolName: "Pool name",
+    newPool: "New pool",
+    /** "Evenings A" */
+    defaultName: (letter: string) => `Evenings ${letter}`,
+    /** *usually 30* */
+    usually: (minutes: number) => `usually ${minutes}`,
+    /** The muted line under the list — verbatim (v1.3 §4.4 B16). */
+    foot: "The evening chooses from these. Nothing here is scheduled.",
+    /** *Next · 5 to choose from* */
+    next: (n: number) => (n === 0 ? "Next" : `Next · ${n} to choose from`),
+    /** [COPY] No ranked activities yet. */
+    nothingToChoose: "Nothing to choose from yet.",
+    /** [COPY] The way back to B15a on the first plan. */
+    backToFreeTime: "Add some free-time activities",
+    /** The picker's meta — *7 to choose from*. */
+    toChooseFrom: (n: number) => `${n} to choose from`,
+  },
+
+  /* ------------------------------------- B17 — as it stands (v1.3 §4.4) -- */
+  b17: {
+    /** The what-gives row (v1.3 §4.4 B17). */
+    whenMorningRunsLong: "When the morning runs long",
+    change: "Change",
+    /** Its accessible name — *When the morning runs long, Work waits, change*. */
+    whatGivesLabel: (value: string) => `When the morning runs long, ${value}, change`,
+    /** [COPY] The row before an answer. */
+    notChosen: "Not chosen",
+  },
+
   /* ------------------------------------------------------------- 13i -- */
   i: {
     heading: (name: string) => `${name}, as it stands.`,
@@ -321,6 +399,10 @@ export const DAY_BUILDER_COPY = {
     band: (name: string, span: string) => `${name}, ${span}, edit`,
     travelThere: "→",
     travelBack: "←",
+    /** *Free time · 5 to choose from* — the pool band's label (v1.3 §4.4 B17). */
+    pool: (n: number) => (n === 0 ? "Free time" : `Free time · ${n} to choose from`),
+    /** *Sleep · 22:45 to 7:00* */
+    sleep: (from: string, to: string) => `Sleep · ${from} to ${to}`,
   },
 
   /** The block words, for bands and captions — v1.3 §1, §3.1 (*After work*, *Free time*; DAY-3). */

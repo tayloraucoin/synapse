@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { MORNING_GROUPS, STARTER_LIBRARY, type MorningGroup, type StarterLibraryEntry } from "@syn/constants";
+import { ACTIVITY_GROUPS, MORNING_GROUPS, STARTER_LIBRARY, type ActivityGroup, type MorningGroup, type StarterLibraryEntry } from "@syn/constants";
 import type { HabitSummaryView, IconValue } from "@syn/types";
 
 import { trpc } from "@/lib/trpc/client";
@@ -46,7 +46,7 @@ export type LandscapeRow = {
    * UX v1.3 R66 (DAY-10): the *All* tab's group — the starter's `group`;
    * null for a habit the person added, listed under *Your own*.
    */
-  group: MorningGroup | null;
+  group: MorningGroup | ActivityGroup | null;
 };
 
 export function midpointOf(min: number | null, max: number | null): number {
@@ -54,14 +54,24 @@ export function midpointOf(min: number | null, max: number | null): number {
   return Math.round((min + max) / 2);
 }
 
-export function useLandscape(options: { withTemplate: boolean }) {
+/**
+ * The two landscapes (UX v1.3 R50, R66; DAY-11): the morning's (screen 8, B9)
+ * and free time's (B15a). Each ticks into its own kind's template, whose
+ * slots carry *usually* for the ranking screen after it.
+ */
+export type LandscapeKind = "morning" | "activity";
+
+export function useLandscape(options: { withTemplate: boolean; blockKind?: LandscapeKind }) {
+  const blockKind: LandscapeKind = options.blockKind ?? "morning";
+  const groups: readonly (MorningGroup | ActivityGroup)[] = blockKind === "activity" ? ACTIVITY_GROUPS : MORNING_GROUPS;
   const utils = trpc.useUtils();
-  const habits = trpc.habit.list.useQuery({ includeArchived: false, blockKind: "morning" });
+  const habits = trpc.habit.list.useQuery({ includeArchived: false, blockKind });
   const templates = trpc.template.list.useQuery(
-    { includeArchived: false, kind: "morning" },
+    { includeArchived: false, kind: blockKind },
     { enabled: options.withTemplate },
   );
-  const templateId = templates.data?.[0]?.id ?? null;
+  // Never a pool: free time's pools are `activity` templates too (TD-26), and the landscape is the library behind them.
+  const templateId = templates.data?.find((template) => template.structure !== "opener_pool_closer")?.id ?? null;
   const detail = trpc.template.get.useQuery(
     { id: templateId ?? "" },
     { enabled: options.withTemplate && templateId !== null },
@@ -92,7 +102,7 @@ export function useLandscape(options: { withTemplate: boolean }) {
   // The starters, then the person's own morning habits as entries of the same shape (v1.3 R66, *Your own*):
   // a tick on one finds the habit by title and adds or removes its slot, as a starter's does.
   const entries: ReadonlyArray<StarterLibraryEntry> = React.useMemo(() => {
-    const starterTitles = new Set(STARTER_LIBRARY.morning.map((entry) => entry.title.toLowerCase()));
+    const starterTitles = new Set(STARTER_LIBRARY[blockKind].map((entry) => entry.title.toLowerCase()));
     const own = existing
       .filter((habit) => !starterTitles.has(habit.title.toLowerCase()))
       .map((habit) => ({
@@ -103,8 +113,8 @@ export function useLandscape(options: { withTemplate: boolean }) {
         importance: habit.lifePriority,
         recommended: false,
       }));
-    return [...STARTER_LIBRARY.morning, ...own];
-  }, [existing]);
+    return [...STARTER_LIBRARY[blockKind], ...own];
+  }, [existing, blockKind]);
 
   const isSelected = React.useCallback(
     (title: string): boolean => {
@@ -128,10 +138,10 @@ export function useLandscape(options: { withTemplate: boolean }) {
 
   const ensureTemplate = React.useCallback(async (): Promise<string> => {
     if (templateId !== null) return templateId;
-    const created = await createTemplate.mutateAsync({ kind: "morning" });
+    const created = await createTemplate.mutateAsync({ kind: blockKind });
     await utils.template.list.invalidate();
     return created.id;
-  }, [templateId, createTemplate, utils]);
+  }, [templateId, createTemplate, utils, blockKind]);
 
   const setPendingFor = (title: string, value: boolean | null) =>
     setPending((current) => {
@@ -144,16 +154,16 @@ export function useLandscape(options: { withTemplate: boolean }) {
   const doTick = React.useCallback(
     async (entry: StarterLibraryEntry): Promise<void> => {
       // Read the record, not the render: a queued tick after an un-tick must see the archive.
-      const before = await utils.habit.list.fetch({ includeArchived: false, blockKind: "morning" });
+      const before = await utils.habit.list.fetch({ includeArchived: false, blockKind });
       let habit: HabitSummaryView | { id: string; title: string } | undefined = before.habits.find(
         (row) => row.title.toLowerCase() === entry.title.toLowerCase(),
       );
       if (!habit) {
-        const made = await fromLibrary.mutateAsync({ blockKind: "morning", titles: [entry.title] });
+        const made = await fromLibrary.mutateAsync({ blockKind, titles: [entry.title] });
         habit = made.rows[0];
         if (!habit) {
           // Already there under this title (a race with a refetch) — read it back.
-          const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind: "morning" });
+          const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind });
           habit = fresh.habits.find((row) => row.title.toLowerCase() === entry.title.toLowerCase());
         }
       }
@@ -175,12 +185,12 @@ export function useLandscape(options: { withTemplate: boolean }) {
         }
       }
     },
-    [fromLibrary, utils, options.withTemplate, ensureTemplate, saveSlot],
+    [fromLibrary, utils, options.withTemplate, ensureTemplate, saveSlot, blockKind],
   );
 
   const doUntick = React.useCallback(
     async (entry: StarterLibraryEntry): Promise<void> => {
-      const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind: "morning" });
+      const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind });
       const habit = fresh.habits.find((row) => row.title.toLowerCase() === entry.title.toLowerCase());
       if (!habit) return;
       if (options.withTemplate && templateId !== null) {
@@ -197,7 +207,7 @@ export function useLandscape(options: { withTemplate: boolean }) {
         setLocked((current) => new Set(current).add(entry.title));
       }
     },
-    [utils, options.withTemplate, templateId, removeSlot, archive],
+    [utils, options.withTemplate, templateId, removeSlot, archive, blockKind],
   );
 
   /** The tap. The tick moves at once; the write follows, one per row, in order. */
@@ -266,9 +276,9 @@ export function useLandscape(options: { withTemplate: boolean }) {
         selected: isSelected(entry.title),
         committing: pending.has(entry.title),
         locked: locked.has(entry.title),
-        group: MORNING_GROUPS.find((group) => group === entry.group) ?? null,
+        group: groups.find((group) => group === entry.group) ?? null,
       })),
-    [entries, isSelected, pending, locked],
+    [entries, isSelected, pending, locked, groups],
   );
 
   const count = options.withTemplate
@@ -277,6 +287,11 @@ export function useLandscape(options: { withTemplate: boolean }) {
 
   return {
     loading: habits.isLoading || (options.withTemplate && templates.isLoading),
+    blockKind,
+    /** The *All* tab's groups, in order. */
+    groups,
+    /** The kind's landscape template — B15b reads its slots for *usually*. */
+    templateId,
     entries,
     rows,
     count,

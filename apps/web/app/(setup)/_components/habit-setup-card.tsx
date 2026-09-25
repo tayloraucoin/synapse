@@ -67,6 +67,7 @@ export function HabitSetupCard({
   initiallyOpen,
   onCollapse,
   onExpand,
+  versions: showVersions = true,
 }: {
   habit: HabitSummaryView;
   slot: SlotView;
@@ -74,6 +75,11 @@ export function HabitSetupCard({
   initiallyOpen: boolean;
   onCollapse?: () => void;
   onExpand?: () => void;
+  /**
+   * UX v1.3 §4.4 B15b (DAY-11): a free-time activity is ranked without
+   * versions — the seven squares and *Usually takes* only. Nothing else changes.
+   */
+  versions?: boolean;
 }) {
   const online = useOnline();
   const utils = trpc.useUtils();
@@ -257,7 +263,7 @@ export function HabitSetupCard({
           max={DURATION_MAX}
         />
 
-        {others.length === 0 ? null : (
+        {!showVersions || others.length === 0 ? null : (
           <div className="flex flex-col gap-(--space-3)">
             {others.map((version) => (
               <div key={version.key} className="flex flex-wrap items-end gap-(--space-2)">
@@ -287,7 +293,7 @@ export function HabitSetupCard({
           </div>
         )}
 
-        {versions.length < HABIT_VERSIONS_MAX ? (
+        {showVersions && versions.length < HABIT_VERSIONS_MAX ? (
           <Button
             variant="ghost"
             className="self-start"

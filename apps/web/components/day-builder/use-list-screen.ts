@@ -31,6 +31,8 @@ export type SeedSlot = {
   scheduling?: "hard" | "soft";
   /** *One of two* — the slot this one alternates with (v1.1 §3.5). */
   alternatesWith?: string;
+  /** UX v1.3 TD-26 (DAY-11): a pool's members are `pool` slots — offered, never scheduled. */
+  role?: "stack" | "pool";
 };
 
 export function useListScreen({
@@ -39,6 +41,8 @@ export function useListScreen({
   fk,
   defaultName,
   seed,
+  structure,
+  metaOf,
 }: {
   api: DayBuilderApi;
   /** v1.3 (DAY-10): `transition` and `activity` for DAY-11's B14 and B16 — widened once, here. */
@@ -47,6 +51,10 @@ export function useListScreen({
   defaultName: (letter: string) => string;
   /** The slots a NEW list starts with; called once, after the template exists. */
   seed: () => Promise<SeedSlot[]> | SeedSlot[];
+  /** UX v1.3 TD-26 (DAY-11): B16's pool is created with structure `opener_pool_closer` (DAY-6's pool shape), and only pools are offered. */
+  structure?: "opener_pool_closer";
+  /** The picker's detail for a list — *Evenings A · 7 to choose from*; minutes and users by default. */
+  metaOf?: (template: TemplateSummaryView) => string;
 }) {
   const utils = trpc.useUtils();
   const create = trpc.template.create.useMutation();
@@ -58,7 +66,11 @@ export function useListScreen({
   const plan = api.plan;
   const templateId = plan === null ? null : (readFk(plan, fk) ?? null);
   const { slots, name, missing, refresh } = useTemplateSlots(templateId);
-  const others = React.useMemo(() => api.byKind(kind), [api, kind]);
+  // A pool screen offers pools only — free time's landscape template is an `activity` template too.
+  const others = React.useMemo(
+    () => api.byKind(kind).filter((template) => structure === undefined || template.structure === structure),
+    [api, kind, structure],
+  );
   const [busy, setBusy] = React.useState(false);
   const creating = React.useRef<string | null>(null);
 
@@ -72,7 +84,7 @@ export function useListScreen({
           durationMin: row.durationMin,
           gapBeforeMin: 0,
           pinnedClock: null,
-          role: "stack",
+          role: row.role ?? "stack",
           priorityOverride: row.priorityOverride ?? null,
           scheduling: row.scheduling ?? "soft",
         });
@@ -88,7 +100,7 @@ export function useListScreen({
     creating.current = key;
     setBusy(true);
     try {
-      const made = await create.mutateAsync({ kind, name: defaultName(letterOf(plan.name)) });
+      const made = await create.mutateAsync({ kind, name: defaultName(letterOf(plan.name)), ...(structure === undefined ? {} : { structure }) });
       await seedInto(made.id);
       await api.patch({ [fk]: made.id } as Record<typeof fk, string>);
       await api.refreshTemplates();
@@ -97,7 +109,7 @@ export function useListScreen({
       setBusy(false);
       creating.current = null;
     }
-  }, [plan, fk, create, kind, defaultName, seedInto, api, utils]);
+  }, [plan, fk, create, kind, defaultName, seedInto, api, utils, structure]);
 
   // Arrival with no list: make one, once per plan.
   React.useEffect(() => {
@@ -131,7 +143,7 @@ export function useListScreen({
         durationMin: row.durationMin,
         gapBeforeMin: 0,
         pinnedClock: null,
-        role: "stack",
+        role: row.role ?? "stack",
         priorityOverride: row.priorityOverride ?? null,
         scheduling: row.scheduling ?? "soft",
         ...(row.alternatesWith === undefined ? {} : { alternatesWith: row.alternatesWith, alternatesDefault: false }),
@@ -203,9 +215,11 @@ export function useListScreen({
       others.map((template: TemplateSummaryView) => ({
         id: template.id,
         title: template.name,
-        meta: `${template.totalMin} min${template.usedBy.length === 0 ? "" : ` · ${template.usedBy.map((plan) => plan.name).join(", ")}`}`,
+        meta:
+          metaOf?.(template) ??
+          `${template.totalMin} min${template.usedBy.length === 0 ? "" : ` · ${template.usedBy.map((plan) => plan.name).join(", ")}`}`,
       })),
-    [others],
+    [others, metaOf],
   );
 
   return {

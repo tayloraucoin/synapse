@@ -1,7 +1,7 @@
 "use client";
 
 import type { DayItemView } from "@syn/types";
-import { BlockBand, GapBand, SCHEDULE_GUTTER_PX, ScheduleAxis, ScheduleBlock, Text, cn } from "@syn/ui";
+import { BlockBand, GapBand, SCHEDULE_GUTTER_PX, ScheduleAxis, ScheduleBlock, SleepBand, Text, cn } from "@syn/ui";
 
 import { toItemView } from "@/components/block-editor";
 
@@ -31,6 +31,7 @@ const PX_PER_MIN = PX_PER_HOUR / 60;
 export function PreviewStrip({
   preview,
   hue = false,
+  sleep = false,
   openLabel,
   disabled,
   onGo,
@@ -39,6 +40,8 @@ export function PreviewStrip({
 }: {
   preview: DayPreview;
   hue?: boolean;
+  /** The review's night beneath the axis (B17). */
+  sleep?: boolean;
   /** The open band's label — *Morning routine · not built yet*. */
   openLabel?: string;
   disabled: boolean;
@@ -50,7 +53,13 @@ export function PreviewStrip({
   const topOf = (minutes: number) => (minutes - preview.startMin) * PX_PER_MIN;
   const spanOf = (block: PreviewBlock) => `${display(block.startMin % (24 * 60))}–${display(block.endMin % (24 * 60))}`;
   const nameOf = (block: PreviewBlock) =>
-    block.open === true && openLabel !== undefined ? openLabel : (block.name ?? COPY.blocks[block.kind] ?? block.kind);
+    block.pooled === true
+      ? COPY.i.pool(block.poolCount ?? 0)
+      : block.open === true && block.kind === "morning" && openLabel !== undefined
+        ? openLabel
+        : (block.name ?? COPY.blocks[block.kind] ?? block.kind);
+  // A pool or an open room carries no clock span in its label — nothing in it is scheduled.
+  const loose = (block: PreviewBlock) => block.open === true || block.pooled === true;
 
   const renderItem = (item: PreviewItem) => {
     if (item.travel !== undefined) {
@@ -117,12 +126,12 @@ export function PreviewStrip({
   };
 
   return (
+    <div className={cn("-mx-(--space-4) flex flex-col", className)}>
     <ScheduleAxis
       startMin={preview.startMin}
       endMin={preview.endMin}
       pxPerHour={PX_PER_HOUR}
       timeZone="UTC"
-      className={cn("-mx-(--space-4)", className)}
     >
       {preview.slack.map((gap) => (
         <GapBand
@@ -142,8 +151,8 @@ export function PreviewStrip({
           topPx={topOf(block.startMin)}
           heightPx={Math.max(24, (block.endMin - block.startMin) * PX_PER_MIN)}
           labelPlacement="inside"
-          span={block.open === true ? undefined : spanOf(block)}
-          pooled={block.open === true}
+          span={loose(block) ? undefined : spanOf(block)}
+          pooled={loose(block)}
           hue={hue}
           editLabel={COPY.i.band(nameOf(block), spanOf(block))}
           onEdit={disabled ? undefined : () => onGo(block.screen)}
@@ -155,5 +164,13 @@ export function PreviewStrip({
       {/* Items sit on the axis, not in the band, so their tops are the axis's (as the strip does). */}
       {preview.blocks.flatMap((block) => block.items.map(renderItem))}
     </ScheduleAxis>
+    {/* B17: the night after lights out, shortened beneath the axis — *Sleep · 22:45 to 7:00* (v1.3 §4.4 B17). */}
+    {sleep ? (
+      <SleepBand
+        label={COPY.i.sleep(display(preview.lightsOutMin % (24 * 60)), display(preview.wakeMin % (24 * 60)))}
+        heightPx={PX_PER_HOUR / 2}
+      />
+    ) : null}
+    </div>
   );
 }

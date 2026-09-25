@@ -29,8 +29,10 @@ import { input, minutesOf, toInputClock } from "./clock";
  */
 
 /**
- * The builder's order — UX v1.3 §4.4 (R45; DAY-9): seventeen screens in the
- * order a day happens. The one list; `visibleScreens` says which a plan shows.
+ * The builder's order — UX v1.3 §4.4 (R45; DAY-9): the screens in the order
+ * a day happens. The one list; `visibleScreens` says which a plan shows.
+ * B15 is two entries, `b15a` and `b15b` (DAY-11, the ticket's recommended
+ * call), so the caption counts both sub-screens: eighteen on a first plan.
  */
 export const BUILDER_SCREENS = [
   "b01",
@@ -47,14 +49,15 @@ export const BUILDER_SCREENS = [
   "b12",
   "b13",
   "b14",
-  "b15",
+  "b15a",
+  "b15b",
   "b16",
   "b17",
 ] as const;
 export type BuilderScreen = (typeof BUILDER_SCREENS)[number];
 
-/** B8 (first thing), B9–B10 (the landscape, ranked), B15 (free time): the first plan's only. */
-const PROFILE_SCREENS: ReadonlySet<BuilderScreen> = new Set(["b08", "b09", "b10", "b15"]);
+/** B8 (first thing), B9–B10 (the landscape, ranked), B15a–b (free time): the first plan's only. */
+const PROFILE_SCREENS: ReadonlySet<BuilderScreen> = new Set(["b08", "b09", "b10", "b15a", "b15b"]);
 
 /**
  * The screens this plan shows — v1.3 §4.4 "Which screens a later day shows".

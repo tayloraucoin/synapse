@@ -382,6 +382,7 @@ export {
   type WeekHueSegmentKind,
   type WeekHueStripProps,
 } from "./composed/display/week-hue-strip";
+export { SleepBand, type SleepBandProps } from "./composed/display/sleep-band";
 export { GapBand, type GapBandProps } from "./composed/display/gap-band";
 export {
   BUDGET_LINE_COPY,

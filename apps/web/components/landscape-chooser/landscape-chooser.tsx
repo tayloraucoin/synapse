@@ -17,8 +17,6 @@ import {
   Text,
 } from "@syn/ui";
 
-import { MORNING_GROUPS } from "@syn/constants";
-
 import { HabitSheet } from "@/components/habit-sheet";
 
 import { LANDSCAPE_COPY as COPY } from "./copy";
@@ -56,7 +54,10 @@ export function LandscapeChooser({ landscape, disabled = false }: LandscapeChoos
   const [query, setQuery] = React.useState("");
   const [habitSheetOpen, setHabitSheetOpen] = React.useState(false);
 
+  const activity = landscape.blockKind === "activity";
   const recommended = landscape.rows.filter((row) => landscape.entries.find((entry) => entry.title === row.title)?.recommended);
+  // *Recommended* in two groups: the morning's *Body · Mind* (v1.2), free time's *Move · Rest* (v1.3 B15a).
+  const firstGroup = (row: LandscapeRow) => (activity ? row.group === "move" : BODY.has(row.title));
   const trimmed = query.trim().toLowerCase();
   const all = landscape.rows.filter((row) => trimmed === "" || row.title.toLowerCase().includes(trimmed));
 
@@ -111,12 +112,12 @@ export function LandscapeChooser({ landscape, disabled = false }: LandscapeChoos
 
       <TabsContent value="recommended" className="flex flex-col gap-(--space-4)">
         <section className="flex flex-col gap-(--space-2)">
-          <GroupHeading>{COPY.groupBody}</GroupHeading>
-          <SelectRowList columns={2}>{recommended.filter((row) => BODY.has(row.title)).map(select)}</SelectRowList>
+          <GroupHeading>{activity ? COPY.groupMove : COPY.groupBody}</GroupHeading>
+          <SelectRowList columns={2}>{recommended.filter(firstGroup).map(select)}</SelectRowList>
         </section>
         <section className="flex flex-col gap-(--space-2)">
-          <GroupHeading>{COPY.groupMind}</GroupHeading>
-          <SelectRowList columns={2}>{recommended.filter((row) => !BODY.has(row.title)).map(select)}</SelectRowList>
+          <GroupHeading>{activity ? COPY.groupRest : COPY.groupMind}</GroupHeading>
+          <SelectRowList columns={2}>{recommended.filter((row) => !firstGroup(row)).map(select)}</SelectRowList>
         </section>
         {addYourOwn}
       </TabsContent>
@@ -132,17 +133,17 @@ export function LandscapeChooser({ landscape, disabled = false }: LandscapeChoos
         />
         {all.length === 0 ? (
           <Text as="p" tone="secondary" aria-live="polite">
-            {COPY.noMatches(query.trim())}
+            {activity ? COPY.noActivitiesMatch(query.trim()) : COPY.noMatches(query.trim())}
           </Text>
         ) : (
           <>
             {trimmed === "" ? null : (
               <Text as="p" className="sr-only" aria-live="polite">
-                {COPY.matches(all.length)}
+                {COPY.matches(all.length, activity)}
               </Text>
             )}
-            {/* UX v1.3 R66: the four groups in order, then *Your own*; a search keeps a heading only where a row remains. */}
-            {[...MORNING_GROUPS, null].map((group) => {
+            {/* UX v1.3 R66: the kind's groups in order, then *Your own*; a search keeps a heading only where a row remains. */}
+            {[...landscape.groups, null].map((group) => {
               const rows = all.filter((row) => row.group === group);
               if (rows.length === 0) return null;
               return (
@@ -159,7 +160,7 @@ export function LandscapeChooser({ landscape, disabled = false }: LandscapeChoos
 
       <HabitSheet
         open={habitSheetOpen}
-        mode="morning-habit"
+        mode={activity ? "activity" : "morning-habit"}
         onOpenChange={setHabitSheetOpen}
         onSaved={(habit) => void landscape.adopt(habit.id)}
       />

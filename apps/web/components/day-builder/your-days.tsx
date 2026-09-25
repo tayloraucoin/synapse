@@ -24,9 +24,10 @@ import type { BuilderScreen } from "./use-day-builder";
  * Under Settings the same list, embedded,
  * with no primary.
  *
- * FIRST ARRIVAL OPENS THE BUILDER: with no plans, one is created and 13a
+ * FIRST ARRIVAL OPENS THE BUILDER: with no plans, one is created and B1
  * shows at once — nobody sees an empty list they have to act on. A draft
- * card resumes at the first screen whose part is still missing.
+ * card resumes at the first screen whose part is still missing. *Build
+ * another day* starts from the last saved plan (v1.3 R68; DAY-11).
  */
 export function YourDays({
   embedded = false,
@@ -50,6 +51,8 @@ export function YourDays({
   );
   const [line, setLine] = React.useState<string | null>(null);
   const [finishing, setFinishing] = React.useState(false);
+  /** *Day B, from Day A* — read politely when another day opens from the last (DAY-11). */
+  const [announce, setAnnounce] = React.useState<string | null>(null);
   const creating = React.useRef(false);
 
   const refresh = React.useCallback(async () => {
@@ -71,6 +74,35 @@ export function YourDays({
     }
   }, [create, refresh]);
 
+  /**
+   * *Build another day* — v1.3 R68, §4.4 Your days (DAY-11): a duplicate of the
+   * LAST SAVED plan (the last complete one in sort order) — its lists
+   * referenced, never copied, its work its own, no weekdays — opened at B1,
+   * where the profile screens are already gone. With no saved plan, or if the
+   * duplicate is refused, an empty plan as before.
+   */
+  const anotherDay = React.useCallback(async () => {
+    const last = [...(plans.data ?? [])].reverse().find((plan) => plan.state === "complete") ?? null;
+    if (last === null) {
+      await startNew();
+      return;
+    }
+    if (creating.current) return;
+    creating.current = true;
+    setLine(null);
+    try {
+      const copy = await duplicate.mutateAsync({ id: last.id });
+      await refresh();
+      setAnnounce(COPY.fromLast(copy.name, last.name));
+      setBuilding({ planId: copy.id, screen: "b01" });
+    } catch {
+      creating.current = false;
+      await startNew();
+      return;
+    }
+    creating.current = false;
+  }, [plans.data, duplicate, refresh, startNew]);
+
   // First arrival: no plans → the builder, at once.
   React.useEffect(() => {
     if (!online || !plans.isSuccess || plans.data.length > 0 || building !== null || embedded) return;
@@ -79,15 +111,23 @@ export function YourDays({
 
   if (building !== null) {
     return (
-      <DayBuilder
-        planId={building.planId}
-        initialScreen={building.screen}
-        embedded={embedded}
-        onExit={() => {
-          void refresh();
-          setBuilding(null);
-        }}
-      />
+      <>
+        {announce === null ? null : (
+          <p role="status" className="sr-only">
+            {announce}
+          </p>
+        )}
+        <DayBuilder
+          planId={building.planId}
+          initialScreen={building.screen}
+          embedded={embedded}
+          onExit={() => {
+            void refresh();
+            setAnnounce(null);
+            setBuilding(null);
+          }}
+        />
+      </>
     );
   }
 
@@ -145,8 +185,8 @@ export function YourDays({
       <Button
         variant="secondary"
         disabled={!online}
-        busy={create.isPending}
-        onClick={() => void startNew()}
+        busy={create.isPending || duplicate.isPending}
+        onClick={() => void anotherDay()}
         className="w-full wide:w-auto wide:self-start"
       >
         {COPY.buildAnotherDay}

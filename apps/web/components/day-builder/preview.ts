@@ -57,6 +57,10 @@ export type PreviewBlock = {
   open?: boolean;
   /** A training band's placement — `after_work` is not *so far*. */
   placement?: string;
+  /** Free time held by a pool (TD-26): drawn dashed, labelled *Free time · 5 to choose from*. */
+  pooled?: boolean;
+  /** How many the pool offers. */
+  poolCount?: number;
 };
 
 export type PreviewSlack = { key: string; startMin: number; endMin: number; before: string; after: string };
@@ -66,6 +70,9 @@ export type DayPreview = {
   endMin: number;
   blocks: PreviewBlock[];
   slack: PreviewSlack[];
+  /** Up at and lights out, in the axis's minutes — the sleep band's words (B17). */
+  wakeMin: number;
+  lightsOutMin: number;
 };
 
 export type PreviewParts = {
@@ -81,6 +88,12 @@ export type PreviewParts = {
   journalMin: number;
   /** B7: with no routine yet, draw its room as an open band. */
   openMorning?: boolean;
+  /** UX v1.3 TD-25 (DAY-11): the after-work list, walked forward after work. */
+  afterWork?: { templateId: string; slots: readonly SlotView[] } | null;
+  /** UX v1.3 TD-26 (DAY-11): free time's pool — its `pool` slots are counted, never placed. */
+  pool?: { templateId: string; slots: readonly SlotView[] } | null;
+  /** B14: with no pool yet, draw the evening's room as an open band. */
+  openEvening?: boolean;
 };
 
 const NO_ICON: IconValue | null = null;
@@ -296,34 +309,72 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
     cursor = block.endMin;
   }
 
-  // The evening's fixtures, each at its clock.
+  // After work (TD-25; DAY-6): forward from the later of work's end and the after-work workouts' —
+  // the transition is ordered after them. A *No work* day has no hand-off.
+  const hasWork = workStart !== null && workEnd !== null && parts.plan.work !== null;
+  const transition = hasWork ? placeList(parts.afterWork ?? null, "forward", cursor, null) : null;
+  if (transition !== null) {
+    blocks.push({
+      key: "transition",
+      kind: "transition",
+      name: parts.plan.afterWork?.name ?? null,
+      screen: "b14",
+      startMin: transition.startMin,
+      endMin: transition.endMin,
+      items: transition.items,
+    });
+    cursor = transition.endMin;
+  }
+  const eveningStart = cursor;
+
+  // The evening's fixtures, each at its clock — pins, whether or not a pool holds the evening.
   const evening = parts.fixtures
     .filter((fixture) => fixture.blockKind !== "work")
     .map((fixture) => ({ fixture, at: minutesOf(fixture.atClock) }))
     .filter((entry): entry is { fixture: FixtureView; at: number } => entry.at !== null)
     .map((entry) => ({ fixture: entry.fixture, at: entry.at < wake ? entry.at + 24 * 60 : entry.at }))
     .sort((a, b) => a.at - b.at);
-  if (evening.length > 0) {
-    const first = evening[0];
-    const last = evening[evening.length - 1];
-    if (first !== undefined && last !== undefined) {
-      blocks.push({
-        key: "activity",
-        kind: "activity",
-        name: null,
-        screen: "b06",
-        startMin: first.at,
-        endMin: Math.max(...evening.map((entry) => entry.at + entry.fixture.durationMin)),
-        items: evening.flatMap(({ fixture, at }) => fixtureItems(fixture, at)),
-      });
-    }
-  }
+  const eveningItems = evening.flatMap(({ fixture, at }) => fixtureItems(fixture, at));
+  const eveningPinsEnd = evening.reduce((latest, entry) => Math.max(latest, entry.at + entry.fixture.durationMin), cursor);
+  const poolCount = parts.pool === undefined || parts.pool === null ? null : parts.pool.slots.filter((slot) => slot.role === "pool").length;
+  const pooledEvening = poolCount !== null || parts.openEvening === true;
+  // As the materialiser walks the pooled evening, its pins push the wind-down's bound.
+  if (pooledEvening) cursor = Math.max(cursor, eveningPinsEnd);
 
   // The wind-down — backward to phone away, then the journal, then lights out.
   const phoneAway = devicesOff ?? end;
   const journalEnd = phoneAway;
   const journalStart = journalEnd - parts.journalMin;
   const windDown = placeList(parts.windDown, "backward", journalStart, cursor);
+  const windDownStart = windDown?.startMin ?? journalStart;
+
+  if (pooledEvening) {
+    // TD-26 (DAY-6): free time is a pool — its span runs from here to the wind-down, nothing in it
+    // scheduled but the fixtures. With no pool yet (B14), the same room is drawn open.
+    blocks.push({
+      key: "activity",
+      kind: "activity",
+      name: parts.plan.evenings?.name ?? null,
+      screen: "b16",
+      startMin: eveningStart,
+      endMin: Math.max(eveningStart, eveningPinsEnd, windDownStart),
+      items: eveningItems,
+      ...(poolCount === null ? { open: true } : { pooled: true, poolCount }),
+    });
+  } else if (evening.length > 0) {
+    const first = evening[0];
+    if (first !== undefined) {
+      blocks.push({
+        key: "activity",
+        kind: "activity",
+        name: null,
+        screen: "b06",
+        startMin: first.at,
+        endMin: eveningPinsEnd,
+        items: eveningItems,
+      });
+    }
+  }
   const windItems: PreviewItem[] = windDown?.items ?? [];
   if (parts.journalMin > 0) {
     windItems.push({ id: "journal", title: COPY.b12.aFewLines, icon: NO_ICON, startMin: journalStart, endMin: journalEnd, pinned: true });
@@ -336,7 +387,7 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
     kind: "wind_down",
     name: parts.plan.windDown?.name ?? null,
     screen: "b12",
-    startMin: windDown?.startMin ?? journalStart,
+    startMin: windDownStart,
     endMin: end,
     items: windItems,
   });
@@ -360,7 +411,30 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
     endMin: Math.max(end, ...blocks.map((block) => block.endMin)),
     blocks,
     slack,
+    wakeMin: wake,
+    lightsOutMin: end,
   };
+}
+
+/**
+ * The evening's room — v1.3 §4.4 B16 (DAY-11): the minutes between the end of
+ * after work (or work, or the routine on a *No work* day) and the start of
+ * the wind-down, read from the preview so B16's line and B17's band are one
+ * number. `after` says what the evening follows, for the line's words.
+ */
+export function eveningRoom(preview: DayPreview): { minutes: number; fromMin: number; after: "transition" | "work" | "routine" } | null {
+  const windDown = preview.blocks.find((block) => block.kind === "wind_down");
+  if (windDown === undefined) return null;
+  const transition = preview.blocks.find((block) => block.kind === "transition");
+  const work = preview.blocks.find((block) => block.kind === "work");
+  const afterWorkTraining = preview.blocks.filter((block) => block.kind === "training" && block.placement === "after_work");
+  const morningSide = preview.blocks.filter((block) => block.kind !== "wind_down" && block.kind !== "activity" && block.startMin < windDown.startMin);
+  const fromMin =
+    transition?.endMin ??
+    (work === undefined ? null : Math.max(work.endMin, ...afterWorkTraining.map((block) => block.endMin))) ??
+    Math.max(preview.startMin, ...morningSide.map((block) => block.endMin));
+  const after = transition !== undefined ? "transition" : work !== undefined ? "work" : "routine";
+  return { minutes: Math.max(0, windDown.startMin - fromMin), fromMin, after };
 }
 
 /**
@@ -371,7 +445,10 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
  */
 export function cutAtWorkEnd(preview: DayPreview): DayPreview {
   const later = (block: PreviewBlock) =>
-    block.kind === "wind_down" || block.kind === "activity" || (block.kind === "training" && block.placement === "after_work");
+    block.kind === "wind_down" ||
+    block.kind === "activity" ||
+    block.kind === "transition" ||
+    (block.kind === "training" && block.placement === "after_work");
   const work = preview.blocks.find((block) => block.kind === "work");
   const early = preview.blocks.filter((block) => !later(block));
   const endMin = work?.endMin ?? Math.max(preview.startMin, ...early.map((block) => block.endMin));
@@ -381,5 +458,33 @@ export function cutAtWorkEnd(preview: DayPreview): DayPreview {
     endMin,
     blocks,
     slack: preview.slack.filter((gap) => gap.endMin <= endMin && blocks.some((block) => block.key === gap.after)),
+    wakeMin: preview.wakeMin,
+    lightsOutMin: preview.lightsOutMin,
   };
+}
+
+/**
+ * B14's strip — v1.3 §4.4 B14 (DAY-11): the preview cut FROM *until about* TO
+ * lights out — the after-work workouts, the transition, free time (open or
+ * pooled), the wind-down. B13's is the work band alone (`workOnly`).
+ */
+export function cutFromWorkEnd(preview: DayPreview): DayPreview {
+  const work = preview.blocks.find((block) => block.kind === "work");
+  const startMin = work?.endMin ?? preview.startMin;
+  const blocks = preview.blocks.filter((block) => block.startMin >= startMin && block.kind !== "work");
+  return {
+    ...preview,
+    startMin,
+    blocks,
+    slack: preview.slack.filter((gap) => gap.startMin >= startMin),
+  };
+}
+
+export function workOnly(preview: DayPreview): DayPreview | null {
+  const work = preview.blocks.find((block) => block.kind === "work");
+  if (work === undefined) return null;
+  const inside = preview.blocks.filter(
+    (block) => block.kind === "work" || (block.startMin >= work.startMin && block.endMin <= work.endMin && block.kind === "training"),
+  );
+  return { ...preview, startMin: work.startMin, endMin: work.endMin, blocks: inside, slack: [] };
 }

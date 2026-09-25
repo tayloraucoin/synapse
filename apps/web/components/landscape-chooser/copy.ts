@@ -11,11 +11,32 @@ export const LANDSCAPE_COPY = {
   tabAll: "All",
   groupBody: "Body",
   groupMind: "Mind",
-  /** The *All* tab's four groups (v1.3 R66, §4.4 B9) and the person's own — `[COPY]` for *Your own*. */
-  groups: { body: "Body", mind: "Mind", practice: "Practice", home: "Home" },
+  /**
+   * The *All* tab's groups — the morning's four (v1.3 R66, §4.4 B9) and free
+   * time's five (R50, B15a) — and the person's own, `[COPY]` for *Your own*.
+   */
+  groups: {
+    body: "Body",
+    mind: "Mind",
+    practice: "Practice",
+    home: "Home",
+    move: "Move",
+    make: "Make",
+    connect: "Connect",
+    rest: "Rest",
+    tend: "Tend",
+  },
   groupOwn: "Your own",
-  /** [COPY] The search's result, read politely — *4 habits match*. */
-  matches: (n: number) => `${n} ${n === 1 ? "habit matches" : "habits match"}`,
+  /** Free time's *Recommended* headings (v1.3 §4.4 B15a). */
+  groupMove: "Move",
+  groupRest: "Rest",
+  /** [COPY] The search's result, read politely — *4 habits match* / *4 activities match*. */
+  matches: (n: number, activity = false) =>
+    activity
+      ? `${n} ${n === 1 ? "activity matches" : "activities match"}`
+      : `${n} ${n === 1 ? "habit matches" : "habits match"}`,
+  /** [COPY] */
+  noActivitiesMatch: (query: string) => `No activities match "${query}"`,
   range: (min: number, max: number) => `${min}–${max} min`,
   addYourOwn: "Add your own",
   searchLabel: "Search",
