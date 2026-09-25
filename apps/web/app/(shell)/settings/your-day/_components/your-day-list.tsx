@@ -21,12 +21,13 @@ import { YOUR_DAY_COPY as COPY } from "./copy";
  * for that kind".
  *
  * V1.3'S ROWS, IN THE DOCUMENT'S ORDER. The fact screens and the builder's
- * lists open embedded; *First thing* opens v1.2's *Before the day* until
- * DAY-12 re-points it at its links-and-all screen; *Getting ready · Morning
+ * lists open embedded; *First thing* opens B8's screen, links and all
+ * (DAY-12); *Getting ready · Morning
  * routine · After work · Evenings · Wind-down* open the block editor for
  * prep, morning, transition, activity and wind-down; *Block order* is its own
- * list. *Free-time activities* and *Each morning* arrive with DAY-12; *Work
- * start*, *Work-day types* and *Wake* are retired and their routes redirect.
+ * list. *Free-time activities* and *Each morning* (DAY-12) complete v1.3's
+ * list; *Work start*, *Work-day types* and *Wake* are retired and their
+ * routes redirect, and *Before the day* redirects to *First thing*.
  *
  * A VALUE NEVER SPINS (cross-cutting G5): while the account loads each row
  * shows a `SkeletonBlock` where its value goes.
@@ -37,6 +38,7 @@ export function YourDayList() {
   const templates = trpc.template.list.useQuery({ includeArchived: false });
   const passages = trpc.passage.list.useQuery();
   const plans = trpc.dayPlan.list.useQuery(undefined);
+  const activities = trpc.habit.list.useQuery({ includeArchived: false, blockKind: "activity" });
 
   const value = (text: string | null | undefined): React.ReactNode =>
     text === undefined ? <SkeletonBlock heightPx={16} className="max-w-32" /> : (text ?? undefined);
@@ -71,7 +73,7 @@ export function YourDayList() {
         description={value(plans.data === undefined ? undefined : COPY.days(plans.data.length))}
         href={settingsYourDayScreenRoute("your-days")}
       />
-      {/* v1.2's *Before the day* screen until DAY-12's *First thing* (with links). */}
+      {/* v1.3 §4.6 (DAY-12): B8's screen — passages, links, the quote, the three lines. */}
       <SettingsRow
         title={COPY.rows.firstThing}
         description={value(
@@ -83,10 +85,15 @@ export function YourDayList() {
                 data.orientAskVisualisation,
               ]),
         )}
-        href={settingsYourDayScreenRoute("before-the-day")}
+        href={settingsYourDayScreenRoute("first-thing")}
       />
       <SettingsRow title={COPY.rows.morningHabits} href={settingsYourDayScreenRoute("morning-habits")} />
       <SettingsRow title={COPY.rows.ranked} href={settingsYourDayScreenRoute("ranked")} />
+      <SettingsRow
+        title={COPY.rows.freeTime}
+        description={value(activities.data === undefined ? undefined : COPY.activities(activities.data.habits.filter((habit) => habit.type === "habit").length))}
+        href={settingsYourDayScreenRoute("free-time")}
+      />
       <SettingsRow
         title={COPY.rows.training}
         description={value(countOf("training"))}
@@ -119,6 +126,11 @@ export function YourDayList() {
       {blockRow(COPY.rows.afterWork, "transition")}
       {blockRow(COPY.rows.evenings, "activity")}
       {blockRow(COPY.rows.windDown, "wind_down")}
+      <SettingsRow
+        title={COPY.rows.eachMorning}
+        description={value(data === undefined ? undefined : COPY.modes[data.morningMode])}
+        href={settingsYourDayScreenRoute("each-morning")}
+      />
       <SettingsRow title={COPY.rows.blockOrder} href={settingsYourDayOrderRoute()} />
     </ul>
   );

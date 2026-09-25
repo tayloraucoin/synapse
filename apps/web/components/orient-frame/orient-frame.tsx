@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { Button, DialogPanel, HelperText, PassageCarousel, Text, TextDisclosureButton, Textarea, type PassageSlide } from "@syn/ui";
+import { Button, DialogPanel, HelperText, LinkCallout, PassageCarousel, Text, TextDisclosureButton, Textarea, type PassageSlide } from "@syn/ui";
 import { DEFAULT_JOURNAL_PROMPTS, INTENTION_MAX, MORNING_GRATITUDE_MAX, VISUALISATION_MAX } from "@syn/constants";
 import { formatCalendarDay } from "@syn/utils";
 
@@ -35,9 +35,23 @@ import { useOrientFrame, type OrientView } from "./use-orient-frame";
  * THE QUOTE IS ATTRIBUTED, in quotation marks, under the neutral caption
  * *A quote*; the app never speaks it. Markdown renders through the editor's
  * read-only mode inside the carousel (TD-15).
+ *
+ * UX v1.3 R53, §5.2 (1b; DAY-12): the person's LINKS, when there are any,
+ * as `LinkCallout`s beneath the reading, 8px apart — things to open, not
+ * content; a tap opens a new tab and writes nothing. With none, nothing is
+ * drawn and no gap is left. The frame gains these and nothing else.
  */
 
 const PROMPT_BY_KEY = new Map(DEFAULT_JOURNAL_PROMPTS.map((prompt) => [prompt.key, prompt.label]));
+
+/** *open.spotify.com* — the callout's detail; the URL itself is never shown. */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return "";
+  }
+}
 
 export function OrientFrame({ initial }: { initial: OrientView }) {
   const frame = useOrientFrame(initial);
@@ -109,6 +123,15 @@ export function OrientFrame({ initial }: { initial: OrientView }) {
           <p className="tabular-off font-serif text-(length:--fs-body) leading-relaxed text-text-secondary">
             {COPY.nothingYet}
           </p>
+        )}
+
+        {/* v1.3 R53, §5.2 (1b; DAY-12): the person's links beneath the reading — opened in a new tab, nothing written. */}
+        {initial.links.length === 0 ? null : (
+          <div className="flex flex-col gap-(--space-2)">
+            {initial.links.map((link) => (
+              <LinkCallout key={link.id} title={link.title} url={link.url} host={hostOf(link.url)} kind={link.kind === "spotify" ? "spotify" : "other"} />
+            ))}
+          </div>
         )}
 
         {hasJournal ? (

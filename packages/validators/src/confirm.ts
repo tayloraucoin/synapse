@@ -63,6 +63,14 @@ export const confirmDayInput = z.object({
   lastNight: z
     .object({ doneItemIds: z.array(z.string().uuid()).max(100) })
     .optional(),
+  /**
+   * UX v1.3 §5.3, TD-26 (DAY-12): the pick's *Free time* under *Build each
+   * morning* — the pool members the person tapped, or *Decide later*
+   * (the default), which leaves the evening pooled. Never inferred.
+   */
+  freeTime: z
+    .union([z.literal("later"), z.object({ habitIds: z.array(z.string().uuid()).max(50) })])
+    .optional(),
 });
 
 export type ConfirmDayInput = z.infer<typeof confirmDayInput>;

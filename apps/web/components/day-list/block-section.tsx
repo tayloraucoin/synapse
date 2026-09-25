@@ -2,10 +2,11 @@
 
 import * as React from "react";
 
-import { BlockHeader, ItemRow, MultitaskGroup, Text } from "@syn/ui";
+import { BlockHeader, Button, ItemRow, MultitaskGroup, Text } from "@syn/ui";
 import type { DayBlockView, DayItemView, DayMode } from "@syn/types";
 
 import { DAY_LIST_COPY as COPY } from "./copy";
+import { PoolSheet } from "./pool-sheet";
 
 /**
  * One block and its rows — UX v1.1 §6.1 (DYN-15), replacing the day part.
@@ -35,7 +36,12 @@ export function BlockSection({
   onUndo,
   onOpen,
   onOpenJournal,
+  dateKey,
+  onPoolChanged,
 }: {
+  /** The day — the pooled evening's sheet chooses into it (DAY-12). */
+  dateKey?: string;
+  onPoolChanged?: () => void;
   block: DayBlockView;
   focusLabel: string | null;
   devicesOffAt: Date | null;
@@ -50,6 +56,7 @@ export function BlockSection({
 }) {
   const ordered = React.useMemo(() => sortForDisplay(block.items), [block.items]);
   const planMode = mode === "plan";
+  const [poolOpen, setPoolOpen] = React.useState(false);
   const span =
     block.startLabel === null || block.endLabel === null
       ? null
@@ -99,10 +106,13 @@ export function BlockSection({
       : onOpen;
   const windDownRowProps = { ...rowProps, onOpen: openRow };
 
+  // UX v1.3 §5.3, §6, TD-26 (DAY-12): free time waiting on its pool — chosen, never inferred.
+  const pooledEvening = block.kind === "activity" && block.state === "pooled" && block.templateId !== null;
+
   return (
     <section>
       <BlockHeader kind={block.kind} name={block.name} span={span} />
-      {block.state === "pooled" && ordered.length === 0 ? (
+      {block.state === "pooled" && ordered.length === 0 && !pooledEvening ? (
         <Text as="p" variant="caption" tone="secondary" className="px-(--space-4) py-(--space-2)">
           {COPY.setInTheMorning}
         </Text>
@@ -122,6 +132,23 @@ export function BlockSection({
           ),
         )}
       </ul>
+      {/* Under the block's pinned fixtures: one row, one tap to one list (v1.3 §6). */}
+      {pooledEvening && !planMode && dateKey !== undefined && block.templateId !== null ? (
+        <>
+          <div className="px-(--space-4) py-(--space-2)">
+            <Button variant="ghost" className="w-full" onClick={() => setPoolOpen(true)}>
+              {COPY.chooseWhenThere}
+            </Button>
+          </div>
+          <PoolSheet
+            open={poolOpen}
+            onOpenChange={setPoolOpen}
+            date={dateKey}
+            templateId={block.templateId}
+            onAdded={() => onPoolChanged?.()}
+          />
+        </>
+      ) : null}
     </section>
   );
 }

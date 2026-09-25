@@ -2,7 +2,7 @@ import { and, eq, gte, lte } from "drizzle-orm";
 
 import { days, users, type RlsClient } from "@syn/db";
 import { ORIENT_READBACK_KEYS } from "@syn/constants";
-import type { MorningMode, PassageView, QuoteView } from "@syn/types";
+import type { LinkView, MorningMode, PassageView, QuoteView } from "@syn/types";
 import {
   SKIP_LINE_WINDOW_DAYS,
   addDays,
@@ -10,6 +10,7 @@ import {
   weekdayIndex,
 } from "@syn/utils";
 
+import { readActiveLinks } from "../library/links";
 import { plannedDayFor } from "../plan/day-plans";
 import { readPreferencesInTx } from "../user/preferences";
 import { confirmDay } from "./confirm-day";
@@ -63,6 +64,12 @@ export type OrientView = {
   todayIndex: number | null;
   /** Today's quote, only when opted in and the bank has one. */
   quote: QuoteView | null;
+  /**
+   * UX v1.3 R53, §5.2 (1b; DAY-12): the person's links, in their order —
+   * callouts beneath the dots, opened in a new tab. Read, never written:
+   * nothing records that one was opened.
+   */
+  links: LinkView[];
   askGratitude: boolean;
   askIntention: boolean;
   askVisualisation: boolean;
@@ -143,6 +150,7 @@ export async function readOrient(
 
     // The reading: the passages in cycle order, and the quote when opted in.
     const { passages: passageRows, quote, todayIndex } = await quoteSlotFor(tx, userId, date);
+    const linkRows = await readActiveLinks(tx, userId);
 
     // The last eight mornings, yesterday first: the seven-day window plus the
     // day before it, which "second consecutive" needs.
@@ -182,6 +190,7 @@ export async function readOrient(
       passages: passageRows,
       todayIndex,
       quote,
+      links: linkRows,
       askGratitude: account?.askGratitude ?? true,
       askIntention: account?.askIntention ?? true,
       askVisualisation: account?.askVisualisation ?? true,
@@ -212,6 +221,7 @@ export async function readOrient(
     passages: row.passages,
     todayIndex: row.todayIndex,
     quote: row.quote,
+    links: row.links,
     askGratitude: row.askGratitude,
     askIntention: row.askIntention,
     askVisualisation: row.askVisualisation,

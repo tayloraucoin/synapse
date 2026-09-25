@@ -12,6 +12,8 @@ import {
   PickerList,
   QuickChipRow,
   SegmentedControl,
+  SelectRow,
+  SelectRowList,
   Text,
   cn,
 } from "@syn/ui";
@@ -366,6 +368,62 @@ export function WorkSection({ pick, disabled }: { pick: QuickPickApi; disabled: 
           disabled={disabled}
         />
       ) : null}
+    </SummaryRow>
+  );
+}
+
+/**
+ * *Free time* — UX v1.3 §5.3, TD-26 (DAY-12). Under *Build each morning*,
+ * when the day's evening waits on a pool: its members as `SelectRow`s,
+ * nothing preselected, and *Decide later* as a ghost row PRESSED BY DEFAULT.
+ * Choosing any un-presses it; pressing it clears them. *Set the day* sends
+ * the choice with the confirm; *Decide later* leaves the block pooled for the
+ * Today row. The evening is chosen, never inferred.
+ */
+export function FreeTimeSection({ pick, disabled }: { pick: QuickPickApi; disabled: boolean }) {
+  const section = pick.view.freeTime;
+  if (section === null) return null;
+  const chosen = section.members.filter((member) => pick.freeTime.has(member.habitId));
+  const later = chosen.length === 0;
+  return (
+    <SummaryRow
+      id="qp-free-time"
+      title={COPY.freeTime}
+      summary={later ? COPY.decideLater : COPY.freeTimeSummary(chosen.map((member) => member.title))}
+      open={pick.open.has("freeTime")}
+      onToggle={() => pick.toggleOpen("freeTime")}
+    >
+      <div className="flex flex-col gap-(--space-2)">
+        <SelectRowList>
+          {section.members.map((member) => (
+            <SelectRow
+              key={member.habitId}
+              icon={member.icon}
+              title={member.title}
+              detail={COPY.usually(member.durationMin)}
+              selected={pick.freeTime.has(member.habitId)}
+              disabled={disabled}
+              onToggle={(selected) =>
+                pick.setFreeTime((current) => {
+                  const next = new Set(current);
+                  if (selected) next.add(member.habitId);
+                  else next.delete(member.habitId);
+                  return next;
+                })
+              }
+            />
+          ))}
+        </SelectRowList>
+        <Button
+          variant="ghost"
+          aria-pressed={later}
+          disabled={disabled}
+          onClick={() => pick.setFreeTime(new Set())}
+          className={cn("w-full justify-start", later && "font-medium")}
+        >
+          {COPY.decideLater}
+        </Button>
+      </div>
     </SummaryRow>
   );
 }

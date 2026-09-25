@@ -1,4 +1,4 @@
-import type { BlockKind, DayPlanView, FixtureView, HabitSummaryView, IconValue, SlotView } from "@syn/types";
+import type { BlockKind, DayPlanSummaryView, DayPlanView, FixtureView, HabitSummaryView, IconValue, SlotView } from "@syn/types";
 import { stackBlock } from "@syn/utils";
 
 import { toStackItems } from "@/components/block-editor";
@@ -461,6 +461,54 @@ export function cutAtWorkEnd(preview: DayPreview): DayPreview {
     wakeMin: preview.wakeMin,
     lightsOutMin: preview.lightsOutMin,
   };
+}
+
+/**
+ * Screen 5's strip — v1.3 §4.5, §13 #36 (DAY-12): a plan's day as `{ kind,
+ * minutes }` in the order the walk lays it, ending in sleep, for
+ * `WeekHueStrip`. Read from the plan's SUMMARY — each list's total, the
+ * clocks, the workouts' lengths — not its slots, so seven rows need no new
+ * procedure. It is the walk's order and the walk's lengths; the evening pool
+ * takes the room between after work and the wind-down, and slack is not
+ * drawn (a picture of the blocks, not a clock).
+ */
+export function segmentsOf(
+  plan: DayPlanSummaryView,
+  parts: { orientMin: number; workoutMin: (habitId: string) => number },
+): Array<{ kind: BlockKind | "sleep"; minutes: number }> {
+  const wake = minutesOf(plan.wakeClock);
+  const lightsOutRaw = minutesOf(plan.lightsOutClock);
+  if (wake === null || lightsOutRaw === null) return [];
+  const lightsOut = lightsOutRaw <= wake ? lightsOutRaw + 24 * 60 : lightsOutRaw;
+  const segments: Array<{ kind: BlockKind | "sleep"; minutes: number }> = [];
+  const push = (kind: BlockKind | "sleep", minutes: number) => {
+    if (minutes > 0) segments.push({ kind, minutes });
+  };
+  const trainingAt = (placement: string) =>
+    plan.training.filter((entry) => entry.placement === placement).forEach((entry) => push("training", parts.workoutMin(entry.habitId)));
+
+  push("orient", parts.orientMin);
+  trainingAt("before_morning");
+  push("morning", plan.morning?.totalMin ?? 0);
+  trainingAt("after_morning");
+  push("prep", plan.gettingReady?.totalMin ?? 0);
+
+  const start = minutesOf(plan.workStartClock);
+  const end = minutesOf(plan.workEndClock);
+  const hasWork = plan.work !== null && start !== null && end !== null;
+  let eveningStart = wake + segments.reduce((sum, segment) => sum + segment.minutes, 0);
+  if (hasWork) {
+    push("work", end - start);
+    const afterWork = plan.training.filter((entry) => entry.placement === "after_work").reduce((sum, entry) => sum + parts.workoutMin(entry.habitId), 0);
+    trainingAt("after_work");
+    push("transition", plan.afterWork?.totalMin ?? 0);
+    eveningStart = end + afterWork + (plan.afterWork?.totalMin ?? 0);
+  }
+  const windDown = plan.windDown?.totalMin ?? 0;
+  if (plan.evenings !== null) push("activity", lightsOut - windDown - eveningStart);
+  push("wind_down", windDown);
+  push("sleep", 24 * 60 - (lightsOut - wake));
+  return segments;
 }
 
 /**

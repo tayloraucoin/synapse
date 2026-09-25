@@ -11,6 +11,7 @@ import { QUICK_PICK_COPY as COPY } from "./copy";
 import {
   BeforeWorkSection,
   FixturesSection,
+  FreeTimeSection,
   LastNightSection,
   PickError,
   RoutineSection,
@@ -81,6 +82,8 @@ export function QuickPick({
           </>
         ) : null}
         <FixturesSection pick={pick} timeZone={timeZone} />
+        {/* v1.3 §5.3 (DAY-12): *Build each morning* only — under *Set from the plan* the evening waits for the Today row. */}
+        {defaultExpanded ? <FreeTimeSection pick={pick} disabled={disabled} /> : null}
       </div>
 
       <PickError message={pick.error} />

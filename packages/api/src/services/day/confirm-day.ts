@@ -14,6 +14,7 @@ import {
 } from "@syn/utils";
 
 import { enqueueBlockPushes } from "../notifications/block-pushes";
+import { ChooseFromPoolError, chooseFromPoolInTx } from "./choose-from-pool";
 import { getDay, type DayView } from "./get-day";
 import { blockTotalMin } from "./lay-out-day";
 import {
@@ -716,6 +717,20 @@ export async function confirmDay(
           isNull(dayItems.originalScheduledStart),
         ),
       );
+
+    /* -- the evening, when the pick chose it (v1.3 §5.3; DAY-12) --------- */
+
+    // Chosen, never inferred: only the members the person tapped; *Decide
+    // later* (or nothing sent) leaves the block pooled for the Today row.
+    const freeTime = input.freeTime;
+    if (freeTime !== undefined && freeTime !== "later" && freeTime.habitIds.length > 0) {
+      try {
+        await chooseFromPoolInTx(tx, userId, { date: input.date, habitIds: freeTime.habitIds }, now);
+      } catch (error) {
+        // A day with no pool has nothing to fill; any other refusal is the morning's to report.
+        if (!(error instanceof ChooseFromPoolError && error.code === "no_pool")) throw error;
+      }
+    }
 
     /* -- yesterday, and the pushes --------------------------------------- */
 

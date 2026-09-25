@@ -165,6 +165,7 @@ export async function getQuickPick(
         work: null,
         fixtures: fixturesOf(view),
         anchor: null,
+        freeTime: await freeTimeOf(tx, userId, blocks, plan),
       };
     }
 
@@ -351,8 +352,35 @@ export async function getQuickPick(
       work,
       fixtures: fixturesOf(view),
       anchor: view.anchor,
+      freeTime: await freeTimeOf(tx, userId, blocks, plan),
     };
   });
+}
+
+/**
+ * The pick's *Free time* (UX v1.3 §5.3, TD-26; DAY-12): the pool the day's
+ * free-time block waits on — the day's own pooled block, or the one the plan
+ * implies for a day not yet built — as its members in rank order. A block
+ * already `set` (the evening chosen) or a day with no pool has no section.
+ */
+async function freeTimeOf(
+  tx: Parameters<Parameters<RlsClient["execute"]>[0]>[0],
+  userId: string,
+  blocks: Awaited<ReturnType<typeof readDayBlocks>>,
+  plan: Awaited<ReturnType<typeof defaultPlanFor>> | null,
+): Promise<QuickPickView["freeTime"]> {
+  const onDay = blocks.find((block) => block.kind === "activity");
+  const templateId =
+    onDay !== undefined
+      ? onDay.state === "pooled"
+        ? onDay.templateId
+        : null
+      : (plan?.blocks.find((block) => block.kind === "activity" && block.pooled === true)?.templateId ?? null);
+  if (templateId === null || templateId === undefined) return null;
+  const members = (await readTemplateSlots(tx, userId, templateId))
+    .filter((slot) => slot.role === "pool")
+    .map((slot) => ({ habitId: slot.habitId, title: slot.habitTitle, icon: slot.habitIcon, durationMin: slot.durationMin }));
+  return members.length === 0 ? null : { members };
 }
 
 function midpoint(min: number | null, max: number | null): number {

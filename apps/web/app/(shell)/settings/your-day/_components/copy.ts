@@ -22,6 +22,10 @@ export const YOUR_DAY_COPY = {
     /** v1.3 §4.6: the landscape. */
     morningHabits: "Morning habits",
     ranked: "Ranked",
+    /** v1.3 §4.6 (DAY-12): the landscape and the ranking. */
+    freeTime: "Free-time activities",
+    /** v1.3 §4.6 (DAY-12): the mode. */
+    eachMorning: "Each morning",
     training: "Training",
     commitments: "Standing commitments",
     closingTheDay: "Closing the day",
@@ -56,6 +60,10 @@ export const YOUR_DAY_COPY = {
   lines: (n: number) => `${n} ${n === 1 ? "line" : "lines"}`,
   /** [COPY] The *Closing the day* row's value: "22:45 · journal". */
   journalOn: "journal",
+  /** The *Each morning* row's value — the two answers' own words (v1.2 §4.14). */
+  modes: { set_from_plan: "Set from the plan", build_each_morning: "Build each morning" },
+  /** [COPY] The *Free-time activities* row's value. */
+  activities: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "activity" : "activities"}`),
   both: "both",
   nothing: "Nothing",
   templates: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "template" : "templates"}`),

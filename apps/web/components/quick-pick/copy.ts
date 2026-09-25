@@ -54,6 +54,13 @@ export const QUICK_PICK_COPY = {
   workWaits: "Work waits",
   routineGetsCut: "Routine gets cut",
   alreadyInPlace: "Already in place",
+  /** UX v1.3 §5.3 (DAY-12), verbatim. */
+  freeTime: "Free time",
+  decideLater: "Decide later",
+  /** *usually 30* */
+  usually: (minutes: number) => `usually ${minutes}`,
+  /** [COPY] The section's summary — *Chess, Read*. */
+  freeTimeSummary: (titles: readonly string[]) => titles.join(", "),
   /* ------------------------------------------------------- primaries -- */
   setTheDay: "Set the day",
   setTheDayAt: (clock: string) => `Set the day · work ${clock}`,

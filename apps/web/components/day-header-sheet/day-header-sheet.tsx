@@ -50,7 +50,8 @@ export function DayHeaderSheet({
   const [adjustOpen, setAdjustOpen] = React.useState(false);
   const [typeOpen, setTypeOpen] = React.useState(false);
   const me = trpc.user.me.useQuery(undefined, { enabled: open });
-  const workTypes = trpc.template.list.useQuery({ includeArchived: false, kind: "work" }, { enabled: open || typeOpen });
+  // v1.3 §3.8 (DAY-12): *Working today* applies a plan's own work — the plans that have work, by name.
+  const workPlans = trpc.day.listWorkPlans.useQuery(undefined, { enabled: open || typeOpen });
   const applyWorkType = trpc.day.applyWorkType.useMutation();
   const removeType = trpc.day.removeWorkType.useMutation();
   const applyType = async (templateId: string) => {
@@ -96,30 +97,32 @@ export function DayHeaderSheet({
     hidden: closed,
   };
   /*
-   * UX v1.2 §3.9, R40, TD-19 (RUN-13): *Working today* on a *Rarely* day
-   * — the work-day type onto a day that has none, and the reverse. Only on
-   * a weekday the profile calls *rarely*; the weekday row is the account's.
+   * UX v1.3 §3.9, §6, R49 (DAY-12; RUN-13 before it): the two rows appear
+   * ONLY on the days §3.9 names. *Working today* on a *Rarely* day with no
+   * work — a plan's own work applied as today's (*as Day A*); one plan applies
+   * at once. *Not working today* on a *Usually* day with work, and on a
+   * *Rarely* day after *Working today* — the work goes, nothing else.
    */
-  const rarely = workModeFor(me.data?.workDays ?? null, day.dateKey) === "rarely";
-  const hasWork = day.blocks.some((block) => block.kind === "work");
+  const workMode = workModeFor(me.data?.workDays ?? null, day.dateKey);
+  const hasWork = day.blocks.some((block) => block.kind === "work" && block.state !== "not_today");
+  const plans = workPlans.data ?? [];
   const workingRow = {
     label: COPY.workingToday,
     onSelect: () => {
       onOpenChange(false);
-      const types = workTypes.data ?? [];
-      const only = types[0];
-      if (types.length <= 1 && only !== undefined) void applyType(only.id);
+      const only = plans[0];
+      if (plans.length === 1 && only !== undefined) void applyType(only.templateId);
       else setTypeOpen(true);
     },
-    hidden: closed || !rarely || hasWork || day.mode === "record",
+    hidden: closed || workMode !== "rarely" || hasWork || day.mode === "record" || plans.length === 0,
   };
   const notWorkingRow = {
-    label: COPY.notWorkingAfterAll,
+    label: COPY.notWorkingToday,
     onSelect: () => {
       onOpenChange(false);
       void removeType.mutateAsync({ date: day.dateKey }).then(() => onChanged?.());
     },
-    hidden: closed || !rarely || !hasWork || day.mode === "record",
+    hidden: closed || (workMode !== "usually" && workMode !== "rarely") || !hasWork || day.mode === "record",
   };
 
   // §10.4's long-press fallback: the Schedule in move mode (DYN-16).
@@ -148,28 +151,25 @@ export function DayHeaderSheet({
         }
       />
 
-      {/* More than one work-day type: which one (v1.2 §3.9). */}
+      {/* More than one plan with work: which one — *as Day A* (v1.3 §3.8). */}
       <SheetHost open={typeOpen}>
         <ResponsiveSheet open={typeOpen} onOpenChange={setTypeOpen} title={COPY.workingToday}>
           <PickerList
             groups={[
               {
-                heading: COPY.whichType,
-                items: (workTypes.data ?? []).map((type) => ({
-                  id: type.id,
-                  title: type.name,
-                  icon: type.workDayType?.icon ?? undefined,
-                  meta:
-                    type.workDayType?.startClock && type.workDayType.endClock
-                      ? `${type.workDayType.startClock}–${type.workDayType.endClock}`
-                      : undefined,
+                heading: COPY.whichPlan,
+                items: plans.map((plan) => ({
+                  id: plan.templateId,
+                  title: COPY.workingTodayAs(plan.name),
+                  icon: plan.icon ?? undefined,
+                  meta: plan.startClock !== null && plan.endClock !== null ? `${plan.startClock}–${plan.endClock}` : undefined,
                 })),
               },
             ]}
             value={null}
             onSelect={(id) => void applyType(id)}
-            searchLabel={COPY.whichType}
-            emptyText={COPY.noTypes}
+            searchLabel={COPY.whichPlan}
+            emptyText={COPY.noPlans}
             presentation="inline"
             className={applyWorkType.isPending ? "pointer-events-none opacity-50" : undefined}
           />

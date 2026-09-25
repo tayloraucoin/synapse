@@ -222,6 +222,8 @@ export function DayList({
           onUndo={list.undoRow}
           onOpen={(item) => setOpenItemId(item.id)}
           onOpenJournal={() => router.push(journalRoute(dateKey))}
+          dateKey={dateKey}
+          onPoolChanged={() => void list.refresh()}
         />
       ))}
 

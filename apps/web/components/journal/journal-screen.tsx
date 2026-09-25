@@ -6,6 +6,7 @@ import { HelperText, SaveStatusText, Text, Textarea } from "@syn/ui";
 import { JOURNAL_ANSWER_MAX } from "@syn/constants";
 
 import { useOnline } from "@/lib/hooks/use-online";
+import { trpc } from "@/lib/trpc/client";
 
 import { JOURNAL_COPY as COPY } from "./copy";
 import { useJournal, type JournalEntry } from "./use-journal";
@@ -21,10 +22,20 @@ import { useJournal, type JournalEntry } from "./use-journal";
  * no word count, no timer, no ceremony. The back is the exit and always
  * works. A past day opened from Review is read-only: the answers as serif
  * text under their captions with hairlines.
+ *
+ * UX v1.3 R54, §7.2 (DAY-12): when the last prompt has its answer, on a
+ * quote-day with the bank on, the morning's quote closes the page — in
+ * Newsreader, in quotation marks, its attribution as a caption, under *A
+ * quote*. The app's own voice never appears around it.
  */
 export function JournalScreen({ initial, readOnly = false }: { initial: JournalEntry; readOnly?: boolean }) {
   const online = useOnline();
   const journal = useJournal(initial);
+  // The quote is the morning's (DAY-6's `readJournalClose`): nothing about the entry chooses it.
+  const close = trpc.journal.close.useQuery({ date: initial.date }, { enabled: !readOnly });
+  const quote = close.data?.quote ?? null;
+  const allAnswered =
+    initial.prompts.length > 0 && initial.prompts.every((prompt) => (journal.answers[prompt.key] ?? "").trim() !== "");
 
   if (readOnly) {
     const written = initial.prompts.filter((prompt) => (initial.answers[prompt.key] ?? "").trim() !== "");
@@ -63,6 +74,23 @@ export function JournalScreen({ initial, readOnly = false }: { initial: JournalE
           onBlur={() => journal.onBlur(prompt.key)}
         />
       ))}
+      {/* v1.3 R54, §7.2 (DAY-12): the morning's quote, once the last line is written — the day opens and closes on one line. */}
+      {allAnswered && quote !== null ? (
+        <figure className="border-hairline m-0 flex flex-col gap-(--space-2) border-t pt-(--space-4)">
+          <Text as="span" variant="caption" tone="secondary">
+            {COPY.aQuote}
+          </Text>
+          <blockquote className="m-0 font-serif text-(length:--fs-body) leading-relaxed">
+            {COPY.quoted(quote.text)}
+          </blockquote>
+          <figcaption>
+            <Text as="span" variant="caption" tone="secondary">
+              {quote.attribution}
+            </Text>
+          </figcaption>
+        </figure>
+      ) : null}
+
       <div className="flex items-center justify-end">
         {journal.status === "retrying" ? (
           <Text as="span" variant="caption" tone="secondary" role="status">

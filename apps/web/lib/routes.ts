@@ -191,19 +191,26 @@ export type YourDayScreen =
   | "work-days"
   /** UX v1.2 §4.16 (RUN-12): the day plans and the builder, embedded. */
   | "your-days"
-  | "before-the-day"
+  /** UX v1.3 §4.6 (DAY-12): passages, links, the quote, the three lines — B8's screen. */
+  | "first-thing"
   /** UX v1.3 §4.6 (DAY-8): the landscape and the ranking, embedded. */
   | "morning-habits"
   | "ranked"
+  /** UX v1.3 §4.6 (DAY-12): free time's landscape and ranking — B15a and B15b. */
+  | "free-time"
   /** UX v1.2 §4.16 (RUN-11): the workouts and the focuses, embedded. */
   | "training"
   | "commitments"
   | "closing-the-day"
   | "focuses"
+  /** UX v1.3 §4.6 (DAY-12): the mode question, alone. */
+  | "each-morning"
   /** RETIRED by v1.3 §4.6 — each redirects to `your-days`; DAY-13 removes the keys. */
   | "work-start"
   | "work-day-types"
-  | "wake";
+  | "wake"
+  /** Superseded by `first-thing` (DAY-12) — redirects there; DAY-13 removes the key. */
+  | "before-the-day";
 
 /** The three v1.3 §4.6 retired: a bookmark or a back-stack entry lands on *Your days*. */
 export const RETIRED_YOUR_DAY_SCREENS: readonly YourDayScreen[] = ["work-start", "work-day-types", "wake"];
@@ -212,14 +219,17 @@ export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "shape",
   "work-days",
   "your-days",
-  "before-the-day",
+  "first-thing",
   "morning-habits",
   "ranked",
+  "free-time",
   "training",
   "commitments",
   "closing-the-day",
   "focuses",
+  "each-morning",
   ...RETIRED_YOUR_DAY_SCREENS,
+  "before-the-day",
 ];
 
 export function settingsYourDayRoute(): string {

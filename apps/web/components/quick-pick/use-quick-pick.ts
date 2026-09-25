@@ -31,9 +31,9 @@ import { QUICK_PICK_COPY as COPY } from "./copy";
  */
 
 export type QuickPickView = RouterOutputs["day"]["quickPick"];
-export type QuickPickSection = "lastNight" | "working" | "routine" | "prep" | "training" | "work";
+export type QuickPickSection = "lastNight" | "working" | "routine" | "prep" | "training" | "work" | "freeTime";
 
-const ALL_SECTIONS: readonly QuickPickSection[] = ["lastNight", "working", "routine", "prep", "training", "work"];
+const ALL_SECTIONS: readonly QuickPickSection[] = ["lastNight", "working", "routine", "prep", "training", "work", "freeTime"];
 
 export function useQuickPick(
   initial: QuickPickView,
@@ -73,6 +73,8 @@ export function useQuickPick(
   const [focusId, setFocusId] = React.useState<string | null>(initial.work?.assignedId ?? null);
   const [anchorIsHard, setAnchorIsHard] = React.useState<boolean>(initial.anchor?.isHard ?? true);
   const [lastNightTicked, setLastNightTicked] = React.useState<Set<string>>(() => new Set());
+  // UX v1.3 §5.3 (DAY-12): the evening's choices; empty is *Decide later*, the default — never inferred.
+  const [freeTime, setFreeTime] = React.useState<Set<string>>(() => new Set());
   const [overOpen, setOverOpen] = React.useState(false);
   const [adjusting, setAdjusting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -181,6 +183,10 @@ export function useQuickPick(
       }
     }
     if (view.lastNight.length > 0) input.lastNight = { doneItemIds: [...lastNightTicked] };
+    // Only under *Build each morning* is the evening asked (v1.3 §5.3); *Set from the plan* leaves it pooled.
+    if (options.defaultExpanded === true && view.freeTime !== null) {
+      input.freeTime = freeTime.size === 0 ? "later" : { habitIds: [...freeTime] };
+    }
     return input;
   }
 
@@ -258,6 +264,8 @@ export function useQuickPick(
     setAnchorIsHard,
     lastNightTicked,
     setLastNightTicked,
+    freeTime,
+    setFreeTime,
     shortenToFit,
     fitting,
     adjusting,

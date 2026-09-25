@@ -6,12 +6,16 @@ export const DAY_HEADER_SHEET_COPY = {
   addOneOff: "Add a one-off",
   editToday: "Edit today",
   close: "Close",
-  /* ---- UX v1.2 §3.9, R40 (RUN-13): a *Rarely* day ---- */
+  /* ---- UX v1.3 §3.9, §6, R49 (DAY-12): a *Usually* or a *Rarely* day ---- */
   workingToday: "Working today",
-  notWorkingAfterAll: "Not working after all",
-  /** [COPY] The type sheet's group heading. */
-  whichType: "Which kind of day",
-  noTypes: "No work-day types yet",
+  /** v1.3 §3.9, verbatim — on a *Usually* day, and on a *Rarely* day after *Working today*. */
+  notWorkingToday: "Not working today",
+  /** *as Day A* — a plan's work, applied to today (v1.3 §3.8). */
+  workingTodayAs: (name: string) => `as ${name}`,
+  /** [COPY] The plan sheet's group heading. */
+  whichPlan: "Your days",
+  /** [COPY] */
+  noPlans: "No days with work yet",
   /* --------------------------------------------- the library pick sheet -- */
   /** [COPY — needs Vesper sign-off] */
   pickTitle: "Add from the library",

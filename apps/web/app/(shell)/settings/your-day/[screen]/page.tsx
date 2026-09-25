@@ -29,13 +29,16 @@ const TITLES: Record<ScreenKey, string> = {
   shape: YOUR_DAY_COPY.rows.shape,
   "work-days": YOUR_DAY_COPY.rows.workDays,
   "your-days": YOUR_DAY_COPY.rows.yourDays,
-  "before-the-day": YOUR_DAY_COPY.rows.firstThing,
+  "first-thing": YOUR_DAY_COPY.rows.firstThing,
   "morning-habits": YOUR_DAY_COPY.rows.morningHabits,
   ranked: YOUR_DAY_COPY.rows.ranked,
+  "free-time": YOUR_DAY_COPY.rows.freeTime,
   training: YOUR_DAY_COPY.rows.training,
   commitments: YOUR_DAY_COPY.rows.commitments,
   "closing-the-day": YOUR_DAY_COPY.rows.closingTheDay,
   focuses: YOUR_DAY_COPY.rows.focuses,
+  "each-morning": YOUR_DAY_COPY.rows.eachMorning,
+  "before-the-day": YOUR_DAY_COPY.rows.firstThing,
   "work-start": YOUR_DAY_COPY.rows.workStart,
   "work-day-types": YOUR_DAY_COPY.rows.workDayTypes,
   wake: YOUR_DAY_COPY.rows.wake,
@@ -53,6 +56,8 @@ export default async function SettingsYourDayScreenPage({
   const { screen } = await params;
   if (!isScreen(screen)) notFound();
   if (RETIRED_YOUR_DAY_SCREENS.includes(screen)) redirect(settingsYourDayScreenRoute("your-days"));
+  // v1.3 §4.6 (DAY-12): *Before the day* became *First thing* (links joined it); DAY-13 removes the key.
+  if (screen === "before-the-day") redirect(settingsYourDayScreenRoute("first-thing"));
 
   const api = await getServerApi();
   const me = await api.user.me();
@@ -82,6 +87,7 @@ export default async function SettingsYourDayScreenPage({
           journalPrompts: me.journalPrompts,
           journalReminderTime: me.journalReminderTime,
           journalReminderEnabled: me.journalReminderEnabled,
+          morningMode: me.morningMode,
         }}
         fixtures={fixtures}
       />
@@ -91,5 +97,7 @@ export default async function SettingsYourDayScreenPage({
 
 export async function generateMetadata({ params }: { params: Promise<{ screen: string }> }) {
   const { screen } = await params;
-  return isScreen(screen) && !RETIRED_YOUR_DAY_SCREENS.includes(screen) ? { title: TITLES[screen] } : {};
+  return isScreen(screen) && !RETIRED_YOUR_DAY_SCREENS.includes(screen) && screen !== "before-the-day"
+    ? { title: TITLES[screen] }
+    : {};
 }

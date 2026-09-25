@@ -416,6 +416,14 @@ export interface QuickPickView {
   fixtures: DayItemView[];
   /** The work anchor, and whether it is hard today; null on an unstructured day. */
   anchor: { clock: string; isHard: boolean } | null;
+  /**
+   * UX v1.3 §5.3, TD-26 (DAY-12): *Free time* — the pool the day's evening
+   * waits on, in its rank order, when the free-time block is pooled; null
+   * otherwise. Nothing preselected: *Decide later* is the default.
+   */
+  freeTime: {
+    members: Array<{ habitId: string; title: string; icon: IconValue; durationMin: number }>;
+  } | null;
 }
 
 /** One day's journal, with the prompts it was written against — v1.1 §7.2. */

@@ -23,6 +23,17 @@ export const DAY_LIST_COPY = {
   work: "Work",
   /** A pooled block before the pick — the week build's promise (§4.13). */
   setInTheMorning: "Set in the morning",
+  /** UX v1.3 §5.3, §6 (DAY-12), verbatim: the pooled evening's one row. */
+  chooseWhenThere: "Choose when you're there",
+  /** [COPY] The pool sheet's primary — *Add 2*. */
+  addChosen: (n: number) => (n === 0 ? "Add" : `Add ${n}`),
+  cancel: "Cancel",
+  /** *30 min* */
+  minutes: (n: number) => `${n} min`,
+  /** [COPY] */
+  poolClosed: "This day is closed.",
+  /** [COPY] */
+  poolError: "Couldn't add. Try again.",
   /** [COPY — needs Vesper sign-off: items with no block, under the blocks.] */
   alsoToday: "Also today",
 
