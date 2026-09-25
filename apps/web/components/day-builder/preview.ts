@@ -8,8 +8,14 @@ import { DAY_BUILDER_COPY as COPY } from "./copy";
 import type { BuilderScreen, EffectiveTimes } from "./use-day-builder";
 
 /**
- * 13i's preview — UX v1.2 §4.13i (RUN-12): the day as it stands, laid out
- * on the client through `stackBlock`, the one arithmetic (v1.1 §3.3, DYN-1).
+ * The builder's preview — UX v1.2 §4.13i (RUN-12), v1.3 R67 (DAY-9): the day
+ * as it stands, laid out on the client through `stackBlock`, the one
+ * arithmetic (v1.1 §3.3, DYN-1). B17 draws it whole; B7 draws it cut at the
+ * end of work (`cutAtWorkEnd`).
+ *
+ * UNDER V1.3 IT MIRRORS DAY-6'S MATERIALISER: one training band per entry of
+ * the plan's training, in the list's order (TD-24), and a fixture's planned
+ * travel as thin ends beside it (TD-27).
  *
  * NOTHING HERE IS WRITTEN. `day_blocks` and `day_items` are RUN-5's
  * `prefillWeek`'s to create, called by RUN-13's completion; this is the same
@@ -47,6 +53,10 @@ export type PreviewBlock = {
   startMin: number;
   endMin: number;
   items: PreviewItem[];
+  /** The routine's room before B11 has built it — drawn as an open band (v1.3 §4.4 B7). */
+  open?: boolean;
+  /** A training band's placement — `after_work` is not *so far*. */
+  placement?: string;
 };
 
 export type PreviewSlack = { key: string; startMin: number; endMin: number; before: string; after: string };
@@ -69,6 +79,8 @@ export type PreviewParts = {
   fixtures: readonly FixtureView[];
   /** The two placed wind-down rows' lengths (§7.1). */
   journalMin: number;
+  /** B7: with no routine yet, draw its room as an open band. */
+  openMorning?: boolean;
 };
 
 const NO_ICON: IconValue | null = null;
@@ -102,10 +114,28 @@ function placeList(
   return { items, startMin: result.startMin, endMin: result.endMin };
 }
 
+/** A fixture at its clock, with its planned travel as thin ends either side (TD-27). */
+function fixtureItems(fixture: FixtureView, at: number): PreviewItem[] {
+  const items: PreviewItem[] = [];
+  const planned = fixture.travel.planned;
+  const there = planned ? fixture.travel.thereMin : 0;
+  const back = planned ? fixture.travel.backMin : 0;
+  if (there > 0) {
+    items.push({ id: `fixture-${fixture.id}-there`, title: fixture.title, icon: NO_ICON, startMin: at - there, endMin: at, travel: "there" });
+  }
+  items.push({ id: `fixture-${fixture.id}`, title: fixture.title, icon: fixture.icon, startMin: at, endMin: at + fixture.durationMin, pinned: true });
+  if (back > 0) {
+    const end = at + fixture.durationMin;
+    items.push({ id: `fixture-${fixture.id}-back`, title: fixture.title, icon: NO_ICON, startMin: end, endMin: end + back, travel: "back" });
+  }
+  return items;
+}
+
 function workoutBlock(
   habit: HabitSummaryView,
   startMin: number,
   key: string,
+  placement: string,
 ): PreviewBlock {
   const length = habit.durationMin ?? 30;
   const there = habit.travel?.planned ? habit.travel.thereMin : 0;
@@ -122,7 +152,7 @@ function workoutBlock(
     items.push({ id: `${habit.id}-back`, title: habit.title, icon: NO_ICON, startMin: cursor, endMin: cursor + back, travel: "back" });
     cursor += back;
   }
-  return { key, kind: "training", name: null, screen: "c", startMin, endMin: cursor, items };
+  return { key, kind: "training", name: null, screen: "b04", startMin, endMin: cursor, items, placement };
 }
 
 export function buildPreview(parts: PreviewParts): DayPreview | null {
@@ -137,11 +167,16 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
 
   const blocks: PreviewBlock[] = [];
   const habitById = new Map(parts.habits.map((habit) => [habit.id, habit]));
+  // One band per entry, in the list's order (TD-24; DAY-6) — the order inside a placement is the list's.
   const training = (placement: string) =>
     parts.plan.trainingPlan
-      .filter((entry) => entry.placement === placement)
-      .map((entry) => habitById.get(entry.habitId))
-      .filter((habit): habit is HabitSummaryView => habit !== undefined);
+      .map((entry, index) => ({ entry, index, habit: habitById.get(entry.habitId) }))
+      .filter(
+        (row): row is { entry: (typeof parts.plan.trainingPlan)[number]; index: number; habit: HabitSummaryView } =>
+          row.entry.placement === placement && row.habit !== undefined,
+      );
+  const trainingBlock = (row: { index: number; habit: HabitSummaryView }, startMin: number, placement: string) =>
+    workoutBlock(row.habit, startMin, `training-${row.index}-${row.habit.id}`, placement);
 
   // Orient — at wake, the orient template's length.
   let cursor = wake;
@@ -150,7 +185,7 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
       key: "orient",
       kind: "orient",
       name: null,
-      screen: "b",
+      screen: "b02",
       startMin: wake,
       endMin: wake + parts.orientMin,
       items: [],
@@ -163,11 +198,14 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
   const morningBound = prepBackward === null ? (workStart ?? null) : prepBackward.startMin;
 
   // Training before the routine.
-  for (const habit of training("before_morning")) {
-    const block = workoutBlock(habit, cursor, `training-${habit.id}`);
+  for (const row of training("before_morning")) {
+    const block = trainingBlock(row, cursor, "before_morning");
     blocks.push(block);
     cursor = block.endMin;
   }
+
+  // Training after the routine takes its time out of the routine's room.
+  const afterMorning = training("after_morning");
 
   // The routine — forward from here, bounded by getting ready (or work).
   const morning = placeList(parts.morning, "forward", cursor, morningBound);
@@ -176,17 +214,26 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
       key: "morning",
       kind: "morning",
       name: parts.plan.morning?.name ?? null,
-      screen: "e",
+      screen: "b11",
       startMin: morning.startMin,
       endMin: morning.endMin,
       items: morning.items,
     });
     cursor = morning.endMin;
+  } else if (parts.openMorning === true && parts.plan.morning === null && morningBound !== null) {
+    // B7: the routine's room, open — what is left before getting ready once the after-routine workouts are out.
+    // With nothing bounding it (a *No work* day with no list yet) it has no room to draw.
+    const afterLength = afterMorning.reduce((sum, row) => sum + workoutBlock(row.habit, 0, "", "").endMin, 0);
+    const roomEnd = morningBound - afterLength;
+    if (roomEnd > cursor) {
+      blocks.push({ key: "morning", kind: "morning", name: null, screen: "b11", startMin: cursor, endMin: roomEnd, items: [], open: true });
+      cursor = roomEnd;
+    }
   }
 
   // Training after the routine.
-  for (const habit of training("after_morning")) {
-    const block = workoutBlock(habit, cursor, `training-${habit.id}`);
+  for (const row of afterMorning) {
+    const block = trainingBlock(row, cursor, "after_morning");
     blocks.push(block);
     cursor = block.endMin;
   }
@@ -198,7 +245,7 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
       key: "prep",
       kind: "prep",
       name: parts.plan.gettingReady?.name ?? null,
-      screen: "d",
+      screen: "b05",
       startMin: prep.startMin,
       endMin: prep.endMin,
       items: prep.items,
@@ -211,8 +258,8 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
     const items: PreviewItem[] = [];
     const midday = Math.round((workStart + workEnd) / 2);
     let inside = midday;
-    for (const habit of training("inside_work")) {
-      const block = workoutBlock(habit, inside, `training-${habit.id}`);
+    for (const row of training("inside_work")) {
+      const block = trainingBlock(row, inside, "inside_work");
       blocks.push(block);
       inside = block.endMin;
     }
@@ -228,13 +275,13 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
       if (fixture.blockKind !== "work") continue;
       const at = minutesOf(fixture.atClock);
       if (at === null) continue;
-      items.push({ id: `fixture-${fixture.id}`, title: fixture.title, icon: fixture.icon, startMin: at, endMin: at + fixture.durationMin, pinned: true });
+      items.push(...fixtureItems(fixture, at));
     }
     blocks.push({
       key: "work",
       kind: "work",
       name: parts.plan.work.name,
-      screen: "b",
+      screen: "b03",
       startMin: workStart,
       endMin: workEnd,
       items: items.sort((a, b) => a.startMin - b.startMin),
@@ -243,8 +290,8 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
   }
 
   // Training after work.
-  for (const habit of training("after_work")) {
-    const block = workoutBlock(habit, cursor, `training-${habit.id}`);
+  for (const row of training("after_work")) {
+    const block = trainingBlock(row, cursor, "after_work");
     blocks.push(block);
     cursor = block.endMin;
   }
@@ -264,17 +311,10 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
         key: "activity",
         kind: "activity",
         name: null,
-        screen: "g",
+        screen: "b06",
         startMin: first.at,
         endMin: Math.max(...evening.map((entry) => entry.at + entry.fixture.durationMin)),
-        items: evening.map(({ fixture, at }) => ({
-          id: `fixture-${fixture.id}`,
-          title: fixture.title,
-          icon: fixture.icon,
-          startMin: at,
-          endMin: at + fixture.durationMin,
-          pinned: true,
-        })),
+        items: evening.flatMap(({ fixture, at }) => fixtureItems(fixture, at)),
       });
     }
   }
@@ -295,7 +335,7 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
     key: "wind_down",
     kind: "wind_down",
     name: parts.plan.windDown?.name ?? null,
-    screen: "h",
+    screen: "b12",
     startMin: windDown?.startMin ?? journalStart,
     endMin: end,
     items: windItems,
@@ -320,5 +360,26 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
     endMin: Math.max(end, ...blocks.map((block) => block.endMin)),
     blocks,
     slack,
+  };
+}
+
+/**
+ * B7's strip — v1.3 §4.4 B7, R67 (DAY-9): the review's preview CUT AT THE END
+ * OF WORK — *up at* to *until about* — or, on a *No work* day, to the end of
+ * the last block placed so far. The evening's fixtures, the after-work
+ * workouts and the wind-down are after work, so none of them is *so far*.
+ */
+export function cutAtWorkEnd(preview: DayPreview): DayPreview {
+  const later = (block: PreviewBlock) =>
+    block.kind === "wind_down" || block.kind === "activity" || (block.kind === "training" && block.placement === "after_work");
+  const work = preview.blocks.find((block) => block.kind === "work");
+  const early = preview.blocks.filter((block) => !later(block));
+  const endMin = work?.endMin ?? Math.max(preview.startMin, ...early.map((block) => block.endMin));
+  const blocks = early.filter((block) => block.startMin < endMin);
+  return {
+    startMin: preview.startMin,
+    endMin,
+    blocks,
+    slack: preview.slack.filter((gap) => gap.endMin <= endMin && blocks.some((block) => block.key === gap.after)),
   };
 }

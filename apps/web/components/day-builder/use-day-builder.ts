@@ -2,13 +2,14 @@
 
 import * as React from "react";
 
+import { DEVICES_OFF_OFFSET_MIN } from "@syn/constants";
 import type { DayPlanPatchInput } from "@syn/validators";
 import type { DayPlanView, HabitSummaryView, SlotView, TemplateSummaryView } from "@syn/types";
 
 import { trpc } from "@/lib/trpc/client";
 
 import { DAY_BUILDER_COPY as COPY } from "./copy";
-import { minutesOf, toInputClock } from "./clock";
+import { input, minutesOf, toInputClock } from "./clock";
 
 /**
  * The builder's state — UX v1.2 §4.13 (R30, TD-10; RUN-12).
@@ -27,8 +28,57 @@ import { minutesOf, toInputClock } from "./clock";
  * touched; the review (13i) is a client preview through `stackBlock`.
  */
 
-export const BUILDER_SCREENS = ["a", "b", "c", "d", "e", "f", "g", "h", "i"] as const;
+/**
+ * The builder's order — UX v1.3 §4.4 (R45; DAY-9): seventeen screens in the
+ * order a day happens. The one list; `visibleScreens` says which a plan shows.
+ */
+export const BUILDER_SCREENS = [
+  "b01",
+  "b02",
+  "b03",
+  "b04",
+  "b05",
+  "b06",
+  "b07",
+  "b08",
+  "b09",
+  "b10",
+  "b11",
+  "b12",
+  "b13",
+  "b14",
+  "b15",
+  "b16",
+  "b17",
+] as const;
 export type BuilderScreen = (typeof BUILDER_SCREENS)[number];
+
+/** B8 (first thing), B9–B10 (the landscape, ranked), B15 (free time): the first plan's only. */
+const PROFILE_SCREENS: ReadonlySet<BuilderScreen> = new Set(["b08", "b09", "b10", "b15"]);
+
+/**
+ * The screens this plan shows — v1.3 §4.4 "Which screens a later day shows".
+ * Pure, from the plan's own facts and the profile's answer, never a client
+ * flag: the FIRST plan is `sortOrder === 0`; a later plan drops the profile
+ * screens, drops B11 when the routine is the same every day, and drops B4
+ * when there are no workouts (the first plan keeps B4 for the cards); a *No
+ * work* plan drops B13 and B14.
+ */
+export function visibleScreens(
+  plan: { sortOrder: number; work: unknown | null },
+  profile: { sameMorningRoutine: boolean | null } | null,
+  workouts: number,
+): BuilderScreen[] {
+  const first = plan.sortOrder === 0;
+  const noWork = plan.work === null;
+  return BUILDER_SCREENS.filter((screen) => {
+    if (!first && PROFILE_SCREENS.has(screen)) return false;
+    if (!first && screen === "b04" && workouts === 0) return false;
+    if (!first && screen === "b11" && profile?.sameMorningRoutine === true) return false;
+    if (noWork && (screen === "b13" || screen === "b14")) return false;
+    return true;
+  });
+}
 
 export type EffectiveTimes = {
   /** "HH:mm" or null when nothing anywhere sets it. */
@@ -99,7 +149,10 @@ export function useDayBuilder(planId: string) {
       workStart: noWork ? null : (toInputClock(plan?.workStartClock) ?? toInputClock(profile?.workStartTime)),
       workEnd: noWork ? null : (toInputClock(plan?.workEndClock) ?? toInputClock(profile?.workEndTime)),
       lightsOut: toInputClock(plan?.lightsOutClock) ?? toInputClock(profile?.lightsOutTime),
-      devicesOff: toInputClock(plan?.devicesOffTime) ?? toInputClock(profile?.devicesOffTimeEffective),
+      // v1.3 §4.4 B2: phone away follows the plan's own lights out until touched (as `resolvePlanAnchors`).
+      devicesOff:
+        toInputClock(plan?.devicesOffTime) ??
+        (plan?.lightsOutTime ? hourBefore(toInputClock(plan.lightsOutTime)) : toInputClock(profile?.devicesOffTimeEffective)),
     };
   }, [plan, profile]);
 
@@ -169,6 +222,13 @@ export function totalOf(slots: readonly SlotView[]): number {
   return slots
     .filter((slot) => slot.alternates === null || slot.alternates.isDefault)
     .reduce((sum, slot) => sum + slot.durationMin + slot.gapBeforeMin, 0);
+}
+
+/** "22:45" → "21:45" — phone away's default, an hour before lights out (v1.2 §4.11). */
+export function hourBefore(clock: string | null): string | null {
+  const minutes = minutesOf(clock);
+  if (minutes === null) return null;
+  return input((minutes - DEVICES_OFF_OFFSET_MIN + 24 * 60) % (24 * 60));
 }
 
 /** Minutes between two clocks, the second wrapping past midnight when earlier. */

@@ -80,7 +80,7 @@ export function ScreenBreaks({ api, disabled }: { api: DayBuilderApi; disabled: 
                 <SelectRow
                   icon={row.icon}
                   title={row.title}
-                  detail={row.habit?.durationMin === null || row.habit === null ? undefined : COPY.c.minutes(row.habit.durationMin)}
+                  detail={row.habit?.durationMin === null || row.habit === null ? undefined : COPY.b04.minutes(row.habit.durationMin)}
                   selected={entry !== null}
                   disabled={disabled}
                   error={line}

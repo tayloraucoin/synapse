@@ -11,12 +11,15 @@ import { useOnline } from "@/lib/hooks/use-online";
 import { DAY_BUILDER_COPY as COPY } from "./copy";
 
 /**
- * The builder's frame — UX v1.2 §4.13 (RUN-12).
+ * The builder's frame — UX v1.3 §4.4 (RUN-12; DAY-9).
  *
  * IN THE SEQUENCE it is screen 4's `StepFrame` (*4 of 5* under UX v1.3
  * §4.4; DAY-8 renumbered it from 13), *Finish later*, the sticky action
- * row) with a second caption under the progress line — *Day A · 3 of 9* —
+ * row) with a second caption under the progress line — *Day A · 3 of 17* —
  * and a back that walks the builder's screens rather than the outer five.
+ * *Back* is on the action row's left too, beside the screen's own ghost
+ * (*Not on this day*, *Skip for now*) and doing what the header arrow does
+ * (v1.3 §4, the frame amended).
  * UNDER SETTINGS (`embedded`) there is no sequence: the same caption,
  * heading, body and action row, without the frame's chrome.
  *
@@ -64,6 +67,7 @@ export function BuilderFrame({
           body={body}
           caption={caption}
           onBack={onBack}
+          backOnActionRow
           primary={primary}
           skip={skip}
           error={error}
@@ -100,6 +104,9 @@ export function BuilderFrame({
           "bg-paper border-hairline sticky bottom-0 z-10 -mx-(--space-4) border-t px-(--space-4) py-(--space-3) pb-[max(var(--space-3),env(safe-area-inset-bottom))]",
         )}
       >
+        <Button variant="ghost" className="me-auto" onClick={onBack}>
+          {COPY.back}
+        </Button>
         {skip === undefined ? null : (
           <Button variant="ghost" busy={skip.busy} disabled={!online} onClick={skip.onSkip}>
             {skip.label}

@@ -122,6 +122,7 @@ export function StepFrame({
   error,
   caption,
   onBack,
+  backOnActionRow = false,
 }: {
   step: number;
   heading: string;
@@ -135,6 +136,8 @@ export function StepFrame({
   caption?: React.ReactNode;
   /** A screen with sub-screens owns its back; the sequence's is the default. */
   onBack?: () => void;
+  /** UX v1.3 §4 (DAY-9): *Back* on the action row too — the builder's screens. */
+  backOnActionRow?: boolean;
 }) {
   const online = useOnline();
   const goTo = useStepNavigation();
@@ -167,6 +170,7 @@ export function StepFrame({
       onFinishLater={() => void goTo(step, todayRoute(), "finishLater")}
       copy={copy}
       caption={caption}
+      backOnActionRow={backOnActionRow}
     >
       {children}
     </StepFrameView>

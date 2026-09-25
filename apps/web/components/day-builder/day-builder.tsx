@@ -2,42 +2,70 @@
 
 import * as React from "react";
 
-import { LoadingText } from "@syn/ui";
-
 import { useOnline } from "@/lib/hooks/use-online";
 import { trpc } from "@/lib/trpc/client";
 
 import { BuilderFrame } from "./builder-frame";
+import { BuilderSkeleton } from "./builder-skeleton";
 import { DAY_BUILDER_COPY as COPY } from "./copy";
-import { ScreenNameDays } from "./screens/13a-name-days";
-import { ScreenShapeTimes } from "./screens/13b-shape-times";
-import { ScreenTraining } from "./screens/13c-training";
-import { ScreenGettingReady } from "./screens/13d-getting-ready";
 import { ScreenMorning } from "./screens/13e-morning";
 import { ScreenBreaks } from "./screens/13f-breaks";
-import { ScreenEvening } from "./screens/13g-evening";
 import { ScreenWindDown } from "./screens/13h-wind-down";
 import { ScreenReview } from "./screens/13i-review";
-import { BUILDER_SCREENS, useDayBuilder, type BuilderScreen } from "./use-day-builder";
+import { ScreenNameDays } from "./screens/b01-name-days";
+import { ScreenTimes } from "./screens/b02-times";
+import { ScreenWork } from "./screens/b03-work";
+import { ScreenTraining } from "./screens/b04-training";
+import { ScreenGettingReady } from "./screens/b05-getting-ready";
+import { ScreenFixed } from "./screens/b06-fixed";
+import { ScreenSoFar } from "./screens/b07-so-far";
+import { useDayBuilder, visibleScreens, type BuilderScreen } from "./use-day-builder";
 
 /**
- * The day builder — UX v1.2 §4.13 (RUN-12): nine screens, one thing each.
+ * The screens this build can draw. B1–B7 are DAY-9's; B11, B12, B13 and B17
+ * are v1.2's `13e`, `13h`, `13f` and `13i` behind them — THE TEMPORARY
+ * TABLE, which DAY-10 (B8–B12) and DAY-11 (B13–B17) shrink to nothing.
+ * B8–B10 and B14–B16 have no v1.2 screen at all; until their tickets land
+ * they are left out of the walk and the caption's count, rather than drawn
+ * as an empty screen.
+ */
+const BUILT: ReadonlySet<BuilderScreen> = new Set([
+  "b01",
+  "b02",
+  "b03",
+  "b04",
+  "b05",
+  "b06",
+  "b07",
+  "b11",
+  "b12",
+  "b13",
+  "b17",
+]);
+
+/**
+ * The day builder — UX v1.3 §4.4 (R45; DAY-9): seventeen screens in the
+ * order a day happens, one thing each.
  *
  * ONE PLAN, HELD BY `useDayBuilder`; every screen writes its part as it
- * goes and *Next* only moves. 13c is skipped without a trace when there are
- * no workouts. *Save Day A* (13i) calls `dayPlan.complete`; a plan left
- * before that stays a draft and the list says so. Back on 13a returns to
- * the list. Offline, the builder is read-only with the standard line.
+ * goes and *Next* only moves. `visibleScreens` decides which screens this
+ * plan shows (the first plan collects the libraries; a later one picks from
+ * them); the caption counts those. *Back* is on the action row and in the
+ * header, and on B1 returns to *Your days*. Every screen shows three
+ * skeleton rows while its data is out (R63). *Save Day A* (the review) calls
+ * `dayPlan.complete`; a plan left before that stays a draft and the list
+ * says so. Offline, the builder is read-only with the standard line.
+ * NOTHING HERE MATERIALISES.
  */
 export function DayBuilder({
   planId,
-  initialScreen = "a",
+  initialScreen = "b01",
   onExit,
   embedded = false,
 }: {
   planId: string;
   initialScreen?: BuilderScreen;
-  /** Back from 13a, and after *Save Day A*. */
+  /** Back from B1, and after *Save Day A*. */
   onExit: () => void;
   embedded?: boolean;
 }) {
@@ -48,12 +76,14 @@ export function DayBuilder({
   const [screen, setScreen] = React.useState<BuilderScreen>(initialScreen);
   const [prepTotal, setPrepTotal] = React.useState(0);
   const [morningTotal, setMorningTotal] = React.useState(0);
+  const [workReady, setWorkReady] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
 
-  const workouts = React.useMemo(() => api.habitsOf((habit) => habit.type === "workout"), [api]);
+  const plan = api.plan;
+  const workoutCount = React.useMemo(() => api.habitsOf((habit) => habit.type === "workout").length, [api]);
   const screens = React.useMemo(
-    () => BUILDER_SCREENS.filter((key) => key !== "c" || workouts.length > 0),
-    [workouts.length],
+    () => (plan === null ? [] : visibleScreens(plan, api.profile, workoutCount).filter((key) => BUILT.has(key))),
+    [plan, api.profile, workoutCount],
   );
   const index = Math.max(0, screens.indexOf(screen));
   const disabled = !online;
@@ -64,7 +94,7 @@ export function DayBuilder({
   };
   const back = () => {
     if (index === 0) onExit();
-    else go(screens[index - 1] ?? "a");
+    else go(screens[index - 1] ?? "b01");
   };
   const forward = () => {
     const next = screens[index + 1];
@@ -72,11 +102,11 @@ export function DayBuilder({
   };
 
   const save = async () => {
-    if (api.plan === null) return;
+    if (plan === null) return;
     api.setLine(null);
     setSaving(true);
     try {
-      await complete.mutateAsync({ id: api.plan.id, noWork: api.plan.work === null });
+      await complete.mutateAsync({ id: plan.id, noWork: plan.work === null });
       await utils.dayPlan.list.invalidate();
       onExit();
     } catch (error) {
@@ -87,45 +117,48 @@ export function DayBuilder({
     }
   };
 
-  const plan = api.plan;
   const name = plan?.name ?? "";
-  const caption = COPY.caption(name, index + 1, screens.length);
+  const caption = COPY.caption(name, index + 1, Math.max(1, screens.length));
 
   const heading = (() => {
     switch (screen) {
-      case "a":
-        return COPY.a.heading;
-      case "b":
-        return COPY.b.heading(name);
-      case "c":
-        return COPY.c.heading;
-      case "d":
-        return COPY.d.heading;
-      case "e":
+      case "b01":
+        return COPY.b01.heading;
+      case "b02":
+        return COPY.b02.heading(name);
+      case "b03":
+        return COPY.b03.heading;
+      case "b04":
+        return COPY.b04.heading;
+      case "b05":
+        return COPY.b05.heading;
+      case "b06":
+        return COPY.b06.heading;
+      case "b07":
+        return COPY.b07.heading(name);
+      case "b11":
         return COPY.e.heading;
-      case "f":
-        return COPY.f.heading;
-      case "g":
-        return COPY.g.heading;
-      case "h":
+      case "b12":
         return COPY.h.heading;
-      case "i":
+      case "b13":
+        return COPY.f.heading;
+      default:
         return COPY.i.heading(name);
     }
   })();
 
   const body = (() => {
     switch (screen) {
-      case "a":
-        return COPY.a.body;
-      case "c":
-        return COPY.c.body;
-      case "d":
-        return COPY.d.body;
-      case "f":
+      case "b01":
+        return COPY.b01.body;
+      case "b05":
+        return COPY.b05.body;
+      case "b06":
+        return COPY.b06.body;
+      case "b07":
+        return COPY.b07.body;
+      case "b13":
         return COPY.f.body;
-      case "g":
-        return COPY.g.body;
       default:
         return undefined;
     }
@@ -133,11 +166,11 @@ export function DayBuilder({
 
   const primaryLabel = (() => {
     switch (screen) {
-      case "d":
+      case "b05":
         return COPY.nextWithMinutes(prepTotal);
-      case "e":
+      case "b11":
         return COPY.nextWithMinutes(morningTotal);
-      case "i":
+      case "b17":
         return COPY.saveDay(name);
       default:
         return COPY.next;
@@ -146,14 +179,16 @@ export function DayBuilder({
 
   const skip = (() => {
     switch (screen) {
-      case "c":
+      case "b04":
         return {
-          label: COPY.c.notOnThisDay,
+          label: COPY.b04.notOnThisDay,
           onSkip: () => {
             void api.patch({ training: [] }).then(forward);
           },
         };
-      case "f":
+      case "b06":
+        return { label: COPY.b06.skip, onSkip: forward };
+      case "b13":
         return {
           label: COPY.f.skip,
           onSkip: () => {
@@ -164,6 +199,8 @@ export function DayBuilder({
         return undefined;
     }
   })();
+
+  const loading = plan === null || api.loading;
 
   return (
     <BuilderFrame
@@ -178,26 +215,29 @@ export function DayBuilder({
       primary={{
         label: primaryLabel,
         onClick: () => {
-          if (screen === "i") void save();
+          if (screen === "b17") void save();
           else forward();
         },
         busy: saving,
-        disabled: plan === null,
+        disabled: loading || (screen === "b03" && !workReady),
       }}
     >
-      {plan === null ? (
-        <LoadingText />
+      {loading ? (
+        <BuilderSkeleton />
       ) : (
         <>
-          {screen === "a" ? <ScreenNameDays api={api} disabled={disabled} /> : null}
-          {screen === "b" ? <ScreenShapeTimes api={api} disabled={disabled} /> : null}
-          {screen === "c" ? <ScreenTraining api={api} workouts={workouts} disabled={disabled} /> : null}
-          {screen === "d" ? <ScreenGettingReady api={api} disabled={disabled} onTotal={setPrepTotal} /> : null}
-          {screen === "e" ? <ScreenMorning api={api} disabled={disabled} onTotal={setMorningTotal} /> : null}
-          {screen === "f" ? <ScreenBreaks api={api} disabled={disabled} /> : null}
-          {screen === "g" ? <ScreenEvening api={api} disabled={disabled} /> : null}
-          {screen === "h" ? <ScreenWindDown api={api} disabled={disabled} /> : null}
-          {screen === "i" ? <ScreenReview api={api} disabled={disabled} onGo={go} /> : null}
+          {screen === "b01" ? <ScreenNameDays api={api} disabled={disabled} /> : null}
+          {screen === "b02" ? <ScreenTimes api={api} disabled={disabled} /> : null}
+          {screen === "b03" ? <ScreenWork api={api} disabled={disabled} onReady={setWorkReady} /> : null}
+          {screen === "b04" ? <ScreenTraining api={api} disabled={disabled} onForward={forward} /> : null}
+          {screen === "b05" ? <ScreenGettingReady api={api} disabled={disabled} onTotal={setPrepTotal} /> : null}
+          {screen === "b06" ? <ScreenFixed api={api} disabled={disabled} /> : null}
+          {screen === "b07" ? <ScreenSoFar api={api} disabled={disabled} onGo={go} /> : null}
+          {/* The temporary table — v1.2's screens behind B11, B12, B13 and B17 until DAY-10 and DAY-11. */}
+          {screen === "b11" ? <ScreenMorning api={api} disabled={disabled} onTotal={setMorningTotal} /> : null}
+          {screen === "b12" ? <ScreenWindDown api={api} disabled={disabled} /> : null}
+          {screen === "b13" ? <ScreenBreaks api={api} disabled={disabled} /> : null}
+          {screen === "b17" ? <ScreenReview api={api} disabled={disabled} onGo={go} /> : null}
         </>
       )}
     </BuilderFrame>

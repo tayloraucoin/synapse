@@ -13,7 +13,12 @@ import { DAY_BUILDER_COPY as COPY } from "../copy";
 import type { DayBuilderApi } from "../use-day-builder";
 
 /**
- * 13a — name and days (UX v1.2 §4.13a).
+ * B1 — name and days (UX v1.3 §4.4 B1; v1.2 §4.13a, renamed by DAY-9).
+ *
+ * ON THE FIRST PLAN, one muted line under the body: start with the first
+ * work day of the week — the rest can start from this one. The chips arrive
+ * preselected for the *Always · Usually · Sometimes* days (RUN-5's create,
+ * widened by DAY-5); a later plan arrives with none.
  *
  * THE NAME WRITES ON BLUR AND ENTER; the glyph and every chip write at once.
  * A chip another plan holds says so beneath it and, on the tap, MOVES: the
@@ -47,7 +52,7 @@ export function ScreenNameDays({ api, disabled }: { api: DayBuilderApi; disabled
     for (const other of others.data ?? []) {
       if (plan !== null && other.id === plan.id) continue;
       for (const weekday of other.weekdays) {
-        notes[weekday] = COPY.a.heldBy(other.name);
+        notes[weekday] = COPY.b01.heldBy(other.name);
         byId.set(weekday, { id: other.id, name: other.name });
       }
     }
@@ -95,15 +100,21 @@ export function ScreenNameDays({ api, disabled }: { api: DayBuilderApi; disabled
 
   return (
     <div className="flex flex-col gap-(--space-5)">
+      {plan.sortOrder === 0 ? (
+        <Text as="p" variant="secondary" tone="secondary">
+          {COPY.b01.helper}
+        </Text>
+      ) : null}
+
       <div className="flex items-end gap-(--space-3)">
         <EmojiSlotButton
           icon={plan.icon}
           onChange={(icon: IconValue) => void api.patch({ icon })}
-          label={COPY.a.chooseAnIcon}
+          label={COPY.b01.chooseAnIcon}
           disabled={disabled}
         />
         <Input
-          label={COPY.a.name}
+          label={COPY.b01.name}
           value={name}
           maxLength={DAY_PLAN_NAME_MAX}
           disabled={disabled}
@@ -120,7 +131,7 @@ export function ScreenNameDays({ api, disabled }: { api: DayBuilderApi; disabled
       </div>
 
       <WeekdayChips
-        label={COPY.a.whichDays}
+        label={COPY.b01.whichDays}
         indexing="monday"
         value={plan.weekdays}
         onChange={(next) => void onDays(next)}
@@ -131,10 +142,10 @@ export function ScreenNameDays({ api, disabled }: { api: DayBuilderApi; disabled
       {moved === null ? null : (
         <div role="status" className="flex items-center justify-between gap-(--space-3)">
           <Text as="span" variant="secondary" tone="secondary">
-            {COPY.a.moved(WEEKDAY_LONG[moved.weekday] ?? "", moved.fromPlanName)}
+            {COPY.b01.moved(WEEKDAY_LONG[moved.weekday] ?? "", moved.fromPlanName)}
           </Text>
           <Button variant="ghost" size="sm" onClick={() => void undo()} disabled={disabled}>
-            {COPY.a.undo}
+            {COPY.b01.undo}
           </Button>
         </div>
       )}

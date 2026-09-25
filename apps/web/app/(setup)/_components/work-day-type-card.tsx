@@ -229,67 +229,37 @@ export function WorkDayTypeCard({
         </CardAction>
       </CardHeader>
       <CardContent>
-        <ChipPicker label={COPY.kind} options={KIND_OPTIONS} value={draft.kind} onChange={pickKind} />
-
-        <div className="flex items-end gap-(--space-2)">
-          <EmojiSlotButton
-            icon={draft.icon}
-            label={COPY.chooseAnIcon}
-            onChange={(icon) => {
-              setIconTouched(true);
-              setDraft((current) => ({ ...current, icon }));
-            }}
-            className="mb-px"
-          />
-          <Input
-            label={COPY.typeName}
-            placeholder={COPY.typeNamePlaceholder}
-            value={draft.name}
-            maxLength={TEMPLATE_NAME_MAX}
-            onChange={(event) => {
-              setNameTouched(event.target.value !== "");
-              setDraft((current) => ({ ...current, name: event.target.value }));
-            }}
-            className="flex-1"
-          />
-        </div>
-
-        <TimeField
-          label={COPY.workingBy}
-          value={draft.workStart}
-          onChange={(value) => setDraft((current) => ({ ...current, workStart: value }))}
-          disclosed
-          changeLabel={COPY.change}
-          doneLabel={COPY.done}
-          required
+        <WorkFields
+          value={draft}
+          onKind={pickKind}
+          onWorkStart={(value) => setDraft((current) => ({ ...current, workStart: value }))}
+          onWorkEnd={(value) => setDraft((current) => ({ ...current, workEnd: value }))}
+          onDirection={(value) => setDraft((current) => ({ ...current, direction: value }))}
+          afterKind={
+            <div className="flex items-end gap-(--space-2)">
+              <EmojiSlotButton
+                icon={draft.icon}
+                label={COPY.chooseAnIcon}
+                onChange={(icon) => {
+                  setIconTouched(true);
+                  setDraft((current) => ({ ...current, icon }));
+                }}
+                className="mb-px"
+              />
+              <Input
+                label={COPY.typeName}
+                placeholder={COPY.typeNamePlaceholder}
+                value={draft.name}
+                maxLength={TEMPLATE_NAME_MAX}
+                onChange={(event) => {
+                  setNameTouched(event.target.value !== "");
+                  setDraft((current) => ({ ...current, name: event.target.value }));
+                }}
+                className="flex-1"
+              />
+            </div>
+          }
         />
-        <TimeField
-          label={COPY.untilAbout}
-          value={draft.workEnd}
-          onChange={(value) => setDraft((current) => ({ ...current, workEnd: value }))}
-          disclosed
-          changeLabel={COPY.change}
-          doneLabel={COPY.done}
-          required
-        />
-
-        <div className="flex flex-col gap-(--space-3)">
-          <Text as="h3" variant="body" weight={500}>
-            {COPY.whatGives}
-          </Text>
-          <LargeTargetRow
-            layout="stacked"
-            label={COPY.whatGives}
-            value={draft.direction}
-            onChange={(value) => setDraft((current) => ({ ...current, direction: value as AnchorDirection }))}
-            options={[
-              { value: "work_waits", label: COPY.gives.work_waits, description: COPY.gives.work_waitsBody },
-              { value: "routine_cut", label: COPY.gives.routine_cut, description: COPY.gives.routine_cutBody },
-              { value: "depends", label: COPY.gives.depends, description: COPY.gives.dependsBody },
-            ]}
-            className="[&>span:first-child]:sr-only"
-          />
-        </div>
 
         {error ? <HelperText error>{error}</HelperText> : null}
 
@@ -300,6 +270,88 @@ export function WorkDayTypeCard({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * The work's four facts — the kind chips, *Working by*, *Until about*, and
+ * *what gives* — as one body (UX v1.3 §4.4 B3; DAY-9). The card above and the
+ * builder's B3 both draw it, so the plan's own work and the v1.2 card cannot
+ * drift until DAY-13 retires the card. Controlled: the caller writes.
+ *
+ * NOTHING PRESELECTED but the values handed in: the chips open on none, the
+ * *what gives* rows on none (v1.3 R46 — "Preselect a kind nowhere").
+ */
+export function WorkFields({
+  value,
+  onKind,
+  onWorkStart,
+  onWorkEnd,
+  onDirection,
+  afterKind,
+  disabled = false,
+}: {
+  value: Pick<WorkDayTypeDraft, "kind" | "workStart" | "workEnd" | "direction">;
+  onKind: (kind: WorkDayKind | null) => void;
+  onWorkStart: (clock: string) => void;
+  onWorkEnd: (clock: string) => void;
+  onDirection: (direction: AnchorDirection) => void;
+  /** The card's name and glyph, between the chips and the times; B3 has none. */
+  afterKind?: React.ReactNode;
+  disabled?: boolean;
+}) {
+  return (
+    <>
+      <ChipPicker
+        label={COPY.kind}
+        options={KIND_OPTIONS}
+        value={value.kind}
+        onChange={(next) => onKind(next as WorkDayKind | null)}
+        disabled={disabled}
+      />
+
+      {afterKind}
+
+      <TimeField
+        label={COPY.workingBy}
+        value={value.workStart}
+        onChange={onWorkStart}
+        disclosed
+        changeLabel={COPY.change}
+        doneLabel={COPY.done}
+        disabled={disabled}
+        required
+      />
+      <TimeField
+        label={COPY.untilAbout}
+        value={value.workEnd}
+        onChange={onWorkEnd}
+        disclosed
+        changeLabel={COPY.change}
+        doneLabel={COPY.done}
+        disabled={disabled}
+        required
+      />
+
+      <div className="flex flex-col gap-(--space-3)">
+        <Text as="h3" variant="body" weight={500}>
+          {COPY.whatGives}
+        </Text>
+        <LargeTargetRow
+          layout="stacked"
+          label={COPY.whatGives}
+          value={value.direction}
+          disabled={disabled}
+          onChange={(next) => onDirection(next as AnchorDirection)}
+          options={[
+            { value: "work_waits", label: COPY.gives.work_waits, description: COPY.gives.work_waitsBody },
+            { value: "routine_cut", label: COPY.gives.routine_cut, description: COPY.gives.routine_cutBody },
+            { value: "depends", label: COPY.gives.depends, description: COPY.gives.dependsBody },
+          ]}
+          className="[&>span:first-child]:sr-only"
+        />
+      </div>
+    </>
   );
 }
 

@@ -78,6 +78,12 @@ export interface StepFrameProps {
    * The primary and *Skip* take theirs through `busy`.
    */
   pending?: "back" | "finishLater" | null;
+  /**
+   * UX v1.3 §4 (the frame, amended; DAY-9): *Back* as ghost text on the
+   * action row's left, beside the header arrow and doing the same, so forward
+   * and back are both in thumb reach. The builder's screens set it.
+   */
+  backOnActionRow?: boolean;
   className?: string;
 }
 
@@ -97,6 +103,7 @@ export function StepFrame({
   stickyActions = true,
   caption,
   pending = null,
+  backOnActionRow = false,
   className,
 }: StepFrameProps) {
   const frameRef = React.useRef<HTMLDivElement>(null);
@@ -159,6 +166,16 @@ export function StepFrame({
         data-step-actions
         className={cn(STEP_FRAME_ACTIONS, stickyActions && STEP_FRAME_ACTIONS_STICKY)}
       >
+        {backOnActionRow && onBack !== undefined ? (
+          <Button
+            variant="ghost"
+            aria-busy={pending === "back" || undefined}
+            className={cn("me-auto", pending === "back" && "opacity-60")}
+            onClick={onBack}
+          >
+            {copy.back}
+          </Button>
+        ) : null}
         {skip === undefined ? null : (
           <Button variant="ghost" busy={skip.busy} disabled={offline} onClick={skip.onSkip}>
             {skip.label ?? copy.skip}

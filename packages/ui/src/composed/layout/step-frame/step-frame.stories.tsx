@@ -101,5 +101,21 @@ export const ActionsInFlow: Story = { args: { stickyActions: false } };
 
 /** UX v1.2 §4.13 (RUN-12): the day builder's second caption under the progress line. */
 export const WithCaption: Story = {
-  args: { step: 13, total: 14, caption: "Day A · 3 of 9", heading: "Train on this day?" },
+  args: { step: 4, total: 5, caption: "Day A · 4 of 17", heading: "Train on this day?" },
+};
+
+/**
+ * UX v1.3 §4 (DAY-9): the builder's *Back* on the action row's left, beside
+ * the screen's own ghost and the primary — forward and back in thumb reach.
+ */
+export const BackOnActionRow: Story = {
+  args: {
+    step: 4,
+    total: 5,
+    caption: "Day A · 4 of 17",
+    heading: "Train on this day?",
+    backOnActionRow: true,
+    skip: { label: "Not on this day", onSkip: () => {} },
+    primary: { label: "Next", onClick: () => {} },
+  },
 };

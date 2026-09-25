@@ -1,10 +1,12 @@
 /**
- * The day builder's strings — UX v1.2 §4.13, verbatim where the document
- * writes them; the rest `[COPY — needs Vesper sign-off]`. No glyph in here
- * (R29) — the glyphs are the plan's, the type's and the habits' own.
+ * The day builder's strings — UX v1.3 §4.4 for B1–B7 (DAY-9), v1.2 §4.13
+ * for the screens still behind them, verbatim where the documents write
+ * them; the rest `[COPY — needs Vesper sign-off]`. No glyph in here (R29) —
+ * the glyphs are the plan's, the work kind's and the habits' own.
  *
  * THE ROOM IS STATED AS ROOM (§3.10, §12.3): no shortfall word, no
  * judgement — the second number, and *runs to 9:12*, are the whole feedback.
+ * THE WORK IS THE PLAN'S (R46): nothing here names it by anything but *Work*.
  */
 export const DAY_BUILDER_COPY = {
   /* ------------------------------------------------------- your days -- */
@@ -47,7 +49,7 @@ export const DAY_BUILDER_COPY = {
   } as Record<string, string>,
 
   /* --------------------------------------------------------- the frame -- */
-  /** "Day A · 3 of 9" */
+  /** "Day A · 3 of 17" — the visible count (v1.3 §4.4). */
   caption: (name: string, step: number, total: number) => `${name} · ${step} of ${total}`,
   next: "Next",
   nextWithMinutes: (minutes: number) => `Next · ${minutes} min`,
@@ -62,13 +64,16 @@ export const DAY_BUILDER_COPY = {
     needs_days: "Pick at least one day first.",
     needs_wake: "Set a wake time first.",
     needs_lights_out: "Set lights out first.",
-    needs_work: "Pick a work-day type, or say there is no work on this day.",
+    /** [COPY] */
+    needs_work: "Say whether there is work on this day.",
   } as Record<string, string>,
 
-  /* ------------------------------------------------------------- 13a -- */
-  a: {
+  /* ------------------------------------------- B1 — name and days (§4.4) -- */
+  b01: {
     heading: "Build a day.",
-    body: "Most people have one or two. Give it a name and say which days it’s for.",
+    body: "Most people have two or three. Give it a name and say which days it’s for.",
+    /** The first plan only — `[COPY — Taylor's G4.1, made a line]`. */
+    helper: "If your days differ, start with the first work day of the week — the rest can start from this one.",
     name: "Name",
     whichDays: "Which days",
     chooseAnIcon: "Choose an icon",
@@ -79,25 +84,35 @@ export const DAY_BUILDER_COPY = {
     heldBy: (plan: string) => `${plan}’s`,
   },
 
-  /* ------------------------------------------------------------- 13b -- */
-  b: {
-    heading: (name: string) => `${name} — the shape of it.`,
-    work: "Work",
-    noWorkOnThisDay: "No work on this day",
+  /* --------------------------------------- B2 — up and lights out (R64) -- */
+  b02: {
+    heading: (name: string) => `${name} — when it starts and ends.`,
     upAt: "Up at",
-    workingBy: "Working by",
-    untilAbout: "Until about",
     lightsOut: "Lights out",
-    /** *2 h before work · 5 h 15 after.* */
-    spans: (before: string, after: string) => `${before} before work · ${after} after.`,
-    /** [COPY] On a no-work day. */
-    spanNoWork: (awake: string) => `${awake} awake.`,
+    phoneAway: "Phone away",
+    phoneAwayLine: "An hour before lights out is a common choice.",
+    /** *15 h 45 awake.* */
+    awake: (span: string) => `${span} awake.`,
   },
 
-  /* ------------------------------------------------------------- 13c -- */
-  c: {
+  /* ----------------------------------------- B3 — work on this day (R46) -- */
+  b03: {
+    heading: "Work on this day?",
+    work: "Work",
+    noWorkOnThisDay: "No work on this day",
+    /** `[COPY — R55]` */
+    foot: "Work is a block of time here. What happens inside it lives in your work tools.",
+    /** *2 h before work · 5 h 15 after.* */
+    spans: (before: string, after: string) => `${before} before work · ${after} after.`,
+  },
+
+  /* ------------------------------------------------ B4 — training (R52) -- */
+  b04: {
     heading: "Train on this day?",
-    body: "Pick what, then where it goes.",
+    yes: "Yes",
+    notRightNow: "Not right now",
+    addAWorkout: "Add a workout",
+    onThisDay: "On this day",
     when: "When",
     beforeWork: "Before work",
     midday: "Midday",
@@ -109,28 +124,79 @@ export const DAY_BUILDER_COPY = {
     foot: "Nothing is fixed. The morning can still swap or skip it.",
     notOnThisDay: "Not on this day",
     minutes: (n: number) => `${n} min`,
+    /** [COPY] Two workouts in one placement, ordered — *Before the routine, in order*. */
+    inOrder: (placement: string) => `${placement}, in order`,
   },
 
-  /* ------------------------------------------------------------- 13d -- */
-  d: {
+  /* ------------------------------------------------ B5 — getting ready -- */
+  b05: {
     heading: "Getting ready.",
     body: "What has to happen before work on this day, in order.",
     listName: "List name",
     newList: "New list",
     /** "Getting ready A" — the letter from the plan's name. */
     defaultName: (letter: string) => `Getting ready ${letter}`,
+    /** [COPY] The list on a *No work* day (v1.3 §4.4 B5). */
+    defaultNameNoWork: (letter: string) => `Getting going ${letter}`,
     pickerSearch: "Search",
     pickerEmpty: "No lists match.",
+    inOrder: "In order",
+    /** *10–20 min* — a starter's range. */
+    range: (min: number, max: number) => `${min}–${max} min`,
     oneOfTwo: "One of two",
     leaveOut: "Leave out on this day",
     notOnThisDay: "Not on this day",
     include: "Include",
     addAStep: "Add a step",
+    /** [COPY] Behind *Add a step*: a step that is not a starter. */
+    somethingElse: "Something else",
     /** *Length, Breakfast* — the stepper's accessible name. */
     lengthOf: (title: string) => `Length, ${title}`,
     /** *Getting ready A · 45 min · 8:15 to 9:00* */
     sticky: (name: string, minutes: number, from: string | null, to: string | null) =>
       from === null || to === null ? `${name} · ${minutes} min` : `${name} · ${minutes} min · ${from} to ${to}`,
+    /** [COPY] The list the plan pointed at is gone. */
+    listRemoved: "This list was removed — start a new one?",
+    /** [COPY] */
+    nothingYet: "Nothing yet.",
+    /** [COPY] One step's write failed — *Couldn't add Breakfast. Try again.* */
+    stepError: (title: string) => `Couldn’t add ${title}. Try again.`,
+  },
+
+  /* --------------------------------------- B6 — fixed on this day (R51) -- */
+  b06: {
+    heading: "Anything fixed on this day?",
+    body: "A stand-up, an appointment, a class. Things with a set time.",
+    otherDays: "Other days",
+    addOne: "Add one",
+    /** [COPY] *Add Thursday to Football?* */
+    addDaysTitle: (days: string, fixture: string) => `Add ${days} to ${fixture}?`,
+    addDaysBody: "The fixture keeps its other days.",
+    add: "Add",
+    /** *Thu · 19:00 · 90 min* */
+    detail: (days: string, at: string, minutes: number) => `${days} · ${at} · ${minutes} min`,
+    /** *+20 there · +20 back* — the second caption line when the travel is planned. */
+    travel: (there: number, back: number) => `+${there} there · +${back} back`,
+    nothingYet: "Nothing yet.",
+    skip: "Skip for now",
+  },
+
+  /* ----------------------------------------------- B7 — so far (R67) -- */
+  b07: {
+    heading: (name: string) => `${name}, so far.`,
+    body: "Up to the end of work. Tap a block to change it.",
+    /** [COPY] The routine's open band before B11 has built it. */
+    morningNotBuilt: "Morning routine · not built yet",
+  },
+
+  /* ------------------------------- the list screens behind B11–B13 (v1.2) -- */
+  d: {
+    listName: "List name",
+    pickerSearch: "Search",
+    pickerEmpty: "No lists match.",
+    oneOfTwo: "One of two",
+    /** *Length, Breakfast* — the stepper's accessible name. */
+    lengthOf: (title: string) => `Length, ${title}`,
     /** [COPY] The list the plan pointed at is gone. */
     listRemoved: "This list was removed — start a new one?",
     /** [COPY] */
@@ -170,23 +236,6 @@ export const DAY_BUILDER_COPY = {
     atATime: "At a time",
     at: "At",
     skip: "Skip for now",
-  },
-
-  /* ------------------------------------------------------------- 13g -- */
-  g: {
-    heading: "The evening.",
-    body: "What’s already in place on these days.",
-    otherDays: "Other days",
-    addOne: "Add one",
-    /** *Not on Day A* */
-    notOn: (plan: string) => `Not on ${plan}`,
-    /** [COPY] *Add Thursday to Football?* */
-    addDaysTitle: (days: string, fixture: string) => `Add ${days} to ${fixture}?`,
-    addDaysBody: "The fixture keeps its other days.",
-    add: "Add",
-    /** *Thu · 19:00 · 90 min* */
-    detail: (days: string, at: string, minutes: number) => `${days} · ${at} · ${minutes} min`,
-    nothingYet: "Nothing yet.",
   },
 
   /* ------------------------------------------------------------- 13h -- */

@@ -13,15 +13,21 @@ import { DAY_BUILDER_COPY as COPY } from "../copy";
 import type { DayBuilderApi } from "../use-day-builder";
 
 /**
- * 13g — the evening (UX v1.2 §4.13g).
+ * B6 — fixed on this day (UX v1.3 §4.4 B6, R51; v1.2 §4.13g renamed by
+ * DAY-9).
  *
  * MATCHED FIXTURES ARE PRESELECTED — those on any of the plan's weekdays;
  * un-selecting one writes `excludedFixtureIds`, and the fixture keeps its
  * days. *Other days* are the rest, unselected; selecting one ADDS THE
  * PLAN's DAYS TO THE FIXTURE after one line of confirm — a fixture is a
  * weekday fact (v1.1 §3.6), so a plan cannot hold one without its days.
+ * A fixture whose travel is planned carries a second caption line, *+20
+ * there · +20 back*; *Add one* opens the sheet with DAY-7's *Here · Away*.
+ *
+ * Re-saving a fixture for its days sends its place and travel back as they
+ * are — the save's defaults would otherwise put its travel to nothing.
  */
-export function ScreenEvening({ api, disabled }: { api: DayBuilderApi; disabled: boolean }) {
+export function ScreenFixed({ api, disabled }: { api: DayBuilderApi; disabled: boolean }) {
   const utils = trpc.useUtils();
   const save = trpc.fixture.save.useMutation();
   const plan = api.plan;
@@ -38,10 +44,19 @@ export function ScreenEvening({ api, disabled }: { api: DayBuilderApi; disabled:
 
   const detailOf = (fixture: FixtureView) => {
     const at = minutesOf(fixture.atClock);
-    return COPY.g.detail(
+    const first = COPY.b06.detail(
       fixture.weekdays.map((weekday) => WEEKDAY_SHORT[weekday]).join(" · "),
       at === null ? fixture.atClock : display(at),
       fixture.durationMin,
+    );
+    const travel = fixture.travel.planned && (fixture.travel.thereMin > 0 || fixture.travel.backMin > 0);
+    return travel ? (
+      <span className="flex flex-col items-end">
+        <span>{first}</span>
+        <span>{COPY.b06.travel(fixture.travel.thereMin, fixture.travel.backMin)}</span>
+      </span>
+    ) : (
+      first
     );
   };
 
@@ -60,6 +75,10 @@ export function ScreenEvening({ api, disabled }: { api: DayBuilderApi; disabled:
         habitId: fixture.habitId,
         kind: fixture.kind,
         icon: fixture.icon,
+        location: fixture.location,
+        travelThereMin: fixture.travel.thereMin,
+        travelBackMin: fixture.travel.backMin,
+        planTravel: fixture.travel.planned,
       });
       await utils.fixture.list.invalidate();
     } catch {
@@ -73,7 +92,7 @@ export function ScreenEvening({ api, disabled }: { api: DayBuilderApi; disabled:
     <div className="flex flex-col gap-(--space-5)">
       {fixtures.length === 0 ? (
         <Text as="p" variant="secondary" tone="secondary">
-          {COPY.g.nothingYet}
+          {COPY.b06.nothingYet}
         </Text>
       ) : null}
 
@@ -104,7 +123,7 @@ export function ScreenEvening({ api, disabled }: { api: DayBuilderApi; disabled:
       {others.length === 0 ? null : (
         <section className="flex flex-col gap-(--space-2)">
           <Text as="h2" variant="secondary" weight={500} tone="secondary">
-            {COPY.g.otherDays}
+            {COPY.b06.otherDays}
           </Text>
           <SelectRowList>
             {others.map((fixture) => (
@@ -126,8 +145,13 @@ export function ScreenEvening({ api, disabled }: { api: DayBuilderApi; disabled:
         </section>
       )}
 
-      <Button variant="secondary" disabled={disabled} onClick={() => setSheetOpen(true)} className="w-full wide:w-auto wide:self-start">
-        {COPY.g.addOne}
+      <Button
+        variant="secondary"
+        disabled={disabled}
+        onClick={() => setSheetOpen(true)}
+        className={fixtures.length === 0 ? "w-full" : "w-full wide:w-auto wide:self-start"}
+      >
+        {COPY.b06.addOne}
       </Button>
 
       <ConfirmDialog
@@ -135,9 +159,9 @@ export function ScreenEvening({ api, disabled }: { api: DayBuilderApi; disabled:
         onOpenChange={(open) => {
           if (!open) setConfirm(null);
         }}
-        title={confirm === null ? "" : COPY.g.addDaysTitle(missingDays.map((weekday) => WEEKDAY_LONG[weekday]).join(", "), confirm.title)}
-        description={COPY.g.addDaysBody}
-        confirmLabel={COPY.g.add}
+        title={confirm === null ? "" : COPY.b06.addDaysTitle(missingDays.map((weekday) => WEEKDAY_LONG[weekday]).join(", "), confirm.title)}
+        description={COPY.b06.addDaysBody}
+        confirmLabel={COPY.b06.add}
         cancelLabel={COPY.cancel}
         onConfirm={() => {
           const fixture = confirm;

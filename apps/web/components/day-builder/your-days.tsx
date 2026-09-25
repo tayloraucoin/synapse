@@ -3,13 +3,14 @@
 import * as React from "react";
 
 import type { DayPlanSummaryView } from "@syn/types";
-import { Button, HelperText, LoadingText, Text } from "@syn/ui";
+import { Button, HelperText, Text } from "@syn/ui";
 
 import { StepFrame, useStepNavigation } from "@/app/(setup)/_components/step-frame";
 import { useOnline } from "@/lib/hooks/use-online";
 import { setupRoute } from "@/lib/routes";
 import { trpc } from "@/lib/trpc/client";
 
+import { BuilderSkeleton } from "./builder-skeleton";
 import { DAY_BUILDER_COPY as COPY } from "./copy";
 import { DayBuilder } from "./day-builder";
 import { DayPlanCard } from "./day-plan-card";
@@ -45,7 +46,7 @@ export function YourDays({
   const remove = trpc.dayPlan.delete.useMutation();
 
   const [building, setBuilding] = React.useState<{ planId: string; screen: BuilderScreen } | null>(
-    editPlanId === null ? null : { planId: editPlanId, screen: "i" },
+    editPlanId === null ? null : { planId: editPlanId, screen: "b17" },
   );
   const [line, setLine] = React.useState<string | null>(null);
   const [finishing, setFinishing] = React.useState(false);
@@ -62,7 +63,7 @@ export function YourDays({
     try {
       const made = await create.mutateAsync({});
       await refresh();
-      setBuilding({ planId: made.id, screen: "a" });
+      setBuilding({ planId: made.id, screen: "b01" });
     } catch {
       setLine(COPY.saveError);
     } finally {
@@ -106,7 +107,7 @@ export function YourDays({
           plan={plan}
           templates={templates.data ?? []}
           disabled={!online}
-          onEdit={() => setBuilding({ planId: plan.id, screen: "i" })}
+          onEdit={() => setBuilding({ planId: plan.id, screen: "b17" })}
           onContinue={() => setBuilding({ planId: plan.id, screen: resumeScreen(plan) })}
           onDuplicate={() => {
             setLine(null);
@@ -114,7 +115,7 @@ export function YourDays({
               .mutateAsync({ id: plan.id })
               .then(async (copy) => {
                 await refresh();
-                setBuilding({ planId: copy.id, screen: "a" });
+                setBuilding({ planId: copy.id, screen: "b01" });
               })
               .catch(() => setLine(COPY.saveError));
           }}
@@ -134,7 +135,7 @@ export function YourDays({
 
   const body = (
     <>
-      {plans.isLoading ? <LoadingText /> : null}
+      {plans.isLoading ? <BuilderSkeleton /> : null}
       {plans.isSuccess && list.length === 0 && embedded ? (
         <Text as="p" variant="secondary" tone="secondary">
           {COPY.noDaysYet}
@@ -182,9 +183,9 @@ export function YourDays({
 
 /** A draft resumes where its parts stop: the first list it has no reference for, else the review. */
 export function resumeScreen(plan: DayPlanSummaryView): BuilderScreen {
-  if (plan.weekdays.length === 0) return "a";
-  if (plan.gettingReady === null) return "d";
-  if (plan.morning === null) return "e";
-  if (plan.windDown === null) return "h";
-  return "i";
+  if (plan.weekdays.length === 0) return "b01";
+  if (plan.gettingReady === null) return "b05";
+  if (plan.morning === null) return "b11";
+  if (plan.windDown === null) return "b12";
+  return "b17";
 }

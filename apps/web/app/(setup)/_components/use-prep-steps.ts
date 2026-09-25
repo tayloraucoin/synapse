@@ -25,6 +25,11 @@ import { SETUP_COPY as COPY } from "./copy";
  * THE LENGTHS ARE THE SLOTS' (`duration_min`), written by the row's stepper
  * on its debounce; the order is the slots' order, written by `moveSlot` on a
  * drop. The prep template exists from the first visit, as DYN-11 made it.
+ *
+ * UX v1.3 §4.4 B5 (DAY-9): given a `templateId`, the ticks write into THAT
+ * list — the plan's own *Getting ready A* — and nothing creates the profile's
+ * template; `null` means the list is not there yet and nothing writes. Left
+ * out, it is screen 7's profile list as before.
  */
 
 export type PrepRow = {
@@ -40,18 +45,19 @@ export type PrepRow = {
   habitId: string | null;
 };
 
-export function usePrepSteps() {
+export function usePrepSteps(options: { templateId?: string | null } = {}) {
   const utils = trpc.useUtils();
-  const prepList = trpc.template.list.useQuery({ includeArchived: false, kind: "prep" });
+  const given = options.templateId !== undefined;
+  const prepList = trpc.template.list.useQuery({ includeArchived: false, kind: "prep" }, { enabled: !given });
   const createTemplate = trpc.template.create.useMutation();
-  const templateId = prepList.data?.[0]?.id ?? null;
+  const templateId = given ? (options.templateId ?? null) : (prepList.data?.[0]?.id ?? null);
 
   const creating = React.useRef(false);
   React.useEffect(() => {
-    if (!prepList.isSuccess || templateId !== null || creating.current) return;
+    if (given || !prepList.isSuccess || templateId !== null || creating.current) return;
     creating.current = true;
     void createTemplate.mutateAsync({ kind: "prep" }).then(() => utils.template.list.invalidate());
-  }, [prepList.isSuccess, templateId, createTemplate, utils]);
+  }, [given, prepList.isSuccess, templateId, createTemplate, utils]);
 
   const detail = trpc.template.get.useQuery({ id: templateId ?? "" }, { enabled: templateId !== null });
   const prepHabits = trpc.habit.list.useQuery({ includeArchived: false, blockKind: "prep" });
@@ -252,7 +258,7 @@ export function usePrepSteps() {
 
   return {
     templateId,
-    ready: prepList.isSuccess && templateId !== null && !detail.isLoading,
+    ready: (given || prepList.isSuccess) && templateId !== null && !detail.isLoading,
     rows,
     slots,
     habits,

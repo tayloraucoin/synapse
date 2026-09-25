@@ -18,7 +18,7 @@ import type {
 import type { DayPlanPatchInput } from "@syn/validators";
 import { formatClockFromMinutes } from "@syn/utils";
 
-import { readPreferences, type UserPreferencesRow } from "../user/preferences";
+import { effectiveEveningTimes, readPreferences, type UserPreferencesRow } from "../user/preferences";
 import { defaultFlowFor } from "./anchors";
 import { listTemplates } from "./templates";
 
@@ -179,7 +179,13 @@ export function resolvePlanAnchors(
     workStart: noWork ? null : (plan.workStartTime ?? workType?.startClock ?? clock(profile.workStartTime)),
     workEnd: noWork ? null : (plan.workEndTime ?? workType?.endClock ?? clock(profile.workEndTime)),
     lightsOut: plan.lightsOutTime ?? clock(profile.lightsOutTime),
-    devicesOff: plan.devicesOffTime ?? clock(profile.devicesOffTimeEffective),
+    // v1.3 §4.4 B2 (DAY-9): phone away follows the plan's OWN lights out until touched.
+    devicesOff:
+      plan.devicesOffTime ??
+      (plan.lightsOutTime !== null
+        ? effectiveEveningTimes({ lightsOutTime: plan.lightsOutTime, devicesOffTime: null, journalReminderTime: null })
+            .devicesOffTimeEffective
+        : clock(profile.devicesOffTimeEffective)),
   };
 }
 
