@@ -11,12 +11,14 @@ import {
   defaultTemplateFor,
   materializeInTx,
   readDayProfile,
+  trainingKey,
   type BlockAssignment,
   type BlockRow,
   type DayProfile,
   type DayRow,
   type Tx,
 } from "./materialize-day";
+import { isUntouchedBlock } from "./untouched";
 
 /**
  * The first week, pre-filled — UX v1.1 §4.13 (DYN-5), and *Copy last week*'s
@@ -219,10 +221,16 @@ export async function defaultPlanFor(
  * LEAVES POOLED: the focus (typical days and counts, as before) and any list
  * the plan does not name (the morning falls to the overflow mode's default).
  *
- * ONE WORKOUT PER DAY in RUN-5: the record has one training block per day
- * (TD-2's unique index allows more; `materializeInTx` and `confirmDay`
- * assume one), so the plan's first placed workout lands and the rest are
- * logged as a follow-on. The plan stores them all.
+ * EVERY PLACED WORKOUT (UX v1.3 R52, TD-24; DAY-6): one training block per
+ * workout, keyed by it (`trainingKey`), with its placement from the start
+ * and the plan's order among those that share one. RUN-5 placed the first
+ * alone.
+ *
+ * UX v1.3 (TD-25, TD-26): the after-work list becomes one `transition` block
+ * when the plan has work; free time's pool becomes the `activity` block,
+ * POOLED with its template — its fixtures pinned, nothing else until a tap
+ * (`chooseFromPool`). A plan without a pool keeps the default activity
+ * template, as before; an archived list is as good as none.
  */
 export async function applyPlanToDay(
   tx: Tx,
@@ -240,7 +248,7 @@ export async function applyPlanToDay(
       ? await plannedDayFor(tx, userId, prefs, weekdayIndex(date))
       : await plannedDayById(tx, userId, prefs, planId);
   if (!planned) return "no_plan";
-  const { plan, anchors, workout } = planned;
+  const { plan, anchors, workouts } = planned;
 
   const orient = await defaultTemplateFor(tx, userId, "orient");
   const windDown = plan.windDownTemplateId ?? (await defaultTemplateFor(tx, userId, "wind_down"));
@@ -258,9 +266,26 @@ export async function applyPlanToDay(
       : [{ kind: "work" as const, templateId: plan.workTemplateId }]),
     { kind: "wind_down", templateId: windDown },
   ];
-  if (workout) blocks.push({ kind: "training", templateId: null });
-  const activity = await defaultTemplateFor(tx, userId, "activity");
-  if (activity !== null) blocks.push({ kind: "activity", templateId: activity });
+  workouts.forEach((entry, order) => {
+    blocks.push({
+      kind: "training",
+      templateId: null,
+      key: trainingKey(entry.habitId),
+      placement: entry.placement,
+      order,
+    });
+  });
+  // After work: one transition block, only on a day with work (v1.3 TD-25; B14 is skipped on *No work*).
+  const afterWork = plan.workTemplateId === null ? null : await liveTemplate(tx, userId, plan.afterWorkTemplateId);
+  if (afterWork !== null) blocks.push({ kind: "transition", templateId: afterWork });
+  // Free time: the pool, pooled with its template (TD-26); else the default activity template.
+  const pool = await liveTemplate(tx, userId, plan.activityTemplateId);
+  if (pool !== null) {
+    blocks.push({ kind: "activity", templateId: pool, pooled: true });
+  } else {
+    const activity = await defaultTemplateFor(tx, userId, "activity");
+    if (activity !== null) blocks.push({ kind: "activity", templateId: activity });
+  }
 
   // The focus stays the rotation's (typical days, counts) — a plan does not name one.
   const defaults = await defaultPlanFor(tx, userId, profile, date, weekDatesForCounts);
@@ -281,27 +306,44 @@ export async function applyPlanToDay(
     },
   });
 
-  if (workout) await placePlannedWorkout(tx, userId, materialised.day, materialised.blocks, workout);
+  for (const entry of workouts) {
+    const blockId = materialised.blockIdByKey.get(trainingKey(entry.habitId));
+    const block = blockId === undefined ? undefined : materialised.blocks.find((row) => row.id === blockId);
+    if (block) await placePlannedWorkout(tx, userId, materialised.day, block, entry);
+  }
+  // The workouts' items are in; lay the day again so their blocks have times.
+  if (workouts.length > 0) await materializeInTx(tx, userId, { date, blocks: "keep" });
   return "planned";
 }
 
-/** The plan's workout onto the day's training block: its placement and its item, at build. */
+/** A template id when the row exists and is not archived; null otherwise. */
+async function liveTemplate(tx: Tx, userId: string, id: string | null): Promise<string | null> {
+  if (id === null) return null;
+  const [row] = await tx
+    .select({ id: templates.id })
+    .from(templates)
+    .where(and(eq(templates.id, id), eq(templates.userId, userId), isNull(templates.archivedAt)))
+    .limit(1);
+  return row?.id ?? null;
+}
+
+/** One of the plan's workouts onto its own training block: its placement and its item, at build. */
 async function placePlannedWorkout(
   tx: Tx,
   userId: string,
   day: DayRow,
-  blocks: readonly BlockRow[],
+  block: BlockRow,
   workout: { habitId: string; placement: TrainingPlacement },
 ): Promise<void> {
-  const block = blocks.find((row) => row.kind === "training");
-  if (!block) return;
   const habit = (await readHabits(tx, userId, [workout.habitId])).get(workout.habitId);
   if (!habit) return;
 
-  await tx
-    .update(dayBlocks)
-    .set({ placement: workout.placement, state: "planned", updatedAt: new Date() })
-    .where(eq(dayBlocks.id, block.id));
+  if (block.placement !== workout.placement && isUntouchedBlock(block)) {
+    await tx
+      .update(dayBlocks)
+      .set({ placement: workout.placement, updatedAt: new Date() })
+      .where(eq(dayBlocks.id, block.id));
+  }
 
   // The workout and, when its travel is planned, the rows beside it (UX v1.2
   // §3.7, TD-12) — the same writer the pick uses.

@@ -2,7 +2,7 @@ import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import { dayItems, habits } from "@syn/db";
 import type { HabitVersion, IconValue, WorkoutLocation } from "@syn/types";
-import { weekdayIndex } from "@syn/utils";
+import { wallClockToInstant, weekdayIndex } from "@syn/utils";
 
 import type { BlockRow, Tx } from "./materialize-day";
 import { isUntouchedItem } from "./untouched";
@@ -194,18 +194,81 @@ export async function writeWorkoutRows(
     workoutId = row.id;
   }
 
-  const ends = block.items.filter(
-    (item) => item.origin === "travel" && item.parentItemId === workoutId,
+  await writeTravelRows(
+    tx,
+    userId,
+    dayId,
+    block,
+    { id: workoutId, lifePriority: workout.lifePriority, thereTitle: travelDestination(workout.location) },
+    { thereMin: workout.travelThereMin, backMin: workout.travelBackMin, planned: workout.planTravel },
+    { kind: "stacked" },
   );
-  const wanted: Array<{ key: "there" | "back"; minutes: number; sortOrder: number }> = [];
-  if (travel && workout.travelThereMin > 0) wanted.push({ key: "there", minutes: workout.travelThereMin, sortOrder: 0 });
-  if (travel && workout.travelBackMin > 0) wanted.push({ key: "back", minutes: workout.travelBackMin, sortOrder: 2 });
+
+  return { workoutId };
+}
+
+/**
+ * Where a parent's two travel rows go (UX v1.3 TD-27):
+ *
+ *  - `stacked` — a workout's: sort 0 and sort 2 around the workout at sort 1,
+ *    flowing in the training block's stack (TD-12, as RUN-6 wrote them).
+ *  - `pinned` — a fixture's: a pin that ends where the fixture starts and a
+ *    pin that starts where it ends, in the fixture's block, because that block
+ *    holds other items and only a pin sits exactly beside a pin. A *there*
+ *    that would start before midnight of the day is not written.
+ */
+export type TravelPosition =
+  | { kind: "stacked" }
+  | { kind: "pinned"; date: string; timezone: string; startMin: number; durationMin: number };
+
+/**
+ * The two travel rows beside a parent item — a workout (TD-12) or a fixture
+ * (UX v1.3 R51, TD-27): *→ {there}* and *← Home*, `origin = travel`,
+ * `parent_item_id` = the parent. One writer for both parents, so the rows are
+ * always the same rows. The parent's own length never includes them. A row is
+ * recognised by its arrow (the *there* row's title starts `→`); an untouched
+ * row is rewritten, a touched one is a record and left, and an untouched end
+ * whose travel is no longer planned goes.
+ */
+export async function writeTravelRows(
+  tx: Tx,
+  userId: string,
+  dayId: string,
+  block: Pick<BlockRow, "id" | "items">,
+  parent: { id: string; lifePriority: number; thereTitle: string },
+  travel: { thereMin: number; backMin: number; planned: boolean },
+  position: TravelPosition,
+): Promise<void> {
+  const ends = block.items.filter((item) => item.origin === "travel" && item.parentItemId === parent.id);
+  const isThereRow = (item: { title: string }) => item.title.startsWith("→");
+
+  type End = { key: "there" | "back"; minutes: number; sortOrder: number; pinAtMin: number | null };
+  const wanted: End[] = [];
+  const pinned = position.kind === "pinned";
+  if (travel.planned && travel.thereMin > 0) {
+    const pinAtMin = pinned ? position.startMin - travel.thereMin : null;
+    if (pinAtMin === null || pinAtMin >= 0) {
+      wanted.push({ key: "there", minutes: travel.thereMin, sortOrder: 0, pinAtMin });
+    }
+  }
+  if (travel.planned && travel.backMin > 0) {
+    wanted.push({
+      key: "back",
+      minutes: travel.backMin,
+      sortOrder: 2,
+      pinAtMin: pinned ? position.startMin + position.durationMin : null,
+    });
+  }
 
   for (const end of wanted) {
     const isThere = end.key === "there";
-    const found = ends.find((item) => (isThere ? item.sortOrder < 1 : item.sortOrder > 1));
+    const found = ends.find((item) => isThereRow(item) === isThere);
+    const pinStart =
+      position.kind === "pinned" && end.pinAtMin !== null
+        ? wallClockToInstant(position.date, minutesToClock(end.pinAtMin), position.timezone)
+        : null;
     const row = {
-      title: isThere ? `→ ${travelDestination(workout.location)}` : "← Home",
+      title: isThere ? `→ ${parent.thereTitle}` : "← Home",
       icon: isThere ? TRAVEL_THERE_ICON : TRAVEL_BACK_ICON,
       type: "task_appointment" as const,
       quantityUnit: null,
@@ -214,34 +277,47 @@ export async function writeWorkoutRows(
       timeMode: "fixed_time" as const,
       durationMin: end.minutes,
       gapBeforeMin: 0,
-      pinned: false,
-      priority: workout.lifePriority,
+      pinned: pinStart !== null,
+      priority: parent.lifePriority,
       scheduling: "soft" as const,
       sortOrder: end.sortOrder,
       templateNameSnapshot: null,
       habitId: null,
       templateSlotId: null,
       origin: "travel" as const,
-      parentItemId: workoutId,
+      parentItemId: parent.id,
+      ...(pinStart === null
+        ? {}
+        : { scheduledStart: pinStart, scheduledEnd: new Date(pinStart.getTime() + end.minutes * 60_000) }),
     };
     if (found && isUntouchedItem(found)) {
       await tx.update(dayItems).set({ ...row, updatedAt: new Date() }).where(eq(dayItems.id, found.id));
     } else if (!found) {
-      await tx.insert(dayItems).values({ ...row, userId, dayId, dayBlockId: block.id });
+      await tx.insert(dayItems).values({
+        ...row,
+        userId,
+        dayId,
+        dayBlockId: block.id,
+        // A pinned row's time is decided at build, as its fixture's is (TD-5).
+        ...(pinStart === null ? {} : { originalScheduledStart: pinStart }),
+      });
     }
   }
 
   // Travel no longer planned: the untouched ends go; a touched one is a record.
   const stale = ends.filter(
-    (item) =>
-      isUntouchedItem(item) &&
-      !wanted.some((end) => (end.key === "there" ? item.sortOrder < 1 : item.sortOrder > 1)),
+    (item) => isUntouchedItem(item) && !wanted.some((end) => (end.key === "there") === isThereRow(item)),
   );
   if (stale.length > 0) {
     await tx.delete(dayItems).where(inArray(dayItems.id, stale.map((item) => item.id)));
   }
+}
 
-  return { workoutId };
+/** Minutes from the day's midnight → "H:mm", past 24:00 allowed (the zone helper rolls it). */
+function minutesToClock(minutes: number): string {
+  const hour = Math.floor(minutes / 60);
+  const minute = ((minutes % 60) + 60) % 60;
+  return `${hour}:${String(minute).padStart(2, "0")}`;
 }
 
 /** A habit as a pick-made item: no slot, its own snapshot. */

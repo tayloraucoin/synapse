@@ -37,6 +37,7 @@ import {
 
 import { ensurePhoneAwayHabit } from "../library/placed-habits";
 import { walkDurationOf } from "../plan/to-view";
+import { writeTravelRows } from "./habit-item";
 import {
   layOutDay,
   type DayLayout,
@@ -81,7 +82,58 @@ export type BlockAssignment = {
   kind: BlockKind;
   /** Null: no template. `"pool"`: decided in the morning, holds nothing yet. */
   templateId: string | null | "pool";
+  /**
+   * UX v1.3 TD-26 (DAY-6): pooled WITH its template — free time's pool
+   * (*Evenings A*) waits on the day with `template_id` set, holding only its
+   * fixtures until a tap chooses from it.
+   */
+  pooled?: boolean;
+  /**
+   * UX v1.3 TD-24 (DAY-6): which block this is when a kind may appear more
+   * than once — `training:<habitId>` for a placed workout; the kind otherwise.
+   */
+  key?: string;
+  /** A placed training block's placement, written when the block is made. */
+  placement?: TrainingPlacement | null;
+  /** The plan's list index, ordering training blocks that share a placement. */
+  order?: number;
 };
+
+/** A placed workout's block key (TD-24). */
+export const trainingKey = (habitId: string): string => `training:${habitId}`;
+
+/**
+ * The assignments a day already has, for a caller that re-lays what is there
+ * or swaps one block (UX v1.3 TD-24, TD-26; DAY-6). Each training block keeps
+ * its own key (the workout it holds, else its row), its placement and its
+ * order, so a re-lay never folds two workouts into one block; a pooled block
+ * keeps its template; the two halves of a split work container are one.
+ */
+export function assignmentsFromBlocks(blocks: readonly BlockRow[]): BlockAssignment[] {
+  const assignments: BlockAssignment[] = [];
+  const sorted = [...blocks].sort((a, b) => a.sortOrder - b.sortOrder);
+  for (const [index, row] of sorted.entries()) {
+    if (row.kind === "work" && assignments.some((entry) => entry.kind === "work")) continue;
+    const pooled = row.state === "pooled";
+    if (row.kind === "training") {
+      const workout = row.items.find((item) => item.type === "workout" && item.habitId !== null);
+      assignments.push({
+        kind: "training",
+        templateId: row.templateId,
+        key: workout?.habitId ? trainingKey(workout.habitId) : `training:row:${row.id}`,
+        placement: row.placement,
+        order: index,
+      });
+      continue;
+    }
+    assignments.push({
+      kind: row.kind,
+      templateId: pooled && row.templateId === null ? "pool" : row.templateId,
+      ...(pooled ? { pooled: true } : {}),
+    });
+  }
+  return assignments;
+}
 
 export type MaterializeInput = {
   date: string;
@@ -580,16 +632,25 @@ export async function defaultTemplateFor(
  * Where each block sits — the profile's order for the six, and the two
  * placeable kinds by their placement (after the morning until placed).
  */
-export function orderBlocks<T extends { kind: BlockKind; placement: TrainingPlacement | null; splitIndex: 0 | 1 | null }>(
+export function orderBlocks<
+  T extends {
+    kind: BlockKind;
+    placement: TrainingPlacement | null;
+    splitIndex: 0 | 1 | null;
+    /** UX v1.3 TD-24: the plan's list index for training blocks sharing a placement. */
+    order?: number;
+  },
+>(
   blocks: readonly T[],
   blockOrder: readonly BlockKind[],
 ): T[] {
   const rank = new Map<BlockKind, number>();
   blockOrder.forEach((kind, index) => rank.set(kind, index * 10));
-  // UX v1.3 (DAY-3): an order saved before `transition` existed lacks it — after work,
-  // past the split container's second half (`work + 6`), before whatever follows.
+  // UX v1.3 (DAY-3, DAY-6): an order saved before `transition` existed lacks it —
+  // after work, past the split container's second half (`work + 6`) and the
+  // after-work training (`work + 8`) and break (`work + 9`), before what follows.
   const workRank = rank.get("work");
-  if (!rank.has("transition") && workRank !== undefined) rank.set("transition", workRank + 8);
+  if (!rank.has("transition") && workRank !== undefined) rank.set("transition", workRank + 9.5);
   for (const kind of DEFAULT_BLOCK_ORDER) {
     if (!rank.has(kind)) rank.set(kind, rank.size * 10);
   }
@@ -618,16 +679,25 @@ export function orderBlocks<T extends { kind: BlockKind; placement: TrainingPlac
     }
   };
 
-  return [...blocks].sort((a, b) => position(a) - position(b));
+  // Two workouts with one placement stack in the plan's order (v1.3 §3.15); the
+  // sort is stable, so blocks without an order keep the order they came in.
+  const tie = (block: T): number => (block.kind === "training" ? (block.order ?? 0) / 1000 : 0);
+  return [...blocks].sort((a, b) => position(a) + tie(a) - (position(b) + tie(b)));
 }
 
 /* ------------------------------------------------------------ desired -- */
 
 type DesiredBlock = {
+  /** The kind, or `training:<habitId>` / `training:row:<id>` for a training block (TD-24). */
+  key: string;
   kind: BlockKind;
   templateId: string | null;
   pooled: boolean;
   splitIndex: 0 | 1 | null;
+  /** Training only: written on create and on an untouched re-point; `undefined` leaves it. */
+  placement?: TrainingPlacement | null;
+  /** Training only: the plan's list index (orders blocks sharing a placement). */
+  order?: number;
 };
 
 export type DesiredItem = {
@@ -771,7 +841,37 @@ function markerPosition(items: readonly DesiredItem[]): number {
 
 /* --------------------------------------------------------- reconcile -- */
 
-export type BlockRowWithSplit = BlockRow & { splitIndex: 0 | 1 | null };
+export type BlockRowWithSplit = BlockRow & {
+  splitIndex: 0 | 1 | null;
+  /** The desired block's key this row answered (TD-24); absent outside a materialise. */
+  key?: string;
+  order?: number;
+};
+
+/**
+ * Which existing row answers a desired block (UX v1.3 TD-24, DAY-6). A
+ * training block is matched BY THE WORKOUT IT HOLDS — never by kind alone,
+ * which would re-point a second workout onto the first — then by an empty
+ * training block (one with no workout yet), then not at all (created). A
+ * `training:row:<id>` key (a re-lay of what is there) matches its own row.
+ * Every other kind matches by kind, as before.
+ */
+function matchIndex(remaining: readonly BlockRow[], want: DesiredBlock): number {
+  if (want.kind !== "training") return remaining.findIndex((row) => row.kind === want.kind);
+  if (want.key.startsWith("training:row:")) {
+    const id = want.key.slice("training:row:".length);
+    return remaining.findIndex((row) => row.id === id);
+  }
+  const holds = (row: BlockRow): string | null =>
+    row.items.find((item) => item.type === "workout" && item.habitId !== null)?.habitId ?? null;
+  if (want.key.startsWith("training:")) {
+    const habitId = want.key.slice("training:".length);
+    const byWorkout = remaining.findIndex((row) => row.kind === "training" && holds(row) === habitId);
+    if (byWorkout !== -1) return byWorkout;
+    return remaining.findIndex((row) => row.kind === "training" && holds(row) === null);
+  }
+  return remaining.findIndex((row) => row.kind === "training");
+}
 
 type ReconcileBlocksResult = {
   blocks: BlockRowWithSplit[];
@@ -799,7 +899,7 @@ async function reconcileBlocks(
   const survivors: BlockRowWithSplit[] = [];
 
   for (const want of desired) {
-    const index = remaining.findIndex((row) => row.kind === want.kind);
+    const index = matchIndex(remaining, want);
     const template = want.templateId === null ? null : templatesById.get(want.templateId) ?? null;
     const state: DayBlockState = want.pooled ? "pooled" : "planned";
 
@@ -813,6 +913,8 @@ async function reconcileBlocks(
           templateId: template?.id ?? null,
           templateNameSnapshot: template?.name ?? null,
           state,
+          // A placed workout's block knows its place from the start (TD-24).
+          placement: want.placement ?? null,
           // Provisional; the two-pass renumber below writes the real order.
           sortOrder: -1 - survivors.length,
         })
@@ -825,13 +927,15 @@ async function reconcileBlocks(
         templateId: template?.id ?? null,
         templateNameSnapshot: template?.name ?? null,
         state,
-        placement: null,
+        placement: want.placement ?? null,
         sortOrder: 0,
         scheduledStart: null,
         scheduledEnd: null,
         originalScheduledStart: null,
         items: [],
         splitIndex: want.splitIndex,
+        key: want.key,
+        order: want.order,
       });
       continue;
     }
@@ -842,12 +946,14 @@ async function reconcileBlocks(
     if (isUntouchedBlock(row)) {
       const nextState: DayBlockState =
         row.state === "not_today" ? row.state : want.pooled ? "pooled" : "planned";
+      const placement = want.placement === undefined ? row.placement : want.placement;
       await tx
         .update(dayBlocks)
         .set({
           templateId: template?.id ?? null,
           templateNameSnapshot: template?.name ?? row.templateNameSnapshot,
           state: nextState,
+          placement,
           updatedAt: new Date(),
         })
         .where(eq(dayBlocks.id, row.id));
@@ -857,7 +963,10 @@ async function reconcileBlocks(
         templateId: template?.id ?? null,
         templateNameSnapshot: template?.name ?? row.templateNameSnapshot,
         state: nextState,
+        placement,
         splitIndex: want.splitIndex,
+        key: want.key,
+        order: want.order,
       });
       continue;
     }
@@ -870,7 +979,13 @@ async function reconcileBlocks(
         .where(eq(dayBlocks.id, row.id));
     }
     counts.kept += 1;
-    survivors.push({ ...row, templateId: template?.id ?? null, splitIndex: want.splitIndex });
+    survivors.push({
+      ...row,
+      templateId: template?.id ?? null,
+      splitIndex: want.splitIndex,
+      key: want.key,
+      order: want.order,
+    });
   }
 
   // Blocks whose assignment is gone.
@@ -1226,7 +1341,13 @@ export async function materializeInTx(
   tx: Tx,
   userId: string,
   input: MaterializeInput,
-): Promise<{ result: MaterializeResult; day: DayRow; profile: DayProfile; blocks: BlockRow[] }> {
+): Promise<{
+  result: MaterializeResult;
+  day: DayRow;
+  profile: DayProfile;
+  blocks: BlockRow[];
+  blockIdByKey: ReadonlyMap<string, string>;
+}> {
   const accountProfile = await readDayProfile(tx, userId);
   const day = await ensureDayRow(tx, userId, accountProfile, input);
   // From here the profile is the day's (TD-21): its own anchors where set.
@@ -1235,29 +1356,32 @@ export async function materializeInTx(
 
   /* -- 1. desired blocks ------------------------------------------------ */
 
-  const wanted = new Map<BlockKind, DesiredBlock>();
-  const put = (kind: BlockKind, templateId: string | null | "pool"): void => {
-    wanted.set(kind, {
-      kind,
-      templateId: templateId === "pool" ? null : templateId,
-      pooled: templateId === "pool",
+  // Keyed by `key` (the kind, or a training block's own key — TD-24), so a
+  // kind that may appear more than once is more than one entry.
+  const wanted = new Map<string, DesiredBlock>();
+  const put = (assignment: BlockAssignment): void => {
+    const key = assignment.key ?? assignment.kind;
+    wanted.set(key, {
+      key,
+      kind: assignment.kind,
+      templateId: assignment.templateId === "pool" ? null : assignment.templateId,
+      pooled: assignment.templateId === "pool" || assignment.pooled === true,
       splitIndex: null,
+      ...(assignment.placement !== undefined ? { placement: assignment.placement } : {}),
+      ...(assignment.order !== undefined ? { order: assignment.order } : {}),
     });
   };
 
-  if (input.blocks === "keep") {
-    for (const row of existing) {
-      if (row.kind === "work" && wanted.has("work")) continue;
-      put(row.kind, row.state === "pooled" ? "pool" : row.templateId);
-    }
-  } else {
-    for (const assignment of input.blocks) put(assignment.kind, assignment.templateId);
+  for (const assignment of input.blocks === "keep" ? assignmentsFromBlocks(existing) : input.blocks) {
+    // Two entries for one workout: the second is ignored (the plan's list holds each once).
+    if (assignment.key !== undefined && wanted.has(assignment.key)) continue;
+    put(assignment);
   }
 
   if (day.shape === "unstructured") {
     // Orient and wind-down only; everything else is added on the day (§3.9).
-    for (const kind of [...wanted.keys()]) {
-      if (kind !== "orient" && kind !== "wind_down") wanted.delete(kind);
+    for (const [key, block] of [...wanted.entries()]) {
+      if (block.kind !== "orient" && block.kind !== "wind_down") wanted.delete(key);
     }
   }
 
@@ -1266,7 +1390,7 @@ export async function materializeInTx(
   for (const kind of ["orient", "wind_down"] as const) {
     if (wanted.has(kind)) continue;
     const kept = existing.find((row) => row.kind === kind);
-    put(kind, kept ? kept.templateId : await defaultTemplateFor(tx, userId, kind));
+    put({ kind, templateId: kept ? kept.templateId : await defaultTemplateFor(tx, userId, kind) });
   }
 
   // A fixture lands in its block whatever the day's shape; a block that does
@@ -1283,6 +1407,11 @@ export async function materializeInTx(
       scheduling: fixtures.scheduling,
       habitId: fixtures.habitId,
       icon: fixtures.icon,
+      // UX v1.3 R51, TD-27 (0009): where, and the travel beside the pin.
+      location: fixtures.location,
+      travelThereMin: fixtures.travelThereMin,
+      travelBackMin: fixtures.travelBackMin,
+      planTravel: fixtures.planTravel,
       habitTitle: habits.title,
       habitIcon: habits.icon,
       habitType: habits.type,
@@ -1306,7 +1435,7 @@ export async function materializeInTx(
       day.shape === "unstructured" && fixture.blockKind === "work"
         ? "activity"
         : fixture.blockKind;
-    if (!wanted.has(kind)) put(kind, null);
+    if (!wanted.has(kind)) put({ kind, templateId: null });
   }
 
   // A split container survives as two rows while it is touched.
@@ -1318,7 +1447,7 @@ export async function materializeInTx(
       const first = wanted.get("work");
       if (first) {
         first.splitIndex = 0;
-        desiredBlocks.push({ ...first, splitIndex: 1 });
+        desiredBlocks.push({ ...first, key: "work:1", splitIndex: 1 });
       }
     }
   }
@@ -1449,6 +1578,42 @@ export async function materializeInTx(
     itemCounts.kept += counts.kept;
   }
 
+  /* -- 3b. a fixture's travel, beside its pin (UX v1.3 R51, TD-27) ------ */
+
+  // The same writer a workout's travel uses (`writeTravelRows`). Every fixture
+  // on the day passes through it — one whose travel is no longer planned has
+  // its untouched ends removed there. The rows are pins either side of the
+  // fixture, so `stackBlock` is unchanged and the fixture's length is its own.
+  if (todaysFixtures.length > 0) {
+    const withItems = await readDayBlocks(tx, userId, day.id);
+    for (const fixture of todaysFixtures) {
+      for (const block of withItems) {
+        const pin = block.items.find((item) => item.origin === "fixture" && item.title === fixture.title);
+        if (!pin) continue;
+        await writeTravelRows(
+          tx,
+          userId,
+          day.id,
+          block,
+          { id: pin.id, lifePriority: pin.priority, thereTitle: fixture.location ?? fixture.title },
+          {
+            thereMin: fixture.travelThereMin,
+            backMin: fixture.travelBackMin,
+            planned: fixture.planTravel,
+          },
+          {
+            kind: "pinned",
+            date: day.date,
+            timezone: day.timezone,
+            startMin: clockMinutes(clockOf(fixture.atTime)),
+            durationMin: fixture.durationMin,
+          },
+        );
+        break;
+      }
+    }
+  }
+
   /* -- 4. lay out and write the times ----------------------------------- */
 
   const blocks = await readDayBlocks(tx, userId, day.id);
@@ -1468,7 +1633,16 @@ export async function materializeInTx(
     ...itemCounts,
   };
 
-  return { result, day, profile, blocks: await readDayBlocks(tx, userId, day.id) };
+  return {
+    result,
+    day,
+    profile,
+    blocks: await readDayBlocks(tx, userId, day.id),
+    // Which row answered each desired key — a placed workout's block by `trainingKey` (TD-24).
+    blockIdByKey: new Map(
+      reconciled.blocks.flatMap((row) => (row.key === undefined ? [] : [[row.key, row.id] as const])),
+    ),
+  };
 }
 
 export async function materializeDay(
@@ -1498,12 +1672,9 @@ export async function applyTemplateToDay(
 
     const day = await readDay(tx, userId, input.date);
     const existing = day ? await readDayBlocks(tx, userId, day.id) : [];
-    const blocks: BlockAssignment[] = existing
-      .filter((row) => row.kind !== template.kind)
-      .map((row) => ({
-        kind: row.kind,
-        templateId: row.state === "pooled" ? "pool" : row.templateId,
-      }));
+    const blocks: BlockAssignment[] = assignmentsFromBlocks(
+      existing.filter((row) => row.kind !== template.kind),
+    );
     blocks.push({ kind: template.kind, templateId: template.id });
 
     // Applying a routine to an unstructured day makes it structured; the two

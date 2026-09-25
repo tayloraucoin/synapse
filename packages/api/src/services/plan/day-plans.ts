@@ -883,9 +883,9 @@ export async function deleteDayPlan(rls: RlsClient, userId: string, id: string):
 
 /**
  * What the week build reads for one weekday (RUN-5): the plan's parts as
- * `materializeInTx` wants them — the block assignments, the anchors, the
- * first placed workout, the exclusions — or null when no complete plan
- * claims the weekday.
+ * `materializeInTx` wants them — the block assignments, the anchors, every
+ * placed workout (UX v1.3 R52), the exclusions — or null when no complete
+ * plan claims the weekday.
  */
 export type PlannedDay = {
   plan: DayPlanRow;
@@ -896,8 +896,11 @@ export type PlannedDay = {
     lightsOut: string | null;
     devicesOff: string | null;
   };
-  /** The first placed workout; RUN-5 places one per day (see DEVIATIONS). */
-  workout: { habitId: string; placement: TrainingPlacement } | null;
+  /**
+   * Every placed workout, in the plan's order (UX v1.3 R52, TD-24) — each
+   * becomes its own training block. A workout listed twice is kept once.
+   */
+  workouts: Array<{ habitId: string; placement: TrainingPlacement }>;
 };
 
 export async function plannedDayFor(
@@ -949,10 +952,17 @@ async function plannedDayOf(
     type = row ? { startClock: clock(row.anchorTime), endClock: clock(row.workEndTime) } : null;
   }
 
+  const seen = new Set<string>();
+  const workouts = plan.training.filter((entry) => {
+    if (seen.has(entry.habitId)) return false;
+    seen.add(entry.habitId);
+    return true;
+  });
+
   return {
     plan,
     anchors: resolvePlanAnchors(plan, type, prefs),
-    workout: plan.training[0] ?? null,
+    workouts,
   };
 }
 

@@ -108,6 +108,22 @@ export const addFromLibraryInput = z.object({
 
 export type AddFromLibraryInput = z.infer<typeof addFromLibraryInput>;
 
+/**
+ * Free time, chosen — UX v1.3 R50, §3.16, TD-26 (DAY-6): the pick's *Free
+ * time* section and the Today row's *Choose when you're there* both send the
+ * day and the pool members tapped. Each once; nothing is chosen for them.
+ */
+export const chooseFromPoolInput = z.object({
+  date: dateKeySchema,
+  habitIds: z
+    .array(z.string().uuid())
+    .min(1)
+    .max(20)
+    .refine((ids) => new Set(ids).size === ids.length, { message: "Each once." }),
+});
+
+export type ChooseFromPoolInput = z.infer<typeof chooseFromPoolInput>;
+
 export const moveItemInput = z.object({
   itemId: z.string().uuid(),
   /** Minutes from midnight of the day's date; past 1440 is after midnight. */

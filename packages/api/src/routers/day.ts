@@ -4,6 +4,7 @@ import { addDays } from "@syn/utils";
 import {
   addFromLibraryInput,
   applyWorkTypeInput,
+  chooseFromPoolInput,
   confirmDayInput,
   getDayInput,
   moveBlockInput,
@@ -16,6 +17,7 @@ import {
 } from "@syn/validators";
 
 import { AddFromLibraryError, addFromLibrary } from "../services/day/add-from-library";
+import { ChooseFromPoolError, chooseFromPool } from "../services/day/choose-from-pool";
 import { WorkTypeError, applyWorkType, removeWorkType } from "../services/day/apply-work-type";
 import { ConfirmRuleError, confirmDay } from "../services/day/confirm-day";
 import { getDay } from "../services/day/get-day";
@@ -198,6 +200,31 @@ export const dayRouter = router({
             case "no_such_block":
               // [COPY — needs Vesper sign-off.]
               throw new TRPCError({ code: "NOT_FOUND", message: "That block isn't on this day.", cause: error });
+            case "closed":
+              throw new TRPCError({ code: "CONFLICT", message: "That day is closed.", cause: error });
+          }
+        }
+        throw error;
+      }
+    }),
+
+  /**
+   * Free time, chosen (UX v1.3 R50, TD-26; DAY-6): the pool members tapped
+   * become items in the pooled evening, which goes `set`. Adds; never removes.
+   */
+  chooseFromPool: protectedProcedure
+    .input(chooseFromPoolInput)
+    .mutation(async ({ ctx, input }) => {
+      try {
+        return await chooseFromPool(ctx.rls, ctx.authContext.userId, input);
+      } catch (error) {
+        if (error instanceof ChooseFromPoolError) {
+          switch (error.code) {
+            case "no_such_day":
+            case "no_pool":
+              throw new TRPCError({ code: "NOT_FOUND", message: error.code, cause: error });
+            case "not_in_pool":
+              throw new TRPCError({ code: "BAD_REQUEST", message: error.code, cause: error });
             case "closed":
               throw new TRPCError({ code: "CONFLICT", message: "That day is closed.", cause: error });
           }

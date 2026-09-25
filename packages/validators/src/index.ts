@@ -318,6 +318,7 @@ export {
 
 export {
   addFromLibraryInput,
+  chooseFromPoolInput,
   adjustApplyInput,
   adjustEntrySchema,
   adjustHowSchema,

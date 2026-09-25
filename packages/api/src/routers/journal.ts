@@ -6,6 +6,7 @@ import {
   JournalRuleError,
   getJournalEntry,
   getLastNight,
+  readJournalClose,
   saveJournalAnswer,
 } from "../services/day/journal";
 import { resolveTodayFor } from "../services/day/today";
@@ -20,6 +21,16 @@ export const journalRouter = router({
     .input(journalGetInput)
     .query(async ({ ctx, input }) =>
       getJournalEntry(ctx.rls, ctx.authContext.userId, input.date),
+    ),
+
+  /**
+   * The close — UX v1.3 R54, §7.2 (DAY-6): the morning's quote on a
+   * quote-day with the bank on; `null` otherwise. Read after the last line.
+   */
+  close: protectedProcedure
+    .input(journalGetInput)
+    .query(async ({ ctx, input }) =>
+      readJournalClose(ctx.rls, ctx.authContext.userId, input.date),
     ),
 
   lastNight: protectedProcedure.query(async ({ ctx }) => {

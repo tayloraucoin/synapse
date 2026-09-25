@@ -1,8 +1,10 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { dayBlocks, dayItems, days, journalEntries, templateSlots, users, type RlsClient } from "@syn/db";
-import type { JournalEntryView, JournalPrompt } from "@syn/types";
+import type { JournalEntryView, JournalPrompt, QuoteView } from "@syn/types";
 import { addDays } from "@syn/utils";
+
+import { quoteSlotFor } from "./reading";
 
 /**
  * The journal — UX v1.1 §7.2, §11.10 (TD-7).
@@ -30,6 +32,22 @@ export class JournalRuleError extends Error {
     this.name = "JournalRuleError";
     this.code = code;
   }
+}
+
+/**
+ * The journal's close — UX v1.3 R54, §7.2 (DAY-6). After the last line, on a
+ * quote-day with the bank opted in, the SAME quote the morning showed for
+ * that date (`quoteSlotFor`, the one arithmetic the frame uses); `null` on a
+ * passage-day or with the bank off. The app never speaks it and nothing about
+ * the entries chooses it — *keyed to the entries* is phase 2 (P2-18).
+ */
+export async function readJournalClose(
+  rls: RlsClient,
+  userId: string,
+  date: string,
+): Promise<{ quote: QuoteView | null }> {
+  const slot = await rls.execute((tx) => quoteSlotFor(tx, userId, date));
+  return { quote: slot.quoteToday ? slot.quote : null };
 }
 
 async function promptsFor(

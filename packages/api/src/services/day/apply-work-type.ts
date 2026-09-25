@@ -4,6 +4,7 @@ import { dayBlocks, dayItems, days, templates, type RlsClient } from "@syn/db";
 
 import {
   anchorIsHardFor,
+  assignmentsFromBlocks,
   materializeInTx,
   readDay,
   readDayBlocks,
@@ -96,8 +97,12 @@ export async function applyWorkType(
       throw new WorkTypeError("already_working");
     }
 
-    // A block un-worked earlier today comes back rather than doubling.
-    for (const row of work) {
+    // A block un-worked earlier today comes back rather than doubling — the
+    // work block, and the after-work block that went with it (v1.3, DAY-6).
+    const revived = existing.filter(
+      (row) => row.kind === "work" || (row.kind === "transition" && row.state === "not_today"),
+    );
+    for (const row of revived) {
       await tx
         .update(dayBlocks)
         .set({ state: "planned", updatedAt: new Date() })
@@ -112,12 +117,8 @@ export async function applyWorkType(
     }
 
     const profile = await readDayProfile(tx, userId);
-    const blocks: BlockAssignment[] = existing
-      .filter((row) => row.kind !== "work")
-      .map((row) => ({
-        kind: row.kind,
-        templateId: row.state === "pooled" ? "pool" : row.templateId,
-      }));
+    // Every other block as it is — each training block keeps its own key (TD-24).
+    const blocks: BlockAssignment[] = assignmentsFromBlocks(existing.filter((row) => row.kind !== "work"));
     blocks.push({ kind: "work", templateId: type.id });
 
     const { result } = await materializeInTx(tx, userId, {
@@ -149,11 +150,17 @@ export async function removeWorkType(
     const day = await readDay(tx, userId, input.date);
     if (!day) throw new WorkTypeError("not_working");
     if (day.closedAt) throw new WorkTypeError("closed");
-    if (day.workTemplateId === null) throw new WorkTypeError("not_working");
 
+    // UX v1.3 §3.9 (DAY-6): any day with a live work block — a *Usually* day
+    // built from the profile has no `work_template_id` of its own. Which days
+    // OFFER the row is the header's (it shows it on *Usually* and *Rarely*).
     const blocks = await readDayBlocks(tx, userId, day.id);
+    const working = blocks.some((row) => row.kind === "work" && row.state !== "not_today");
+    if (!working && day.workTemplateId === null) throw new WorkTypeError("not_working");
+
     for (const row of blocks) {
-      if (row.kind !== "work") continue;
+      // The after-work hand-off goes with the work it follows (v1.3 TD-25).
+      if (row.kind !== "work" && row.kind !== "transition") continue;
       await tx
         .update(dayBlocks)
         .set({ state: "not_today", updatedAt: new Date() })

@@ -1,24 +1,22 @@
 import { and, eq, gte, lte } from "drizzle-orm";
 
 import { days, users, type RlsClient } from "@syn/db";
-import { CYCLE_EPOCH, ORIENT_READBACK_KEYS } from "@syn/constants";
+import { ORIENT_READBACK_KEYS } from "@syn/constants";
 import type { MorningMode, PassageView, QuoteView } from "@syn/types";
 import {
   SKIP_LINE_WINDOW_DAYS,
   addDays,
-  cycleIndex,
   shouldShowSkipLine,
   weekdayIndex,
 } from "@syn/utils";
 
-import { readActivePassages } from "../library/passages";
 import { plannedDayFor } from "../plan/day-plans";
-import { readQuoteForDate } from "../system/quotes";
 import { readPreferencesInTx } from "../user/preferences";
 import { confirmDay } from "./confirm-day";
 import { getLastNight } from "./journal";
 import { ensureDayRow, readDay, readDayProfile } from "./materialize-day";
 import { resolvePickDefaults } from "./quick-pick";
+import { quoteSlotFor } from "./reading";
 
 /**
  * The orient frame — UX v1.1 §5.1, §5.2 (DYN-13).
@@ -144,10 +142,7 @@ export async function readOrient(
       .limit(1);
 
     // The reading: the passages in cycle order, and the quote when opted in.
-    const passageRows = await readActivePassages(tx, userId);
-    const quote = account?.quotesOptIn ? await readQuoteForDate(tx, date) : null;
-    const slides = passageRows.length + (quote ? 1 : 0);
-    const todayIndex = cycleIndex(slides, date, CYCLE_EPOCH);
+    const { passages: passageRows, quote, todayIndex } = await quoteSlotFor(tx, userId, date);
 
     // The last eight mornings, yesterday first: the seven-day window plus the
     // day before it, which "second consecutive" needs.

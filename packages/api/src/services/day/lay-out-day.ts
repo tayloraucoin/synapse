@@ -29,7 +29,10 @@ import { stackBlock, type StackItem } from "@syn/utils";
  *   work ................................... the container, from the anchor
  *                                             to work end; split around an
  *                                             *inside work* placement
- *   activity ............................... forward from work's end
+ *   transition ............................. forward from work's end, or an
+ *                                             after-work workout's (v1.3 TD-25)
+ *   activity ............................... forward from there; POOLED, its
+ *                                             span runs to wind-down (TD-26)
  *   wind_down .............................. backward to lights-out; the
  *                                             devices-off marker is a pin in
  *                                             it like any other
@@ -180,7 +183,23 @@ export function layOutDay(
   const prep = ordered.find((block) => block.kind === "prep");
   const prepTotal = prep ? blockTotalMin(prep) : 0;
 
+  /** A pooled free-time block: its span runs to wind-down's start, set once that is laid. */
+  let pooledEvening: { id: string; startMin: number } | null = null;
+
   for (const block of ordered) {
+    // UX v1.3 TD-26 (DAY-6): free time waiting on its pool still has room. Its
+    // fixtures are pins and walk as pins; the span is the evening, from here
+    // to wind-down, so the room line and the Today row have numbers. Nothing
+    // is inferred into it — the pool's members are not items until a tap.
+    if (block.kind === "activity" && block.state === "pooled") {
+      const result = walk(block, "forward", cursor, null);
+      result.startMin = cursor;
+      result.endMin = Math.max(cursor, result.endMin ?? cursor);
+      laid.set(block.id, result);
+      pooledEvening = { id: block.id, startMin: cursor };
+      cursor = result.endMin;
+      continue;
+    }
     if (block.state === "pooled" || block.state === "not_today") {
       laid.set(block.id, unplaced(block));
       continue;
@@ -284,6 +303,10 @@ export function layOutDay(
         break;
       }
 
+      // UX v1.3 TD-25 (DAY-6): after work flows forward from where the walk
+      // has reached — the end of work, or of an after-work workout ordered
+      // before it — exactly as free time does after it.
+      case "transition":
       case "activity": {
         const result = walk(block, "forward", cursor, null);
         laid.set(block.id, result);
@@ -309,6 +332,16 @@ export function layOutDay(
   // An *inside work* block on a day without a work container is unplaced.
   if (insideWork && !laid.has(insideWork.id)) {
     laid.set(insideWork.id, unplaced(insideWork));
+  }
+
+  // The pooled evening's span ends where wind-down begins.
+  if (pooledEvening !== null) {
+    const windDown = ordered.find((block) => block.kind === "wind_down");
+    const windDownStart = windDown ? (laid.get(windDown.id)?.startMin ?? null) : null;
+    const evening = laid.get(pooledEvening.id);
+    if (evening && windDownStart !== null && evening.endMin !== null) {
+      evening.endMin = Math.max(evening.endMin, windDownStart);
+    }
   }
 
   return {

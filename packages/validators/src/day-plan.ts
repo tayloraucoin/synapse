@@ -84,7 +84,14 @@ export const dayPlanPatchSchema = z
      */
     afterWorkTemplateId: z.string().uuid().nullable().optional(),
     activityTemplateId: z.string().uuid().nullable().optional(),
-    training: z.array(dayPlanTrainingSchema).max(7).optional(),
+    // v1.3 R52 (DAY-6): several workouts, each once — its block is keyed by it (TD-24).
+    training: z
+      .array(dayPlanTrainingSchema)
+      .max(7)
+      .refine((entries) => new Set(entries.map((entry) => entry.habitId)).size === entries.length, {
+        message: "Each workout once.",
+      })
+      .optional(),
     breaks: z.array(dayPlanBreakSchema).max(7).optional(),
     excludedFixtureIds: z.array(z.string().uuid()).max(50).optional(),
     sortOrder: z.number().int().min(0).max(999).optional(),

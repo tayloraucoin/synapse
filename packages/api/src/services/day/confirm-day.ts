@@ -19,6 +19,7 @@ import { blockTotalMin } from "./lay-out-day";
 import {
   anchorIsHardFor,
   desiredTemplateItems,
+  assignmentsFromBlocks,
   layoutFor,
   materializeInTx,
   readDay,
@@ -507,10 +508,7 @@ export async function ensureTrainingBlock(
   if (blocks.some((row) => row.kind === "training")) return blocks;
 
   const assignments: BlockAssignment[] = blocks.length
-    ? blocks.map((row) => ({
-        kind: row.kind,
-        templateId: row.state === "pooled" ? "pool" : row.templateId,
-      }))
+    ? assignmentsFromBlocks(blocks)
     : (await defaultPlanFor(tx, userId, profile, date)).blocks;
   if (!assignments.some((row) => row.kind === "training")) {
     assignments.push({ kind: "training", templateId: null });
@@ -689,7 +687,11 @@ export async function confirmDay(
       })
       .where(eq(days.id, day.id));
 
-    const blockIds = laidBlocks.map((block) => block.id);
+    // UX v1.3 TD-26 (DAY-6): a pooled FREE TIME block is not set with the day —
+    // the evening is chosen, never inferred; it stays pooled until a tap.
+    const blockIds = laidBlocks
+      .filter((block) => !(block.kind === "activity" && block.state === "pooled"))
+      .map((block) => block.id);
     await tx
       .update(dayBlocks)
       .set({ state: "set", updatedAt: now })
