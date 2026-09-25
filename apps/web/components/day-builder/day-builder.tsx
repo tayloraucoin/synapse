@@ -8,9 +8,7 @@ import { trpc } from "@/lib/trpc/client";
 import { BuilderFrame } from "./builder-frame";
 import { BuilderSkeleton } from "./builder-skeleton";
 import { DAY_BUILDER_COPY as COPY } from "./copy";
-import { ScreenMorning } from "./screens/13e-morning";
 import { ScreenBreaks } from "./screens/13f-breaks";
-import { ScreenWindDown } from "./screens/13h-wind-down";
 import { ScreenReview } from "./screens/13i-review";
 import { ScreenNameDays } from "./screens/b01-name-days";
 import { ScreenTimes } from "./screens/b02-times";
@@ -19,13 +17,17 @@ import { ScreenTraining } from "./screens/b04-training";
 import { ScreenGettingReady } from "./screens/b05-getting-ready";
 import { ScreenFixed } from "./screens/b06-fixed";
 import { ScreenSoFar } from "./screens/b07-so-far";
-import { useDayBuilder, visibleScreens, type BuilderScreen } from "./use-day-builder";
+import { ScreenFirstThing } from "./screens/b08-first-thing";
+import { ScreenLandscape } from "./screens/b09-landscape";
+import { ScreenRanked } from "./screens/b10-ranked";
+import { ScreenMorning } from "./screens/b11-morning";
+import { ScreenWindDown } from "./screens/b12-wind-down";
+import { BUILDER_SCREENS, useDayBuilder, visibleScreens, type BuilderScreen } from "./use-day-builder";
 
 /**
- * The screens this build can draw. B1–B7 are DAY-9's; B11, B12, B13 and B17
- * are v1.2's `13e`, `13h`, `13f` and `13i` behind them — THE TEMPORARY
- * TABLE, which DAY-10 (B8–B12) and DAY-11 (B13–B17) shrink to nothing.
- * B8–B10 and B14–B16 have no v1.2 screen at all; until their tickets land
+ * The screens this build can draw. B1–B12 are DAY-9's and DAY-10's; B13 and
+ * B17 are v1.2's `13f` and `13i` behind them — THE TEMPORARY TABLE, which
+ * DAY-11 (B13–B17) removes. B14–B16 have no v1.2 screen at all; until DAY-11
  * they are left out of the walk and the caption's count, rather than drawn
  * as an empty screen.
  */
@@ -37,6 +39,9 @@ const BUILT: ReadonlySet<BuilderScreen> = new Set([
   "b05",
   "b06",
   "b07",
+  "b08",
+  "b09",
+  "b10",
   "b11",
   "b12",
   "b13",
@@ -77,14 +82,19 @@ export function DayBuilder({
   const [prepTotal, setPrepTotal] = React.useState(0);
   const [morningTotal, setMorningTotal] = React.useState(0);
   const [workReady, setWorkReady] = React.useState(false);
+  const [morningReady, setMorningReady] = React.useState(false);
+  const [firstThing, setFirstThing] = React.useState({ passages: 0, links: 0 });
+  const [habitCount, setHabitCount] = React.useState(0);
   const [saving, setSaving] = React.useState(false);
 
   const plan = api.plan;
   const workoutCount = React.useMemo(() => api.habitsOf((habit) => habit.type === "workout").length, [api]);
-  const screens = React.useMemo(
-    () => (plan === null ? [] : visibleScreens(plan, api.profile, workoutCount).filter((key) => BUILT.has(key))),
-    [plan, api.profile, workoutCount],
-  );
+  const screens = React.useMemo(() => {
+    if (plan === null) return [];
+    const visible = visibleScreens(plan, api.profile, workoutCount).filter((key) => BUILT.has(key));
+    // A screen reached outside the walk — B11 by *Change for this day* on a shared routine — joins it in place.
+    return visible.includes(screen) ? visible : BUILDER_SCREENS.filter((key) => key === screen || visible.includes(key));
+  }, [plan, api.profile, workoutCount, screen]);
   const index = Math.max(0, screens.indexOf(screen));
   const disabled = !online;
 
@@ -136,10 +146,16 @@ export function DayBuilder({
         return COPY.b06.heading;
       case "b07":
         return COPY.b07.heading(name);
+      case "b08":
+        return COPY.b08.heading;
+      case "b09":
+        return COPY.b09.heading;
+      case "b10":
+        return COPY.b10.heading;
       case "b11":
-        return COPY.e.heading;
+        return COPY.b11.heading;
       case "b12":
-        return COPY.h.heading;
+        return COPY.b12.heading;
       case "b13":
         return COPY.f.heading;
       default:
@@ -157,6 +173,12 @@ export function DayBuilder({
         return COPY.b06.body;
       case "b07":
         return COPY.b07.body;
+      case "b08":
+        return COPY.b08.body;
+      case "b09":
+        return COPY.b09.body;
+      case "b10":
+        return COPY.b10.body;
       case "b13":
         return COPY.f.body;
       default:
@@ -168,6 +190,10 @@ export function DayBuilder({
     switch (screen) {
       case "b05":
         return COPY.nextWithMinutes(prepTotal);
+      case "b08":
+        return COPY.b08.next(firstThing.passages, firstThing.links);
+      case "b09":
+        return COPY.b09.next(habitCount);
       case "b11":
         return COPY.nextWithMinutes(morningTotal);
       case "b17":
@@ -188,6 +214,8 @@ export function DayBuilder({
         };
       case "b06":
         return { label: COPY.b06.skip, onSkip: forward };
+      case "b08":
+        return { label: COPY.b08.skip, onSkip: forward };
       case "b13":
         return {
           label: COPY.f.skip,
@@ -219,7 +247,7 @@ export function DayBuilder({
           else forward();
         },
         busy: saving,
-        disabled: loading || (screen === "b03" && !workReady),
+        disabled: loading || (screen === "b03" && !workReady) || (screen === "b11" && !morningReady),
       }}
     >
       {loading ? (
@@ -233,9 +261,14 @@ export function DayBuilder({
           {screen === "b05" ? <ScreenGettingReady api={api} disabled={disabled} onTotal={setPrepTotal} /> : null}
           {screen === "b06" ? <ScreenFixed api={api} disabled={disabled} /> : null}
           {screen === "b07" ? <ScreenSoFar api={api} disabled={disabled} onGo={go} /> : null}
-          {/* The temporary table — v1.2's screens behind B11, B12, B13 and B17 until DAY-10 and DAY-11. */}
-          {screen === "b11" ? <ScreenMorning api={api} disabled={disabled} onTotal={setMorningTotal} /> : null}
-          {screen === "b12" ? <ScreenWindDown api={api} disabled={disabled} /> : null}
+          {screen === "b08" ? <ScreenFirstThing api={api} onCounts={setFirstThing} /> : null}
+          {screen === "b09" ? <ScreenLandscape onCount={setHabitCount} /> : null}
+          {screen === "b10" ? <ScreenRanked /> : null}
+          {screen === "b11" ? (
+            <ScreenMorning api={api} disabled={disabled} onTotal={setMorningTotal} onReady={setMorningReady} />
+          ) : null}
+          {screen === "b12" ? <ScreenWindDown api={api} disabled={disabled} onGo={go} /> : null}
+          {/* The temporary table — v1.2's screens behind B13 and B17 until DAY-11. */}
           {screen === "b13" ? <ScreenBreaks api={api} disabled={disabled} /> : null}
           {screen === "b17" ? <ScreenReview api={api} disabled={disabled} onGo={go} /> : null}
         </>

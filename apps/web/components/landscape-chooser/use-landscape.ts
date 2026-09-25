@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { STARTER_LIBRARY, type StarterLibraryEntry } from "@syn/constants";
+import { MORNING_GROUPS, STARTER_LIBRARY, type MorningGroup, type StarterLibraryEntry } from "@syn/constants";
 import type { HabitSummaryView, IconValue } from "@syn/types";
 
 import { trpc } from "@/lib/trpc/client";
@@ -42,6 +42,11 @@ export type LandscapeRow = {
   committing: boolean;
   /** In the library and used on a day — shown selected, not un-tickable. */
   locked: boolean;
+  /**
+   * UX v1.3 R66 (DAY-10): the *All* tab's group — the starter's `group`;
+   * null for a habit the person added, listed under *Your own*.
+   */
+  group: MorningGroup | null;
 };
 
 export function midpointOf(min: number | null, max: number | null): number {
@@ -84,7 +89,22 @@ export function useLandscape(options: { withTemplate: boolean }) {
   const slots = React.useMemo(() => detail.data?.slots ?? [], [detail.data?.slots]);
   const slotByHabit = React.useMemo(() => new Map(slots.map((slot) => [slot.habitId, slot])), [slots]);
 
-  const entries = STARTER_LIBRARY.morning;
+  // The starters, then the person's own morning habits as entries of the same shape (v1.3 R66, *Your own*):
+  // a tick on one finds the habit by title and adds or removes its slot, as a starter's does.
+  const entries: ReadonlyArray<StarterLibraryEntry> = React.useMemo(() => {
+    const starterTitles = new Set(STARTER_LIBRARY.morning.map((entry) => entry.title.toLowerCase()));
+    const own = existing
+      .filter((habit) => !starterTitles.has(habit.title.toLowerCase()))
+      .map((habit) => ({
+        title: habit.title,
+        icon: habit.icon as StarterLibraryEntry["icon"],
+        rangeMin: habit.durationMin ?? 10,
+        rangeMax: habit.durationMax ?? habit.durationMin ?? 20,
+        importance: habit.lifePriority,
+        recommended: false,
+      }));
+    return [...STARTER_LIBRARY.morning, ...own];
+  }, [existing]);
 
   const isSelected = React.useCallback(
     (title: string): boolean => {
@@ -246,6 +266,7 @@ export function useLandscape(options: { withTemplate: boolean }) {
         selected: isSelected(entry.title),
         committing: pending.has(entry.title),
         locked: locked.has(entry.title),
+        group: MORNING_GROUPS.find((group) => group === entry.group) ?? null,
       })),
     [entries, isSelected, pending, locked],
   );

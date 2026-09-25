@@ -45,10 +45,20 @@ export type PrepRow = {
   habitId: string | null;
 };
 
-export function usePrepSteps(options: { templateId?: string | null } = {}) {
+/**
+ * The kinds whose list is built by ticking starters (UX v1.3 §4.4 B5, B12,
+ * B14): a prep step's slot is priority 7 and hard, as screen 7 made it; a
+ * wind-down or after-work step's is the plain soft slot the builder seeds.
+ */
+export type StarterKind = "prep" | "wind_down" | "transition";
+
+export function usePrepSteps(options: { templateId?: string | null; kind?: StarterKind } = {}) {
   const utils = trpc.useUtils();
+  const kind: StarterKind = options.kind ?? "prep";
+  const slotRule =
+    kind === "prep" ? { priorityOverride: 7, scheduling: "hard" as const } : { priorityOverride: null, scheduling: "soft" as const };
   const given = options.templateId !== undefined;
-  const prepList = trpc.template.list.useQuery({ includeArchived: false, kind: "prep" }, { enabled: !given });
+  const prepList = trpc.template.list.useQuery({ includeArchived: false, kind }, { enabled: !given });
   const createTemplate = trpc.template.create.useMutation();
   const templateId = given ? (options.templateId ?? null) : (prepList.data?.[0]?.id ?? null);
 
@@ -56,11 +66,11 @@ export function usePrepSteps(options: { templateId?: string | null } = {}) {
   React.useEffect(() => {
     if (given || !prepList.isSuccess || templateId !== null || creating.current) return;
     creating.current = true;
-    void createTemplate.mutateAsync({ kind: "prep" }).then(() => utils.template.list.invalidate());
-  }, [given, prepList.isSuccess, templateId, createTemplate, utils]);
+    void createTemplate.mutateAsync({ kind }).then(() => utils.template.list.invalidate());
+  }, [given, kind, prepList.isSuccess, templateId, createTemplate, utils]);
 
   const detail = trpc.template.get.useQuery({ id: templateId ?? "" }, { enabled: templateId !== null });
-  const prepHabits = trpc.habit.list.useQuery({ includeArchived: false, blockKind: "prep" });
+  const prepHabits = trpc.habit.list.useQuery({ includeArchived: false, blockKind: kind });
   const fromLibrary = trpc.habit.createFromStarterLibrary.useMutation();
   const saveSlot = trpc.template.saveSlot.useMutation();
   const removeSlot = trpc.template.removeSlot.useMutation();
@@ -107,34 +117,34 @@ export function usePrepSteps(options: { templateId?: string | null } = {}) {
         gapBeforeMin: 0,
         pinnedClock: null,
         role: "stack",
-        priorityOverride: 7,
-        scheduling: "hard",
+        priorityOverride: slotRule.priorityOverride,
+        scheduling: slotRule.scheduling,
         ...(partnerId === undefined ? {} : { alternatesWith: partnerId, alternatesDefault: false }),
       });
     },
-    [templateId, utils, saveSlot],
+    [templateId, utils, saveSlot, slotRule.priorityOverride, slotRule.scheduling],
   );
 
   const doTick = React.useCallback(
     async (title: string, rangeMin: number, rangeMax: number) => {
-      const before = await utils.habit.list.fetch({ includeArchived: false, blockKind: "prep" });
+      const before = await utils.habit.list.fetch({ includeArchived: false, blockKind: kind });
       let habit: HabitSummaryView | { id: string } | undefined = before.habits.find(
         (row) => row.title.toLowerCase() === title.toLowerCase(),
       );
       if (!habit) {
-        const made = await fromLibrary.mutateAsync({ blockKind: "prep", titles: [title] });
+        const made = await fromLibrary.mutateAsync({ blockKind: kind, titles: [title] });
         habit = made.rows[0];
       }
       if (!habit) throw new Error("no_habit");
       await addSlot(habit.id, midpointOf(rangeMin, rangeMax));
     },
-    [utils, fromLibrary, addSlot],
+    [utils, fromLibrary, addSlot, kind],
   );
 
   const doUntick = React.useCallback(
     async (title: string) => {
       if (templateId === null) return;
-      const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind: "prep" });
+      const fresh = await utils.habit.list.fetch({ includeArchived: false, blockKind: kind });
       const habit = fresh.habits.find((row) => row.title.toLowerCase() === title.toLowerCase());
       if (!habit) return;
       const current = await utils.template.get.fetch({ id: templateId });
@@ -145,7 +155,7 @@ export function usePrepSteps(options: { templateId?: string | null } = {}) {
       if (usage.recentDays.length === 0) await archive.mutateAsync({ id: habit.id });
       else setLocked((existing) => new Set(existing).add(title));
     },
-    [templateId, utils, removeSlot, archive],
+    [templateId, utils, removeSlot, archive, kind],
   );
 
   const toggle = React.useCallback(
@@ -170,9 +180,10 @@ export function usePrepSteps(options: { templateId?: string | null } = {}) {
     [doTick, doUntick, refresh],
   );
 
-  /** The rows: the ten starters, then the person's own steps not among them. */
+  /** The rows: the kind's starters (never the placed ones), then the person's own not among them. */
+  const offers = React.useMemo(() => STARTER_LIBRARY[kind].filter((entry) => entry.placed !== true), [kind]);
   const rows: PrepRow[] = React.useMemo(() => {
-    const starters = STARTER_LIBRARY.prep.map((entry) => {
+    const starters = offers.map((entry) => {
       const habit = habitByTitle.get(entry.title.toLowerCase()) ?? null;
       const ahead = pending.get(entry.title);
       return {
@@ -187,7 +198,7 @@ export function usePrepSteps(options: { templateId?: string | null } = {}) {
         habitId: habit?.id ?? null,
       };
     });
-    const starterTitles = new Set(STARTER_LIBRARY.prep.map((entry) => entry.title.toLowerCase()));
+    const starterTitles = new Set(offers.map((entry) => entry.title.toLowerCase()));
     const own = habits
       .filter((habit) => !starterTitles.has(habit.title.toLowerCase()))
       .map((habit) => {
@@ -205,7 +216,7 @@ export function usePrepSteps(options: { templateId?: string | null } = {}) {
         };
       });
     return [...starters, ...own];
-  }, [habitByTitle, pending, slotByHabit, locked, habits]);
+  }, [offers, habitByTitle, pending, slotByHabit, locked, habits]);
 
   /** The stepper: the slot's `duration_min`, on the stepper's debounce. */
   const setLength = React.useCallback(

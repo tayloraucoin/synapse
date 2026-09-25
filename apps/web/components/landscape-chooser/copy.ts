@@ -11,6 +11,11 @@ export const LANDSCAPE_COPY = {
   tabAll: "All",
   groupBody: "Body",
   groupMind: "Mind",
+  /** The *All* tab's four groups (v1.3 R66, §4.4 B9) and the person's own — `[COPY]` for *Your own*. */
+  groups: { body: "Body", mind: "Mind", practice: "Practice", home: "Home" },
+  groupOwn: "Your own",
+  /** [COPY] The search's result, read politely — *4 habits match*. */
+  matches: (n: number) => `${n} ${n === 1 ? "habit matches" : "habits match"}`,
   range: (min: number, max: number) => `${min}–${max} min`,
   addYourOwn: "Add your own",
   searchLabel: "Search",

@@ -17,6 +17,8 @@ import {
   Text,
 } from "@syn/ui";
 
+import { MORNING_GROUPS } from "@syn/constants";
+
 import { HabitSheet } from "@/components/habit-sheet";
 
 import { LANDSCAPE_COPY as COPY } from "./copy";
@@ -36,6 +38,11 @@ import type { LandscapeApi, LandscapeRow } from "./use-landscape";
  *
  * NO FIT NUMBER, NO MINUTES TOTAL, NOTHING PRE-CHECKED — "hospitality, not
  * persuasion". The screen is the data bank.
+ *
+ * UX v1.3 R66, §4.4 B9 (DAY-10): *All* lists the library under *Body · Mind ·
+ * Practice · Home* from each starter's `group`, and the person's own habits
+ * under *Your own* at the end; a search collapses the groups to the rows that
+ * match and says how many, politely.
  */
 
 const BODY = new Set(["Breath work", "Cold shower", "Stretch", "Walk", "Sunlight", "Water", "Make the bed"]);
@@ -128,7 +135,24 @@ export function LandscapeChooser({ landscape, disabled = false }: LandscapeChoos
             {COPY.noMatches(query.trim())}
           </Text>
         ) : (
-          <SelectRowList columns={2}>{all.map(select)}</SelectRowList>
+          <>
+            {trimmed === "" ? null : (
+              <Text as="p" className="sr-only" aria-live="polite">
+                {COPY.matches(all.length)}
+              </Text>
+            )}
+            {/* UX v1.3 R66: the four groups in order, then *Your own*; a search keeps a heading only where a row remains. */}
+            {[...MORNING_GROUPS, null].map((group) => {
+              const rows = all.filter((row) => row.group === group);
+              if (rows.length === 0) return null;
+              return (
+                <section key={group ?? "own"} className="flex flex-col gap-(--space-2)">
+                  <GroupHeading>{group === null ? COPY.groupOwn : COPY.groups[group]}</GroupHeading>
+                  <SelectRowList columns={2}>{rows.map(select)}</SelectRowList>
+                </section>
+              );
+            })}
+          </>
         )}
         {addYourOwn}
       </TabsContent>

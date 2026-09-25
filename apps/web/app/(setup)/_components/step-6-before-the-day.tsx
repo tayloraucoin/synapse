@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { GroupHeading, StatusLine, Switch, Text } from "@syn/ui";
 
+import { LINKS_COPY, LinkList } from "@/components/links";
 import { PassageList } from "@/components/passages";
 import { useOnline } from "@/lib/hooks/use-online";
 import { trpc } from "@/lib/trpc/client";
@@ -37,14 +38,20 @@ export function Step6BeforeTheDay({
   initialAskIntention,
   initialAskVisualisation,
   embedded = false,
+  bare = false,
   onSaved,
+  onCounts,
 }: {
   initialQuotesOptIn: boolean;
   initialAskGratitude: boolean;
   initialAskIntention: boolean;
   initialAskVisualisation: boolean;
   embedded?: boolean;
+  /** Inside the day builder's frame as B8 (DAY-10): the content alone. */
+  bare?: boolean;
   onSaved?: () => void;
+  /** B8's primary counts — *Next · 2 passages · 1 link*. */
+  onCounts?: (counts: { passages: number; links: number }) => void;
 }) {
   const online = useOnline();
   const save = trpc.user.updatePreferences.useMutation();
@@ -54,7 +61,12 @@ export function Step6BeforeTheDay({
   const [intention, setIntention] = React.useState(initialAskIntention);
   const [visualisation, setVisualisation] = React.useState(initialAskVisualisation);
   const [count, setCount] = React.useState<number | null>(null);
+  const [linkCount, setLinkCount] = React.useState(0);
   const [line, setLine] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    onCounts?.({ passages: count ?? 0, links: linkCount });
+  }, [count, linkCount, onCounts]);
 
   type Key = "quotesOptIn" | "orientAskGratitude" | "orientAskIntention" | "orientAskVisualisation";
   const setters: Record<Key, (next: boolean) => void> = {
@@ -81,6 +93,7 @@ export function Step6BeforeTheDay({
     checked: boolean,
     label: string,
     caption: string,
+    secondCaption?: string,
   ) => {
     const id = `switch-${key}`;
     return (
@@ -92,6 +105,11 @@ export function Step6BeforeTheDay({
           <Text as="span" variant="caption" tone="secondary">
             {caption}
           </Text>
+          {secondCaption === undefined ? null : (
+            <Text as="span" variant="caption" tone="secondary">
+              {secondCaption}
+            </Text>
+          )}
         </span>
         <Switch id={id} checked={checked} disabled={!online} onCheckedChange={(next) => void toggle(key, next)} />
       </div>
@@ -104,6 +122,7 @@ export function Step6BeforeTheDay({
       heading={COPY.step6Heading}
       body={COPY.step6Body}
       embedded={embedded}
+      bare={bare}
       onSaved={onSaved}
       primaryLabel={COPY.continuePassages(count ?? 0)}
       save={null}
@@ -114,9 +133,15 @@ export function Step6BeforeTheDay({
           <PassageList onCountChange={setCount} />
         </section>
 
+        {/* UX v1.3 R53, §4.4 B8 (DAY-10): things to open from the morning — the server derives each one's kind. */}
+        <section className="flex flex-col gap-(--space-3)">
+          <GroupHeading>{LINKS_COPY.heading}</GroupHeading>
+          <LinkList disabled={!online} onCountChange={setLinkCount} />
+        </section>
+
         <section className="flex flex-col gap-(--space-2)">
           <GroupHeading>{COPY.aQuoteEachDay}</GroupHeading>
-          {row("quotesOptIn", quotes, COPY.quoteSwitch, COPY.quoteLine)}
+          {row("quotesOptIn", quotes, COPY.quoteSwitch, COPY.quoteLine, COPY.quoteClosesJournal)}
         </section>
 
         <section className="flex flex-col gap-(--space-2)">

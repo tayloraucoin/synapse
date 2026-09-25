@@ -41,8 +41,9 @@ export function useListScreen({
   seed,
 }: {
   api: DayBuilderApi;
-  kind: Extract<BlockKind, "prep" | "morning" | "wind_down">;
-  fk: "prepTemplateId" | "morningTemplateId" | "windDownTemplateId";
+  /** v1.3 (DAY-10): `transition` and `activity` for DAY-11's B14 and B16 — widened once, here. */
+  kind: Extract<BlockKind, "prep" | "morning" | "wind_down" | "transition" | "activity">;
+  fk: ListFk;
   defaultName: (letter: string) => string;
   /** The slots a NEW list starts with; called once, after the template exists. */
   seed: () => Promise<SeedSlot[]> | SeedSlot[];
@@ -227,7 +228,9 @@ export function useListScreen({
   };
 }
 
-function readFk(plan: DayBuilderApi["plan"] & object, fk: "prepTemplateId" | "morningTemplateId" | "windDownTemplateId"): string | null {
+type ListFk = "prepTemplateId" | "morningTemplateId" | "windDownTemplateId" | "afterWorkTemplateId" | "activityTemplateId";
+
+function readFk(plan: DayBuilderApi["plan"] & object, fk: ListFk): string | null {
   switch (fk) {
     case "prepTemplateId":
       return plan.gettingReady?.templateId ?? null;
@@ -235,5 +238,9 @@ function readFk(plan: DayBuilderApi["plan"] & object, fk: "prepTemplateId" | "mo
       return plan.morning?.templateId ?? null;
     case "windDownTemplateId":
       return plan.windDown?.templateId ?? null;
+    case "afterWorkTemplateId":
+      return plan.afterWork?.templateId ?? null;
+    case "activityTemplateId":
+      return plan.evenings?.templateId ?? null;
   }
 }

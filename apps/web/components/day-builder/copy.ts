@@ -203,8 +203,37 @@ export const DAY_BUILDER_COPY = {
     nothingYet: "Nothing yet.",
   },
 
-  /* ------------------------------------------------------------- 13e -- */
-  e: {
+  /* ----------------------------------- B8 — first thing (profile; R53) -- */
+  b08: {
+    heading: "What do you want to hear first thing?",
+    body: "Your own words, a passage you love, a quote you chose. The morning opens on it, before anything else gets in.",
+    /** *Next · 2 passages · 1 link* — counts where a count helps. */
+    next: (passages: number, links: number) => {
+      const parts = [
+        passages === 0 ? null : `${passages} ${passages === 1 ? "passage" : "passages"}`,
+        links === 0 ? null : `${links} ${links === 1 ? "link" : "links"}`,
+      ].filter((part): part is string => part !== null);
+      return parts.length === 0 ? "Next" : `Next · ${parts.join(" · ")}`;
+    },
+    skip: "Skip for now",
+  },
+
+  /* ---------------------------------- B9 — the landscape (profile; R66) -- */
+  b09: {
+    heading: "What do you do, or want to do, to start the day well?",
+    body: "Everything. It doesn't have to fit.",
+    /** *Next · 9 habits* */
+    next: (n: number) => (n === 0 ? "Next" : `Next · ${n} ${n === 1 ? "habit" : "habits"}`),
+  },
+
+  /* --------------------------------------- B10 — ranked (profile; R58) -- */
+  b10: {
+    heading: "How much does each one matter, and how long does it take?",
+    body: "Rough is fine. The morning is built from these.",
+  },
+
+  /* ------------------------------ B11 — the morning routine (v1.3 §4.4) -- */
+  b11: {
     heading: "The morning routine.",
     /** *72 min for the routine on this day — up at 7:00, orient 3, getting ready 45, work by 9:00.* */
     room: (room: number, wake: string, orient: number, ready: number, work: string) =>
@@ -222,6 +251,15 @@ export const DAY_BUILDER_COPY = {
     shortenToFit: "Shorten to fit",
     versions: "Versions",
     usually: (minutes: number) => `usually ${minutes}`,
+    /** [COPY] B11 with nothing ranked yet (DAY-10's edge state). */
+    nothingToRank: "Nothing to rank yet.",
+    /** The question, first plan only (v1.3 R61, §4.4 B11) — verbatim. */
+    sameEveryDay: "Same routine every day",
+    sameEveryDayBody: "This list, wherever it fits. Days with less room take less of it.",
+    variesByDay: "It varies by day",
+    variesByDayBody: "Each day picks or builds its own.",
+    /** The question's accessible name — `[COPY]`. */
+    sameQuestion: "Same routine every day?",
   },
 
   /* ------------------------------------------------------------- 13f -- */
@@ -238,11 +276,23 @@ export const DAY_BUILDER_COPY = {
     skip: "Skip for now",
   },
 
-  /* ------------------------------------------------------------- 13h -- */
-  h: {
-    heading: "Winding down.",
-    /** *Lights out 22:45 · phone away 21:45.* */
+  /* -------------------------------------- B12 — winding down (v1.3 §4.4) -- */
+  b12: {
+    heading: "How does the day end?",
+    /** *Lights out 22:45 · phone away 21:45.* — B2's times; *Change* returns there. */
     body: (lightsOut: string, phoneAway: string) => `Lights out ${lightsOut} · phone away ${phoneAway}.`,
+    change: "Change",
+    /** The *Change* link's accessible name (DAY-10 Accessibility). */
+    changeTheTimes: "Change the times",
+    /** A later plan on the shared routine — *Morning routine A · 45 chosen · 62 for the routine on this day*. */
+    sharedRoutine: (name: string, chosen: number, room: number | null) =>
+      room === null ? `${name} · ${chosen} chosen` : `${name} · ${chosen} chosen · ${room} for the routine on this day`,
+    changeForThisDay: "Change for this day",
+    /** `[COPY]` The first plan's journal group heading (v1.3 §4.4 B12). */
+    aFewLinesGroup: "A few lines",
+    /** *10–20 min* — a starter's range. */
+    range: (min: number, max: number) => `${min}–${max} min`,
+    inOrder: "In order",
     listName: "List name",
     newList: "New",
     defaultName: (letter: string) => `Wind-down ${letter}`,

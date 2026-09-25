@@ -27,9 +27,12 @@ import { HabitSetupCard } from "./habit-setup-card";
  */
 export function Step9Ranked({
   embedded = false,
+  bare = false,
   onSaved,
 }: {
   embedded?: boolean;
+  /** Inside the day builder's frame as B10 (DAY-10): the content alone. */
+  bare?: boolean;
   onSaved?: () => void;
 }) {
   const templates = trpc.template.list.useQuery({ includeArchived: false, kind: "morning" });
@@ -52,6 +55,7 @@ export function Step9Ranked({
       body={COPY.step9Body}
       save={null}
       embedded={embedded}
+      bare={bare}
       onSaved={onSaved}
     >
       {loading ? (

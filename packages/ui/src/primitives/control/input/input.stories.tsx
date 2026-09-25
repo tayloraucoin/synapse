@@ -50,6 +50,16 @@ export const Password: Story = {
   ),
 };
 
+/** UX v1.3 §4.4 B8 (DAY-10): the `LinkSheet`'s field — `type="url"`, the URL keyboard, no autocorrect. */
+export const Url: Story = {
+  args: { label: "Link", mode: "url", placeholder: "https://…", error: "That link doesn't look right." },
+  render: (args) => (
+    <div className="max-w-sm p-(--space-6)">
+      <Input {...args} />
+    </div>
+  ),
+};
+
 /** Error is a 1px ink border and an ink line. Never red (§9.3). */
 export const WithError: Story = {
   args: { label: "Email", mode: "email", error: "That doesn't look like an email address." },

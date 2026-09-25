@@ -34,7 +34,9 @@ export type InputMode =
   | "password"
   | "number"
   | "time"
-  | "date";
+  | "date"
+  /** UX v1.3 §4.4 B8 (DAY-10): the `LinkSheet`'s *Link* — `type="url"`, no autocorrect. */
+  | "url";
 
 export interface InputClasses {
   root?: string;
@@ -71,6 +73,15 @@ function getModeDefaults(
         type: "email",
         inputMode: "email",
         autoComplete: "email",
+        autoCapitalize: "none",
+        autoCorrect: "off",
+        spellCheck: false,
+      };
+    case "url":
+      return {
+        type: "url",
+        inputMode: "url",
+        autoComplete: "url",
         autoCapitalize: "none",
         autoCorrect: "off",
         spellCheck: false,

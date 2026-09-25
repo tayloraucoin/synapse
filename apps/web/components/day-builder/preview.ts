@@ -326,10 +326,10 @@ export function buildPreview(parts: PreviewParts): DayPreview | null {
   const windDown = placeList(parts.windDown, "backward", journalStart, cursor);
   const windItems: PreviewItem[] = windDown?.items ?? [];
   if (parts.journalMin > 0) {
-    windItems.push({ id: "journal", title: COPY.h.aFewLines, icon: NO_ICON, startMin: journalStart, endMin: journalEnd, pinned: true });
+    windItems.push({ id: "journal", title: COPY.b12.aFewLines, icon: NO_ICON, startMin: journalStart, endMin: journalEnd, pinned: true });
   }
   if (devicesOff !== null) {
-    windItems.push({ id: "phone-away", title: COPY.h.phoneAway, icon: NO_ICON, startMin: phoneAway, endMin: phoneAway + 1, pinned: true });
+    windItems.push({ id: "phone-away", title: COPY.b12.phoneAway, icon: NO_ICON, startMin: phoneAway, endMin: phoneAway + 1, pinned: true });
   }
   blocks.push({
     key: "wind_down",

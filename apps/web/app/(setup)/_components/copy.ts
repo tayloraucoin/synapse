@@ -126,6 +126,8 @@ export const SETUP_COPY = {
   quoteSwitch: "A quote from the bank, some mornings",
   /** [COPY §13 #29] */
   quoteLine: "One a day, from a set we keep. Attributed, never ours.",
+  /** `[COPY — R54]` The added caption under the quote's line (v1.3 §4.4 B8; DAY-10). */
+  quoteClosesJournal: "It also closes the journal, on the nights it's on.",
   inTheMorning: "In the morning",
   askGratitude: "Ask one line of gratitude",
   gratitudeCaption: "Grateful for, this morning",
@@ -247,6 +249,8 @@ export const SETUP_COPY = {
   phoneAway: "Phone away",
   /** One sentence, cites nothing (v1.1 §13 #13; v1.2 §4.11). */
   phoneAwayLine: "An hour before lights out is a common choice.",
+  /** [COPY — needs Vesper sign-off] v1.3 R64 (DAY-10): the times are each day plan's now. */
+  timesAreEachDays: "Each day sets its own — change them under Your days.",
   fewLines: "A few lines at night",
   fewLinesBody: "Around 10 minutes, before the phone goes away.",
   promptsLabel: "Prompts",

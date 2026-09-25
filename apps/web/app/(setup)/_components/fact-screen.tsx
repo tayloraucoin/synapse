@@ -42,6 +42,12 @@ export interface FactScreenProps {
   skippable?: boolean;
   /** Settings → Your day: no frame, a *Save* primary. */
   embedded?: boolean;
+  /**
+   * UX v1.3 §4.4 B8–B10 (DAY-10): inside another frame — the day builder's —
+   * the content alone: no heading, no body, no primary. The builder's frame
+   * carries all three, and its *Next* is the one primary.
+   */
+  bare?: boolean;
   onSaved?: () => void;
 }
 
@@ -55,6 +61,7 @@ export function FactScreen({
   disabled = false,
   skippable = true,
   embedded = false,
+  bare = false,
   onSaved,
 }: FactScreenProps) {
   const online = useOnline();
@@ -86,6 +93,15 @@ export function FactScreen({
       return;
     }
     await goTo(step + 1, setupRoute(step + 1));
+  }
+
+  if (bare) {
+    return (
+      <div className="flex flex-col gap-(--space-5)">
+        {children}
+        {error ? <HelperText error>{error}</HelperText> : null}
+      </div>
+    );
   }
 
   if (embedded) {

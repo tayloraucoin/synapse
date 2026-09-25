@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+
 import { LandscapeChooser, useLandscape } from "@/components/landscape-chooser";
 import { useOnline } from "@/lib/hooks/use-online";
 
@@ -16,13 +18,23 @@ import { FactScreen } from "./fact-screen";
  */
 export function Step8Landscape({
   embedded = false,
+  bare = false,
   onSaved,
+  onCountChange,
 }: {
   embedded?: boolean;
+  /** Inside the day builder's frame as B9 (DAY-10): the content alone. */
+  bare?: boolean;
   onSaved?: () => void;
+  /** B9's primary — *Next · 9 habits*. */
+  onCountChange?: (count: number) => void;
 }) {
   const online = useOnline();
   const landscape = useLandscape({ withTemplate: true });
+
+  React.useEffect(() => {
+    onCountChange?.(landscape.count);
+  }, [landscape.count, onCountChange]);
 
   return (
     <FactScreen
@@ -32,6 +44,7 @@ export function Step8Landscape({
       save={null}
       primaryLabel={COPY.continueHabits(landscape.count)}
       embedded={embedded}
+      bare={bare}
       onSaved={onSaved}
     >
       <LandscapeChooser landscape={landscape} disabled={!online} />

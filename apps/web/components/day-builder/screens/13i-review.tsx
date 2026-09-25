@@ -9,7 +9,7 @@ import { SlotSheet } from "@/components/block-editor";
 import { buildPreview } from "../preview";
 import { PreviewStrip } from "../preview-strip";
 import { useTemplateSlots, type BuilderScreen, type DayBuilderApi } from "../use-day-builder";
-import { JOURNAL_MIN } from "./13h-wind-down";
+import { JOURNAL_MIN } from "./b12-wind-down";
 
 /**
  * 13i — the day as it stands (UX v1.2 §4.13i), B17 until DAY-11 rebuilds it.
