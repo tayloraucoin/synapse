@@ -1,5 +1,6 @@
 import { sanitizeNextPath } from "@syn/utils";
 
+import { SETUP_TOTAL_STEPS } from "@/app/(setup)/_components/copy";
 import { orientRoute, setupRoute, todayRoute, verifyRoute } from "@/lib/routes";
 
 /**
@@ -23,7 +24,7 @@ export const SETUP_REDIRECT_LAUNCH_LIMIT = 3;
 export type EntryProfile = {
   /** Null until first run is finished. */
   firstRunCompletedAt: Date | string | null;
-  /** Which step to resume at, 1–14 (UX v1.2 §4). */
+  /** Which step to resume at, 1–5 (UX v1.3 §4); a v1.2 value above 5 clamps to 4. */
   firstRunStep: number | null;
 };
 
@@ -94,10 +95,16 @@ export function resolveEntry({
   return todayRoute();
 }
 
-/** The fourteen screens of UX v1.2 §4 (RUN-8). Anything out of range resumes at the beginning. */
-export const SETUP_STEP_COUNT = 14;
-
-function clampSetupStep(step: number | null | undefined): number {
-  if (!step || step < 1 || step > SETUP_STEP_COUNT) return 1;
+/**
+ * Where a stored `first_run_step` resumes — UX v1.3 §4, TD-31 (DAY-8).
+ *
+ * Nothing stored, or below 1, starts at the beginning. ABOVE THE FIVE is an
+ * account left mid-flow under v1.2's fourteen: every screen it had reached
+ * past 2 is now a part of *Your days* or behind it, so it resumes at screen 4
+ * rather than being thrown back to the start or sent to a 404.
+ */
+export function clampSetupStep(step: number | null | undefined): number {
+  if (!step || step < 1) return 1;
+  if (step > SETUP_TOTAL_STEPS) return 4;
   return Math.floor(step);
 }

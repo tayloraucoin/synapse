@@ -58,8 +58,8 @@ export const updatePreferencesInput = z
      * a second device resumes where the person actually stopped. Twelve under
      * UX v1.1 §4 (DYN-10).
      */
-    /** 1–14 under UX v1.2 §4 (RUN-8). */
-    firstRunStep: z.number().int().min(1).max(14).nullable().optional(),
+    /** 1–5 under UX v1.3 §4 (TD-31; DAY-8) — a stored v1.2 value above 5 is the entry tree's to clamp. */
+    firstRunStep: z.number().int().min(1).max(5).nullable().optional(),
     /**
      * ST-08's two deferred changes (cross-cutting §7.3, §7.5).
      *

@@ -29,6 +29,7 @@ import {
   settingsYourDayRoute,
 } from "@/lib/routes";
 import { beginDeliberateSignOut } from "@/lib/auth/session-expired";
+import { clampSetupStep } from "@/lib/entry/resolve-entry";
 import { useOnline } from "@/lib/hooks/use-online";
 import { useRunningTimer } from "@/lib/stores/use-timer-store";
 import { trpc } from "@/lib/trpc/client";
@@ -100,7 +101,7 @@ export function SettingsIndex({
         {setupOwed ? (
           <SettingsRow
             title={COPY.resumeSetup}
-            href={setupRoute(me.data?.firstRunStep ?? 1)}
+            href={setupRoute(clampSetupStep(me.data?.firstRunStep))}
           />
         ) : null}
 

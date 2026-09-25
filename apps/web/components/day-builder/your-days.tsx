@@ -18,7 +18,8 @@ import type { BuilderScreen } from "./use-day-builder";
 /**
  * *Your days* — UX v1.2 §4.13, §4.16 (RUN-12): a card per plan in
  * `sort_order`, *Build another day*, and — in the sequence — *Continue · n
- * days*, which moves to screen 14 (RUN-13), where first run completes.
+ * days*, which moves to screen 5 (RUN-13; screen 14 until DAY-8
+ * renumbered the sequence to v1.3's five), where first run completes.
  * Under Settings the same list, embedded,
  * with no primary.
  *
@@ -31,7 +32,7 @@ export function YourDays({
   editPlanId = null,
 }: {
   embedded?: boolean;
-  /** Screen 14's *Edit Day A*: open the builder on this plan's review at once (RUN-13). */
+  /** Screen 5's *Edit Day A*: open the builder on this plan's review at once (RUN-13). */
   editPlanId?: string | null;
 }) {
   const goTo = useStepNavigation();
@@ -90,11 +91,11 @@ export function YourDays({
   }
 
   const list = plans.data ?? [];
-  // *Continue · n days* only moves; screen 14 completes first run (RUN-13).
+  // *Continue · n days* only moves; screen 5 completes first run (RUN-13; v1.3 §4.5).
   const finish = async () => {
     setLine(null);
     setFinishing(true);
-    await goTo(14, setupRoute(14));
+    await goTo(5, setupRoute(5));
   };
 
   const cards = (
@@ -164,7 +165,7 @@ export function YourDays({
 
   return (
     <StepFrame
-      step={13}
+      step={4}
       heading={COPY.yourDays}
       error={line}
       primary={{

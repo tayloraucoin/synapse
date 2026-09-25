@@ -1,33 +1,44 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { PageFrame, ShellPageHeader } from "@/components/page-frame";
 import { getServerApi } from "@/lib/trpc/server";
-import { YOUR_DAY_SCREENS, settingsYourDayRoute, type YourDayScreen as ScreenKey } from "@/lib/routes";
+import {
+  RETIRED_YOUR_DAY_SCREENS,
+  YOUR_DAY_SCREENS,
+  settingsYourDayRoute,
+  settingsYourDayScreenRoute,
+  type YourDayScreen as ScreenKey,
+} from "@/lib/routes";
 
 import { YOUR_DAY_COPY } from "../_components/copy";
 import { YourDayScreen } from "./_components/your-day-screen";
 
 /**
- * `/settings/your-day/{screen}` — one of the first-run screens embedded
- * (UX v1.2 §4.16, v1.1 §4.14): DYN-10's six, DYN-18's *Closing the day*
- * (screen 11 under v1.2), v1.2's *Work-day types* (RUN-8), *Training* and
- * *Work focuses* (RUN-11), and *Your days* (RUN-12). The segment is one of
- * the listed words; anything else is a 404. The block-kind rows live
- * under `block/{kind}` and *Block order* under `order`, so they never reach
- * this route.
+ * `/settings/your-day/{screen}` — one of the first run's screens or the
+ * builder's lists, embedded (UX v1.3 §4.6; DAY-8). The segment is one of the
+ * listed words; anything else is a 404. The block-kind rows live under
+ * `block/{kind}` and *Block order* under `order`, so they never reach this
+ * route.
+ *
+ * THE THREE RETIRED WORDS REDIRECT to *Your days* — *Work start*, *Work-day
+ * types* and *Wake* are parts of each day plan under v1.3, and a bookmark or
+ * a back-stack entry should land somewhere true rather than on a 404. DAY-13
+ * removes the keys.
  */
 const TITLES: Record<ScreenKey, string> = {
   shape: YOUR_DAY_COPY.rows.shape,
   "work-days": YOUR_DAY_COPY.rows.workDays,
+  "your-days": YOUR_DAY_COPY.rows.yourDays,
+  "before-the-day": YOUR_DAY_COPY.rows.firstThing,
+  "morning-habits": YOUR_DAY_COPY.rows.morningHabits,
+  ranked: YOUR_DAY_COPY.rows.ranked,
+  training: YOUR_DAY_COPY.rows.training,
+  commitments: YOUR_DAY_COPY.rows.commitments,
+  "closing-the-day": YOUR_DAY_COPY.rows.closingTheDay,
+  focuses: YOUR_DAY_COPY.rows.focuses,
   "work-start": YOUR_DAY_COPY.rows.workStart,
   "work-day-types": YOUR_DAY_COPY.rows.workDayTypes,
-  training: YOUR_DAY_COPY.rows.training,
-  focuses: YOUR_DAY_COPY.rows.workFocuses,
-  commitments: YOUR_DAY_COPY.rows.commitments,
   wake: YOUR_DAY_COPY.rows.wake,
-  "before-the-day": YOUR_DAY_COPY.rows.beforeTheDay,
-  "closing-the-day": YOUR_DAY_COPY.rows.closingTheDay,
-  "your-days": YOUR_DAY_COPY.rows.yourDays,
 };
 
 function isScreen(value: string): value is ScreenKey {
@@ -41,14 +52,11 @@ export default async function SettingsYourDayScreenPage({
 }) {
   const { screen } = await params;
   if (!isScreen(screen)) notFound();
+  if (RETIRED_YOUR_DAY_SCREENS.includes(screen)) redirect(settingsYourDayScreenRoute("your-days"));
 
   const api = await getServerApi();
   const me = await api.user.me();
   const fixtures = screen === "commitments" ? await api.fixture.list() : [];
-  const workTypes =
-    screen === "work-start" || screen === "work-day-types" || screen === "wake"
-      ? await api.template.list({ includeArchived: false, kind: "work" })
-      : [];
 
   return (
     <PageFrame
@@ -76,7 +84,6 @@ export default async function SettingsYourDayScreenPage({
           journalReminderEnabled: me.journalReminderEnabled,
         }}
         fixtures={fixtures}
-        workTypes={workTypes}
       />
     </PageFrame>
   );
@@ -84,5 +91,5 @@ export default async function SettingsYourDayScreenPage({
 
 export async function generateMetadata({ params }: { params: Promise<{ screen: string }> }) {
   const { screen } = await params;
-  return isScreen(screen) ? { title: TITLES[screen] } : {};
+  return isScreen(screen) && !RETIRED_YOUR_DAY_SCREENS.includes(screen) ? { title: TITLES[screen] } : {};
 }

@@ -55,6 +55,8 @@ export interface ScheduleAxisProps {
   timeZone: string;
   locale?: string;
   onExtend?: (direction: "earlier" | "later") => void;
+  /** The grid's accessible name — *Schedule* by default; the primer's is *An example day* (v1.3 §4.2; DAY-8). */
+  ariaLabel?: string;
   /** Absolutely positioned blocks, spans, ghosts and bands. */
   children: React.ReactNode;
   className?: string;
@@ -81,6 +83,7 @@ export function ScheduleAxis({
   timeZone,
   locale,
   onExtend,
+  ariaLabel = "Schedule",
   children,
   className,
 }: ScheduleAxisProps) {
@@ -115,7 +118,7 @@ export function ScheduleAxis({
       <div
         role="grid"
         aria-rowcount={bandCount}
-        aria-label="Schedule"
+        aria-label={ariaLabel}
         style={{ height: `${heightPx}px`, paddingInlineStart: `${GUTTER_PX}px` }}
         className="relative"
       >

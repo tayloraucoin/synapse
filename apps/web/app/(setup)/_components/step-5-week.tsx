@@ -16,14 +16,15 @@ import { SETUP_COPY as COPY } from "./copy";
 import { StepFrame, useStepNavigation } from "./step-frame";
 
 /**
- * Screen 14 — *Your usual week* and the mode question (UX v1.2 §4.14; RUN-13).
+ * Screen 5 — *Your usual week* and the mode question (UX v1.3 §4.5; v1.2
+ * §4.14's screen 14, RUN-13, renumbered by DAY-8; the hue strips are DAY-12's).
  *
  * SEVEN ROWS, NO NUMBER ABOUT THE WEEK. Each weekday reads its complete
  * plan, or *Off* when the profile says *never* / *rarely* and no plan holds
  * it, or *Unstructured*. A tap opens the picker: choosing a plan writes
  * `dayPlan.update({ weekdays })` on it (the service takes the day from
  * whichever plan held it — one weekday, one plan); *Unstructured* clears the
- * day from its plan. *Edit Day A* returns to screen 13's builder on that
+ * day from its plan. *Edit Day A* returns to screen 4's builder on that
  * plan's review.
  *
  * ONE QUESTION, ALREADY ANSWERED BY DEFAULT: *Set from the plan* is
@@ -33,7 +34,7 @@ import { StepFrame, useStepNavigation } from "./step-frame";
  * `/orient` while today has no `woke_at`, else `/today`; *Plan this week
  * first* lands on the week build.
  */
-export function Step14Week({
+export function Step5Week({
   initialWorkDays,
   initialMode,
 }: {
@@ -104,8 +105,8 @@ export function Step14Week({
 
   return (
     <StepFrame
-      step={14}
-      heading={COPY.step14Heading}
+      step={5}
+      heading={COPY.weekHeading}
       error={error}
       primary={{
         label: COPY.openToday,
@@ -171,7 +172,7 @@ export function Step14Week({
               <Button
                 variant="ghost"
                 className="w-full"
-                onClick={() => void goTo(13, setupRoute(13, { edit: openPlan.id }), "other")}
+                onClick={() => void goTo(4, setupRoute(4, { edit: openPlan.id }), "other")}
               >
                 {COPY.editPlan(openPlan.name)}
               </Button>

@@ -21,6 +21,7 @@ import {
   serverUpdateReady,
   subscribeUpdateReady,
 } from "@/lib/pwa/update-ready";
+import { clampSetupStep } from "@/lib/entry/resolve-entry";
 import { trpc } from "@/lib/trpc/client";
 import { dayRoute, reviewDayRoute, setupRoute, todayRoute } from "@/lib/routes";
 
@@ -158,7 +159,8 @@ export function ShellStatusLine({ dayKey }: { dayKey?: string }) {
       dayKey={scopeKey}
       setupIncomplete={data.setupIncomplete}
       onFinishSetup={() => {
-        router.push(setupRoute(data.setupStep ?? 1));
+        // A v1.2 step above the five resumes at *Your days* (TD-31; DAY-8).
+        router.push(setupRoute(clampSetupStep(data.setupStep)));
       }}
       reviewPending={firstPending !== undefined}
       pendingText={

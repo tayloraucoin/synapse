@@ -2,21 +2,14 @@
 
 import { useRouter } from "next/navigation";
 
-import type {
-  AnchorDirection,
-  FixtureView,
-  JournalPrompt,
-  ScheduleShape,
-  TemplateSummaryView,
-  WorkDays,
-} from "@syn/types";
+import type { AnchorDirection, FixtureView, JournalPrompt, ScheduleShape, WorkDays } from "@syn/types";
 
 import { Step1Shape } from "@/app/(setup)/_components/step-1-shape";
-import { Step2WorkDays } from "@/app/(setup)/_components/step-2-work-days";
-import { Step3WorkShape, WorkDayTypeCards } from "@/app/(setup)/_components/step-3-work-shape";
+import { Step3WorkDays } from "@/app/(setup)/_components/step-3-work-days";
 import { Step4Commitments } from "@/app/(setup)/_components/step-4-commitments";
-import { Step5Wake } from "@/app/(setup)/_components/step-5-wake";
 import { Step6BeforeTheDay } from "@/app/(setup)/_components/step-6-before-the-day";
+import { Step8Landscape } from "@/app/(setup)/_components/step-8-landscape";
+import { Step9Ranked } from "@/app/(setup)/_components/step-9-ranked";
 import { Step10Training } from "@/app/(setup)/_components/step-10-training";
 import { Step11Closing } from "@/app/(setup)/_components/step-11-closing";
 import { Step12Focuses } from "@/app/(setup)/_components/step-12-focuses";
@@ -24,11 +17,13 @@ import { YourDays } from "@/components/day-builder";
 import { settingsYourDayRoute, type YourDayScreen as ScreenKey } from "@/lib/routes";
 
 /**
- * One of the first-run screens, `embedded` — UX v1.2 §4.16, v1.1 §4.14:
- * "The first-run screens, without the frame". The screen's own *Save*
- * returns to the list; there is no sequence to continue. *Work-day types*
- * (v1.2) mounts screen 3's *No* path's cards without the radio — each card
- * saves itself, so the page has no *Save* of its own.
+ * One of the first-run screens, `embedded` — UX v1.3 §4.6 (DAY-8), v1.2
+ * §4.16: "The first-run screens, without the frame". The screen's own
+ * *Save* returns to the list; there is no sequence to continue. *Morning
+ * habits* and *Ranked* are v1.2's landscape and ranking screens, embedded,
+ * until the builder's own parts replace them. The three retired words
+ * (*Work start*, *Work-day types*, *Wake*) redirect in the page and never
+ * reach this switch.
  *
  * A client leaf because *Save* is a callback, and the page above is a
  * Server Component that reads the account once so the screen paints with
@@ -57,12 +52,10 @@ export function YourDayScreen({
   screen,
   values,
   fixtures,
-  workTypes,
 }: {
   screen: ScreenKey;
   values: YourDayScreenValues;
   fixtures: FixtureView[];
-  workTypes: TemplateSummaryView[];
 }) {
   const router = useRouter();
   const done = () => {
@@ -73,32 +66,18 @@ export function YourDayScreen({
     case "shape":
       return <Step1Shape initialShape={values.scheduleShape} embedded onSaved={done} />;
     case "work-days":
-      return <Step2WorkDays initialWorkDays={values.workDays} embedded onSaved={done} />;
-    case "work-start":
-      return (
-        <Step3WorkShape
-          initialWorkStart={values.workStartTime}
-          initialWorkEnd={values.workEndTime}
-          initialDirection={values.anchorDirection}
-          initialTypes={workTypes}
-          embedded
-          onSaved={done}
-        />
-      );
-    case "work-day-types":
-      return <WorkDayTypeCards />;
+      return <Step3WorkDays initialWorkDays={values.workDays} embedded onSaved={done} />;
     case "commitments":
       return <Step4Commitments initialFixtures={fixtures} embedded onSaved={done} />;
+    case "morning-habits":
+      return <Step8Landscape embedded onSaved={done} />;
+    case "ranked":
+      return <Step9Ranked embedded onSaved={done} />;
+    case "work-start":
+    case "work-day-types":
     case "wake":
-      return (
-        <Step5Wake
-          initialWake={values.usualWakeTime}
-          workStart={values.workStartTime}
-          workTypes={workTypes}
-          embedded
-          onSaved={done}
-        />
-      );
+      // Redirected by the page (v1.3 §4.6); DAY-13 removes the keys.
+      return null;
     case "before-the-day":
       return (
         <Step6BeforeTheDay

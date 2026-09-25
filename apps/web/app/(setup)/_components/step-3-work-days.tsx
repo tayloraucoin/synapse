@@ -21,19 +21,19 @@ import { SETUP_COPY as COPY } from "./copy";
 import { FactScreen } from "./fact-screen";
 
 /**
- * Screen 2 — work days (UX v1.2 §4.2).
+ * Screen 3 — work days (UX v1.3 §4.3; v1.2 §4.2's screen 2, renumbered by
+ * DAY-8).
  *
- * Seven rows, Monday first, each with a four-value select — *Always ·
- * Sometimes · Rarely · Never* — "the select is the control because four
- * words do not fit a segment at 375px" (W5). Mon–Fri *Always*, Sat and Sun
- * *Never* (S2.2). Beneath, the disclosure *What does each choice do?* opens
- * the four lines, verbatim.
+ * Seven rows, Monday first, each with a five-value select — *Always ·
+ * Usually · Sometimes · Rarely · Never* (R49) — "the select is the control
+ * because four words do not fit a segment at 375px" (W5). Mon–Fri *Always*,
+ * Sat and Sun *Never* (S2.2). Beneath, the disclosure *What does each choice
+ * do?* opens the five lines, verbatim.
  *
  * UX v1.3 §4.3 (DAY-2): the control is the `Select` primitive, its menu
  * anchored under the trigger (`position="popper"`) — the native menu opened
  * where the OS put it (T2.1); the disclosure is an `InfoDisclosure` (R60,
- * T2.3), the value in weight 500 and the definition after it. Four values
- * until DAY-8 brings *Usually*.
+ * T2.3), the value in weight 500 and the definition after it.
  *
  * EVERY CHANGE WRITES AT ONCE (§4, R30; TD-18). A select is a fact the
  * moment it changes: the row shows the new value, the write goes, and a
@@ -56,10 +56,10 @@ const DEFAULT_WORK_DAYS: WorkDays = {
 };
 
 const KEYS = ["0", "1", "2", "3", "4", "5", "6"] as const;
-// The four v1.2 values; *Usually* (v1.3 R49) joins with its copy in DAY-8.
-const MODES = ["always", "sometimes", "rarely", "never"] as const satisfies readonly WorkDayMode[];
+// v1.3 R49: five values, *Usually* second.
+const MODES = ["always", "usually", "sometimes", "rarely", "never"] as const satisfies readonly WorkDayMode[];
 
-export function Step2WorkDays({
+export function Step3WorkDays({
   initialWorkDays,
   embedded = false,
   onSaved,
@@ -97,9 +97,9 @@ export function Step2WorkDays({
 
   return (
     <FactScreen
-      step={2}
-      heading={COPY.step2Heading}
-      body={COPY.step2Body}
+      step={3}
+      heading={COPY.workDaysHeading}
+      body={COPY.workDaysBody}
       embedded={embedded}
       onSaved={onSaved}
       // Save as you go: the selects have written already; embedded's *Save* re-sends the same.

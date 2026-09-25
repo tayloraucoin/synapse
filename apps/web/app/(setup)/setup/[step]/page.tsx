@@ -4,33 +4,27 @@ import { getServerApi } from "@/lib/trpc/server";
 
 import { SETUP_COPY, SETUP_TOTAL_STEPS } from "../../_components/copy";
 import { Step1Shape } from "../../_components/step-1-shape";
-import { Step2WorkDays } from "../../_components/step-2-work-days";
-import { Step3WorkShape } from "../../_components/step-3-work-shape";
-import { Step4Commitments } from "../../_components/step-4-commitments";
-import { Step5Wake } from "../../_components/step-5-wake";
-import { Step6BeforeTheDay } from "../../_components/step-6-before-the-day";
-import { Step7BeforeWork } from "../../_components/step-7-before-work";
-import { Step8Landscape } from "../../_components/step-8-landscape";
-import { Step9Ranked } from "../../_components/step-9-ranked";
-import { Step10Training } from "../../_components/step-10-training";
-import { Step11Closing } from "../../_components/step-11-closing";
-import { Step12Focuses } from "../../_components/step-12-focuses";
-import { Step13Days } from "../../_components/step-13-days";
-import { Step14Week } from "../../_components/step-14-week";
+import { Step2Blocks } from "../../_components/step-2-blocks";
+import { Step3WorkDays } from "../../_components/step-3-work-days";
+import { Step4Days } from "../../_components/step-4-days";
+import { Step5Week } from "../../_components/step-5-week";
 
 /**
- * The first-run sequence — UX v1.2 §4, fourteen screens (RUN-8 renumbered
- * v1.1's twelve; 1–12 are v1.2's, 13 is the day builder (RUN-12), 14 is
- * the week and the mode question, which completes first run (RUN-13)).
+ * The first-run sequence — UX v1.3 §4 (R45, TD-31; DAY-8), five screens:
+ * the shape of the week; the blocks primer; which days are work; your days
+ * (the builder, v1.2's nine screens until DAY-9…DAY-11); your week, which
+ * completes first run (RUN-13). v1.2's other step files stay on disk,
+ * unrouted, until DAY-13 — Settings → Your day still mounts some of them.
  *
- * THE STEP IS THE URL, and the segment is validated: a step outside 1–14 is
+ * THE STEP IS THE URL, and the segment is validated: a step outside 1–5 is
  * a 404, because a sequence that renders an empty screen is worse than a
- * 404.
+ * 404. An account stored mid-v1.2 (a step above 5) is resumed at 4 by the
+ * entry tree's clamp, never sent here.
  *
  * THE PAGE IS A SERVER COMPONENT and each screen is a client leaf that
  * receives its current values as props, so a pre-filled field renders as
- * value + Change on first paint rather than after a fetch. Screens whose
- * content is a list the person builds (7–10, 12) read their own queries.
+ * value + Change on first paint rather than after a fetch. Screen 2 renders
+ * from constants; screen 4's list reads its own queries.
  *
  * IT DOES NOT GATE ON `first_run_completed_at`. Someone who finished setup
  * and types `/setup/3` gets screen 3 — everything in the sequence is editable
@@ -50,6 +44,7 @@ export default async function SetupStepPage({
   if (!Number.isInteger(stepNumber) || stepNumber < 1 || stepNumber > SETUP_TOTAL_STEPS) {
     notFound();
   }
+
   const api = await getServerApi();
   const me = await api.user.me();
 
@@ -57,60 +52,13 @@ export default async function SetupStepPage({
     case 1:
       return <Step1Shape initialShape={me.scheduleShape} />;
     case 2:
-      return <Step2WorkDays initialWorkDays={me.workDays} />;
-    case 3: {
-      const types = await api.template.list({ includeArchived: false, kind: "work" });
-      return (
-        <Step3WorkShape
-          initialWorkStart={me.workStartTime}
-          initialWorkEnd={me.workEndTime}
-          initialDirection={me.anchorDirection}
-          initialTypes={types}
-        />
-      );
-    }
-    case 4: {
-      const fixtures = await api.fixture.list();
-      return <Step4Commitments initialFixtures={fixtures} />;
-    }
-    case 5: {
-      const types = await api.template.list({ includeArchived: false, kind: "work" });
-      return <Step5Wake initialWake={me.usualWakeTime} workStart={me.workStartTime} workTypes={types} />;
-    }
-    case 6:
-      return (
-        <Step6BeforeTheDay
-          initialQuotesOptIn={me.quotesOptIn}
-          initialAskGratitude={me.orientAskGratitude}
-          initialAskIntention={me.orientAskIntention}
-          initialAskVisualisation={me.orientAskVisualisation}
-        />
-      );
-    case 7:
-      return <Step7BeforeWork initialWake={me.usualWakeTime} initialWorkStart={me.workStartTime} />;
-    case 8:
-      return <Step8Landscape />;
-    case 9:
-      return <Step9Ranked />;
-    case 10:
-      return <Step10Training />;
-    case 11:
-      return (
-        <Step11Closing
-          initialLightsOut={me.lightsOutTime}
-          initialDevicesOff={me.devicesOffTime}
-          initialJournalEnabled={me.journalEnabled}
-          initialPrompts={me.journalPrompts}
-          initialReminderTime={me.journalReminderTime}
-          initialReminderEnabled={me.journalReminderEnabled}
-        />
-      );
-    case 12:
-      return <Step12Focuses />;
-    case 13:
-      return <Step13Days editPlanId={typeof edit === "string" && edit !== "" ? edit : null} />;
+      return <Step2Blocks />;
+    case 3:
+      return <Step3WorkDays initialWorkDays={me.workDays} />;
+    case 4:
+      return <Step4Days editPlanId={typeof edit === "string" && edit !== "" ? edit : null} />;
     default:
-      return <Step14Week initialWorkDays={me.workDays} initialMode={me.morningMode} />;
+      return <Step5Week initialWorkDays={me.workDays} initialMode={me.morningMode} />;
   }
 }
 

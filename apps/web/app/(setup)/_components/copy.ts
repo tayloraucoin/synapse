@@ -13,7 +13,7 @@
  */
 export const SETUP_COPY = {
   /* ------------------------------------------------------------ frame -- */
-  /** "3 of 14" — the caption, and the document title (§4). */
+  /** "3 of 5" — the caption, and the document title (v1.3 §4). */
   progress: (step: number, total: number) => `${step} of ${total}`,
   back: "Back",
   finishLater: "Finish later",
@@ -37,23 +37,26 @@ export const SETUP_COPY = {
   },
   notYet: "not yet",
 
-  /* ------------------------------------------------------- screen 2 -- */
-  step2Heading: "Which days do you work?",
-  step2Body: "Most weeks, that is.",
+  /* --------------------------------------- screen 3 (v1.3 §4.3; DAY-8) -- */
+  workDaysHeading: "Which days do you work?",
+  workDaysBody: "Most weeks, that is.",
+  /** Five values, *Usually* second (v1.3 R49, §4.3). */
   workDayModes: {
     always: "Always",
+    usually: "Usually",
     sometimes: "Sometimes",
     rarely: "Rarely",
     never: "Never",
   },
   whatEachChoiceDoes: "What does each choice do?",
   /**
-   * The four lines' definitions, verbatim (v1.2 §4.2), after the term —
+   * The five lines' definitions, verbatim (v1.3 §4.3), after the term —
    * `InfoDisclosure` sets the term (`workDayModes`) in weight 500 and the
-   * dash between (v1.3 R60, §4.3; DAY-2). *Usually* arrives with DAY-8.
+   * dash between (v1.3 R60; DAY-2).
    */
   workDayModeDefinitions: {
     always: "a work day. The morning is built around it.",
+    usually: "a work day, most weeks. “Not working today” is one tap away in the day’s menu.",
     sometimes: "the morning asks, “Working today?” and builds from the answer.",
     rarely: "planned as a day off. “Working today” is one tap away in the day’s menu if it turns out otherwise.",
     never: "a day off. Nothing about work is asked.",
@@ -277,9 +280,9 @@ export const SETUP_COPY = {
   continueFocuses: (n: number) =>
     n === 0 ? "Continue" : `Continue · ${n} ${n === 1 ? "focus" : "focuses"}`,
 
-  /* ------------------------------------------------------ screen 14 -- */
+  /* ------------------------------ screen 5 (v1.3 §4.5; was 14 — DAY-8) -- */
   /** v1.2 §4.14, verbatim. */
-  step14Heading: "Your usual week.",
+  weekHeading: "Your usual week.",
   yourDays: "Your days",
   unstructured: "Unstructured",
   off: "Off",
@@ -301,5 +304,9 @@ export const SETUP_COPY = {
   planWeekFirst: "Plan this week first",
 } as const;
 
-/** The sequence's length under UX v1.2 §4 (RUN-8). */
-export const SETUP_TOTAL_STEPS = 14;
+/**
+ * The sequence's length under UX v1.3 §4 (R45, TD-31; DAY-8): the shape of
+ * the week, the blocks primer, work days, your days, your week. The one
+ * definition — the entry tree's clamp imports it.
+ */
+export const SETUP_TOTAL_STEPS = 5;

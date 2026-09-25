@@ -77,7 +77,7 @@ is a defect.**
 | `/logout` | `logoutRoute()` | AU-06 (a route handler) |
 | `/auth/callback` | `authCallbackRoute()` | OAuth / PKCE |
 | `/auth/confirm` | `authConfirmRoute()` | email `token_hash` |
-| `/setup/{1–14}` | `setupRoute(step, { edit? })` | UX v1.2 §4.1–§4.14 — fourteen screens (RUN-8 renumbered): 1–12 are v1.2's (RUN-8…RUN-11); 13 is *Your days* and the nine-screen day builder (RUN-12, `components/day-builder/`; `?edit={planId}` opens the builder on that plan's review); 14 is *Your usual week* and the mode question (RUN-13) — *Open today* / *Plan this week first* write `morning_mode`, complete first run and pre-fill the week from the plans |
+| `/setup/{1–5}` | `setupRoute(step, { edit? })` | UX v1.3 §4.1–§4.5 — five screens (DAY-8 renumbered; 6 and up are 404s, and the entry tree resumes a stored v1.2 step above 5 at 4): 1 *The shape of your week*; 2 *Days are built in blocks* — the primer, the example day and the legend (`components/blocks-primer/`); 3 *Work days*, five values; 4 *Your days* and the day builder (RUN-12, `components/day-builder/`; `?edit={planId}` opens the builder on that plan's review); 5 *Your usual week* and the mode question (RUN-13) — *Open today* / *Plan this week first* write `morning_mode`, complete first run and pre-fill the week from the plans |
 | `/orient` | `orientRoute()` | UX v1.1 §5.2 — the orient frame; the entry tree puts it before any tab while today has no `woke_at` (DYN-13); no header, no tab bar |
 | `/today` | `todayRoute()` | LS-01 — the quick-pick while `confirmed_at` is null (v1.1 §5.3, DYN-14), the list after |
 | `/today/schedule` | `todayScheduleRoute(options?)` | SC-01, editable (UX v1.1 §6.5, DYN-16); `{ move: true }` → `?mode=move`, the tap-to-lift fallback the day header sheet's *Edit today* opens |
@@ -94,8 +94,8 @@ is a defect.**
 | `/settings/account` | `settingsAccountRoute()` | ST-01 |
 | `/settings/habits` | `settingsHabitsRoute()` | LB-01 |
 | `/settings/habits/{id}` | `settingsHabitRoute(id)` | LB-02 |
-| `/settings/your-day` | `settingsYourDayRoute()` | UX v1.1 §4.14 — the twelve first-run screens as a list (DYN-8) |
-| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one of DYN-10's six screens, DYN-18's `closing-the-day` (screen 11 under v1.2), or v1.2's `work-day-types` (RUN-8), `training` / `focuses` (RUN-11), `your-days` (RUN-12), embedded: `shape · work-days · work-start · work-day-types · training · focuses · commitments · wake · before-the-day · closing-the-day · your-days` |
+| `/settings/your-day` | `settingsYourDayRoute()` | UX v1.3 §4.6 — the first run's screens and the builder's parts as a list, in the document's order (DYN-8; DAY-8) |
+| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one screen, embedded: `shape · work-days · your-days · before-the-day` (the *First thing* row, until DAY-12) `· morning-habits · ranked · training · commitments · closing-the-day · focuses`. Retired by v1.3 §4.6 — `work-start · work-day-types · wake` each **redirects to your-days until DAY-13** |
 | `/settings/your-day/block/{kind}` | `settingsYourDayBlockRoute(kind, templateId?)` | the block editor for a kind (§3.11); the template list above it when more than one |
 | `/settings/your-day/order` | `settingsYourDayOrderRoute()` | Block order (§4.14) |
 | `/settings/week` · `/settings/week/{week}` | `settingsWeekRoute(week?)` | WK-01 |

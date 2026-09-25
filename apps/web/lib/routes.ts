@@ -84,10 +84,10 @@ export function assetRoute(storedPath: string): string {
 
 /* ---------------------------------------------------------------- setup -- */
 
-/** UX v1.2 §4's fourteen screens (RUN-8). `step` is 1–14; the page 404s on anything else. */
+/** UX v1.3 §4's five screens (R45, TD-31; DAY-8). `step` is 1–5; the page 404s on anything else. */
 export function setupRoute(step: number, options?: { edit?: string }): string {
   const base = `/setup/${step}`;
-  // UX v1.2 §4.14 (RUN-13): *Edit Day A* opens screen 13's builder on that plan's review.
+  // RUN-13: *Edit Day A* opens screen 4's builder on that plan's review.
   return options?.edit ? `${base}?edit=${encodeURIComponent(options.edit)}` : base;
 }
 
@@ -181,39 +181,45 @@ export function settingsHabitRoute(id: string): string {
 }
 
 /*
- * Settings → Your day (UX v1.1 §4.14): the twelve first-run screens without
- * the frame. The six fact screens are DYN-10's, embedded; *Closing the day*
- * is screen 10 (DYN-18); the block-kind rows open the block editor for that
- * kind; *Block order* is its own list.
+ * Settings → Your day (UX v1.3 §4.6; DAY-8): the first run's screens and the
+ * builder's parts without the frame. The fact screens are embedded; the
+ * block-kind rows open the block editor for that kind (`block/{kind}`);
+ * *Block order* is its own list (`order`).
  */
 export type YourDayScreen =
   | "shape"
   | "work-days"
-  | "work-start"
-  /** UX v1.2 §4.16 (RUN-8): screen 3's *No* path — the cards, without the radio. */
-  | "work-day-types"
-  /** UX v1.2 §4.16 (RUN-11): screens 10 and 12 embedded — the workouts and the focuses. */
-  | "training"
-  | "focuses"
-  | "commitments"
-  | "wake"
+  /** UX v1.2 §4.16 (RUN-12): the day plans and the builder, embedded. */
+  | "your-days"
   | "before-the-day"
+  /** UX v1.3 §4.6 (DAY-8): the landscape and the ranking, embedded. */
+  | "morning-habits"
+  | "ranked"
+  /** UX v1.2 §4.16 (RUN-11): the workouts and the focuses, embedded. */
+  | "training"
+  | "commitments"
   | "closing-the-day"
-  /** UX v1.2 §4.16 (RUN-12): screen 13's list — the day plans and the builder, embedded. */
-  | "your-days";
+  | "focuses"
+  /** RETIRED by v1.3 §4.6 — each redirects to `your-days`; DAY-13 removes the keys. */
+  | "work-start"
+  | "work-day-types"
+  | "wake";
+
+/** The three v1.3 §4.6 retired: a bookmark or a back-stack entry lands on *Your days*. */
+export const RETIRED_YOUR_DAY_SCREENS: readonly YourDayScreen[] = ["work-start", "work-day-types", "wake"];
 
 export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
   "shape",
   "work-days",
-  "work-start",
-  "work-day-types",
-  "training",
-  "focuses",
-  "commitments",
-  "wake",
-  "before-the-day",
-  "closing-the-day",
   "your-days",
+  "before-the-day",
+  "morning-habits",
+  "ranked",
+  "training",
+  "commitments",
+  "closing-the-day",
+  "focuses",
+  ...RETIRED_YOUR_DAY_SCREENS,
 ];
 
 export function settingsYourDayRoute(): string {

@@ -1,7 +1,8 @@
 /**
- * Settings → Your day's strings — UX v1.1 §4.14: "The first-run screens,
- * without the frame, as a list". The twelve row titles are the document's;
- * the row values and anything else are `[COPY — needs Vesper sign-off]`.
+ * Settings → Your day's strings — UX v1.3 §4.6 (DAY-8; v1.1 §4.14 before
+ * it): "The first-run screens, without the frame, as a list". The row titles
+ * are the document's; the row values and anything else are
+ * `[COPY — needs Vesper sign-off]`.
  *
  * The template list's strings (TP-01, `components/template-editor/` — deleted
  * with DYN-8) live here now: the list is drawn above the block editor for a
@@ -10,24 +11,32 @@
 export const YOUR_DAY_COPY = {
   title: "Your day",
 
-  /* --------------------------------------------------- the twelve rows -- */
+  /* ------------------------------------------ the rows (v1.3 §4.6 order) -- */
   rows: {
     shape: "Shape of the week",
     workDays: "Work days",
-    workStart: "Work start",
-    /** UX v1.2 §4.16 (RUN-8): screen 3's cards, without the radio. */
-    workDayTypes: "Work-day types",
-    commitments: "Standing commitments",
-    wake: "Wake",
-    beforeTheDay: "Before the day",
-    beforeWork: "Before work",
-    morningRoutine: "Morning routine",
-    training: "Training",
-    closingTheDay: "Closing the day",
-    workFocuses: "Work focuses",
-    /** UX v1.2 §4.16 (RUN-12): screen 13's list, embedded. */
+    /** UX v1.2 §4.16 (RUN-12): the day plans and the builder, embedded. */
     yourDays: "Your days",
+    /** v1.3 §4.6: passages, links, the quote, the three lines (*Before the day* under v1.2). */
+    firstThing: "First thing",
+    /** v1.3 §4.6: the landscape. */
+    morningHabits: "Morning habits",
+    ranked: "Ranked",
+    training: "Training",
+    commitments: "Standing commitments",
+    closingTheDay: "Closing the day",
+    focuses: "Focuses",
+    /** The block-kind rows — the block editor for prep, morning, transition, activity, wind-down. */
+    gettingReady: "Getting ready",
+    morningRoutine: "Morning routine",
+    afterWork: "After work",
+    evenings: "Evenings",
+    windDown: "Wind-down",
     blockOrder: "Block order",
+    /** RETIRED by v1.3 §4.6: the titles of the three redirecting routes until DAY-13. */
+    workStart: "Work start",
+    workDayTypes: "Work-day types",
+    wake: "Wake",
   },
   /** [COPY] The *Your days* row's value. */
   days: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "day" : "days"}`),
@@ -40,13 +49,8 @@ export const YOUR_DAY_COPY = {
     own_structure_dynamic: "Own structure, and it changes",
     fluid: "Fluid days",
   },
-  gives: {
-    work_waits: "work waits",
-    routine_cut: "routine gets cut",
-    depends: "depends on the day",
-  },
   fixtures: (n: number) => (n === 0 ? "None" : `${n} ${n === 1 ? "fixture" : "fixtures"}`),
-  /** [COPY] The *Before the day* row's value under v1.2 (RUN-9). */
+  /** [COPY] The *First thing* row's value (*Before the day* under v1.2, RUN-9). */
   passages: (n: number) => `${n} ${n === 1 ? "passage" : "passages"}`,
   aQuote: "a quote",
   lines: (n: number) => `${n} ${n === 1 ? "line" : "lines"}`,
@@ -55,9 +59,6 @@ export const YOUR_DAY_COPY = {
   both: "both",
   nothing: "Nothing",
   templates: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "template" : "templates"}`),
-  /** [COPY] The *Work-day types* row's value. */
-  types: (n: number) => (n === 0 ? "Not yet" : `${n} ${n === 1 ? "type" : "types"}`),
-
   /* ---------------------------------------------------- the block order -- */
   orderTitle: "Block order",
   orderBody: "The order the blocks fall in on a day. Training and breaks are placed each morning.",

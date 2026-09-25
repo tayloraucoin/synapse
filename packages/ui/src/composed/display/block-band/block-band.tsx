@@ -66,6 +66,13 @@ export interface BlockBandProps {
   /** *7:00–9:00* — read beside the name when the label is inside the band. */
   span?: string;
   /**
+   * The inside label's distance from the band's top — 8px by default (§10.3).
+   * UX v1.3 §4.2 (DAY-8): at the primer's 28px an hour a five-minute band is
+   * 2px tall, so the primer lays the labels in one lane down the axis and
+   * hands each band its offset; a label may then run past its band's foot.
+   */
+  labelOffsetPx?: number;
+  /**
    * UX v1.2 §4.13i (RUN-12) — a read-only strip where the band is the way
    * to its screen: the label becomes a button named `editLabel`
    * (*Morning, 7:45–8:40, edit*). Ignored when `draggable`.
@@ -95,6 +102,7 @@ export function BlockBand({
   children,
   labelPlacement,
   span,
+  labelOffsetPx = LABEL_TOP_PX,
   onEdit,
   editLabel,
   hue = false,
@@ -109,7 +117,7 @@ export function BlockBand({
 
   // Inside: the label sits in the band, 8px from its top-left, past the gutter.
   const labelStyle: React.CSSProperties = inside
-    ? { top: `${LABEL_TOP_PX}px`, insetInlineStart: `${gutterPx + LABEL_TOP_PX}px` }
+    ? { top: `${labelOffsetPx}px`, insetInlineStart: `${gutterPx + LABEL_TOP_PX}px` }
     : { top: `${LABEL_TOP_PX}px`, width: `${gutterPx}px` };
   const labelClass = inside ? "absolute z-10 text-start" : "absolute start-0 pe-(--space-2) text-end";
 

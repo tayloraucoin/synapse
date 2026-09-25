@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { SettingsRow, SkeletonBlock } from "@syn/ui";
-import type { WorkDays } from "@syn/types";
+import type { BlockKind, WorkDays } from "@syn/types";
 import { formatClockFromMinutes, clockToMinutes } from "@syn/utils";
 
 import { trpc } from "@/lib/trpc/client";
@@ -16,16 +16,17 @@ import {
 import { YOUR_DAY_COPY as COPY } from "./copy";
 
 /**
- * Settings → Your day — UX v1.1 §4.14: "The first-run screens, without the
- * frame, as a list … Each opens its screen; the block-kind rows open the
- * block editor for that kind".
+ * Settings → Your day — UX v1.3 §4.6 (DAY-8): "The first-run screens,
+ * without the frame, as a list … the block-kind rows open the block editor
+ * for that kind".
  *
- * TWELVE ROWS, IN THE DOCUMENT'S ORDER. Rows 1–6 open DYN-10's screens
- * embedded; *Before work* and *Morning routine* open the editor for prep and
- * morning; *Closing the day* opens screen 10 embedded (DYN-18), which carries
- * the wind-down editor as a ghost row; *Training* and *Work focuses* open the
- * training and work editors until DYN-11 re-points them at its own screens;
- * *Block order* is its own list.
+ * V1.3'S ROWS, IN THE DOCUMENT'S ORDER. The fact screens and the builder's
+ * lists open embedded; *First thing* opens v1.2's *Before the day* until
+ * DAY-12 re-points it at its links-and-all screen; *Getting ready · Morning
+ * routine · After work · Evenings · Wind-down* open the block editor for
+ * prep, morning, transition, activity and wind-down; *Block order* is its own
+ * list. *Free-time activities* and *Each morning* arrive with DAY-12; *Work
+ * start*, *Work-day types* and *Wake* are retired and their routes redirect.
  *
  * A VALUE NEVER SPINS (cross-cutting G5): while the account loads each row
  * shows a `SkeletonBlock` where its value goes.
@@ -41,10 +42,14 @@ export function YourDayList() {
     text === undefined ? <SkeletonBlock heightPx={16} className="max-w-32" /> : (text ?? undefined);
 
   const data = me.data;
-  const countOf = (kind: "prep" | "morning" | "training" | "wind_down" | "work") =>
+  const countOf = (kind: BlockKind) =>
     templates.data === undefined
       ? undefined
       : COPY.templates(templates.data.filter((template) => template.kind === kind).length);
+
+  const blockRow = (title: string, kind: BlockKind) => (
+    <SettingsRow key={kind} title={title} description={value(countOf(kind))} href={settingsYourDayBlockRoute(kind)} />
+  );
 
   return (
     <ul className="flex flex-col">
@@ -60,41 +65,15 @@ export function YourDayList() {
         description={value(data === undefined ? undefined : workDaysLabel(data.workDays))}
         href={settingsYourDayScreenRoute("work-days")}
       />
+      {/* RUN-12: the day plans and the builder, embedded. */}
       <SettingsRow
-        title={COPY.rows.workStart}
-        description={value(
-          data === undefined
-            ? undefined
-            : data.workStartTime === null
-              ? null
-              : data.anchorDirection === null
-                ? clock(data.workStartTime)
-                : `${clock(data.workStartTime)} · ${COPY.gives[data.anchorDirection]}`,
-        )}
-        href={settingsYourDayScreenRoute("work-start")}
+        title={COPY.rows.yourDays}
+        description={value(plans.data === undefined ? undefined : COPY.days(plans.data.length))}
+        href={settingsYourDayScreenRoute("your-days")}
       />
-      {/* UX v1.2 §4.16 (RUN-8): the types, one row — *2 types* or *Not yet*. */}
+      {/* v1.2's *Before the day* screen until DAY-12's *First thing* (with links). */}
       <SettingsRow
-        title={COPY.rows.workDayTypes}
-        description={value(
-          templates.data === undefined
-            ? undefined
-            : COPY.types(templates.data.filter((template) => template.kind === "work").length),
-        )}
-        href={settingsYourDayScreenRoute("work-day-types")}
-      />
-      <SettingsRow
-        title={COPY.rows.commitments}
-        description={value(fixtures.data === undefined ? undefined : COPY.fixtures(fixtures.data.length))}
-        href={settingsYourDayScreenRoute("commitments")}
-      />
-      <SettingsRow
-        title={COPY.rows.wake}
-        description={value(data === undefined ? undefined : clock(data.usualWakeTime))}
-        href={settingsYourDayScreenRoute("wake")}
-      />
-      <SettingsRow
-        title={COPY.rows.beforeTheDay}
+        title={COPY.rows.firstThing}
         description={value(
           data === undefined || passages.data === undefined
             ? undefined
@@ -106,20 +85,17 @@ export function YourDayList() {
         )}
         href={settingsYourDayScreenRoute("before-the-day")}
       />
-      <SettingsRow
-        title={COPY.rows.beforeWork}
-        description={value(countOf("prep"))}
-        href={settingsYourDayBlockRoute("prep")}
-      />
-      <SettingsRow
-        title={COPY.rows.morningRoutine}
-        description={value(countOf("morning"))}
-        href={settingsYourDayBlockRoute("morning")}
-      />
+      <SettingsRow title={COPY.rows.morningHabits} href={settingsYourDayScreenRoute("morning-habits")} />
+      <SettingsRow title={COPY.rows.ranked} href={settingsYourDayScreenRoute("ranked")} />
       <SettingsRow
         title={COPY.rows.training}
         description={value(countOf("training"))}
         href={settingsYourDayScreenRoute("training")}
+      />
+      <SettingsRow
+        title={COPY.rows.commitments}
+        description={value(fixtures.data === undefined ? undefined : COPY.fixtures(fixtures.data.length))}
+        href={settingsYourDayScreenRoute("commitments")}
       />
       {/* DYN-18: the screen, not the editor — its ghost row reaches the editor. */}
       <SettingsRow
@@ -134,16 +110,15 @@ export function YourDayList() {
         href={settingsYourDayScreenRoute("closing-the-day")}
       />
       <SettingsRow
-        title={COPY.rows.workFocuses}
+        title={COPY.rows.focuses}
         description={value(countOf("work"))}
         href={settingsYourDayScreenRoute("focuses")}
       />
-      {/* RUN-12: screen 13's list — the day plans and the builder, embedded. */}
-      <SettingsRow
-        title={COPY.rows.yourDays}
-        description={value(plans.data === undefined ? undefined : COPY.days(plans.data.length))}
-        href={settingsYourDayScreenRoute("your-days")}
-      />
+      {blockRow(COPY.rows.gettingReady, "prep")}
+      {blockRow(COPY.rows.morningRoutine, "morning")}
+      {blockRow(COPY.rows.afterWork, "transition")}
+      {blockRow(COPY.rows.evenings, "activity")}
+      {blockRow(COPY.rows.windDown, "wind_down")}
       <SettingsRow title={COPY.rows.blockOrder} href={settingsYourDayOrderRoute()} />
     </ul>
   );
@@ -154,12 +129,16 @@ function clock(stored: string): string {
   return formatClockFromMinutes(clockToMinutes(stored.slice(0, 5)));
 }
 
-/** "Mon–Fri · Sat sometimes" — runs of *always*, then the *sometimes* days. */
+/**
+ * "Mon–Fri · Sat usually · Sun sometimes" — runs of *always*, then the
+ * *usually* days (v1.3 R49; DAY-8), then the *sometimes* days.
+ */
 function workDaysLabel(days: WorkDays | null): string | null {
   if (days === null) return null;
   const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
   const keys = ["0", "1", "2", "3", "4", "5", "6"] as const;
   const always = keys.filter((key) => days[key] === "always").map((key) => Number(key));
+  const usually = keys.filter((key) => days[key] === "usually").map((key) => names[Number(key)]);
   const sometimes = keys.filter((key) => days[key] === "sometimes").map((key) => names[Number(key)]);
 
   const runs: string[] = [];
@@ -175,6 +154,7 @@ function workDaysLabel(days: WorkDays | null): string | null {
   }
 
   const parts = [runs.join(", ")];
+  if (usually.length > 0) parts.push(`${usually.join(", ")} usually`);
   if (sometimes.length > 0) parts.push(`${sometimes.join(", ")} sometimes`);
   const label = parts.filter((part) => part !== "").join(" · ");
   return label === "" ? COPY.nothing : label;

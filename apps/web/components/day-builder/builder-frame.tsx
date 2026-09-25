@@ -13,14 +13,15 @@ import { DAY_BUILDER_COPY as COPY } from "./copy";
 /**
  * The builder's frame — UX v1.2 §4.13 (RUN-12).
  *
- * IN THE SEQUENCE it is screen 13's `StepFrame` (*13 of 14*, *Finish
- * later*, the sticky action row) with a second caption under the progress
- * line — *Day A · 3 of 9* — and a back that walks the nine screens rather
- * than the fourteen. UNDER SETTINGS (`embedded`) there is no sequence: the
- * same caption, heading, body and action row, without the frame's chrome.
+ * IN THE SEQUENCE it is screen 4's `StepFrame` (*4 of 5* under UX v1.3
+ * §4.4; DAY-8 renumbered it from 13), *Finish later*, the sticky action
+ * row) with a second caption under the progress line — *Day A · 3 of 9* —
+ * and a back that walks the builder's screens rather than the outer five.
+ * UNDER SETTINGS (`embedded`) there is no sequence: the same caption,
+ * heading, body and action row, without the frame's chrome.
  *
  * FOCUS MOVES TO THE HEADING on every screen change (the outer frame only
- * does so on a step change, and the step stays 13). The caption is
+ * does so on a step change, and the step stays 4). The caption is
  * `aria-live="polite"` so the change is read as well as seen.
  */
 export function BuilderFrame({
@@ -58,7 +59,7 @@ export function BuilderFrame({
     return (
       <div ref={rootRef} className="contents">
         <StepFrame
-          step={13}
+          step={4}
           heading={heading}
           body={body}
           caption={caption}
