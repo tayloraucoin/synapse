@@ -366,6 +366,22 @@ export {
   type BandVariants,
   type BlockBandProps,
 } from "./composed/display/block-band";
+export {
+  BrandGlyph,
+  SpotifyMark,
+  type BrandGlyphKind,
+  type BrandGlyphProps,
+} from "./composed/display/brand-glyph";
+export {
+  LINK_CALLOUT_COPY,
+  LinkCallout,
+  type LinkCalloutProps,
+} from "./composed/display/link-callout";
+export {
+  WeekHueStrip,
+  type WeekHueSegmentKind,
+  type WeekHueStripProps,
+} from "./composed/display/week-hue-strip";
 export { GapBand, type GapBandProps } from "./composed/display/gap-band";
 export {
   BUDGET_LINE_COPY,

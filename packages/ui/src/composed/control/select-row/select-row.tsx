@@ -52,6 +52,12 @@ export interface SelectRowProps {
   disabledCaption?: string;
   /** An uploaded icon's resolved URL. */
   imageUrl?: string | null;
+  /**
+   * UX v1.3 R59, §4.4 B11, B16 (DAY-7): a slot between the glyph and the title
+   * — the routine's and the pool's rows pass the matters cell (`PriorityMark`),
+   * whose own name joins the row's.
+   */
+  leading?: React.ReactNode;
   className?: string;
 }
 
@@ -67,6 +73,7 @@ export function SelectRow({
   disabled = false,
   disabledCaption,
   imageUrl = null,
+  leading,
   className,
 }: SelectRowProps) {
   const errorId = React.useId();
@@ -100,6 +107,9 @@ export function SelectRow({
         )}
       >
         <EmojiSlot icon={icon} imageUrl={imageUrl} className={cn(disabled && "opacity-40")} />
+        {leading === undefined || leading === null ? null : (
+          <span className={cn("-ms-(--space-1) flex shrink-0 items-center", disabled && "opacity-40")}>{leading}</span>
+        )}
 
         <span className="flex min-w-0 flex-1 items-baseline gap-(--space-2)">
           <Text

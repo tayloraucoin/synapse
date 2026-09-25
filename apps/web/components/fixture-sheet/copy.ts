@@ -14,7 +14,23 @@ export const FIXTURE_SHEET_COPY = {
   days: "Which days",
   at: "At",
   forLabel: "For",
+  /** UX v1.3 §4.4 B6, R51 — *Where*: here or away, then the place and the travel. */
   where: "Where",
+  here: "Here",
+  away: "Away",
+  place: "Place",
+  placePlaceholder: "The clinic, the studio, the office…",
+  gettingThere: "Getting there",
+  gettingBack: "Getting back",
+  planForTheTravel: "Plan for the travel",
+  /** [COPY] v1.3 §4.4 B6, §13 #40 — for Taylor's read. */
+  planForTheTravelLine: "Kept beside it, never added to it. Either trip can be dropped on the day.",
+  /**
+   * [COPY — needs Vesper sign-off] The block segment's name. v1.3 gives *Where*
+   * to *Here · Away* and leaves *In work · In the evening* unlabelled; a
+   * segmented control still needs a name.
+   */
+  partOfTheDay: "Part of the day",
   inWork: "In work",
   inTheEvening: "In the evening",
   save: "Save",

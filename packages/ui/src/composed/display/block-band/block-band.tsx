@@ -38,7 +38,7 @@ import { cn } from "../../../lib/cn";
 import { Text } from "../../../primitives/typography/text";
 import { BLOCK_HEADER_COPY, BLOCK_KIND_WORDS } from "../block-header/copy";
 import { BandLabelPlacementContext, SCHEDULE_GUTTER_PX, type BandLabelPlacement } from "../schedule-axis";
-import { bandVariants } from "./band.variants";
+import { BLOCK_LABEL_HUE, bandVariants } from "./band.variants";
 
 /** §10.3: "the block band's gutter label sits at 8px from the band's top." */
 const LABEL_TOP_PX = 8;
@@ -72,6 +72,12 @@ export interface BlockBandProps {
    */
   onEdit?: () => void;
   editLabel?: string;
+  /**
+   * UX v1.3 R47, TD-29 (DAY-7): the kind's hue — the wash and the label's
+   * pairing, decided by the kind. PLANNING SURFACES ONLY: the primer, the
+   * builder's progress and review, the week. Never `/today` or the Schedule.
+   */
+  hue?: boolean;
   className?: string;
 }
 
@@ -91,8 +97,11 @@ export function BlockBand({
   span,
   onEdit,
   editLabel,
+  hue = false,
   className,
 }: BlockBandProps) {
+  // Hued: the label takes the kind's 700 (200 in dark) instead of the secondary tone.
+  const labelTone = hue ? BLOCK_LABEL_HUE[kind] : undefined;
   const label = name ?? BLOCK_KIND_WORDS[kind];
   const axisPlacement = React.useContext(BandLabelPlacementContext);
   const inside = (labelPlacement ?? axisPlacement) === "inside";
@@ -115,7 +124,7 @@ export function BlockBand({
       <div
         aria-hidden="true"
         style={{ insetInlineStart: `${gutterPx}px` }}
-        className={cn(bandVariants({ tone: pooled ? "pooled" : "block" }), "inset-y-0 end-0")}
+        className={cn(bandVariants({ tone: pooled ? "pooled" : "block", kind, hue }), "inset-y-0 end-0")}
       />
 
       {draggable ? (
@@ -134,7 +143,7 @@ export function BlockBand({
             "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none",
           )}
         >
-          <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
+          <Text as="span" variant="caption" tone="secondary" className={cn("tabular-nums", labelTone)}>
             {labelText}
           </Text>
         </button>
@@ -150,13 +159,13 @@ export function BlockBand({
             "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:outline-none",
           )}
         >
-          <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
+          <Text as="span" variant="caption" tone="secondary" className={cn("tabular-nums", labelTone)}>
             {labelText}
           </Text>
         </button>
       ) : (
         <span aria-hidden="true" style={labelStyle} className={labelClass}>
-          <Text as="span" variant="caption" tone="secondary" className="tabular-nums">
+          <Text as="span" variant="caption" tone="secondary" className={cn("tabular-nums", labelTone)}>
             {labelText}
           </Text>
         </span>

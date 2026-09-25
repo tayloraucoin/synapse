@@ -395,6 +395,18 @@
       "types": "./src/composed/display/block-band/index.ts",
       "default": "./src/composed/display/block-band/index.ts"
     },
+    "./brand-glyph": {
+      "types": "./src/composed/display/brand-glyph/index.ts",
+      "default": "./src/composed/display/brand-glyph/index.ts"
+    },
+    "./link-callout": {
+      "types": "./src/composed/display/link-callout/index.ts",
+      "default": "./src/composed/display/link-callout/index.ts"
+    },
+    "./week-hue-strip": {
+      "types": "./src/composed/display/week-hue-strip/index.ts",
+      "default": "./src/composed/display/week-hue-strip/index.ts"
+    },
     "./gap-band": {
       "types": "./src/composed/display/gap-band/index.ts",
       "default": "./src/composed/display/gap-band/index.ts"

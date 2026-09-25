@@ -45,7 +45,13 @@ export interface ScheduleAxisProps {
   /** Minutes from day start. */
   startMin: number;
   endMin: number;
-  pxPerHour?: 64 | 96;
+  /**
+   * 64, or 96 at ≥150% text. 28 is the COMPACT scale (UX v1.3 §4.2; DAY-7):
+   * the primer's 24-hour example day on one phone screen — every third hour
+   * labelled, half-hour lines hidden, every band's label inside it. Nothing
+   * on `/today` or the Schedule passes 28.
+   */
+  pxPerHour?: 28 | 64 | 96;
   timeZone: string;
   locale?: string;
   onExtend?: (direction: "earlier" | "later") => void;
@@ -81,14 +87,17 @@ export function ScheduleAxis({
   const spanMin = Math.max(0, endMin - startMin);
   const bandCount = Math.ceil(spanMin / MIN_PER_BAND);
   const heightPx = (spanMin / 60) * pxPerHour;
-  const labelPlacement: BandLabelPlacement = spanMin < INSIDE_UNDER_MIN ? "inside" : "gutter";
+  const compact = pxPerHour === 28;
+  const labelPlacement: BandLabelPlacement = compact || spanMin < INSIDE_UNDER_MIN ? "inside" : "gutter";
+  // At 28px an hour, a label every hour would touch the next; every third reads.
+  const labelEvery = compact ? 3 : 1;
 
   const hours = React.useMemo(() => {
     const first = Math.ceil(startMin / 60) * 60;
     const out: number[] = [];
-    for (let m = first; m <= endMin; m += 60) out.push(m);
+    for (let m = first; m <= endMin; m += 60 * labelEvery) out.push(m);
     return out;
-  }, [endMin, startMin]);
+  }, [endMin, labelEvery, startMin]);
 
   return (
     <div className={cn("relative overflow-y-auto", className)}>
@@ -133,7 +142,7 @@ export function ScheduleAxis({
                   "h-full border-t",
                   isHour
                     ? "border-edge"
-                    : isHalf || pxPerHour === 96
+                    : !compact && (isHalf || pxPerHour === 96)
                       ? "border-hairline"
                       : "border-transparent",
                 )}

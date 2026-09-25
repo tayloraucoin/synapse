@@ -77,3 +77,13 @@ export const LargeTextScale: Story = {
 export const Extendable: Story = {
   args: { children: null, onExtend: () => {} },
 };
+
+/**
+ * UX v1.3 §4.2 (DAY-7): the compact 28px an hour — the primer's 24 hours,
+ * 7:00 to 7:00, in 672px; every third hour labelled, half-hours unlined,
+ * and every band's label inside it.
+ */
+export const Compact28px24Hours: Story = {
+  decorators: [(Story) => <div className="h-[720px] max-w-[375px]"><Story /></div>],
+  args: { startMin: 7 * 60, endMin: 31 * 60, pxPerHour: 28, children: null },
+};

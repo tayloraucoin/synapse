@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
 
 import { Button } from "../../../primitives/control/button";
+import { PriorityMark } from "../../display/priority-mark";
 import { SelectRow, SelectRowList } from "./select-row";
 
 /**
@@ -57,6 +58,23 @@ export const Saving: Story = { args: { selected: true, committing: true } };
 /** The write rejected: the tick reverted, the screen's line reads with the row. */
 export const Failed: Story = {
   args: { selected: false, error: "That didn't save. Tap again when you're back online." },
+};
+
+/** UX v1.3 R59 (DAY-7): the matters cell between the glyph and the title — the routine's and the pool's rows. */
+export const WithLeadingPriorityMark: Story = {
+  args: { selected: true, icon: { kind: "emoji", value: "🥶" }, title: "Cold shower", detail: "usually 12", leading: <PriorityMark value={5} /> },
+};
+
+/** A 20-character title with the mark at 375px: glyph, mark, title, detail and check on one 56px line. */
+export const WithMarkLongTitle375: Story = {
+  decorators: [(Story) => <div className="max-w-[375px]"><Story /></div>],
+  args: {
+    selected: true,
+    icon: { kind: "emoji", value: "🔤" },
+    title: "Language practice ok",
+    detail: "usually 15",
+    leading: <PriorityMark value={4} />,
+  },
 };
 
 export const Disabled: Story = {

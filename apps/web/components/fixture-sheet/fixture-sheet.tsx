@@ -12,11 +12,21 @@ import {
   MinutesStepper,
   ResponsiveSheet,
   SegmentedControl,
+  Switch,
+  Text,
   TimeField,
   WeekdayChips,
   type Weekday as ChipWeekday,
 } from "@syn/ui";
-import { DURATION_MAX, DURATION_MIN, FIXTURE_KINDS, FIXTURE_TITLE_MAX, fixtureKindDefaults } from "@syn/constants";
+import {
+  DURATION_MAX,
+  DURATION_MIN,
+  FIXTURE_KINDS,
+  FIXTURE_LOCATION_MAX,
+  FIXTURE_TITLE_MAX,
+  TRAVEL_MAX,
+  fixtureKindDefaults,
+} from "@syn/constants";
 import type { FixtureKind, FixtureView, IconValue } from "@syn/types";
 
 import { SheetHost } from "@/components/page-frame";
@@ -39,6 +49,12 @@ import { FIXTURE_SHEET_COPY as COPY } from "./copy";
  * selected. Picking one fills the glyph and the block the person has not
  * chosen themselves (`iconTouched`, `whereTouched`); both stay theirs to
  * change, and a kind changed later moves neither once touched.
+ *
+ * UX v1.3 R51, §4.4 B6 (DAY-7): after the kind and the title, **Where** —
+ * *Here · Away*; away reveals **Place**, **Getting there** · **Getting back**
+ * and **Plan for the travel**. *Away* is derived on edit from the four fields
+ * (a place or a travel length); *Here*, or away with nothing filled in,
+ * saves no place and no travel. The block segment below is *Part of the day*.
  *
  * ONE SHEET, THREE DOORS: first run's screen 4, Settings → Your day, and the
  * week build (DYN-12). The write is `fixture.save`; the list the caller
@@ -76,6 +92,13 @@ export function FixtureSheet({
   const [durationMin, setDurationMin] = React.useState<number | null>(30);
   const [where, setWhere] = React.useState<"work" | "activity">("work");
   const [whereTouched, setWhereTouched] = React.useState(false);
+  // UX v1.3 R51 (DAY-7): here or away — named `away` so it never collides with the block's `where`.
+  const [away, setAway] = React.useState(false);
+  const [place, setPlace] = React.useState("");
+  const [thereMin, setThereMin] = React.useState<number | null>(0);
+  const [backMin, setBackMin] = React.useState<number | null>(0);
+  const [planTravel, setPlanTravel] = React.useState(true);
+  const awayHeadingId = React.useId();
   const [error, setError] = React.useState<string | null>(null);
   const [discardOpen, setDiscardOpen] = React.useState(false);
 
@@ -92,8 +115,19 @@ export function FixtureSheet({
       setDurationMin(fixture.durationMin);
       setWhere(fixture.blockKind === "activity" ? "activity" : "work");
       setWhereTouched(true);
+      // *Away* is derived from the four fields — no fifth column (DAY-7).
+      setAway(fixture.location !== null || fixture.travel.thereMin > 0 || fixture.travel.backMin > 0);
+      setPlace(fixture.location ?? "");
+      setThereMin(fixture.travel.thereMin);
+      setBackMin(fixture.travel.backMin);
+      setPlanTravel(fixture.travel.planned);
       return;
     }
+    setAway(false);
+    setPlace("");
+    setThereMin(0);
+    setBackMin(0);
+    setPlanTravel(true);
     setKind(null);
     setIcon(null);
     setIconTouched(false);
@@ -124,7 +158,18 @@ export function FixtureSheet({
         durationMin !== fixture.durationMin ||
         (fixture.blockKind === "activity" ? "activity" : "work") !== where ||
         kind !== fixture.kind ||
-        JSON.stringify(icon) !== JSON.stringify(fixture.icon);
+        JSON.stringify(icon) !== JSON.stringify(fixture.icon) ||
+        (away ? place.trim() : "") !== (fixture.location ?? "") ||
+        (away ? (thereMin ?? 0) : 0) !== fixture.travel.thereMin ||
+        (away ? (backMin ?? 0) : 0) !== fixture.travel.backMin ||
+        (away ? planTravel : true) !== fixture.travel.planned;
+
+  // *Here*, or *Away* with nothing filled in, saves as here (DAY-7).
+  const placeValue = away ? place.trim() : "";
+  const travel = away
+    ? { there: thereMin ?? 0, back: backMin ?? 0, planned: planTravel }
+    : { there: 0, back: 0, planned: true };
+  const reallyAway = placeValue !== "" || travel.there > 0 || travel.back > 0;
   const canSave = title.trim() !== "" && weekdays.length > 0 && durationMin !== null;
 
   async function submit(): Promise<void> {
@@ -141,6 +186,11 @@ export function FixtureSheet({
         scheduling: "hard",
         kind: kind ?? "other",
         icon: icon ?? undefined,
+        // UX v1.3 R51, TD-27 (DAY-5's `fixture.save`): the place and the travel.
+        location: reallyAway && placeValue !== "" ? placeValue : null,
+        travelThereMin: reallyAway ? travel.there : 0,
+        travelBackMin: reallyAway ? travel.back : 0,
+        planTravel: reallyAway ? travel.planned : true,
       });
       await utils.fixture.list.invalidate();
       onSaved?.(saved);
@@ -198,6 +248,57 @@ export function FixtureSheet({
               className="flex-1"
             />
           </div>
+
+          {/* UX v1.3 §4.4 B6, R51: here or away; away reveals the place and the travel. */}
+          <SegmentedControl
+            label={COPY.where}
+            value={away ? "away" : "here"}
+            onChange={(next) => setAway(next === "away")}
+            options={[
+              { value: "here" as const, label: COPY.here },
+              { value: "away" as const, label: COPY.away },
+            ]}
+          />
+          {away ? (
+            <div role="group" aria-labelledby={awayHeadingId} className="flex flex-col gap-(--space-3)">
+              <Text as="span" id={awayHeadingId} aria-live="polite" className="sr-only">
+                {COPY.away}
+              </Text>
+              <Input
+                label={COPY.place}
+                placeholder={COPY.placePlaceholder}
+                value={place}
+                maxLength={FIXTURE_LOCATION_MAX}
+                onChange={(event) => setPlace(event.target.value)}
+              />
+              <MinutesStepper
+                label={COPY.gettingThere}
+                value={thereMin}
+                onChange={setThereMin}
+                min={0}
+                max={TRAVEL_MAX}
+              />
+              <MinutesStepper
+                label={COPY.gettingBack}
+                value={backMin}
+                onChange={setBackMin}
+                min={0}
+                max={TRAVEL_MAX}
+              />
+              <div className="flex items-start justify-between gap-(--space-4)">
+                <span className="flex min-w-0 flex-col gap-(--space-1)">
+                  <Text as="label" htmlFor={`${awayHeadingId}-travel`} variant="body" weight={500}>
+                    {COPY.planForTheTravel}
+                  </Text>
+                  <Text as="span" variant="caption" tone="secondary">
+                    {COPY.planForTheTravelLine}
+                  </Text>
+                </span>
+                <Switch id={`${awayHeadingId}-travel`} checked={planTravel} onCheckedChange={setPlanTravel} />
+              </div>
+            </div>
+          ) : null}
+
           <WeekdayChips
             label={COPY.days}
             indexing="monday"
@@ -213,7 +314,7 @@ export function FixtureSheet({
             max={DURATION_MAX}
           />
           <SegmentedControl
-            label={COPY.where}
+            label={COPY.partOfTheDay}
             value={where}
             onChange={(next) => {
               setWhereTouched(true);

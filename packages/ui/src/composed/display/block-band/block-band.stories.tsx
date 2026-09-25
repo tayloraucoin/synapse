@@ -156,6 +156,84 @@ export const TapToEdit: StoryObj = {
   ),
 };
 
+/* ---- UX v1.3 R47, TD-29 (DAY-7): the kind's hue, planning surfaces only ---- */
+
+/** The primer's example day (v1.3 §12.4), as spans from 7:00 — minutes from 7:00 and lengths. */
+const EXAMPLE: ReadonlyArray<{ kind: React.ComponentProps<typeof BlockBand>["kind"]; name: string | null; from: number; to: number; span: string }> = [
+  { kind: "orient", name: null, from: 0, to: 5, span: "7:00" },
+  { kind: "morning", name: "Morning routine", from: 5, to: 60, span: "7:05" },
+  { kind: "training", name: null, from: 60, to: 120, span: "8:00" },
+  { kind: "prep", name: null, from: 120, to: 150, span: "9:00" },
+  { kind: "work", name: null, from: 150, to: 480, span: "9:30" },
+  { kind: "break", name: null, from: 480, to: 495, span: "15:00" },
+  { kind: "break", name: "Lunch", from: 495, to: 525, span: "15:15" },
+  { kind: "work", name: null, from: 525, to: 720, span: "15:45" },
+  { kind: "transition", name: null, from: 720, to: 750, span: "19:00" },
+  { kind: "activity", name: null, from: 750, to: 840, span: "19:30" },
+  { kind: "wind_down", name: null, from: 840, to: 930, span: "21:00" },
+];
+const COMPACT = 28;
+const px28 = (minutes: number) => (minutes / 60) * COMPACT;
+
+/** Nine kinds, hued, on the compact 28px/h axis — the washes read as one family, labels inside. */
+export const NineKindsHued: StoryObj = {
+  decorators: [
+    (Story) => (
+      <ScheduleAxis startMin={7 * 60} endMin={31 * 60} pxPerHour={28} timeZone={STORY_TIME_ZONE} className="h-[700px] max-w-[375px]">
+        <Story />
+      </ScheduleAxis>
+    ),
+  ],
+  render: () => (
+    <>
+      {EXAMPLE.map((band) => (
+        <BlockBand
+          key={`${band.kind}-${band.from}`}
+          kind={band.kind}
+          name={band.name}
+          span={band.span}
+          topPx={px28(band.from)}
+          heightPx={Math.max(px28(band.to - band.from), 12)}
+          hue
+        />
+      ))}
+    </>
+  ),
+};
+
+/** Hued and pooled: the dashed edge stays over the wash. */
+export const HuedAndPooled: StoryObj = {
+  decorators: [
+    (Story) => (
+      <ScheduleAxis startMin={18 * 60} endMin={21 * 60} pxPerHour={64} timeZone={STORY_TIME_ZONE} className="h-[220px]">
+        <Story />
+      </ScheduleAxis>
+    ),
+  ],
+  render: () => (
+    <>
+      <BlockBand kind="transition" name="After work A" topPx={0} heightPx={32} hue labelPlacement="inside" span="18:00–18:30" />
+      <BlockBand kind="activity" name="Evenings A" topPx={40} heightPx={140} hue pooled labelPlacement="inside" span="18:30–21:00" />
+    </>
+  ),
+};
+
+/** The rule: the Schedule's monochrome bands (left, no `hue`) beside the planning surfaces' hued ones. */
+export const MonochromeBesideHued: StoryObj = {
+  decorators: [(Story) => <Story />],
+  render: () => (
+    <div className="grid grid-cols-2 gap-(--space-4)">
+      {[false, true].map((hue) => (
+        <ScheduleAxis key={String(hue)} startMin={7 * 60} endMin={10 * 60} pxPerHour={64} timeZone={STORY_TIME_ZONE} className="h-[220px]">
+          <BlockBand kind="morning" name="Morning routine A" topPx={0} heightPx={64} hue={hue} labelPlacement="inside" span="7:00–8:00" />
+          <BlockBand kind="prep" name="Getting ready A" topPx={72} heightPx={48} hue={hue} labelPlacement="inside" span="8:00–8:45" />
+          <BlockBand kind="work" name={null} topPx={128} heightPx={64} hue={hue} labelPlacement="inside" span="9:00–" />
+        </ScheduleAxis>
+      ))}
+    </div>
+  ),
+};
+
 function minutesOf(date: Date): number {
   return ((date.getUTCHours() - 7 + 24) % 24) * 60 + date.getUTCMinutes();
 }
