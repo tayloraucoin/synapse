@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-17 · 1303 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-25 · 1385 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -71,26 +71,18 @@ apps/
           fact-screen.tsx  # one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)
           focus-setup-card.tsx  # one focus (v1.2 §4.12): a blank glyph by default, a week count, usual days with Flexible; creates on the first fact
           habit-setup-card.tsx  # one habit ranked (v1.2 §4.9, TD-11): matters, usually (the slot's length), up to three versions; every control writes its own fact
+          setup-cards.tsx
           step-1-shape.tsx
-          step-10-training.tsx
-          step-11-closing.tsx  # screen 11 (v1.2 §4.11, R38): phone away follows lights out until touched; wind-down rows; sortable prompts; the reminder in the person's words
-          step-12-focuses.tsx
-          step-13-days.tsx  # screen 13 — mounts YourDays (the day builder, components/day-builder); Continue · n days moves to 14; ?edit= opens a plan's review
-          step-14-week.tsx  # screen 14 — the seven weekday rows and the mode question (v1.2 §4.14); Open today / Plan this week first complete first run with morning_mode and pre-fill the week from the plans
-          step-2-work-days.tsx
-          step-3-work-shape.tsx  # screen 3 (v1.2 §4.3): Yes — the anchor, its end, what gives, ensureWork; No — the work-day type cards, each writing itself
-          step-4-commitments.tsx
-          step-5-wake.tsx
-          step-6-before-the-day.tsx
-          step-7-before-work.tsx
-          step-8-landscape.tsx
-          step-9-ranked.tsx  # screen 9 (v1.2 §4.9): one HabitSetupCard per morning slot in tick order; collapsed cards sink; nothing reorders here
+          step-2-blocks.tsx  # screen 2 — the blocks primer (v1.3 §4.2): the example day and the legend, one read, no skip
+          step-3-work-days.tsx
+          step-4-days.tsx  # screen 4 — mounts YourDays (the day builder, components/day-builder); Continue · n days moves to 5; ?edit= opens a plan's review
+          step-5-week.tsx  # screen 5 — the seven weekday rows and the mode question (v1.3 §4.5); Open today / Plan this week first complete first run with morning_mode and pre-fill the week from the plans
           step-frame.tsx
-          use-prep-steps.ts  # screen 7's writes: a tick creates the step and its prep slot at once, queued per row so a second tap is never a second create (S7.5)
-          work-day-type-card.tsx  # one kind of work day (v1.2 §4.3, TD-14): kind chips fill name and glyph, Done writes the template and collapses to one line
+          use-card-entries.ts
           workout-setup-card.tsx  # one workout of the rotation (v1.2 §4.10, TD-12): type chips fill name and glyph when empty; where, and the travel beside the length; creates on the first fact
         setup/
           [step]/
+            loading.tsx
             page.tsx
         layout.tsx
       (shell)/
@@ -206,6 +198,12 @@ apps/
               your-day-list.tsx  # the twelve first-run screens as a list (v1.1 §4.14); block-kind rows open the editor for their kind
             [screen]/
               _components/
+                closing-screen.tsx  # Settings → Closing the day: the two times read-only (each plan's), wind-down starter rows, the journal (JournalSettings)
+                commitments-screen.tsx
+                each-morning-screen.tsx
+                focuses-screen.tsx
+                free-time-screen.tsx
+                training-screen.tsx
                 your-day-screen.tsx
               page.tsx
             block/
@@ -282,6 +280,11 @@ apps/
         index.ts
         slot-sheet.tsx  # the editor's one form; the same-position question with three answers lives in its footer
         use-block-editor.ts  # the block editor's state (v1.1 §3.11): the autosave queue, and the client walk — stackBlock over the page's SlotViews, so the footer never fetches
+      blocks-primer/
+        block-legend.tsx
+        blocks-primer.tsx  # the example day on the 28px axis (7:00–22:30, sleep shortened beneath), hued bands with one label lane, and the legend
+        copy.ts
+        index.ts
       category-sheet/
         category-sheet.tsx
         copy.ts
@@ -292,26 +295,40 @@ apps/
         index.ts
       day-builder/
         screens/
-          13a-name-days.tsx
-          13b-shape-times.tsx
-          13c-training.tsx
-          13d-getting-ready.tsx
-          13e-morning.tsx  # the routine against the room: computeBudget's number stated as room, the greedy fill by rank, BudgetLine with 'for the routine' and 'runs to'
-          13f-breaks.tsx
-          13g-evening.tsx
-          13h-wind-down.tsx
-          13i-review.tsx
+          b01-name-days.tsx
+          b02-times.tsx
+          b03-work.tsx  # B3 — the plan's own work: the four facts written as dayPlan.update({ work }); the §13 #32 preselection; never 'type'
+          b04-training.tsx  # B4 — the workout cards above, a row per workout on this day, several placements, an order list where two share one
+          b05-getting-ready.tsx
+          b06-fixed.tsx
+          b07-so-far.tsx
+          b08-first-thing.tsx
+          b09-landscape.tsx
+          b10-ranked.tsx  # B10 and Settings → Ranked: one HabitSetupCard per morning slot in tick order; Done collapses in place; nothing reorders here
+          b11-morning.tsx  # B11 — the routine against the room: computeBudget's number stated as room, the greedy fill by rank, the matters cell on each row, and the same/varies question once on the first plan
+          b12-wind-down.tsx  # B12 — the wind-down list with its starters ticked in, the placed rows, the first plan's journal group, and a later plan's shared routine taken by reference
+          b13-during-work.tsx
+          b14-after-work.tsx
+          b15a-free-time-landscape.tsx
+          b15b-free-time-ranked.tsx
+          b16-free-time-pool.tsx
+          b17-review.tsx
         builder-frame.tsx
+        builder-skeleton.tsx
         clock.ts
         copy.ts
         day-builder.tsx  # the nine-screen builder (v1.2 §4.13): one plan held by useDayBuilder, every screen writes as it goes, Next moves, Save Day A completes
         day-plan-card.tsx
         index.ts
         list-header.tsx
-        preview.ts  # 13i's client preview — the whole day through stackBlock, the one arithmetic; nothing here writes a block or an item
+        preview-strip.tsx  # the strip B7 and the review both draw — axis at 96px/h, bands (hued on planning surfaces), slack, items, travel ends
+        preview.ts  # the builder's client preview — the whole day through stackBlock, the one arithmetic; a band per training entry (DAY-6's mirror); cutAtWorkEnd for B7; nothing here writes a block or an item
         slot-rows.tsx
         use-day-builder.ts  # the builder's state — the plan from the service's response (TD-21 clocks), the templates with usedBy, the habits, the fixtures; a chained patch
         use-list-screen.ts  # 13d/13e/13h's writes: a list created on arrival once per plan and kind, chosen by FK never copied, slots saved per change
+        use-plan-preview.ts
+        use-prep-steps.ts  # a step list's writes (prep, wind-down, after work): a tick creates the step and its slot at once, queued per row so a second tap is never a second create (S7.5)
+        work-fields.tsx  # the work's four facts — kind chips, Working by, Until about, what gives — controlled; B3 draws it
         your-days.tsx  # the list of plans (sequence and Settings): DayPlanCards, Build another day, first arrival opens the builder at once
       day-header-sheet/
         copy.ts
@@ -325,6 +342,7 @@ apps/
         day-list-header.tsx
         day-list.tsx
         index.ts
+        pool-sheet.tsx
         use-day-list.ts
         use-landing.ts
       fixture-sheet/
@@ -353,12 +371,21 @@ apps/
         index.ts
         journal-screen.tsx  # the journal (v1.1 §7.2): the person's prompts over serif fields that autosave; no finish, no count, no starter phrase
         use-journal.ts
+      journal-settings/
+        index.ts
+        journal-settings.tsx  # the journal's switch, prompts and reminder — one component for the builder's B12 and Settings → Closing the day
       landscape-chooser/
         copy.ts
         index.ts
         landscape-chooser.tsx
         landscape-sheet.tsx
         use-landscape.ts  # the landscape's single commit (W4): ticks are local, Continue writes the habits then the morning template's slots — never a fit number
+      links/
+        copy.ts
+        index.ts
+        link-list.tsx
+        link-sheet.tsx
+        use-links.ts  # the person's links — the kind is the server's, nothing is fetched; remove archives optimistically
       one-off-sheet/
         index.ts
         one-off-sheet.tsx
@@ -544,6 +571,7 @@ docs/
     2026-09-12-app-walkthrough-feedback-v1.0.md
     2026-09-16-first-run-walkthrough-feedback-v1.1.md
     2026-09-16-ux-v1.2-engineering-handoff.md
+    2026-09-24-first-run-walkthrough-feedback-v1.2.md
     marketing-changelog.md
     phase-2-collection.md
     ux-v1.1-thread-primer.md
@@ -687,6 +715,27 @@ docs/
       RUN-8-the-frame-and-screens-1-5.md
       RUN-9-screen-6-and-the-orient-frame.md
       TECHNICAL-DECISIONS.md
+    epic-6-day-first-first-run/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DAY-1-the-fix-batch-the-composites.md
+      DAY-10-the-builder-second-movement.md
+      DAY-11-the-builder-third-movement.md
+      DAY-12-the-week-the-frame-and-the-evening.md
+      DAY-13-migration-0010-and-the-retirements.md
+      DAY-2-the-fix-batch-the-screens.md
+      DAY-3-vocabulary-seeds-validators-tokens.md
+      DAY-4-migration-0009-v1-3-additive.md
+      DAY-5-plan-services.md
+      DAY-6-the-day-under-v1-3.md
+      DAY-7-syn-ui-for-v1-3.md
+      DAY-8-the-outer-sequence.md
+      DAY-9-the-builder-first-movement.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      TECHNICAL-DECISIONS.md
     infrastructure/
       _templates/
         slice-spec.md
@@ -720,6 +769,7 @@ docs/
     synapse_ui_component_needs_and_handoff.md
     ux-spec-v1.1.md
     ux-spec-v1.2.md
+    ux-spec-v1.3.md
     ux-spec-v1.md
   README.md
 packages/
@@ -736,6 +786,7 @@ packages/
         habit.ts
         item.ts
         journal.ts
+        link.ts
         notification.ts
         passage.ts
         quote.ts
@@ -758,6 +809,7 @@ packages/
           bring-back.ts
           carry-item.ts
           choose-alternate.ts  # one of, after the pick (v1.1 §6.3): the row takes the other member; the block re-flows
+          choose-from-pool.ts
           close-day.ts
           confirm-day.ts  # Set the day — resolves the pools, walks once, writes original_scheduled_start for the first and only time
           copy-week.ts
@@ -777,6 +829,7 @@ packages/
           prefill-week.ts
           preview-fit.ts
           quick-pick.ts
+          reading.ts
           reflow-block.ts  # the one re-lay of a set day (v1.1 §6.3–6.5): fixed points as pins, the rest walked forward; two columns written, never the original
           set-done.ts
           timer.ts
@@ -796,6 +849,7 @@ packages/
           ensure-reason-set.ts
           get-habit.ts
           habit-usage.ts
+          links.ts
           list-habits.ts
           list-reasons.ts
           passages.ts
@@ -894,10 +948,12 @@ packages/
       brand.ts
       contact.ts
       default-reasons.ts
+      example-day.ts
       fixture-kinds.ts
       index.ts
       journal-prompts.ts
       limits.ts  # Epic 1 §9's bounds, shared by the zod schema and the input's maxLength
+      link-hosts.ts
       motion.ts
       notification-catalogue.ts
       placed-rows.ts
@@ -915,11 +971,12 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <9 migration .sql files, 0000–0008 — append-only, human-reviewed before a hosted migrate>
-      meta/ <10 drizzle snapshot files + _journal.json>
+      <11 migration .sql files, 0000–0010 — append-only, human-reviewed before a hosted migrate>
+      meta/ <12 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
+      reset-user.ts
       run-setup-sql.ts
       seed-users.ts
     src/
@@ -937,6 +994,7 @@ packages/
           categories.ts
           habits.ts
           index.ts
+          links.ts
           passages.ts
           reasons.ts
         notification/
@@ -1101,6 +1159,10 @@ packages/
             image-cropper.stories.tsx
             image-cropper.tsx
             index.ts
+          info-disclosure/
+            index.ts
+            info-disclosure.stories.tsx
+            info-disclosure.tsx
           large-target-row/
             index.ts
             large-target-row.stories.tsx
@@ -1234,6 +1296,11 @@ packages/
             block-header.tsx
             copy.ts
             index.ts
+          brand-glyph/
+            brand-glyph.stories.tsx
+            brand-glyph.tsx
+            index.ts
+            spotify.tsx
           budget-line/
             budget-line.stories.tsx
             budget-line.tsx
@@ -1292,6 +1359,11 @@ packages/
             item-row.stories.tsx
             item-row.tsx
             item-row.variants.ts
+          link-callout/
+            copy.ts
+            index.ts
+            link-callout.stories.tsx
+            link-callout.tsx
           list-row/
             index.ts
             list-row.stories.tsx
@@ -1314,6 +1386,11 @@ packages/
             index.ts
             preflight-note.stories.tsx
             preflight-note.tsx
+          priority-mark/
+            copy.ts
+            index.ts
+            priority-mark.stories.tsx
+            priority-mark.tsx
           review-region/
             index.ts
             review-region.stories.tsx
@@ -1339,6 +1416,10 @@ packages/
             index.ts
             settings-row.stories.tsx
             settings-row.tsx
+          sleep-band/
+            index.ts
+            sleep-band.stories.tsx
+            sleep-band.tsx
           slot-row/
             copy.ts
             index.ts
@@ -1370,6 +1451,10 @@ packages/
             index.ts
             trust-line.stories.tsx
             trust-line.tsx
+          week-hue-strip/
+            index.ts
+            week-hue-strip.stories.tsx
+            week-hue-strip.tsx
         feedback/
           discard-dialog/
             copy.ts
@@ -1442,7 +1527,11 @@ packages/
             screen-frame.stories.tsx
             screen-frame.tsx
           step-frame/
+            copy.ts
             index.ts
+            step-frame-skeleton.stories.tsx
+            step-frame-skeleton.tsx
+            step-frame.classes.ts
             step-frame.stories.tsx
             step-frame.tsx  # the first-run frame, presentational; the app's (setup)/_components/step-frame.tsx binds it
         navigation/
@@ -1457,6 +1546,7 @@ packages/
       lib/
         cn.ts
         committing.ts  # the committing face, one string: a hairline pulse, never a disabled control (v1.2 guardrail 4)
+        selection.ts
         use-media-query.ts
       primitives/
         control/
@@ -1572,6 +1662,7 @@ packages/
             tooltip.tsx
         layout/
           card/
+            card-summary.tsx
             card.stories.tsx
             card.tsx  # the setup card's base (v1.2 §4): surface, hairline, 16px, flat; feature folders compose it
             index.ts
@@ -1641,6 +1732,7 @@ packages/
         strip.ts
       errors.ts
       index.ts
+      link.ts
       number.ts
       path.ts
       string.ts
@@ -1668,6 +1760,7 @@ packages/
       item.ts
       journal.ts
       keys.ts
+      link.ts
       notification.ts
       passage.ts
       preferences.ts

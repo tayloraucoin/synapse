@@ -17,6 +17,7 @@
 | [`cross-cutting-system/`](cross-cutting-system/) | `SYS-` | The shell, time, About & feedback, error and session states, keyboard, PWA install and update | `docs/ux/synapse_navigation_and_system_ux_architecture.md` | 5 |
 | [`epic-4-dynamic-schedule/`](epic-4-dynamic-schedule/) | `DYN-` | **UX v1.1** — the block model, the block editor, the twelve-screen first run, the orient frame, the quick-pick, the Today tab by block, the editable Schedule, Adjust, the evening, the amended Review, the revised notifications, the cleanup. Cuts across every surface Epics 1–3 built. **Complete 2026-09-13.** | `docs/ux/ux-spec-v1.1.md` (accepted 2026-09-12) | 21 |
 | [`epic-5-first-run-rebuilt/`](epic-5-first-run-rebuilt/) | `RUN-` | **UX v1.2** — the fourteen-screen first run ending in the day builder and the week; work-day types, steps and versions, travel around a workout, passages and the quote bank, day plans, the two morning modes, the journal reminder, emoji on the person's nouns, optimistic-by-rule and save-as-you-go. | `docs/ux/ux-spec-v1.2.md` (draft 2026-09-16) | 15 (all full) |
+| [`epic-6-day-first-first-run/`](epic-6-day-first-first-run/) | `DAY-` | **UX v1.3** — the first run built day-first: five screens with the day builder as the middle; the blocks primer and block hues; a plan that owns its work; per-day times; the after-work transition; several workouts on a day; fixed events with a place and travel; the free-time library and pool; links on the orient frame; the quote after the journal; *Usually*; the selection grammar, two-line cards, the info disclosure, the matters cell, steppers by one, designed loading; and the fix batch for the v1.2 build's defects. | `docs/ux/ux-spec-v1.3.md` (draft 2026-09-24) | 13 (all full) |
 
 Ticket prefixes are three letters so they never collide with the two-letter **screen** IDs the UX documents use (`AU-`, `FR-`, `LB-`, `CT-`, `TP-`, `WK-`, `ST-`, `SH-`, `LS-`, `DH-`, `IT-`, `SC-`, `SF-`, `TR-`, `PN-`, `RV-`, `DR-`, `WR-`, `HS-`, `SY-`). A ticket cites screens by their ID; a screen never cites a ticket.
 
@@ -58,6 +59,10 @@ Every ticket in Epics 1–3 and the cross-cutting track is Complete, so Epic 4's
 ### Epic 5 (UX v1.2), added 2026-09-16
 
 Epic 4 is Complete, so Epic 5's order is its own: [`epic-5-first-run-rebuilt/00-build-order.md`](epic-5-first-run-rebuilt/00-build-order.md). Its critical path is `RUN-1 → RUN-2 → RUN-3 → RUN-7 → RUN-8 → RUN-10 → RUN-11 → RUN-12 → RUN-13 → RUN-15`. It consumes Epic 4 whole and nothing waits on it. One ticket, RUN-14 (the quotes admin surface), is `[PROVISIONAL — Taylor, D3]` and does not gate. Migrations `0007` and `0008` follow `0004`–`0006`, none applied to a hosted tier by an agent.
+
+### Epic 6 (UX v1.3), added 2026-09-24
+
+Epic 5's RUN-1…RUN-13 are Complete, so Epic 6's order is its own: [`epic-6-day-first-first-run/00-build-order.md`](epic-6-day-first-first-run/00-build-order.md). Its critical path is `DAY-1 → DAY-2 → DAY-3 → DAY-4 → DAY-5 → DAY-7 → DAY-8 → DAY-9 → DAY-10 → DAY-11 → DAY-12 → DAY-13`, built in seven batches (its build order § Build batches). The fix batch (DAY-1, DAY-2) ships first and survives any flip of v1.3 §13. RUN-15 is superseded by DAY-13 (TD-30): `0009` is Epic 6's additive migration and `0010` the one retirements migration; RUN-14 stays Epic 5's and provisional. Nothing waits on Taylor.
 
 ### Launch-blocking set
 

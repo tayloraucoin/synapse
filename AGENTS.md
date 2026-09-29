@@ -46,7 +46,7 @@ Setup: Node **22** (`.nvmrc`), Yarn **4.13.0** (`corepack enable && yarn install
 | Verify (matches CI) | `yarn lint && yarn lint:boundaries && yarn check-types && yarn build` |
 | Dev server | `yarn dev` (all) · `yarn web:dev` · `yarn web:dev:local` (LAN/phone) |
 | Per-app checks | `yarn web:build` / `web:lint` / `web:typecheck` (same for `ui:*`) |
-| Database | `yarn db:generate` · `db:migrate` · `db:push` · `db:setup` · `db:reset` · `db:seed` · `db:seed-users` · `db:schema-reference` |
+| Database | `yarn db:generate` · `db:migrate` · `db:push` · `db:setup` · `db:reset` · `db:reset-user` · `db:seed` · `db:seed-users` · `db:schema-reference` |
 | Storybook (`@syn/ui`) | `yarn ui:storybook` |
 | Docs upkeep | `yarn directory-map` (regen the tree) · `yarn docs:check-links` (verify every markdown link) |
 | Formatting | `yarn format` |

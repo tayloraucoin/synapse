@@ -18,6 +18,7 @@
     "db:push": "drizzle-kit push --config drizzle.config.ts",
     "db:setup": "node --experimental-strip-types --no-warnings scripts/run-setup-sql.ts",
     "db:reset": "node --experimental-strip-types --no-warnings scripts/reset-local-db.ts",
+    "db:reset-user": "node --experimental-strip-types --no-warnings scripts/reset-user.ts",
     "db:seed": "tsx src/seed/index.ts",
     "db:seed-users": "tsx scripts/seed-users.ts",
     "db:schema-reference": "node scripts/generate-schema-reference.mjs"

@@ -39,6 +39,9 @@ All integrations are read-only into Synapse. A `data_sources` seam on the profil
 | P2-15 | **Messages keyed to the day** (a passage per work focus or mood) | A later layer over the orient block; needs focuses and the frame to exist. |
 | P2-16 | **Other schedule archetypes** — the three greyed cards | Each gets built around a real person Taylor knows who fits it. Names to be written around people. |
 | P2-17 | **Landing page rewrite** | Tracked in [`marketing-changelog.md`](marketing-changelog.md); executed when a UX version warrants it. |
+| P2-18 | **A quote keyed to the entries** — the evening's quote chosen from the calendar, the morning lines and the journal (Taylor, 2026-09-24, C7) | Needs the AI the product does not have in Phase 1; also a trust question (v1.2 R36: nothing in the frame keyed to the person). v1.3 R54 ships the morning's bank quote after the journal as the seam. |
+| P2-19 | **Google Places on a fixed event's location** (Taylor, 2026-09-24, C5) | v1.3 §3.14 stores the place as text and the travel as minutes; a place lookup and a map are the layer over it. |
+| P2-20 | **The Review's *four days running* line over free time** (Taylor, 2026-09-24, C4) | v1.3 §3.16 makes free time a pool and counts nothing; the observation is a Review surface with a tone rule to write first. |
 
 ## Research hypotheses (observe, don't build)
 
