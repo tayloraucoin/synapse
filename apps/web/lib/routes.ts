@@ -162,6 +162,32 @@ export function reviewHistoryRoute(): string {
   return "/review/history";
 }
 
+/* ------------------------------------------------------------- workflow -- */
+
+/**
+ * Workflow — the fourth peer (Workflow UX spec v0.1 §5, W1; FLO-5). Resolves
+ * to the last view opened, else the first (FLO-6).
+ */
+export function workflowRoute(): string {
+  return "/workflow";
+}
+
+/** One view's board, WF-01. `column` is compact's shown column (`?col=`, FLO-8). */
+export function workflowViewRoute(viewId: string, options?: { column?: string }): string {
+  const path = `${workflowRoute()}/${viewId}`;
+  return options?.column ? `${path}?col=${encodeURIComponent(options.column)}` : path;
+}
+
+/**
+ * Is this path Workflow's? The one scope check the tab highlight, the entry
+ * tree's orient exemption (W16) and the shortcut hook share, so none of them
+ * writes the prefix itself.
+ */
+export function isWorkflowPath(path: string): boolean {
+  const root = workflowRoute();
+  return path === root || path.startsWith(`${root}/`) || path.startsWith(`${root}?`);
+}
+
 /* ------------------------------------------------------------- settings -- */
 
 export function settingsRoute(): string {

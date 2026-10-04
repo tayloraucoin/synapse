@@ -9,6 +9,7 @@ import {
   settingsRoute,
   todayRoute,
   todayScheduleRoute,
+  workflowRoute,
 } from "@/lib/routes";
 
 /**
@@ -78,6 +79,10 @@ export function useGlobalShortcuts(handlers: GlobalShortcutHandlers): void {
           break;
         case "3":
           router.push(reviewRoute());
+          break;
+        case "4":
+          // Workflow, the fourth peer (Workflow UX spec v0.1 W1; FLO-5).
+          router.push(workflowRoute());
           break;
         case ",":
           router.push(settingsRoute());

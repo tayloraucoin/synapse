@@ -83,7 +83,7 @@ Taylor's standing instruction (Epic 5, 2026-09-16): Mason executes the track in 
 | Batch | Tickets | Gate (Complete in `PROGRESS.md`) | What it proves | Status |
 |---|---|---|---|---|
 | 1 | FLO-1 · FLO-2 | — | The contract and the columns for everything after; `0011` authored, not applied | **Complete 2026-10-03** |
-| 2 | FLO-3 · FLO-5 | FLO-2 | Every procedure answers on the local tier; the export is whole; `/workflow` exists in the nav and renders a frame | Not started |
+| 2 | FLO-3 · FLO-5 | FLO-2 | Every procedure answers on the local tier; the export is whole; `/workflow` exists in the nav and renders a frame | **Built 2026-10-03** — FLO-3 Complete; FLO-5 blocked on its criterion 4 (320px) |
 | 3 | FLO-4 | FLO-1 | Every composite with its story; the mark breathes, and is still under reduced motion | Not started |
 | 4 | FLO-6 | FLO-3, FLO-4, FLO-5 | The notes' §5 loop, end to end: fire, work another, come back, the right one is *next* | Not started |
 | 5 | FLO-7 | FLO-6 | A day's real use without touching a database: add, edit, move, start, archive, pin | Not started |

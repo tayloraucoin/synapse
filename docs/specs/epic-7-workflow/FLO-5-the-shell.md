@@ -3,7 +3,7 @@
 **Epic:** FLO — Workflow · **Phase 2** · Size: S
 **Slice type:** Five small edits to files other tracks own, plus a placeholder route. The risk class is *a regression in the habit day's navigation or entry* — a tab highlighted wrong, the orient frame skipped where it should not be, a fifth tab that does not fit a small phone.
 
-**Status:** Not started
+**Status:** Built, blocked on criterion 4 (2026-10-03) — five word tabs need 330px at 320px; routed to Vesper per the ticket's own STOP. Every other criterion is met.
 
 ---
 

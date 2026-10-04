@@ -19,12 +19,19 @@ rather than reaching for a remembered API.
 
 **Phase 1 only** (official spec §12). In scope: auth, first run, the habit
 library, categories, templates, the week build, the two execution tabs, the Day
-and Week Review, history, settings, and PWA notifications.
+and Week Review, history, settings, PWA notifications, and Workflow (below).
 
 **One marketing page, and only one:** the landing at `/` for a visitor who is
 not signed in (SYS-6; design in `docs/ux/landing-page-ux.md`). Lifted into
 scope by Taylor on 2026-09-05 for exactly this page. No second marketing page,
 no blog, no pricing page, no `apps/marketing`.
+
+**Workflow, the second feature area:** a board of lanes by columns for running
+several AI-driven threads at once (`docs/ux/workflow-ux-spec-v0.1.md`, Epic 7).
+Lifted into scope on 2026-10-03 on the authority of Taylor's stakeholder notes
+of that date (*Synapse — Epic 2: Workflow*). It adds no AI, no outbound
+request, no notification and no Realtime, and it does not wait behind the
+orient frame (W16).
 
 **Not in scope, and not to be scaffolded:** AI or a coach (§7.7 is a note, not
 a feature), billing, any marketing surface beyond the one page above, anything
@@ -90,6 +97,8 @@ is a defect.**
 | `/review/week/{week}` | `reviewWeekRoute(week)` | WR-01 |
 | `/review/week/{week}/habit/{id}` | `reviewWeekHabitRoute(week, id)` | WR-02 |
 | `/review/history` | `reviewHistoryRoute()` | HS-01 |
+| `/workflow` | `workflowRoute()` | Workflow UX v0.1 §5 — the fourth peer (W1). Resolves to the last view opened, else the first (FLO-6); until then an empty frame. **Exempt from the orient redirect** (W16): `resolveEntry` skips the orient branch for any Workflow path (`isWorkflowPath`) |
+| `/workflow/{view}` | `workflowViewRoute(viewId, { column? })` | WF-01, the board; `{view}` is the view's uuid; `?col=` is compact's shown column (FLO-8). Sheets are `?sheet=` URL state (FLO-6…FLO-8). Exempt from the orient redirect, as above |
 | `/settings` | `settingsRoute()` | ST-00 |
 | `/settings/account` | `settingsAccountRoute()` | ST-01 |
 | `/settings/habits` | `settingsHabitsRoute()` | LB-01 |

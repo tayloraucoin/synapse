@@ -34,4 +34,8 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { keys: ["Space"], label: "Toggle done on the focused row" },
   { keys: ["Enter"], label: "Open the item" },
   { keys: ["s"], label: "Start or stop the timer on the focused row" },
+
+  /* ------------------------------ Workflow — Workflow UX spec v0.1 §7 -- */
+  // Each board key joins this group in the ticket that makes it work (FLO-6…FLO-8).
+  { keys: ["4"], label: "Workflow" },
 ];

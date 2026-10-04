@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-10-04 · 1443 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-04 · 1446 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -221,6 +221,12 @@ apps/
           _components/
             today-screen.tsx
           schedule/
+            page.tsx
+          page.tsx
+        workflow/
+          _components/
+            copy.ts
+          [view]/
             page.tsx
           page.tsx
         layout.tsx  # THE auth gate

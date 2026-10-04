@@ -1,7 +1,7 @@
 import { sanitizeNextPath } from "@syn/utils";
 
 import { SETUP_TOTAL_STEPS } from "@/app/(setup)/_components/copy";
-import { orientRoute, setupRoute, todayRoute, verifyRoute } from "@/lib/routes";
+import { isWorkflowPath, orientRoute, setupRoute, todayRoute, verifyRoute } from "@/lib/routes";
 
 /**
  * The entry decision tree — cross-cutting §4.2, run on every cold open and
@@ -79,20 +79,25 @@ export function resolveEntry({
     return setupRoute(step);
   }
 
+  const target = intendedRoute ? sanitizeNextPath(intendedRoute, todayRoute()) : null;
+
   // UX v1.1 §5.1 — the orient frame before any tab, once per day: the day has
   // no wake yet and is not closed. A deep link waits behind it; a closed day
   // (auto-closed at 03:00 before the frame was ever opened) is skipped, and
   // the next day's frame is the next open's.
-  if (today !== null && today.wokeAt === null && !today.closed) {
+  //
+  // EXCEPT WORKFLOW (Workflow UX spec v0.1 W16, §13 #W8): opening the board
+  // at a terminal does not wait behind the morning frame; the habit tabs
+  // still do. Decided on the sanitized path, so only a real Workflow route is
+  // exempt.
+  const workflowExempt = target !== null && isWorkflowPath(target);
+  if (today !== null && today.wokeAt === null && !today.closed && !workflowExempt) {
     return orientRoute();
   }
 
   // §4.2 step 4/5 — a deep link, else today. Pending reviews never redirect;
   // they surface as the status line and the Review dot.
-  if (intendedRoute) {
-    return sanitizeNextPath(intendedRoute, todayRoute());
-  }
-  return todayRoute();
+  return target ?? todayRoute();
 }
 
 /**
