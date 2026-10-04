@@ -89,6 +89,35 @@ export const WhatGives: StoryObj = {
 };
 
 /**
+ * Workflow WF-03 (FLO-8): `trailing` — a saved template's menu BESIDE its card,
+ * outside the label, so pressing it never chooses the option. The built-in
+ * two carry none; nothing is preselected.
+ */
+export const WithTrailing: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<string | null>(null);
+    const menu = (name: string) => (
+      <Button variant="ghost" size="icon" aria-label={`${name} options`}>
+        ⋮
+      </Button>
+    );
+    return (
+      <LargeTargetRow
+        label="Start from"
+        layout="stacked"
+        value={value}
+        onChange={setValue}
+        options={[
+          { value: "starter:working", label: "Working", description: "In progress · Ongoing · Finish later · Done" },
+          { value: "starter:queue", label: "Queue", description: "Up next · Later · Someday" },
+          { value: "t-reviews", label: "Reviews", description: "Asked · Waiting · Read", trailing: menu("Reviews") },
+        ]}
+      />
+    );
+  },
+};
+
+/**
  * UX v1.2 (RUN-7): `leading` — the person's emoji through `EmojiSlot`, in the
  * 44px square. A disabled option fades its glyph with the rest.
  */

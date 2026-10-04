@@ -339,7 +339,7 @@ function placeOf(tasks: readonly WorkflowTaskView[], task: WorkflowTaskView): Pl
 }
 
 /** The array with `task` taken out and put back at `index` of its (new) cell. */
-function insertAt(tasks: readonly WorkflowTaskView[], task: WorkflowTaskView, index: number): WorkflowTaskView[] {
+export function insertAt(tasks: readonly WorkflowTaskView[], task: WorkflowTaskView, index: number): WorkflowTaskView[] {
   const others = tasks.filter((other) => other.id !== task.id);
   const cell = cellTasks(others, task.columnId, task.groupId);
   if (cell.length === 0) return [...others, task];

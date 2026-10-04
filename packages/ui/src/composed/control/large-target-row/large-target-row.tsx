@@ -49,6 +49,12 @@ export interface LargeTargetOption {
   caption?: string;
   /** An `IconValue` through `EmojiSlot`, or any node (v1.2). */
   leading?: React.ReactNode | IconValue;
+  /**
+   * Stacked only (Workflow WF-03, FLO-8): a control BESIDE the card — a saved
+   * template's menu. It sits outside the `label`, so pressing it never
+   * chooses the option and it is its own focus stop.
+   */
+  trailing?: React.ReactNode;
 }
 
 export interface LargeTargetRowProps {
@@ -98,7 +104,8 @@ export function LargeTargetRow({
               </span>
             );
 
-          return (
+          const beside = stacked && option.trailing !== undefined;
+          const card = (
             <label
               key={option.value}
               aria-disabled={option.disabled === true ? true : undefined}
@@ -107,6 +114,7 @@ export function LargeTargetRow({
                 stacked
                   ? "min-h-18 w-full justify-between gap-(--space-3) px-(--space-4) py-(--space-3)"
                   : "h-14 flex-1 justify-center",
+                beside && "w-auto min-w-0 flex-1",
                 "text-(length:--fs-body) font-medium",
                 "transition-colors duration-(--dur-state) ease-(--ease-settle)",
                 "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
@@ -166,6 +174,14 @@ export function LargeTargetRow({
                 </span>
               ) : null}
             </label>
+          );
+
+          if (!beside) return card;
+          return (
+            <div key={option.value} className="flex items-center gap-(--space-1)">
+              {card}
+              {option.trailing}
+            </div>
           );
         })}
       </div>

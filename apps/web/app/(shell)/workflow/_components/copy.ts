@@ -74,5 +74,49 @@ export const WORKFLOW_COPY = {
   /* ---- dialogs (§7 *Dialogs*) ---- */
   archiveGroupTitle: (group: string) => `Archive ${group}.`,
   archiveGroupBody: "Its tasks move to No group.",
+  archiveViewTitle: (view: string) => `Archive ${view}.`,
+  archiveViewBody: "Its tasks are kept and come back with it.",
   cancel: "Cancel",
+
+  /* ---- the header (§7 *Header*, *View menu*) ---- */
+  newView: "New view",
+  viewOptions: "View options",
+  columns: "Columns",
+  saveAsTemplate: "Save as a template",
+  archivedSheet: "Archived",
+  archiveThisView: "Archive this view",
+
+  /* ---- New view (§7 *New view*, WF-03) ---- */
+  name: "Name",
+  startFrom: "Start from",
+  viewNameRequired: "A view needs a name.",
+  archivedViews: "Archived views",
+  createView: "Create view",
+  /** A template row's menu, named by what it acts on, as every menu here. */
+  templateOptions: (name: string) => `${name} options`,
+
+  /* ---- Columns (§7 *Columns*, WF-04) ---- */
+  tasksFireHere: "Tasks fire here",
+  closedTasksLandHere: "Closed tasks land here",
+  remove: "Remove",
+  addColumn: "Add a column",
+  columnOptions: (name: string) => `${name} options`,
+  moveItsTasksFirst: "Move its tasks first.",
+  whereShouldTasksGo: (column: string) => `Where should the tasks in ${column} go?`,
+  moveAndRemove: "Move and remove",
+  stopFiring: (column: string) => `Tasks in ${column} will stop firing.`,
+  continue: "Continue",
+  removed: "Removed",
+
+  /* ---- Save as a template (§7 *Save a template*) ---- */
+  templateNameRequired: "A template needs a name.",
+  save: "Save",
+
+  /* ---- Archived (§7 *Archived*, WF-05) ---- */
+  tasks: "Tasks",
+  groups: "Groups",
+  restore: "Restore",
+  archivedOn: (group: string, date: string) => `${group} · archived ${date}`,
+  nothingArchived: "Nothing archived.",
+  restored: "Restored",
 } as const;

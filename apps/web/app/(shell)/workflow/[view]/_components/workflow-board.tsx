@@ -22,9 +22,6 @@ import {
   Popover,
   PopoverAnchor,
   PopoverContent,
-  Tabs,
-  TabsList,
-  TabsTrigger,
   TaskRow,
   Text,
   useIsWide,
@@ -36,11 +33,19 @@ import { workflowViewRoute } from "@/lib/routes";
 import { trpc, type RouterOutputs } from "@/lib/trpc/client";
 
 import { WORKFLOW_COPY as COPY } from "../../_components/copy";
+import { ArchivedSheet } from "./archived-sheet";
 import { ClosedEarlier } from "./closed-earlier";
+import { ColumnTabs } from "./column-tabs";
+import { ColumnsSheet } from "./columns-sheet";
 import { LaneMenu } from "./lane-menu";
+import { NewViewSheet } from "./new-view-sheet";
+import { SaveTemplateDialog } from "./save-template-dialog";
 import { TaskMenu } from "./task-menu";
 import { TaskSheet } from "./task-sheet";
+import { useViewSettings } from "./use-view-settings";
 import { NO_GROUP, useWorkflowBoard } from "./use-workflow-board";
+import { ViewMenu } from "./view-menu";
+import { ViewTabs } from "./view-tabs";
 import { WorkflowTitle } from "./workflow-title";
 
 type ViewList = RouterOutputs["workflow"]["view"]["list"];
@@ -66,8 +71,14 @@ type FocusTarget = { kind: "task"; id: string } | { kind: "add"; laneKey: string
 type FocusRequest = FocusTarget & { seq: number };
 
 /**
- * WF-01, the board (Workflow UX v0.1 §4; FLO-6, FLO-7) — composed from FLO-4's
- * components; no row markup is written here.
+ * WF-01, the board (Workflow UX v0.1 §4; FLO-6, FLO-7, FLO-8) — composed from
+ * FLO-4's components; no row markup is written here.
+ *
+ * THE HEADER ROW (FLO-8): the view tabs and *New view*; trailing, the Next
+ * strip and *View options*. On compact the menu sits on the tabs' row and
+ * the column tabs come beneath — one column shows at a time, kept in `?col=`.
+ * The three planning sheets (*New view*, *Columns*, *Archived*) are `?sheet=`
+ * URL state like the task sheet; their writes are `use-view-settings`.
  *
  * THE KEYBOARD GRID. One row in the board is in the tab order (roving
  * `tabIndex` on each row's main button); the toggles keep their own stops, so
@@ -94,9 +105,26 @@ export function WorkflowBoard({
   const isWide = useIsWide();
   const utils = trpc.useUtils();
   const taskSheet = useSheet("task");
+  const newViewSheet = useSheet("new-view");
+  const columnsSheet = useSheet("columns");
+  const archivedSheet = useSheet("archived");
   const [addParam, setAddParam] = useQueryState("add", parseAsString.withOptions({ history: "replace" }));
+  // Compact's shown column (FLO-8): replaced, never pushed — back leaves the board.
+  const [colParam, setColParam] = useQueryState("col", parseAsString.withOptions({ history: "replace" }));
   const regionRef = React.useRef<HTMLDivElement>(null);
   const b = useWorkflowBoard(viewId, initialBoard, initialViews);
+  const settings = useViewSettings({ viewId, board: b.board, tasks: b.tasks, now: b.now, online: b.online });
+  const [renamingView, setRenamingView] = React.useState(false);
+  const [savingTemplate, setSavingTemplate] = React.useState(false);
+  const [archivingView, setArchivingView] = React.useState(false);
+  // The sheets *View options* opens return focus to it (UX WF-03…WF-05 accessibility).
+  const viewMenuRef = React.useRef<HTMLButtonElement>(null);
+
+  // A sheet opens clean: an old failure line belongs to the write that failed.
+  const { clearError } = settings;
+  React.useEffect(() => {
+    if (columnsSheet.open || archivedSheet.open) clearError();
+  }, [columnsSheet.open, archivedSheet.open, clearError]);
 
   const { board, lanes, next, nextTask, nextLane } = b;
   const columnName = (columnId: string) => board.columns.find((column) => column.id === columnId)?.name ?? "";
@@ -176,8 +204,11 @@ export function WorkflowBoard({
     const section = document.activeElement?.closest("section");
     const sections = Array.from(regionRef.current?.querySelectorAll("section") ?? []);
     const lane = lanes[section ? sections.indexOf(section) : -1] ?? lanes[0];
-    if (lane !== undefined) setOpenAdd({ laneKey: lane.key, columnId: firstColumn.id });
-  }, [addParam, setAddParam, b.online, firstColumn, lanes]);
+    if (lane === undefined) return;
+    // On compact the first column's cell must be the one shown.
+    if (!isWide) void setColParam(null);
+    setOpenAdd({ laneKey: lane.key, columnId: firstColumn.id });
+  }, [addParam, setAddParam, b.online, firstColumn, lanes, isWide, setColParam]);
 
   /* ---------------------------------------------------- lane editing -- */
 
@@ -372,32 +403,60 @@ export function WorkflowBoard({
   /* --------------------------------------------------------------- render -- */
 
   const tabs = b.views.tabs;
-  // Compact shows one column — the view's first, until FLO-8's column tabs.
-  const visibleColumnId = isWide ? undefined : firstColumn?.id;
+  // Compact shows one column: `?col=`, or the first when it is absent or names none here.
+  const shownColumnId = board.columns.find((column) => column.id === colParam)?.id ?? firstColumn?.id;
+  const visibleColumnId = isWide ? undefined : shownColumnId;
   const pinned = new Set(board.pinnedGroupIds);
   const unpinned = board.groups.filter((group) => !pinned.has(group.id));
+  const settingsSheetOpen = newViewSheet.open || columnsSheet.open || archivedSheet.open || savingTemplate;
+  const boardError = b.error ?? (settingsSheetOpen ? null : settings.error);
+
+  const viewMenu = (
+    <ViewMenu
+      triggerRef={viewMenuRef}
+      isLastView={tabs.length <= 1}
+      disabled={!b.online}
+      onRename={() => setRenamingView(true)}
+      onColumns={() => columnsSheet.openWith()}
+      onSaveTemplate={() => {
+        settings.clearError();
+        setSavingTemplate(true);
+      }}
+      onArchived={() => archivedSheet.openWith()}
+      onArchive={() => setArchivingView(true)}
+    />
+  );
 
   return (
     <div className="flex min-w-0 flex-col gap-(--space-3)">
       <WorkflowTitle title={tabTitle} />
 
       <div className="flex min-w-0 flex-col gap-(--space-2) wide:flex-row wide:items-center wide:justify-between">
-        {/* The tabs scroll sideways when they overflow (compact); the padding keeps the active line inside. */}
-        <div className="min-w-0 overflow-x-auto pb-(--space-2)">
-          <Tabs value={viewId} activationMode="manual" onValueChange={(id) => router.push(workflowViewRoute(id))}>
-            <TabsList variant="line" aria-label={COPY.viewsLabel} className="justify-start">
-              {tabs.map((tab) => (
-                <TabsTrigger key={tab.id} value={tab.id} className="flex-none">
-                  {tab.name}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+        <div className="flex min-w-0 items-start gap-(--space-2)">
+          <ViewTabs
+            tabs={tabs}
+            viewId={viewId}
+            renaming={renamingView}
+            onNavigate={(id) => router.push(workflowViewRoute(id))}
+            onRename={settings.renameView}
+            onRenameEnd={() => setRenamingView(false)}
+          />
+          <Button variant="ghost" className="flex-none" onClick={() => newViewSheet.openWith()}>
+            {COPY.newView}
+          </Button>
+          {isWide ? null : <div className="ms-auto flex-none">{viewMenu}</div>}
         </div>
-        <NextStrip next={strip} onGo={goToNext} />
+        <div className="flex min-w-0 items-center gap-(--space-2)">
+          <NextStrip next={strip} onGo={goToNext} />
+          {isWide ? viewMenu : null}
+        </div>
       </div>
 
-      {b.error === null ? null : <HelperText error>{b.error}</HelperText>}
+      {isWide ? null : (
+        <ColumnTabs columns={board.columns} shownId={shownColumnId} onChange={(id) => void setColParam(id)} />
+      )}
+
+      {boardError === null ? null : <HelperText error>{boardError}</HelperText>}
 
       {b.firstOpen ? (
         <div className="flex flex-col gap-(--space-3)">
@@ -651,6 +710,71 @@ export function WorkflowBoard({
         onConfirm={() => {
           if (archivingGroup !== null) b.archiveGroup(archivingGroup.id);
           setArchivingGroup(null);
+        }}
+      />
+
+      {/* ---- FLO-8: the planning layer ---- */}
+
+      <NewViewSheet
+        open={newViewSheet.open}
+        onClose={newViewSheet.close}
+        online={b.online}
+        archivedViews={b.views.archived}
+        creating={settings.creatingView}
+        savingTemplate={settings.savingTemplate}
+        error={settings.error}
+        clearError={settings.clearError}
+        onCreate={settings.createView}
+        onRestoreView={(id) => void settings.restoreView(id)}
+        onRenameTemplate={settings.renameTemplate}
+        onArchiveTemplate={settings.archiveTemplate}
+      />
+
+      <ColumnsSheet
+        open={columnsSheet.open}
+        onClose={columnsSheet.close}
+        returnFocusRef={viewMenuRef}
+        online={b.online}
+        columns={board.columns}
+        tasks={b.tasks}
+        error={settings.error}
+        onRename={(id, name) => void settings.renameColumn(id, name)}
+        onReorder={(ids) => void settings.reorderColumns(ids)}
+        onAdd={(name) => void settings.addColumn(name)}
+        onSetRole={(id, role) => void settings.setRole(id, role)}
+        onRemove={settings.removeColumn}
+      />
+
+      <ArchivedSheet
+        open={archivedSheet.open}
+        onClose={archivedSheet.close}
+        returnFocusRef={viewMenuRef}
+        online={b.online}
+        error={settings.error}
+        onRestore={settings.restore}
+      />
+
+      <SaveTemplateDialog
+        open={savingTemplate}
+        onOpenChange={setSavingTemplate}
+        returnFocusRef={viewMenuRef}
+        title={COPY.saveAsTemplate}
+        busy={settings.savingTemplate}
+        error={settings.error}
+        online={b.online}
+        onSave={settings.saveTemplate}
+      />
+
+      <ConfirmDialog
+        open={archivingView}
+        onOpenChange={setArchivingView}
+        title={COPY.archiveViewTitle(board.view.name)}
+        description={COPY.archiveViewBody}
+        confirmLabel={COPY.archive}
+        cancelLabel={COPY.cancel}
+        onConfirm={() => {
+          setArchivingView(false);
+          void settings.archiveView();
         }}
       />
     </div>

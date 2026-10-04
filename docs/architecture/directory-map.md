@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-10-04 · 1482 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-04 · 1490 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -228,12 +228,20 @@ apps/
             copy.ts
           [view]/
             _components/
+              archived-sheet.tsx
               closed-earlier.tsx
+              column-tabs.tsx
+              columns-sheet.tsx
               lane-menu.tsx
+              new-view-sheet.tsx
+              save-template-dialog.tsx
               task-menu.tsx
               task-sheet.tsx
               use-task-sheet.ts
+              use-view-settings.ts
               use-workflow-board.ts
+              view-menu.tsx
+              view-tabs.tsx
               workflow-board.tsx
               workflow-title.tsx
             loading.tsx

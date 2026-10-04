@@ -108,3 +108,28 @@ export const DirtyGuard: StoryObj = {
     );
   },
 };
+
+/**
+ * `returnFocusRef` (Workflow, FLO-8): a sheet opened from a menu item has no
+ * opener left to return to — the item went with its menu. On close, focus goes
+ * to the named control (here *View options*) rather than to the page.
+ */
+export const ReturnFocus: StoryObj = {
+  render: function Render() {
+    const [open, setOpen] = React.useState(false);
+    const menuRef = React.useRef<HTMLButtonElement>(null);
+    return (
+      <div className="flex gap-(--space-3) p-(--space-6)">
+        <Button ref={menuRef} variant="ghost">
+          View options
+        </Button>
+        <Button onClick={() => setOpen(true)}>Open (focus returns to View options)</Button>
+        <ResponsiveSheet open={open} onOpenChange={setOpen} title="Columns" returnFocusRef={menuRef}>
+          <Text as="p" variant="body">
+            Close this sheet: focus lands on *View options*.
+          </Text>
+        </ResponsiveSheet>
+      </div>
+    );
+  },
+};

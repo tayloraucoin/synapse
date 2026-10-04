@@ -4,7 +4,7 @@
 **Slice type:** The planning layer — arranging boards rather than working one. The risk class is *a column change that strands or silently un-fires tasks*, *the last view or the last column removed*, and *a template edit that changes a view it should not* (W10).
 **Vigil:** removing a column that holds firing tasks; taking the firing role off a column; the last view; the last column.
 
-**Status:** Not started
+**Status:** Complete (2026-10-04)
 
 > **Vigil — full review.** State what happened for each: (1) *Remove* on an empty column, then *Undo*; (2) *Remove* on a column holding tasks, choosing a destination — every task, in order, in the destination; (3) the same where the removed column was the active one and held a firing task — the dialog said firing would stop, and it did; (4) *Tasks fire here* moved from one column to another — exactly one column fires, and the old one's tasks are not firing; (5) *Remove* on the only column — disabled; (6) *Archive this view* on the only view — disabled; (7) a view made from a saved template, then the template renamed and archived — the view unchanged; (8) a view archived and restored — its tasks back with it.
 
