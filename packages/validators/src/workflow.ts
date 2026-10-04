@@ -100,6 +100,17 @@ export const workflowTaskSetFiringInput = z.object({
 });
 export type WorkflowTaskSetFiringInput = z.infer<typeof workflowTaskSetFiringInput>;
 
+/**
+ * Bring an archived task back (WF-05) — to the end of its cell, or to `toIndex`
+ * when it is the undo of *Archive*, with the firing it had (TD-39).
+ */
+export const workflowTaskRestoreInput = z.object({
+  id,
+  toIndex: z.number().int().min(0).optional(),
+  restoreFiringStartedAt: z.coerce.date().nullable().optional(),
+});
+export type WorkflowTaskRestoreInput = z.infer<typeof workflowTaskRestoreInput>;
+
 /** *Closed earlier*, newest first, a page at a time; the cursor is the service's to shape. */
 export const workflowListClosedInput = z.object({
   viewId: id,
@@ -167,6 +178,10 @@ export const workflowTemplateSaveInput = z.object({
   name: named(TEMPLATE_NAME_REQUIRED),
 });
 export type WorkflowTemplateSaveInput = z.infer<typeof workflowTemplateSaveInput>;
+
+/** Archive a template — a built-in id parses, and the service refuses it by name. */
+export const workflowTemplateIdInput = z.object({ id: templateId });
+export type WorkflowTemplateIdInput = z.infer<typeof workflowTemplateIdInput>;
 
 export const workflowTemplateRenameInput = z.object({
   id: templateId,

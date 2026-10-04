@@ -56,3 +56,10 @@ Decisions made during the build are appended after these in the full format.
 
 ## 2026-10-03 · TD-46 · One additive migration, `0011_workflow`; authored and verified locally; applied by Taylor, after `0009` and `0010`
 **Decision:** purely additive; an agent stops before `db:migrate` on any hosted tier; a human reads the SQL. **Full entry:** assessment §3 TD-46.
+
+## 2026-10-03 · FLO-3 · `ensureWorkflowDefaults` serialises a person's first read with a transaction-scoped advisory lock
+**Context (as it was then):** FLO-3's edge states require *at most one pair of views* when two first requests race (the `/workflow` page and a prefetch). The ticket suggested re-reading the count inside one transaction; under `READ COMMITTED` two transactions can both read zero and both insert.
+**Options weighed:** A — re-read inside the transaction (does not close the race); B — a unique constraint that two starter views would violate (there is no natural key: a person may rename or add views freely); C — `pg_advisory_xact_lock(hashtext('workflow_defaults:' || user_id))` after a cheap first read, then re-read.
+**Decision:** C. The common path (views exist) takes no lock; the first-ever read locks per person, re-reads, and writes only if still empty. The lock ends with the transaction.
+**Consequences:** at most one pair, with no schema change. Costs one lock call per person, once. `pg_advisory_xact_lock` is executable by `authenticated` on stock Postgres and Supabase.
+**Revisit trigger:** a second kind of lazily-ensured default that wants the same guard — then lift it into one helper.

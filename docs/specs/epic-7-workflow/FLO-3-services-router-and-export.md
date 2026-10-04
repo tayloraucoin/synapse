@@ -4,7 +4,7 @@
 **Slice type:** The API for the whole feature area, and the one multi-step write in it. The risk class is *a move that leaves a gap or a duplicate in a cell's order*, *a role effect forgotten on one path* (firing surviving outside an active column; `closed_at` surviving outside a done one), and *an export that silently omits a table*. The move is the ticket inside the ticket.
 **Vigil:** exercise the move on every path below and inspect both cells' `sort_order` after each; diff the export's tables against the schema.
 
-**Status:** Not started
+**Status:** Complete (2026-10-03)
 
 > **Vigil — full review of the move and the export.** State which of these were exercised on the local tier and what each cell's `sort_order` sequence was afterwards: (1) reorder inside a cell; (2) same lane, another column; (3) same column, another lane; (4) another lane and another column; (5) out of the active column while firing; (6) into the done column; (7) out of the done column; (8) each of 5–7 undone with `restoreFiringStartedAt`; (9) `toIndex` beyond the cell's length; (10) the same move sent twice. Then: every table under `packages/db/src/schema/workflow/` appears in `readAccountData`, and the JSON export of a seeded account contains a task's title.
 

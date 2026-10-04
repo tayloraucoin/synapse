@@ -21,7 +21,7 @@ The contract; the six tables; the services and the export; the board with its to
 
 ### Phase 1 — The data
 - [x] **FLO-2** · The `workflow/` schema domain and migration `0011_workflow`: six tables, one enum, the two partial unique indexes, owner-private policies, row types, the schema reference — M · (FLO-1) · **Mason migration review; human reads the SQL**
-- [ ] **FLO-3** · Services, the `workflow` router, and the export: the board read, ensure-defaults, set-firing, the move, start, archive and restore, groups and pins, views and columns, templates; the six tables in the account export — L · (FLO-2) · **Vigil: the move's seven paths; the export diffed against the schema**
+- [x] **FLO-3** · Services, the `workflow` router, and the export: the board read, ensure-defaults, set-firing, the move, start, archive and restore, groups and pins, views and columns, templates; the six tables in the account export — L · (FLO-2) · **Vigil: the move's seven paths; the export diffed against the schema**
 
 ### Phase 2 — The composites and the shell (parallel with Phase 1)
 - [ ] **FLO-4** · `@syn/ui` for Workflow: `FiringMark`, `FiringToggle`, `TaskRow`, `LaneHeader`, `NextStrip`, `InlineAddRow`, the static `Board`, `ScreenFrame` `"board"`, the breath token and keyframe, stories — L · (FLO-1) · **Vesper review of stories in both themes and under reduced motion**

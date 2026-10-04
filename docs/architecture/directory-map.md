@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-10-04 · 1416 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-04 · 1443 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -817,6 +817,7 @@ packages/
         timer.ts
         user.ts
         week.ts
+        workflow.ts
       services/
         asset/
           create-upload-url.ts
@@ -921,6 +922,32 @@ packages/
           delete-account.ts
           preferences.ts
           request-export.ts
+        workflow/
+          apply-role-effects.ts
+          archive-group.ts
+          archive-task.ts
+          archive-view.ts
+          cells.ts
+          day-context.ts
+          ensure-defaults.ts
+          get-board.ts
+          list-archived.ts
+          list-closed-tasks.ts
+          list-views.ts
+          move-task.ts
+          pin-group-today.ts
+          remove-column.ts
+          reorder-groups.ts
+          rule-error.ts
+          save-columns.ts
+          save-group.ts
+          save-task.ts
+          save-template.ts
+          save-view.ts
+          set-column-role.ts
+          set-firing.ts
+          start-task.ts
+          to-view.ts
       context.ts
       index.ts
       root.ts
@@ -1063,6 +1090,7 @@ packages/
         seed-profile.ts
         seed-reasons.ts
         seed-template.ts
+        seed-workflow.ts
       build-database-env-for-next-config.ts
       client.ts
       connection-env.ts  # tier resolution; defaults to local so nothing reaches production by omission

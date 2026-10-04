@@ -22,6 +22,12 @@ import {
   userAvatars,
   users,
   webPushSubscriptions,
+  workflowColumns,
+  workflowDayPins,
+  workflowGroups,
+  workflowTasks,
+  workflowTemplates,
+  workflowViews,
   type RlsClient,
 } from "@syn/db";
 
@@ -68,6 +74,10 @@ export const EXPORT_FILE_NAMES = [
   "day_blocks.csv",
   "fixtures.csv",
   "journal_entries.csv",
+  // Epic 7 (FLO-3, TD-45): the two Workflow tables a person opens in a
+  // spreadsheet; the other four are in the JSON.
+  "workflow_tasks.csv",
+  "workflow_groups.csv",
   "synapse-export.json",
 ] as const;
 
@@ -98,6 +108,13 @@ export type AccountData = {
   dayBlocks: Row[];
   fixtures: Row[];
   journalEntries: Row[];
+  /* ---- Workflow (FLO-3, TD-45) — the person's client work, all of it ---- */
+  workflowViews: Row[];
+  workflowColumns: Row[];
+  workflowGroups: Row[];
+  workflowTasks: Row[];
+  workflowTemplates: Row[];
+  workflowDayPins: Row[];
 };
 
 /**
@@ -153,6 +170,12 @@ export async function readAccountData(
       blockRows,
       fixtureRows,
       journalRows,
+      workflowViewRows,
+      workflowColumnRows,
+      workflowGroupRows,
+      workflowTaskRows,
+      workflowTemplateRows,
+      workflowDayPinRows,
     ] = await Promise.all([
       own(users, users.id),
       own(userAvatars, userAvatars.userId),
@@ -174,6 +197,12 @@ export async function readAccountData(
       own(dayBlocks, dayBlocks.userId),
       own(fixtures, fixtures.userId),
       own(journalEntries, journalEntries.userId),
+      own(workflowViews, workflowViews.userId),
+      own(workflowColumns, workflowColumns.userId),
+      own(workflowGroups, workflowGroups.userId),
+      own(workflowTasks, workflowTasks.userId),
+      own(workflowTemplates, workflowTemplates.userId),
+      own(workflowDayPins, workflowDayPins.userId),
     ]);
 
     return {
@@ -197,6 +226,12 @@ export async function readAccountData(
       dayBlocks: blockRows,
       fixtures: fixtureRows,
       journalEntries: journalRows,
+      workflowViews: workflowViewRows,
+      workflowColumns: workflowColumnRows,
+      workflowGroups: workflowGroupRows,
+      workflowTasks: workflowTaskRows,
+      workflowTemplates: workflowTemplateRows,
+      workflowDayPins: workflowDayPinRows,
     };
   });
 }
@@ -288,6 +323,8 @@ export function buildExportJson(data: AccountData, exportedAt: Date): string {
   const shiftsByDay = groupBy(data.shifts, "dayId");
   const sessionsByItem = groupBy(data.timerSessions, "dayItemId");
   const missesByItem = groupBy(data.misses, "dayItemId");
+  const columnsByView = groupBy(data.workflowColumns, "viewId");
+  const tasksByColumn = groupBy(data.workflowTasks, "columnId");
 
   const graph = {
     exportedAt: exportedAt.toISOString(),
@@ -328,6 +365,23 @@ export function buildExportJson(data: AccountData, exportedAt: Date): string {
     ),
     dataExports: jsonRows(dataExports, data.dataExports),
     feedbackMessages: jsonRows(feedbackMessages, data.feedbackMessages),
+    /**
+     * Workflow (FLO-3, TD-45): each view with its columns, each column with its
+     * tasks; the lanes, the saved templates and the day pins beside them. The
+     * flat view below carries every task again, archived ones included.
+     */
+    workflow: {
+      views: data.workflowViews.map((view) => ({
+        ...(jsonRow(workflowViews, view) as Row),
+        columns: (columnsByView.get(String(view.id)) ?? []).map((column) => ({
+          ...(jsonRow(workflowColumns, column) as Row),
+          tasks: jsonRows(workflowTasks, tasksByColumn.get(String(column.id)) ?? []),
+        })),
+      })),
+      groups: jsonRows(workflowGroups, data.workflowGroups),
+      templates: jsonRows(workflowTemplates, data.workflowTemplates),
+      dayPins: jsonRows(workflowDayPins, data.workflowDayPins),
+    },
     /** The flat view — see the note above. */
     flat: {
       templateSlots: jsonRows(templateSlots, data.templateSlots),
@@ -339,6 +393,8 @@ export function buildExportJson(data: AccountData, exportedAt: Date): string {
       dayBlocks: jsonRows(dayBlocks, data.dayBlocks),
       fixtures: jsonRows(fixtures, data.fixtures),
       journalEntries: jsonRows(journalEntries, data.journalEntries),
+      workflowColumns: jsonRows(workflowColumns, data.workflowColumns),
+      workflowTasks: jsonRows(workflowTasks, data.workflowTasks),
     },
   };
 
@@ -379,6 +435,8 @@ export function buildExportFiles(
     "day_blocks.csv": encoder.encode(toCsv(dayBlocks, data.dayBlocks)),
     "fixtures.csv": encoder.encode(toCsv(fixtures, data.fixtures)),
     "journal_entries.csv": encoder.encode(toCsv(journalEntries, data.journalEntries)),
+    "workflow_tasks.csv": encoder.encode(toCsv(workflowTasks, data.workflowTasks)),
+    "workflow_groups.csv": encoder.encode(toCsv(workflowGroups, data.workflowGroups)),
     "synapse-export.json": encoder.encode(buildExportJson(data, exportedAt)),
   };
 }

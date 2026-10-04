@@ -6,7 +6,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 |---|---|---|---|---|
 | FLO-1 | The contract: view models, starters and limits, validators, the pure order and next functions | — | Complete | 2026-10-03 |
 | FLO-2 | The `workflow/` schema domain and migration `0011_workflow` | FLO-1 | Complete | 2026-10-03 |
-| FLO-3 | Services, the `workflow` router, and the export | FLO-2 | Not started | |
+| FLO-3 | Services, the `workflow` router, and the export | FLO-2 | Complete | 2026-10-03 |
 | FLO-4 | `@syn/ui` for Workflow: the mark, the toggle, the row, the lane head, the strip, the add row, the static board | FLO-1 | Not started | |
 | FLO-5 | The shell: the fourth peer, routes, the orient exemption, the `4` key, scope | — | Not started | |
 | FLO-6 | The board: read, fire, next | FLO-3, FLO-4, FLO-5 | Not started | |
@@ -19,7 +19,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 
 - [x] FLO-1
 - [x] FLO-2
-- [ ] FLO-3
+- [x] FLO-3
 - [ ] FLO-4
 - [ ] FLO-5
 - [ ] FLO-6
