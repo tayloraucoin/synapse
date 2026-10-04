@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-25 · 1385 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-04 · 1416 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -736,6 +736,25 @@ docs/
       PROGRESS.md
       README.md
       TECHNICAL-DECISIONS.md
+    epic-7-workflow/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      01-technology-assessment.md
+      DEVIATIONS.md
+      FLO-1-the-contract.md
+      FLO-10-close-out.md
+      FLO-2-schema-and-migration-0011.md
+      FLO-3-services-router-and-export.md
+      FLO-4-syn-ui-for-workflow.md
+      FLO-5-the-shell.md
+      FLO-6-the-board-read-fire-next.md
+      FLO-7-tasks-and-groups.md
+      FLO-8-views-columns-templates.md
+      FLO-9-the-drag.md
+      PROGRESS.md
+      README.md
+      TECHNICAL-DECISIONS.md
     infrastructure/
       _templates/
         slice-spec.md
@@ -771,6 +790,7 @@ docs/
     ux-spec-v1.2.md
     ux-spec-v1.3.md
     ux-spec-v1.md
+    workflow-ux-spec-v0.1.md
   README.md
 packages/
   api/
@@ -964,6 +984,7 @@ packages/
       timezones.ts
       user-images.ts
       work-day-kinds.ts
+      workflow-starters.ts
       workout-types.ts
     .gitignore
     eslint.config.mjs
@@ -971,8 +992,8 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <11 migration .sql files, 0000–0010 — append-only, human-reviewed before a hosted migrate>
-      meta/ <12 drizzle snapshot files + _journal.json>
+      <12 migration .sql files, 0000–0011 — append-only, human-reviewed before a hosted migrate>
+      meta/ <13 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
@@ -1024,6 +1045,14 @@ packages/
           index.ts
           user-avatars.ts
           users.ts
+        workflow/
+          index.ts
+          workflow-columns.ts
+          workflow-day-pins.ts
+          workflow-groups.ts
+          workflow-tasks.ts
+          workflow-templates.ts
+          workflow-views.ts
         auth.ts
         enum-values.ts  # checks every pgEnum against its @syn/types union at compile time — wrap every new enum
         enums.ts
@@ -1081,6 +1110,7 @@ packages/
         domain.ts  # schema-shaped unions, snake_case, fixed by v2 handoff §3.5
         ui-state.ts  # presentational unions, kebab-case; derived per render, never stored
         view.ts  # what a component receives — never a DB row
+        workflow.ts
       auth-context.ts
       index.ts
     .gitignore
@@ -1730,6 +1760,10 @@ packages/
       review/
         adherence.ts
         strip.ts
+      workflow/
+        index.ts
+        order-groups.ts
+        resolve-next.ts
       errors.ts
       index.ts
       link.ts
@@ -1772,6 +1806,7 @@ packages/
       timer.ts
       user.ts
       week.ts
+      workflow.ts
     .gitignore
     eslint.config.mjs
     package.json
