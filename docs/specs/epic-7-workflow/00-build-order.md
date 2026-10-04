@@ -24,7 +24,7 @@ The contract; the six tables; the services and the export; the board with its to
 - [x] **FLO-3** · Services, the `workflow` router, and the export: the board read, ensure-defaults, set-firing, the move, start, archive and restore, groups and pins, views and columns, templates; the six tables in the account export — L · (FLO-2) · **Vigil: the move's seven paths; the export diffed against the schema**
 
 ### Phase 2 — The composites and the shell (parallel with Phase 1)
-- [ ] **FLO-4** · `@syn/ui` for Workflow: `FiringMark`, `FiringToggle`, `TaskRow`, `LaneHeader`, `NextStrip`, `InlineAddRow`, the static `Board`, `ScreenFrame` `"board"`, the breath token and keyframe, stories — L · (FLO-1) · **Vesper review of stories in both themes and under reduced motion**
+- [x] **FLO-4** · `@syn/ui` for Workflow: `FiringMark`, `FiringToggle`, `TaskRow`, `LaneHeader`, `NextStrip`, `InlineAddRow`, the static `Board`, `ScreenFrame` `"board"`, the breath token and keyframe, stories — L · (FLO-1) · **Vesper review of stories in both themes and under reduced motion**
 - [ ] **FLO-5** · The shell: the fourth peer, the two routes and a placeholder frame, `tabForPath`, the orient exemption, the `4` key, `apps/web/AGENTS.md`'s scope and route rows — S · (none)
 
 ### Phase 3 — The surface
@@ -84,7 +84,7 @@ Taylor's standing instruction (Epic 5, 2026-09-16): Mason executes the track in 
 |---|---|---|---|---|
 | 1 | FLO-1 · FLO-2 | — | The contract and the columns for everything after; `0011` authored, not applied | **Complete 2026-10-03** |
 | 2 | FLO-3 · FLO-5 | FLO-2 | Every procedure answers on the local tier; the export is whole; `/workflow` exists in the nav and renders a frame | **Built 2026-10-03** — FLO-3 Complete; FLO-5 blocked on its criterion 4 (320px) |
-| 3 | FLO-4 | FLO-1 | Every composite with its story; the mark breathes, and is still under reduced motion | Not started |
+| 3 | FLO-4 | FLO-1 | Every composite with its story; the mark breathes, and is still under reduced motion | **Complete 2026-10-04** |
 | 4 | FLO-6 | FLO-3, FLO-4, FLO-5 | The notes' §5 loop, end to end: fire, work another, come back, the right one is *next* | Not started |
 | 5 | FLO-7 | FLO-6 | A day's real use without touching a database: add, edit, move, start, archive, pin | Not started |
 | 6 | FLO-8 | FLO-7 | Different workflows: a new view from a template, its columns arranged, a template saved | Not started |

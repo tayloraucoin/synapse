@@ -5,8 +5,10 @@ import { Text } from "../../../primitives/typography/text";
 import { ScreenFrame } from "./screen-frame";
 
 /**
- * Two widths only. A third would be a decision made per screen, and screens
- * that disagree about their measure read as different applications.
+ * Three widths, each a surface's: `text` and `canvas` for the habit day,
+ * `board` (no cap) for Workflow's board alone. A width per screen would be a
+ * decision made per screen, and screens that disagree about their measure
+ * read as different applications.
  */
 const meta: Meta<typeof ScreenFrame> = {
   title: "Composed/Layout/ScreenFrame",
@@ -38,6 +40,9 @@ type Story = StoryObj<typeof ScreenFrame>;
 export const TextWidth: Story = {};
 
 export const CanvasWidth: Story = { args: { width: "canvas" } };
+
+/** No max-width — the whole content area, for Workflow's board. */
+export const BoardWidth: Story = { name: "Board width", args: { width: "board" } };
 
 export const Prose: Story = { args: { prose: true } };
 

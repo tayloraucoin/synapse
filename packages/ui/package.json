@@ -543,6 +543,34 @@
       "types": "./src/composed/control/tag-input/index.ts",
       "default": "./src/composed/control/tag-input/index.ts"
     },
+    "./firing-mark": {
+      "types": "./src/composed/display/firing-mark/index.ts",
+      "default": "./src/composed/display/firing-mark/index.ts"
+    },
+    "./firing-toggle": {
+      "types": "./src/composed/control/firing-toggle/index.ts",
+      "default": "./src/composed/control/firing-toggle/index.ts"
+    },
+    "./task-row": {
+      "types": "./src/composed/display/task-row/index.ts",
+      "default": "./src/composed/display/task-row/index.ts"
+    },
+    "./lane-header": {
+      "types": "./src/composed/display/lane-header/index.ts",
+      "default": "./src/composed/display/lane-header/index.ts"
+    },
+    "./next-strip": {
+      "types": "./src/composed/display/next-strip/index.ts",
+      "default": "./src/composed/display/next-strip/index.ts"
+    },
+    "./inline-add-row": {
+      "types": "./src/composed/control/inline-add-row/index.ts",
+      "default": "./src/composed/control/inline-add-row/index.ts"
+    },
+    "./board": {
+      "types": "./src/composed/layout/board/index.ts",
+      "default": "./src/composed/layout/board/index.ts"
+    },
     "./emoji-slot-button": {
       "types": "./src/composed/control/emoji-slot-button/index.ts",
       "default": "./src/composed/control/emoji-slot-button/index.ts"

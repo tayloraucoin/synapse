@@ -4,7 +4,7 @@
 **Slice type:** New composites in `@syn/ui`, every state a story; one new token group and the repository's first keyframe. The risk class is *a mark frozen dim under reduced motion*, *a firing row that reads louder than the next row*, and *a component that takes a row or computes an order*.
 **Vigil:** none. **Vesper review:** below.
 
-**Status:** Not started
+**Status:** Complete (2026-10-04)
 
 > **Vesper — story review, both themes, and with the OS set to reduce motion.** Open Storybook. Confirm: the mark is 10px, breathes 1 → 0.35 → 1 over 2.4s, and is the only thing on the *Board, a working day* story that moves; with reduced motion it is still and at full opacity, never dim; a firing row's title is `text-text-secondary` and it has no border, no wash and no note line; the next row is the only row on `bg-surface` and its first word is *next* at weight 500; *firing* and its duration are `text-accent-text`, not the 500; a folded `LaneHeader` shows the mark and the word *next* when it should and neither when it should not; the hue edge is 2px with the name beside it; `InlineAddRow` resting is a ghost row, editing is a field with no button; the board's first column is the widest and stays put while the others scroll sideways at 900px; at 375px one column shows. Nothing shows a count. Say what you would change before FLO-6 composes them.
 

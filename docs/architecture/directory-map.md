@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-10-04 · 1446 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-04 · 1472 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -1167,6 +1167,7 @@ packages/
       composed/
         __fixtures__/
           view-models.ts  # story fixtures shaped as the app's view models — Taylor's Monday by block lives here
+          workflow.ts
         control/
           chip-picker/
             chip-picker.stories.tsx
@@ -1219,6 +1220,10 @@ packages/
             emoji-slot-button.stories.tsx
             emoji-slot-button.tsx
             index.ts
+          firing-toggle/
+            firing-toggle.stories.tsx
+            firing-toggle.tsx
+            index.ts
           image-cropper/
             image-cropper.stories.tsx
             image-cropper.tsx
@@ -1227,6 +1232,10 @@ packages/
             index.ts
             info-disclosure.stories.tsx
             info-disclosure.tsx
+          inline-add-row/
+            index.ts
+            inline-add-row.stories.tsx
+            inline-add-row.tsx
           large-target-row/
             index.ts
             large-target-row.stories.tsx
@@ -1399,6 +1408,10 @@ packages/
             expander-section.stories.tsx
             expander-section.tsx
             index.ts
+          firing-mark/
+            firing-mark.stories.tsx
+            firing-mark.tsx
+            index.ts
           gap-band/
             gap-band.stories.tsx
             gap-band.tsx
@@ -1423,6 +1436,11 @@ packages/
             item-row.stories.tsx
             item-row.tsx
             item-row.variants.ts
+          lane-header/
+            copy.ts
+            index.ts
+            lane-header.stories.tsx
+            lane-header.tsx
           link-callout/
             copy.ts
             index.ts
@@ -1437,6 +1455,11 @@ packages/
             index.ts
             multitask-group.stories.tsx
             multitask-group.tsx
+          next-strip/
+            copy.ts
+            index.ts
+            next-strip.stories.tsx
+            next-strip.tsx
           now-line/
             index.ts
             now-line.stories.tsx
@@ -1498,6 +1521,12 @@ packages/
             index.ts
             tag.stories.tsx
             tag.tsx
+          task-row/
+            copy.ts
+            index.ts
+            task-row.stories.tsx
+            task-row.tsx
+            task-row.variants.ts
           template-usage-row/
             index.ts
             template-usage-row.stories.tsx
@@ -1576,6 +1605,10 @@ packages/
           auth-frame/
             auth-frame.stories.tsx
             auth-frame.tsx
+            index.ts
+          board/
+            board.stories.tsx
+            board.tsx
             index.ts
           error-page/
             copy.ts
