@@ -9,6 +9,7 @@ import {
   Board,
   BoardCell,
   BoardLane,
+  BoardLaneHandle,
   Button,
   ColorSwatchRow,
   ConfirmDialog,
@@ -483,7 +484,18 @@ export function WorkflowBoard({
       </p>
 
       <div ref={regionRef} className="min-w-0">
-        <Board columns={board.columns} visibleColumnId={visibleColumnId}>
+        <Board
+          columns={board.columns}
+          visibleColumnId={visibleColumnId}
+          // FLO-9: the drag is another caller of the same move and reorder; offline, no drag mounts.
+          onMoveTask={
+            b.online
+              ? ({ id, toColumnId, toGroupId, toIndex }) =>
+                  void b.moveTask(id, { columnId: toColumnId, groupId: toGroupId, index: toIndex }, { toast: true })
+              : undefined
+          }
+          onReorderLanes={b.online ? b.reorderLanes : undefined}
+        >
           {lanes.map((lane) => {
             const name = lane.group?.name ?? LANE_HEADER_COPY.noGroup;
             const group = lane.group;
@@ -535,6 +547,7 @@ export function WorkflowBoard({
                         firstToday={lane.firstToday}
                         hasFiring={lane.hasFiring}
                         hasNext={lane.hasNext}
+                        handle={<BoardLaneHandle label={LANE_HEADER_COPY.reorder} />}
                         menu={
                           group === null ? undefined : (
                             <LaneMenu
@@ -578,7 +591,15 @@ export function WorkflowBoard({
               );
 
             return (
-              <BoardLane key={lane.key} label={name} collapsed={lane.collapsed} header={header}>
+              <BoardLane
+                key={lane.key}
+                label={name}
+                collapsed={lane.collapsed}
+                header={header}
+                groupId={group?.id ?? null}
+                // Pinned lanes hold their place; *No group* has no grip (UX §3.5).
+                reorderable={group !== null && !lane.firstToday}
+              >
                 {board.columns.map((column, columnIndex) => (
                   <BoardCell
                     key={column.id}

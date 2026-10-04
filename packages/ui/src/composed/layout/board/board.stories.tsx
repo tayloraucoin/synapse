@@ -21,6 +21,7 @@ import { InlineAddRow } from "../../control/inline-add-row";
 import { LANE_HEADER_COPY, LaneHeader } from "../../display/lane-header";
 import { TaskRow } from "../../display/task-row";
 import { Board, BoardCell, BoardLane, BoardSkeleton } from "./board";
+import { BoardLaneHandle, type BoardMoveIntent } from "./board-dnd";
 
 /**
  * The static board. Check, in both themes: the only thing that moves is the
@@ -224,6 +225,133 @@ export const CompactOneColumn: Story = {
   name: "Compact, one column",
   parameters: { viewport: { defaultViewport: "mobile1" } },
   render: () => <DemoBoard columns={WORKING_COLUMNS} lanes={WORKING_DAY} visibleColumnId="col-progress" />,
+};
+
+/* --------------------------------------------------------------- FLO-9 -- */
+
+type Call = { name: "onMoveTask"; intent: BoardMoveIntent } | { name: "onReorderLanes"; ids: string[] };
+
+/**
+ * The board with its two callbacks. Each intent is logged as it is called and
+ * then applied to the story's own state — the app's `moveTask` does the same
+ * with its cache. *Northwind* is pinned (*first today*): no grip; *No group*
+ * has none either.
+ */
+function DraggableBoard({ visibleColumnId }: { visibleColumnId?: string }) {
+  const [lanes, setLanes] = React.useState<LaneSpec[]>(WORKING_DAY);
+  const [calls, setCalls] = React.useState<Call[]>([]);
+  const [collapsed, setCollapsed] = React.useState<Record<string, boolean>>({ [INTERNAL.id]: true });
+  const tasks = lanes.flatMap((lane) => lane.tasks.map((task) => ({ ...task, groupId: lane.group?.id ?? null })));
+
+  const onMoveTask = (intent: BoardMoveIntent) => {
+    setCalls((log) => [...log, { name: "onMoveTask", intent }]);
+    setLanes((current) => {
+      const moved = tasks.find((task) => task.id === intent.id);
+      if (moved === undefined) return current;
+      const placed = { ...moved, columnId: intent.toColumnId, groupId: intent.toGroupId };
+      return current.map((lane) => {
+        const rest = lane.tasks.filter((task) => task.id !== intent.id);
+        if ((lane.group?.id ?? null) !== intent.toGroupId) return { ...lane, tasks: rest };
+        const cell = rest.filter((task) => task.columnId === intent.toColumnId);
+        const anchor = cell[intent.toIndex];
+        const at = anchor === undefined ? rest.length : rest.indexOf(anchor);
+        return { ...lane, tasks: [...rest.slice(0, at), placed, ...rest.slice(at)] };
+      });
+    });
+  };
+
+  const onReorderLanes = (ids: string[]) => {
+    setCalls((log) => [...log, { name: "onReorderLanes", ids }]);
+    setLanes((current) => {
+      const fixed = current.filter((lane) => lane.group === null || !ids.includes(lane.group.id));
+      const pinned = fixed.filter((lane) => lane.group !== null);
+      const none = fixed.filter((lane) => lane.group === null);
+      const moving = ids.flatMap((id) => current.filter((lane) => lane.group?.id === id));
+      return [...pinned, ...moving, ...none];
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-(--space-4)">
+      <Board
+        columns={WORKING_COLUMNS}
+        visibleColumnId={visibleColumnId}
+        onMoveTask={onMoveTask}
+        onReorderLanes={onReorderLanes}
+      >
+        {lanes.map((lane) => {
+          const key = lane.group?.id ?? "none";
+          const name = lane.group?.name ?? LANE_HEADER_COPY.noGroup;
+          const isCollapsed = collapsed[key] ?? false;
+          return (
+            <BoardLane
+              key={key}
+              label={name}
+              collapsed={isCollapsed}
+              groupId={lane.group?.id ?? null}
+              reorderable={lane.group !== null && lane.firstToday !== true}
+              header={
+                <LaneHeader
+                  name={name}
+                  hue={lane.group?.hue ?? null}
+                  plain={lane.group === null}
+                  collapsed={isCollapsed}
+                  onCollapsedChange={(next) => setCollapsed((state) => ({ ...state, [key]: next }))}
+                  firstToday={lane.firstToday}
+                  handle={<BoardLaneHandle label={LANE_HEADER_COPY.reorder} />}
+                />
+              }
+            >
+              {WORKING_COLUMNS.map((column) => (
+                <BoardCell key={column.id} columnId={column.id} label={`${name}, ${column.name}`}>
+                  {lane.tasks
+                    .filter((task) => task.columnId === column.id)
+                    .map((task) => (
+                      <TaskRow
+                        key={task.id}
+                        task={task}
+                        variant={rowVariant(column)}
+                        now={WORKFLOW_STORY_NOW}
+                        groupName={lane.group?.name ?? null}
+                        columnName={column.name}
+                        onOpen={() => {}}
+                        onFiringChange={column.role === "active" ? () => {} : undefined}
+                      />
+                    ))}
+                </BoardCell>
+              ))}
+            </BoardLane>
+          );
+        })}
+      </Board>
+      <ol aria-label="Calls" className="text-(length:--fs-caption) m-0 flex list-none flex-col gap-(--space-1) p-(--space-4) font-mono">
+        {calls.map((call, index) => (
+          <li key={index} data-call={call.name}>
+            {call.name}({JSON.stringify(call.name === "onMoveTask" ? call.intent : call.ids)})
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/**
+ * Drag a row to any place in any cell of any lane — the 2px ink line is where
+ * it lands, and the log shows the one `onMoveTask` it caused. A mouse lifts
+ * after 6px; touch after a 300ms hold (a shorter swipe scrolls); the keyboard
+ * from the row's handle (`Tab` to it — it shows when focused): `Space`, arrows,
+ * `Space`, `Esc`. *Harbor* drags by its grip; *Internal* is folded and takes a
+ * row on its head. Dropping where it started logs nothing.
+ */
+export const Draggable: Story = {
+  render: () => <DraggableBoard />,
+};
+
+/** Compact: a row drags within the one column shown; between columns is the menu. */
+export const DraggableCompact: Story = {
+  name: "Draggable, compact",
+  parameters: { viewport: { defaultViewport: "mobile1" } },
+  render: () => <DraggableBoard visibleColumnId="col-progress" />,
 };
 
 /** One column: no sideways scroll, the one track fills. */

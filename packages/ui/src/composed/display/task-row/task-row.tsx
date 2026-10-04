@@ -26,6 +26,12 @@
  * `groupName` and `columnName` are not rendered — they compose the main
  * button's accessible name: title, group, column, then state, with durations
  * in words (*"…, Northwind, In progress, next, back 2 minutes"*).
+ *
+ * THE DRAG (FLO-9) is the board's, not the row's: inside a draggable `Board`'s
+ * cell, a mouse lifts the row from its main button after 6px and a finger after
+ * a long-press; the keyboard lifts from a handle that is visually hidden until
+ * it has focus (*Move {title}*), because the row's own `Space` fires and `Enter`
+ * opens. Outside one, nothing of it renders.
  */
 "use client";
 
@@ -37,6 +43,7 @@ import { cn } from "../../../lib/cn";
 import { Skeleton } from "../../../primitives/display/skeleton";
 import { Text } from "../../../primitives/typography/text";
 import { FiringToggle } from "../../control/firing-toggle";
+import { useBoardRowDrag } from "../../layout/board/board-dnd";
 import { WORKFLOW_ROW_COPY, type WorkflowRowCopy } from "./copy";
 import { taskRowVariants } from "./task-row.variants";
 
@@ -69,22 +76,26 @@ function minutesSince(from: Date, now: Date): number {
   return Math.max(0, Math.floor((now.getTime() - from.getTime()) / 60_000));
 }
 
-export function TaskRow({
-  task,
-  variant,
-  isNext = false,
-  now,
-  groupName,
-  columnName,
-  onOpen,
-  onFiringChange,
-  menu,
-  disabled = false,
-  lifted = false,
-  copy: copyOverride,
-  className,
-}: TaskRowProps) {
+export function TaskRow(props: TaskRowProps) {
+  const {
+    task,
+    variant,
+    isNext = false,
+    now,
+    groupName,
+    columnName,
+    onOpen,
+    onFiringChange,
+    menu,
+    disabled = false,
+    lifted = false,
+    copy: copyOverride,
+    className,
+  } = props;
   const copy = { ...WORKFLOW_ROW_COPY, ...copyOverride };
+  // FLO-9: inert unless the row sits in a draggable board's cell. The preview
+  // is this row again, lifted and without its menu — the firing mark still breathes.
+  const drag = useBoardRowDrag(task.id, task.title, () => <TaskRow {...props} lifted menu={undefined} />);
   const active = variant === "active";
   const firing = active && task.firingStartedAt !== null;
   const next = active && isNext && !firing;
@@ -123,12 +134,15 @@ export function TaskRow({
 
   return (
     <li
+      ref={drag?.rowRef}
       data-task-id={task.id}
       data-next={next || undefined}
       data-firing={firing || undefined}
       className={cn(
         taskRowVariants({ next, closed: variant === "closed", disabled, lifted }),
         !active && "ps-(--space-3)",
+        // Lifted, its place in the cell is held open; the overlay is what moves.
+        drag?.isDragging && "opacity-0",
         className,
       )}
     >
@@ -146,9 +160,18 @@ export function TaskRow({
       <button
         type="button"
         data-row-main=""
-        onClick={onOpen}
+        onClick={() => {
+          // The release that ends a drag is not a press.
+          if (drag?.consumeClick()) return;
+          onOpen();
+        }}
+        {...drag?.mainListeners}
         aria-label={accessibleName}
-        className="flex min-w-0 flex-1 flex-col justify-center gap-(--space-1) py-(--space-2) text-left focus-visible:outline-none"
+        className={cn(
+          "flex min-w-0 flex-1 flex-col justify-center gap-(--space-1) py-(--space-2) text-left focus-visible:outline-none",
+          // A long-press lifts; it must not also select text or open the system's callout.
+          drag !== null && "select-none [-webkit-touch-callout:none]",
+        )}
       >
         <Text
           as="span"
@@ -184,6 +207,8 @@ export function TaskRow({
           </Text>
         ) : null}
       </button>
+
+      {drag?.handle}
 
       {menu === undefined ? null : (
         <span

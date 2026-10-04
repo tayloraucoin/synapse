@@ -33,7 +33,7 @@ The contract; the six tables; the services and the export; the board with its to
 - [x] **FLO-8** · Views, columns, templates, the archive, the compact column tabs: view tabs and switching, *New view*, the Columns sheet with roles and remove-with-move, *Save as a template*, the Archived sheet, the view menu — L · (FLO-7) · **Vigil: removing a column that holds firing tasks; the last view and the last column**
 
 ### Phase 4 — Does not gate
-- [ ] **FLO-9** · The drag: `Board` gains its `DndContext`; a row across cells and lanes; a lane among lanes; touch and keyboard — M · (FLO-7) · **Vigil on touch and keyboard; Vesper on the lift and the drop line**
+- [x] **FLO-9** · The drag: `Board` gains its `DndContext`; a row across cells and lanes; a lane among lanes; touch and keyboard — M · (FLO-7) · **Vigil on touch and keyboard; Vesper on the lift and the drop line**
 
 ### Phase 5 — The corpus
 - [ ] **FLO-10** · Close-out: the placement rules' new domain and router, the tracks table, the docs index, the directory map, the link check, the scope line confirmed — S · (FLO-8)

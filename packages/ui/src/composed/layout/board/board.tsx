@@ -40,6 +40,14 @@ import { cn } from "../../../lib/cn";
 import { Skeleton } from "../../../primitives/display/skeleton";
 import { Text } from "../../../primitives/typography/text";
 import { TaskRowSkeleton } from "../../display/task-row";
+import {
+  BoardCellDragContext,
+  BoardDnd,
+  LaneGripProvider,
+  useBoardCellDrop,
+  useBoardLaneDrag,
+  type BoardMoveIntent,
+} from "./board-dnd";
 
 type BoardContextValue = {
   columns: readonly WorkflowColumnView[];
@@ -73,11 +81,19 @@ export interface BoardProps {
   columns: readonly WorkflowColumnView[];
   /** Compact only: the column shown. */
   visibleColumnId?: string;
+  /**
+   * FLO-9: a row dropped somewhere new. Given, rows drag; absent (and with
+   * `onReorderLanes` absent), no drag context mounts and the board is static.
+   */
+  onMoveTask?: (intent: BoardMoveIntent) => void;
+  /** FLO-9: the reorderable lanes' ids in their new order, after a lane's drop. */
+  onReorderLanes?: (ids: string[]) => void;
   children: React.ReactNode;
   className?: string;
 }
 
-export function Board({ columns, visibleColumnId, children, className }: BoardProps) {
+export function Board({ columns, visibleColumnId, onMoveTask, onReorderLanes, children, className }: BoardProps) {
+  const rootRef = React.useRef<HTMLDivElement>(null);
   const compact = visibleColumnId !== undefined;
   const shownId = compact
     ? (columns.find((column) => column.id === visibleColumnId) ?? columns[0])?.id ?? null
@@ -95,9 +111,10 @@ export function Board({ columns, visibleColumnId, children, className }: BoardPr
     [columns, shownId],
   );
 
-  return (
+  const board = (
     <BoardContext.Provider value={context}>
       <div
+        ref={rootRef}
         className={cn("flex min-w-0 flex-col", className)}
         style={{ "--board-template": template, "--board-min": minWidth } as React.CSSProperties}
       >
@@ -125,6 +142,13 @@ export function Board({ columns, visibleColumnId, children, className }: BoardPr
       </div>
     </BoardContext.Provider>
   );
+
+  if (onMoveTask === undefined && onReorderLanes === undefined) return board;
+  return (
+    <BoardDnd rootRef={rootRef} columns={columns} onMoveTask={onMoveTask} onReorderLanes={onReorderLanes}>
+      {board}
+    </BoardDnd>
+  );
 }
 
 export interface BoardLaneProps {
@@ -133,19 +157,48 @@ export interface BoardLaneProps {
   /** A `LaneHeader`. */
   header: React.ReactNode;
   collapsed: boolean;
+  /** FLO-9: the lane's group — the place a dropped row takes; null is *No group*. */
+  groupId?: string | null;
+  /** FLO-9: drags among lanes by its grip — a group lane that is not pinned today. */
+  reorderable?: boolean;
   children: React.ReactNode;
   className?: string;
 }
 
 /** One group: its head across the board, then one cell per column (unless folded). */
-export function BoardLane({ label, header, collapsed, children, className }: BoardLaneProps) {
+export function BoardLane({
+  label,
+  header,
+  collapsed,
+  groupId = null,
+  reorderable = false,
+  children,
+  className,
+}: BoardLaneProps) {
+  const drag = useBoardLaneDrag({ groupId, name: label, reorderable, collapsed, preview: header });
   return (
-    <section aria-label={label} className={cn("group/lane border-hairline border-b", className)}>
-      <div className="sticky left-0 w-[100cqi] max-w-full">{header}</div>
-      {collapsed ? null : <div className="grid grid-cols-(--board-template)">{children}</div>}
+    <section
+      ref={drag.sectionRef}
+      aria-label={label}
+      data-board-lane=""
+      data-group-key={groupId ?? "none"}
+      data-reorderable={(reorderable && groupId !== null) || undefined}
+      className={cn("group/lane border-hairline border-b", drag.isDragging && "opacity-40", className)}
+    >
+      <div ref={drag.headRef} data-board-lane-head="" className="sticky left-0 w-[100cqi] max-w-full">
+        <LaneGripProvider grip={drag.grip}>{header}</LaneGripProvider>
+      </div>
+      {collapsed ? null : (
+        <BoardLaneContext.Provider value={groupId}>
+          <div className="grid grid-cols-(--board-template)">{children}</div>
+        </BoardLaneContext.Provider>
+      )}
     </section>
   );
 }
+
+/** Which lane a cell is in, for its drop target and its rows. */
+const BoardLaneContext = React.createContext<string | null>(null);
 
 export interface BoardCellProps {
   columnId: string;
@@ -161,6 +214,9 @@ export interface BoardCellProps {
 /** One group's tasks in one column. Renders nothing on compact unless its column is shown. */
 export function BoardCell({ columnId, label, children, footer, className }: BoardCellProps) {
   const { columns, visibleColumnId } = useBoard();
+  const groupId = React.useContext(BoardLaneContext);
+  const dropRef = useBoardCellDrop(columnId, groupId);
+  const place = React.useMemo(() => ({ columnId, groupId }), [columnId, groupId]);
   if (visibleColumnId !== null && columnId !== visibleColumnId) return null;
 
   const index = columns.findIndex((column) => column.id === columnId);
@@ -168,12 +224,18 @@ export function BoardCell({ columnId, label, children, footer, className }: Boar
 
   return (
     <div
+      ref={dropRef}
+      data-board-cell=""
+      data-column-id={columnId}
+      data-group-key={groupId ?? "none"}
       style={{ gridColumn: visibleColumnId === null ? index + 1 : 1 }}
       className={cn("min-w-0 pb-(--space-2)", pinned && "bg-paper sticky left-0 z-10", className)}
     >
-      <ul aria-label={label} className="m-0 flex list-none flex-col p-0">
-        {children}
-      </ul>
+      <BoardCellDragContext.Provider value={place}>
+        <ul aria-label={label} className="m-0 flex list-none flex-col p-0">
+          {children}
+        </ul>
+      </BoardCellDragContext.Provider>
       {footer}
     </div>
   );

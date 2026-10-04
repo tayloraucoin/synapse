@@ -604,12 +604,16 @@ export {
 } from "./composed/display/next-strip";
 export { InlineAddRow, type InlineAddRowProps } from "./composed/control/inline-add-row";
 export {
+  BOARD_COPY,
   Board,
   BoardCell,
   BoardLane,
+  BoardLaneHandle,
   BoardSkeleton,
   type BoardCellProps,
+  type BoardCopy,
   type BoardLaneProps,
+  type BoardMoveIntent,
   type BoardProps,
   type BoardSkeletonProps,
 } from "./composed/layout/board";

@@ -309,7 +309,8 @@ export function useWorkflowBoard(viewId: string, initialBoard: WorkflowBoardView
  * The writes (FLO-7).
  *
  * ONE MOVE, EVERY CALLER. The menu, `Alt`+arrows, the sheet's selects, *Start*'s
- * undo, *Closed earlier* and — later — the drag all call `moveTask`. It reads
+ * undo, *Closed earlier* and the drag (FLO-9, through `Board`'s `onMoveTask`)
+ * all call `moveTask`. It reads
  * the task's PRIOR place from the cache (`{ columnId, groupId, index }` and its
  * firing), splices the cached array so the row moves on the press, sends a
  * PLACE (`toIndex`, never an order number — TD-35), and builds the toast whose
@@ -732,6 +733,28 @@ function useBoardWrites({
     [groupWrite, groupReorder],
   );
 
+  /**
+   * A lane dropped among lanes (FLO-9) — `ids` are the unpinned lanes in their
+   * new order; they take the unpinned places in the usual order, and pinned
+   * lanes keep theirs. The full id list is sent, as every reorder.
+   */
+  const reorderLanes = React.useCallback(
+    (ids: string[]) => {
+      const { groups, pinnedGroupIds } = latest.current.board;
+      const pinned = new Set(pinnedGroupIds);
+      const moving = ids.filter((id) => groups.some((group) => group.id === id && !pinned.has(id)));
+      let next = 0;
+      const order = groups.map((group) => (pinned.has(group.id) ? group.id : (moving[next++] ?? group.id)));
+      if (order.every((id, index) => id === groups[index]?.id)) return;
+      const byId = new Map(groups.map((group) => [group.id, group]));
+      groupWrite(
+        () => order.map((id) => byId.get(id) as WorkflowGroupView),
+        () => groupReorder.mutateAsync({ ids: order }),
+      );
+    },
+    [groupWrite, groupReorder],
+  );
+
   /** *First today* / *Back to usual order* (W9) — today's pins, newest first. */
   const setFirstToday = React.useCallback(
     (groupId: string, pinned: boolean) => {
@@ -808,6 +831,7 @@ function useBoardWrites({
     renameGroup,
     setGroupHue,
     moveGroup,
+    reorderLanes,
     setFirstToday,
     archiveGroup,
   };

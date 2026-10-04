@@ -8,6 +8,8 @@ export const LANE_HEADER_COPY = {
   noGroup: "No group",
   collapse: (name: string) => `Collapse ${name}`,
   expand: (name: string) => `Expand ${name}`,
+  /** The grip (§7 *Lane*; FLO-9). */
+  reorder: (name: string) => `Reorder ${name}`,
 } as const;
 
 export type LaneHeaderCopy = typeof LANE_HEADER_COPY;

@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-10-04 · 1490 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-04 · 1492 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -1626,8 +1626,10 @@ packages/
             auth-frame.tsx
             index.ts
           board/
+            board-dnd.tsx
             board.stories.tsx
             board.tsx
+            copy.ts
             index.ts
           error-page/
             copy.ts

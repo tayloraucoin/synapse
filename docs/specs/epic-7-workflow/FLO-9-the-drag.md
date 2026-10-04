@@ -4,7 +4,7 @@
 **Slice type:** One interaction, the least-precedented UI in the epic: nested sortables in one drag context. The risk class is *a drop that lands somewhere other than where the line showed it*, *a drag that fights scrolling on touch*, and *a second code path for moving* that drifts from the menu's.
 **Vigil:** touch (long-press, scroll while holding, drop, cancel) and keyboard (lift, move, drop, cancel) on a real phone width and a desktop.
 
-**Status:** Not started
+**Status:** Complete (2026-10-04)
 
 > **Vigil — touch and keyboard.** On a touch device or emulation at 375px: a long-press lifts a row; a short swipe still scrolls the page; holding near the edge scrolls; dropping lands where the line was; a second finger or `Esc` cancels and the row is back. At 1280px with a pointer: a row dragged from *In progress* in one lane to the middle of *Finish later* in another lands at that index in that lane, and *Undo* returns it. With the keyboard: the sortable's lift, arrows, drop and cancel work on a row and on a lane, and each step is announced. State which you ran.
 >
