@@ -1,5 +1,10 @@
 /**
- * BottomNav — the compact-layout tab bar: List · Schedule · Review.
+ * BottomNav — the compact-layout tab bar: List · Schedule · Review · Workflow
+ * · Settings.
+ *
+ * FIVE WORDS AT 320PX. Above 360px the cells share the width by content; below
+ * it they are equal and unpadded, which is the only way the five labels fit a
+ * 320px phone untruncated at the type scale's size (Workflow UX v0.1, FLO-5).
  *
  * Word labels only. The Review tab can carry a presence dot when items are
  * waiting, and the dot is never the whole message: `dotLabel` renders
@@ -103,7 +108,12 @@ const BottomNavItem = React.forwardRef<HTMLAnchorElement, BottomNavItemProps>(
 
     return (
       <li
-        className={cn("flex-1", classes?.item)}
+        className={cn(
+          // Under 360px five word tabs (Workflow, FLO-5) only fit as equal
+          // cells: 64px each at 320px, every one over the 44px target.
+          "flex-1 max-[359px]:min-w-0 max-[359px]:basis-0",
+          classes?.item,
+        )}
         aria-hidden={dimmed || undefined}
       >
         <Comp

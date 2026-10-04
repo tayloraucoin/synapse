@@ -31,6 +31,28 @@ export const Overview: Story = {
   ),
 };
 
+/** The shell's five tabs. Check at 320px: one row, nothing truncated, every cell at least 44px. */
+export const FiveTabs: Story = {
+  tags: ["!autodocs"],
+  render: () => (
+    <div className="relative h-64">
+      <BottomNav className="absolute">
+        <BottomNavList>
+          <BottomNavItem href="#" active>
+            List
+          </BottomNavItem>
+          <BottomNavItem href="#">Schedule</BottomNavItem>
+          <BottomNavItem href="#" dot dotLabel="items waiting">
+            Review
+          </BottomNavItem>
+          <BottomNavItem href="#">Workflow</BottomNavItem>
+          <BottomNavItem href="#">Settings</BottomNavItem>
+        </BottomNavList>
+      </BottomNav>
+    </div>
+  ),
+};
+
 /** Under a sheet's scrim: visible, not tappable (cross-cutting §2.2). */
 export const Dimmed: Story = {
   tags: ["!autodocs"],
