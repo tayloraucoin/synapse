@@ -11,7 +11,7 @@
 
 ## 1. ENTITY OVERVIEW
 
-**23 tables** in `public`, plus a reference-only mirror of Supabase's `auth.users`. Grouped by domain.
+**29 tables** in `public`, plus a reference-only mirror of Supabase's `auth.users`. Grouped by domain.
 
 **Group 1 — Auth & Users.** `users` is the shadow of `auth.users` — its primary key **is** the foreign key, and the row is created by the `handle_new_user()` trigger, never by the app. It carries every account scalar: timezone, day-close and review-reminder times, theme, display name, the usual wake time, the week-build reminder's day and time, the first-run resume point, the deferred-settings pending pair, and — since UX v1.1 (0005) — the shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range, lights-out and devices-off, the overflow mode, the orient frame's settings, the journal's switch and prompts, and the block order — and, since UX v1.2 (0007), how mornings go (`morning_mode`), the quote opt-in, the two further morning lines, and the journal reminder's switch and time. There is no wake anchor since `0006` (v1.1 R11, DYN-21): the orient frame is the wake moment. `user_avatars` is the optional photo, keyed by `user_id` — one per person, no surrogate id. Deleting the auth user cascades through this row to everything.
 
@@ -25,6 +25,8 @@
 
 **Group 6 — System.** `data_exports` tracks a request to export everything (preparing → ready → expired, with the object path and a 24-hour expiry). `feedback_messages` is the About message: insert-only for its author, no authenticated read, and it holds only the message plus the two optional context fields the switch controls. `quotes` (0007) is the bank a person may opt into for the morning frame — app content with no `user_id`, under `catalogReadPolicies`: every signed-in person reads the published rows, nobody writes through the authenticated role, and nothing about the person decides which quote a day shows.
 
+**Group 7 — Workflow.** Since Epic 7 (0011), six owner-private tables for the board of lanes by columns. `workflow_views` (a board: name, tab order, `last_opened_at`) owns its `workflow_columns` (name, order, a nullable `role` of `active` or `done`, at most one of each per view by partial unique index). `workflow_groups` are the lanes (name, `hue` from `category_color_key`, usual order, `collapsed`). `workflow_tasks` carry a title, a note, a place in their cell, and three timestamps — `firing_started_at`, `last_returned_at`, `closed_at` — with no boolean beside them; `column_id` restricts, `group_id` sets null (the lane *No group*), `view_id` cascades. `workflow_templates` is what the person saved, as a jsonb snapshot of names and roles; the two built-in templates are constants. `workflow_day_pins` is one row per `(user_id, day_key)` naming the groups made *first today*. Everything archives; nothing about *next* or today's lane order is stored.
+
 **Deliberately not here** (official spec §3.11): no streak, no score cache — the number is computed on read — no social graph, and no coach output table. There is also no `week_plans` table: a week's status is derived from its days. And no wake anchor at all since UX v1.1 R11 (`0006`).
 
 ---
@@ -33,9 +35,9 @@
 
 **The one central entity.** `users`. Synapse is single-player: there is no couple, no team, no shared row. **Every table hangs directly off this one** and carries its own denormalised `user_id`, so every policy is the same three lines and every table is greppable for its owner — no policy ever subqueries another RLS-guarded table.
 
-**One-to-many from `users`.** `categories`, `habits`, `reasons`, `passages`, `templates`, `template_slots`, `fixtures`, `day_plans`, `days`, `day_blocks`, `day_items`, `timer_sessions`, `shifts`, `misses`, `journal_entries`, `notification_prefs`, `notification_deliveries`, `web_push_subscriptions`, `data_exports`, `feedback_messages`. **One-to-one:** `user_avatars`. **Owned by nobody:** `quotes` — the product's catalogue, no `user_id`.
+**One-to-many from `users`.** `categories`, `habits`, `reasons`, `passages`, `templates`, `template_slots`, `fixtures`, `day_plans`, `days`, `day_blocks`, `day_items`, `timer_sessions`, `shifts`, `misses`, `journal_entries`, `notification_prefs`, `notification_deliveries`, `web_push_subscriptions`, `data_exports`, `feedback_messages`, and the six `workflow_*` tables (0011). **One-to-one:** `user_avatars`. **Owned by nobody:** `quotes` — the product's catalogue, no `user_id`.
 
-**The ownership chains** (each child also carries `user_id` directly): `categories` → `habits` → `template_slots` → `day_items`; `templates` → `template_slots` and `templates` → `day_blocks`; `days` → `day_blocks` → `day_items` → { `timer_sessions`, `misses` }; `days` → `shifts` → `misses`; `days` → `journal_entries` (one each).
+**The ownership chains** (each child also carries `user_id` directly): `categories` → `habits` → `template_slots` → `day_items`; `templates` → `template_slots` and `templates` → `day_blocks`; `days` → `day_blocks` → `day_items` → { `timer_sessions`, `misses` }; `days` → `shifts` → `misses`; `days` → `journal_entries` (one each); `workflow_views` → `workflow_columns` → `workflow_tasks` (the column `restrict`, the view `cascade`), and `workflow_groups` → `workflow_tasks` (`set null` — the lane *No group*).
 
 **References that are not ownership.** `days.work_focus_habit_id` → `habits` and `fixtures.habit_id` → `habits` (both `set null`), `days.work_template_id` → `templates` and `day_plans`' four template FKs (all `set null` — a plan references, never copies, and an archived list leaves the plan standing), `day_items.carried_from_item_id` / `misses.traded_up_item_id` → `day_items` (both `set null` — a record points at another record without owning it), and `day_items.parent_item_id` → `day_items` (`cascade` — a travel row without its workout is nothing).
 
@@ -74,6 +76,7 @@
 - **Day:** `assignment_state`, `completion_state`, `item_origin`, `timer_session_source`, `miss_resolved_by`.
 - **Notifications:** `device_platform`, `notification_kind`.
 - **System:** `export_status`.
+- **Workflow:** `workflow_column_role`.
 
 Colocation rule (drizzle-orm-conventions §3): an enum used by one table lives in that table's file; by two tables in one directory, in that directory's `enums.ts`; by two directories, in the root `enums.ts`. The five shared enums are below; the rest live beside their table, and their source appears with that table in §4.
 
@@ -245,7 +248,8 @@ export const missTierEnum = pgEnum(
  * the accent teal and never the violet, so the semantic layer stays
  * unambiguous.
  *
- * Only `categories` stores it as a column, but it is the same closed set an
+ * `categories` and `workflow_groups` (Epic 7, a lane's hue) store it as a
+ * column, and it is the same closed set an
  * `IconValue` of kind "curated" carries as `colorKey` in the `icon` jsonb on
  * both `habits` and `day_items` — two more directories. It lives here so the
  * hue vocabulary has one home rather than one home and two comments.
@@ -423,7 +427,8 @@ export const missTierEnum = pgEnum(
  * the accent teal and never the violet, so the semantic layer stays
  * unambiguous.
  *
- * Only `categories` stores it as a column, but it is the same closed set an
+ * `categories` and `workflow_groups` (Epic 7, a lane's hue) store it as a
+ * column, and it is the same closed set an
  * `IconValue` of kind "curated" carries as `colorKey` in the `icon` jsonb on
  * both `habits` and `day_items` — two more directories. It lives here so the
  * hue vocabulary has one home rather than one home and two comments.
@@ -3911,6 +3916,544 @@ export const quotes = pgTable(
 
 **RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
 
+### GROUP 7 — WORKFLOW
+
+Since Epic 7 (0011): the board for work that waits on a prompt, separate from the habit day. A `workflow_views` row is a board; its `workflow_columns` are its states, at most one `active` (tasks fire here) and one `done` per view, held by two partial unique indexes; `workflow_groups` are its lanes (usually clients), coloured with a category hue; `workflow_tasks` sit in one column and one lane, firing when `firing_started_at` is set. `workflow_templates` are column arrangements the person saved — a jsonb snapshot; the two built-in ones are constants, never rows. `workflow_day_pins` holds the groups made *first today*, keyed by the person's day, so nothing runs to clear them. *Next* is never stored. `workflow_tasks.column_id` restricts, so a column holding tasks cannot be deleted until they are moved.
+
+```ts
+// packages/db/src/schema/workflow/workflow-views.ts
+/**
+ * workflow_views — one board: a named set of columns with the tasks in them
+ * (Workflow UX spec v0.1 §3.6, §11; Epic 7 TD-33, TD-34).
+ *
+ * A VIEW OWNS ITS COLUMNS (W10). Nothing points back at the template it was
+ * made from — a template is only where a view's columns started. The two
+ * starter views are made on the first board read (`ensureWorkflowDefaults`,
+ * TD-41), never by a migration.
+ *
+ * `last_opened_at` is how `/workflow` knows which view to return to (TD-44).
+ * `sort_order` is the view tabs' order. ARCHIVE, NEVER DELETE (W18): an
+ * archived view keeps its columns and tasks and brings them back with it.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import { index, pgTable, smallint, text, timestamp, uuid } from "drizzle-orm/pg-core";
+
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { workflowColumns } from "./workflow-columns";
+import { workflowTasks } from "./workflow-tasks";
+
+export const workflowViews = pgTable(
+  "workflow_views",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    /** The view `/workflow` returns to is the one opened last. */
+    lastOpenedAt: timestamp("last_opened_at", { withTimezone: true }),
+    /** 1–40 (`WORKFLOW_NAME_MAX`, the validator's bound). */
+    name: text("name").notNull(),
+    /** The view tabs' order — dense, rewritten by the service (TD-35). */
+    sortOrder: smallint("sort_order").notNull(),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("workflow_views_user_id_sort_order_idx").on(table.userId, table.sortOrder),
+    index("workflow_views_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "workflow_views",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const workflowViewsRelations = relations(workflowViews, ({ many, one }) => ({
+  columns: many(workflowColumns),
+  tasks: many(workflowTasks),
+  user: one(users, {
+    fields: [workflowViews.userId],
+    references: [users.id],
+  }),
+}));
+
+// packages/db/src/schema/workflow/workflow-columns.ts
+/**
+ * workflow_columns — a state a task is in, in one view (Workflow UX spec v0.1
+ * §3.6, §11; Epic 7 TD-34).
+ *
+ * COLUMNS ARE ROWS, not jsonb on the view, because tasks reference them: a
+ * removed column cannot orphan a task silently. `workflow_tasks.column_id`
+ * RESTRICTS, so a column that holds tasks cannot be deleted until its tasks
+ * are moved — exactly WF-04's *Move its tasks first*.
+ *
+ * AT MOST ONE OF EACH ROLE PER VIEW (W11) is held by the database, not
+ * promised by the service: two partial unique indexes on `view_id`, one where
+ * the role is `active` (tasks fire here), one where it is `done` (closed tasks
+ * land here). `role` is nullable; no third value means "none".
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import {
+  index,
+  pgEnum,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
+
+import type { WorkflowColumnRole } from "@syn/types";
+
+import { enumValues } from "../enum-values";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { workflowTasks } from "./workflow-tasks";
+import { workflowViews } from "./workflow-views";
+
+/** WorkflowColumn.role — W11. One table, so it lives in this file (drizzle-orm-conventions §3). */
+export const workflowColumnRoleEnum = pgEnum(
+  "workflow_column_role",
+  enumValues<WorkflowColumnRole>()(["active", "done"]),
+);
+
+export const workflowColumns = pgTable(
+  "workflow_columns",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    /** 1–40 (`WORKFLOW_NAME_MAX`). */
+    name: text("name").notNull(),
+    /** Null for a column with no role. */
+    role: workflowColumnRoleEnum("role"),
+    /** The column's place in its view — dense, rewritten by the service (TD-35). */
+    sortOrder: smallint("sort_order").notNull(),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    viewId: uuid("view_id")
+      .notNull()
+      .references(() => workflowViews.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    uniqueIndex("workflow_columns_view_id_active_idx")
+      .on(table.viewId)
+      .where(sql`${table.role} = 'active'`),
+    uniqueIndex("workflow_columns_view_id_done_idx")
+      .on(table.viewId)
+      .where(sql`${table.role} = 'done'`),
+    index("workflow_columns_view_id_sort_order_idx").on(table.viewId, table.sortOrder),
+    index("workflow_columns_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "workflow_columns",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const workflowColumnsRelations = relations(workflowColumns, ({ many, one }) => ({
+  tasks: many(workflowTasks),
+  user: one(users, {
+    fields: [workflowColumns.userId],
+    references: [users.id],
+  }),
+  view: one(workflowViews, {
+    fields: [workflowColumns.viewId],
+    references: [workflowViews.id],
+  }),
+}));
+
+// packages/db/src/schema/workflow/workflow-groups.ts
+/**
+ * workflow_groups — a set of tasks, usually a client; a lane (Workflow UX spec
+ * v0.1 §3.5, §11; Epic 7 TD-34).
+ *
+ * THE HUE IS A CATEGORY HUE. `hue` is `category_color_key`, the root enum the
+ * categories use — one hue vocabulary, one home; a group never gets a list of
+ * its own. It is drawn as the lane head's leading edge, always beside the name.
+ *
+ * `sort_order` is the usual order. *First today* is not stored here: it is a
+ * pin for one day in `workflow_day_pins` (TD-37). `collapsed` is remembered per
+ * group, across views. ARCHIVE, NEVER DELETE (W18) — the archive service moves
+ * the group's tasks to *No group* first; `workflow_tasks.group_id` setting null
+ * is the backstop, never the path.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import {
+  boolean,
+  index,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
+
+import { categoryColorKeyEnum } from "../enums";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { workflowTasks } from "./workflow-tasks";
+
+export const workflowGroups = pgTable(
+  "workflow_groups",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    /** The lane is folded to its head — on every view. */
+    collapsed: boolean("collapsed").notNull().default(false),
+    hue: categoryColorKeyEnum("hue").notNull(),
+    /** 1–40 (`WORKFLOW_NAME_MAX`). The person's words — never logged. */
+    name: text("name").notNull(),
+    /** The usual order — dense, rewritten by the service (TD-35). */
+    sortOrder: smallint("sort_order").notNull(),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("workflow_groups_user_id_sort_order_idx").on(table.userId, table.sortOrder),
+    index("workflow_groups_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "workflow_groups",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const workflowGroupsRelations = relations(workflowGroups, ({ many, one }) => ({
+  tasks: many(workflowTasks),
+  user: one(users, {
+    fields: [workflowGroups.userId],
+    references: [users.id],
+  }),
+}));
+
+// packages/db/src/schema/workflow/workflow-tasks.ts
+/**
+ * workflow_tasks — one thread of work; a row on the board (Workflow UX spec
+ * v0.1 §3.2–§3.8, §11; Epic 7 TD-33–TD-36). On screen the noun is *Task*; in
+ * code it is always a *workflow task*, because a habit has a task type too.
+ *
+ * FIRING IS A TIMESTAMP, NOT A FLAG (TD-36). `firing_started_at` set means a
+ * prompt is running; `last_returned_at` is when it last came back. There is no
+ * boolean beside them to disagree with them. *Next* is not stored anywhere —
+ * it is computed from order on every render (TD-38).
+ *
+ * THE ON-DELETE RULES ARE THE DESIGN.
+ * - `column_id` RESTRICTS: a column holding tasks cannot be deleted until they
+ *   are moved (WF-04). A cascade here would delete a person's work.
+ * - `group_id` SETS NULL: the lane *No group*. Groups are archived, not deleted,
+ *   and the archive service moves tasks explicitly; this is the backstop.
+ * - `view_id` CASCADES, with the view. It is denormalised from the column for
+ *   the board read; the move service is its only writer and writes it with
+ *   `column_id`, together (TD-35).
+ *
+ * `sort_order` is the task's place in its cell — one group in one column —
+ * dense and server-rewritten. No unique constraint: a dense rewrite inside a
+ * transaction passes through duplicates.
+ *
+ * The title and the note are the person's client work: never logged, never in
+ * an error message, always in the export (TD-45).
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import { index, pgTable, smallint, text, timestamp, uuid } from "drizzle-orm/pg-core";
+
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { workflowColumns } from "./workflow-columns";
+import { workflowGroups } from "./workflow-groups";
+import { workflowViews } from "./workflow-views";
+
+export const workflowTasks = pgTable(
+  "workflow_tasks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    /** Set on entering the done column; cleared on leaving it (TD-35). */
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    /** A prompt is running. Cleared when the task leaves the active column. */
+    firingStartedAt: timestamp("firing_started_at", { withTimezone: true }),
+    /** When the prompt last came back — *back · 2 min*. */
+    lastReturnedAt: timestamp("last_returned_at", { withTimezone: true }),
+    /** ≤ 2000 (`WORKFLOW_NOTE_MAX`) — what was asked, what to check (W19). */
+    note: text("note"),
+    /** The place in its cell — dense, rewritten by the service (TD-35). */
+    sortOrder: smallint("sort_order").notNull(),
+    /** 1–120 (`WORKFLOW_TITLE_MAX`). */
+    title: text("title").notNull(),
+
+    columnId: uuid("column_id")
+      .notNull()
+      .references(() => workflowColumns.id, { onDelete: "restrict" }),
+    /** Null is the lane *No group*. */
+    groupId: uuid("group_id").references(() => workflowGroups.id, {
+      onDelete: "set null",
+    }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    viewId: uuid("view_id")
+      .notNull()
+      .references(() => workflowViews.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("workflow_tasks_view_id_column_id_group_id_sort_order_idx").on(
+      table.viewId,
+      table.columnId,
+      table.groupId,
+      table.sortOrder,
+    ),
+    index("workflow_tasks_user_id_archived_at_idx").on(table.userId, table.archivedAt),
+    index("workflow_tasks_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "workflow_tasks",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const workflowTasksRelations = relations(workflowTasks, ({ one }) => ({
+  column: one(workflowColumns, {
+    fields: [workflowTasks.columnId],
+    references: [workflowColumns.id],
+  }),
+  group: one(workflowGroups, {
+    fields: [workflowTasks.groupId],
+    references: [workflowGroups.id],
+  }),
+  user: one(users, {
+    fields: [workflowTasks.userId],
+    references: [users.id],
+  }),
+  view: one(workflowViews, {
+    fields: [workflowTasks.viewId],
+    references: [workflowViews.id],
+  }),
+}));
+
+// packages/db/src/schema/workflow/workflow-templates.ts
+/**
+ * workflow_templates — a saved arrangement of columns to start a view from
+ * (Workflow UX spec v0.1 §3.6, §11; Epic 7 TD-34).
+ *
+ * A SNAPSHOT, NOT ROWS OF ROWS. Nothing refers to a template after a view is
+ * made from it (W10), so its columns are one jsonb list of names and roles.
+ * Editing a template never changes an existing view.
+ *
+ * ONLY WHAT THE PERSON SAVED. The two built-in templates (*Working*, *Queue*)
+ * are constants in `@syn/constants` (`WORKFLOW_STARTERS`), never rows (TD-41).
+ * ARCHIVE, NEVER DELETE (W18).
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import { index, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+
+import type { WorkflowTemplateColumn } from "@syn/types";
+
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+
+export const workflowTemplates = pgTable(
+  "workflow_templates",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    // JSON shape: WorkflowTemplateColumn[] — see @syn/types (src/domain/workflow.ts)
+    columns: jsonb("columns").$type<WorkflowTemplateColumn[]>().notNull(),
+    /** 1–40 (`WORKFLOW_NAME_MAX`). */
+    name: text("name").notNull(),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("workflow_templates_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "workflow_templates",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const workflowTemplatesRelations = relations(workflowTemplates, ({ one }) => ({
+  user: one(users, {
+    fields: [workflowTemplates.userId],
+    references: [users.id],
+  }),
+}));
+
+// packages/db/src/schema/workflow/workflow-day-pins.ts
+/**
+ * workflow_day_pins — the groups made *first today*, for one of the person's
+ * days (Workflow UX spec v0.1 §3.5 W9, §11; Epic 7 TD-37).
+ *
+ * KEYED BY THE DAY, SO NOTHING RUNS. One row per `(user_id, day_key)`, the key
+ * from `resolveDayKey` and the person's own day close. A new day has a new key,
+ * so yesterday's pins are simply never read — no job, no cleanup, nothing to
+ * dismiss. A stale row is a few bytes and stays in the export as a record of
+ * what was pinned.
+ *
+ * PINS ONLY, NOT A WHOLE ORDER. The rest of the lanes keep their usual order
+ * (`workflow_groups.sort_order`); a full order per day would have to be
+ * reconciled every time a group is added. An id whose group was archived later
+ * is left in place and ignored by `orderGroupsForDay`.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import { date, index, jsonb, pgTable, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+
+export const workflowDayPins = pgTable(
+  "workflow_day_pins",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    /** The person's day the pins belong to — the same key `days.date` holds. */
+    dayKey: date("day_key").notNull(),
+    // JSON shape: string[] — group ids, newest pin first
+    groupIds: jsonb("group_ids").$type<string[]>().notNull(),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    uniqueIndex("workflow_day_pins_user_id_day_key_idx").on(table.userId, table.dayKey),
+    index("workflow_day_pins_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "workflow_day_pins",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const workflowDayPinsRelations = relations(workflowDayPins, ({ one }) => ({
+  user: one(users, {
+    fields: [workflowDayPins.userId],
+    references: [users.id],
+  }),
+}));
+```
+
+#### `workflow_views`
+
+**PURPOSE.** workflow_views — one board: a named set of columns with the tasks in them (Workflow UX spec v0.1 §3.6, §11; Epic 7 TD-33, TD-34). A VIEW OWNS ITS COLUMNS (W10). Nothing points back at the template it was made from — a template is only where a view's columns started. The two starter views are made on the first board read (`ensureWorkflowDefaults`, TD-41), never by a migration. `last_opened_at` is how `/workflow` knows which view to return to (TD-44). `sort_order` is the view tabs' order. ARCHIVE, NEVER DELETE (W18): an archived view keeps its columns and tasks and brings them back with it. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `workflow_views_user_id_sort_order_idx`
+- `workflow_views_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `workflow_columns`
+
+**PURPOSE.** workflow_columns — a state a task is in, in one view (Workflow UX spec v0.1 §3.6, §11; Epic 7 TD-34). COLUMNS ARE ROWS, not jsonb on the view, because tasks reference them: a removed column cannot orphan a task silently. `workflow_tasks.column_id` RESTRICTS, so a column that holds tasks cannot be deleted until its tasks are moved — exactly WF-04's *Move its tasks first*. AT MOST ONE OF EACH ROLE PER VIEW (W11) is held by the database, not promised by the service: two partial unique indexes on `view_id`, one where the role is `active` (tasks fire here), one where it is `done` (closed tasks land here). `role` is nullable; no third value means "none". POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `workflow_columns_view_id_active_idx`
+- `workflow_columns_view_id_done_idx`
+- `workflow_columns_view_id_sort_order_idx`
+- `workflow_columns_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `workflow_groups`
+
+**PURPOSE.** workflow_groups — a set of tasks, usually a client; a lane (Workflow UX spec v0.1 §3.5, §11; Epic 7 TD-34). THE HUE IS A CATEGORY HUE. `hue` is `category_color_key`, the root enum the categories use — one hue vocabulary, one home; a group never gets a list of its own. It is drawn as the lane head's leading edge, always beside the name. `sort_order` is the usual order. *First today* is not stored here: it is a pin for one day in `workflow_day_pins` (TD-37). `collapsed` is remembered per group, across views. ARCHIVE, NEVER DELETE (W18) — the archive service moves the group's tasks to *No group* first; `workflow_tasks.group_id` setting null is the backstop, never the path. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `workflow_groups_user_id_sort_order_idx`
+- `workflow_groups_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `workflow_tasks`
+
+**PURPOSE.** workflow_tasks — one thread of work; a row on the board (Workflow UX spec v0.1 §3.2–§3.8, §11; Epic 7 TD-33–TD-36). On screen the noun is *Task*; in code it is always a *workflow task*, because a habit has a task type too. FIRING IS A TIMESTAMP, NOT A FLAG (TD-36). `firing_started_at` set means a prompt is running; `last_returned_at` is when it last came back. There is no boolean beside them to disagree with them. *Next* is not stored anywhere — it is computed from order on every render (TD-38). THE ON-DELETE RULES ARE THE DESIGN. - `column_id` RESTRICTS: a column holding tasks cannot be deleted until they are moved (WF-04). A cascade here would delete a person's work. - `group_id` SETS NULL: the lane *No group*. Groups are archived, not deleted, and the archive service moves tasks explicitly; this is the backstop. - `view_id` CASCADES, with the view. It is denormalised from the column for the board read; the move service is its only writer and writes it with `column_id`, together (TD-35). `sort_order` is the task's place in its cell — one group in one column — dense and server-rewritten. No unique constraint: a dense rewrite inside a transaction passes through duplicates. The title and the note are the person's client work: never logged, never in an error message, always in the export (TD-45). POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `workflow_tasks_view_id_column_id_group_id_sort_order_idx`
+- `workflow_tasks_user_id_archived_at_idx`
+- `workflow_tasks_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `workflow_templates`
+
+**PURPOSE.** workflow_templates — a saved arrangement of columns to start a view from (Workflow UX spec v0.1 §3.6, §11; Epic 7 TD-34). A SNAPSHOT, NOT ROWS OF ROWS. Nothing refers to a template after a view is made from it (W10), so its columns are one jsonb list of names and roles. Editing a template never changes an existing view. ONLY WHAT THE PERSON SAVED. The two built-in templates (*Working*, *Queue*) are constants in `@syn/constants` (`WORKFLOW_STARTERS`), never rows (TD-41). ARCHIVE, NEVER DELETE (W18). POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `workflow_templates_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `workflow_day_pins`
+
+**PURPOSE.** workflow_day_pins — the groups made *first today*, for one of the person's days (Workflow UX spec v0.1 §3.5 W9, §11; Epic 7 TD-37). KEYED BY THE DAY, SO NOTHING RUNS. One row per `(user_id, day_key)`, the key from `resolveDayKey` and the person's own day close. A new day has a new key, so yesterday's pins are simply never read — no job, no cleanup, nothing to dismiss. A stale row is a few bytes and stays in the export as a record of what was pinned. PINS ONLY, NOT A WHOLE ORDER. The rest of the lanes keep their usual order (`workflow_groups.sort_order`); a full order per day would have to be reconciled every time a group is added. An id whose group was archived later is left in place and ignored by `orderGroupsForDay`. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `workflow_day_pins_user_id_day_key_idx`
+- `workflow_day_pins_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
 
 ---
 
@@ -4014,7 +4557,7 @@ Re-running the seed prints zeros across the board, which means idempotent rather
 
 ## 10. OPEN QUESTIONS & FLAGGED DECISIONS
 
-- **23 tables is the whole Phase-1 model.** A later ticket that needs a column adds it as a normal migration with a logged deviation, not as a second domain migration by default.
+- **29 tables is the whole Phase-1 model.** A later ticket that needs a column adds it as a normal migration with a logged deviation, not as a second domain migration by default.
 - **`feedback_messages` readability is `[PROVISIONAL — Taylor]`.** The table is insert-only for its author and is read by the builder out of band. Confirm that is what you want; the row deliberately holds nothing from a person's list.
 - **`day_items.calendar_event_id` is a Phase-2 seam.** The column exists so calendar import (official spec §4.7) is not a migration; nothing in Phase 1 writes it.
 - **`template_slots.multitask_group` is enforced in the service, not the schema.** "Two slots sharing a start offset must share a group" cannot be a partial unique index, because the rule is *unless grouped*. SET-5 owns it, in the words TP-02 shows.

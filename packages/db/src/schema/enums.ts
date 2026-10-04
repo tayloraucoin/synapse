@@ -118,7 +118,8 @@ export const missTierEnum = pgEnum(
  * the accent teal and never the violet, so the semantic layer stays
  * unambiguous.
  *
- * Only `categories` stores it as a column, but it is the same closed set an
+ * `categories` and `workflow_groups` (Epic 7, a lane's hue) store it as a
+ * column, and it is the same closed set an
  * `IconValue` of kind "curated" carries as `colorKey` in the `icon` jsonb on
  * both `habits` and `day_items` — two more directories. It lives here so the
  * hue vocabulary has one home rather than one home and two comments.

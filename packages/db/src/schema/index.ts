@@ -24,6 +24,7 @@ export * from "./plan";
 export * from "./day";
 export * from "./notification";
 export * from "./system";
+export * from "./workflow";
 
 export * from "./rls/helpers";
 export * from "./rls/standard-policies";
