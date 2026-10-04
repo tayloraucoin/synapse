@@ -1,10 +1,10 @@
-import { and, asc, desc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 
-import { workflowViews, type RlsClient } from "@syn/db";
-import type { WorkflowViewTab } from "@syn/types";
+import { workflowColumns, workflowViews, type RlsClient } from "@syn/db";
+import type { WorkflowColumnView, WorkflowViewTab } from "@syn/types";
 
 import { ensureWorkflowDefaults } from "./ensure-defaults";
-import { toViewTab } from "./to-view";
+import { COLUMN_COLUMNS, toColumnView, toViewTab } from "./to-view";
 
 export type WorkflowViewList = {
   /** The view tabs, in tab order. */
@@ -13,6 +13,8 @@ export type WorkflowViewList = {
   archived: (WorkflowViewTab & { archivedAt: Date })[];
   /** The view `/workflow` opens: the last one opened, else the first (UX §3.6). */
   lastOpenedId: string | null;
+  /** Each unarchived view's columns, in order — *Move to view*'s second level (FLO-7). */
+  columnsByView: Record<string, WorkflowColumnView[]>;
 };
 
 /**
@@ -40,6 +42,27 @@ export async function listViews(rls: RlsClient, userId: string): Promise<Workflo
         .orderBy(desc(workflowViews.archivedAt)),
     ]);
 
+    const columns =
+      active.length === 0
+        ? []
+        : await tx
+            .select({ ...COLUMN_COLUMNS })
+            .from(workflowColumns)
+            .where(
+              and(
+                eq(workflowColumns.userId, userId),
+                inArray(
+                  workflowColumns.viewId,
+                  active.map((view) => view.id),
+                ),
+              ),
+            )
+            .orderBy(asc(workflowColumns.sortOrder), asc(workflowColumns.createdAt));
+    const columnsByView: Record<string, WorkflowColumnView[]> = {};
+    for (const column of columns) {
+      (columnsByView[column.viewId] ??= []).push(toColumnView(column));
+    }
+
     let last = active[0] ?? null;
     for (const view of active) {
       if (view.lastOpenedAt === null) continue;
@@ -52,6 +75,7 @@ export async function listViews(rls: RlsClient, userId: string): Promise<Workflo
         view.archivedAt === null ? [] : [{ ...toViewTab(view), archivedAt: view.archivedAt }],
       ),
       lastOpenedId: last?.id ?? null,
+      columnsByView,
     };
   });
 }

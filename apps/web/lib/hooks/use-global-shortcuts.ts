@@ -5,6 +5,7 @@ import * as React from "react";
 
 import { dispatchScrollToNow } from "@/lib/hooks/use-scroll-memory";
 import {
+  isWorkflowPath,
   reviewRoute,
   settingsRoute,
   todayRoute,
@@ -50,6 +51,8 @@ function isEditable(target: EventTarget | null): boolean {
 export type GlobalShortcutHandlers = {
   /** `n` — only where a day is on screen; elsewhere it does nothing. */
   onAddOneOff?: () => void;
+  /** `n` on a Workflow board — *New task* (FLO-7). */
+  onNewWorkflowTask?: () => void;
   /** `?` — the shortcut list. */
   onShowShortcuts: () => void;
 };
@@ -92,8 +95,11 @@ export function useGlobalShortcuts(handlers: GlobalShortcutHandlers): void {
           dispatchScrollToNow();
           break;
         case "n":
-          // Scoped to the day (§3.1) — `n` on Settings means nothing.
+          // Scoped to the day (§3.1) — `n` on Settings means nothing. On
+          // Workflow it is *New task* (UX WF-01), a sibling scope, not a change
+          // to the day's.
           if (isDayRoute(pathname)) latest.current.onAddOneOff?.();
+          else if (isWorkflowPath(pathname)) latest.current.onNewWorkflowTask?.();
           else return;
           break;
         case "?":

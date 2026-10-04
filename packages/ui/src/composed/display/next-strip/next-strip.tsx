@@ -52,8 +52,10 @@ export function NextStrip({ next, onGo, copy: copyOverride, className }: NextStr
 
   const lead = `${next.groupName ?? copy.noGroup} · `;
   const split = next.title.length > TAIL * 2;
-  const head = split ? next.title.slice(0, -TAIL) : next.title;
-  const tail = split ? next.title.slice(-TAIL) : "";
+  // A space at the split would be dropped at the edge of a flex item
+  // ("pricingpage"), so it is kept as a non-breaking one.
+  const head = split ? next.title.slice(0, -TAIL).replace(/ $/, " ") : next.title;
+  const tail = split ? next.title.slice(-TAIL).replace(/^ /, " ") : "";
 
   return (
     <button

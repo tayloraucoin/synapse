@@ -63,6 +63,12 @@ export type WorkflowReorderInput = z.infer<typeof workflowReorderInput>;
 /* ---- tasks ---- */
 
 export const workflowTaskCreateInput = z.object({
+  /**
+   * The client's own uuid for the new task (FLO-7), so the row it draws at once
+   * is the row the server stores — no temporary id to swap. Optional: the
+   * server makes one when it is absent.
+   */
+  id: id.optional(),
   viewId: id,
   columnId: id,
   groupId: id.nullable(),

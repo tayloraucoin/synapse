@@ -4,7 +4,7 @@
 **Slice type:** Every write a person makes to a board, from the screen, without a drag. The risk class is *an undo that does not put things back* (position, lane, firing), *a move that shows one thing and stores another*, and *a form that loses a typed sentence*.
 **Vigil:** every move's undo; a pin across a day close; the sheet's save-as-you-go under a failing network.
 
-**Status:** Not started
+**Status:** Complete (2026-10-04)
 
 > **Vigil — full review.** For each of: *Move to* another column; `Alt`+`→`; `Alt`+`↓`; moving a firing task out of the active column; moving into the done column; *Start* from the queue; *Archive* — press *Undo* inside five seconds and state that the task is back in its lane, column and exact position, and that a task which was firing is firing again with its original minute count. Then: pin a group *First today*, move the local clock past the person's day close, refetch, and state that the usual order is back with nothing to dismiss. Then, with `workflow.task.update` failing: type a note, blur, and state that the field reverts and one line says so, and say plainly what happens to the words that were typed.
 

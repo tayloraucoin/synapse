@@ -7,7 +7,7 @@ import { ShortcutsDialog } from "@syn/ui";
 
 import { useGlobalShortcuts } from "@/lib/hooks/use-global-shortcuts";
 import { SHORTCUTS } from "@/lib/keyboard/shortcuts";
-import { dayRoute, todayRoute } from "@/lib/routes";
+import { dayRoute, todayRoute, workflowViewIdOf, workflowViewRoute } from "@/lib/routes";
 
 /**
  * The one keyboard listener in the app, and the `?` dialog it opens — SYS-4.
@@ -38,6 +38,12 @@ export function ShortcutsHost() {
         ? dayRoute(pathname.split("/")[2] ?? "")
         : todayRoute();
       router.push(`${base}?sheet=one-off`);
+    },
+    // FLO-7: *New task* crosses to the board as URL state it reads and clears.
+    // Replace, not push, so back does not land on a page that reopens it.
+    onNewWorkflowTask: () => {
+      const viewId = workflowViewIdOf(pathname);
+      if (viewId !== null) router.replace(workflowViewRoute(viewId, { add: true }));
     },
   });
 

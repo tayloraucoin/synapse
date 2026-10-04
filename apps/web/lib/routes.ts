@@ -172,10 +172,24 @@ export function workflowRoute(): string {
   return "/workflow";
 }
 
-/** One view's board, WF-01. `column` is compact's shown column (`?col=`, FLO-8). */
-export function workflowViewRoute(viewId: string, options?: { column?: string }): string {
+/**
+ * One view's board, WF-01. `column` is compact's shown column (`?col=`, FLO-8);
+ * `add` is the `n` key's hand-off — the board opens an add row and clears it.
+ */
+export function workflowViewRoute(viewId: string, options?: { column?: string; add?: boolean }): string {
   const path = `${workflowRoute()}/${viewId}`;
-  return options?.column ? `${path}?col=${encodeURIComponent(options.column)}` : path;
+  const query = new URLSearchParams();
+  if (options?.column) query.set("col", options.column);
+  if (options?.add) query.set("add", "1");
+  const search = query.toString();
+  return search === "" ? path : `${path}?${search}`;
+}
+
+/** The view id in a Workflow board path, or null on the root route. */
+export function workflowViewIdOf(path: string): string | null {
+  if (!isWorkflowPath(path)) return null;
+  const [, , viewId] = path.split("?")[0]?.split("/") ?? [];
+  return viewId === undefined || viewId === "" ? null : viewId;
 }
 
 /**

@@ -69,6 +69,7 @@ export async function createWorkflowTask(
     const [row] = await tx
       .insert(workflowTasks)
       .values({
+        ...(input.id === undefined ? {} : { id: input.id }),
         userId,
         viewId: input.viewId,
         columnId: column.id,

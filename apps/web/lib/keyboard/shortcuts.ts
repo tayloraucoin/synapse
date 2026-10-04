@@ -45,4 +45,8 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { keys: ["g"], label: "Go to next" },
   { keys: ["["], label: "Previous view" },
   { keys: ["]"], label: "Next view" },
+  // FLO-7 — §7's words.
+  { keys: ["Enter"], label: "Open" },
+  { keys: ["n"], label: "New task" },
+  { keys: ["Alt", "↑", "↓", "←", "→"], label: "Move a task" },
 ];
