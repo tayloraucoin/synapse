@@ -6,14 +6,17 @@ import {
   dataExports,
   dayBlocks,
   dayItems,
+  dayPlans,
   days,
   feedbackMessages,
   fixtures,
   habits,
   journalEntries,
+  links,
   misses,
   notificationDeliveries,
   notificationPrefs,
+  passages,
   reasons,
   shifts,
   templates,
@@ -54,7 +57,7 @@ import {
  *    browser — and they are not a record of anything the person did. The row is
  *    still exported, so "I had a subscription on this device from this date" is
  *    in the file; the ability to use it is not.
- *  - **`storage_path` values are kept**, because they name the person's own
+ *  - **`storage_path` values (and `passages.images`) are kept**, because they name the person's own
  *    objects and are meaningless to anyone else, but the IMAGES themselves are
  *    not bundled: official spec §7.6's list is five CSVs and one JSON, and a
  *    zip that silently grew to include every icon would break the size promise
@@ -76,6 +79,9 @@ export const EXPORT_FILE_NAMES = [
   "journal_entries.csv",
   // Epic 7 (FLO-3, TD-45): the two Workflow tables a person opens in a
   // spreadsheet; the other four are in the JSON.
+  // Passages, links and day plans (v1.2/v1.3) are JSON-only for the same
+  // reason: Markdown bodies, a title-and-URL list, and a row of template
+  // references are read in the graph, not opened in a spreadsheet.
   "workflow_tasks.csv",
   "workflow_groups.csv",
   "synapse-export.json",
@@ -108,6 +114,10 @@ export type AccountData = {
   dayBlocks: Row[];
   fixtures: Row[];
   journalEntries: Row[];
+  /* ---- UX v1.2 (0007) and v1.3 (0009) ---- */
+  passages: Row[];
+  links: Row[];
+  dayPlans: Row[];
   /* ---- Workflow (FLO-3, TD-45) — the person's client work, all of it ---- */
   workflowViews: Row[];
   workflowColumns: Row[];
@@ -131,13 +141,13 @@ export async function readAccountData(
 ): Promise<AccountData> {
   return rls.execute(async (tx) => {
     /*
-     * One read shape over seventeen tables.
+     * One read shape over twenty-nine tables.
      *
      * `PgTable` and `PgColumn` are the concrete types Drizzle's builder is
      * happy to be handed by variable — the bare `Table` interface trips its
      * "does this subquery return anything" conditional, which is written for
      * data-modifying CTEs and has nothing to say about a plain select. The
-     * result is widened to plain rows because seventeen differently-shaped
+     * result is widened to plain rows because twenty-nine differently-shaped
      * selects have no useful common type, and everything downstream reads
      * columns through `getTableColumns` anyway.
      *
@@ -170,6 +180,9 @@ export async function readAccountData(
       blockRows,
       fixtureRows,
       journalRows,
+      passageRows,
+      linkRows,
+      dayPlanRows,
       workflowViewRows,
       workflowColumnRows,
       workflowGroupRows,
@@ -197,6 +210,9 @@ export async function readAccountData(
       own(dayBlocks, dayBlocks.userId),
       own(fixtures, fixtures.userId),
       own(journalEntries, journalEntries.userId),
+      own(passages, passages.userId),
+      own(links, links.userId),
+      own(dayPlans, dayPlans.userId),
       own(workflowViews, workflowViews.userId),
       own(workflowColumns, workflowColumns.userId),
       own(workflowGroups, workflowGroups.userId),
@@ -226,6 +242,9 @@ export async function readAccountData(
       dayBlocks: blockRows,
       fixtures: fixtureRows,
       journalEntries: journalRows,
+      passages: passageRows,
+      links: linkRows,
+      dayPlans: dayPlanRows,
       workflowViews: workflowViewRows,
       workflowColumns: workflowColumnRows,
       workflowGroups: workflowGroupRows,
@@ -335,6 +354,10 @@ export function buildExportJson(data: AccountData, exportedAt: Date): string {
     categories: jsonRows(categories, data.categories),
     habits: jsonRows(habits, data.habits),
     reasons: jsonRows(reasons, data.reasons),
+    // UX v1.2 (0007) and v1.3 (0009): the morning's reading and links,
+    // archived ones included.
+    passages: jsonRows(passages, data.passages),
+    links: jsonRows(links, data.links),
     templates: data.templates.map((template) => ({
       ...(jsonRow(templates, template) as Row),
       slots: jsonRows(
@@ -342,6 +365,9 @@ export function buildExportJson(data: AccountData, exportedAt: Date): string {
         slotsByTemplate.get(String(template.id)) ?? [],
       ),
     })),
+    // UX v1.2 (0007): the named days. Flat, not nested under a template — a
+    // plan points at up to seven templates by id, and no one of them owns it.
+    dayPlans: jsonRows(dayPlans, data.dayPlans),
     days: data.days.map((day) => ({
       ...(jsonRow(days, day) as Row),
       items: (itemsByDay.get(String(day.id)) ?? []).map((item) => ({
@@ -418,7 +444,7 @@ function groupBy(rows: Row[], key: string): Map<string, Row[]> {
 
 /* ------------------------------------------------------------- the zip -- */
 
-/** The six files, as bytes, ready for `zipSync`. */
+/** Every file `EXPORT_FILE_NAMES` lists, as bytes, ready for `zipSync`. */
 export function buildExportFiles(
   data: AccountData,
   exportedAt: Date,
