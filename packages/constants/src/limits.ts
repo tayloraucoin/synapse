@@ -165,3 +165,17 @@ export const LINK_TITLE_MAX = 80;
 export const LINK_URL_MAX = 2048;
 /** A fixture's place — `fixtures.location`, free text (v1.3 §3.14, §11.3). */
 export const FIXTURE_LOCATION_MAX = 80;
+
+/*
+ * ---- Workflow UX v0.1 (FLO-1, TD-40) ----
+ * Capped with no message: the field stops accepting and says nothing (WF-01).
+ */
+
+/** A task's title — `workflow_tasks.title`. */
+export const WORKFLOW_TITLE_MAX = 120;
+/** A task's note — `workflow_tasks.note` (W19). */
+export const WORKFLOW_NOTE_MAX = 2000;
+/** A group's, a view's, a column's or a template's name. */
+export const WORKFLOW_NAME_MAX = 40;
+/** Columns per view — one to five (§3.6, §13 #W4). */
+export const WORKFLOW_COLUMNS_MAX = 5;

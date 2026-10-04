@@ -100,3 +100,15 @@ export type {
   WorkDayTypeView,
   WorkPlanView,
 } from "./domain/view";
+
+export type {
+  WorkflowBoardView,
+  WorkflowColumnRole,
+  WorkflowColumnView,
+  WorkflowGroupView,
+  WorkflowNext,
+  WorkflowTaskView,
+  WorkflowTemplateColumn,
+  WorkflowTemplateView,
+  WorkflowViewTab,
+} from "./domain/workflow";

@@ -142,6 +142,26 @@ export function formatElapsed(seconds: number): string {
   return `${minutes}:${ss}`;
 }
 
+/**
+ * A duration in whole minutes, the product's short form — "1 min", "59 min",
+ * "1 h", "1 h 12 min" (Workflow UX spec v0.1 §3.3, §7). Minutes, never
+ * seconds: the board's *firing · 4 min* re-renders on the minute and nothing
+ * ticks.
+ *
+ * BELOW ONE MINUTE IT IS THE EMPTY STRING, so the caller renders the word
+ * alone (*firing*) and drops the middot. Not `formatElapsed`, which is the
+ * timer's running `m:ss`.
+ */
+export function formatMinutesShort(minutes: number): string {
+  const total = Math.floor(minutes);
+  if (!(total >= 1)) return "";
+  const hours = Math.floor(total / MINUTES_PER_HOUR);
+  const rest = total % MINUTES_PER_HOUR;
+  if (hours === 0) return `${rest} min`;
+  if (rest === 0) return `${hours} h`;
+  return `${hours} h ${rest} min`;
+}
+
 export type CalendarDayStyle = "short" | "long";
 
 /**
