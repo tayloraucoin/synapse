@@ -239,7 +239,7 @@ apps/
               task-sheet.tsx
               use-task-sheet.ts
               use-view-settings.ts
-              use-workflow-board.ts
+              use-workflow-board.ts  # the board's one cache entry: the wanted-state toggle (latest press wins), lanes and next built once, and moveTask — every move's one path, with an undo that restores lane, column, place and firing
               view-menu.tsx
               view-tabs.tsx
               workflow-board.tsx
@@ -842,7 +842,7 @@ packages/
         timer.ts
         user.ts
         week.ts
-        workflow.ts
+        workflow.ts  # one router nested by noun — view, column, group, task, template (TD-40); a rule refused is BAD_REQUEST with its code, never FORBIDDEN
       services/
         asset/
           create-upload-url.ts
@@ -959,7 +959,7 @@ packages/
           list-archived.ts
           list-closed-tasks.ts
           list-views.ts
-          move-task.ts
+          move-task.ts  # THE move (TD-35): column, lane and place in one transaction, dense per cell, the role effects; every caller — menu, keys, sheet, undo, drag — sends a place here
           pin-group-today.ts
           remove-column.ts
           reorder-groups.ts
@@ -1097,7 +1097,7 @@ packages/
           index.ts
           user-avatars.ts
           users.ts
-        workflow/
+        workflow/  # Workflow's six tables (Epic 7, TD-33): views own their columns, a task is in one cell, firing is two timestamps, templates are snapshots, day pins are today's
           index.ts
           workflow-columns.ts
           workflow-day-pins.ts
@@ -1625,8 +1625,8 @@ packages/
             auth-frame.stories.tsx
             auth-frame.tsx
             index.ts
-          board/
-            board-dnd.tsx
+          board/  # Workflow's board (FLO-4, FLO-9): lanes of lists by columns, pinned first track, synced sticky heads, compact one column; static unless given its two drag callbacks
+            board-dnd.tsx  # the board's drag: emits a place, writes nothing; the 2px ink line is where the drop lands; a swipe still scrolls; shares no code with sortable-list
             board.stories.tsx
             board.tsx
             copy.ts
@@ -1851,7 +1851,7 @@ packages/
       workflow/
         index.ts
         order-groups.ts
-        resolve-next.ts
+        resolve-next.ts  # the one next (W8): pure, from today's lane order, the tasks and the columns; the row, the strip, the announcement and the tab title all read it
       errors.ts
       index.ts
       link.ts

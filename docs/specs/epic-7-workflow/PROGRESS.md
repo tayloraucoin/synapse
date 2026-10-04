@@ -13,7 +13,7 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 | FLO-7 | Tasks and groups: add, the task sheet, moves by menu and key, *Start*, archive, *first today* | FLO-6 | Complete | 2026-10-04 |
 | FLO-8 | Views, columns, templates, the archive, the compact column tabs | FLO-7 | Complete | 2026-10-04 |
 | FLO-9 | The drag | FLO-7 | Complete | 2026-10-04 |
-| FLO-10 | Close-out: the corpus | FLO-8 | Not started | |
+| FLO-10 | Close-out: the corpus | FLO-8 | Complete | 2026-10-04 |
 
 ## Checklist
 
@@ -26,4 +26,4 @@ The only authoritative answer to "is this Complete". A row per ticket; the check
 - [x] FLO-7
 - [x] FLO-8
 - [x] FLO-9
-- [ ] FLO-10
+- [x] FLO-10

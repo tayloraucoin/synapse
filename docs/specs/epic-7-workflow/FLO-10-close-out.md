@@ -3,7 +3,7 @@
 **Epic:** FLO — Workflow · **Phase 5** · Size: S
 **Slice type:** Documentation only — the corpus made to say what was built. The risk class is *a second home for a fact*, and *an index that describes the plan instead of the code*.
 
-**Status:** Not started
+**Status:** Complete (2026-10-04)
 
 ---
 

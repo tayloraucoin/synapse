@@ -97,8 +97,8 @@ is a defect.**
 | `/review/week/{week}` | `reviewWeekRoute(week)` | WR-01 |
 | `/review/week/{week}/habit/{id}` | `reviewWeekHabitRoute(week, id)` | WR-02 |
 | `/review/history` | `reviewHistoryRoute()` | HS-01 |
-| `/workflow` | `workflowRoute()` | Workflow UX v0.1 §5 — the fourth peer (W1). Resolves to the last view opened, else the first (FLO-6); until then an empty frame. **Exempt from the orient redirect** (W16): `resolveEntry` skips the orient branch for any Workflow path (`isWorkflowPath`) |
-| `/workflow/{view}` | `workflowViewRoute(viewId, { column?, add? })` | WF-01, the board; `{view}` is the view's uuid; `?col=` is compact's shown column (FLO-8); `?add=1` opens the first lane's add row and is cleared (FLO-7, the `n` key). Sheets are `?sheet=` URL state (FLO-6…FLO-8). Exempt from the orient redirect, as above |
+| `/workflow` | `workflowRoute()` | Workflow UX v0.1 §5 — the fourth peer (W1). Never renders: resolves to the last view opened, else the first (FLO-6). **Exempt from the orient redirect** (W16): `resolveEntry` skips the orient branch for any Workflow path (`isWorkflowPath`) |
+| `/workflow/{view}` | `workflowViewRoute(viewId, { column?, add? })` | WF-01, the board; `{view}` is the view's uuid (an unknown or archived one goes back to `/workflow`); `?col=` is compact's shown column, replaced not pushed (FLO-8); `?add=1` opens the first lane's add row and is cleared (FLO-7, the `n` key, which reads the view back with `workflowViewIdOf(path)`). Sheets are `?sheet=` URL state: `task&id=` WF-02 (FLO-7), `new-view` WF-03, `columns` WF-04, `archived` WF-05 (FLO-8). Exempt from the orient redirect, as above |
 | `/settings` | `settingsRoute()` | ST-00 |
 | `/settings/account` | `settingsAccountRoute()` | ST-01 |
 | `/settings/habits` | `settingsHabitsRoute()` | LB-01 |

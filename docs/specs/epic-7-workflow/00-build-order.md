@@ -36,7 +36,7 @@ The contract; the six tables; the services and the export; the board with its to
 - [x] **FLO-9** · The drag: `Board` gains its `DndContext`; a row across cells and lanes; a lane among lanes; touch and keyboard — M · (FLO-7) · **Vigil on touch and keyboard; Vesper on the lift and the drop line**
 
 ### Phase 5 — The corpus
-- [ ] **FLO-10** · Close-out: the placement rules' new domain and router, the tracks table, the docs index, the directory map, the link check, the scope line confirmed — S · (FLO-8)
+- [x] **FLO-10** · Close-out: the placement rules' new domain and router, the tracks table, the docs index, the directory map, the link check, the scope line confirmed — S · (FLO-8)
 
 ## Ordering constraints (alphabetical order hides these)
 
@@ -88,7 +88,7 @@ Taylor's standing instruction (Epic 5, 2026-09-16): Mason executes the track in 
 | 4 | FLO-6 | FLO-3, FLO-4, FLO-5 | The notes' §5 loop, end to end: fire, work another, come back, the right one is *next* | **Complete 2026-10-04** |
 | 5 | FLO-7 | FLO-6 | A day's real use without touching a database: add, edit, move, start, archive, pin | **Complete 2026-10-04** |
 | 6 | FLO-8 | FLO-7 | Different workflows: a new view from a template, its columns arranged, a template saved | **Complete 2026-10-04** |
-| 7 | FLO-9 · FLO-10 | FLO-7, FLO-8 | The fast path over the same moves; the corpus says what was built | Not started |
+| 7 | FLO-9 · FLO-10 | FLO-7, FLO-8 | The fast path over the same moves; the corpus says what was built | **Complete 2026-10-04** |
 
 **To start a batch**, a new thread is given: the role prompt `docs/roles/engineering/Mason—cto-principle-dev-role-prompt.md`, this track's `README.md` (its kickoff contract, with the batch line filled in), and the batch's tickets. Everything else is on the tickets' attach-lists.
 

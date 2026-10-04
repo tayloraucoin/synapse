@@ -194,6 +194,8 @@ Batched, each with a recommendation and the default in force. None blocks batch 
 | Q4 | Migrations `0004`–`0010` on staging. | Apply before a hosted walk is wanted. | **Local tier only**; every ticket says so in its report. | A hosted walk of anything | When Taylor wants staging |
 | Q5 | The on-screen noun (*Task*, W17, #W9). | *Task*, the notes' own word. | ***Task*.** A flip is `copy.ts` only; code says `workflow task` either way. | — | — |
 
+**As built (FLO-10, 2026-10-04):** none of Q1–Q5 was answered; every default above is in force and is what shipped — Q1 the scope line in `apps/web/AGENTS.md` (FLO-5); Q2 the breathing mark (FLO-4); Q3 the orient exemption (FLO-5); Q4 the local tier only, `0011` applied to no database; Q5 *Task*. A flip is still the one change each row names, logged in `DEVIATIONS.md`.
+
 ---
 
 ## Non-negotiables (every ticket honours these)
