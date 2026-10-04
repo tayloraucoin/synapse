@@ -55,6 +55,8 @@ export interface LaneHeaderProps {
   handle?: React.ReactNode;
   /** The lane *No group*: no hue, no menu, no handle. */
   plain?: boolean;
+  /** Offline: the disclosure is present and does nothing (WF-01 *Offline*). */
+  disabled?: boolean;
   copy?: Partial<LaneHeaderCopy>;
   className?: string;
 }
@@ -70,6 +72,7 @@ export function LaneHeader({
   menu,
   handle,
   plain = false,
+  disabled = false,
   copy: copyOverride,
   className,
 }: LaneHeaderProps) {
@@ -88,11 +91,13 @@ export function LaneHeader({
         type="button"
         aria-expanded={!collapsed}
         aria-label={collapsed ? copy.expand(name) : copy.collapse(name)}
+        disabled={disabled}
         onClick={() => onCollapsedChange(!collapsed)}
         className={cn(
           "inline-flex size-(--target) shrink-0 items-center justify-center rounded-(--radius) text-text-secondary",
           "transition-colors duration-(--dur-state) ease-(--ease-settle)",
           "hover:bg-fill-muted hover:text-ink",
+          "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent",
         )}
       >
         <ChevronDown

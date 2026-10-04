@@ -123,6 +123,7 @@ export function TaskRow({
 
   return (
     <li
+      data-task-id={task.id}
       data-next={next || undefined}
       data-firing={firing || undefined}
       className={cn(

@@ -38,4 +38,11 @@ export const SHORTCUTS: readonly Shortcut[] = [
   /* ------------------------------ Workflow — Workflow UX spec v0.1 §7 -- */
   // Each board key joins this group in the ticket that makes it work (FLO-6…FLO-8).
   { keys: ["4"], label: "Workflow" },
+  // FLO-6 — the board's grid. §7's words where it has them.
+  // [COPY — needs Vesper sign-off: §7 names no line for the arrows.]
+  { keys: ["↑", "↓", "←", "→"], label: "Move between tasks on the board" },
+  { keys: ["Space"], label: "Fire or mark back" },
+  { keys: ["g"], label: "Go to next" },
+  { keys: ["["], label: "Previous view" },
+  { keys: ["]"], label: "Next view" },
 ];

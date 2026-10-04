@@ -52,6 +52,9 @@ export const ExpandedIgnoresMarkAndNext: Story = { args: { hasFiring: true, hasN
 
 export const FirstToday: Story = { args: { firstToday: true, name: "Harbor", hue: "sky" } };
 
+/** Offline: the disclosure is there and does nothing. */
+export const Disabled: Story = { args: { disabled: true } };
+
 export const Plain: Story = {
   name: "Plain (No group)",
   args: { name: LANE_HEADER_COPY.noGroup, hue: null, plain: true },

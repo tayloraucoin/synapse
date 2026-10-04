@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-10-04 · 1472 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-04 · 1477 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -227,7 +227,13 @@ apps/
           _components/
             copy.ts
           [view]/
+            _components/
+              use-workflow-board.ts
+              workflow-board.tsx
+              workflow-title.tsx
+            loading.tsx
             page.tsx
+          loading.tsx
           page.tsx
         layout.tsx  # THE auth gate
       api/

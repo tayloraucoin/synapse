@@ -4,7 +4,7 @@
 **Slice type:** The first surface, and the core loop of the product on it. The risk class is *the working person's worst moment*: a toggle that waits, a toggle that ends in the state the person did not last choose, a *next* that disagrees between the row and the strip, a board that blanks.
 **Vigil:** induce a slow network and a failing one on the toggle; emulate reduced motion; walk the notes' §5 loop.
 
-**Status:** Not started
+**Status:** Complete (2026-10-04)
 
 > **Vigil — full review, induced.** With the network throttled to slow 3G: press a toggle and confirm the mark, the words, *next* on the row and the strip all change before the request settles. Press the same toggle twice quickly and confirm the final state is the second press's. With requests to `workflow.task.setFiring` blocked: confirm the row and *next* revert and exactly one save-failure line shows. Offline: confirm toggles are disabled, not hidden, and the offline line shows. With reduced motion emulated: confirm no mark animates and every firing row still says *firing*. Then walk the notes' loop on seeded data — fire two tasks, the third is *next*; bring the first back, it is *next* again if it outranks; fire all, *Everything is firing.*; bring back a lower then a higher, the higher is *next*. State which of these you ran and which you could only read.
 >

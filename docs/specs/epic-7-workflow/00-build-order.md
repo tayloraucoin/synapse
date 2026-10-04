@@ -28,7 +28,7 @@ The contract; the six tables; the services and the export; the board with its to
 - [x] **FLO-5** · The shell: the fourth peer, the two routes and a placeholder frame, `tabForPath`, the orient exemption, the `4` key, `apps/web/AGENTS.md`'s scope and route rows — S · (none)
 
 ### Phase 3 — The surface
-- [ ] **FLO-6** · The board: read, fire, next — the two pages, `use-workflow-board`, the optimistic toggle, the Next strip and the tab title, loading, first open, offline, failure, the keyboard grid — L · (FLO-3, FLO-4, FLO-5) · **Vigil: the toggle under a slow and a failing network; reduced motion; the notes' §5 loop walked**
+- [x] **FLO-6** · The board: read, fire, next — the two pages, `use-workflow-board`, the optimistic toggle, the Next strip and the tab title, loading, first open, offline, failure, the keyboard grid — L · (FLO-3, FLO-4, FLO-5) · **Vigil: the toggle under a slow and a failing network; reduced motion; the notes' §5 loop walked**
 - [ ] **FLO-7** · Tasks and groups: the add rows, the task sheet, *Move to* and `Alt`+arrows, *Start*, archive with undo, *Closed earlier*; group create, rename, colour, collapse, move, *First today*, archive — L · (FLO-6) · **Vigil: every move's undo restores firing; a pin across a day close**
 - [ ] **FLO-8** · Views, columns, templates, the archive, the compact column tabs: view tabs and switching, *New view*, the Columns sheet with roles and remove-with-move, *Save as a template*, the Archived sheet, the view menu — L · (FLO-7) · **Vigil: removing a column that holds firing tasks; the last view and the last column**
 
@@ -85,7 +85,7 @@ Taylor's standing instruction (Epic 5, 2026-09-16): Mason executes the track in 
 | 1 | FLO-1 · FLO-2 | — | The contract and the columns for everything after; `0011` authored, not applied | **Complete 2026-10-03** |
 | 2 | FLO-3 · FLO-5 | FLO-2 | Every procedure answers on the local tier; the export is whole; `/workflow` exists in the nav and renders a frame | **Complete** — FLO-3 2026-10-03; FLO-5 2026-10-04, after the 320px fix |
 | 3 | FLO-4 | FLO-1 | Every composite with its story; the mark breathes, and is still under reduced motion | **Complete 2026-10-04** |
-| 4 | FLO-6 | FLO-3, FLO-4, FLO-5 | The notes' §5 loop, end to end: fire, work another, come back, the right one is *next* | Not started |
+| 4 | FLO-6 | FLO-3, FLO-4, FLO-5 | The notes' §5 loop, end to end: fire, work another, come back, the right one is *next* | **Complete 2026-10-04** |
 | 5 | FLO-7 | FLO-6 | A day's real use without touching a database: add, edit, move, start, archive, pin | Not started |
 | 6 | FLO-8 | FLO-7 | Different workflows: a new view from a template, its columns arranged, a template saved | Not started |
 | 7 | FLO-9 · FLO-10 | FLO-7, FLO-8 | The fast path over the same moves; the corpus says what was built | Not started |
