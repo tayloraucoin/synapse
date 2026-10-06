@@ -71,15 +71,23 @@ export function resolveEntry({
     return verifyRoute();
   }
 
+  const target = intendedRoute ? sanitizeNextPath(intendedRoute, todayRoute()) : null;
+  // Decided on the sanitized path, so only a real Workflow route is exempt.
+  const workflowExempt = target !== null && isWorkflowPath(target);
+
   // §4.2 step 3 — first run, but only while the person has not yet shown that
   // leaving it was deliberate.
+  //
+  // TEMPORARY (Taylor, 2026-10-06): Workflow is exempt from the setup redirect
+  // too, so the board can be used before first run is finished. PUT BACK when
+  // Workflow needs the full schedule (soon) — delete `&& !workflowExempt` here
+  // and Workflow returns to "first run comes first, as for every shell route"
+  // (Workflow UX v0.1 §5 *Entry*). Logged in epic-7-workflow/DEVIATIONS.md.
   const setupIncomplete = !profile?.firstRunCompletedAt;
-  if (setupIncomplete && launchCount <= SETUP_REDIRECT_LAUNCH_LIMIT) {
+  if (setupIncomplete && launchCount <= SETUP_REDIRECT_LAUNCH_LIMIT && !workflowExempt) {
     const step = clampSetupStep(profile?.firstRunStep);
     return setupRoute(step);
   }
-
-  const target = intendedRoute ? sanitizeNextPath(intendedRoute, todayRoute()) : null;
 
   // UX v1.1 §5.1 — the orient frame before any tab, once per day: the day has
   // no wake yet and is not closed. A deep link waits behind it; a closed day
@@ -88,9 +96,7 @@ export function resolveEntry({
   //
   // EXCEPT WORKFLOW (Workflow UX spec v0.1 W16, §13 #W8): opening the board
   // at a terminal does not wait behind the morning frame; the habit tabs
-  // still do. Decided on the sanitized path, so only a real Workflow route is
-  // exempt.
-  const workflowExempt = target !== null && isWorkflowPath(target);
+  // still do. (This exemption is permanent; the setup one above is not.)
   if (today !== null && today.wokeAt === null && !today.closed && !workflowExempt) {
     return orientRoute();
   }
