@@ -73,6 +73,71 @@
 }
 
 /*
+ * A passage's prose — UX v1.2 §4.6, §5.2 (RUN-7). ONE RENDERER: the editor's
+ * document and the read-only passage (the orient frame's carousel) are the
+ * same tiptap document under this one class, so the words look the same being
+ * written and being read, and nothing is ever `dangerouslySetInnerHTML`.
+ * Newsreader at body size; a quote is a hairline on the left; a list is a
+ * plain bullet; a link is underlined ink (colour never alone, §9.3). Five
+ * marks and nodes — bold, italic, quote, list, link — and no heading, image,
+ * colour or table, because those extensions are not installed.
+ */
+@layer components {
+  .prose-passage {
+    font-family: var(--font-serif);
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
+    font-variant-numeric: normal;
+    color: var(--ink);
+    max-width: var(--measure);
+  }
+  .prose-passage p {
+    margin: 0;
+  }
+  .prose-passage p + p,
+  .prose-passage p + blockquote,
+  .prose-passage blockquote + p,
+  .prose-passage ul + p,
+  .prose-passage p + ul {
+    margin-top: var(--space-3);
+  }
+  .prose-passage blockquote {
+    margin: 0;
+    padding-inline-start: var(--space-3);
+    border-inline-start: 1px solid var(--hairline);
+    color: var(--text-secondary);
+  }
+  .prose-passage ul {
+    margin: 0;
+    padding-inline-start: var(--space-5);
+    list-style: disc;
+  }
+  .prose-passage li + li {
+    margin-top: var(--space-1);
+  }
+  .prose-passage a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .prose-passage strong {
+    font-weight: 600;
+  }
+  /* tiptap's placeholder: the first empty paragraph shows its `data-placeholder`. */
+  .prose-passage p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: var(--text-muted);
+    pointer-events: none;
+    float: left;
+    height: 0;
+  }
+  .prose-passage:focus-visible,
+  .prose-passage .ProseMirror:focus-visible {
+    outline: none;
+  }
+}
+
+/*
  * The duration tokens already collapse under reduced motion (preset.css), but
  * a component may hard-code a Tailwind duration; this is the floor.
  * Official spec §9.6: under reduced motion, sheets crossfade, the checkbox

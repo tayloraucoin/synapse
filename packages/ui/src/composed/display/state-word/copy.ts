@@ -25,6 +25,11 @@ export const STATE_WORDS: Record<StateWordKind, string> = {
   updated: "updated",
   pending: "pending",
   archived: "archived",
+  /** UX v1.1 §7.1 — a wind-down row after devices-off; ticked the next morning. */
+  "confirm-later": "confirm in the morning",
+  /** UX v1.1 §3.11 — the role captions in an opener · pool · closer routine. */
+  opener: "opener",
+  closer: "closer",
 };
 
 /** Kinds whose word is completed by `text`. */

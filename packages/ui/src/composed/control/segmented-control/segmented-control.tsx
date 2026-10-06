@@ -40,6 +40,14 @@ export interface SegmentedControlProps<T extends string> {
   onChange: (value: T) => void;
   label: React.ReactNode;
   disabled?: boolean;
+  /**
+   * UX v1.1 W5: the segments stack under the label when three would wrap.
+   * `auto` (the default) stacks when there are three or more options and the
+   * text is large enough that a row would wrap — measured by the browser,
+   * not guessed: each segment keeps a minimum width, so at 200% text the
+   * row wraps into the stacked layout by itself. `true` forces it.
+   */
+  stacked?: boolean | "auto";
   classes?: SegmentedControlClasses;
   className?: string;
 }
@@ -50,9 +58,14 @@ export function SegmentedControl<T extends string>({
   onChange,
   label,
   disabled = false,
+  stacked = "auto",
   classes,
   className,
 }: SegmentedControlProps<T>) {
+  const forceStack = stacked === true;
+  // Three or more segments may wrap; each keeps a floor so the wrap is a
+  // clean stack rather than a ragged row.
+  const mayWrap = stacked === "auto" && options.length >= 3;
   const groupName = React.useId();
   const labelId = React.useId();
   const helperId = React.useId();
@@ -79,6 +92,14 @@ export function SegmentedControl<T extends string>({
         aria-describedby={helper === undefined ? undefined : helperId}
         className={cn(
           "border-hairline flex w-full overflow-hidden rounded-(--radius) border",
+          /*
+           * Dividers as the group's own fill showing through 1px gaps, so a
+           * row that wraps into two keeps a hairline between every segment
+           * in both directions without any segment carrying a border that
+           * doubles the group's.
+           */
+          "bg-hairline gap-px",
+          forceStack ? "flex-col" : mayWrap ? "flex-wrap" : "",
           classes?.group,
         )}
       >
@@ -89,14 +110,14 @@ export function SegmentedControl<T extends string>({
             <label
               key={option.value}
               className={cn(
-                "flex h-(--target) flex-1 cursor-pointer items-center justify-center",
-                "border-hairline text-(length:--fs-secondary) font-medium",
-                "border-s first:border-s-0",
+                "flex h-(--target) flex-1 cursor-pointer items-center justify-center px-(--space-2)",
+                "text-(length:--fs-secondary) font-medium",
+                mayWrap && "min-w-[8rem]",
                 "transition-colors duration-(--dur-state) ease-(--ease-settle)",
                 "focus-within:ring-2 focus-within:ring-ring focus-within:ring-inset",
                 selected
                   ? "bg-primary text-primary-foreground"
-                  : "text-ink hover:bg-surface",
+                  : "bg-paper text-ink hover:bg-surface",
                 disabled && "pointer-events-none opacity-40",
                 classes?.item,
               )}

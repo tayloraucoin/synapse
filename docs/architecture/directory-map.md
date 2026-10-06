@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-05 · 676 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-09-25 · 1385 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -25,25 +25,64 @@ apps/
   web/
     app/
       _components/
+        landing/
+          example-day.ts  # the landing's example day, its block grouping, and its state derivation — no React
+          example-list.tsx
+          index.ts
+          landing-page.tsx
+          review-figure.tsx
         pwa-mode-sync.tsx
         service-worker-registration.tsx
+      (auth-pending)/
+        reset/
+          _components/
+            reset-form.tsx
+          layout.tsx
+          page.tsx
+        verify/
+          _components/
+            verify-panel.tsx
+          layout.tsx
+          page.tsx
+        layout.tsx
       (auth)/
+        _components/
+          auth-divider.tsx
+          copy.ts
+          form-message.tsx
         forgot/
+          _components/
+            forgot-form.tsx
           page.tsx
         invite/
           page.tsx
-        reset/
-          page.tsx
         signin/
+          _components/
+            sign-in-form.tsx
           page.tsx
         signup/
-          page.tsx
-        verify/
+          _components/
+            sign-up-form.tsx
           page.tsx
         layout.tsx
       (setup)/
+        _components/
+          copy.ts
+          fact-screen.tsx  # one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)
+          focus-setup-card.tsx  # one focus (v1.2 §4.12): a blank glyph by default, a week count, usual days with Flexible; creates on the first fact
+          habit-setup-card.tsx  # one habit ranked (v1.2 §4.9, TD-11): matters, usually (the slot's length), up to three versions; every control writes its own fact
+          setup-cards.tsx
+          step-1-shape.tsx
+          step-2-blocks.tsx  # screen 2 — the blocks primer (v1.3 §4.2): the example day and the legend, one read, no skip
+          step-3-work-days.tsx
+          step-4-days.tsx  # screen 4 — mounts YourDays (the day builder, components/day-builder); Continue · n days moves to 5; ?edit= opens a plan's review
+          step-5-week.tsx  # screen 5 — the seven weekday rows and the mode question (v1.3 §4.5); Open today / Plan this week first complete first run with morning_mode and pre-fill the week from the plans
+          step-frame.tsx
+          use-card-entries.ts
+          workout-setup-card.tsx  # one workout of the rotation (v1.2 §4.10, TD-12): type chips fill name and glyph when empty; where, and the travel beside the length; creates on the first fact
         setup/
           [step]/
+            loading.tsx
             page.tsx
         layout.tsx
       (shell)/
@@ -51,21 +90,34 @@ apps/
           app-shell.tsx
           nav-items.ts
           rail.tsx
+          shell-context.tsx
+          shell-providers.tsx
           status-line-slot.tsx
           tab-bar.tsx
+          theme-sync.tsx
+          timer-title.tsx
         day/
           [date]/
             item/
               [id]/
                 page.tsx
+            journal/
+              page.tsx
             schedule/
               page.tsx
             page.tsx
+        orient/
+          page.tsx
         review/
+          _components/
+            review-tab.tsx
           day/
             [date]/
               page.tsx
           history/
+            _components/
+              copy.ts
+              history-list.tsx
             page.tsx
           week/
             [week]/
@@ -75,48 +127,115 @@ apps/
               page.tsx
           page.tsx
         settings/
+          _components/
+            copy.ts
+            settings-index.tsx
           about/
+            _components/
+              copy.ts
+              feedback-form.tsx
+              shortcuts-table.tsx
             page.tsx
           account/
+            _components/
+              account-form.tsx
+              account-photo.tsx
+              account-screen.tsx
+              password-section.tsx
             page.tsx
           appearance/
+            _components/
+              appearance-form.tsx
             page.tsx
           categories/
+            _components/
+              category-list-header.tsx
+              category-list.tsx
             page.tsx
           data/
+            _components/
+              copy.ts
+              delete-section.tsx
+              export-section.tsx
             page.tsx
           day/
+            _components/
+              day-time-form.tsx
             page.tsx
           habits/
+            _components/
+              copy.ts
+              library-header.tsx
+              library.tsx
             [id]/
+              _components/
+                habit-detail-header.tsx
+                habit-detail.tsx
               page.tsx
             page.tsx
           notifications/
+            _components/
+              notifications-screen.tsx
             page.tsx
           reasons/
+            _components/
+              reason-sheet.tsx
+              reasons-screen.tsx
             page.tsx
           share/
-            page.tsx
-          templates/
-            [id]/
-              page.tsx
+            _components/
+              share-panel.tsx
             page.tsx
           week/
+            _components/
+              current-week.tsx
             [week]/
+              page.tsx
+            page.tsx
+          your-day/
+            _components/
+              copy.ts
+              your-day-list.tsx  # the twelve first-run screens as a list (v1.1 §4.14); block-kind rows open the editor for their kind
+            [screen]/
+              _components/
+                closing-screen.tsx  # Settings → Closing the day: the two times read-only (each plan's), wind-down starter rows, the journal (JournalSettings)
+                commitments-screen.tsx
+                each-morning-screen.tsx
+                focuses-screen.tsx
+                free-time-screen.tsx
+                training-screen.tsx
+                your-day-screen.tsx
+              page.tsx
+            block/
+              [kind]/
+                _components/
+                  kind-editor.tsx
+                page.tsx
+            order/
+              _components/
+                block-order.tsx
               page.tsx
             page.tsx
           page.tsx
         today/
+          _components/
+            today-screen.tsx
           schedule/
             page.tsx
           page.tsx
         layout.tsx  # THE auth gate
       api/
+        assets/
+          [bucket]/
+            [...path]/
+              route.ts
         jobs/
           scheduler/
             route.ts
         pwa/
           push/
+            snooze/
+              route.ts
             subscribe/
               route.ts
             unsubscribe/
@@ -129,6 +248,13 @@ apps/
           route.ts
         confirm/
           route.ts
+      legal/
+        _components/
+          legal-page.tsx
+        privacy/
+          page.tsx
+        terms/
+          page.tsx
       logout/
         route.ts
       error.tsx
@@ -137,13 +263,223 @@ apps/
       layout.tsx
       manifest.ts
       not-found.tsx
-      page.tsx
+      page.tsx  # the landing page when signed out; the §4.2 entry tree when signed in
+    components/
+      adjust-sheet/
+        adjust-sheet.tsx
+        copy.ts
+        index.ts
+        use-adjust.ts  # Adjust's four answers feeding one server preview (v1.1 §6.6); Set sends the fingerprint; nothing is inferred
+      block-editor/
+        add-sheet.tsx
+        apply-changes-dialog.tsx
+        block-editor.tsx
+        block-strip.tsx  # the editor's strip (v1.1 §3.11): the layer in editor mode — reorder through moveSlot, resize and gap through saveSlot, nothing clamped
+        copy.ts
+        editor-footer.tsx
+        index.ts
+        slot-sheet.tsx  # the editor's one form; the same-position question with three answers lives in its footer
+        use-block-editor.ts  # the block editor's state (v1.1 §3.11): the autosave queue, and the client walk — stackBlock over the page's SlotViews, so the footer never fetches
+      blocks-primer/
+        block-legend.tsx
+        blocks-primer.tsx  # the example day on the 28px axis (7:00–22:30, sleep shortened beneath), hued bands with one label lane, and the legend
+        copy.ts
+        index.ts
+      category-sheet/
+        category-sheet.tsx
+        copy.ts
+        index.ts
+      confirm-yesterday/
+        confirm-yesterday-panel.tsx
+        copy.ts
+        index.ts
+      day-builder/
+        screens/
+          b01-name-days.tsx
+          b02-times.tsx
+          b03-work.tsx  # B3 — the plan's own work: the four facts written as dayPlan.update({ work }); the §13 #32 preselection; never 'type'
+          b04-training.tsx  # B4 — the workout cards above, a row per workout on this day, several placements, an order list where two share one
+          b05-getting-ready.tsx
+          b06-fixed.tsx
+          b07-so-far.tsx
+          b08-first-thing.tsx
+          b09-landscape.tsx
+          b10-ranked.tsx  # B10 and Settings → Ranked: one HabitSetupCard per morning slot in tick order; Done collapses in place; nothing reorders here
+          b11-morning.tsx  # B11 — the routine against the room: computeBudget's number stated as room, the greedy fill by rank, the matters cell on each row, and the same/varies question once on the first plan
+          b12-wind-down.tsx  # B12 — the wind-down list with its starters ticked in, the placed rows, the first plan's journal group, and a later plan's shared routine taken by reference
+          b13-during-work.tsx
+          b14-after-work.tsx
+          b15a-free-time-landscape.tsx
+          b15b-free-time-ranked.tsx
+          b16-free-time-pool.tsx
+          b17-review.tsx
+        builder-frame.tsx
+        builder-skeleton.tsx
+        clock.ts
+        copy.ts
+        day-builder.tsx  # the nine-screen builder (v1.2 §4.13): one plan held by useDayBuilder, every screen writes as it goes, Next moves, Save Day A completes
+        day-plan-card.tsx
+        index.ts
+        list-header.tsx
+        preview-strip.tsx  # the strip B7 and the review both draw — axis at 96px/h, bands (hued on planning surfaces), slack, items, travel ends
+        preview.ts  # the builder's client preview — the whole day through stackBlock, the one arithmetic; a band per training entry (DAY-6's mirror); cutAtWorkEnd for B7; nothing here writes a block or an item
+        slot-rows.tsx
+        use-day-builder.ts  # the builder's state — the plan from the service's response (TD-21 clocks), the templates with usedBy, the habits, the fixtures; a chained patch
+        use-list-screen.ts  # 13d/13e/13h's writes: a list created on arrival once per plan and kind, chosen by FK never copied, slots saved per change
+        use-plan-preview.ts
+        use-prep-steps.ts  # a step list's writes (prep, wind-down, after work): a tick creates the step and its slot at once, queued per row so a second tap is never a second create (S7.5)
+        work-fields.tsx  # the work's four facts — kind chips, Working by, Until about, what gives — controlled; B3 draws it
+        your-days.tsx  # the list of plans (sequence and Settings): DayPlanCards, Build another day, first arrival opens the builder at once
+      day-header-sheet/
+        copy.ts
+        day-header-sheet.tsx
+        index.ts
+        library-pick-sheet.tsx
+        wake-time-sheet.tsx
+      day-list/
+        block-section.tsx  # one block's rows (v1.1 §6.1): the work container with nested fixtures, the devices-off marker, the confirm-in-the-morning rows
+        copy.ts
+        day-list-header.tsx
+        day-list.tsx
+        index.ts
+        pool-sheet.tsx
+        use-day-list.ts
+        use-landing.ts
+      fixture-sheet/
+        copy.ts
+        fixture-sheet.tsx
+        index.ts
+      habit-day-sheet/
+        copy.ts
+        habit-day-sheet.tsx  # Edit today's (v1.1 §6.4): the day, never the habit; no clamp on Takes
+        index.ts
+      habit-sheet/
+        copy.ts
+        habit-sheet.tsx
+        icon-chooser.tsx
+        index.ts
+        quick-habit-sheet.tsx  # the habit sheet's quick modes (v1.2 S7.3): emoji, name, range — a step before work, a morning habit, a wind-down habit
+        use-habit-sheet.ts
+      item-sheet/
+        copy.ts
+        index.ts
+        item-sheet.tsx
+        manual-time-sheet.tsx
+        use-item-sheet.ts
+      journal/
+        copy.ts
+        index.ts
+        journal-screen.tsx  # the journal (v1.1 §7.2): the person's prompts over serif fields that autosave; no finish, no count, no starter phrase
+        use-journal.ts
+      journal-settings/
+        index.ts
+        journal-settings.tsx  # the journal's switch, prompts and reminder — one component for the builder's B12 and Settings → Closing the day
+      landscape-chooser/
+        copy.ts
+        index.ts
+        landscape-chooser.tsx
+        landscape-sheet.tsx
+        use-landscape.ts  # the landscape's single commit (W4): ticks are local, Continue writes the habits then the morning template's slots — never a fit number
+      links/
+        copy.ts
+        index.ts
+        link-list.tsx
+        link-sheet.tsx
+        use-links.ts  # the person's links — the kind is the server's, nothing is fetched; remove archives optimistically
+      one-off-sheet/
+        index.ts
+        one-off-sheet.tsx
+      orient-frame/
+        copy.ts
+        index.ts
+        orient-frame.tsx  # the first screen of the morning (v1.1 §5.2): the person's words, one line to write, one primary — no time, no count, no chrome
+        use-orient-frame.ts
+      page-frame/
+        index.ts
+        page-frame.tsx
+        sheet-host.tsx
+        shell-page-header.tsx
+        shell-status-line.tsx
+      passages/
+        copy.ts
+        excerpt.ts  # the card's decorative excerpt — Markdown stripped to text; the body itself is only ever rendered by the read-only editor
+        index.ts
+        passage-card.tsx
+        passage-list.tsx  # the passages in cycle order — sortable cards, an archive with a five-second undo; screen 6 and Settings mount the same list
+        passage-sheet.tsx  # a passage's sheet (v1.2 §4.6, TD-15): title, the five-control editor, four image tiles uploaded on add, tags; writes on Save
+        use-passages.ts  # the list's writes at once: reorder on drop, archive with undo through restore
+      platform-steps-sheet/
+        copy.ts
+        index.ts
+        platform-steps-sheet.tsx
+      quick-pick/
+        copy.ts
+        index.ts
+        quick-pick.tsx
+        sections.tsx
+        summary-row.tsx
+        use-quick-pick.ts  # the quick-pick's answers and the live budget line (v1.1 §5.3); Set the day sends only what changed
+      reminder-prompt/
+        copy.ts
+        index.ts
+        reminder-prompt.tsx
+        use-reminder-prompt.ts
+      resume-guard/
+        index.ts
+        resume-guard.tsx
+      review-day/
+        copy.ts
+        decision-column.tsx
+        finished.tsx
+        index.ts
+        reflections-section.tsx
+        review-day.tsx
+        traded-up-sheet.tsx
+        use-review-day.ts
+      review-week/
+        carried-sheet.tsx
+        copy.ts
+        habit-detail.tsx
+        index.ts
+        review-week.tsx
+        shifts-sheet.tsx
+      schedule-canvas/
+        copy.ts
+        index.ts
+        layout.ts  # the Schedule's arithmetic, pure: bands, slack, the work container, blocks, ghosts only once the original time has passed (v1.1 §6.5)
+        schedule-canvas.tsx  # the editable Schedule (v1.1 §6.5): the layer's intents as DYN-6's writes; a pin asks, the morning band goes to Adjust, a record has no layer
+        shift-sheet.tsx
+      session-expired-dialog/
+        copy.ts
+        index.ts
+        session-expired-dialog.tsx
+        session-watcher.tsx
+      shortcuts-host/
+        index.ts
+        shortcuts-host.tsx
+      week-build/
+        copy.ts
+        day-sheet.tsx  # one day's plan by block (v1.1 §4.13): every write is assignBlocks with the whole assignment; the sheet never reconciles
+        index.ts
+        week-canvas.tsx
+        week-header.tsx
+        week-keys.ts
+      zone-switch-dialog/
+        copy.ts
+        index.ts
+        zone-switch-dialog.tsx
+    content/
+      landing.ts  # the landing page's copy deck (SYS-6). Surface prose lives here, never inline
     lib/
+      assets/
+        icon-url.ts
       auth/
         auth-redirect-response.ts
+        describe-auth-error.ts
         get-request-context.ts
         get-request-user.ts
         require-verified-email.ts
+        session-expired.ts
       clients/
         supabase/
           client.ts
@@ -156,22 +492,38 @@ apps/
       forms/
         use-synapse-form.ts
       hooks/
+        use-back.ts
+        use-device-zone.ts
         use-dismissed.ts
         use-elapsed.ts
+        use-global-shortcuts.ts
         use-icon-upload.ts
         use-leave-guard.ts
         use-local-draft.ts
+        use-now.ts
         use-online.ts
+        use-pull-to-refresh.ts
         use-remembered-toggle.ts
+        use-roving-focus.ts
+        use-scroll-memory.ts
+        use-sheet.ts
+        use-submit-shortcut.ts
+        use-undo-window.ts
       image/
         reencode.ts
+      keyboard/
+        shortcuts.ts
       pwa/
         install-detection.ts
+        permission-state.ts
         push-subscribe.ts
+        update-ready.ts
         use-install-prompt.ts
+        use-installable.ts
       stores/
         .gitkeep
         README.md  # the client-state rule, and why there is no Zustand store yet
+        use-timer-store.ts
       trpc/
         client.ts
         provider.tsx
@@ -213,11 +565,177 @@ docs/
     environments.md
     migrations.md
     rls.md
+  product/
+    2026-09-11-taylor-ux-review-notes.md
+    2026-09-11-vesper-questions-for-ux-v1.1.md
+    2026-09-12-app-walkthrough-feedback-v1.0.md
+    2026-09-16-first-run-walkthrough-feedback-v1.1.md
+    2026-09-16-ux-v1.2-engineering-handoff.md
+    2026-09-24-first-run-walkthrough-feedback-v1.2.md
+    marketing-changelog.md
+    phase-2-collection.md
+    ux-v1.1-thread-primer.md
+    value-proposition.md
+  reviews/
+    2026-09-06-full-build-review.md
   roles/
+    engineering/
+      Forge—staff-engineer-role-prompt.md
+      Loom—ai-systems-architect-role-prompt.md
+      Mason—cto-principle-dev-role-prompt.md
+      Vigil—qa-role-prompt.md
+      Warden—security-privacy-engineer-role-prompt.md
+    marketing-growth/
+      Cantor_copywriter-role-prompt.md
+      Cantor_ext_human-hand-mode.md
+      Hearth_brand-strategist-role-prompt.md
+    operations-strategy/
+      Crucible_devils-advocate-role-prompt.md
+      Pilot_business-advisor-role-prompt.md
+      Reeve—project-manager-role-prompt.md
     product-design/
+      Compass_product-strategist-role-prompt.md
+      Envoy_user-researcher-role-prompt.md
+      Tribune_customer-advocate-role-prompt.md
       vesper-ux-ui-designer-role-prompt.md
+    science-clinical/
+      Sage_behavioral-scientist-role-prompt.md
     role-authoring-guide.md
   specs/
+    cross-cutting-system/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      SYS-1-shell.md
+      SYS-2-time-zones-and-deferred-switches.md
+      SYS-3-about-feedback-errors-and-session.md
+      SYS-4-keyboard-and-focus.md
+      SYS-5-pwa-install-and-update.md
+      SYS-6-landing-page.md
+      TECHNICAL-DECISIONS.md
+    epic-1-setup/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      SET-1-domain-schema.md
+      SET-10-your-data-export-and-delete.md
+      SET-2-auth-screens.md
+      SET-3-icon-and-avatar-pipeline.md
+      SET-4-categories-and-habit-library.md
+      SET-5-templates.md
+      SET-6-week-build-and-materialisation.md
+      SET-7-first-run.md
+      SET-8-settings-core.md
+      SET-9-reasons-and-notification-preferences.md
+      TECHNICAL-DECISIONS.md
+    epic-2-in-use/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      TECHNICAL-DECISIONS.md
+      USE-1-day-model.md
+      USE-2-plain-list.md
+      USE-3-item-sheet-day-header-and-timers.md
+      USE-4-manual-time-and-one-off-from-the-day.md
+      USE-5-schedule.md
+      USE-6-shift-my-day.md
+      USE-7-capacity-trim.md
+      USE-8-notifications.md
+    epic-3-review/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      REV-1-resolver-and-the-number.md
+      REV-2-review-tab-and-day-review.md
+      REV-3-traded-up-reflections-edit-mode-and-history.md
+      REV-4-week-review.md
+      TECHNICAL-DECISIONS.md
+    epic-4-dynamic-schedule/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      01-authoring-handoff-remaining-tickets.md
+      DEVIATIONS.md
+      DYN-1-vocabulary-view-models-and-stack-block.md
+      DYN-10-first-run-1-6.md
+      DYN-11-first-run-7-12-and-the-first-week.md
+      DYN-12-week-build-amended.md
+      DYN-13-orient-frame-and-the-wake-moment.md
+      DYN-14-quick-pick-and-set-the-day.md
+      DYN-15-today-by-block.md
+      DYN-16-schedule-editable.md
+      DYN-17-adjust.md
+      DYN-18-the-evening.md
+      DYN-19-review-amended.md
+      DYN-2-migration-0004-block-templates-and-stacked-slots.md
+      DYN-20-notifications-revised.md
+      DYN-21-migration-0006-and-the-retirements.md
+      DYN-3-migration-0005-profile-fixtures-day-blocks-journal.md
+      DYN-4-plan-services-block-templates-position-rule-fixtures-library.md
+      DYN-5-materialisation-per-block-and-set-the-day.md
+      DYN-6-adjust-do-now-habit-day-edits-and-moves.md
+      DYN-7-ui-composites-for-v1-1.md
+      DYN-8-block-editor-step-one-and-your-day.md
+      DYN-9-block-editor-step-two.md
+      PROGRESS.md
+      README.md
+      TECHNICAL-DECISIONS.md
+    epic-5-first-run-rebuilt/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      RUN-1-vocabulary-seeds-and-the-emoji-rule.md
+      RUN-10-screens-7-9-steps-landscape-ranked.md
+      RUN-11-screens-10-12-training-closing-focus.md
+      RUN-12-screen-13-the-day-builder.md
+      RUN-13-screen-14-and-the-morning-modes.md
+      RUN-14-the-quotes-admin-surface.md
+      RUN-15-migration-0008-and-the-retirements.md
+      RUN-2-migration-0007-v1-2-additive.md
+      RUN-3-plan-services-types-kinds-versions.md
+      RUN-4-passages-and-the-quote-bank-services.md
+      RUN-5-day-plans-service-prefill-and-set-from-the-plan.md
+      RUN-6-the-day-travel-versions-working-today-reminder.md
+      RUN-7-ui-composites-for-v1-2.md
+      RUN-8-the-frame-and-screens-1-5.md
+      RUN-9-screen-6-and-the-orient-frame.md
+      TECHNICAL-DECISIONS.md
+    epic-6-day-first-first-run/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      DAY-1-the-fix-batch-the-composites.md
+      DAY-10-the-builder-second-movement.md
+      DAY-11-the-builder-third-movement.md
+      DAY-12-the-week-the-frame-and-the-evening.md
+      DAY-13-migration-0010-and-the-retirements.md
+      DAY-2-the-fix-batch-the-screens.md
+      DAY-3-vocabulary-seeds-validators-tokens.md
+      DAY-4-migration-0009-v1-3-additive.md
+      DAY-5-plan-services.md
+      DAY-6-the-day-under-v1-3.md
+      DAY-7-syn-ui-for-v1-3.md
+      DAY-8-the-outer-sequence.md
+      DAY-9-the-builder-first-movement.md
+      DEVIATIONS.md
+      PROGRESS.md
+      README.md
+      TECHNICAL-DECISIONS.md
     infrastructure/
       _templates/
         slice-spec.md
@@ -237,30 +755,152 @@ docs/
       PROGRESS.md  # the only authoritative answer to "is this Complete"
       README.md
       TECHNICAL-DECISIONS.md
+    README.md
     spec-system-guide.md
   ux/
+    branding-guide.md
     epic1_setup_ux_architecture.md
     epic2_in_use_ux_architecture.md
     epic3_review_ux_architecture.md
-    habit_tracker_official_ux_spec_v1.md
+    landing-page-ux.md
     README.md
     synapse_navigation_and_system_ux_architecture.md
     synapse_ui_component_needs_and_handoff_v2.md
     synapse_ui_component_needs_and_handoff.md
+    ux-spec-v1.1.md
+    ux-spec-v1.2.md
+    ux-spec-v1.3.md
+    ux-spec-v1.md
   README.md
 packages/
   api/
     src/
       routers/
+        adjust.ts
+        asset.ts
+        category.ts
+        day-plan.ts
+        day.ts
+        feedback.ts
+        fixture.ts
+        habit.ts
+        item.ts
+        journal.ts
+        link.ts
+        notification.ts
+        passage.ts
+        quote.ts
+        reason.ts
+        review.ts
+        shell.ts
+        template.ts
+        timer.ts
         user.ts
+        week.ts
       services/
+        asset/
+          create-upload-url.ts
+          storage.ts
+        day/
+          add-from-library.ts  # Add from the library: a habit-day item at the end of a block, re-flowed; no block on an unstructured day
+          adjust-day.ts  # Adjust — scope computed, preview then commit with a fingerprint, one shifts row of the right kind, undo per decision (b)
+          apply-template-changes.ts
+          apply-work-type.ts  # Working today (v1.2 §3.9): a work-day type onto a Rarely day through the materialiser, and the reverse — not_today, items parked, the day's work anchors cleared; nothing scored
+          bring-back.ts
+          carry-item.ts
+          choose-alternate.ts  # one of, after the pick (v1.1 §6.3): the row takes the other member; the block re-flows
+          choose-from-pool.ts
+          close-day.ts
+          confirm-day.ts  # Set the day — resolves the pools, walks once, writes original_scheduled_start for the first and only time
+          copy-week.ts
+          do-now.ts
+          edit-habit-day.ts
+          get-day.ts
+          get-item.ts
+          habit-item.ts  # a habit as a pick- or plan-made item, its version resolved (v1.2 §3.5), and the workout with its two travel rows — one writer for the pick, the trade and the week build (v1.2 §3.7)
+          item-fields.ts
+          journal.ts
+          lay-out-day.ts  # the whole day's arithmetic — chains stackBlock per kind, forward from wake, backward to work and lights-out. Pure; build and confirm both call it
+          manual-time.ts
+          materialize-day.ts  # THE materialiser, by block (v1.1 §11.11). Reconciles, never rebuilds; pooled blocks hold nothing; originals only for fixtures and pins
+          move-item.ts
+          one-off.ts
+          orient.ts  # the frame's read, and the wake stamp that rides in it — once per day (R11)
+          prefill-week.ts
+          preview-fit.ts
+          quick-pick.ts
+          reading.ts
+          reflow-block.ts  # the one re-lay of a set day (v1.1 §6.3–6.5): fixed points as pins, the rest walked forward; two columns written, never the original
+          set-done.ts
+          timer.ts
+          today.ts
+          trade-workouts.ts  # the week build's training swap (R25): both days' workout items, refused on a set day
+          undo-eligibility.ts  # the three refusals an undo of any shifts row meets — ten minutes, a later shift, done anyway; Adjust's undo reads it
+          untouched.ts  # the two predicates that decide what materialisation may rewrite — item and block
+          week-view.ts
+          wind-down.ts
         jobs/
+          auto-close-days.ts
+          expire-exports.ts
+          notify.ts  # the notification scans: the four start kinds in one job gated on confirmed_at and grouped by the minute (v1.1 §9), then N4–N6; quiet after Day Complete on every query
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
+        library/
+          archive-habit.ts
+          ensure-reason-set.ts
+          get-habit.ts
+          habit-usage.ts
+          links.ts
+          list-habits.ts
+          list-reasons.ts
+          passages.ts
+          placed-habits.ts
+          save-category.ts
+          save-habit.ts
+          save-reason.ts
+          starter-library.ts
+          to-view.ts
         notifications/
+          block-pushes.ts  # the seam confirmDay calls: the scan model is the delivery (v1.1 §9, DYN-20), so it reports the block boundaries ahead and writes nothing
+          build-payload.ts
+          deliver.ts
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
+          list-prefs.ts
           web-push.ts
+        plan/
+          anchors.ts  # which profile time a block kind walks from, and in which direction — the only reader of that mapping
+          day-plans.ts
+          fit.ts  # the fit at planning time (v1.1 §3.10): computeBudget over the profile and the orient/prep templates — first run's last screen reads it
+          fixtures.ts
+          most-used-template.ts
+          save-slot.ts  # THE same-position rule (v1.1 §3.5): multitask or one-of at one position, else SamePositionError. Every slot write pays it
+          templates.ts
+          to-view.ts  # one stackBlock walk per template; startClock is derived here, never stored
+        review/
+          confirm-last-night.ts  # confirm yesterday from the review (v1.1 §7.3): the morning's rule on the review's own day; never a reason
+          decide.ts
+          decision-state.ts
+          finish-review.ts
+          get-review-day.ts
+          get-review-history.ts
+          get-review-week.ts  # the week read: adherence from the resolver, and v1.1 §8.2's counts, time by block and reflections derived from the rows, never stored
+          habit-week.ts
+          pending-days.ts
+          save-changes.ts
+          to-scored.ts
+        shell/
+          settings-counts.ts
+          status.ts
+        system/
+          quotes.ts
+          send-feedback.ts
         user/
+          apply-pending-settings.ts
+          avatar.ts
+          build-export.ts
+          complete-first-run.ts  # the one write that ends first run: marks the row, stores the overflow mode, pre-fills the current week
+          delete-account.ts
           preferences.ts
+          request-export.ts
       context.ts
       index.ts
       root.ts
@@ -290,6 +930,7 @@ packages/
       base.js
       boundaries.js  # the import matrix. Diverges from CC's copy — see TECHNICAL-DECISIONS
       next.js
+      no-emoji.js  # UX v1.2 R29 as lint: no emoji in any copy.ts; a glyph is IconValue data on the person's nouns (TD-20)
       react-internal.js
       spacing.js
     prettier/
@@ -303,45 +944,96 @@ packages/
     package.json
   constants/
     src/
+      block-kinds.ts
       brand.ts
       contact.ts
+      default-reasons.ts
+      example-day.ts
+      fixture-kinds.ts
       index.ts
+      journal-prompts.ts
       limits.ts  # Epic 1 §9's bounds, shared by the zod schema and the input's maxLength
+      link-hosts.ts
       motion.ts
+      notification-catalogue.ts
+      placed-rows.ts
+      schedule-shapes.ts
+      starter-library.ts
+      storage-buckets.ts
       storage-keys.ts
       timezones.ts
       user-images.ts
+      work-day-kinds.ts
+      workout-types.ts
     .gitignore
     eslint.config.mjs
     package.json
     tsconfig.json
   db/
     migrations/
-      <1 migration .sql files, 0000–0000 — append-only, human-reviewed before a hosted migrate>
-      meta/ <2 drizzle snapshot files + _journal.json>
+      <11 migration .sql files, 0000–0010 — append-only, human-reviewed before a hosted migrate>
+      meta/ <12 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
+      reset-user.ts
       run-setup-sql.ts
       seed-users.ts
     src/
       local-dev/
         ensure-local-user-from-supabase-auth.ts
       schema/
+        day/
+          day-items.ts  # the record. Snapshots title/icon/unit/axes/preflight; original_scheduled_start is trigger-immutable
+          index.ts
+          journal-entries.ts
+          misses.ts
+          shifts.ts
+          timer-sessions.ts
+        library/
+          categories.ts
+          habits.ts
+          index.ts
+          links.ts
+          passages.ts
+          reasons.ts
         notification/
           index.ts
+          notification-deliveries.ts
+          notification-prefs.ts
           web-push-subscriptions.ts
+        plan/
+          day-blocks.ts
+          day-plans.ts
+          days.ts
+          enums.ts
+          fixtures.ts
+          index.ts
+          template-slots.ts
+          templates.ts
         rls/
           helpers.ts
           standard-policies.ts  # three factories, all owner-private. No admin-read exists
-        user/
+        system/
+          data-exports.ts
+          feedback-messages.ts
           index.ts
+          quotes.ts
+        user/
+          enums.ts
+          index.ts
+          user-avatars.ts
           users.ts
         auth.ts
+        enum-values.ts  # checks every pgEnum against its @syn/types union at compile time — wrap every new enum
         enums.ts
         index.ts
       seed/
         index.ts
+        seed-library.ts
+        seed-profile.ts
+        seed-reasons.ts
+        seed-template.ts
       build-database-env-for-next-config.ts
       client.ts
       connection-env.ts  # tier resolution; defaults to local so nothing reaches production by omission
@@ -366,6 +1058,8 @@ packages/
   hooks/
     src/
       index.ts
+      use-derived-items.ts
+      use-optimistic-value.ts  # the optimistic contract (v1.2 TD-18): the value moves on the tap, the write follows on a debounce, a rejection reverts unless a newer tap is pending; platform-pure
       use-zod-form.ts
     .gitignore
     eslint.config.mjs
@@ -408,7 +1102,7 @@ packages/
         tokens.ts
       composed/
         __fixtures__/
-          view-models.ts
+          view-models.ts  # story fixtures shaped as the app's view models — Taylor's Monday by block lives here
         control/
           chip-picker/
             chip-picker.stories.tsx
@@ -417,6 +1111,11 @@ packages/
           color-swatch-row/
             color-swatch-row.stories.tsx
             color-swatch-row.tsx
+            index.ts
+          confirm-yesterday-rows/
+            confirm-yesterday-rows.stories.tsx
+            confirm-yesterday-rows.tsx
+            copy.ts
             index.ts
           count-stepper/
             count-stepper.stories.tsx
@@ -439,6 +1138,11 @@ packages/
             decision-panel.stories.tsx
             decision-panel.tsx
             index.ts
+          drag-layer/
+            copy.ts
+            drag-layer.stories.tsx
+            drag-layer.tsx  # THE drag layer (v1.1 §6.5, §10.4): owns the gesture, the preview, the keyboard and the live region; emits intents, writes nothing
+            index.ts
           ellipses-menu/
             ellipses-menu.stories.tsx
             ellipses-menu.tsx
@@ -447,10 +1151,18 @@ packages/
             emoji-picker.stories.tsx
             emoji-picker.tsx
             index.ts
+          emoji-slot-button/
+            emoji-slot-button.stories.tsx
+            emoji-slot-button.tsx
+            index.ts
           image-cropper/
             image-cropper.stories.tsx
             image-cropper.tsx
             index.ts
+          info-disclosure/
+            index.ts
+            info-disclosure.stories.tsx
+            info-disclosure.tsx
           large-target-row/
             index.ts
             large-target-row.stories.tsx
@@ -485,6 +1197,11 @@ packages/
             index.ts
             quick-chip-row.stories.tsx
             quick-chip-row.tsx
+          range-editor/
+            copy.ts
+            index.ts
+            range-editor.stories.tsx
+            range-editor.tsx  # from · to · min on one 44px line; never clamps (R21); the one sentence when to < from
           range-input/
             index.ts
             range-input.stories.tsx
@@ -497,6 +1214,11 @@ packages/
             index.ts
             reflection-block.stories.tsx
             reflection-block.tsx
+          rich-text-editor/
+            copy.ts
+            index.ts
+            rich-text-editor.stories.tsx
+            rich-text-editor.tsx  # the passage editor over tiptap (v1.2 TD-15): five controls, Markdown at the boundary, one renderer for editing and reading
           search-field/
             index.ts
             search-field.stories.tsx
@@ -505,15 +1227,25 @@ packages/
             index.ts
             segmented-control.stories.tsx
             segmented-control.tsx
-          starter-set-chooser/
+          select-row/
             index.ts
-            starter-set-chooser.stories.tsx
-            starter-set-chooser.tsx
+            select-row.stories.tsx
+            select-row.tsx  # the row that is the selection (v1.2 §4): button[aria-pressed], tick on the tap, optimistic
+          sortable-list/
+            copy.ts
+            index.ts
+            sortable-list.stories.tsx
+            sortable-list.tsx  # reorder by handle, pointer and keyboard over dnd-kit (v1.2 TD-16); Alt+arrows and a live region; shares no code with drag-layer
           stepper-17/
             index.ts
             stepper-17.stories.tsx
             stepper-17.tsx
             stepper-17.variants.ts
+          tag-input/
+            copy.ts
+            index.ts
+            tag-input.stories.tsx
+            tag-input.tsx  # chips from Enter or a comma, a 44px × each, Backspace takes the last, a cap with a count
           text-disclosure-button/
             index.ts
             text-disclosure-button.stories.tsx
@@ -554,6 +1286,26 @@ packages/
             big-number.stories.tsx
             big-number.tsx
             index.ts
+          block-band/
+            band.variants.ts  # the bands' skin — bg-surface at rest, no new colour (v1.1 §10.3)
+            block-band.stories.tsx
+            block-band.tsx
+            index.ts
+          block-header/
+            block-header.stories.tsx
+            block-header.tsx
+            copy.ts
+            index.ts
+          brand-glyph/
+            brand-glyph.stories.tsx
+            brand-glyph.tsx
+            index.ts
+            spotify.tsx
+          budget-line/
+            budget-line.stories.tsx
+            budget-line.tsx
+            copy.ts
+            index.ts
           category-bar/
             category-bar.stories.tsx
             category-bar.tsx
@@ -571,17 +1323,21 @@ packages/
             day-outcome-row.stories.tsx
             day-outcome-row.tsx
             index.ts
-          day-part-header/
-            day-part-header.stories.tsx
-            day-part-header.tsx
-            index.ts
           decided-line/
             decided-line.stories.tsx
             decided-line.tsx
             index.ts
+          emoji-slot/
+            emoji-slot.stories.tsx
+            emoji-slot.tsx  # the one home for the emoji rule (v1.2 §10.2): a 44px square, font-emoji, aria-hidden; every row and card header renders through it
+            index.ts
           expander-section/
             expander-section.stories.tsx
             expander-section.tsx
+            index.ts
+          gap-band/
+            gap-band.stories.tsx
+            gap-band.tsx
             index.ts
           group-heading/
             group-heading.stories.tsx
@@ -596,12 +1352,18 @@ packages/
             index.ts
             item-icon.stories.tsx
             item-icon.tsx
+            pin-glyph.tsx
           item-row/
             copy.ts
             index.ts
             item-row.stories.tsx
             item-row.tsx
             item-row.variants.ts
+          link-callout/
+            copy.ts
+            index.ts
+            link-callout.stories.tsx
+            link-callout.tsx
           list-row/
             index.ts
             list-row.stories.tsx
@@ -615,10 +1377,20 @@ packages/
             index.ts
             now-line.stories.tsx
             now-line.tsx
+          passage-carousel/
+            copy.ts
+            index.ts
+            passage-carousel.stories.tsx
+            passage-carousel.tsx  # the orient frame's reading (v1.2 §5.2): one slide, dots as tabs, swipe or arrows, crossfade under reduced motion
           preflight-note/
             index.ts
             preflight-note.stories.tsx
             preflight-note.tsx
+          priority-mark/
+            copy.ts
+            index.ts
+            priority-mark.stories.tsx
+            priority-mark.tsx
           review-region/
             index.ts
             review-region.stories.tsx
@@ -644,6 +1416,15 @@ packages/
             index.ts
             settings-row.stories.tsx
             settings-row.tsx
+          sleep-band/
+            index.ts
+            sleep-band.stories.tsx
+            sleep-band.tsx
+          slot-row/
+            copy.ts
+            index.ts
+            slot-row.stories.tsx
+            slot-row.tsx
           state-word/
             copy.ts
             index.ts
@@ -670,6 +1451,10 @@ packages/
             index.ts
             trust-line.stories.tsx
             trust-line.tsx
+          week-hue-strip/
+            index.ts
+            week-hue-strip.stories.tsx
+            week-hue-strip.tsx
         feedback/
           discard-dialog/
             copy.ts
@@ -741,6 +1526,14 @@ packages/
             index.ts
             screen-frame.stories.tsx
             screen-frame.tsx
+          step-frame/
+            copy.ts
+            index.ts
+            step-frame-skeleton.stories.tsx
+            step-frame-skeleton.tsx
+            step-frame.classes.ts
+            step-frame.stories.tsx
+            step-frame.tsx  # the first-run frame, presentational; the app's (setup)/_components/step-frame.tsx binds it
         navigation/
           app-header/
             app-header.stories.tsx
@@ -752,6 +1545,8 @@ packages/
         use-theme.ts
       lib/
         cn.ts
+        committing.ts  # the committing face, one string: a hairline pulse, never a disabled control (v1.2 guardrail 4)
+        selection.ts
         use-media-query.ts
       primitives/
         control/
@@ -866,6 +1661,11 @@ packages/
             tooltip.stories.tsx
             tooltip.tsx
         layout/
+          card/
+            card-summary.tsx
+            card.stories.tsx
+            card.tsx  # the setup card's base (v1.2 §4): surface, hairline, 16px, flat; feature folders compose it
+            index.ts
           collapsible/
             collapsible.stories.tsx
             collapsible.tsx
@@ -913,8 +1713,26 @@ packages/
     tsconfig.json
   utils/
     src/
+      day/
+        adjust.ts  # Adjust's arithmetic, pure: slide or hold; shorten · cut · choose over fitToBudget and stackBlock
+        boundaries.ts
+        budget.ts
+        cycle.ts
+        day-key.ts
+        index.ts
+        item-state.ts
+        late-offer.ts
+        priority.ts
+        skip-line.ts  # R18 as code: the one behaviour line, second consecutive skip only, once in seven days
+        stack.ts
+        wall-clock.ts
+        week.ts
+      review/
+        adherence.ts
+        strip.ts
       errors.ts
       index.ts
+      link.ts
       number.ts
       path.ts
       string.ts
@@ -925,12 +1743,35 @@ packages/
     tsconfig.json
   validators/
     src/
+      account.ts
+      adjust.ts
+      asset.ts
       auth-credentials.ts
+      block.ts
+      category.ts
+      confirm.ts
+      day-plan.ts
+      day.ts
+      feedback.ts
+      fixture.ts
+      habit.ts
+      icon.ts
       index.ts
+      item.ts
+      journal.ts
       keys.ts
+      link.ts
+      notification.ts
+      passage.ts
       preferences.ts
       push.ts
+      reason.ts
+      review.ts
+      shift.ts
+      template.ts
+      timer.ts
       user.ts
+      week.ts
     .gitignore
     eslint.config.mjs
     package.json

@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  * browser. Doing only the first leaves a cookie the SDK will try to refresh;
  * doing only the second leaves a live token that another device still holds.
  */
-export async function GET(request: NextRequest): Promise<NextResponse> {
+async function signOut(request: NextRequest): Promise<NextResponse> {
   const { origin } = new URL(request.url);
   const response = NextResponse.redirect(`${origin}${signInRoute()}`);
 
@@ -40,4 +40,20 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   );
 
   return response;
+}
+
+/**
+ * POST is what AU-06's dialog submits, and the one to prefer.
+ *
+ * A sign-out reachable by GET is a sign-out a link prefetch, a scanner, or an
+ * `<img src>` on another site can trigger. It stays exported because the route
+ * has been addressable that way since INF-6 and something may still link to
+ * it; new callers post.
+ */
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  return signOut(request);
+}
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  return signOut(request);
 }

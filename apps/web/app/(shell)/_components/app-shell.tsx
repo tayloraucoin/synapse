@@ -16,8 +16,17 @@
  * today's list*, not "skip to content" — a person using it knows what they
  * want.
  *
- * `sheetOpen` dims the tab bar and hides `main` from assistive tech, so a
- * screen reader inside a sheet cannot wander back into the page underneath.
+ * `sheetOpen` dims the tab bar, so a tab under a scrim is visibly and actually
+ * inert rather than a live target a stray tap can hit.
+ *
+ * WHAT MOVED OUT, AND WHY (SYS-1). `main`, the header slot and the status-line
+ * slot used to be here; they are now `PageFrame`'s, in `components/page-frame/`.
+ * A `<header>` is only a `banner` landmark while it is not inside `main`, and
+ * every page's header is rendered by the page — from inside this component's
+ * children, which were inside `main`. Keeping the three landmarks in the
+ * relationship cross-cutting §3.4 describes meant giving the page the whole
+ * column. The skip link stays here, first in the DOM, and still targets
+ * `#main`, which every `PageFrame` renders.
  */
 "use client";
 
@@ -36,27 +45,35 @@ import { TabBar } from "./tab-bar";
  * disagrees with the URL. The pathname is the truth.
  */
 export interface AppShellProps {
-  /** An `<AppHeader/>` the route owns. */
-  header: React.ReactNode;
-  /** The status line for this render, or null. */
-  statusLine?: React.ReactNode;
-  contentWidth?: "text" | "canvas";
   reviewHasPending: boolean;
   user: { name: string; imageUrl: string | null };
-  /** True while a sheet owns the screen. */
+  /** True while a sheet owns the screen — dims and disables the tab bar. */
   sheetOpen?: boolean;
+  /**
+   * The orient frame (UX v1.1 §5.2, DYN-13): "no header, no tab bar". Paper
+   * and the page alone — the rail and the tab bar are not rendered, the skip
+   * link still is (the frame renders `main`).
+   */
+  bare?: boolean;
+  /** A page, which renders its own `PageFrame` (header, status line, `main`). */
   children: React.ReactNode;
 }
 
 export function AppShell({
-  header,
-  statusLine,
-  contentWidth = "text",
   reviewHasPending,
   user,
   sheetOpen = false,
+  bare = false,
   children,
 }: AppShellProps) {
+  if (bare) {
+    return (
+      <div className="bg-paper flex min-h-dvh flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-paper flex min-h-dvh flex-col wide:flex-row">
       <a
@@ -75,30 +92,7 @@ export function AppShell({
         <Rail reviewHasPending={reviewHasPending} user={user} />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        {header}
-        {statusLine}
-
-        <main
-          id="main"
-          aria-hidden={sheetOpen || undefined}
-          className={cn(
-            "flex-1",
-            "pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom))] wide:pb-0",
-          )}
-        >
-          <div
-            className={cn(
-              "w-full",
-              contentWidth === "text"
-                ? "max-w-(--content-text)"
-                : "max-w-(--content-canvas)",
-            )}
-          >
-            {children}
-          </div>
-        </main>
-      </div>
+      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
 
       <div className="fixed inset-x-0 bottom-0 wide:hidden">
         <TabBar reviewHasPending={reviewHasPending} dimmed={sheetOpen} />

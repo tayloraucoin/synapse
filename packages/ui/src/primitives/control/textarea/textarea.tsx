@@ -35,6 +35,13 @@ export interface TextareaProps extends React.ComponentProps<"textarea"> {
   autoGrow?: boolean;
   /** Default false — a drag handle is a decision the surface rarely wants. */
   resizable?: boolean;
+  /**
+   * `serif` — UX v1.1 §5.2, §7.2: the orient frame's two lines and the
+   * journal's fields. Newsreader at body size, one row to start, growing,
+   * a hairline underneath rather than a box. The only serif control in the
+   * library (v1.1 §10.3: reflective surfaces only).
+   */
+  variant?: "default" | "serif";
   classes?: TextareaClasses;
 }
 
@@ -45,17 +52,19 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       label,
       helperText,
       error,
-      autoGrow = false,
+      variant = "default",
+      autoGrow = variant === "serif",
       resizable = false,
       classes,
       id,
-      rows = 3,
+      rows = variant === "serif" ? 1 : 3,
       onChange,
       "aria-describedby": ariaDescribedBy,
       ...props
     },
     ref,
   ) {
+    const serif = variant === "serif";
     const generatedId = React.useId();
     const textareaId = id ?? generatedId;
     const helperId = `${textareaId}-helper`;
@@ -83,7 +92,12 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label ? (
           <Label
             htmlFor={textareaId}
-            className={cn("mb-(--space-2)", classes?.label)}
+            className={cn(
+              "mb-(--space-2)",
+              // The prompt is a caption over the words (§5.2, §7.2).
+              serif && "text-text-secondary text-(length:--fs-caption) font-normal",
+              classes?.label,
+            )}
           >
             {label}
           </Label>
@@ -112,6 +126,17 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             hasError && "border-ink hover:border-ink",
             resizable ? "resize-y" : "resize-none",
             autoGrow && "overflow-hidden",
+            /*
+             * Serif: paper, not a box — a hairline underneath, the reading
+             * face at body size, and a ceiling so forty pasted lines scroll
+             * inside rather than pushing the primary off the screen.
+             */
+            serif && [
+              "font-serif text-(length:--fs-body) leading-relaxed",
+              "border-0 border-b border-hairline bg-transparent px-0 shadow-none",
+              "rounded-none focus-visible:border-ink",
+              "max-h-[60vh] overflow-y-auto",
+            ],
             classes?.textarea,
             className,
           )}

@@ -90,12 +90,20 @@ export function AppHeader({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex min-w-0 items-baseline gap-(--space-3)">
+          {/*
+           * `tabIndex={-1}` so a tab switch can move focus here
+           * (cross-cutting §3.4) without adding the title to the tab order.
+           * The outline is suppressed because this focus is programmatic and
+           * announces itself by being read — a ring around a heading nobody
+           * clicked reads as a bug.
+           */}
           <Text
             as="h1"
             variant="heading"
             weight={600}
             truncate
-            className={classes?.title}
+            tabIndex={-1}
+            className={cn("outline-none", classes?.title)}
           >
             {title}
           </Text>

@@ -16,7 +16,7 @@
  */
 "use client";
 
-import type { HabitSummaryView, StripState } from "@syn/types";
+import type { HabitSummaryView, StripState, StripWeek } from "@syn/types";
 import * as React from "react";
 
 import { cn } from "../../../lib/cn";
@@ -40,6 +40,14 @@ const SQUARE: Record<StripState, string> = {
   "didnt-do": "border border-edge",
   "not-assigned": "",
   pending: "border border-dashed border-edge",
+  /*
+   * UX v1.1 §7.3, R16: "shown in the Week Review's strip as blank with the
+   * label *not confirmed*". A hairline outline — a blank that is still a
+   * square, told apart from `not-counted`'s edge by the lighter line and
+   * from `pending`'s dashes by being solid. Excluded from the number, never
+   * hidden.
+   */
+  "not-confirmed": "border border-hairline",
 };
 
 /** Words for the label, so the strip reads out loud correctly. */
@@ -51,6 +59,7 @@ const STATE_WORDS: Record<StripState, string> = {
   "didnt-do": "missed",
   "not-assigned": "not assigned",
   pending: "pending",
+  "not-confirmed": "not confirmed",
 };
 
 export interface StripSquareProps {
@@ -105,17 +114,19 @@ export function StripSquare({
 }
 
 export interface HabitStripProps {
-  habit: HabitSummaryView;
-  /** Monday–Sunday. */
-  days: readonly [
-    StripState,
-    StripState,
-    StripState,
-    StripState,
-    StripState,
-    StripState,
-    StripState,
-  ];
+  /**
+   * Only the icon and the title are read, so only those are asked for.
+   *
+   * It took a whole `HabitSummaryView` until REV-4, whose week model carries a
+   * DIFFERENT view of the same habit — it has the two fields this needs and
+   * none of the library ones. Widening the caller to satisfy a type nothing
+   * here uses would have meant a cast at the one call site, which is the type
+   * system being talked out of its job. (`ReflectionBlock` was narrowed for the
+   * same reason in REV-3.)
+   */
+  habit: Pick<HabitSummaryView, "icon" | "title">;
+  /** Monday–Sunday — the named tuple, so callers never cast (`@syn/utils`). */
+  days: StripWeek;
   /** "Monday" … — the accessible names for each square. */
   dayLabels: readonly string[];
   credit: number;

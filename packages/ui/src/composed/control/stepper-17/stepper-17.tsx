@@ -19,12 +19,21 @@
  * `resting` is the value the person's setup already implies; `onReset`
  * appears once the choice differs from it, so returning to the default is one
  * tap and not a memory test.
+ *
+ * UX v1.2 (RUN-7). `layout="row"` draws the seven as 40px squares with 4px
+ * gaps — 304px, which fits a 375px sheet on one line (§4.9); the numbers stay
+ * visible and the chosen one is ink-filled. At 200% text they wrap 4+3.
+ * OPTIMISTIC BY RULE (§2 guardrail 4, TD-18): the chosen cell fills on the
+ * tap, `onChange` hears it at once, `onCommit` fires once after the debounce,
+ * the group's edge pulses while the write is out, and a rejection reverts.
  */
 "use client";
 
+import { useOptimisticValue } from "@syn/hooks/use-optimistic-value";
 import * as React from "react";
 
 import { cn } from "../../../lib/cn";
+import { COMMITTING_PULSE } from "../../../lib/committing";
 import { HelperText } from "../../../primitives/display/helper-text";
 import { Text } from "../../../primitives/typography/text";
 import { stepper17CellVariants } from "./stepper-17.variants";
@@ -44,7 +53,14 @@ export interface Stepper17Classes {
 
 export interface Stepper17Props {
   value: Stepper17Value | null;
-  onChange: (value: Stepper17Value) => void;
+  /** Every local change, at once — for a form's own state. */
+  onChange?: (value: Stepper17Value) => void;
+  /** The write, debounced by the control; reject to revert. */
+  onCommit?: (value: Stepper17Value) => Promise<void> | void;
+  committing?: boolean;
+  onCommitError?: (error: unknown) => void;
+  /** `cells` — 44px targets that wrap under 360px; `row` — seven 40px squares on one line (v1.2 §4.9). */
+  layout?: "cells" | "row";
   label: React.ReactNode;
   helperText?: React.ReactNode;
   error?: React.ReactNode;
@@ -63,6 +79,10 @@ export interface Stepper17Props {
 export function Stepper17({
   value,
   onChange,
+  onCommit,
+  committing: committingProp = false,
+  onCommitError,
+  layout = "cells",
   label,
   helperText,
   error,
@@ -78,6 +98,18 @@ export function Stepper17({
   const labelId = React.useId();
   const helperId = React.useId();
 
+  const { local, set, committing: writing } = useOptimisticValue<Stepper17Value | null>({
+    value,
+    onCommit: onCommit === undefined ? undefined : (next) => (next === null ? undefined : onCommit(next)),
+    onError: onCommitError,
+  });
+  const committing = committingProp || writing;
+
+  const choose = (next: Stepper17Value) => {
+    set(next);
+    onChange?.(next);
+  };
+
   const message = error ?? helperText;
   const invalid = error !== undefined && error !== null;
 
@@ -87,11 +119,11 @@ export function Stepper17({
     const digit = Number.parseInt(event.key, 10);
     if (Number.isNaN(digit) || digit < 1 || digit > 7) return;
     event.preventDefault();
-    onChange(digit as Stepper17Value);
+    choose(digit as Stepper17Value);
   };
 
   const showReset =
-    onReset !== undefined && resting !== null && value !== null && value !== resting;
+    onReset !== undefined && resting !== null && local !== null && local !== resting;
 
   return (
     <div className={cn("flex flex-col gap-(--space-2)", className, classes?.root)}>
@@ -123,21 +155,25 @@ export function Stepper17({
         aria-required={required || undefined}
         aria-invalid={invalid || undefined}
         onKeyDown={onKeyDown}
+        data-committing={committing || undefined}
         className={cn(
           "flex flex-wrap gap-(--space-1)",
           invalid && "rounded-(--radius) outline outline-ink",
+          committing && cn("rounded-(--radius) border", COMMITTING_PULSE),
           classes?.group,
         )}
       >
         {VALUES.map((option) => {
-          const selected = value === option;
-          const isResting = value === null && resting === option;
+          const selected = local === option;
+          const isResting = local === null && resting === option;
 
           return (
             <label
               key={option}
               className={cn(
                 stepper17CellVariants({
+                  // The row layout: 40px squares, 4px gaps — 304px, one line at 375px.
+                  size: layout === "row" ? "row" : "cell",
                   state: selected
                     ? "selected"
                     : isResting
@@ -155,7 +191,7 @@ export function Stepper17({
                 value={option}
                 checked={selected}
                 disabled={disabled}
-                onChange={() => onChange(option)}
+                onChange={() => choose(option)}
                 className="sr-only"
               />
               <span aria-hidden="true">{option}</span>
@@ -169,7 +205,7 @@ export function Stepper17({
           aria-hidden="true"
           className={cn(
             "text-text-secondary flex justify-between text-(length:--fs-caption)",
-            "max-w-[332px]",
+            layout === "row" ? "max-w-[304px]" : "max-w-[332px]",
             classes?.captions,
           )}
         >

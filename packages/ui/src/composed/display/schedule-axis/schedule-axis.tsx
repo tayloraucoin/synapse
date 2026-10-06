@@ -25,16 +25,38 @@ import { cn } from "../../../lib/cn";
 import { Button } from "../../../primitives/control/button";
 
 const MIN_PER_BAND = 15;
-const GUTTER_PX = 48;
+/** The hour-label column; bands and gaps start after it (UX v1.1 §6.5). */
+export const SCHEDULE_GUTTER_PX = 48;
+const GUTTER_PX = SCHEDULE_GUTTER_PX;
+
+/**
+ * UX v1.2 §4.13i, S12.1 (RUN-7): where a `BlockBand` puts its label. Under
+ * three hours of axis the gutter is too short for the labels to clear each
+ * other — "labels never in the gutter below 3 hours of height" — so the axis
+ * says *inside* and every band on it draws its name inside its own top edge.
+ * A band given `labelPlacement` explicitly ignores the axis.
+ */
+export type BandLabelPlacement = "gutter" | "inside";
+const INSIDE_UNDER_MIN = 3 * 60;
+
+export const BandLabelPlacementContext = React.createContext<BandLabelPlacement>("gutter");
 
 export interface ScheduleAxisProps {
   /** Minutes from day start. */
   startMin: number;
   endMin: number;
-  pxPerHour?: 64 | 96;
+  /**
+   * 64, or 96 at ≥150% text. 28 is the COMPACT scale (UX v1.3 §4.2; DAY-7):
+   * the primer's 24-hour example day on one phone screen — every third hour
+   * labelled, half-hour lines hidden, every band's label inside it. Nothing
+   * on `/today` or the Schedule passes 28.
+   */
+  pxPerHour?: 28 | 64 | 96;
   timeZone: string;
   locale?: string;
   onExtend?: (direction: "earlier" | "later") => void;
+  /** The grid's accessible name — *Schedule* by default; the primer's is *An example day* (v1.3 §4.2; DAY-8). */
+  ariaLabel?: string;
   /** Absolutely positioned blocks, spans, ghosts and bands. */
   children: React.ReactNode;
   className?: string;
@@ -61,19 +83,24 @@ export function ScheduleAxis({
   timeZone,
   locale,
   onExtend,
+  ariaLabel = "Schedule",
   children,
   className,
 }: ScheduleAxisProps) {
   const spanMin = Math.max(0, endMin - startMin);
   const bandCount = Math.ceil(spanMin / MIN_PER_BAND);
   const heightPx = (spanMin / 60) * pxPerHour;
+  const compact = pxPerHour === 28;
+  const labelPlacement: BandLabelPlacement = compact || spanMin < INSIDE_UNDER_MIN ? "inside" : "gutter";
+  // At 28px an hour, a label every hour would touch the next; every third reads.
+  const labelEvery = compact ? 3 : 1;
 
   const hours = React.useMemo(() => {
     const first = Math.ceil(startMin / 60) * 60;
     const out: number[] = [];
-    for (let m = first; m <= endMin; m += 60) out.push(m);
+    for (let m = first; m <= endMin; m += 60 * labelEvery) out.push(m);
     return out;
-  }, [endMin, startMin]);
+  }, [endMin, labelEvery, startMin]);
 
   return (
     <div className={cn("relative overflow-y-auto", className)}>
@@ -91,7 +118,7 @@ export function ScheduleAxis({
       <div
         role="grid"
         aria-rowcount={bandCount}
-        aria-label="Schedule"
+        aria-label={ariaLabel}
         style={{ height: `${heightPx}px`, paddingInlineStart: `${GUTTER_PX}px` }}
         className="relative"
       >
@@ -118,7 +145,7 @@ export function ScheduleAxis({
                   "h-full border-t",
                   isHour
                     ? "border-edge"
-                    : isHalf || pxPerHour === 96
+                    : !compact && (isHalf || pxPerHour === 96)
                       ? "border-hairline"
                       : "border-transparent",
                 )}
@@ -144,7 +171,7 @@ export function ScheduleAxis({
           </span>
         ))}
 
-        {children}
+        <BandLabelPlacementContext.Provider value={labelPlacement}>{children}</BandLabelPlacementContext.Provider>
       </div>
 
       {onExtend === undefined ? null : (

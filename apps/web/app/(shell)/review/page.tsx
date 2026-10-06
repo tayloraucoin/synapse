@@ -1,18 +1,18 @@
-import { Heading, Text } from "@syn/ui";
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { REVIEW_COPY } from "@/components/review-day";
+
+import { ReviewTab } from "./_components/review-tab";
 
 /**
- * Placeholder — RV-00 Review. 
+ * RV-00 Review.
  *
- * Replaced by the Epic 3 track. The `Heading` is here from day one so every
- * page has exactly one `h1` (cross-cutting §11) before any content exists.
+ * A tab rather than a pushed screen, so it has no back arrow — the shell's
+ * avatar is its only header action, and every region is a door forward.
  */
 export default function ReviewPage() {
   return (
-    <>
-      <Heading>RV-00 Review</Heading>
-      <Text as="p" tone="secondary">
-        Today, this week, history.
-      </Text>
-    </>
+    <PageFrame header={<ShellPageHeader title={REVIEW_COPY.title} />}>
+      <ReviewTab />
+    </PageFrame>
   );
 }

@@ -2,7 +2,7 @@ import type { StatusLineVariant } from "@syn/types";
 import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
 
-import { STATUS_LINE_COPY } from "./copy";
+import { STATUS_LINE_COPY, pendingReviewText } from "./copy";
 import { InstallLine, TimezoneLine, UpdateLine } from "./presets";
 import { StatusLine } from "./status-line";
 
@@ -51,8 +51,38 @@ export const Install: StoryObj = {
 };
 
 /**
- * All ten. Three of these lines — setup, pending-review, permission — are
- * marked `[COPY — needs Vesper sign-off]` in `copy.ts`.
+ * The pending-review line as the shell actually builds it (SYS-1).
+ *
+ * `STATUS_LINE_COPY["pending-review"].text` is only the fallback; the real
+ * line names the day and the count, which is official spec §10.5's own
+ * sentence. Yesterday is "Yesterday"; anything older is its weekday.
+ */
+export const PendingReview: StoryObj = {
+  render: () => (
+    <div className="flex flex-col gap-(--space-2)">
+      <StatusLine
+        variant="pending-review"
+        text={pendingReviewText(null, 3)}
+        action={{ label: "Review", onClick: () => {} }}
+      />
+      <StatusLine
+        variant="pending-review"
+        text={pendingReviewText(null, 1)}
+        action={{ label: "Review", onClick: () => {} }}
+      />
+      <StatusLine
+        variant="pending-review"
+        text={pendingReviewText("Thursday", 2)}
+        action={{ label: "Review", onClick: () => {} }}
+      />
+    </div>
+  ),
+};
+
+/**
+ * All ten. Only one line — permission — is still marked
+ * `[COPY — needs Vesper sign-off]` in `copy.ts`; SYS-1 signed setup and
+ * pending-review.
  */
 export const AllVariants: StoryObj = {
   render: () => (

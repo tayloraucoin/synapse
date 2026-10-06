@@ -68,3 +68,28 @@ export const Disabled: StoryObj<typeof SegmentedControl<string>> = {
     ],
   },
 };
+
+/**
+ * UX v1.1 W5 (DYN-7): three segments stack under the label when they would
+ * wrap — at 200% text, or in a narrow column. The container here is narrow
+ * so the wrap shows without changing the browser's text size.
+ */
+export const ThreeSegmentsStacked: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState("work_waits");
+    return (
+      <div className="max-w-[240px]">
+        <SegmentedControl
+          label="When your morning runs long, what gives?"
+          value={value}
+          onChange={setValue}
+          options={[
+            { value: "work_waits", label: "Work waits" },
+            { value: "routine_cut", label: "The routine gets cut" },
+            { value: "depends", label: "Depends on the day" },
+          ]}
+        />
+      </div>
+    );
+  },
+};

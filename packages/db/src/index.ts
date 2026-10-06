@@ -35,9 +35,75 @@ export {
 
 export * from "./schema";
 
-import { users, webPushSubscriptions } from "./schema";
+import {
+  categories,
+  dataExports,
+  dayBlocks,
+  dayItems,
+  days,
+  feedbackMessages,
+  fixtures,
+  habits,
+  journalEntries,
+  links,
+  misses,
+  notificationPrefs,
+  reasons,
+  shifts,
+  templateSlots,
+  templates,
+  timerSessions,
+  userAvatars,
+  users,
+  webPushSubscriptions,
+} from "./schema";
 
+/**
+ * Row types — one `$inferSelect` / `$inferInsert` pair per public table.
+ *
+ * `@syn/db` owns row types; they are never re-declared in `@syn/types`, which
+ * holds the shapes a row cannot give you (the unions the DB and the UI share,
+ * and the view models the API maps rows into). Nothing outside `@syn/db` and
+ * `@syn/api` imports a table — everyone else takes one of these types or a
+ * view model.
+ */
+export type Category = typeof categories.$inferSelect;
+export type NewCategory = typeof categories.$inferInsert;
+export type DataExport = typeof dataExports.$inferSelect;
+export type NewDataExport = typeof dataExports.$inferInsert;
+export type Day = typeof days.$inferSelect;
+export type NewDay = typeof days.$inferInsert;
+export type DayBlock = typeof dayBlocks.$inferSelect;
+export type NewDayBlock = typeof dayBlocks.$inferInsert;
+export type DayItem = typeof dayItems.$inferSelect;
+export type NewDayItem = typeof dayItems.$inferInsert;
+export type FeedbackMessage = typeof feedbackMessages.$inferSelect;
+export type NewFeedbackMessage = typeof feedbackMessages.$inferInsert;
+export type Fixture = typeof fixtures.$inferSelect;
+export type NewFixture = typeof fixtures.$inferInsert;
+export type Habit = typeof habits.$inferSelect;
+export type NewHabit = typeof habits.$inferInsert;
+export type JournalEntry = typeof journalEntries.$inferSelect;
+export type NewJournalEntry = typeof journalEntries.$inferInsert;
+export type Link = typeof links.$inferSelect;
+export type NewLink = typeof links.$inferInsert;
+export type Miss = typeof misses.$inferSelect;
+export type NewMiss = typeof misses.$inferInsert;
+export type NotificationPref = typeof notificationPrefs.$inferSelect;
+export type NewNotificationPref = typeof notificationPrefs.$inferInsert;
+export type Reason = typeof reasons.$inferSelect;
+export type NewReason = typeof reasons.$inferInsert;
+export type Shift = typeof shifts.$inferSelect;
+export type NewShift = typeof shifts.$inferInsert;
+export type Template = typeof templates.$inferSelect;
+export type NewTemplate = typeof templates.$inferInsert;
+export type TemplateSlot = typeof templateSlots.$inferSelect;
+export type NewTemplateSlot = typeof templateSlots.$inferInsert;
+export type TimerSession = typeof timerSessions.$inferSelect;
+export type NewTimerSession = typeof timerSessions.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+export type UserAvatar = typeof userAvatars.$inferSelect;
+export type NewUserAvatar = typeof userAvatars.$inferInsert;
 export type WebPushSubscription = typeof webPushSubscriptions.$inferSelect;
 export type NewWebPushSubscription = typeof webPushSubscriptions.$inferInsert;

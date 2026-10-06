@@ -26,6 +26,12 @@ export interface InlineQuestionRowProps {
   text: React.ReactNode;
   primary: InlineQuestionAction;
   secondary: InlineQuestionAction;
+  /**
+   * UX v1.1 §3.5 (DYN-8): the same-position question has three answers —
+   * *Yes, multitask · No, one or the other · Move it*. Rendered first, so
+   * the order reads secondary · tertiary · primary from the left.
+   */
+  tertiary?: InlineQuestionAction;
   /** Used as the group's accessible name when `text` is not a plain string. */
   ariaLabel?: string;
   className?: string;
@@ -35,6 +41,7 @@ export function InlineQuestionRow({
   text,
   primary,
   secondary,
+  tertiary,
   ariaLabel,
   className,
 }: InlineQuestionRowProps) {
@@ -54,10 +61,15 @@ export function InlineQuestionRow({
       <Text as="p" variant="secondary" className="min-w-0 flex-1">
         {text}
       </Text>
-      <div className="flex shrink-0 items-center gap-(--space-1)">
+      <div className="flex shrink-0 flex-wrap items-center gap-(--space-1)">
         <Button variant="ghost" size="sm" onClick={secondary.onClick}>
           {secondary.label}
         </Button>
+        {tertiary === undefined ? null : (
+          <Button variant="ghost" size="sm" onClick={tertiary.onClick}>
+            {tertiary.label}
+          </Button>
+        )}
         <Button variant="ghost" size="sm" onClick={primary.onClick}>
           {primary.label}
         </Button>

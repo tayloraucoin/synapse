@@ -23,3 +23,13 @@ export const SameStart: StoryObj<typeof InlineQuestionRow> = {
     secondary: { label: "One after the other", onClick: () => {} },
   },
 };
+
+/** UX v1.1 §3.5 (DYN-8): the same-position question with its third answer, *one of*. */
+export const SamePosition: StoryObj<typeof InlineQuestionRow> = {
+  args: {
+    text: "Breakfast is already here. Do these happen at the same time?",
+    primary: { label: "Yes, multitask", onClick: () => {} },
+    tertiary: { label: "No, one or the other", onClick: () => {} },
+    secondary: { label: "Move it", onClick: () => {} },
+  },
+};

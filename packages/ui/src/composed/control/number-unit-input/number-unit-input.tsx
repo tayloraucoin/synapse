@@ -32,6 +32,15 @@ export interface NumberUnitChip {
 export interface NumberUnitInputProps {
   value: number | null;
   onChange: (value: number | null) => void;
+  /**
+   * Fired when the field loses focus — where an autosaving caller commits.
+   *
+   * A number is not finished until someone stops typing: saving on every
+   * keystroke would write "1", "12", "127" for one value of 127. IT-01 uses
+   * this and a flush on close, which between them cover every way a person
+   * leaves the field.
+   */
+  onBlur?: () => void;
   /** The habit's own word — "pages", "km", "min". */
   unit: string;
   min?: number;
@@ -48,6 +57,7 @@ export interface NumberUnitInputProps {
 export function NumberUnitInput({
   value,
   onChange,
+  onBlur,
   unit,
   min,
   max,
@@ -89,6 +99,7 @@ export function NumberUnitInput({
           disabled={disabled}
           aria-invalid={invalid || undefined}
           aria-describedby={message === undefined ? undefined : helperId}
+          onBlur={onBlur}
           onChange={(event) => {
             const raw = event.target.value;
             if (raw === "") {

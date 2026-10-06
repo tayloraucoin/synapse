@@ -7,14 +7,23 @@
  * resolve in TypeScript, while `drizzle.config.ts` pins
  * `schemaFilter: ["public"]` so drizzle-kit never migrates that schema.
  *
- * No domain table (habits, categories, templates, slots, week plans, days, day
- * items, misses, shifts, reasons, timer sessions) exists yet. Those come from
- * the feature epics' tech spec, built on the patterns in `rls/`.
+ * Fifteen tables in `public`: the two from the foundation (`users`,
+ * `web_push_subscriptions`) and the thirteen SET-1 added for official spec §3.
+ * Every one of them is owner-private except `feedback_messages`, which is
+ * insert-only for its author and readable by nobody through the app.
+ *
+ * `enum-values.ts` is deliberately NOT re-exported: it is a compile-time parity
+ * helper that schema files import directly, not part of `@syn/db`'s API.
  */
 export * from "./auth";
 export * from "./enums";
 
 export * from "./user";
+export * from "./library";
+export * from "./plan";
+export * from "./day";
 export * from "./notification";
+export * from "./system";
+
 export * from "./rls/helpers";
 export * from "./rls/standard-policies";

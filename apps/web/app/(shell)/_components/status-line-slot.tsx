@@ -40,6 +40,12 @@ export interface StatusLineSlotProps {
   setupIncomplete?: boolean;
   onFinishSetup?: () => void;
   reviewPending?: boolean;
+  /**
+   * Official spec §10.5's line, built by the caller because it names the day
+   * and the count (`pendingReviewText`). Falls back to the copy table's
+   * generic sentence when absent.
+   */
+  pendingText?: string;
   onOpenReview?: () => void;
   lateOffer?: boolean;
   onShiftDay?: () => void;
@@ -58,6 +64,7 @@ export function StatusLineSlot({
   setupIncomplete = false,
   onFinishSetup,
   reviewPending = false,
+  pendingText,
   onOpenReview,
   lateOffer = false,
   onShiftDay,
@@ -101,6 +108,7 @@ export function StatusLineSlot({
     return (
       <StatusLine
         variant="pending-review"
+        text={pendingText}
         action={{ label: "Review", onClick: onOpenReview }}
       />
     );
@@ -110,7 +118,7 @@ export function StatusLineSlot({
     return (
       <StatusLine
         variant="late-offer"
-        action={{ label: "Shift the day", onClick: onShiftDay }}
+        action={{ label: "Adjust the morning", onClick: onShiftDay }}
         onDismiss={dismissLate}
       />
     );

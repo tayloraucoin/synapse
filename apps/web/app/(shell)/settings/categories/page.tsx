@@ -1,18 +1,19 @@
-import { Heading, Text } from "@syn/ui";
+import { PageFrame } from "@/components/page-frame";
+
+import { CategoryList } from "./_components/category-list";
+import { CategoryListHeader } from "./_components/category-list-header";
 
 /**
- * Placeholder — CT-01 Categories. 
+ * CT-01 Categories.
  *
- * Replaced by the Epic 1 track. The `Heading` is here from day one so every
- * page has exactly one `h1` (cross-cutting §11) before any content exists.
+ * "Used for time-distribution reporting only, never for any mechanic"
+ * (official spec §3.2) — which is why this screen is small and why deleting
+ * from it is safe.
  */
 export default function SettingsCategoriesPage() {
   return (
-    <>
-      <Heading>CT-01 Categories</Heading>
-      <Text as="p" tone="secondary">
-        For time reporting only — never a mechanic.
-      </Text>
-    </>
+    <PageFrame header={<CategoryListHeader />}>
+      <CategoryList />
+    </PageFrame>
   );
 }

@@ -8,6 +8,76 @@
       "when": 1788579676005,
       "tag": "0000_brave_quicksilver",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788637648134,
+      "tag": "0001_famous_titania",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788654855420,
+      "tag": "0002_simple_blue_shield",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788660743304,
+      "tag": "0003_flaky_major_mapleleaf",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789272577280,
+      "tag": "0004_block_templates_and_stacked_slots",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789278111045,
+      "tag": "0005_profile_fixtures_day_blocks_journal",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789357054755,
+      "tag": "0006_retire_v1_model",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789597195235,
+      "tag": "0007_v1_2_additive",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789603402424,
+      "tag": "0008_day_anchors_and_exclusions",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790363591592,
+      "tag": "0009_v1_3_additive",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790372580647,
+      "tag": "0010_retirements",
+      "breakpoints": true
     }
   ]
 }

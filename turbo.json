@@ -121,6 +121,12 @@
     "db:reset": {
       "cache": false
     },
+    "db:reset-user": {
+      "cache": false,
+      "env": [
+        "RESET_USER_EMAIL"
+      ]
+    },
     "db:seed-users": {
       "cache": false
     },

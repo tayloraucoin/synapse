@@ -1,5 +1,15 @@
 import { createLogger } from "@syn/observability";
 
+import { autoCloseDaysJob } from "./auto-close-days";
+import { expireExportsJob } from "./expire-exports";
+import {
+  notifyJournalReminderJob,
+  notifyStartsJob,
+  notifyPendingReviewJob,
+  notifyReviewReminderJob,
+  notifyWeekBuildJob,
+} from "./notify";
+
 const log = createLogger("jobs/scheduler");
 
 /**
@@ -11,10 +21,10 @@ const log = createLogger("jobs/scheduler");
  * §8.2's N1 fires at an item's `scheduled_start`, and a reminder that arrives
  * hours later is worse than none.
  *
- * EMPTY ON PURPOSE. The jobs themselves — N1 fixed-time start, N4 review
- * reminder, N5 pending review, N6 week build — need `day_items`, which the
- * feature epics create. They register here as `ScheduledJob` entries; nothing
- * about this file changes when they do.
+ * `auto_close_days` (USE-1) is the first entry. The notification jobs — the
+ * four start kinds in one scan (UX v1.1 §9, DYN-20), N4 review reminder, N5
+ * pending review, N6 week build — register the same way as USE-8 lands
+ * them; nothing about this file changes when they do.
  *
  * A job that throws is logged and does not stop the others: one broken job
  * must not silence every notification in the product.
@@ -31,7 +41,25 @@ export type ScheduledJob = {
   run: () => Promise<number>;
 };
 
-export const SCHEDULED_JOBS: readonly ScheduledJob[] = [];
+/**
+ * The order matters in one place: auto-close runs FIRST, so a day that ended
+ * overnight is closed before the notification jobs decide what to send about
+ * it. N5 asks about yesterday's auto-closed day, and it must not miss it
+ * because the close had not happened yet in the same scan.
+ *
+ * `expire_exports` (SET-10) is last and order-independent — it touches nothing
+ * the others read.
+ */
+export const SCHEDULED_JOBS: readonly ScheduledJob[] = [
+  autoCloseDaysJob,
+  notifyStartsJob,
+  notifyReviewReminderJob,
+  notifyPendingReviewJob,
+  notifyWeekBuildJob,
+  // UX v1.2 §9 N2 (RUN-6) — order-independent; it reads the journal alone.
+  notifyJournalReminderJob,
+  expireExportsJob,
+];
 
 export async function runScheduledJobs(): Promise<ScheduledJobResult[]> {
   const results: ScheduledJobResult[] = [];

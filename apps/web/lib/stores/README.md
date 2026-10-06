@@ -1,6 +1,6 @@
 # Client state — one tool per kind
 
-There is no Zustand store here yet, and that is the point. Reach for the
+There is exactly one Zustand store here, and that is the point. Reach for the
 cheapest thing that fits, in this order:
 
 | The state is… | Use | Not |
@@ -26,16 +26,22 @@ frequency — a theme, a signed-in user, an open sheet — and wrong at machine
 frequency, where it re-renders a whole subtree many times a second to update
 one number.
 
-**The first sanctioned Zustand store is the running-timer tick.** A timer
+**The first sanctioned Zustand store is the running-timer tick**, and it now
+exists as [`use-timer-store.ts`](use-timer-store.ts), built by USE-3. A timer
 publishes elapsed seconds at 1 Hz, and four places read it: the item row, the
 item sheet, the tab title, and (Phase 2) the persistent notification. Through
-Context, that is the entire day list re-rendering every second. It is built by
-Epic 2's timer ticket as `use-timer-store.ts`, not before.
+Context, that is the entire day list re-rendering every second.
 
-If you want a store for something else, the bar is the same: a wide tree, a
-high frequency, and a measurement. Otherwise the answer is Context.
+It holds no server data. Whether a timer EXISTS is a `timer_sessions` row; the
+store holds what to draw and is re-seeded from the server on every refetch — so
+the rule above is kept, not bent, by the one store that exists.
+
+If you want a SECOND store, the bar is the same one this one cleared: a wide
+tree, a high frequency, and a measurement. Otherwise the answer is Context.
 
 ## Conscious Connections declares Zustand and has no store
 
 That is not an oversight — it is the rule working. The dependency is present so
-the escalation costs nothing when it is genuinely earned. Synapse does the same.
+the escalation costs nothing when it is genuinely earned. Synapse kept the same
+discipline through eleven feature tickets and then spent it once, on the one
+thing that measurably needed it.

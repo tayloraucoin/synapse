@@ -10,7 +10,12 @@
  * column. Schema-shaped unions live in `domain.ts`.
  */
 
-/** Official spec §5.9 row/block matrix + Epic 2 §2 additions. */
+/**
+ * Official spec §5.9 row/block matrix + Epic 2 §2 additions + UX v1.1 §10.1:
+ * `moved` (an upcoming item whose planned start differs from its original —
+ * a re-plan, counted never scored), `confirm-later` (a wind-down item after
+ * devices-off, confirmed the next morning), `not-confirmed` (left unticked).
+ */
 export type ItemState =
   | "upcoming"
   | "soon"
@@ -26,7 +31,10 @@ export type ItemState =
   | "not-assigned"
   | "cut-by-shift"
   | "missed"
-  | "pending-review";
+  | "pending-review"
+  | "moved"
+  | "confirm-later"
+  | "not-confirmed";
 
 /** Where a row sits inside a multitask group's bracket — official spec §9.7. */
 export type MultitaskPosition = "none" | "first" | "middle" | "last";
@@ -46,7 +54,12 @@ export type StateWordKind =
   | "add-unit"
   | "updated"
   | "pending"
-  | "archived";
+  | "archived"
+  /** UX v1.1 §7.1 — the caption on a wind-down row after devices-off. */
+  | "confirm-later"
+  /** UX v1.1 §3.11 — the role captions in an opener · pool · closer routine. */
+  | "opener"
+  | "closer";
 
 /** Cross-cutting §8.2 — the live day, a past day as a record, a future day as a plan. */
 export type DayMode = "live" | "record" | "plan";
@@ -77,7 +90,28 @@ export type StripState =
   | "half"
   | "didnt-do"
   | "not-assigned"
-  | "pending";
+  | "pending"
+  /** UX v1.1 §7.3, R16 — a wind-down item left unticked: blank, labelled, excluded. */
+  | "not-confirmed";
+
+/**
+ * A whole week of squares — Monday to Sunday, always exactly seven.
+ *
+ * A TUPLE, NOT AN ARRAY. `HabitStrip` draws seven squares and its prop says so;
+ * a plain `StripState[]` forced every caller to cast, which is the type system
+ * being talked out of a length invariant the read models actually guarantee
+ * (`weekDates` returns seven keys, and the builders map over them). Named once,
+ * a six-day week fails to compile rather than failing to render.
+ */
+export type StripWeek = readonly [
+  StripState,
+  StripState,
+  StripState,
+  StripState,
+  StripState,
+  StripState,
+  StripState,
+];
 
 /** The item timer — official spec §5.4. */
 export type TimerStatus = "idle" | "running" | "paused";
@@ -93,7 +127,9 @@ export type StatusLineVariant =
   | "update"
   | "timezone"
   | "install"
-  | "permission";
+  | "permission"
+  /** UX v1.1 §6.6 — the one quiet Adjust offer after a late wake, once a day. */
+  | "late-wake-offer";
 
 /**
  * Notification permission as the interface reasons about it — official spec
@@ -110,3 +146,33 @@ export type PermissionState =
 
 /** The three steps of the shift sheet — official spec §5.6, Epic 2 SF-01. */
 export type ShiftStep = 1 | 2 | 3;
+
+/*
+ * ---- UX v1.1 additions ----
+ */
+
+/** The four steps of the Adjust sheet — v1.1 §6.6. */
+export type AdjustStep = 1 | 2 | 3 | 4;
+
+/** Where the Adjust sheet was opened from; it preselects the reason chip. */
+export type AdjustEntry = "late-offer" | "header" | "one-off" | "band-drag";
+
+/** The drag layer's states on the Schedule and in the block editor — v1.1 §6.5, §10.2. */
+export type DragState = "idle" | "lifted" | "dropping" | "refused" | "confirming";
+
+/** The sections of the quick-pick, in the order they appear — v1.1 §5.3. */
+export type QuickPickSectionKind =
+  | "last-night"
+  | "shape"
+  | "routine"
+  | "prep"
+  | "training"
+  | "work"
+  | "fixtures";
+
+/**
+ * The budget line's relation to its budget — v1.1 §5.3. Three states, one
+ * treatment: the second number is the feedback, and the line never changes
+ * colour.
+ */
+export type BudgetState = "under" | "exact" | "over";

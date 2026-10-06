@@ -23,6 +23,8 @@ import {
   AlarmClock,
   Anchor,
   Apple,
+  ArrowLeft,
+  ArrowRight,
   Backpack,
   Bath,
   Bed,
@@ -267,7 +269,21 @@ export const CURATED_GLYPHS: readonly CuratedGlyph[] = [
   { name: "gamepad-2", label: "Gaming", group: "Outside", Icon: Gamepad2 },
 ];
 
-const BY_NAME = new Map(CURATED_GLYPHS.map((glyph) => [glyph.name, glyph]));
+/**
+ * The two travel glyphs — UX v1.2 §3.7, TD-12 (RUN-6). A travel row beside a
+ * workout is the app's own row on the person's day, so it carries a plain
+ * arrow rather than an emoji (R29 is about the person's nouns); they resolve
+ * here for `ItemIcon` but are NOT offered in the picker — `CURATED_GLYPHS`
+ * stays the person's set.
+ */
+export const TRAVEL_GLYPHS: readonly CuratedGlyph[] = [
+  { name: "arrow-right", label: "There", group: "Outside", Icon: ArrowRight },
+  { name: "arrow-left", label: "Back", group: "Outside", Icon: ArrowLeft },
+];
+
+const BY_NAME = new Map(
+  [...CURATED_GLYPHS, ...TRAVEL_GLYPHS].map((glyph) => [glyph.name, glyph]),
+);
 
 /** Returns the glyph, or undefined when a stored name is no longer curated. */
 export function getCuratedGlyph(name: string): CuratedGlyph | undefined {

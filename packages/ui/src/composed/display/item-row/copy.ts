@@ -8,4 +8,9 @@ export const ITEM_ROW_COPY = {
   markDone: (title: string) => `Mark ${title} done`,
   markNotDone: (title: string) => `Mark ${title} not done`,
   addUnit: (unit: string) => unit,
+  /** UX v1.1 §7.3 — the word on a row left unticked, rendered outside the strip. */
+  notConfirmed: "not confirmed",
+  /** UX v1.1 §6.1, §10.1 — the accessible words for a pin and the container. */
+  pinned: "pinned",
+  container: "block",
 } as const;

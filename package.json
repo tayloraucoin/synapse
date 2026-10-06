@@ -26,6 +26,7 @@
     "db:push": "turbo run db:push --filter=@syn/db",
     "db:setup": "turbo run db:setup --filter=@syn/db",
     "db:reset": "turbo run db:reset --filter=@syn/db",
+    "db:reset-user": "turbo run db:reset-user --filter=@syn/db",
     "db:seed": "turbo run db:seed --filter=@syn/db",
     "db:seed-users": "turbo run db:seed-users --filter=@syn/db",
     "db:schema-reference": "turbo run db:schema-reference --filter=@syn/db"

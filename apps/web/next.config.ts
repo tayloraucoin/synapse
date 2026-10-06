@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadEnvConfig } from "@next/env";
@@ -23,6 +24,27 @@ loadEnvConfig(webRoot);
  */
 const supabaseEnv = buildSupabaseEnvForNextConfig();
 const databaseEnv = buildDatabaseEnvForNextConfig();
+
+/**
+ * The version line on ST-00, stamped at build time.
+ *
+ * It is read from `package.json` here rather than from a Vercel variable
+ * because the build is the only moment both facts are known and fixed. The
+ * date is the build's, not the deploy's: "what am I running" is answered by
+ * when it was compiled.
+ *
+ * `VERCEL_GIT_COMMIT_SHA` is deliberately NOT read — INF-8's precedent is that
+ * every environment variable this app depends on is declared in `env.ts` and
+ * listed for turbo, and a platform variable read here would be neither.
+ */
+const packageJson = JSON.parse(
+  readFileSync(path.join(webRoot, "package.json"), "utf8"),
+) as { version?: string };
+
+const versionEnv = {
+  NEXT_PUBLIC_APP_VERSION: packageJson.version ?? "0.0.0",
+  NEXT_PUBLIC_BUILD_DATE: new Date().toISOString().slice(0, 10),
+};
 
 const nextConfig: NextConfig = {
   /**
@@ -55,6 +77,7 @@ const nextConfig: NextConfig = {
   env: {
     ...supabaseEnv,
     ...databaseEnv,
+    ...versionEnv,
     NEXT_PUBLIC_SITE_URL: env.siteUrl,
   },
 

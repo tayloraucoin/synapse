@@ -10,8 +10,27 @@ export const STORAGE_KEYS = {
   THEME: "syn:theme",
   /** Per-surface dismissals — the install line, the once-a-day late offer. */
   DISMISSED_PREFIX: "syn:dismissed:",
+  /**
+   * Each tab's scroll position, kept for the session (cross-cutting §4.3:
+   * "each peer keeps its scroll position … for the session"). Concatenated
+   * with the tab name — `syn:scroll:list`.
+   */
+  SCROLL_PREFIX: "syn:scroll:",
   /** Unsent form-sheet drafts, keyed by the record being edited. */
   DRAFT_PREFIX: "syn:draft:",
-  /** Set when the install status line is dismissed; it never returns (§5.1). */
-  INSTALL_DISMISSED_UNTIL: "syn:install-dismissed-until",
+  /**
+   * The address AU-03 is waiting on, so *Check your email* can name it and
+   * *Resend the link* can send to it. `sessionStorage`, never the URL: an
+   * email address in a query string ends up in history and in any referrer.
+   */
+  AUTH_PENDING_EMAIL: "syn:auth-pending-email",
+  /**
+   * The name typed on AU-02, kept only so *Use a different email* can return
+   * to the form without retyping it (Epic 1 AU-03).
+   *
+   * THERE IS NO PASSWORD KEY AND THERE NEVER WILL BE. The document says "name
+   * and password retained in memory"; SET-2 keeps the name only and the
+   * password is retyped. A password in browser storage is a password on disk.
+   */
+  AUTH_PENDING_NAME: "syn:auth-pending-name",
 } as const;

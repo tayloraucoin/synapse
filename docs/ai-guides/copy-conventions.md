@@ -97,6 +97,12 @@ When the same string can come from multiple places:
 - No i18n layer yet — structure copy so locale files can replace these modules later.
 - New questionnaires: add `content/questionnaires/<slug>.ts` (+ `.tsx` if needed); wire via `COVER_COPY_BY_SLUG` in the route re-export.
 
+## Emoji (UX v1.2 R29, §12.1; TD-20)
+
+**The product's copy never contains an emoji.** A thing the person owns may carry one as its icon — a habit, a step, a workout, a focus, a fixture, a passage, a day plan, the two evening times, and (the one chrome exception) the four archetype cards, which name kinds of people. No heading, body line, button, caption, status line, dialog, notification, or sentence in the app's voice ever carries one.
+
+The rule is lint, not review: `packages/config/eslint/no-emoji.js` fails any `copy.ts` (every package, through the base config) and all of `packages/constants/src/` on an emoji in a string or template literal. The six seed files that legitimately carry glyphs (`starter-library`, `workout-types`, `fixture-kinds`, `work-day-kinds`, `schedule-shapes`, `placed-rows`) are the rule's exception list, and they carry a glyph only in `icon.value` as `{ kind: "emoji", value }` — never in a `title`. A glyph that reaches a screen does so as `IconValue` data through `EmojiSlot` / `ItemIcon`, `aria-hidden`, with the title as the accessible name.
+
 ---
 
 ## Related

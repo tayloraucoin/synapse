@@ -12,7 +12,7 @@
 
 ## Why
 
-[Design/product rationale. Cite UX handoff §§ (`docs/ux/habit_tracker_official_ux_spec_v1.md`) and UI-spec variant IDs where applicable. §0.3 rulings are signed.]
+[Design/product rationale. Cite UX handoff §§ (`docs/ux/ux-spec-v1.md`) and UI-spec variant IDs where applicable. §0.3 rulings are signed.]
 
 ---
 

@@ -252,4 +252,18 @@ User-facing strings follow a dedicated convention — **not** inline in componen
 
 ---
 
+## 10. Optimistic by rule (UX v1.2 §2 guardrail 4, TD-18)
+
+A control's own state changes on the tap, before any request. This is a property of the composite, not a habit of the screen:
+
+- **Steppers** (`MinutesStepper`, `CountStepper`, `Stepper17`) and **`SelectRow`** take `value` and a synchronous `onChange` for the local value, plus `onCommit`, which the composite debounces (`STEPPER_COMMIT_DEBOUNCE_MS`, 400 ms trailing; a tick commits at once). The screen feeds back `committing` and `error`.
+- **Never disabled in flight.** Only a primary that would double-submit disables itself. A committing control shows a hairline pulse, never a spinner and never red.
+- **A failure reverts with one line.** The composite restores the last committed value; the screen shows the sentence (`StatusLine`). A revert must not fire if a newer commit is pending — `useOptimisticValue` in `@syn/hooks` tracks a sequence number for this.
+- **A second tap on a tick is an un-tick, never a duplicate.** Rows are keyed by the thing (a starter's title until the create returns an id, then the id); an un-tick during an in-flight create is queued behind it.
+- **Save as you go** (guardrail 5): every fact writes when entered; *Continue* and *Done* navigate. A sheet's *Save* is its one fact — a half-written passage is not a fact.
+
+`useOptimisticValue<T>({ value, onCommit, debounceMs, onError })` → `{ local, set, hold, committing, error, revert }` (`@syn/hooks`, imported by `@syn/ui` through `@syn/hooks/use-optimistic-value` — TD-22) is the one implementation; a screen that wraps its own `useDebounce` is the convention eroding. `set` moves the value and schedules the commit; `hold` moves it without one (a number mid-typing, committed on blur). The composites expose the contract as `value` · `onChange?` (sync) · `onCommit?` · `committing?` (the screen's, OR-ed with the control's own) · `onCommitError?` (after the revert; the screen's `StatusLine` says the line). The committing face is `COMMITTING_PULSE` in `@syn/ui/src/lib/committing.ts` — a hairline pulse, one string.
+
+---
+
 _End of Component Guidelines. When visual decisions conflict with this file, `branding-design-system.md` wins._

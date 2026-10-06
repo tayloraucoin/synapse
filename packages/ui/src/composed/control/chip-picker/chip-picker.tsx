@@ -12,27 +12,37 @@
  *
  * `noneLabel` is always present and always first — "no category" is a real
  * answer, and making it a chip means it is chosen rather than left behind.
+ *
+ * UX v1.2 (RUN-8): the KIND chips — a work-day type's, a fixture's — are a
+ * vocabulary, never a suggestion, and the sheet opens on none selected
+ * without a *None* chip to say so: `noneLabel` may be omitted, and then
+ * `value: null` is simply nothing chosen. An option may carry an `icon`
+ * (its `IconValue`), drawn at the chip's leading edge through `ItemIcon`.
  */
 "use client";
 
-import type { CategoryKey } from "@syn/types";
+import type { CategoryKey, IconValue } from "@syn/types";
 import * as React from "react";
 
 import { cn } from "../../../lib/cn";
 import { Text } from "../../../primitives/typography/text";
 import { CategoryChip } from "../../display/category-chip";
+import { ItemIcon } from "../../display/item-icon";
 
 export interface ChipPickerOption {
   value: string;
   label: string;
   colorKey?: CategoryKey;
+  /** The kind's glyph (v1.2 §4.3, §4.4) — data, never in the label string. */
+  icon?: IconValue;
 }
 
 export interface ChipPickerProps {
   options: readonly ChipPickerOption[];
   value: string | null;
   onChange: (value: string | null) => void;
-  noneLabel: string;
+  /** The *None* chip; omit it for a vocabulary that opens on nothing chosen (v1.2). */
+  noneLabel?: string;
   createLabel?: string;
   onCreate?: () => void;
   label: React.ReactNode;
@@ -75,24 +85,26 @@ export function ChipPicker({
         aria-labelledby={groupLabelId}
         className="flex flex-wrap items-center gap-(--space-2)"
       >
-        <label className={chipShell(value === null)}>
-          <input
-            type="radio"
-            name={groupName}
-            checked={value === null}
-            disabled={disabled}
-            onChange={() => onChange(null)}
-            className="sr-only"
-          />
-          <span
-            className={cn(
-              "inline-flex h-6 items-center rounded-(--radius) px-(--space-2)",
-              "bg-surface text-text-body text-(length:--fs-caption)",
-            )}
-          >
-            {noneLabel}
-          </span>
-        </label>
+        {noneLabel === undefined ? null : (
+          <label className={chipShell(value === null)}>
+            <input
+              type="radio"
+              name={groupName}
+              checked={value === null}
+              disabled={disabled}
+              onChange={() => onChange(null)}
+              className="sr-only"
+            />
+            <span
+              className={cn(
+                "inline-flex h-6 items-center rounded-(--radius) px-(--space-2)",
+                "bg-surface text-text-body text-(length:--fs-caption)",
+              )}
+            >
+              {noneLabel}
+            </span>
+          </label>
+        )}
 
         {options.map((option) => {
           const selected = option.value === value;
@@ -109,7 +121,8 @@ export function ChipPicker({
                 className="sr-only"
               />
               {option.colorKey === undefined ? (
-                <span className="inline-flex h-6 items-center rounded-(--radius) bg-surface px-(--space-2) text-(length:--fs-caption)">
+                <span className="inline-flex h-6 items-center gap-(--space-1) rounded-(--radius) bg-surface px-(--space-2) text-(length:--fs-caption)">
+                  {option.icon === undefined ? null : <ItemIcon icon={option.icon} size={20} />}
                   {option.label}
                 </span>
               ) : (

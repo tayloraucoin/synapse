@@ -11,6 +11,8 @@
  * where a bad value can be turned into a 404 rather than a broken link.
  */
 
+import type { BlockKind } from "@syn/types";
+
 /* ---------------------------------------------------------------- entry -- */
 
 export function homeRoute(): string {
@@ -63,21 +65,59 @@ export function authConfirmRoute(): string {
   return "/auth/confirm";
 }
 
+/* --------------------------------------------------------------- assets -- */
+
+/**
+ * The session-gated read route for one stored image (SET-3).
+ *
+ * `storedPath` is the bucket-qualified path a row holds —
+ * `icons/{user_id}/{uuid}.jpg` — so the URL is the path with one prefix. The
+ * result is only ever resolvable by the owner's session; there is no public
+ * URL for an icon or an avatar.
+ *
+ * Callers use `iconImageUrl` / `avatarImageUrl` in `lib/assets/icon-url.ts`
+ * rather than this directly, so the null cases stay in one place.
+ */
+export function assetRoute(storedPath: string): string {
+  return `/api/assets/${storedPath}`;
+}
+
 /* ---------------------------------------------------------------- setup -- */
 
-/** FR-01…05. `step` is 1–5; the page 404s on anything else. */
-export function setupRoute(step: number): string {
-  return `/setup/${step}`;
+/** UX v1.3 §4's five screens (R45, TD-31; DAY-8). `step` is 1–5; the page 404s on anything else. */
+export function setupRoute(step: number, options?: { edit?: string }): string {
+  const base = `/setup/${step}`;
+  // RUN-13: *Edit Day A* opens screen 4's builder on that plan's review.
+  return options?.edit ? `${base}?edit=${encodeURIComponent(options.edit)}` : base;
 }
 
 /* ------------------------------------------------------------ execution -- */
+
+/** The orient frame — the first screen of the morning (UX v1.1 §5.1, DYN-13). */
+export function orientRoute(): string {
+  return "/orient";
+}
 
 export function todayRoute(): string {
   return "/today";
 }
 
-export function todayScheduleRoute(): string {
-  return "/today/schedule";
+/**
+ * The Schedule's one option (UX v1.1 §10.4, DYN-16): `move` opens it in
+ * move mode — a tap lifts, a tap drops — the long-press fallback the day
+ * header sheet's *Edit today* row reaches.
+ */
+export type ScheduleRouteOptions = { move?: boolean };
+
+export const SCHEDULE_MOVE_MODE_PARAM = "mode";
+export const SCHEDULE_MOVE_MODE_VALUE = "move";
+
+function scheduleQuery(options?: ScheduleRouteOptions): string {
+  return options?.move ? `?${SCHEDULE_MOVE_MODE_PARAM}=${SCHEDULE_MOVE_MODE_VALUE}` : "";
+}
+
+export function todayScheduleRoute(options?: ScheduleRouteOptions): string {
+  return `/today/schedule${scheduleQuery(options)}`;
 }
 
 /** A past or future day. `date` is `YYYY-MM-DD`. */
@@ -85,8 +125,13 @@ export function dayRoute(date: string): string {
   return `/day/${date}`;
 }
 
-export function dayScheduleRoute(date: string): string {
-  return `/day/${date}/schedule`;
+export function dayScheduleRoute(date: string, options?: ScheduleRouteOptions): string {
+  return `/day/${date}/schedule${scheduleQuery(options)}`;
+}
+
+/** The journal — UX v1.1 §7.2 (DYN-18); read-only for a past day from Review. */
+export function journalRoute(date: string): string {
+  return `/day/${date}/journal`;
 }
 
 /** The item sheet, addressable because a notification deep-links to it. */
@@ -135,12 +180,63 @@ export function settingsHabitRoute(id: string): string {
   return `/settings/habits/${id}`;
 }
 
-export function settingsTemplatesRoute(): string {
-  return "/settings/templates";
+/*
+ * Settings → Your day (UX v1.3 §4.6; DAY-8): the first run's screens and the
+ * builder's parts without the frame. The fact screens are embedded; the
+ * block-kind rows open the block editor for that kind (`block/{kind}`);
+ * *Block order* is its own list (`order`).
+ */
+export type YourDayScreen =
+  | "shape"
+  | "work-days"
+  /** UX v1.2 §4.16 (RUN-12): the day plans and the builder, embedded. */
+  | "your-days"
+  /** UX v1.3 §4.6 (DAY-12): passages, links, the quote, the three lines — B8's screen. */
+  | "first-thing"
+  /** UX v1.3 §4.6 (DAY-8): the landscape and the ranking, embedded. */
+  | "morning-habits"
+  | "ranked"
+  /** UX v1.3 §4.6 (DAY-12): free time's landscape and ranking — B15a and B15b. */
+  | "free-time"
+  /** UX v1.2 §4.16 (RUN-11): the workouts and the focuses, embedded. */
+  | "training"
+  | "commitments"
+  | "closing-the-day"
+  | "focuses"
+  /** UX v1.3 §4.6 (DAY-12): the mode question, alone. */
+  | "each-morning";
+
+export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
+  "shape",
+  "work-days",
+  "your-days",
+  "first-thing",
+  "morning-habits",
+  "ranked",
+  "free-time",
+  "training",
+  "commitments",
+  "closing-the-day",
+  "focuses",
+  "each-morning",
+];
+
+export function settingsYourDayRoute(): string {
+  return "/settings/your-day";
 }
 
-export function settingsTemplateRoute(id: string): string {
-  return `/settings/templates/${id}`;
+export function settingsYourDayScreenRoute(screen: YourDayScreen): string {
+  return `/settings/your-day/${screen}`;
+}
+
+/** With a template id, the editor opens on that template; without, the kind's page decides. */
+export function settingsYourDayBlockRoute(kind: BlockKind, templateId?: string): string {
+  const base = `/settings/your-day/block/${kind}`;
+  return templateId ? `${base}?t=${encodeURIComponent(templateId)}` : base;
+}
+
+export function settingsYourDayOrderRoute(): string {
+  return "/settings/your-day/order";
 }
 
 /** Without a week, the week build opens on the current one. */
@@ -178,6 +274,23 @@ export function settingsShareRoute(): string {
 
 export function settingsAboutRoute(): string {
   return "/settings/about";
+}
+
+/* ---------------------------------------------------------------- legal -- */
+
+/**
+ * The two legal pages — SYS-3.
+ *
+ * PUBLIC, AND OUTSIDE THE THREE ROUTE GROUPS. A privacy policy a person has to
+ * sign in to read is not a privacy policy, and both the landing page's footer
+ * and About link to them. They have no shell and no gate.
+ */
+export function legalPrivacyRoute(): string {
+  return "/legal/privacy";
+}
+
+export function legalTermsRoute(): string {
+  return "/legal/terms";
 }
 
 /* --------------------------------------------------------------- helper -- */

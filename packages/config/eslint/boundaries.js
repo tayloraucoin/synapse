@@ -69,7 +69,10 @@ const PACKAGE_IMPORTS = {
     "auth",
   ],
   hooks: ["config", "constants", "types", "utils", "validators"],
-  ui: ["config", "constants", "types", "utils", "validators"],
+  // ui → hooks: the HEADLESS hooks only (`useOptimisticValue`, RUN-7 / TD-18).
+  // The conventions' "NOT hooks-data" stands — a hook that binds transport
+  // lives in apps/web/lib/hooks and never reaches here.
+  ui: ["config", "constants", "types", "utils", "validators", "hooks"],
 };
 
 const APP_IMPORTS = [
@@ -151,10 +154,14 @@ const RESTRICTED_EXTERNAL = [
   { module: "postgres", owners: ["db"] },
   { module: "drizzle-kit", owners: ["db"] },
   { module: "web-push", owners: ["api"] },
-  // The emoji picker is web rendering, so it stays behind @syn/ui's re-skin.
-  // An app or a service reaching for it directly would be a platform-bound
-  // dependency escaping the one place that owns rendering.
+  // Rendering engines stay behind @syn/ui's re-skin: the emoji picker, the
+  // sortable (dnd-kit) and the passage editor (tiptap + its Markdown bridge).
+  // An app or a service reaching for one directly would be a platform-bound
+  // dependency escaping the one place that owns rendering (UX v1.2 TD-16).
   { module: "frimousse", owners: ["ui"] },
+  { module: "@dnd-kit/*", owners: ["ui"] },
+  { module: "@tiptap/*", owners: ["ui"] },
+  { module: "tiptap-markdown", owners: ["ui"] },
 ];
 
 /**

@@ -86,6 +86,11 @@ const rawEnv = createEnv({
     // A shared registrable domain for the Supabase auth cookie. Unset = a
     // host-only cookie, which is correct for a single origin.
     NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN: z.string().optional(),
+
+    // ST-00's version line. Stamped by next.config.ts from package.json and
+    // the build date; never set by hand in an environment file.
+    NEXT_PUBLIC_APP_VERSION: z.string().optional(),
+    NEXT_PUBLIC_BUILD_DATE: z.string().optional(),
   },
   runtimeEnv: {
     DATABASE_ENVIRONMENT: process.env.DATABASE_ENVIRONMENT,
@@ -126,6 +131,8 @@ const rawEnv = createEnv({
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN:
       process.env.NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN,
+    NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
+    NEXT_PUBLIC_BUILD_DATE: process.env.NEXT_PUBLIC_BUILD_DATE,
   },
   emptyStringAsUndefined: true,
   skipValidation: process.env.SKIP_ENV_VALIDATION === "true",

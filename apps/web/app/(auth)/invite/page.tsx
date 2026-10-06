@@ -1,18 +1,16 @@
-import { Heading, Text } from "@syn/ui";
+import { redirect } from "next/navigation";
+
+import { AUTH_NOTICE } from "@/app/(auth)/_components/copy";
+import { signUpRoute, withNotice } from "@/lib/routes";
 
 /**
- * Placeholder — AU-02 Create account (invite). 
+ * The shared invite link (Epic 1 ST-11, cross-cutting §4.1).
  *
- * Replaced by the Epic 1 track. The `Heading` is here from day one so every
- * page has exactly one `h1` (cross-cutting §11) before any content exists.
+ * A redirect rather than a second sign-up screen. There are no invite tokens
+ * and no referral counts (official spec §4.1) — the link's only job is to
+ * carry the one line that says the app is free and the list is private, so it
+ * is a query flag on the one form.
  */
 export default function InvitePage() {
-  return (
-    <>
-      <Heading>AU-02 Create account (invite)</Heading>
-      <Text as="p" tone="secondary">
-        The shared link — AU-02 with the invite line.
-      </Text>
-    </>
-  );
+  redirect(withNotice(signUpRoute(), AUTH_NOTICE.invite));
 }

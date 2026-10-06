@@ -1,18 +1,35 @@
-import { Heading, Text } from "@syn/ui";
+import { getServerApi } from "@/lib/trpc/server";
+
+import { TodayScreen } from "./_components/today-screen";
 
 /**
- * Placeholder — LS-01 Plain List. 
+ * LS-01 — today, in one of two states (UX v1.1 R6, DYN-14).
  *
- * Replaced by the Epic 2 track. The `Heading` is here from day one so every
- * page has exactly one `h1` (cross-cutting §11) before any content exists.
+ * THE DAY IS READ ON THE SERVER and handed to the client as `initialData`, so
+ * the first paint is the real day rather than a skeleton that resolves a beat
+ * later. Unconfirmed, the quick-pick is read the same way; the client screen
+ * branches on `confirmedAt` and flips to the list when *Set the day* lands.
+ *
+ * WHICH DAY "TODAY" IS depends on the person's close time, so it comes from
+ * `day.today` rather than from the server's calendar date. At 01:00 under a
+ * 03:00 close, today is still yesterday's date — and this is the screen where
+ * getting that wrong would show someone an empty list at the end of a long
+ * evening.
  */
-export default function TodayPage() {
+export default async function TodayPage() {
+  const api = await getServerApi();
+  const { todayKey } = await api.day.today();
+  const day = await api.day.get({ date: todayKey });
+  const pick = day.confirmedAt === null ? await api.day.quickPick({ date: todayKey }) : null;
+  // UX v1.2 §5.3 (RUN-13): under *Build each morning* the pick opens expanded.
+  const me = pick === null ? null : await api.user.me();
+
   return (
-    <>
-      <Heading>LS-01 Plain List</Heading>
-      <Text as="p" tone="secondary">
-        Today, top to bottom, in time order.
-      </Text>
-    </>
+    <TodayScreen
+      dateKey={todayKey}
+      initialDay={day}
+      initialPick={pick}
+      pickExpanded={me?.morningMode === "build_each_morning"}
+    />
   );
 }

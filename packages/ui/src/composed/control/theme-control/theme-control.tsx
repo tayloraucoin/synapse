@@ -33,6 +33,15 @@ import { THEME_CONTROL_COPY, THEME_OPTIONS, type ThemeOption } from "./copy";
 export interface ThemeControlProps {
   label?: React.ReactNode;
   helperText?: React.ReactNode;
+  /**
+   * Called with the chosen option AFTER the theme has been applied.
+   *
+   * The control still owns `setTheme` — the visible change must not wait on a
+   * caller, and a control that only reported the choice would let one consumer
+   * forget to apply it. ST-09 uses this to persist the choice to the account,
+   * which is the cross-device source; the local store is the per-device cache.
+   */
+  onThemeChange?: (theme: ThemeOption) => void;
   className?: string;
 }
 
@@ -50,6 +59,7 @@ function useHasHydrated(): boolean {
 export function ThemeControl({
   label = THEME_CONTROL_COPY.label,
   helperText = THEME_CONTROL_COPY.helperText,
+  onThemeChange,
   className,
 }: ThemeControlProps) {
   const { theme, setTheme } = useAppTheme();
@@ -93,7 +103,10 @@ export function ThemeControl({
                 name={groupName}
                 value={option}
                 checked={isSelected}
-                onChange={() => setTheme(option)}
+                onChange={() => {
+                  setTheme(option);
+                  onThemeChange?.(option);
+                }}
                 // `--primary` is neutral-800 light / neutral-100 dark, which
                 // is exactly the pair this needs — so no `dark:` variant.
                 className="size-5 shrink-0 accent-(--primary)"

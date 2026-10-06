@@ -70,3 +70,60 @@ export const Disabled: StoryObj<typeof Stepper17> = {
     disabled: true,
   },
 };
+
+/**
+ * UX v1.2 §4.9 — seven 40px squares (304px with the gaps) on one line in a
+ * 375px sheet with 16px gutters; 4+3 at 200% text. The wrapper here undoes
+ * the meta decorator's 32px padding so the story measures like the sheet.
+ */
+export const Row: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<Stepper17Value | null>(4);
+    return (
+      <div className="-mx-(--space-6) max-w-[343px]">
+        <Stepper17 layout="row" label="Priority" value={value} onChange={setValue} />
+      </div>
+    );
+  },
+};
+
+type OptimisticArgs = { slowNetwork: boolean; failCommits: boolean };
+
+/**
+ * UX v1.2 (RUN-7): the chosen cell fills on the tap; `onCommit` fires once
+ * after 400ms of quiet; the group's edge pulses while the write is out and
+ * every cell stays tappable. A failed write reverts to the saved value.
+ */
+export const Optimistic: StoryObj<OptimisticArgs> = {
+  args: { slowNetwork: true, failCommits: false },
+  argTypes: {
+    slowNetwork: { control: "boolean" },
+    failCommits: { control: "boolean" },
+  },
+  render: function Render(args) {
+    const [saved, setSaved] = React.useState<Stepper17Value | null>(4);
+    const [log, setLog] = React.useState<string[]>([]);
+    return (
+      <div className="flex flex-col gap-(--space-4)">
+        <Stepper17
+          layout="row"
+          label="Priority"
+          value={saved}
+          onCommit={async (next) => {
+            await new Promise((resolve) => setTimeout(resolve, args.slowNetwork ? 2000 : 100));
+            // `Error` is a story name in this file; the global is reached by name.
+            if (args.failCommits) throw new globalThis.Error("offline");
+            setSaved(next);
+            setLog((entries) => [...entries, `commit ${next}`]);
+          }}
+          onCommitError={() => setLog((entries) => [...entries, "reverted"])}
+        />
+        <ol className="text-text-secondary m-0 list-decimal ps-(--space-5) text-(length:--fs-caption)">
+          {log.map((entry, index) => (
+            <li key={index}>{entry}</li>
+          ))}
+        </ol>
+      </div>
+    );
+  },
+};

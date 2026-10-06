@@ -11,6 +11,7 @@
     "./eslint/next-js": "./eslint/next.js",
     "./eslint/react-internal": "./eslint/react-internal.js",
     "./eslint/boundaries": "./eslint/boundaries.js",
+    "./eslint/no-emoji": "./eslint/no-emoji.js",
     "./prettier": "./prettier/index.js",
     "./tailwind/preset.css": "./tailwind/preset.css",
     "./tsconfig/base.json": "./tsconfig/base.json",

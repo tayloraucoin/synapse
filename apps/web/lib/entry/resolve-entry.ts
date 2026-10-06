@@ -1,6 +1,7 @@
 import { sanitizeNextPath } from "@syn/utils";
 
-import { setupRoute, todayRoute, verifyRoute } from "@/lib/routes";
+import { SETUP_TOTAL_STEPS } from "@/app/(setup)/_components/copy";
+import { orientRoute, setupRoute, todayRoute, verifyRoute } from "@/lib/routes";
 
 /**
  * The entry decision tree — cross-cutting §4.2, run on every cold open and
@@ -23,8 +24,18 @@ export const SETUP_REDIRECT_LAUNCH_LIMIT = 3;
 export type EntryProfile = {
   /** Null until first run is finished. */
   firstRunCompletedAt: Date | string | null;
-  /** Which step to resume at, 1–5. */
+  /** Which step to resume at, 1–5 (UX v1.3 §4); a v1.2 value above 5 clamps to 4. */
   firstRunStep: number | null;
+};
+
+/**
+ * Today's waking state — UX v1.1 §5.1: the orient frame comes before any tab
+ * while the day has no `woke_at` and is not closed. Null when the caller has
+ * no day to ask about (no account row yet).
+ */
+export type EntryToday = {
+  wokeAt: Date | string | null;
+  closed: boolean;
 };
 
 export type ResolveEntryInput = {
@@ -38,6 +49,7 @@ export type ResolveEntryInput = {
    * sign-in redirect remembered. Honoured once setup is not owed.
    */
   intendedRoute?: string | null;
+  today?: EntryToday | null;
 };
 
 /**
@@ -52,6 +64,7 @@ export function resolveEntry({
   profile,
   launchCount,
   intendedRoute,
+  today = null,
 }: ResolveEntryInput): string {
   // §4.2 step 2 — an unverified email blocks everything else.
   if (!isEmailVerified) {
@@ -66,6 +79,14 @@ export function resolveEntry({
     return setupRoute(step);
   }
 
+  // UX v1.1 §5.1 — the orient frame before any tab, once per day: the day has
+  // no wake yet and is not closed. A deep link waits behind it; a closed day
+  // (auto-closed at 03:00 before the frame was ever opened) is skipped, and
+  // the next day's frame is the next open's.
+  if (today !== null && today.wokeAt === null && !today.closed) {
+    return orientRoute();
+  }
+
   // §4.2 step 4/5 — a deep link, else today. Pending reviews never redirect;
   // they surface as the status line and the Review dot.
   if (intendedRoute) {
@@ -74,8 +95,16 @@ export function resolveEntry({
   return todayRoute();
 }
 
-/** FR-01…05. Anything out of range resumes at the beginning. */
-function clampSetupStep(step: number | null | undefined): number {
-  if (!step || step < 1 || step > 5) return 1;
+/**
+ * Where a stored `first_run_step` resumes — UX v1.3 §4, TD-31 (DAY-8).
+ *
+ * Nothing stored, or below 1, starts at the beginning. ABOVE THE FIVE is an
+ * account left mid-flow under v1.2's fourteen: every screen it had reached
+ * past 2 is now a part of *Your days* or behind it, so it resumes at screen 4
+ * rather than being thrown back to the start or sent to a 404.
+ */
+export function clampSetupStep(step: number | null | undefined): number {
+  if (!step || step < 1) return 1;
+  if (step > SETUP_TOTAL_STEPS) return 4;
   return Math.floor(step);
 }

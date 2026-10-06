@@ -1,18 +1,31 @@
-import { Heading, Text } from "@syn/ui";
+import { AuthFrame } from "@syn/ui";
+
+import { AUTH_COPY, AUTH_NOTICE } from "@/app/(auth)/_components/copy";
+
+import { SignUpForm } from "./_components/sign-up-form";
 
 /**
- * Placeholder — AU-02 Create account. 
+ * AU-02 Create account.
  *
- * Replaced by the Epic 1 track. The `Heading` is here from day one so every
- * page has exactly one `h1` (cross-cutting §11) before any content exists.
+ * The invite line is a query flag, not a second screen: `/invite` redirects
+ * here with `notice=invite`, so the shared link and the *Create an account*
+ * link land on one form that cannot drift into two.
  */
-export default function SignUpPage() {
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const fromInvite = params.notice === AUTH_NOTICE.invite;
+
   return (
-    <>
-      <Heading>AU-02 Create account</Heading>
-      <Text as="p" tone="secondary">
-        Name, email, password.
-      </Text>
-    </>
+    <AuthFrame
+      heading={AUTH_COPY.signUp.heading}
+      lead={fromInvite ? AUTH_COPY.signUp.inviteLine : undefined}
+      trustLine
+    >
+      <SignUpForm />
+    </AuthFrame>
   );
 }

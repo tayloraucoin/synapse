@@ -52,6 +52,24 @@ export interface WebPushPayload {
   icon?: string;
   badge?: string;
   url?: string;
+  /**
+   * Platform-permitting buttons — *Start* · *Done* on N1, *Review* · *Later*
+   * on N4 (official spec §8.6). Older iOS shows none of them, which is why the
+   * BODY TAP always lands correctly on its own: an action is a shortcut, never
+   * the only way through.
+   */
+  actions?: Array<{ action: string; title: string }>;
+  /**
+   * Where each action goes. The service worker reads `event.action` and falls
+   * back to `url`, so an action with no entry here behaves like a body tap
+   * rather than doing nothing.
+   */
+  actionUrls?: Record<string, string>;
+  /**
+   * N4 only: the day *Later* defers. The worker posts it rather than parsing
+   * a date out of a URL, so the two cannot drift apart.
+   */
+  snoozeDate?: string;
 }
 
 export interface WebPushSubscriptionData {

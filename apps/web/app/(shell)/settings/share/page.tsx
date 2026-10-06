@@ -1,18 +1,24 @@
-import { Heading, Text } from "@syn/ui";
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { env } from "@/env";
+import { inviteRoute } from "@/lib/routes";
+
+import { SETTINGS_COPY } from "../_components/copy";
+import { SharePanel } from "./_components/share-panel";
 
 /**
- * Placeholder — ST-11 Share the app. 
+ * ST-11 Share the app.
  *
- * Replaced by the Epic 1 track. The `Heading` is here from day one so every
- * page has exactly one `h1` (cross-cutting §11) before any content exists.
+ * The link is the tier's own origin plus `/invite`, built on the server from
+ * `env.siteUrl`. A client leaf reading `window.location.origin` would hand out
+ * whatever host the person happens to be on — a preview deployment, a LAN
+ * address during development — and those links work for nobody else.
  */
 export default function SettingsSharePage() {
   return (
-    <>
-      <Heading>ST-11 Share the app</Heading>
-      <Text as="p" tone="secondary">
-        The invite link.
-      </Text>
-    </>
+    <PageFrame
+      header={<ShellPageHeader title={SETTINGS_COPY.shareTheApp} showBack />}
+    >
+      <SharePanel url={`${env.siteUrl}${inviteRoute()}`} />
+    </PageFrame>
   );
 }

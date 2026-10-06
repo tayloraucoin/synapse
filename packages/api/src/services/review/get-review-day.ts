@@ -1,0 +1,543 @@
+import { and, asc, eq, inArray } from "drizzle-orm";
+
+import { dayItems, days, misses, reasons, shifts, type RlsClient } from "@syn/db";
+import type {
+  BlockKind,
+  DayItemView,
+  DecisionState,
+  MissTier,
+  ReviewMode,
+} from "@syn/types";
+import { computeAdherence, type AdherenceResult } from "@syn/utils";
+
+import { getDay } from "../day/get-day";
+import { decisionStateFor } from "./decision-state";
+import { readMisses, toScoredItems } from "./to-scored";
+
+/**
+ * Everything the Day Review renders — REV-2's read, built here so the number
+ * and the rows it describes come from one query.
+ *
+ * `result` IS NULL UNTIL THE DAY IS REVIEWED. The number comes AFTER the
+ * decisions, not alongside them: a percent computed over items nobody has
+ * decided yet would be a guess shown as a fact, and the person would see it
+ * move as they answered. Epic 3's whole sequence is decide, then count.
+ *
+ * IT RECOMPUTES EVERY TIME. Nothing is stored (official spec §3.11), so a day
+ * reviewed last week whose items were since undone from the List shows the new
+ * number — with `review_edited_at` saying the record was touched. A cached
+ * percent would be the one number in the product that could be wrong.
+ */
+export type DecisionItemView = {
+  item: DayItemView;
+  state: DecisionState;
+  decision: {
+    tier: MissTier;
+    reasonKey: string | null;
+    reasonLabel: string | null;
+    reasonText: string | null;
+    tradedUpItemId: string | null;
+  } | null;
+  verdict: "not-counted" | "half" | "missed" | null;
+  carriedCount: number;
+  carriedSince: string | null;
+  shiftContext: { deltaMin: number; at: Date; reasonLabel: string | null } | null;
+};
+
+/**
+ * One reflection block's data — DR-06.
+ *
+ * `DayItemView` deliberately carries none of this: it is the row as the List
+ * and the Schedule draw it, and three fields nobody outside the review reads
+ * would be three fields every consumer has to skip past. The axes come from the
+ * item's SNAPSHOT (`reflection_axes`), so archiving the habit later does not
+ * change what the day says was asked.
+ */
+export type ReflectionItemView = {
+  item: DayItemView;
+  axes: string[];
+  ratings: Record<string, number>;
+  note: string | null;
+};
+
+export type ReviewDayView = {
+  dateKey: string;
+  mode: ReviewMode;
+  /** The day's own zone — every clock on this screen is formatted in it. */
+  timezone: string;
+  /**
+   * How many items could carry a reflection, and how many have one — DR-06's
+   * section header. The body is REV-3's; the count is a fact about the day and
+   * belongs to the day's read model.
+   */
+  reflections: { rateable: number; rated: number };
+  /** DR-06's bodies, in the same order the count above was taken. */
+  reflectionItems: ReflectionItemView[];
+  closedAt: Date | null;
+  closeReason: "manual" | "auto" | null;
+  reviewedAt: Date | null;
+  reviewEditedAt: Date | null;
+  summary: {
+    done: number;
+    assigned: number;
+    moved: number;
+    notAssigned: number;
+    cut: number;
+  };
+  toDecide: DecisionItemView[];
+  cut: DecisionItemView[];
+  doneItems: DayItemView[];
+  /**
+   * The items still running — DR-04's picker offers them alongside the done
+   * ones. They appear in none of the three collections above by design: an
+   * active item is not owed a decision and is not finished, so it is listed
+   * here rather than smuggled into one of them.
+   */
+  activeItems: DayItemView[];
+  shifts: Array<{
+    id: string;
+    at: Date;
+    deltaMin: number;
+    reasonLabel: string | null;
+    tier: MissTier;
+  }>;
+  result: AdherenceResult | null;
+  pendingCount: number;
+
+  /* ---- UX v1.1 §8.1, §7.3 (DYN-18, DYN-19) ---- */
+  /** The morning's intention, in the person's words, or null. */
+  intention: string | null;
+  /** The day's blocks in order — the review's section headers and the work line. */
+  blocks: Array<{
+    id: string;
+    kind: BlockKind;
+    name: string | null;
+    startLabel: string | null;
+    endLabel: string | null;
+  }>;
+  /** Items Adjust shortened (`shifts.shortened_item_ids`, across the day's shifts). */
+  shortenedIds: string[];
+  /** Wind-down items still waiting after devices-off — the confirm panel's rows. */
+  lastNight: DayItemView[];
+  /** The focus's title, for the work line. */
+  focusLabel: string | null;
+};
+
+/** Never walk a carry chain further than this — a cycle would not terminate. */
+const CARRY_WALK_CAP = 60;
+
+export async function getReviewDay(
+  rls: RlsClient,
+  userId: string,
+  dateKey: string,
+  context: { todayKey: string; timeZone: string; dayCloseTime: string; now: Date },
+): Promise<ReviewDayView> {
+  // The rendered rows are USE-1's, so the review shows exactly what the List
+  // showed — one mapping, two screens.
+  const day = await getDay(rls, userId, dateKey, context);
+
+  const raw = await rls.execute(async (tx) => {
+    const [row] = await tx
+      .select({
+        id: days.id,
+        closedAt: days.closedAt,
+        closeReason: days.closeReason,
+        reviewedAt: days.reviewedAt,
+        reviewEditedAt: days.reviewEditedAt,
+        intention: days.intention,
+      })
+      .from(days)
+      .where(and(eq(days.userId, userId), eq(days.date, dateKey)))
+      .limit(1);
+
+    if (!row) return null;
+
+    const items = await tx
+      .select({
+        id: dayItems.id,
+        priority: dayItems.priority,
+        timeMode: dayItems.timeMode,
+        scheduledStart: dayItems.scheduledStart,
+        scheduledEnd: dayItems.scheduledEnd,
+        originalScheduledStart: dayItems.originalScheduledStart,
+        doneAt: dayItems.doneAt,
+        deferredAt: dayItems.deferredAt,
+        assignmentState: dayItems.assignmentState,
+        completionState: dayItems.completionState,
+        carriedFromItemId: dayItems.carriedFromItemId,
+        habitId: dayItems.habitId,
+        reflectionAxes: dayItems.reflectionAxes,
+        reflectionRatings: dayItems.reflectionRatings,
+        notesReflection: dayItems.notesReflection,
+      })
+      .from(dayItems)
+      .where(and(eq(dayItems.dayId, row.id), eq(dayItems.userId, userId)))
+      .orderBy(asc(dayItems.scheduledStart), asc(dayItems.sortOrder));
+
+    return { day: row, items };
+  });
+
+  if (raw === null) {
+    return emptyReview(dateKey, day.timezone);
+  }
+
+  const itemIds = raw.items.map((item) => item.id);
+  const missRows = await readMisses(rls, userId, itemIds);
+  const scored = await toScoredItems(rls, userId, raw.items, missRows);
+  const result = computeAdherence(scored);
+
+  // The decisions, with their labels and their context.
+  const detail = await rls.execute(async (tx) => {
+    const fullMisses =
+      itemIds.length === 0
+        ? []
+        : await tx
+            .select({
+              dayItemId: misses.dayItemId,
+              tier: misses.tier,
+              reasonKey: misses.reasonKey,
+              reasonText: misses.reasonText,
+              resolvedBy: misses.resolvedBy,
+              shiftId: misses.shiftId,
+              tradedUpItemId: misses.tradedUpItemId,
+            })
+            .from(misses)
+            .where(
+              and(
+                eq(misses.userId, userId),
+                inArray(misses.dayItemId, itemIds),
+              ),
+            );
+
+    // Archived reasons are still rows, and a record made under one still
+    // needs its label (the ticket's own edge case).
+    const labels = await tx
+      .select({ key: reasons.key, label: reasons.label })
+      .from(reasons)
+      .where(eq(reasons.userId, userId));
+
+    const shiftRows = await tx
+      .select({
+        id: shifts.id,
+        at: shifts.at,
+        deltaMin: shifts.deltaMin,
+        reasonKey: shifts.reasonKey,
+        reasonText: shifts.reasonText,
+        tier: shifts.tier,
+        shortenedItemIds: shifts.shortenedItemIds,
+      })
+      .from(shifts)
+      .where(and(eq(shifts.userId, userId), eq(shifts.dayId, raw.day.id)))
+      .orderBy(asc(shifts.at));
+
+    return { fullMisses, labels, shiftRows };
+  });
+
+  const labelByKey = new Map(detail.labels.map((row) => [row.key, row.label]));
+  const missByItem = new Map(
+    detail.fullMisses.map((miss) => [miss.dayItemId, miss]),
+  );
+
+  const carriedSince = await resolveCarriedSince(rls, userId, raw.items);
+
+  // An item with configured axes can be reflected on; one with any rating has
+  // been. Both are read off the snapshot, so archiving the habit later does
+  // not change what the day says happened.
+  const reflectableIds = new Set(
+    raw.items
+      .filter((row) => row.reflectionAxes.length > 0)
+      .map((row) => row.id),
+  );
+  const ratedIds = new Set(
+    raw.items
+      .filter((row) => Object.keys(row.reflectionRatings).length > 0)
+      .map((row) => row.id),
+  );
+
+  const dayClosed = raw.day.closedAt !== null;
+  // UX v1.1 §8.1 (DYN-19): the day by block; `parts` is no longer read here.
+  const viewByItemId = new Map<string, DayItemView>();
+  for (const block of day.blocks) {
+    for (const view of block.items) viewByItemId.set(view.id, view);
+  }
+  for (const view of day.unblocked) viewByItemId.set(view.id, view);
+  for (const view of day.notAssigned) viewByItemId.set(view.id, view);
+  for (const view of day.cutByShift) viewByItemId.set(view.id, view);
+
+  /*
+   * §7.3 — the wind-down items still waiting after devices-off: `upcoming`
+   * (confirm in the morning) or `not_confirmed` (R16: resolvable here). They
+   * are the panel's rows and are kept out of the decision column.
+   */
+  const lastNightIds = new Set(
+    (day.blocks.find((block) => block.kind === "wind_down")?.items ?? [])
+      .filter((view) => view.state === "confirm-later" || view.state === "not-confirmed")
+      .map((view) => view.id),
+  );
+
+  function decisionViewFor(itemId: string): DecisionItemView | null {
+    const view = viewByItemId.get(itemId);
+    const row = raw?.items.find((candidate) => candidate.id === itemId);
+    if (!view || !row) return null;
+
+    const miss = missByItem.get(itemId) ?? null;
+    const verdict = result.perItem[itemId]?.verdict ?? null;
+    const shift =
+      miss?.shiftId === null || miss?.shiftId === undefined
+        ? null
+        : (detail.shiftRows.find((row) => row.id === miss.shiftId) ?? null);
+
+    return {
+      item: view,
+      state: decisionStateFor(row, miss, dayClosed),
+      decision:
+        miss === null
+          ? null
+          : {
+              tier: miss.tier,
+              reasonKey: miss.reasonKey,
+              reasonLabel:
+                (miss.reasonKey === null
+                  ? null
+                  : (labelByKey.get(miss.reasonKey) ?? null)) ??
+                miss.reasonText,
+              reasonText: miss.reasonText,
+              tradedUpItemId: miss.tradedUpItemId,
+            },
+      verdict:
+        verdict === "not-counted" || verdict === "half" || verdict === "missed"
+          ? verdict
+          : null,
+      carriedCount: carriedSince.get(itemId)?.count ?? 0,
+      carriedSince: carriedSince.get(itemId)?.since ?? null,
+      shiftContext:
+        shift === null
+          ? null
+          : {
+              deltaMin: shift.deltaMin,
+              at: shift.at,
+              reasonLabel:
+                (shift.reasonKey === null
+                  ? null
+                  : (labelByKey.get(shift.reasonKey) ?? null)) ??
+                shift.reasonText,
+            },
+    };
+  }
+
+  const toDecide = raw.items
+    .filter(
+      (row) =>
+        row.assignmentState === "assigned" &&
+        row.completionState !== "done" &&
+        row.completionState !== "active" &&
+        !lastNightIds.has(row.id),
+    )
+    .map((row) => decisionViewFor(row.id))
+    .filter((view): view is DecisionItemView => view !== null);
+
+  const cut = raw.items
+    .filter((row) => row.assignmentState === "cut_by_shift")
+    .map((row) => decisionViewFor(row.id))
+    .filter((view): view is DecisionItemView => view !== null);
+
+  const doneItems = raw.items
+    .filter((row) => row.completionState === "done")
+    .map((row) => viewByItemId.get(row.id))
+    .filter((view): view is DayItemView => view !== undefined);
+
+  const activeItems = raw.items
+    .filter(
+      (row) =>
+        row.assignmentState === "assigned" && row.completionState === "active",
+    )
+    .map((row) => viewByItemId.get(row.id))
+    .filter((view): view is DayItemView => view !== undefined);
+
+  const pendingCount = Object.values(result.perItem).filter(
+    (entry) => entry.verdict === "pending",
+  ).length;
+
+  /*
+   * DR-06's blocks — the same rule the count uses, so the heading and the body
+   * can never disagree about what is rateable.
+   *
+   * ALREADY-RATED ITEMS ARE LAST (Epic 3 §2). The section is a prompt, and the
+   * things still worth answering belong at the top of it; ordering by "has a
+   * rating" rather than by time is the one place in the review where the day's
+   * sequence is not the right order.
+   */
+  const reflectionRows = raw.items.filter(
+    (row) => reflectableIds.has(row.id) || row.completionState === "done",
+  );
+
+  const reflectionItems: ReflectionItemView[] = [
+    ...reflectionRows.filter((row) => !ratedIds.has(row.id)),
+    ...reflectionRows.filter((row) => ratedIds.has(row.id)),
+  ]
+    .map((row) => {
+      const view = viewByItemId.get(row.id);
+      if (!view) return null;
+      return {
+        item: view,
+        axes: [...row.reflectionAxes],
+        ratings: { ...row.reflectionRatings },
+        note: row.notesReflection,
+      };
+    })
+    .filter((entry): entry is ReflectionItemView => entry !== null);
+
+  /*
+   * THE MODE IS ABOUT WHAT THE SCREEN IS FOR, not about the calendar.
+   * `live` is a day still being lived; `pending` is a closed day with
+   * decisions owed; `edit` is a day already reviewed, where the screen becomes
+   * a record with a way to change it.
+   */
+  const mode: ReviewMode =
+    raw.day.reviewedAt !== null ? "edit" : dayClosed ? "pending" : "live";
+
+  return {
+    dateKey,
+    mode,
+    timezone: day.timezone,
+    reflections: {
+      // An item can be reflected on when its habit configured axes, or once it
+      // is done — the same rule the item sheet uses to show the block.
+      rateable: raw.items.filter(
+        (row) =>
+          reflectableIds.has(row.id) || row.completionState === "done",
+      ).length,
+      rated: ratedIds.size,
+    },
+    reflectionItems,
+    closedAt: raw.day.closedAt,
+    closeReason: raw.day.closeReason,
+    reviewedAt: raw.day.reviewedAt,
+    reviewEditedAt: raw.day.reviewEditedAt,
+    summary: {
+      done: doneItems.length,
+      assigned: raw.items.filter((row) => row.assignmentState === "assigned")
+        .length,
+      moved: result.offSchedule.moved,
+      notAssigned: raw.items.filter(
+        (row) => row.assignmentState === "not_assigned",
+      ).length,
+      cut: cut.length,
+    },
+    toDecide,
+    cut,
+    doneItems,
+    activeItems,
+    shifts: detail.shiftRows.map((row) => ({
+      id: row.id,
+      at: row.at,
+      deltaMin: row.deltaMin,
+      reasonLabel:
+        (row.reasonKey === null ? null : (labelByKey.get(row.reasonKey) ?? null)) ??
+        row.reasonText,
+      tier: row.tier,
+    })),
+    // The number comes after the decisions.
+    result: raw.day.reviewedAt === null ? null : result,
+    pendingCount,
+    intention: raw.day.intention,
+    blocks: day.blocks.map((block) => ({
+      id: block.id,
+      kind: block.kind,
+      name: block.name,
+      startLabel: block.startLabel,
+      endLabel: block.endLabel,
+    })),
+    shortenedIds: [...new Set(detail.shiftRows.flatMap((row) => row.shortenedItemIds ?? []))],
+    lastNight: [...lastNightIds]
+      .map((id) => viewByItemId.get(id))
+      .filter((view): view is DayItemView => view !== undefined),
+    focusLabel: day.focusLabel,
+  };
+}
+
+/**
+ * How many days an item has been carried, and since when.
+ *
+ * The walk is capped: `carried_from_item_id` is a chain a person builds one
+ * day at a time, but a bad migration or a hand-edited row could close it into
+ * a cycle, and a review screen must not be the thing that hangs.
+ */
+async function resolveCarriedSince(
+  rls: RlsClient,
+  userId: string,
+  items: readonly { id: string; carriedFromItemId: string | null }[],
+): Promise<Map<string, { count: number; since: string | null }>> {
+  const out = new Map<string, { count: number; since: string | null }>();
+  const chained = items.filter((item) => item.carriedFromItemId !== null);
+  if (chained.length === 0) return out;
+
+  for (const item of chained) {
+    let cursor = item.carriedFromItemId;
+    let count = 0;
+    let since: string | null = null;
+    const seen = new Set<string>();
+
+    while (cursor !== null && count < CARRY_WALK_CAP) {
+      if (seen.has(cursor)) break;
+      seen.add(cursor);
+
+      const rows: Array<{ carriedFromItemId: string | null; date: string }> =
+        await rls.execute((tx) =>
+          tx
+            .select({
+              carriedFromItemId: dayItems.carriedFromItemId,
+              date: days.date,
+            })
+            .from(dayItems)
+            .innerJoin(days, eq(days.id, dayItems.dayId))
+            .where(
+              and(eq(dayItems.id, cursor as string), eq(dayItems.userId, userId)),
+            )
+            .limit(1),
+        );
+
+      const row = rows[0];
+      if (!row) break;
+
+      count += 1;
+      since = String(row.date);
+      cursor = row.carriedFromItemId;
+    }
+
+    out.set(item.id, { count, since });
+  }
+
+  return out;
+}
+
+/** A date with no `days` row — nothing was ever planned, so nothing to review. */
+function emptyReview(
+  dateKey: string,
+  timezone: string,
+): ReviewDayView {
+  return {
+    dateKey,
+    mode: "live",
+    timezone,
+    reflections: { rateable: 0, rated: 0 },
+    reflectionItems: [],
+    closedAt: null,
+    closeReason: null,
+    reviewedAt: null,
+    reviewEditedAt: null,
+    summary: { done: 0, assigned: 0, moved: 0, notAssigned: 0, cut: 0 },
+    toDecide: [],
+    cut: [],
+    doneItems: [],
+    activeItems: [],
+    shifts: [],
+    result: null,
+    pendingCount: 0,
+    intention: null,
+    blocks: [],
+    shortenedIds: [],
+    lastNight: [],
+    focusLabel: null,
+  };
+}

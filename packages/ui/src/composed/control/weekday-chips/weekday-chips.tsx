@@ -35,11 +35,45 @@ const DAYS: readonly { value: Weekday; initial: string; name: string }[] = [
   { value: 0, initial: "S", name: "Sunday" },
 ];
 
+/**
+ * UX v1.1 (DYN-7): `fixtures.weekdays`, `habits.typical_days` and
+ * `users.work_days` count Monday as 0 (`@syn/types` `Weekday`), while this
+ * control has always spoken `Date.getDay()` (Sunday as 0). `indexing="monday"`
+ * makes the value Monday-first in and out, so a caller storing a fixture's
+ * days never carries an offset in its own code — the two conventions meet
+ * here and nowhere else.
+ */
+export type WeekdayIndexing = "date" | "monday";
+
+/** `Date.getDay()` → Monday-first. */
+function toMondayFirst(day: Weekday): Weekday {
+  return ((day + 6) % 7) as Weekday;
+}
+
+/** Monday-first → `Date.getDay()`. */
+function toDateDay(day: Weekday): Weekday {
+  return ((day + 1) % 7) as Weekday;
+}
+
 export interface WeekdayChipsProps {
   value: ReadonlyArray<Weekday>;
   onChange: (next: Weekday[]) => void;
   label: React.ReactNode;
   disabled?: boolean;
+  /** Which convention `value` and `onChange` speak. Default: `Date.getDay()`. */
+  indexing?: WeekdayIndexing;
+  /**
+   * UX v1.2 §4.11 (RUN-7) — a leading *Flexible* chip: set, it clears every
+   * day and renders ink; picking a day clears it. `undefined` hides the chip.
+   */
+  flexible?: boolean;
+  onFlexible?: (flexible: boolean) => void;
+  flexibleLabel?: string;
+  /**
+   * UX v1.2 §4.13a (RUN-12) — a word beneath a chip, in `value`'s indexing:
+   * the other plan that holds the day (*Day A's*). Read after the day's name.
+   */
+  notes?: Partial<Record<Weekday, string>>;
   className?: string;
 }
 
@@ -48,16 +82,35 @@ export function WeekdayChips({
   onChange,
   label,
   disabled = false,
+  indexing = "date",
+  flexible,
+  onFlexible,
+  flexibleLabel = "Flexible",
+  notes,
   className,
 }: WeekdayChipsProps) {
   const groupLabelId = React.useId();
-  const selected = new Set(value);
+  const selected = new Set(indexing === "monday" ? value.map(toDateDay) : value);
+  const showFlexible = flexible !== undefined;
+  const noteFor = (day: Weekday): string | undefined =>
+    notes?.[indexing === "monday" ? toMondayFirst(day) : day];
+  const anyNote = DAYS.some((day) => noteFor(day.value) !== undefined);
 
   const toggle = (day: Weekday) => {
     const next = new Set(selected);
     if (next.has(day)) next.delete(day);
     else next.add(day);
-    onChange(DAYS.map((d) => d.value).filter((d) => next.has(d)));
+    const ordered = DAYS.map((d) => d.value).filter((d) => next.has(d));
+    onChange(indexing === "monday" ? ordered.map(toMondayFirst) : ordered);
+    // A day is a day; the week is no longer flexible.
+    if (flexible) onFlexible?.(false);
+  };
+
+  const toggleFlexible = () => {
+    const next = !flexible;
+    onFlexible?.(next);
+    // Flexible clears the days — the two are one answer.
+    if (next && value.length > 0) onChange([]);
   };
 
   return (
@@ -71,33 +124,64 @@ export function WeekdayChips({
       </Text>
 
       <div className="flex flex-wrap gap-(--space-1)">
+        {showFlexible ? (
+          <label
+            className={cn(
+              "inline-flex h-(--target) cursor-pointer items-center justify-center px-(--space-3)",
+              "rounded-(--radius) text-(length:--fs-body) font-medium",
+              "transition-colors duration-(--dur-state) ease-(--ease-settle)",
+              "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+              flexible
+                ? "bg-primary text-primary-foreground border border-transparent"
+                : "border-edge text-ink border hover:bg-surface",
+              disabled && "pointer-events-none opacity-40",
+            )}
+          >
+            <input
+              type="checkbox"
+              checked={flexible}
+              disabled={disabled}
+              onChange={toggleFlexible}
+              className="sr-only"
+            />
+            <span>{flexibleLabel}</span>
+          </label>
+        ) : null}
         {DAYS.map((day) => {
           const isOn = selected.has(day.value);
+          const note = noteFor(day.value);
 
           return (
-            <label
-              key={day.name}
-              className={cn(
-                "inline-flex size-(--target) cursor-pointer items-center justify-center",
-                "rounded-(--radius) text-(length:--fs-body) font-medium",
-                "transition-colors duration-(--dur-state) ease-(--ease-settle)",
-                "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
-                isOn
-                  ? "bg-primary text-primary-foreground border border-transparent"
-                  : "border-edge text-ink border hover:bg-surface",
-                disabled && "pointer-events-none opacity-40",
-              )}
-            >
-              <input
-                type="checkbox"
-                checked={isOn}
-                disabled={disabled}
-                onChange={() => toggle(day.value)}
-                className="sr-only"
-              />
-              <span aria-hidden="true">{day.initial}</span>
-              <span className="sr-only">{day.name}</span>
-            </label>
+            <span key={day.name} className="inline-flex flex-col items-center gap-(--space-1)">
+              <label
+                className={cn(
+                  "inline-flex size-(--target) cursor-pointer items-center justify-center",
+                  "rounded-(--radius) text-(length:--fs-body) font-medium",
+                  "transition-colors duration-(--dur-state) ease-(--ease-settle)",
+                  "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
+                  isOn
+                    ? "bg-primary text-primary-foreground border border-transparent"
+                    : "border-edge text-ink border hover:bg-surface",
+                  disabled && "pointer-events-none opacity-40",
+                )}
+              >
+                <input
+                  type="checkbox"
+                  checked={isOn}
+                  disabled={disabled}
+                  onChange={() => toggle(day.value)}
+                  className="sr-only"
+                />
+                <span aria-hidden="true">{day.initial}</span>
+                <span className="sr-only">{note === undefined ? day.name : `${day.name}, ${note}`}</span>
+              </label>
+              {/* The note beneath keeps every column the same height once any day has one. */}
+              {anyNote ? (
+                <Text as="span" variant="caption" tone="secondary" aria-hidden="true" className="max-w-(--target) truncate">
+                  {note ?? " "}
+                </Text>
+              ) : null}
+            </span>
           );
         })}
       </div>

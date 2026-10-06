@@ -35,6 +35,9 @@ const TONE: Record<StateWordKind, string> = {
   updated: "text-text-secondary",
   pending: "text-text-secondary",
   archived: "text-text-secondary",
+  "confirm-later": "text-text-secondary",
+  opener: "text-text-secondary",
+  closer: "text-text-secondary",
 };
 
 export interface StateWordProps {

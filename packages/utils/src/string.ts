@@ -58,3 +58,32 @@ export function getInitials(name: string, max = 2): string {
   const last = words[words.length - 1] ?? "";
   return `${first.charAt(0)}${last.charAt(0)}`.slice(0, max).toUpperCase();
 }
+
+/**
+ * A stable identifier from a label — "Earlier thing ran long" becomes
+ * `earlier_thing_ran_long`.
+ *
+ * SET-9 needs it for reason keys. INF-2 dropped Conscious Connections'
+ * `slugify` as unneeded; it is needed now, and the shape here is Synapse's:
+ * UNDERSCORES, not hyphens, because these keys sit beside `something_came_up`
+ * and `chose_not_to` from official spec §3.10 and a mixed set would read as
+ * two different naming schemes in one column.
+ *
+ * ACCENTS ARE FOLDED, not dropped: "Café" becomes `cafe` rather than `caf`.
+ * Anything else outside `a-z0-9` becomes a separator, runs collapse, and the
+ * ends are trimmed.
+ *
+ * An empty result is possible — a label of only emoji has no ASCII to keep —
+ * so the caller decides the fallback rather than this inventing one.
+ */
+export function slugify(value: string, maxLength = 64): string {
+  return value
+    .normalize("NFKD")
+    // Combining marks left behind by the decomposition.
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, maxLength)
+    .replace(/_+$/, "");
+}

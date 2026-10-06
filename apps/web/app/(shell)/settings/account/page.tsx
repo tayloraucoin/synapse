@@ -1,18 +1,38 @@
-import { Heading, Text } from "@syn/ui";
+import { PageFrame, ShellPageHeader } from "@/components/page-frame";
+import { getRequestUser } from "@/lib/auth/get-request-user";
+import { getServerApi } from "@/lib/trpc/server";
+
+import { SETTINGS_COPY } from "../_components/copy";
+import { AccountScreen } from "./_components/account-screen";
 
 /**
- * Placeholder — ST-01 Account. 
+ * ST-01 Account.
  *
- * Replaced by the Epic 1 track. The `Heading` is here from day one so every
- * page has exactly one `h1` (cross-cutting §11) before any content exists.
+ * WHETHER THIS ACCOUNT HAS A PASSWORD IS ANSWERED FROM THE IDENTITY LIST, on
+ * the server, where the auth user actually is. An account with no `email`
+ * identity has never had a password, so the Password section is one sentence
+ * rather than a form — and asking the browser would mean shipping the identity
+ * list to it for no other reason.
  */
-export default function SettingsAccountPage() {
+export default async function SettingsAccountPage() {
+  const api = await getServerApi();
+  const me = await api.user.me();
+  const { user } = await getRequestUser();
+
+  const identities = user?.identities ?? [];
+  const googleOnly =
+    identities.length > 0 &&
+    !identities.some((identity) => identity.provider === "email");
+
   return (
-    <>
-      <Heading>ST-01 Account</Heading>
-      <Text as="p" tone="secondary">
-        Name, email, avatar, sign out.
-      </Text>
-    </>
+    <PageFrame
+      header={<ShellPageHeader title={SETTINGS_COPY.account} showBack />}
+    >
+      <AccountScreen
+        name={me.displayName ?? ""}
+        email={me.email ?? ""}
+        googleOnly={googleOnly}
+      />
+    </PageFrame>
   );
 }

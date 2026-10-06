@@ -18,3 +18,15 @@ export {
   visibleFieldError,
   type UseZodFormProps,
 } from "./use-zod-form";
+
+export {
+  useDerivedItems,
+  type DerivableItem,
+  type DerivedDayInput,
+} from "./use-derived-items";
+
+export {
+  useOptimisticValue,
+  type UseOptimisticValueOptions,
+  type UseOptimisticValueResult,
+} from "./use-optimistic-value";

@@ -249,6 +249,18 @@ export {
   Separator,
 } from "./primitives/layout/separator";
 export {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardSummary,
+  CardTitle,
+  type CardSummaryClasses,
+  type CardSummaryProps,
+} from "./primitives/layout/card";
+export {
   Sheet,
   SheetClose,
   SheetContent,
@@ -341,11 +353,48 @@ export {
   type ShiftRowProps,
   type WeekRowProps,
 } from "./composed/display/day-outcome-row";
+/* ---- UX v1.1 (DYN-7): the block model's composites ---- */
 export {
-  DayPartHeader,
-  type DayPart,
-  type DayPartHeaderProps,
-} from "./composed/display/day-part-header";
+  BLOCK_HEADER_COPY,
+  BLOCK_KIND_WORDS,
+  BlockHeader,
+  type BlockHeaderProps,
+} from "./composed/display/block-header";
+export {
+  BlockBand,
+  bandVariants,
+  type BandVariants,
+  type BlockBandProps,
+} from "./composed/display/block-band";
+export {
+  BrandGlyph,
+  SpotifyMark,
+  type BrandGlyphKind,
+  type BrandGlyphProps,
+} from "./composed/display/brand-glyph";
+export {
+  LINK_CALLOUT_COPY,
+  LinkCallout,
+  type LinkCalloutProps,
+} from "./composed/display/link-callout";
+export {
+  WeekHueStrip,
+  type WeekHueSegmentKind,
+  type WeekHueStripProps,
+} from "./composed/display/week-hue-strip";
+export { SleepBand, type SleepBandProps } from "./composed/display/sleep-band";
+export { GapBand, type GapBandProps } from "./composed/display/gap-band";
+export {
+  BUDGET_LINE_COPY,
+  BudgetLine,
+  budgetStateFor,
+  type BudgetLineProps,
+} from "./composed/display/budget-line";
+export {
+  SLOT_ROW_COPY,
+  SlotRow,
+  type SlotRowProps,
+} from "./composed/display/slot-row";
 export {
   DecidedLine,
   type DecidedLineProps,
@@ -366,6 +415,7 @@ export {
   ItemRow,
   isDoneState,
   isFadedState,
+  isUntickableState,
   itemRowVariants,
   stateWordFor,
   type ItemRowClasses,
@@ -387,7 +437,10 @@ export {
   type ReviewRegionProps,
 } from "./composed/display/review-region";
 export {
+  BandLabelPlacementContext,
+  SCHEDULE_GUTTER_PX,
   ScheduleAxis,
+  type BandLabelPlacement,
   type ScheduleAxisProps,
 } from "./composed/display/schedule-axis";
 export {
@@ -440,10 +493,12 @@ export {
 export {
   CURATED_GLYPHS,
   ItemIcon,
+  PinGlyph,
   getCuratedGlyph,
   type CuratedGlyph,
   type ItemIconProps,
   type ItemIconSize,
+  type PinGlyphProps,
 } from "./composed/display/item-icon";
 export {
   ListRow,
@@ -452,6 +507,59 @@ export {
   type ListRowProps,
   type ListRowSurfaceVariants,
 } from "./composed/display/list-row";
+export {
+  EmojiSlot,
+  isIconValue,
+  type EmojiSlotProps,
+  type EmojiSlotSize,
+} from "./composed/display/emoji-slot";
+export {
+  PRIORITY_MARK_COPY,
+  PriorityMark,
+  type PriorityMarkProps,
+  type PriorityMarkValue,
+} from "./composed/display/priority-mark";
+export {
+  PASSAGE_CAROUSEL_COPY,
+  PassageCarousel,
+  type PassageCarouselProps,
+  type PassageSlide,
+} from "./composed/display/passage-carousel";
+export {
+  SelectRow,
+  SelectRowList,
+  type SelectRowListProps,
+  type SelectRowProps,
+} from "./composed/control/select-row";
+export {
+  SORTABLE_LIST_COPY,
+  SortableHandle,
+  SortableList,
+  type SortableHandleProps,
+  type SortableItem,
+  type SortableListProps,
+  type SortableRenderState,
+} from "./composed/control/sortable-list";
+export {
+  RANGE_EDITOR_COPY,
+  RangeEditor,
+  type RangeEditorProps,
+  type RangeEditorValue,
+} from "./composed/control/range-editor";
+export {
+  RICH_TEXT_EDITOR_COPY,
+  RichTextEditor,
+  type RichTextEditorProps,
+} from "./composed/control/rich-text-editor";
+export {
+  TAG_INPUT_COPY,
+  TagInput,
+  type TagInputProps,
+} from "./composed/control/tag-input";
+export {
+  EmojiSlotButton,
+  type EmojiSlotButtonProps,
+} from "./composed/control/emoji-slot-button";
 export {
   SettingsRow,
   type SettingsRowProps,
@@ -489,6 +597,14 @@ export {
   ScreenFrame,
   type ScreenFrameProps,
 } from "./composed/layout/screen-frame";
+export {
+  STEP_FRAME_SKELETON_COPY,
+  StepFrame,
+  StepFrameSkeleton,
+  type StepFrameCopy,
+  type StepFrameProps,
+  type StepFrameSkeletonProps,
+} from "./composed/layout/step-frame";
 export {
   AppHeader,
   type AppHeaderClasses,
@@ -537,6 +653,7 @@ export {
   StatusLine,
   TimezoneLine,
   UpdateLine,
+  pendingReviewText,
   timezoneMismatchText,
   type InstallLineProps,
   type PermissionLineProps,
@@ -626,6 +743,20 @@ export {
   type LargeTargetOption,
   type LargeTargetRowProps,
 } from "./composed/control/large-target-row";
+/* ---- UX v1.1 (DYN-7): the drag layer and the confirm rows ---- */
+export {
+  DRAG_LAYER_COPY,
+  DragLayer,
+  type DragIntent,
+  type DragLayerBlock,
+  type DragLayerItem,
+  type DragLayerProps,
+} from "./composed/control/drag-layer";
+export {
+  CONFIRM_YESTERDAY_COPY,
+  ConfirmYesterdayRows,
+  type ConfirmYesterdayRowsProps,
+} from "./composed/control/confirm-yesterday-rows";
 export {
   MINUTES_STEPPER_COPY,
   MinutesStepper,
@@ -679,11 +810,6 @@ export {
   type SegmentedControlProps,
 } from "./composed/control/segmented-control";
 export {
-  StarterSetChooser,
-  type StarterSetChooserProps,
-  type StarterSetItem,
-} from "./composed/control/starter-set-chooser";
-export {
   Stepper17,
   stepper17CellVariants,
   type Stepper17Classes,
@@ -695,6 +821,12 @@ export {
   type TextDisclosureButtonClasses,
   type TextDisclosureButtonProps,
 } from "./composed/control/text-disclosure-button";
+export {
+  InfoDisclosure,
+  type InfoDisclosureClasses,
+  type InfoDisclosureItem,
+  type InfoDisclosureProps,
+} from "./composed/control/info-disclosure";
 export {
   TIERS_WITH_REASONS,
   TIER_RADIO_ROWS_COPY,
@@ -714,4 +846,5 @@ export {
   WeekdayChips,
   type Weekday,
   type WeekdayChipsProps,
+  type WeekdayIndexing,
 } from "./composed/control/weekday-chips";

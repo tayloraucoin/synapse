@@ -1,10 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import * as React from "react";
-import Link from "next/link";
 
 import { createLogger } from "@syn/observability";
-import { Button, Heading, Text } from "@syn/ui";
+import { ErrorPage } from "@syn/ui";
 
 import { todayRoute } from "@/lib/routes";
 
@@ -15,10 +15,13 @@ const log = createLogger("web/error");
  *
  * "Your changes are kept" is a promise, not a platitude: the local-first
  * writes survive a re-render, and the copy says so because the first thing a
- * person wonders after an error is whether they lost something.
+ * person wonders after an error is whether they lost something. The sentence
+ * lives in `ErrorPage` with its sibling variant's.
  *
- * The digest is logged, never shown. An error code on screen asks a person to
- * do support's job.
+ * THE DIGEST IS LOGGED, NEVER SHOWN. An error code on screen asks a person to
+ * do support's job — and the message is logged rather than rendered for the
+ * same reason: a thrown `Error` can carry a title, a note, or an id in its
+ * text, and this screen is not the place any of that surfaces.
  */
 export default function GlobalError({
   error,
@@ -27,6 +30,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const router = useRouter();
+
   React.useEffect(() => {
     log.log("render error", {
       message: error.message,
@@ -37,18 +42,13 @@ export default function GlobalError({
   return (
     <main
       id="main"
-      className="mx-auto flex min-h-screen-safe w-full max-w-sm flex-col justify-center gap-(--space-4) p-(--space-4)"
+      className="mx-auto flex min-h-screen-safe w-full max-w-sm flex-col justify-center"
     >
-      <Heading>Something went wrong on this screen.</Heading>
-      <Text as="p" tone="body">
-        Your changes are kept.
-      </Text>
-      <div className="flex gap-(--space-3)">
-        <Button onClick={reset}>Reload</Button>
-        <Button variant="secondary" asChild>
-          <Link href={todayRoute()}>Open today</Link>
-        </Button>
-      </div>
+      <ErrorPage
+        variant="unrecoverable"
+        onReload={reset}
+        onOpenToday={() => router.push(todayRoute())}
+      />
     </main>
   );
 }

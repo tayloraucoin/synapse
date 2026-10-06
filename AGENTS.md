@@ -5,8 +5,8 @@
 ## Start here (turn one)
 
 1. **What this is:** a Yarn 4 + Turborepo monorepo — the Synapse habit-tracker PWA (`apps/web`), an Expo seam (`apps/mobile`, README only), and `@syn/*` capability packages. The conventions are Conscious Connections', copied and re-scoped — never imported.
-2. **Read before coding, in order:** this file → `docs/specs/infrastructure/README.md` → your ticket spec → the UX source it cites in `docs/ux/`.
-3. **Specs live in `docs/specs/`:** the current queue is `docs/specs/infrastructure/`. Process + kickoff contract: [`docs/specs/infrastructure/README.md`](docs/specs/infrastructure/README.md).
+2. **Read before coding, in order:** this file → [`docs/specs/README.md`](docs/specs/README.md) (the four tracks, the global build order, the placement rules) → your track's `README.md` → your ticket spec → the UX source it cites in `docs/ux/`.
+3. **Specs live in `docs/specs/`:** the foundation track (`infrastructure/`) is Complete; the current queue is the four feature tracks — `epic-1-setup/`, `epic-2-in-use/`, `epic-3-review/`, `cross-cutting-system/` — sequenced in [`docs/specs/README.md`](docs/specs/README.md). Each track's `README.md` carries its kickoff contract.
 4. **Orient in the docs tree** via [`docs/README.md`](docs/README.md) (one line per document) and [`docs/architecture/directory-map.md`](docs/architecture/directory-map.md) (the generated tree, with a note on every load-bearing file).
 5. **Verify work** the way CI does: `yarn lint && yarn lint:boundaries && yarn check-types && yarn build` (see Commands). There is **no test suite** — do not write tests during slices.
 6. **Done means:** acceptance criteria met · verify commands pass · the spec's `Status:` line flipped · `PROGRESS.md` ticked · one `DEVIATIONS.md` line per divergence.
@@ -17,7 +17,7 @@
 
 When docs disagree, follow this order:
 
-1. **Product behaviour** → `docs/ux/habit_tracker_official_ux_spec_v1.md` (its **§0.3 rulings are signed**), then the three epic documents and `docs/ux/synapse_navigation_and_system_ux_architecture.md` for their own screens, then `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` for component contracts.
+1. **Product behaviour** → `docs/ux/ux-spec-v1.md` (its **§0.3 rulings are signed**), then the three epic documents and `docs/ux/synapse_navigation_and_system_ux_architecture.md` for their own screens, then `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` for component contracts.
 2. **Architecture & placement** → [`docs/architecture/codebase-conventions.md`](docs/architecture/codebase-conventions.md) (locked). Stack choices: [`docs/architecture/tech-stack.md`](docs/architecture/tech-stack.md).
 3. **Domain guides** → [`docs/ai-guides/`](docs/ai-guides/) govern their domain (tokens, typography, classnames, components, copy, db/RLS, tRPC) and sit **below** the conventions doc but **above** ad-hoc judgment.
 4. **App-specific rules** → the nearest [`AGENTS.md`](apps/web/AGENTS.md). **Wins on conflict** with the conventions doc for that app (route topology, scope).
@@ -46,7 +46,7 @@ Setup: Node **22** (`.nvmrc`), Yarn **4.13.0** (`corepack enable && yarn install
 | Verify (matches CI) | `yarn lint && yarn lint:boundaries && yarn check-types && yarn build` |
 | Dev server | `yarn dev` (all) · `yarn web:dev` · `yarn web:dev:local` (LAN/phone) |
 | Per-app checks | `yarn web:build` / `web:lint` / `web:typecheck` (same for `ui:*`) |
-| Database | `yarn db:generate` · `db:migrate` · `db:push` · `db:setup` · `db:reset` · `db:seed` · `db:seed-users` · `db:schema-reference` |
+| Database | `yarn db:generate` · `db:migrate` · `db:push` · `db:setup` · `db:reset` · `db:reset-user` · `db:seed` · `db:seed-users` · `db:schema-reference` |
 | Storybook (`@syn/ui`) | `yarn ui:storybook` |
 | Docs upkeep | `yarn directory-map` (regen the tree) · `yarn docs:check-links` (verify every markdown link) |
 | Formatting | `yarn format` |
@@ -57,7 +57,7 @@ Full index, one line per document: [`docs/README.md`](docs/README.md).
 
 | Path | What |
 |------|------|
-| [`docs/ux/habit_tracker_official_ux_spec_v1.md`](docs/ux/habit_tracker_official_ux_spec_v1.md) | Product behaviour — the authority. **§0.3 rulings are signed.** §9 is the brand, §10 the copy. |
+| [`docs/ux/ux-spec-v1.md`](docs/ux/ux-spec-v1.md) | Product behaviour — the authority. **§0.3 rulings are signed.** §9 is the brand, §10 the copy. |
 | [`docs/ux/`](docs/ux/) | The three epic documents, the cross-cutting document, and the v2 component handoff. Read the one that owns your screen. |
 | [`docs/architecture/codebase-conventions.md`](docs/architecture/codebase-conventions.md) | Architecture & placement — the locked contract. |
 | [`docs/architecture/tech-stack.md`](docs/architecture/tech-stack.md) | Canonical stack choices, pinned versions, and what is deliberately absent. |

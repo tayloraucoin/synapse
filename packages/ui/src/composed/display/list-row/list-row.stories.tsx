@@ -70,3 +70,13 @@ export const Wide: Story = {
 export const Muted: Story = {
   args: { title: "Old habit", tag: "archived", muted: true, href: "#" },
 };
+
+/** UX v1.2 (RUN-7): `leading` as an `IconValue` renders through `EmojiSlot` — the 44px square, `aria-hidden`. */
+export const WithLeadingEmoji: Story = {
+  args: {
+    title: "Stretch",
+    meta: "5–10 min · importance 4",
+    leading: { kind: "emoji", value: "🧘" },
+    href: "#",
+  },
+};

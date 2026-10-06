@@ -21,10 +21,15 @@ rather than reaching for a remembered API.
 library, categories, templates, the week build, the two execution tabs, the Day
 and Week Review, history, settings, and PWA notifications.
 
+**One marketing page, and only one:** the landing at `/` for a visitor who is
+not signed in (SYS-6; design in `docs/ux/landing-page-ux.md`). Lifted into
+scope by Taylor on 2026-09-05 for exactly this page. No second marketing page,
+no blog, no pricing page, no `apps/marketing`.
+
 **Not in scope, and not to be scaffolded:** AI or a coach (§7.7 is a note, not
-a feature), billing, a marketing surface, anything social, Google Calendar
-import (Phase 2), offline writes (Phase 2), the Schedule tab's Phase-2
-refinements.
+a feature), billing, any marketing surface beyond the one page above, anything
+social, Google Calendar import (Phase 2), offline writes (Phase 2), the
+Schedule tab's Phase-2 refinements.
 
 ---
 
@@ -62,7 +67,7 @@ is a defect.**
 
 | Route | Builder | Screen |
 |---|---|---|
-| `/` | `homeRoute()` | resolves per §4.2 — never renders |
+| `/` | `homeRoute()` | signed out: the landing page (SYS-6). Signed in: resolves per §4.2 — never renders |
 | `/signin` | `signInRoute(next?)` | AU-01 |
 | `/signup` | `signUpRoute()` | AU-02 |
 | `/verify` | `verifyRoute(next?)` | AU-03 |
@@ -72,12 +77,14 @@ is a defect.**
 | `/logout` | `logoutRoute()` | AU-06 (a route handler) |
 | `/auth/callback` | `authCallbackRoute()` | OAuth / PKCE |
 | `/auth/confirm` | `authConfirmRoute()` | email `token_hash` |
-| `/setup/{1–5}` | `setupRoute(step)` | FR-01…05 |
-| `/today` | `todayRoute()` | LS-01 |
-| `/today/schedule` | `todayScheduleRoute()` | SC-01 |
+| `/setup/{1–5}` | `setupRoute(step, { edit? })` | UX v1.3 §4.1–§4.5 — five screens (DAY-8 renumbered; 6 and up are 404s, and the entry tree resumes a stored v1.2 step above 5 at 4): 1 *The shape of your week*; 2 *Days are built in blocks* — the primer, the example day and the legend (`components/blocks-primer/`); 3 *Work days*, five values; 4 *Your days* and the day builder (RUN-12, `components/day-builder/`; `?edit={planId}` opens the builder on that plan's review); 5 *Your usual week* and the mode question (RUN-13) — *Open today* / *Plan this week first* write `morning_mode`, complete first run and pre-fill the week from the plans |
+| `/orient` | `orientRoute()` | UX v1.1 §5.2 — the orient frame; the entry tree puts it before any tab while today has no `woke_at` (DYN-13); no header, no tab bar |
+| `/today` | `todayRoute()` | LS-01 — the quick-pick while `confirmed_at` is null (v1.1 §5.3, DYN-14), the list after |
+| `/today/schedule` | `todayScheduleRoute(options?)` | SC-01, editable (UX v1.1 §6.5, DYN-16); `{ move: true }` → `?mode=move`, the tap-to-lift fallback the day header sheet's *Edit today* opens |
 | `/day/{date}` | `dayRoute(date)` | LS-01, record or plan mode |
-| `/day/{date}/schedule` | `dayScheduleRoute(date)` | SC-01, past or future |
+| `/day/{date}/schedule` | `dayScheduleRoute(date, options?)` | SC-01, past (record: no drag) or future (plan: drag, no ghosts); the same `{ move }` option |
 | `/day/{date}/item/{id}` | `dayItemRoute(date, id)` | IT-01 — addressable for deep links |
+| `/day/{date}/journal` | `journalRoute(date)` | UX v1.1 §7.2 — the journal (DYN-18); today or a past day, read-only from Review (`?from=review`), a future day is a 404 |
 | `/review` | `reviewRoute()` | RV-00 |
 | `/review/day/{date}` | `reviewDayRoute(date)` | DR-01 |
 | `/review/week/{week}` | `reviewWeekRoute(week)` | WR-01 |
@@ -87,8 +94,10 @@ is a defect.**
 | `/settings/account` | `settingsAccountRoute()` | ST-01 |
 | `/settings/habits` | `settingsHabitsRoute()` | LB-01 |
 | `/settings/habits/{id}` | `settingsHabitRoute(id)` | LB-02 |
-| `/settings/templates` | `settingsTemplatesRoute()` | TP-01 |
-| `/settings/templates/{id}` | `settingsTemplateRoute(id)` | TP-02 |
+| `/settings/your-day` | `settingsYourDayRoute()` | UX v1.3 §4.6 — the first run's screens and the builder's parts as a list, in the document's order (DYN-8; DAY-8) |
+| `/settings/your-day/{screen}` | `settingsYourDayScreenRoute(screen)` | one screen, embedded: `shape · work-days · your-days · first-thing` (B8: passages, links, the quote, the three lines) `· morning-habits · ranked · free-time` (B15a + B15b) `· training · commitments · closing-the-day` (the journal; the two times read-only) `· focuses · each-morning` (the mode question alone; *Save* writes `morning_mode`). Any other word is a 404 |
+| `/settings/your-day/block/{kind}` | `settingsYourDayBlockRoute(kind, templateId?)` | the block editor for a kind (§3.11); the template list above it when more than one |
+| `/settings/your-day/order` | `settingsYourDayOrderRoute()` | Block order (§4.14) |
 | `/settings/week` · `/settings/week/{week}` | `settingsWeekRoute(week?)` | WK-01 |
 | `/settings/categories` | `settingsCategoriesRoute()` | CT-01 |
 | `/settings/reasons` | `settingsReasonsRoute()` | ST-06 |
@@ -98,10 +107,16 @@ is a defect.**
 | `/settings/data` | `settingsDataRoute()` | ST-10 |
 | `/settings/share` | `settingsShareRoute()` | ST-11 |
 | `/settings/about` | `settingsAboutRoute()` | SY-01 |
+| `/legal/privacy` | `legalPrivacyRoute()` | SYS-3 — public, no shell, no gate |
+| `/legal/terms` | `legalTermsRoute()` | SYS-3 — public, no shell, no gate |
 
 `{date}` is `YYYY-MM-DD` and `{week}` is `YYYY-Www`; both are validated by
 `dateKeySchema` / `weekKeySchema` from `@syn/validators` — the same schemas the
 API uses, so a key that 404s here cannot succeed against a procedure.
+
+The two `/legal/*` pages sit outside all three groups on purpose: a privacy
+policy a person has to sign in to read is not a privacy policy, and both the
+landing footer and About link to them.
 
 ### The three route groups
 

@@ -2,8 +2,17 @@
 
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
+import {
+  httpBatchLink,
+  TRPCClientError,
+  type TRPCLink,
+} from "@trpc/client";
+import { observable } from "@trpc/server/observable";
 import superjson from "superjson";
+
+import type { AppRouter } from "@syn/api";
+
+import { notifySessionExpired } from "@/lib/auth/session-expired";
 
 import { trpc } from "./client";
 
@@ -54,6 +63,16 @@ export function TrpcProvider({ children }: TrpcProviderProps) {
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
+        /*
+         * SY-04's first detection. Every procedure in this app is protected, so
+         * an `UNAUTHORIZED` from any of them means the session went — and the
+         * link is the one place every request passes through, which is what
+         * makes this one listener rather than an error branch in each caller.
+         *
+         * The latch inside `notifySessionExpired` is the ref guard the ticket
+         * asks for: a batch of five failing calls raises the dialog once.
+         */
+        sessionExpiryLink,
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
           // superjson must be set on BOTH the link and the server's initTRPC
@@ -71,3 +90,28 @@ export function TrpcProvider({ children }: TrpcProviderProps) {
     </trpc.Provider>
   );
 }
+
+/**
+ * A pass-through link that watches for `UNAUTHORIZED` on the way back.
+ *
+ * It observes rather than intercepts: the error still reaches the caller, so a
+ * screen that wanted to show its own message still can. This only raises the
+ * dialog.
+ */
+const sessionExpiryLink: TRPCLink<AppRouter> = () => (options) =>
+  observable((observer) => {
+    const subscription = options.next(options.op).subscribe({
+      next: (value) => observer.next(value),
+      complete: () => observer.complete(),
+      error: (error) => {
+        if (
+          error instanceof TRPCClientError &&
+          error.data?.code === "UNAUTHORIZED"
+        ) {
+          notifySessionExpired();
+        }
+        observer.error(error);
+      },
+    });
+    return () => subscription.unsubscribe();
+  });

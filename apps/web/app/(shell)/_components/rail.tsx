@@ -28,15 +28,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
+import { dispatchScrollToNow } from "@/lib/hooks/use-scroll-memory";
 import { settingsRoute } from "@/lib/routes";
-import { NAV_ITEMS, REVIEW_DOT_LABEL, type NavTab } from "./nav-items";
-
-function tabForPath(pathname: string): NavTab {
-  if (pathname.startsWith("/settings")) return "settings";
-  if (pathname.startsWith("/review")) return "review";
-  if (pathname.endsWith("/schedule")) return "schedule";
-  return "list";
-}
+import { NAV_ITEMS, REVIEW_DOT_LABEL, tabForPath } from "./nav-items";
 
 export interface RailProps {
   reviewHasPending: boolean;
@@ -61,7 +55,16 @@ export function Rail({ reviewHasPending, user }: RailProps) {
             {NAV_ITEMS.map((item) => (
               <SidebarMenuItem key={item.tab}>
                 <SidebarMenuButton asChild isActive={item.tab === active}>
-                  <Link href={item.href} aria-current={item.tab === active ? "page" : undefined}>
+                  {/* Same rule as the tab bar: the active item scrolls. */}
+                  <Link
+                    href={item.href}
+                    aria-current={item.tab === active ? "page" : undefined}
+                    onClick={(event) => {
+                      if (item.tab !== active) return;
+                      event.preventDefault();
+                      dispatchScrollToNow();
+                    }}
+                  >
                     <span>{item.label}</span>
                     {item.tab === "review" && reviewHasPending ? (
                       <>

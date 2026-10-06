@@ -3,7 +3,7 @@
 **Product:** Synapse (working name, confirmed)
 **Author:** Vesper
 **Date:** 4 Sept 2026
-**Governs:** every screen a person meets before and outside execution mode — auth, first run, the habit library, categories, templates, the week build, settings. The official spec (`habit_tracker_official_ux_spec_v1.md`, §3, §4, §8, §9, §10) is the authority above this document; the rulings in its §0.3 are now signed and are treated as settled here.
+**Governs:** every screen a person meets before and outside execution mode — auth, first run, the habit library, categories, templates, the week build, settings. The official spec (`ux-spec-v1.md`, §3, §4, §8, §9, §10) is the authority above this document; the rulings in its §0.3 are now signed and are treated as settled here.
 **Next consumer:** the UI designer, who will derive the component list from §12 of this document; then the UI/UX collaboration per screen.
 
 ---

@@ -11,6 +11,7 @@ export {
 } from "./presets";
 export {
   STATUS_LINE_COPY,
+  pendingReviewText,
   timezoneMismatchText,
   type StatusLineCopyEntry,
 } from "./copy";

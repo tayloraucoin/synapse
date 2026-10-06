@@ -40,6 +40,52 @@ export function formatClock(
 }
 
 /**
+ * A wall clock built from minutes, with no zone — "7:20".
+ *
+ * A TEMPLATE HAS NO TIME ZONE, and that is the point of it: slots hold offsets
+ * from an anchor so the same template can be applied at 06:00 or 08:00, on any
+ * day, in any zone. The zone enters at materialisation (SET-6), when an offset
+ * becomes an instant. So the editor's clock arithmetic is plain minutes, and
+ * `formatClock` — which needs a `Date` and a zone — is the wrong tool for it.
+ *
+ * Minutes wrap at a day: an offset past midnight shows the next day's clock
+ * with no marker, which is what Epic 1 TP-02 asks for (it gives none).
+ * Negative minutes wrap the same way, so an item two hours before a 07:00
+ * anchor reads 5:00 rather than -120.
+ */
+export function formatClockFromMinutes(
+  minutes: number,
+  locale: string = DEFAULT_LOCALE,
+): string {
+  const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
+  const wrapped = ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+  const hour = Math.floor(wrapped / MINUTES_PER_HOUR);
+  const minute = wrapped % MINUTES_PER_HOUR;
+
+  // A fixed reference date, so the formatter renders a clock and nothing else.
+  return new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(2000, 0, 1, hour, minute)));
+}
+
+/** "HH:mm" → minutes since midnight. The inverse is `clockFromMinutes`. */
+export function clockToMinutes(clock: string): number {
+  const [hour = "0", minute = "0"] = clock.split(":");
+  return Number(hour) * MINUTES_PER_HOUR + Number(minute);
+}
+
+/** Minutes since midnight → "HH:mm", the value a `TimeField` holds. */
+export function clockFromMinutes(minutes: number): string {
+  const MINUTES_PER_DAY = 24 * MINUTES_PER_HOUR;
+  const wrapped = ((minutes % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
+  const hour = Math.floor(wrapped / MINUTES_PER_HOUR);
+  const minute = wrapped % MINUTES_PER_HOUR;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+/**
  * A window, as the row's time text reads it — "1:00–4:00" (official spec §5.2,
  * Epic 2 LS-01).
  *
@@ -145,6 +191,25 @@ export function toDateKey(date: Date, timeZone: string): string {
   const month = parts.find((part) => part.type === "month")?.value ?? "";
   const day = parts.find((part) => part.type === "day")?.value ?? "";
   return `${year}-${month}-${day}`;
+}
+
+/**
+ * The city half of an IANA zone id — the word the header's zone label names
+ * (cross-cutting §7.3, *times in Vancouver*).
+ *
+ * IT IS THE LAST SEGMENT, UNDERSCORES AS SPACES, and deliberately nothing more:
+ * `America/Vancouver` → *Vancouver*, `America/Argentina/Buenos_Aires` →
+ * *Buenos Aires*, `UTC` → *UTC*. A prettier map of ids to place names would be
+ * a second copy of `TIMEZONE_REGIONS` that goes stale the first time the tz
+ * database adds a city, and a label that read *Pacific Time* would be wrong for
+ * the person who is in Vancouver rather than Los Angeles.
+ *
+ * A zone with no segment worth showing falls back to the id itself, because a
+ * raw `Etc/GMT+8` in the header is honest and an empty caption is not.
+ */
+export function zoneCityLabel(iana: string): string {
+  const city = iana.split("/").at(-1)?.replace(/_/g, " ") ?? "";
+  return city.length > 0 ? city : iana;
 }
 
 /**
