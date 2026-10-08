@@ -78,12 +78,16 @@ export {
   formatClock,
   formatClockFromMinutes,
   formatElapsed,
+  formatMinutesShort,
   formatWindow,
   minutesFromDayStart,
   toDateKey,
   zoneCityLabel,
   type CalendarDayStyle,
 } from "./time";
+
+/* ---- Workflow — today's lane order and the one *next* (TD-38) ---- */
+export { orderGroupsForDay, resolveNext } from "./workflow";
 
 /* ---- the resolver — official spec §7.3, §7.4 ---- */
 export {

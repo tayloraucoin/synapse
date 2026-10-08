@@ -576,6 +576,48 @@ export {
   type TrustLineProps,
 } from "./composed/display/trust-line";
 
+/* ---- composed: Workflow's board (Workflow UX v0.1 §9, FLO-4) ---- */
+export { FiringMark, type FiringMarkProps } from "./composed/display/firing-mark";
+export { FiringToggle, type FiringToggleProps } from "./composed/control/firing-toggle";
+export {
+  TaskRow,
+  TaskRowSkeleton,
+  WORKFLOW_ROW_COPY,
+  taskRowVariants,
+  type TaskRowProps,
+  type TaskRowVariant,
+  type TaskRowVariants,
+  type WorkflowRowCopy,
+} from "./composed/display/task-row";
+export {
+  LANE_HEADER_COPY,
+  LaneHeader,
+  type LaneHeaderCopy,
+  type LaneHeaderProps,
+} from "./composed/display/lane-header";
+export {
+  NEXT_STRIP_COPY,
+  NextStrip,
+  type NextStripCopy,
+  type NextStripProps,
+  type NextStripValue,
+} from "./composed/display/next-strip";
+export { InlineAddRow, type InlineAddRowProps } from "./composed/control/inline-add-row";
+export {
+  BOARD_COPY,
+  Board,
+  BoardCell,
+  BoardLane,
+  BoardLaneHandle,
+  BoardSkeleton,
+  type BoardCellProps,
+  type BoardCopy,
+  type BoardLaneProps,
+  type BoardMoveIntent,
+  type BoardProps,
+  type BoardSkeletonProps,
+} from "./composed/layout/board";
+
 /* ---- composed: layout & navigation ---- */
 export {
   ActionRowSheet,

@@ -160,6 +160,9 @@
   --row-min: 56px; --target: 44px;
   --content-text: 720px; --content-canvas: 960px;
   --header-h: 56px; --tabbar-h: 56px; --rail-w: 220px; --sheet-w: 420px;
+  /* Workflow's board tracks (Workflow UX v0.1 §3.1, FLO-4): the first column
+     `minmax(--board-col-wide, 1.5fr)`, the rest `minmax(--board-col, 1fr)`. */
+  --board-col-wide: 320px; --board-col: 240px;
 
   /* ---- RADII ---- */
   --radius: 6px; --radius-sheet: 10px; --radius-full: 9999px;
@@ -167,6 +170,11 @@
   /* ---- MOTION ---- */
   --ease-settle: cubic-bezier(0.2, 0, 0, 1);
   --dur-state: 120ms; --dur-sheet: 200ms;
+  /* The firing mark's breath (Workflow UX v0.1 §3.3, §6; TD-42) — the one long
+     duration in the product. It does NOT collapse under reduced motion like
+     the two above: the animation is never attached there (`motion-safe:` only),
+     so the still mark is at full opacity rather than frozen mid-breath. */
+  --dur-breathe: 2400ms;
 
   /* ---- shadcn bridge (light) — official spec §9.7 map ---- */
   --background: var(--syn-neutral-50);

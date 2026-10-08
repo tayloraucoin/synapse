@@ -16,6 +16,27 @@
 @import "@syn/config/tailwind/preset.css";
 @source "../**/*.{ts,tsx}";
 
+/*
+ * The firing mark's breath — Workflow UX v0.1 §3.3, §6 (W5, TD-42). The one
+ * animation on the board at rest: opacity 1 → 0.35 → 1 over `--dur-breathe`,
+ * ease-in-out, continuously. `FiringMark` applies `motion-safe:animate-breathe`
+ * and nothing else may use it; under reduced motion it is never attached, so
+ * the mark is still at full opacity.
+ */
+@theme {
+  --animate-breathe: syn-breathe var(--dur-breathe) ease-in-out infinite;
+
+  @keyframes syn-breathe {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+}
+
 @layer base {
   *,
   *::before,
@@ -139,7 +160,10 @@
 
 /*
  * The duration tokens already collapse under reduced motion (preset.css), but
- * a component may hard-code a Tailwind duration; this is the floor.
+ * a component may hard-code a Tailwind duration; this is the floor. (The
+ * firing mark's breath does not rely on it: an infinite animation forced to
+ * 0ms rests on a keyframe of the browser's choosing, so it is simply never
+ * attached under reduced motion — TD-42.)
  * Official spec §9.6: under reduced motion, sheets crossfade, the checkbox
  * mark appears without drawing, and everything else is already still.
  */

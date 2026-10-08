@@ -8,7 +8,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 export const bottomNavItemVariants = cva(
   [
     "flex min-h-(--tabbar-h) w-full flex-col items-center justify-center",
-    "gap-(--space-1) px-(--space-2)",
+    // No side padding under 360px: the equal cell is the label's room (FLO-5).
+    "gap-(--space-1) px-(--space-2) max-[359px]:px-0",
     "font-sans text-(length:--fs-secondary) font-medium",
     "transition-colors duration-(--dur-state) ease-(--ease-settle)",
   ],

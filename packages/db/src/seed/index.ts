@@ -23,6 +23,7 @@ import { seedStarterLibrary } from "./seed-library";
 import { seedFixture, seedProfile, seedRotation } from "./seed-profile";
 import { seedDefaultReasons } from "./seed-reasons";
 import { seedBlockTemplates } from "./seed-template";
+import { seedWorkflow } from "./seed-workflow";
 
 /** Matches `scripts/seed-users.ts`. A `.test` domain cannot resolve. */
 const SMOKE_ACCOUNT_EMAIL = "dev@synapse.test";
@@ -55,6 +56,8 @@ async function seed(): Promise<void> {
   const template = await seedBlockTemplates(db, account.id);
   const rotation = await seedRotation(db, account.id);
   const fixture = await seedFixture(db, account.id);
+  // Epic 7 (FLO-3): a Workflow board with invented groups.
+  const workflow = await seedWorkflow(db, account.id);
 
   console.log(`@syn/db seed — ${SMOKE_ACCOUNT_EMAIL}`);
   console.log(`  profile written:     ${profile.profile}`);
@@ -66,6 +69,9 @@ async function seed(): Promise<void> {
   console.log(`  workouts inserted:   ${rotation.workouts}`);
   console.log(`  focuses inserted:    ${rotation.focuses}`);
   console.log(`  fixtures inserted:   ${fixture.fixtures}`);
+  console.log(`  workflow views:      ${workflow.views}`);
+  console.log(`  workflow groups:     ${workflow.groups}`);
+  console.log(`  workflow tasks:      ${workflow.tasks}`);
   console.log("  (0 across the board on a re-run means idempotent, not broken)");
   console.log("  Days are not seeded: run week.prefill for the current week from the app or a probe.");
 }

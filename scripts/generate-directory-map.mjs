@@ -109,6 +109,10 @@ const ANNOTATIONS = {
   "packages/api/src/services/plan/fit.ts": "the fit at planning time (v1.1 §3.10): computeBudget over the profile and the orient/prep templates — first run's last screen reads it",
   "packages/api/src/services/day/trade-workouts.ts": "the week build's training swap (R25): both days' workout items, refused on a set day",
   "packages/api/src/services/user/complete-first-run.ts": "the one write that ends first run: marks the row, stores the overflow mode, pre-fills the current week",
+  "packages/db/src/schema/workflow": "Workflow's six tables (Epic 7, TD-33): views own their columns, a task is in one cell, firing is two timestamps, templates are snapshots, day pins are today's",
+  "packages/api/src/routers/workflow.ts": "one router nested by noun — view, column, group, task, template (TD-40); a rule refused is BAD_REQUEST with its code, never FORBIDDEN",
+  "packages/api/src/services/workflow/move-task.ts": "THE move (TD-35): column, lane and place in one transaction, dense per cell, the role effects; every caller — menu, keys, sheet, undo, drag — sends a place here",
+  "packages/utils/src/workflow/resolve-next.ts": "the one next (W8): pure, from today's lane order, the tasks and the columns; the row, the strip, the announcement and the tab title all read it",
 
   // --- ui ---
   "packages/ui/src/index.ts": "enumerated exports; no \"./*\" wildcard",
@@ -128,6 +132,8 @@ const ANNOTATIONS = {
   "packages/ui/src/composed/display/block-band/band.variants.ts": "the bands' skin \u2014 bg-surface at rest, no new colour (v1.1 \u00a710.3)",
   "packages/ui/src/composed/layout/step-frame/step-frame.tsx": "the first-run frame, presentational; the app's (setup)/_components/step-frame.tsx binds it",
   "packages/ui/src/composed/__fixtures__/view-models.ts": "story fixtures shaped as the app's view models \u2014 Taylor's Monday by block lives here",
+  "packages/ui/src/composed/layout/board": "Workflow's board (FLO-4, FLO-9): lanes of lists by columns, pinned first track, synced sticky heads, compact one column; static unless given its two drag callbacks",
+  "packages/ui/src/composed/layout/board/board-dnd.tsx": "the board's drag: emits a place, writes nothing; the 2px ink line is where the drop lands; a swipe still scrolls; shares no code with sortable-list",
 
   // --- the app ---
   "apps/web/env.ts": "the only process.env reader in the app",
@@ -141,6 +147,7 @@ const ANNOTATIONS = {
   "apps/web/lib/stores/README.md": "the client-state rule, and why there is no Zustand store yet",
   "apps/web/public/sw.js": "push only. No caching \u2014 Phase 1 has no offline contract",
   "apps/web/app/(shell)/layout.tsx": "THE auth gate",
+  "apps/web/app/(shell)/workflow/[view]/_components/use-workflow-board.ts": "the board's one cache entry: the wanted-state toggle (latest press wins), lanes and next built once, and moveTask — every move's one path, with an undo that restores lane, column, place and firing",
   "apps/web/components/block-editor/use-block-editor.ts": "the block editor's state (v1.1 §3.11): the autosave queue, and the client walk — stackBlock over the page's SlotViews, so the footer never fetches",
   "apps/web/components/block-editor/slot-sheet.tsx": "the editor's one form; the same-position question with three answers lives in its footer",
   "apps/web/app/(setup)/_components/fact-screen.tsx": "one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)",

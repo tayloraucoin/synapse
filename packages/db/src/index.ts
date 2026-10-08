@@ -56,6 +56,12 @@ import {
   userAvatars,
   users,
   webPushSubscriptions,
+  workflowColumns,
+  workflowDayPins,
+  workflowGroups,
+  workflowTasks,
+  workflowTemplates,
+  workflowViews,
 } from "./schema";
 
 /**
@@ -107,3 +113,16 @@ export type UserAvatar = typeof userAvatars.$inferSelect;
 export type NewUserAvatar = typeof userAvatars.$inferInsert;
 export type WebPushSubscription = typeof webPushSubscriptions.$inferSelect;
 export type NewWebPushSubscription = typeof webPushSubscriptions.$inferInsert;
+export type WorkflowColumn = typeof workflowColumns.$inferSelect;
+export type NewWorkflowColumn = typeof workflowColumns.$inferInsert;
+export type WorkflowDayPin = typeof workflowDayPins.$inferSelect;
+export type NewWorkflowDayPin = typeof workflowDayPins.$inferInsert;
+export type WorkflowGroup = typeof workflowGroups.$inferSelect;
+export type NewWorkflowGroup = typeof workflowGroups.$inferInsert;
+export type WorkflowTask = typeof workflowTasks.$inferSelect;
+export type NewWorkflowTask = typeof workflowTasks.$inferInsert;
+export type WorkflowTemplate = typeof workflowTemplates.$inferSelect;
+export type NewWorkflowTemplate = typeof workflowTemplates.$inferInsert;
+/** `…Row`, not `WorkflowView`: the `…View` suffix is the view models' in `@syn/types`. */
+export type WorkflowViewRow = typeof workflowViews.$inferSelect;
+export type NewWorkflowViewRow = typeof workflowViews.$inferInsert;

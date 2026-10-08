@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-09-25 · 1385 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-04 · 1492 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -222,6 +222,31 @@ apps/
             today-screen.tsx
           schedule/
             page.tsx
+          page.tsx
+        workflow/
+          _components/
+            copy.ts
+          [view]/
+            _components/
+              archived-sheet.tsx
+              closed-earlier.tsx
+              column-tabs.tsx
+              columns-sheet.tsx
+              lane-menu.tsx
+              new-view-sheet.tsx
+              save-template-dialog.tsx
+              task-menu.tsx
+              task-sheet.tsx
+              use-task-sheet.ts
+              use-view-settings.ts
+              use-workflow-board.ts  # the board's one cache entry: the wanted-state toggle (latest press wins), lanes and next built once, and moveTask — every move's one path, with an undo that restores lane, column, place and firing
+              view-menu.tsx
+              view-tabs.tsx
+              workflow-board.tsx
+              workflow-title.tsx
+            loading.tsx
+            page.tsx
+          loading.tsx
           page.tsx
         layout.tsx  # THE auth gate
       api/
@@ -736,6 +761,25 @@ docs/
       PROGRESS.md
       README.md
       TECHNICAL-DECISIONS.md
+    epic-7-workflow/
+      _templates/
+        slice-spec.md
+      00-build-order.md
+      01-technology-assessment.md
+      DEVIATIONS.md
+      FLO-1-the-contract.md
+      FLO-10-close-out.md
+      FLO-2-schema-and-migration-0011.md
+      FLO-3-services-router-and-export.md
+      FLO-4-syn-ui-for-workflow.md
+      FLO-5-the-shell.md
+      FLO-6-the-board-read-fire-next.md
+      FLO-7-tasks-and-groups.md
+      FLO-8-views-columns-templates.md
+      FLO-9-the-drag.md
+      PROGRESS.md
+      README.md
+      TECHNICAL-DECISIONS.md
     infrastructure/
       _templates/
         slice-spec.md
@@ -771,6 +815,7 @@ docs/
     ux-spec-v1.2.md
     ux-spec-v1.3.md
     ux-spec-v1.md
+    workflow-ux-spec-v0.1.md
   README.md
 packages/
   api/
@@ -797,6 +842,7 @@ packages/
         timer.ts
         user.ts
         week.ts
+        workflow.ts  # one router nested by noun — view, column, group, task, template (TD-40); a rule refused is BAD_REQUEST with its code, never FORBIDDEN
       services/
         asset/
           create-upload-url.ts
@@ -901,6 +947,32 @@ packages/
           delete-account.ts
           preferences.ts
           request-export.ts
+        workflow/
+          apply-role-effects.ts
+          archive-group.ts
+          archive-task.ts
+          archive-view.ts
+          cells.ts
+          day-context.ts
+          ensure-defaults.ts
+          get-board.ts
+          list-archived.ts
+          list-closed-tasks.ts
+          list-views.ts
+          move-task.ts  # THE move (TD-35): column, lane and place in one transaction, dense per cell, the role effects; every caller — menu, keys, sheet, undo, drag — sends a place here
+          pin-group-today.ts
+          remove-column.ts
+          reorder-groups.ts
+          rule-error.ts
+          save-columns.ts
+          save-group.ts
+          save-task.ts
+          save-template.ts
+          save-view.ts
+          set-column-role.ts
+          set-firing.ts
+          start-task.ts
+          to-view.ts
       context.ts
       index.ts
       root.ts
@@ -964,6 +1036,7 @@ packages/
       timezones.ts
       user-images.ts
       work-day-kinds.ts
+      workflow-starters.ts
       workout-types.ts
     .gitignore
     eslint.config.mjs
@@ -971,8 +1044,8 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <11 migration .sql files, 0000–0010 — append-only, human-reviewed before a hosted migrate>
-      meta/ <12 drizzle snapshot files + _journal.json>
+      <12 migration .sql files, 0000–0011 — append-only, human-reviewed before a hosted migrate>
+      meta/ <13 drizzle snapshot files + _journal.json>
     scripts/
       generate-schema-reference.mjs
       reset-local-db.ts
@@ -1024,6 +1097,14 @@ packages/
           index.ts
           user-avatars.ts
           users.ts
+        workflow/  # Workflow's six tables (Epic 7, TD-33): views own their columns, a task is in one cell, firing is two timestamps, templates are snapshots, day pins are today's
+          index.ts
+          workflow-columns.ts
+          workflow-day-pins.ts
+          workflow-groups.ts
+          workflow-tasks.ts
+          workflow-templates.ts
+          workflow-views.ts
         auth.ts
         enum-values.ts  # checks every pgEnum against its @syn/types union at compile time — wrap every new enum
         enums.ts
@@ -1034,6 +1115,7 @@ packages/
         seed-profile.ts
         seed-reasons.ts
         seed-template.ts
+        seed-workflow.ts
       build-database-env-for-next-config.ts
       client.ts
       connection-env.ts  # tier resolution; defaults to local so nothing reaches production by omission
@@ -1081,6 +1163,7 @@ packages/
         domain.ts  # schema-shaped unions, snake_case, fixed by v2 handoff §3.5
         ui-state.ts  # presentational unions, kebab-case; derived per render, never stored
         view.ts  # what a component receives — never a DB row
+        workflow.ts
       auth-context.ts
       index.ts
     .gitignore
@@ -1103,6 +1186,7 @@ packages/
       composed/
         __fixtures__/
           view-models.ts  # story fixtures shaped as the app's view models — Taylor's Monday by block lives here
+          workflow.ts
         control/
           chip-picker/
             chip-picker.stories.tsx
@@ -1155,6 +1239,10 @@ packages/
             emoji-slot-button.stories.tsx
             emoji-slot-button.tsx
             index.ts
+          firing-toggle/
+            firing-toggle.stories.tsx
+            firing-toggle.tsx
+            index.ts
           image-cropper/
             image-cropper.stories.tsx
             image-cropper.tsx
@@ -1163,6 +1251,10 @@ packages/
             index.ts
             info-disclosure.stories.tsx
             info-disclosure.tsx
+          inline-add-row/
+            index.ts
+            inline-add-row.stories.tsx
+            inline-add-row.tsx
           large-target-row/
             index.ts
             large-target-row.stories.tsx
@@ -1335,6 +1427,10 @@ packages/
             expander-section.stories.tsx
             expander-section.tsx
             index.ts
+          firing-mark/
+            firing-mark.stories.tsx
+            firing-mark.tsx
+            index.ts
           gap-band/
             gap-band.stories.tsx
             gap-band.tsx
@@ -1359,6 +1455,11 @@ packages/
             item-row.stories.tsx
             item-row.tsx
             item-row.variants.ts
+          lane-header/
+            copy.ts
+            index.ts
+            lane-header.stories.tsx
+            lane-header.tsx
           link-callout/
             copy.ts
             index.ts
@@ -1373,6 +1474,11 @@ packages/
             index.ts
             multitask-group.stories.tsx
             multitask-group.tsx
+          next-strip/
+            copy.ts
+            index.ts
+            next-strip.stories.tsx
+            next-strip.tsx
           now-line/
             index.ts
             now-line.stories.tsx
@@ -1434,6 +1540,12 @@ packages/
             index.ts
             tag.stories.tsx
             tag.tsx
+          task-row/
+            copy.ts
+            index.ts
+            task-row.stories.tsx
+            task-row.tsx
+            task-row.variants.ts
           template-usage-row/
             index.ts
             template-usage-row.stories.tsx
@@ -1512,6 +1624,12 @@ packages/
           auth-frame/
             auth-frame.stories.tsx
             auth-frame.tsx
+            index.ts
+          board/  # Workflow's board (FLO-4, FLO-9): lanes of lists by columns, pinned first track, synced sticky heads, compact one column; static unless given its two drag callbacks
+            board-dnd.tsx  # the board's drag: emits a place, writes nothing; the 2px ink line is where the drop lands; a swipe still scrolls; shares no code with sortable-list
+            board.stories.tsx
+            board.tsx
+            copy.ts
             index.ts
           error-page/
             copy.ts
@@ -1730,6 +1848,10 @@ packages/
       review/
         adherence.ts
         strip.ts
+      workflow/
+        index.ts
+        order-groups.ts
+        resolve-next.ts  # the one next (W8): pure, from today's lane order, the tasks and the columns; the row, the strip, the announcement and the tab title all read it
       errors.ts
       index.ts
       link.ts
@@ -1772,6 +1894,7 @@ packages/
       timer.ts
       user.ts
       week.ts
+      workflow.ts
     .gitignore
     eslint.config.mjs
     package.json

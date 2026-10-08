@@ -19,6 +19,7 @@ import { templateRouter } from "./routers/template";
 import { timerRouter } from "./routers/timer";
 import { userRouter } from "./routers/user";
 import { weekRouter } from "./routers/week";
+import { workflowRouter } from "./routers/workflow";
 import { createCallerFactory, router } from "./trpc";
 
 /**
@@ -51,6 +52,7 @@ export const appRouter = router({
   timer: timerRouter,
   user: userRouter,
   week: weekRouter,
+  workflow: workflowRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -93,18 +93,22 @@ In practice you almost never type these: use `<Text variant>`. See
 | Spacing (**the whole scale**: 4·8·12·16·24·32·48) | `gap-(--space-1)` … `gap-(--space-7)` |
 | A row's minimum height (56px) | `min-h-(--row-min)` |
 | A touch target (44px) | `size-(--target)` / `h-(--target)` |
-| Content width | `max-w-(--content-text)` 720px · `max-w-(--content-canvas)` 960px |
+| Content width | `max-w-(--content-text)` 720px · `max-w-(--content-canvas)` 960px · `ScreenFrame width="board"` (no cap — Workflow's board only) |
+| Workflow's board tracks | `--board-col-wide` 320px (the first column) · `--board-col` 240px (the rest) — read by `Board`'s grid template, not typed in a class |
 | Prose measure (64ch) | `max-w-(--measure)` |
 | Radius | `rounded-(--radius)` 6px · `rounded-(--radius-sheet)` 10px · `rounded-(--radius-full)` |
 | A state change (120ms) | `duration-(--dur-state)` |
 | A sheet or expansion (200ms) | `duration-(--dur-sheet)` |
 | Easing | `ease-(--ease-settle)` — settles, never bounces |
+| The firing mark's breath (2400ms) | `motion-safe:animate-breathe` — `FiringMark` only; `--dur-breathe` and `@keyframes syn-breathe` (Workflow UX v0.1 §3.3, TD-42). The one animation at rest; never attached under reduced motion |
 | The one breakpoint (768px) | the `wide:` variant |
 | An overlay shadow | `shadow-(--shadow-overlay)` |
 | A scrim | `bg-(--scrim)` |
 
 Both duration tokens collapse to `0ms` under `prefers-reduced-motion`, and
-`globals.css` zeroes any hard-coded duration as a floor.
+`globals.css` zeroes any hard-coded duration as a floor. `--dur-breathe` does
+not collapse: the breath is applied `motion-safe:` only, so under reduced
+motion it is never attached and the mark rests at full opacity.
 
 ---
 

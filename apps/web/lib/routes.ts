@@ -162,6 +162,46 @@ export function reviewHistoryRoute(): string {
   return "/review/history";
 }
 
+/* ------------------------------------------------------------- workflow -- */
+
+/**
+ * Workflow — the fourth peer (Workflow UX spec v0.1 §5, W1; FLO-5). Resolves
+ * to the last view opened, else the first (FLO-6).
+ */
+export function workflowRoute(): string {
+  return "/workflow";
+}
+
+/**
+ * One view's board, WF-01. `column` is compact's shown column (`?col=`, FLO-8);
+ * `add` is the `n` key's hand-off — the board opens an add row and clears it.
+ */
+export function workflowViewRoute(viewId: string, options?: { column?: string; add?: boolean }): string {
+  const path = `${workflowRoute()}/${viewId}`;
+  const query = new URLSearchParams();
+  if (options?.column) query.set("col", options.column);
+  if (options?.add) query.set("add", "1");
+  const search = query.toString();
+  return search === "" ? path : `${path}?${search}`;
+}
+
+/** The view id in a Workflow board path, or null on the root route. */
+export function workflowViewIdOf(path: string): string | null {
+  if (!isWorkflowPath(path)) return null;
+  const [, , viewId] = path.split("?")[0]?.split("/") ?? [];
+  return viewId === undefined || viewId === "" ? null : viewId;
+}
+
+/**
+ * Is this path Workflow's? The one scope check the tab highlight, the entry
+ * tree's orient exemption (W16) and the shortcut hook share, so none of them
+ * writes the prefix itself.
+ */
+export function isWorkflowPath(path: string): boolean {
+  const root = workflowRoute();
+  return path === root || path.startsWith(`${root}/`) || path.startsWith(`${root}?`);
+}
+
 /* ------------------------------------------------------------- settings -- */
 
 export function settingsRoute(): string {

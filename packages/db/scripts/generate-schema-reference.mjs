@@ -85,6 +85,19 @@ const GROUPS = [
       "system/quotes.ts",
     ],
   },
+  {
+    title: "GROUP 7 — WORKFLOW",
+    intro:
+      "Since Epic 7 (0011): the board for work that waits on a prompt, separate from the habit day. A `workflow_views` row is a board; its `workflow_columns` are its states, at most one `active` (tasks fire here) and one `done` per view, held by two partial unique indexes; `workflow_groups` are its lanes (usually clients), coloured with a category hue; `workflow_tasks` sit in one column and one lane, firing when `firing_started_at` is set. `workflow_templates` are column arrangements the person saved — a jsonb snapshot; the two built-in ones are constants, never rows. `workflow_day_pins` holds the groups made *first today*, keyed by the person's day, so nothing runs to clear them. *Next* is never stored. `workflow_tasks.column_id` restricts, so a column holding tasks cannot be deleted until they are moved.",
+    files: [
+      "workflow/workflow-views.ts",
+      "workflow/workflow-columns.ts",
+      "workflow/workflow-groups.ts",
+      "workflow/workflow-tasks.ts",
+      "workflow/workflow-templates.ts",
+      "workflow/workflow-day-pins.ts",
+    ],
+  },
 ];
 
 function readSchemaFile(relPath) {
@@ -192,6 +205,8 @@ function buildEntityOverview(tables) {
 
 **Group 6 — System.** \`data_exports\` tracks a request to export everything (preparing → ready → expired, with the object path and a 24-hour expiry). \`feedback_messages\` is the About message: insert-only for its author, no authenticated read, and it holds only the message plus the two optional context fields the switch controls. \`quotes\` (0007) is the bank a person may opt into for the morning frame — app content with no \`user_id\`, under \`catalogReadPolicies\`: every signed-in person reads the published rows, nobody writes through the authenticated role, and nothing about the person decides which quote a day shows.
 
+**Group 7 — Workflow.** Since Epic 7 (0011), six owner-private tables for the board of lanes by columns. \`workflow_views\` (a board: name, tab order, \`last_opened_at\`) owns its \`workflow_columns\` (name, order, a nullable \`role\` of \`active\` or \`done\`, at most one of each per view by partial unique index). \`workflow_groups\` are the lanes (name, \`hue\` from \`category_color_key\`, usual order, \`collapsed\`). \`workflow_tasks\` carry a title, a note, a place in their cell, and three timestamps — \`firing_started_at\`, \`last_returned_at\`, \`closed_at\` — with no boolean beside them; \`column_id\` restricts, \`group_id\` sets null (the lane *No group*), \`view_id\` cascades. \`workflow_templates\` is what the person saved, as a jsonb snapshot of names and roles; the two built-in templates are constants. \`workflow_day_pins\` is one row per \`(user_id, day_key)\` naming the groups made *first today*. Everything archives; nothing about *next* or today's lane order is stored.
+
 **Deliberately not here** (official spec §3.11): no streak, no score cache — the number is computed on read — no social graph, and no coach output table. There is also no \`week_plans\` table: a week's status is derived from its days. And no wake anchor at all since UX v1.1 R11 (\`0006\`).`;
 }
 
@@ -200,9 +215,9 @@ function buildRelationshipSummary() {
 
 **The one central entity.** \`users\`. Synapse is single-player: there is no couple, no team, no shared row. **Every table hangs directly off this one** and carries its own denormalised \`user_id\`, so every policy is the same three lines and every table is greppable for its owner — no policy ever subqueries another RLS-guarded table.
 
-**One-to-many from \`users\`.** \`categories\`, \`habits\`, \`reasons\`, \`passages\`, \`templates\`, \`template_slots\`, \`fixtures\`, \`day_plans\`, \`days\`, \`day_blocks\`, \`day_items\`, \`timer_sessions\`, \`shifts\`, \`misses\`, \`journal_entries\`, \`notification_prefs\`, \`notification_deliveries\`, \`web_push_subscriptions\`, \`data_exports\`, \`feedback_messages\`. **One-to-one:** \`user_avatars\`. **Owned by nobody:** \`quotes\` — the product's catalogue, no \`user_id\`.
+**One-to-many from \`users\`.** \`categories\`, \`habits\`, \`reasons\`, \`passages\`, \`templates\`, \`template_slots\`, \`fixtures\`, \`day_plans\`, \`days\`, \`day_blocks\`, \`day_items\`, \`timer_sessions\`, \`shifts\`, \`misses\`, \`journal_entries\`, \`notification_prefs\`, \`notification_deliveries\`, \`web_push_subscriptions\`, \`data_exports\`, \`feedback_messages\`, and the six \`workflow_*\` tables (0011). **One-to-one:** \`user_avatars\`. **Owned by nobody:** \`quotes\` — the product's catalogue, no \`user_id\`.
 
-**The ownership chains** (each child also carries \`user_id\` directly): \`categories\` → \`habits\` → \`template_slots\` → \`day_items\`; \`templates\` → \`template_slots\` and \`templates\` → \`day_blocks\`; \`days\` → \`day_blocks\` → \`day_items\` → { \`timer_sessions\`, \`misses\` }; \`days\` → \`shifts\` → \`misses\`; \`days\` → \`journal_entries\` (one each).
+**The ownership chains** (each child also carries \`user_id\` directly): \`categories\` → \`habits\` → \`template_slots\` → \`day_items\`; \`templates\` → \`template_slots\` and \`templates\` → \`day_blocks\`; \`days\` → \`day_blocks\` → \`day_items\` → { \`timer_sessions\`, \`misses\` }; \`days\` → \`shifts\` → \`misses\`; \`days\` → \`journal_entries\` (one each); \`workflow_views\` → \`workflow_columns\` → \`workflow_tasks\` (the column \`restrict\`, the view \`cascade\`), and \`workflow_groups\` → \`workflow_tasks\` (\`set null\` — the lane *No group*).
 
 **References that are not ownership.** \`days.work_focus_habit_id\` → \`habits\` and \`fixtures.habit_id\` → \`habits\` (both \`set null\`), \`days.work_template_id\` → \`templates\` and \`day_plans\`' four template FKs (all \`set null\` — a plan references, never copies, and an archived list leaves the plan standing), \`day_items.carried_from_item_id\` / \`misses.traded_up_item_id\` → \`day_items\` (both \`set null\` — a record points at another record without owning it), and \`day_items.parent_item_id\` → \`day_items\` (\`cascade\` — a travel row without its workout is nothing).
 
@@ -252,6 +267,7 @@ function buildEnumSection(enums) {
     ],
     "Notifications": ["device_platform", "notification_kind"],
     "System": ["export_status"],
+    "Workflow": ["workflow_column_role"],
   };
 
   const enumSet = new Set(enums.map((e) => e.name));

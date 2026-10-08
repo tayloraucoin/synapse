@@ -70,6 +70,13 @@ export interface ResponsiveSheetProps {
   onDiscardRequest?: () => void;
   /** Cross-cutting §3.4. */
   initialFocus?: "first-field" | "title";
+  /**
+   * Where focus goes on close, when the control that opened the sheet is no
+   * longer there — a menu item, gone with its menu (Workflow WF-03…WF-05,
+   * FLO-8: focus returns to *View options*). Absent, the primitive's own
+   * return applies.
+   */
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
   children: React.ReactNode;
   classes?: ResponsiveSheetClasses;
   className?: string;
@@ -87,6 +94,7 @@ export function ResponsiveSheet({
   dirty = false,
   onDiscardRequest,
   initialFocus = "title",
+  returnFocusRef,
   children,
   classes,
   className,
@@ -179,6 +187,16 @@ export function ResponsiveSheet({
     [initialFocus],
   );
 
+  const onCloseAutoFocus = React.useCallback(
+    (event: Event) => {
+      const target = returnFocusRef?.current;
+      if (target === null || target === undefined) return;
+      event.preventDefault();
+      target.focus();
+    },
+    [returnFocusRef],
+  );
+
   if (isWide) {
     return (
       <Sheet open={open} onOpenChange={requestChange}>
@@ -188,6 +206,7 @@ export function ResponsiveSheet({
           // a corner close, or the sheet has two exits in the same 44px.
           showCloseButton={headerAction === undefined}
           onOpenAutoFocus={onOpenAutoFocus}
+          onCloseAutoFocus={onCloseAutoFocus}
           className={cn(
             "flex w-(--sheet-w) max-w-full flex-col gap-0 p-0",
             className,
@@ -207,6 +226,7 @@ export function ResponsiveSheet({
   return (
     <Drawer open={open} onOpenChange={requestChange}>
       <DrawerContent
+        onCloseAutoFocus={onCloseAutoFocus}
         className={cn(
           "flex flex-col gap-0 p-0",
           /*

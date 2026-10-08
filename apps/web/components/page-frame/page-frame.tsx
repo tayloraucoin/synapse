@@ -43,7 +43,8 @@ export interface PageFrameProps {
    * today key, which the status line already knows.
    */
   dayKey?: string;
-  contentWidth?: "text" | "canvas";
+  /** `board` — no cap, Workflow's board only (FLO-6, TD-44). */
+  contentWidth?: "text" | "canvas" | "board";
   children: React.ReactNode;
 }
 
