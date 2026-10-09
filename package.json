@@ -10,6 +10,7 @@
     "check-types": "turbo run check-types",
     "directory-map": "node scripts/generate-directory-map.mjs",
     "docs:check-links": "node scripts/check-doc-links.mjs",
+    "check-ledger": "node scripts/check-ledger.mjs",
     "test:doc-links": "node --test scripts/check-doc-links.test.mjs",
     "check-turbo-env": "node scripts/check-turbo-env.mjs",
     "emoji-data": "node scripts/copy-emoji-data.mjs",
