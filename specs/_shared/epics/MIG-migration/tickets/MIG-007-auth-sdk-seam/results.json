@@ -8,10 +8,10 @@
       "run": {
         "command": "yarn test:auth-seam --test-name-pattern C1",
         "exit": 0,
-        "at": "2026-10-09T21:04:15Z",
-        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
+        "at": "2026-10-09T21:06:48Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C1.log",
-        "evidence_sha256": "b487b781a269200bdf4b5cc425027d7e0746ee119083b0d40a3fb88715f47e4e",
+        "evidence_sha256": "aba1d30c454d536d050956e865f55fc61f73c42666ead5c054c3b6aac643314c",
         "tests": 3
       }
     },
@@ -21,10 +21,10 @@
       "run": {
         "command": "yarn test:auth-seam --test-name-pattern C2",
         "exit": 0,
-        "at": "2026-10-09T21:04:18Z",
-        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
+        "at": "2026-10-09T21:06:51Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C2.log",
-        "evidence_sha256": "90da38a1da0a39a0607636186f96e3b099179461bd36545911b875d42e7b6414",
+        "evidence_sha256": "2056b6f1c4f9459f8f4fe6f01f6b22c149d7685500300a8cd601bbc8ff6fbcc5",
         "tests": 1
       }
     },
@@ -34,10 +34,10 @@
       "run": {
         "command": "yarn test:auth-seam --test-name-pattern C3",
         "exit": 0,
-        "at": "2026-10-09T21:04:19Z",
-        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
+        "at": "2026-10-09T21:06:52Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C3.log",
-        "evidence_sha256": "3392e7139d4bc0cbbc1bfccc043395fbbaf549e1cb217af6ae42913299792317",
+        "evidence_sha256": "63f814e45742d68c3d8a7285ee1735d6c2394ce90efc3b04d880c4c44c356a1d",
         "tests": 3
       }
     },
@@ -47,10 +47,10 @@
       "run": {
         "command": "yarn lint:boundaries",
         "exit": 0,
-        "at": "2026-10-09T21:04:20Z",
-        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
+        "at": "2026-10-09T21:06:54Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C4.log",
-        "evidence_sha256": "88e1139fb83468493b41c4ca91dd04cb33ec21e5600778f094d238fe6b021023"
+        "evidence_sha256": "ab2536a9d333ef82c6e0c86d5970b26d210e2c420c6b3796a1995b919cd4696a"
       }
     },
     "C5": {
@@ -59,10 +59,10 @@
       "run": {
         "command": "yarn contract:record MIG-7 C5 --evidence specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C5-walk.md --verdict deferred",
         "exit": 0,
-        "at": "2026-10-09T20:56:46Z",
-        "head": "5599fec8b2643134b43b71dc9ab8b640b63f22c2",
+        "at": "2026-10-09T21:06:47Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C5-walk.md",
-        "evidence_sha256": "7fc6b2b600c57d0be95f4e3056798ca8629fc1a81bb63028dbd0fe54f107509d",
+        "evidence_sha256": "b07337ba0ee3583c411a1e766dba726adf4dd3744cdc6b2ed6341b26c5cb7829",
         "deferred": true
       }
     },
@@ -72,10 +72,10 @@
       "run": {
         "command": "yarn test:auth-seam --test-name-pattern C6",
         "exit": 0,
-        "at": "2026-10-09T21:04:29Z",
-        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
+        "at": "2026-10-09T21:07:02Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C6.log",
-        "evidence_sha256": "79220e972103e4338b9c3e488e2c0ee8e7877d96e729829e239ae9ebc3c05233",
+        "evidence_sha256": "452bbd3f7a1bc36fd6394d17ff01595f722c4224a319440bea2b6579f7f14aa1",
         "tests": 1
       }
     },
@@ -172,5 +172,5 @@
     "headless_runs": 2,
     "headless_weighted": 597707
   },
-  "updated_at": "2026-10-09T21:05:38Z"
+  "updated_at": "2026-10-09T21:07:02Z"
 }
