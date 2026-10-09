@@ -8,10 +8,8 @@
  * reached by a mason and a warden reviewer glob in toolkit.json.
  */
 import "dotenv/config";
-
 import { createClient } from "@supabase/supabase-js";
 import { firstNonEmpty } from "@syn/utils";
-
 import { resolveDbEnvironment } from "../src/connection-env.ts";
 
 /**
@@ -33,7 +31,9 @@ function getSupabaseUrl(env: NodeJS.ProcessEnv = process.env): string {
   return (env.NEXT_PUBLIC_SUPABASE_URL ?? "").trim();
 }
 
-function getSupabaseServiceRoleKey(env: NodeJS.ProcessEnv = process.env): string {
+function getSupabaseServiceRoleKey(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
   const tier = resolveDbEnvironment(env);
   if (tier === "local" || tier === "staging") {
     return firstNonEmpty(

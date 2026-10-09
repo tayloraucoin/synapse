@@ -2,7 +2,6 @@
 // Imports nothing server-only and resolves no environment itself.
 
 import { createBrowserClient as createSupabaseBrowserClient } from "@supabase/ssr";
-
 import type { AuthClient } from "./context";
 
 export type { AuthClient };

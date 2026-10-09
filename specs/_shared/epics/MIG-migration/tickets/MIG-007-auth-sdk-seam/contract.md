@@ -36,7 +36,7 @@ planned_paths:
   - "docs/developer-guides/remove-supabase-auth.md"
   - "docs/developer-guides/authentication.md"
   - "scripts/check-auth-seam.test.mjs"
-depends_on: [ MIG-6 ] # work-ids that must be built first (their own criteria PASS)
+depends_on: [MIG-6] # work-ids that must be built first (their own criteria PASS)
 out_of_scope:
   - "Billing, email and AI families (none in Phase 1)"
   - "Vendor dashboard changes (Operator)"
