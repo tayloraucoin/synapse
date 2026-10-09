@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-10-09 · 1972 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-09 · 2082 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -48,6 +48,36 @@ _Generated 2026-10-09 · 1972 files (noise collapsed) · `yarn directory-map` to
     ci.yml  # lint → boundaries → types → build, with no secrets
   PULL_REQUEST_TEMPLATE.md
 apps/
+  docs/
+    app/
+      [[...slug]]/
+        _components/
+          frontmatter-panel.tsx
+          markdown.tsx
+          mermaid-diagram.tsx
+        page.tsx
+      search-index.json/
+        route.ts
+      globals.css
+      layout.tsx
+      not-found.tsx
+    components/
+      shell/
+        docs-nav.tsx
+        search.tsx
+        sidebar.tsx
+    lib/
+      docs.ts
+      search-entry.ts
+    public/
+      icon-192.png
+    eslint.config.mjs
+    next-env.d.ts
+    next.config.ts
+    package.json
+    postcss.config.mjs
+    tsconfig.json
+    turbo.json
   mobile/
     README.md  # a deliberate empty seam. Do not scaffold
   web/
@@ -524,6 +554,15 @@ apps/
     content/
       landing.ts  # the landing page's copy deck (SYS-6). Surface prose lives here, never inline
     docs/
+      design/
+        refs/
+          README.md
+        anti-patterns.md
+        components.md
+        coverage-gaps.md
+        DESIGN.md
+        states.md
+        tokens.md
       product-rules.md
     lib/
       assets/
@@ -592,12 +631,14 @@ apps/
     AGENTS.md
     CLAUDE.md
     env.ts  # the only process.env reader in the app
+    eslint-suppressions.json
     eslint.config.mjs
     next.config.ts  # collapses the tier vars into canonical names the browser can inline
     package.json
     postcss.config.mjs
     proxy.ts  # session refresh only — Next 16's name for middleware
     tsconfig.json
+    turbo.json
     vercel.json
 docs/
   ai-guides/
@@ -825,6 +866,7 @@ docs/
       claude-settings-json-2026-10-09.md
       README.md
     records/
+      0001-adopt-the-practice.md
       README.md
     changelog.md
     ledger.md
@@ -851,6 +893,7 @@ docs/
     database-setup.md
     environments.md
     migrations.md
+    remove-supabase-auth.md
     rls.md
   engineering/
     schemas/
@@ -876,6 +919,10 @@ docs/
       events.template.md
       experiment.template.md
       readout.template.md
+  pem/
+    adaptations/
+      2026-10-09-docs-app-in-migration.md
+    README.md
   product/
     2026-09-11-taylor-ux-review-notes.md
     2026-09-11-vesper-questions-for-ux-v1.1.md
@@ -1159,6 +1206,7 @@ packages/
       root.ts
       trpc.ts  # two procedure tiers, the error formatter, and the RLS rule in its header
     .gitignore
+    eslint-suppressions.json
     eslint.config.mjs
     package.json
     tsconfig.json
@@ -1166,6 +1214,7 @@ packages/
     src/
       admin.ts
       auth-errors.ts
+      browser.ts
       client.ts
       context.ts  # one person role, guest. service_role is for the scheduler
       cookies.ts
@@ -1175,6 +1224,7 @@ packages/
       server.ts
       session.ts
     .gitignore
+    eslint-suppressions.json
     eslint.config.mjs
     package.json
     tsconfig.json
@@ -1184,6 +1234,7 @@ packages/
       boundaries.js  # the import matrix. Diverges from CC's copy — see TECHNICAL-DECISIONS
       next.js
       no-emoji.js  # UX v1.2 R29 as lint: no emoji in any copy.ts; a glyph is IconValue data on the person's nouns (TD-20)
+      process-env.js
       react-internal.js
       spacing.js
     prettier/
@@ -1227,7 +1278,13 @@ packages/
     migrations/
       <12 migration .sql files, 0000–0011 — append-only, human-reviewed before a hosted migrate>
       meta/ <13 drizzle snapshot files + _journal.json>
+      migrations.lock.json
     scripts/
+      fixtures/
+        check-migrations/
+          0000_unguarded.sql
+      check-migrations.test.ts
+      check-migrations.ts
       generate-schema-reference.mjs
       reset-local-db.ts
       reset-user.ts
@@ -1313,6 +1370,7 @@ packages/
     AGENTS.md
     CLAUDE.md
     drizzle.config.ts
+    eslint-suppressions.json
     eslint.config.mjs
     package.json
     SCHEMA_REFERENCE.md  # generated from src/schema by db:schema-reference — never hand-edited
@@ -1335,6 +1393,7 @@ packages/
       is-dev.ts
       logging.ts
     .gitignore
+    eslint-suppressions.json
     eslint.config.mjs
     package.json
     tsconfig.json
@@ -2036,8 +2095,10 @@ packages/
       errors.ts
       index.ts
       link.ts
+      number.test.ts
       number.ts
       path.ts
+      string.test.ts
       string.ts
       time.ts  # every formatter takes an explicit timeZone — the day's, not the viewer's
     .gitignore
@@ -2081,7 +2142,12 @@ packages/
     package.json
     tsconfig.json
 scripts/
+  check-auth-seam.test.mjs
   check-doc-links.mjs
+  check-doc-links.test.mjs
+  check-env-seam.test.mjs
+  check-ledger.mjs
+  check-turbo-env.mjs
   copy-emoji-data.mjs
   generate-directory-map.mjs
   local-dev-origins.mjs
@@ -2090,15 +2156,100 @@ specs/
   _shared/
     epics/
       MIG-migration/
+        tickets/
+          MIG-001-promote-ux-spec/
+            contract.md
+            results.json
+          MIG-002-host-link-checker/
+            evidence/
+              C2.txt
+            contract.md
+            results.json
+          MIG-003-turbo-env-hashing/
+            as-built.md
+            contract.md
+            results.json
+          MIG-004-check-migrations/
+            as-built.md
+            contract.md
+            results.json
+            review-mason.md
+            review-warden.md
+          MIG-005-tests-beyond-smoke/
+            contract.md
+            results.json
+          MIG-006-env-seam/
+            as-built.md
+            contract.md
+            results.json
+          MIG-007-auth-sdk-seam/
+            evidence/
+              C5-walk.md
+            as-built.md
+            contract.md
+            results.json
+            review-mason.md
+            review-warden.md
+          MIG-008-use-client-placement/
+            contract.md
+          MIG-009-design-layer/
+            as-built.md
+            contract.md
+            results.json
+          MIG-010-format-all/
+            contract.md
+          MIG-011-day-one-leftovers/
+            contract.md
+            results.json
+          MIG-012-bash-guard-split/
+            contract.md
+          MIG-013-bash-guard-fixture-restore/
+            contract.md
+          MIG-014-coverage-thresholds/
+            contract.md
+          MIG-015-env-seam-auth/
+            contract.md
+          MIG-016-env-seam-observability/
+            contract.md
+          MIG-017-env-seam-api/
+            contract.md
+          MIG-018-env-seam-db/
+            contract.md
+          MIG-019-env-seam-web/
+            contract.md
+          MIG-020-next-config-env-secrets/
+            contract.md
+          MIG-021-retire-domain-guides/
+            contract.md
+          MIG-022-auth-guide-leftovers/
+            contract.md
+          _preflight.md
         assess.md
         brief.md
         rulings.md
   web/
     ux/
+      _global/
+        copy-register.md
+        navigation.md
+        offline-and-sync.md
+        overview.md
+        record-integrity.md
+        shell.md
+        system-states.md
+        time-and-day.md
+      auth/
+        forgot.md
+        overview.md
+        reset.md
+        sign-in.md
+        sign-up.md
+        verify.md
       .gitkeep
   _status.md
 tests/
   smoke.test.ts
+  test-runner.test.ts
 tooling/
   fixtures/
     settings/
@@ -2694,6 +2845,7 @@ tooling/
   check-reviewers.ts
   check-settings.ts
   check-specs.ts
+  check-stack.ts
   check-test-weakening.ts
   contract.ts
   cost.ts

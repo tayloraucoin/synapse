@@ -28,7 +28,7 @@ Setup: Node **22** (`.nvmrc`), Yarn **4.13.0** (`corepack enable && yarn install
 | Task                | Command                                                                                                     |
 | ------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Verify (matches CI) | `yarn verify` · `yarn verify:fast` (changed files)                                                          |
-| Dev server          | `yarn dev` (all) · `yarn web:dev` · `yarn web:dev:local` (LAN/phone)                                        |
+| Dev server          | `yarn dev` (all) · `yarn web:dev` · `yarn web:dev:local` (LAN/phone) · `yarn docs:dev` (docs app, :3001)    |
 | Per-app checks      | `yarn web:build` / `web:lint` / `web:typecheck` (same for `ui:*`)                                           |
 | Database            | `yarn db:generate` · `db:migrate` · `db:push` · `db:setup` · `db:reset` · `db:seed` · `db:schema-reference` |
 | Storybook           | `yarn ui:storybook`                                                                                         |

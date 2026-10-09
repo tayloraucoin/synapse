@@ -1,0 +1,251 @@
+@import "tailwindcss";
+@import "@syn/config/tailwind/preset.css";
+@import "@syn/ui/styles/globals.css";
+/* The @syn/ui components this app uses carry their classes in the package. */
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+
+@plugin "@tailwindcss/typography";
+
+/*
+ * Docs-local tokens: the reading values from PEM's Docs spec, aliased onto
+ * Synapse's preset, which has no neutral-350 and no hover or selected token
+ * (docs/pem/adaptations/2026-10-09-docs-app-in-migration.md). They add no raw
+ * colour; the preset itself is never edited from here. In light, each sits a
+ * step darker than the preset's text tokens, so muted text on the sidebar
+ * holds AA at the sidebar's small size.
+ */
+:root {
+  --docs-text: var(--syn-neutral-700);
+  --docs-muted: var(--text-body);
+  --docs-code-surface: var(--muted);
+}
+
+.dark {
+  --docs-text: var(--text-body);
+  --docs-muted: var(--muted-foreground);
+  --docs-code-surface: var(--card);
+}
+
+@theme inline {
+  --color-docs-text: var(--docs-text);
+  --color-docs-muted: var(--docs-muted);
+  --color-docs-code-surface: var(--docs-code-surface);
+}
+
+@theme static {
+  /* The reading column; tables and code blocks break out to the full width. */
+  --container-docs-measure: 65ch;
+  --text-docs-h1: 2rem;
+  --text-docs-h1--line-height: 1.2;
+  --leading-docs-h2: 1.3;
+  --tracking-docs-h1: -0.02em;
+  --tracking-docs-h2: -0.01em;
+  /* The narrowest a table column gets before its table scrolls sideways. */
+  --docs-cell-min: 12ch;
+  /* The narrowest a column of prose gets (a ledger's Decision column). */
+  --docs-col-prose: 28ch;
+  /* A section heading's space above and below (the Docs spec's h2 margins). */
+  --docs-section-above: 2em;
+  --docs-section-below: 1em;
+  --docs-subsection-above: 1.6em;
+}
+
+/* The article reads in token colours in both themes, so no prose-invert. */
+.prose {
+  --tw-prose-body: var(--docs-text);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-lead: var(--docs-muted);
+  --tw-prose-links: var(--foreground);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-counters: var(--docs-muted);
+  --tw-prose-bullets: var(--docs-muted);
+  --tw-prose-hr: var(--border);
+  --tw-prose-quotes: var(--docs-text);
+  --tw-prose-quote-borders: var(--border);
+  --tw-prose-captions: var(--docs-muted);
+  --tw-prose-kbd: var(--foreground);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-pre-code: var(--foreground);
+  --tw-prose-pre-bg: var(--docs-code-surface);
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+  /* A long URL or path breaks rather than widen the page on a phone. */
+  @apply max-w-none text-base wrap-break-word;
+}
+
+.prose > * {
+  @apply max-w-docs-measure;
+}
+.prose > :where(header, pre, .docs-table, .docs-diagram, .docs-diagram-source) {
+  @apply max-w-none;
+}
+
+.prose h1 {
+  @apply text-docs-h1 font-bold tracking-docs-h1;
+}
+.prose h2 {
+  @apply text-2xl leading-docs-h2 font-semibold tracking-docs-h2;
+}
+.prose h3 {
+  @apply text-xl font-semibold;
+}
+.prose h4 {
+  @apply text-base font-semibold;
+}
+.prose :where(h1, h2, h3, h4) {
+  @apply text-balance;
+}
+/* A very long title (marked by the renderer) is set a step smaller. */
+.prose h1.docs-title-long {
+  @apply text-2xl leading-docs-h2 tracking-docs-h2;
+}
+/* A file that stacks several documents keeps one title; each later H1 reads
+   as a section heading. */
+.prose h1 ~ h1 {
+  @apply mt-(--docs-section-above) mb-(--docs-section-below) text-2xl leading-docs-h2 font-semibold tracking-docs-h2;
+}
+
+/* A rule right before a heading repeats the break the heading already makes,
+   so only the heading's own space remains. */
+.prose hr:has(+ :is(h1, h2, h3)) {
+  @apply hidden;
+}
+/* Typography zeroes the margin after any rule; the heading keeps its own. */
+.prose hr + h2 {
+  @apply mt-(--docs-section-above);
+}
+.prose hr + h3 {
+  @apply mt-(--docs-subsection-above);
+}
+
+.prose a {
+  @apply font-medium underline-offset-4 decoration-docs-muted hover:decoration-foreground;
+}
+
+.prose :where(code):not(:where(pre *)) {
+  @apply font-medium;
+}
+/* In running text a long path breaks anywhere rather than widen the page on
+   a phone; inside a table it stays whole and the table scrolls instead. */
+.prose :where(code):not(:where(pre *, table *)) {
+  @apply wrap-anywhere;
+}
+.prose code::before,
+.prose code::after {
+  content: none;
+}
+
+/* Code blocks scroll sideways and never wrap. */
+.prose pre {
+  @apply overflow-x-auto rounded-md border border-border p-4 whitespace-pre;
+}
+
+/* Wide tables (the ledger, the research reports) scroll inside their own
+   frame, never the page; a column of short keys (IDs) never breaks. The column
+   minimums apply only in a narrow frame (a phone), so a desktop column still
+   fits a seven-column table without scrolling. */
+.prose .docs-table {
+  @apply @container my-8 overflow-x-auto rounded-md border border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none;
+}
+.prose .docs-table table {
+  @apply my-0 text-sm;
+}
+.prose .docs-table :where(th, td) {
+  @apply p-2 align-top @max-4xl:min-w-(--docs-cell-min);
+}
+.prose .docs-table .docs-col-prose {
+  @apply @max-4xl:min-w-(--docs-col-prose);
+}
+.prose .docs-table .docs-col-key {
+  @apply min-w-0 whitespace-nowrap;
+}
+.prose .docs-table thead th {
+  @apply bg-muted text-foreground;
+}
+
+/* A Mermaid diagram, drawn at its natural width: wider than the column, it
+   scrolls inside its own frame, as a table does. Until it draws, or when it
+   cannot, its source shows as a code block under a short error. Its text is
+   the tables' size, read by the diagram when it draws. */
+.prose :where(.docs-diagram, .docs-diagram-source) {
+  @apply text-sm;
+}
+.prose .docs-diagram {
+  @apply my-8 overflow-x-auto rounded-md border border-border p-4 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none;
+}
+.prose .docs-diagram svg {
+  @apply mx-auto block;
+}
+.prose .docs-diagram-source {
+  @apply my-8;
+}
+.prose .docs-diagram-source pre {
+  @apply my-0;
+}
+.prose .docs-diagram-error {
+  @apply my-0 mb-2 text-sm text-foreground;
+}
+
+/* Blockquotes carry instruction blocks ("Who fills / When / …"), one label per
+   source line. Keep those line breaks, and drop typography's quote styling. */
+.prose blockquote {
+  @apply font-normal not-italic;
+}
+.prose blockquote p {
+  white-space: pre-line;
+}
+.prose blockquote p::before,
+.prose blockquote p::after {
+  content: none;
+}
+/* The page's lead ("In one line", "How to use this file") reads as its
+   opening paragraphs, as on the entry pages: no bar, no indent. */
+.prose blockquote.docs-lead {
+  @apply border-0 ps-0;
+}
+.prose blockquote.docs-lead p {
+  @apply whitespace-normal;
+}
+/* A field block ("Who fills / When / Lives at") is a filled panel, one label
+   per line; a surface instead of a stripe (canon A-05). Its text is the
+   foreground, since the panel's surface sits closer to the body text colour
+   than the page does. */
+.prose blockquote.docs-fields {
+  @apply rounded-md border-0 bg-docs-code-surface p-4 text-foreground;
+}
+/* Small text on the paragraphs, not the panel, so the panel keeps the body
+   measure (it is set in ch). */
+.prose blockquote.docs-fields p {
+  @apply text-sm;
+}
+.prose blockquote.docs-fields > :first-child {
+  @apply mt-0;
+}
+.prose blockquote.docs-fields > :last-child {
+  @apply mb-0;
+}
+
+/* <details> from the practice's files: a disclosure with the summary as its
+   handle. */
+.prose .docs-details {
+  @apply my-6 rounded-md border border-border;
+}
+.prose .docs-details > summary {
+  @apply cursor-pointer rounded-md px-4 py-2 font-medium text-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none;
+}
+.prose .docs-details[open] > summary {
+  @apply rounded-b-none border-b border-border;
+}
+.prose .docs-details > :not(summary) {
+  @apply mx-4;
+}
+
+::selection {
+  background-color: var(--accent-hover-surface);
+  color: var(--foreground);
+}
+
+/* Safari still draws the disclosure triangle on <summary>; the nav draws its own. */
+nav summary::-webkit-details-marker {
+  display: none;
+}

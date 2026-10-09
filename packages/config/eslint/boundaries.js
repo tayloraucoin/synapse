@@ -30,7 +30,7 @@ import tseslint from "typescript-eslint";
 const configDir = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(configDir, "../../..");
 
-const APP_TYPES = ["app-web", "app-mobile"];
+const APP_TYPES = ["app-web", "app-mobile", "app-docs"];
 
 /** Yarn workspaces symlink @syn/* into node_modules — match both paths. */
 function workspacePackage(type, folder) {
@@ -275,6 +275,7 @@ export const boundariesConfig = [
         "node_modules/@syn/**/*",
         "node_modules/web/**/*",
         "node_modules/mobile/**/*",
+        "node_modules/docs/**/*",
       ],
       "boundaries/ignore": [
         "**/.next/**",
@@ -297,6 +298,7 @@ export const boundariesConfig = [
       "boundaries/elements": [
         workspaceApp("app-web", "web"),
         workspaceApp("app-mobile", "mobile"),
+        workspaceApp("app-docs", "docs"),
         workspacePackage("config", "config"),
         workspacePackage("constants", "constants"),
         workspacePackage("types", "types"),
