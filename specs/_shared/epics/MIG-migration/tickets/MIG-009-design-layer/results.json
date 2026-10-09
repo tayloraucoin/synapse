@@ -27,16 +27,77 @@
       }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "manual",
-      "run": null
+      "run": {
+        "command": "yarn contract:record MIG-9 C3 --evidence specs/_shared/epics/MIG-migration/tickets/MIG-009-design-layer/as-built.md",
+        "exit": 0,
+        "at": "2026-10-09T20:56:15Z",
+        "head": "5599fec8b2643134b43b71dc9ab8b640b63f22c2",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-009-design-layer/as-built.md",
+        "evidence_sha256": "02433af7273483e40335e3045176c1dd0cc96b20204ebd0e5adf7ea7ae5342d5"
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "manual",
-      "run": null
+      "run": {
+        "command": "yarn contract:record MIG-9 C4 --evidence specs/_shared/epics/MIG-migration/tickets/MIG-009-design-layer/as-built.md",
+        "exit": 0,
+        "at": "2026-10-09T20:56:16Z",
+        "head": "5599fec8b2643134b43b71dc9ab8b640b63f22c2",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-009-design-layer/as-built.md",
+        "evidence_sha256": "02433af7273483e40335e3045176c1dd0cc96b20204ebd0e5adf7ea7ae5342d5"
+      }
     }
   },
   "built_at": "2026-10-09T20:45:41Z",
-  "updated_at": "2026-10-09T20:45:46Z"
+  "cost": {
+    "at": "2026-10-09T20:58:13Z",
+    "calls": 65,
+    "weighted": 1288610,
+    "tokens_input": 134,
+    "tokens_cache_read": 9401073,
+    "tokens_cache_write": 141551,
+    "tokens_output": 34286,
+    "by_category": {
+      "build": {
+        "calls": 42,
+        "weighted": 817796
+      },
+      "proofs": {
+        "calls": 16,
+        "weighted": 310808
+      },
+      "captures": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "reviews": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "status": {
+        "calls": 3,
+        "weighted": 53188
+      },
+      "git": {
+        "calls": 3,
+        "weighted": 64203
+      },
+      "re-reading": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "other": {
+        "calls": 1,
+        "weighted": 42616
+      }
+    },
+    "context_last_call": 185497,
+    "threads": 1,
+    "headless_runs": 0,
+    "headless_weighted": 0
+  },
+  "updated_at": "2026-10-09T20:58:13Z"
 }
