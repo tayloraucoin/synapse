@@ -1,0 +1,42 @@
+{
+  "id": "MIG-9",
+  "criteria_sha256": "fa7651938cfb6451f17867ad5393a543083c9ec1640d9687e63cfe4cace5486f",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-refs",
+        "exit": 0,
+        "at": "2026-10-09T20:45:42Z",
+        "head": "fa3ce1036848059138489592f21a971219c1f8d9",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-009-design-layer/evidence/C1.log",
+        "evidence_sha256": "29512e3e85957393955117f5686530a5c118a40098583bf2401c0344f3a059ac"
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn budget",
+        "exit": 0,
+        "at": "2026-10-09T20:45:45Z",
+        "head": "fa3ce1036848059138489592f21a971219c1f8d9",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-009-design-layer/evidence/C2.log",
+        "evidence_sha256": "14a46435065dc38897d65d9fc76b7b749842a6e903bf9f47f1506aa888eba9c5"
+      }
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    }
+  },
+  "built_at": "2026-10-09T20:45:41Z",
+  "updated_at": "2026-10-09T20:45:46Z"
+}
