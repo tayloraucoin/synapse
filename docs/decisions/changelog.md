@@ -10,3 +10,7 @@ load_when:
 ---
 
 # Changelog
+
+## 2026-10-09 — SYN: Synapse adopts the practice (migrate, near path)
+
+- Layer 1 and layer 2 on `feature/pem-migration` from `main` at `f2bfeb1`, toolkit `62d344b`: `toolkit.json`, the copied practice and tooling, the derived spine, rules and settings, `yarn verify` in CI, the old specs and roles archived in `decisions/imported/`, MIG-1 to MIG-11 drafted. Record 0001; rulings in `specs/_shared/epics/MIG-migration/rulings.md`.

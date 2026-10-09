@@ -24,3 +24,7 @@ One line per log, archived whole with its track on 2026-10-09 (record 0001). Ent
 - epic-6-day-first-first-run: [`imported/specs/epic-6-day-first-first-run/TECHNICAL-DECISIONS.md`](imported/specs/epic-6-day-first-first-run/TECHNICAL-DECISIONS.md), 10 entries, append-only.
 - epic-7-workflow: [`imported/specs/epic-7-workflow/TECHNICAL-DECISIONS.md`](imported/specs/epic-7-workflow/TECHNICAL-DECISIONS.md), 15 entries, append-only.
 - cross-cutting-system: [`imported/specs/cross-cutting-system/TECHNICAL-DECISIONS.md`](imported/specs/cross-cutting-system/TECHNICAL-DECISIONS.md), 7 entries, append-only.
+
+## Records
+
+- 0001: Synapse adopts the practice as an overlay, in place, with its history and its own rules kept: [`records/0001-adopt-the-practice.md`](records/0001-adopt-the-practice.md). Usher, 2026-10-09.
