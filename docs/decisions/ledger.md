@@ -28,3 +28,7 @@ One line per log, archived whole with its track on 2026-10-09 (record 0001). Ent
 ## Records
 
 - 0001: Synapse adopts the practice as an overlay, in place, with its history and its own rules kept: [`records/0001-adopt-the-practice.md`](records/0001-adopt-the-practice.md). Usher, 2026-10-09.
+
+## Rulings without a record
+
+- MIG-5: the workspace test runner is Vitest 5.0.3, exact, per workspace with tests, run by `yarn test` through Turbo and failing on zero test files; `node:test` stays for the root `tests/`, `tooling/` and `scripts/`. Why: workspace source uses extensionless and `@syn/*` TypeScript imports `node:test` cannot load unaided, and the React workspaces need a DOM. [`changelog.md`](changelog.md), 2026-10-09.

@@ -1,0 +1,32 @@
+{
+  "id": "MIG-5",
+  "criteria_sha256": "6552d75de6ef9c9d9024e67a9d828ffc51b1990d7357866b6d3a0b7ecfe94033",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    }
+  },
+  "updated_at": "2026-10-09T20:30:43Z"
+}

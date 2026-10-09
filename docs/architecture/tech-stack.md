@@ -21,6 +21,7 @@ resolver, and the privacy grammar — never the plumbing.
 | Turborepo | **2.10.12** | `globalEnv` is load-bearing: an undeclared variable fails the turbo lint. |
 | ESLint | **9.39.5** flat config | Two passes: code quality per package, import boundaries from the root. |
 | Prettier | **3.7+** with `@ianvs/prettier-plugin-sort-imports` | |
+| Vitest | **5.0.3** (exact, per workspace with tests; MIG-5, 2026-10-09) | The workspace test runner: `yarn test` runs it through Turbo and an empty suite fails. Owner: Touchstone. A workspace takes it with its first test file. `node:test` stays for the root `tests/`, `tooling/` and `scripts/`, which run on bare Node. Expires if the React workspaces need a runner Vitest cannot host. Ruling: the ledger, MIG-5. |
 
 ## Framework and rendering
 
@@ -87,9 +88,9 @@ resolver, and the privacy grammar — never the plumbing.
   §8.5 rules out the notifications that would feed it. A crash reporter is a
   later decision, and whatever is chosen must never receive item titles, notes,
   or reasons.
-- **No tests — yet, and deliberately.** Tests are a finalization pass after
-  human QA, not a slice obligation. Verification during a slice is
-  `yarn lint && yarn lint:boundaries && yarn check-types && yarn build`, plus
-  the ticket's own observable criteria.
+- **Tests arrive with each feature ticket** (MIG-5, 2026-10-09, superseding
+  "no tests yet"). Vitest per workspace, reached by `yarn test` through Turbo;
+  a criterion's evidence type says when a test is owed
+  (`.claude/rules/testing.md`). Coverage thresholds wait for a measurement.
 - **No offline caching.** The service worker pushes and caches nothing; Phase 1
   blocks writes offline with the standard line (cross-cutting §6.1).
