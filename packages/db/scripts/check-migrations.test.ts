@@ -46,9 +46,7 @@ function copyMigrations(): { dir: string; lock: string } {
   const root = mkdtempSync(path.join(tmpdir(), "check-migrations-"));
   const dir = path.join(root, "migrations");
   cpSync(MIGRATIONS_DIR, dir, { recursive: true });
-  const lock = path.join(root, "migrations.lock.json");
-  cpSync(LOCK_PATH, lock);
-  return { dir, lock };
+  return { dir, lock: path.join(dir, path.basename(LOCK_PATH)) };
 }
 
 function rulesOf(sql: string): string[] {
@@ -375,6 +373,38 @@ test("C3: record refuses a new migration that touches auth, and a migration miss
   writeFileSync(path.join(dir, "0013_unlisted.sql"), "SELECT 1;");
   const rules = runCheck(dir, lock).findings.map((f) => `${f.file} ${f.rule}`);
   assert.ok(rules.includes("0013_unlisted.sql journal"), rules.join("\n"));
+});
+
+test("C3: a journal entry with no file fails, recorded or not", () => {
+  const { dir, lock } = copyMigrations();
+  const journalPath = path.join(dir, "meta", "_journal.json");
+  const journal = JSON.parse(readFileSync(journalPath, "utf8")) as {
+    entries: { idx: number; when: number; tag: string }[];
+  };
+  const last = journal.entries.at(-1)!;
+  journal.entries.push({
+    ...last,
+    idx: last.idx + 1,
+    when: last.when + 1000,
+    tag: "0012_absent",
+  });
+  writeFileSync(journalPath, JSON.stringify(journal, null, 2));
+  const fresh = runCheck(dir, lock).findings.map((f) => `${f.file} ${f.rule}`);
+  assert.ok(fresh.includes("0012_absent.sql journal"), fresh.join("\n"));
+
+  const recorded = copyMigrations();
+  rmSync(path.join(recorded.dir, "0004_block_templates_and_stacked_slots.sql"));
+  const gone = runCheck(recorded.dir, recorded.lock).findings.map(
+    (f) => `${f.file} ${f.rule}`,
+  );
+  assert.ok(
+    gone.includes("0004_block_templates_and_stacked_slots.sql journal"),
+    gone.join("\n"),
+  );
+  assert.ok(
+    gone.includes("0004_block_templates_and_stacked_slots.sql append-only"),
+    gone.join("\n"),
+  );
 });
 
 test("C4: yarn verify runs check-migrations and its tests after build", () => {

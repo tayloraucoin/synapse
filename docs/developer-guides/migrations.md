@@ -60,7 +60,7 @@ Never run destructive migrations against production without explicit approval.
 `packages/db/scripts/check-migrations.ts` runs after `yarn build` in `yarn verify` and fails on two things (MIG-4):
 
 - **A statement that acts on the `auth` schema**, in any migration, whatever its file name. Allowed: a foreign key to `auth.users`, and calls to `auth.uid()`, `auth.role()`, `auth.jwt()` and `auth.email()`. The one exception is `0000`'s guarded stub, matched exactly; the unguarded `CREATE SCHEMA "auth"` that `drizzle-kit generate` re-emits fails. Put anything else for `auth` in `packages/db/supabase/setup`.
-- **A break of the append-only rule.** `packages/db/migrations.lock.json` records each migration's journal entry and the sha256 of its SQL. A recorded migration that is edited, removed, renamed or given a new `when` fails, and so does one not yet recorded, or a `.sql` file with no journal entry.
+- **A break of the append-only rule.** `packages/db/migrations/migrations.lock.json` records each migration's journal entry and the sha256 of its SQL. A recorded migration that is edited, removed, renamed or given a new `when` fails, and so does one not yet recorded, a `.sql` file with no journal entry, or an entry with no file.
 
 After `yarn db:generate` (or a hand-authored migration), once the SQL is final, run `yarn check-migrations --record` and commit the lock with the migration. Recording only appends. It refuses while anything recorded has changed or while the new file touches `auth`. To amend a migration no tier has applied yet, remove its entry from the lock in the same commit, where the reviewer of the SQL sees it. Never remove the entry of a migration a tier has applied: write a new migration.
 

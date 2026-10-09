@@ -2,7 +2,8 @@
 /**
  * `yarn check-migrations` (in `yarn verify`, after build): fails before anyone
  * can apply a migration that acts on Supabase's `auth` schema, or one that
- * breaks the append-only rule. Modelled on the toolkit's check (D-STK-5).
+ * breaks the append-only rule. Modelled on the toolkit's
+ * packages/db/scripts/check-migrations.ts.
  *
  * The auth rule reads every statement of every migration, never a file name.
  * Supabase owns `auth`; a migration may point a foreign key at `auth.users`
@@ -14,9 +15,10 @@
  * form `drizzle-kit generate` re-emits (`CREATE SCHEMA "auth"`, then
  * `CREATE TABLE "auth"."users"`) fails.
  *
- * The append-only rule reads `meta/_journal.json` and the lock file beside the
- * migrations folder (`migrations.lock.json`), which records each migration's
- * journal entry and the sha256 of its SQL. A recorded migration that changed,
+ * The append-only rule reads `meta/_journal.json` and the lock file in the
+ * migrations folder (`migrations.lock.json`, where the folder's reviewer glob
+ * reaches it), which records each migration's journal entry and the sha256 of
+ * its SQL. A recorded migration that changed,
  * moved or went missing fails, and so does one not recorded yet:
  * `yarn check-migrations --record` appends the new entries once the SQL is
  * final, and never rewrites one already there.
@@ -551,7 +553,7 @@ export const PACKAGE_DIR = path.resolve(
   "..",
 );
 export const MIGRATIONS_DIR = path.join(PACKAGE_DIR, "migrations");
-export const LOCK_PATH = path.join(PACKAGE_DIR, "migrations.lock.json");
+export const LOCK_PATH = path.join(MIGRATIONS_DIR, "migrations.lock.json");
 
 function main(argv: string[]): number {
   const record = argv.includes("--record");
