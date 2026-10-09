@@ -67,3 +67,7 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Proof logs written by yarn contract:run; recorded evidence is .md or .txt
+specs/**/evidence/.*.tmp
+specs/**/evidence/*.log

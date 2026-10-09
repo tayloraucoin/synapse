@@ -52,7 +52,6 @@
   "apps/web/lib/sandbox/": "stays in the toolkit",
   "apps/web/app/api/ai/": "stays in the toolkit",
   "docs/runbooks/add/docker-local-database.md": "stays in the toolkit",
-  "apps/web/turbo.json": "stays in the toolkit",
   "apps/docs/components/shell/docs-nav.tsx": "stays in the toolkit",
   "yarn check-ui-layout": "layer 3, part 8",
   "yarn db:setup:local": "layer 3, part 2",

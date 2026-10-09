@@ -3,25 +3,53 @@
   "criteria_sha256": "3fc9cee5efbb99c352f5dccb3198db49926b265bf72760ea5a93e496fb81b146",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-09T16:08:21Z",
+        "head": "dcb095331cf8a5974beb0b5c0ad15cae45217310",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-003-turbo-env-hashing/evidence/C1.log",
+        "evidence_sha256": "a4a28a3a93d0a8d5c7bf5cd4fb53e1cc7b25a65d56a725990bcfd7a444b478ee"
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-09T16:08:37Z",
+        "head": "dcb095331cf8a5974beb0b5c0ad15cae45217310",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-003-turbo-env-hashing/evidence/C2.log",
+        "evidence_sha256": "f14fdb5e6cbaf329f0d29566a2b4dbf562a61133cf01c748c791b6948a95c92f"
+      }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-turbo-env",
+        "exit": 0,
+        "at": "2026-10-09T16:08:56Z",
+        "head": "dcb095331cf8a5974beb0b5c0ad15cae45217310",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-003-turbo-env-hashing/evidence/C3.log",
+        "evidence_sha256": "022d901bfa1cfb20429125a3c811d10bd5de1c6e192d5afa8d76a390fe2855ec"
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-turbo-env --build",
+        "exit": 0,
+        "at": "2026-10-09T16:09:12Z",
+        "head": "dcb095331cf8a5974beb0b5c0ad15cae45217310",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-003-turbo-env-hashing/evidence/C4.log",
+        "evidence_sha256": "e7a0314061a59ab458135661624bf459ea0ad95da5b32e4ce791a6f9b6b19908"
+      }
     }
   },
-  "updated_at": "2026-10-09T16:05:43Z"
+  "updated_at": "2026-10-09T16:09:13Z"
 }
