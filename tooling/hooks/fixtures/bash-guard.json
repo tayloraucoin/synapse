@@ -235,7 +235,7 @@
       "rule": "push",
       "expect": "allow",
       "name": "the word in a commit message",
-      "command": "git commit -m \"PJ: J3 note that agents never git push\""
+      "command": "git commit -m \"SYN: J3 note that agents never git push\""
     },
     {
       "rule": "push",
@@ -281,7 +281,7 @@
       "rule": "commit-on-main",
       "expect": "allow",
       "name": "commit on a work branch",
-      "command": "git commit -m \"PJ: on the branch\""
+      "command": "git commit -m \"SYN: on the branch\""
     },
     {
       "rule": "commit-on-main",
@@ -307,7 +307,7 @@
       "rule": "commit-on-main",
       "expect": "allow",
       "name": "main is an ordinary branch when another is protected",
-      "command": "git commit -m \"PJ: on main\"",
+      "command": "git commit -m \"SYN: on main\"",
       "context": {
         "branch": "main",
         "protectedBranch": "trunk"
@@ -362,7 +362,7 @@
       "rule": "commit-work-id",
       "expect": "allow",
       "name": "toolkit prefix",
-      "command": "git commit -m \"PJ: J3 bash guard with fixtures\""
+      "command": "git commit -m \"SYN: J3 bash guard with fixtures\""
     },
     {
       "rule": "commit-work-id",
@@ -386,13 +386,13 @@
       "rule": "commit-work-id",
       "expect": "allow",
       "name": "combined flags",
-      "command": "git commit -qam \"DOC-2: sidebar sorts by name\""
+      "command": "git commit -qam \"WEB-2: sidebar sorts by name\""
     },
     {
       "rule": "commit-work-id",
       "expect": "allow",
       "name": "heredoc message",
-      "command": "git add -A && git commit -q -F - <<'EOF'\nPJ: J3 bash guard\n\nA body line.\nEOF"
+      "command": "git add -A && git commit -q -F - <<'EOF'\nSYN: J3 bash guard\n\nA body line.\nEOF"
     },
     {
       "rule": "commit-work-id",

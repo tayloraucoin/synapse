@@ -1,8 +1,9 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "$comment": "Repo-scoped Claude Code rules. TRACKED IN GIT so every worktree inherits them on checkout. Machine-wide baseline lives in ~/.claude/settings.json.",
   "$comment-database": "The database rules encode the track's non-negotiable: an agent authors SQL and stops. db:reset and any drop are denied outright; every hosted write asks. db:reset also refuses non-local tiers in its own script (packages/db/scripts/reset-local-db.ts) — two independent guards, because this one is a config file someone can edit.",
   "$comment-network": "curl/wget are allowed because sandbox.network below is the real boundary — the OS-level proxy restricts them to allowedDomains. URL-shaped allow patterns like Bash(curl http://x/ *) are fragile and bypassed by flag order, redirects, or protocol; domain enforcement belongs in the sandbox.",
-
+  "$comment-practice": "Merged in migrate step 5 (record 0001): every host block kept; the floor rows added beside them, each written once; the two team hooks. The push deny, bash-guard and stop-gate are the operator rows, in settings.local.json.",
   "permissions": {
     "allow": [
       "Bash(yarn *)",
@@ -19,26 +20,68 @@
       "Bash(curl *)",
       "Bash(wget *)"
     ],
-
     "deny": [
       "Bash(*db:reset*)",
       "Bash(*db:drop*)",
       "Bash(*supabase db reset*)",
       "Bash(*drizzle-kit drop*)",
       "Bash(*DROP SCHEMA*)",
-      "Bash(*DROP DATABASE*)"
+      "Bash(*DROP DATABASE*)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean *)",
+      "Bash(git branch -D *)",
+      "Bash(git filter-branch *)",
+      "Bash(npm publish *)",
+      "Bash(npm login *)",
+      "Read(**/.env.local)",
+      "Read(**/.env.*.local)",
+      "Read(**/.env.development)",
+      "Read(**/.env.staging)",
+      "Read(**/.env.production)",
+      "Read(**/.env)",
+      "Read(**/secrets/**)",
+      "Read(**/*.pem)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Bash(yarn npm publish *)",
+      "Bash(yarn npm login *)"
     ],
-
     "ask": [
       "Bash(*db:migrate*)",
       "Bash(*db:push*)",
       "Bash(*db:seed*)",
       "Bash(*db:setup*)",
       "Bash(*drizzle-kit migrate*)",
-      "Bash(*drizzle-kit push*)"
+      "Bash(*drizzle-kit push*)",
+      "Bash(*db:local:reset*)",
+      "Bash(*supabase db push*)"
     ]
   },
-
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/tooling/hooks/results-gate.ts\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/tooling/hooks/session-start.ts\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
   "sandbox": {
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
@@ -70,6 +113,10 @@
         "~/Library/Caches/Yarn",
         "~/.yarn",
         "~/.npm"
+      ],
+      "denyRead": [
+        "~/.ssh",
+        "~/.aws"
       ]
     }
   }
