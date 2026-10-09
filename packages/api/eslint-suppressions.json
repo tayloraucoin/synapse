@@ -1,0 +1,7 @@
+{
+  "src/services/notifications/web-push.ts": {
+    "no-restricted-properties": {
+      "count": 3
+    }
+  }
+}

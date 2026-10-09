@@ -1,0 +1,12 @@
+{
+  "src/is-dev.ts": {
+    "no-restricted-properties": {
+      "count": 1
+    }
+  },
+  "src/logging.ts": {
+    "no-restricted-properties": {
+      "count": 3
+    }
+  }
+}

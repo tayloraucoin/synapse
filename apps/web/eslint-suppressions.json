@@ -1,0 +1,22 @@
+{
+  "app/(shell)/settings/about/_components/feedback-form.tsx": {
+    "no-restricted-properties": {
+      "count": 1
+    }
+  },
+  "app/(shell)/settings/about/page.tsx": {
+    "no-restricted-properties": {
+      "count": 2
+    }
+  },
+  "app/_components/service-worker-registration.tsx": {
+    "no-restricted-properties": {
+      "count": 1
+    }
+  },
+  "lib/pwa/push-subscribe.ts": {
+    "no-restricted-properties": {
+      "count": 1
+    }
+  }
+}

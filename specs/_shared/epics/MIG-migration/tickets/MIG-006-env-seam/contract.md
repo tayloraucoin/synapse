@@ -4,14 +4,18 @@ size: medium # small: under half a day, the default; medium: half a day to two d
 objective: "process.env is read only in each workspace's env.ts, and a lint rule keeps it that way"
 slice_type: "configuration seam; risks a secret read on the client"
 non_negotiables:
-  - "[FILL: at most seven, one line each]"
-devs_call: "[FILL: what the builder decides freely]"
+  - "No read moves in this ticket; the follow-on tickets move them per module folder."
+  - "The rule is an error inside each workspace's yarn lint, so yarn verify carries it; never a warning, never turned off to go green."
+  - "Today's readers are frozen by ESLint bulk suppressions, one committed file per workspace that has readers; a count never rises."
+  - "Exactly two files are exempt by name, the two apps/web/AGENTS.md documents, and they may read only NEXT_PUBLIC_* names (and NODE_ENV)."
+  - "No variable's name or value changes, and no boundaries error is suppressed."
+devs_call: "The rule's form (no-restricted-properties plus a small local rule for the exempt files), where it sits in the shared ESLint config, and how the test proves it."
 cites:
-  - "[FILL: the one surface file, as specs/<app>/ux/<area>/<surface>.md]"
-  - "[FILL: decision and criterion IDs from it, as D-OB2-1 or OB2-W3]"
-truth_files: "none: [FILL: why no living UX file changes]" # or a list of specs/<app>/ux/ paths edited in this PR
+  - "MIG-migration assess V3"
+  - "toolkit migrate verify recipe 3.1 (bulk suppressions)"
+truth_files: "none: lint configuration; the app's behaviour does not change" # or a list of specs/<app>/ux/ paths edited in this PR
 qa: Q1 # Q1, Q2 or Q3, as the operator confirmed (docs/workflows/qa-levels.md)
-reviewers: [] # who reviews, as the operator confirmed; role names, as in vigil or warden
+reviewers: []
 focus: [] # named parts to examine more closely, as in "the webhook handler: every event type handled (warden)"
 operator_review: false # true when Taylor wants to look it over himself, as for a new surface in the browser; the ticket still closes
 planned_paths:
@@ -20,18 +24,26 @@ planned_paths:
   - "packages/config/eslint/**"
   - "apps/web/**"
   - "packages/**"
-depends_on: [MIG-3] # work-ids that must be built first (their own criteria PASS)
+depends_on: [ MIG-3 ] # work-ids that must be built first (their own criteria PASS)
 out_of_scope:
   - "Changing any variable's name or value"
 criteria:
   - id: C1
-    statement: "[FILL: what is true when this is done, observable by a user or caller]"
+    statement: "A new environment read outside the workspace's own env.ts (member, destructured, or an env import from the process module) is a lint error in every workspace; env.ts itself reads freely"
     evidence: test
-    command: "[FILL: yarn <script>; a package.json script that runs this criterion's test]"
+    command: "yarn test:env-seam --test-name-pattern C1"
   - id: C2
-    statement: "[FILL]"
+    statement: "Each workspace with readers commits eslint-suppressions.json; its counts are exact, so one more read in a frozen file fails, and a count left above the reads fails until pruned"
+    evidence: test
+    command: "yarn test:env-seam --test-name-pattern C2"
+  - id: C3
+    statement: "The two documented NEXT_PUBLIC_* readers are named in the rule's config and exempt, a sibling file is not, and inside them any non-public name is still an error"
+    evidence: test
+    command: "yarn test:env-seam --test-name-pattern C3"
+  - id: C4
+    statement: "yarn lint is green over every workspace with the rule on and the suppressions in place"
     evidence: check
-    command: "[FILL: yarn <script>]"
+    command: "yarn lint"
 ---
 
 # Contract — MIG-6 env-seam
@@ -45,3 +57,12 @@ Drafted by the migration (rulings.md, record 0001) on 2026-10-09; the criteria a
 - **Plan:** Adopt the existing env.ts readers (with apps/web/lib/env/ tier resolution); a lint rule against process.env outside env.ts, installed with ESLint bulk suppressions per workspace (verify.md 3.1) so the count only falls; the two documented exceptions named in the rule's config; then one ticket per module folder that moves its reads behind env.ts. env.ts is already a Warden row in toolkit.json.
 - **Conflict risk:** medium (19 readers, under the 25 that makes it high). Trigger: the lint with suppressions any time; the moves follow MIG-7's module order.
 - **Estimate:** half a day for the rule; the moves about a day. Estimates.
+
+## As built
+
+- **The rule:** `packages/config/eslint/process-env.js`, spread into the shared base (`base.js`), so every workspace's `yarn lint` runs it. The seam is `env.ts` or `src/env.ts` at the workspace root, never any file of that name.
+- **Measured by the lint run:** 30 reads in 13 files across five workspaces (web 4 files, api 1, auth 1, db 5, observability 2). Assess V3's 19 counted comments and the seam files themselves.
+- **Deviation:** `eslint-plugin-only-warn` left the base config. It downgraded every error to a warning, and bulk suppressions hold errors only, so the freeze came out empty. Under `--max-warnings 0` the gate for every other rule is unchanged (a tightening, verify.md 3.1 step 4). The dependency stays in `packages/config/package.json` [ASSUMPTION: its removal waits for a lockfile change of its own].
+- **Warden (consulted):** no secret reaches a browser bundle today. Taken here: the exempt files may read only public names, the seam is root-only, and env imports from the process module are banned. Drafted: the `next.config.ts` `env:` block carries server secrets Next would inline on any literal client read (red, latent); the client readers move to a client-safe public module, not `apps/web/env.ts`, which pulls `node:path` and the server schema.
+- `apps/web/env.ts`'s header named the wrong second exception; it now names the two the rule names.
+

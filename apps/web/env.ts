@@ -1,10 +1,10 @@
 /**
  * THE ONLY `process.env` READER IN THIS APP.
  *
- * Two exceptions exist and both are documented where they live:
- * `lib/clients/supabase/client.ts` reads canonical `NEXT_PUBLIC_*` names as
- * literals (Next cannot inline a dynamic lookup into a browser bundle), and
- * `lib/env/resolve-tier-env.ts` is this file's own helper.
+ * Two exceptions exist, named in the lint rule (packages/config/eslint/
+ * process-env.js) and in apps/web/AGENTS.md: `lib/clients/supabase/client.ts`
+ * and `lib/trpc/provider.tsx` read canonical `NEXT_PUBLIC_*` names as literals
+ * (Next cannot inline a dynamic lookup into a browser bundle).
  *
  * Tier selection: `DATABASE_ENVIRONMENT=local|staging|production`, **defaulting
  * to `local`** — a shell with nothing set must not reach production (INF-5).
