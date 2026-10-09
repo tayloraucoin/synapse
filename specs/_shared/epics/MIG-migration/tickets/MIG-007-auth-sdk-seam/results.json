@@ -8,11 +8,11 @@
       "run": {
         "command": "yarn test:auth-seam --test-name-pattern C1",
         "exit": 0,
-        "at": "2026-10-09T20:56:21Z",
-        "head": "5599fec8b2643134b43b71dc9ab8b640b63f22c2",
+        "at": "2026-10-09T21:04:15Z",
+        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C1.log",
-        "evidence_sha256": "f223d6edbd421bd952af959d4845b06058f58437bbe2e0c3800fac6d0a0c73e9",
-        "tests": 8
+        "evidence_sha256": "b487b781a269200bdf4b5cc425027d7e0746ee119083b0d40a3fb88715f47e4e",
+        "tests": 3
       }
     },
     "C2": {
@@ -21,11 +21,11 @@
       "run": {
         "command": "yarn test:auth-seam --test-name-pattern C2",
         "exit": 0,
-        "at": "2026-10-09T20:56:24Z",
-        "head": "5599fec8b2643134b43b71dc9ab8b640b63f22c2",
+        "at": "2026-10-09T21:04:18Z",
+        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C2.log",
-        "evidence_sha256": "71cc968b597010cb7842e8e01ad998aa52a284241b82252fcd0b8287a73be044",
-        "tests": 8
+        "evidence_sha256": "90da38a1da0a39a0607636186f96e3b099179461bd36545911b875d42e7b6414",
+        "tests": 1
       }
     },
     "C3": {
@@ -34,11 +34,11 @@
       "run": {
         "command": "yarn test:auth-seam --test-name-pattern C3",
         "exit": 0,
-        "at": "2026-10-09T20:56:27Z",
-        "head": "5599fec8b2643134b43b71dc9ab8b640b63f22c2",
+        "at": "2026-10-09T21:04:19Z",
+        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C3.log",
-        "evidence_sha256": "4fc18da1e2777e1864a7aa932d6f1ca95c9c9d51c3bd34cd3963e62bd0ad027a",
-        "tests": 8
+        "evidence_sha256": "3392e7139d4bc0cbbc1bfccc043395fbbaf549e1cb217af6ae42913299792317",
+        "tests": 3
       }
     },
     "C4": {
@@ -47,10 +47,10 @@
       "run": {
         "command": "yarn lint:boundaries",
         "exit": 0,
-        "at": "2026-10-09T20:56:29Z",
-        "head": "5599fec8b2643134b43b71dc9ab8b640b63f22c2",
+        "at": "2026-10-09T21:04:20Z",
+        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C4.log",
-        "evidence_sha256": "d05fc1fa0831db845696612407658ac00f0318dbaded3c0f2eb7ea25b6ef5273"
+        "evidence_sha256": "88e1139fb83468493b41c4ca91dd04cb33ec21e5600778f094d238fe6b021023"
       }
     },
     "C5": {
@@ -72,11 +72,11 @@
       "run": {
         "command": "yarn test:auth-seam --test-name-pattern C6",
         "exit": 0,
-        "at": "2026-10-09T20:56:39Z",
-        "head": "5599fec8b2643134b43b71dc9ab8b640b63f22c2",
+        "at": "2026-10-09T21:04:29Z",
+        "head": "5aaa35c723b8ddbc9144925aa1a8f65470eea8e0",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C6.log",
-        "evidence_sha256": "20ae428110e66eaab7b1e326e7491a22c2e01a9743dc66ea2b92fb75be4e10c0",
-        "tests": 8
+        "evidence_sha256": "79220e972103e4338b9c3e488e2c0ee8e7877d96e729829e239ae9ebc3c05233",
+        "tests": 1
       }
     },
     "review:mason": {
@@ -125,5 +125,5 @@
     }
   },
   "built_at": "2026-10-09T20:56:20Z",
-  "updated_at": "2026-10-09T21:02:53Z"
+  "updated_at": "2026-10-09T21:04:29Z"
 }
