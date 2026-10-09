@@ -35,6 +35,9 @@
     "SUPABASE_SERVICE_ROLE_KEY_STAGING",
     "NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN"
   ],
+  "globalPassThroughEnv": [
+    "TMPDIR"
+  ],
   "ui": "tui",
   "tasks": {
     "build": {
