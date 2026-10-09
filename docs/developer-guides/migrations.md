@@ -27,24 +27,7 @@ Sometimes a migration is written by hand (complex re-keys, snapshot collisions, 
 
 **Symptoms when the journal entry is missing:** `yarn db:migrate` reports success immediately; no new SQL runs; runtime errors like `column "…" does not exist` (pgCode `42703`); `db:seed` fails on the same missing columns.
 
-**Prevention — journal vs SQL file parity:**
-
-```bash
-cd packages/db && node -e "
-const fs=require('fs');
-const j=require('./migrations/meta/_journal.json');
-const sql=fs.readdirSync('./migrations').filter(f=>f.endsWith('.sql')).map(f=>f.replace('.sql','')).sort();
-const tags=j.entries.map(e=>e.tag).sort();
-const missingInJournal=sql.filter(t=>!tags.includes(t));
-const orphanJournal=tags.filter(t=>!sql.includes(t));
-if(missingInJournal.length) console.error('SQL files NOT in _journal.json:', missingInJournal.join(', '));
-if(orphanJournal.length) console.error('Journal entries with NO .sql file:', orphanJournal.join(', '));
-if(!missingInJournal.length&&!orphanJournal.length) console.log('OK:', sql.length, 'migrations in sync');
-else process.exit(1);
-"
-```
-
-Run this before committing migration work or after any hand-authored SQL.
+**Prevention — journal vs SQL file parity:** run `yarn check-migrations` (below) before committing migration work or after any hand-authored SQL. It fails on a `.sql` file with no journal entry and on an entry with no file.
 
 
 `drizzle-kit` reads `packages/db/.env`. Confirm `DATABASE_ENVIRONMENT` before migrating:
@@ -62,12 +45,12 @@ Never run destructive migrations against production without explicit approval.
 - **A statement that acts on the `auth` schema**, in any migration, whatever its file name. Allowed: a foreign key to `auth.users`, and calls to `auth.uid()`, `auth.role()`, `auth.jwt()` and `auth.email()`. The one exception is `0000`'s guarded stub, matched exactly; the unguarded `CREATE SCHEMA "auth"` that `drizzle-kit generate` re-emits fails. Put anything else for `auth` in `packages/db/supabase/setup`.
 - **A break of the append-only rule.** `packages/db/migrations/migrations.lock.json` records each migration's journal entry and the sha256 of its SQL. A recorded migration that is edited, removed, renamed or given a new `when` fails, and so does one not yet recorded, a `.sql` file with no journal entry, or an entry with no file.
 
-After `yarn db:generate` (or a hand-authored migration), once the SQL is final, run `yarn check-migrations --record` and commit the lock with the migration. Recording only appends. It refuses while anything recorded has changed or while the new file touches `auth`. To amend a migration no tier has applied yet, remove its entry from the lock in the same commit, where the reviewer of the SQL sees it. Never remove the entry of a migration a tier has applied: write a new migration.
+After `yarn db:generate` (or a hand-authored migration), once the SQL is final, run `yarn check-migrations --record` and commit the lock with the migration. Recording only appends. It refuses while anything recorded has changed or while the new file touches `auth`. To amend the last migration while no tier has applied it, remove its entry, the lock's last, in the same commit, where the reviewer of the SQL sees it, then record again. Removing an earlier entry shifts every entry after it and fails. Never remove the entry of a migration a tier has applied: write a new migration.
 
 ## Supabase coexistence gotchas
 
 - `schemaFilter: ['public']` in `drizzle.config.ts` — never migrate `auth`, `storage`, etc.
-- `drizzle-kit generate` may re-emit `CREATE SCHEMA "auth"` — use `CREATE SCHEMA IF NOT EXISTS "auth"` in the first migration if regenerating from scratch.
+- `drizzle-kit generate` re-emits `CREATE SCHEMA "auth"` and a stub `auth.users` when the first migration is regenerated from scratch. Re-apply `0000`'s guarded DO block (`packages/db/AGENTS.md`) in their place. `yarn check-migrations` fails the bare statements, `CREATE SCHEMA IF NOT EXISTS "auth"` alone included.
 - After migrations, run `yarn db:setup` for triggers, RLS enablement loop, and storage buckets.
 
 ## RLS policy migrations
@@ -104,18 +87,8 @@ If `0003`/`0004` were hand-edited with placeholder timestamps like `178200000000
 **Prevention:**
 
 - Do not hand-edit `when` in the journal unless you know the ordering implications.
-- After `db:generate`, confirm the new entry's `when` is greater than all prior entries (and greater than `max(created_at)` on shared DBs).
-- Quick check:
-
-```bash
-cd packages/db && node -e "
-const j=require('./migrations/meta/_journal.json');
-const last=j.entries.at(-1);
-const prev=j.entries.at(-2);
-if(last.when<=prev.when) console.error('BAD: new when',last.when,'<= prev',prev.when);
-else console.log('OK:', last.tag, last.when);
-"
-```
+- After `db:generate`, run `yarn check-migrations`: it fails when an entry's `when` is not after the one before it. Confirm by hand that the new `when` is greater than `max(created_at)` on shared databases; no file shows that.
+- Bumping the `when` of a recorded entry fails the check. For the last, unapplied entry, remove its lock entry and record again, as in [the migration check](#the-migration-check-yarn-check-migrations-in-yarn-verify).
 
 ## All pending migrations share ONE transaction
 

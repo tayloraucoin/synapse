@@ -64,7 +64,11 @@ function guardStatement(): string {
 
 test("C1: the committed migrations pass, 0000's guard included", () => {
   const { files, findings } = runCheck(MIGRATIONS_DIR, LOCK_PATH);
-  assert.equal(files, 12);
+  const journal = JSON.parse(
+    readFileSync(path.join(MIGRATIONS_DIR, "meta", "_journal.json"), "utf8"),
+  ) as { entries: unknown[] };
+  assert.ok(files > 0);
+  assert.equal(files, journal.entries.length);
   assert.deepEqual(findings, []);
 });
 
@@ -173,6 +177,8 @@ test("C2: each kind of DDL or write against auth fails", () => {
     "alter default privileges in schema auth grant all on tables to postgres",
     "alter table public.notes set schema auth",
     "alter schema scratch rename to auth",
+    "create schema authorization auth",
+    'create schema if not exists authorization "auth"',
     'alter table "auth"."users" add column "plan" text',
     "ALTER TABLE AUTH.USERS ENABLE ROW LEVEL SECURITY",
     "alter table auth . users enable row level security",
@@ -196,6 +202,8 @@ test("C2: each kind of DDL or write against auth fails", () => {
     "select auth.uid(1)",
     "set search_path = auth",
     "select set_config('search_path', 'auth', false)",
+    "select set_config('search_path', 'au' || 'th', false)",
+    "set search_path to scratch",
     "create function public.f() returns void language sql set search_path = auth as $$ delete from users $$",
     'create table U&"\\0061uth".x (id int)',
     "do $$ begin execute 'create table ' || 'au' || 'th.x (id int)'; end $$",
@@ -405,6 +413,45 @@ test("C3: a journal entry with no file fails, recorded or not", () => {
     gone.includes("0004_block_templates_and_stacked_slots.sql append-only"),
     gone.join("\n"),
   );
+});
+
+test("C3: record stops at the first refused entry, so nothing later takes its place", () => {
+  const { dir, lock } = copyMigrations();
+  const journalPath = path.join(dir, "meta", "_journal.json");
+  const journal = JSON.parse(readFileSync(journalPath, "utf8")) as {
+    entries: { idx: number; when: number; tag: string }[];
+  };
+  const last = journal.entries.at(-1)!;
+  journal.entries.push(
+    {
+      ...last,
+      idx: last.idx + 1,
+      when: last.when + 1000,
+      tag: "0012_touches_auth",
+    },
+    {
+      ...last,
+      idx: last.idx + 2,
+      when: last.when + 2000,
+      tag: "0013_synthetic",
+    },
+  );
+  writeFileSync(journalPath, JSON.stringify(journal, null, 2));
+  writeFileSync(
+    path.join(dir, "0012_touches_auth.sql"),
+    "DROP TABLE auth.sessions;",
+  );
+  writeFileSync(
+    path.join(dir, "0013_synthetic.sql"),
+    'CREATE TABLE "synthetic" ("id" uuid);',
+  );
+  const before = readFileSync(lock, "utf8");
+  assert.deepEqual(runCheck(dir, lock, { record: true }).recorded, []);
+  assert.equal(readFileSync(lock, "utf8"), before);
+  const unrecorded = runCheck(dir, lock)
+    .findings.filter((f) => f.rule === "append-only")
+    .map((f) => f.file);
+  assert.deepEqual(unrecorded, ["0012_touches_auth.sql", "0013_synthetic.sql"]);
 });
 
 test("C4: yarn verify runs check-migrations and its tests after build", () => {

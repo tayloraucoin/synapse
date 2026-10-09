@@ -54,9 +54,26 @@
       }
     },
     "review:mason": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "manual",
-      "run": null
+      "run": {
+        "command": "yarn review:run mason MIG-4",
+        "exit": 0,
+        "at": "2026-10-09T21:20:14Z",
+        "head": "019231682b36c15f6c973141cee1acf106477123",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/review-mason.md",
+        "evidence_sha256": "af6c4c90bcfab74b3fe099e7ffd4af24fc335e28ef702cd80b74bd80f2d7c159",
+        "contract_sha256": "93f08587336e270d77e79abeb9f58b5a1dbfb873fe5e6cad8f5b7b93b376a9f2",
+        "criteria_sha256": "73a031451850bb0760b0af902fc9731679f10d0e6aa6c96ed9415ebac2600d4f",
+        "as_built_sha256": "d3571fc76137a6101d623aae2fef983876cb0bd546a81c01a217a1733af8fb38",
+        "runner": "claude 2.1.295 (Claude Code) (role docs/roles/engineering/mason-cto-principal-dev.md; tools Read,Grep,Glob)",
+        "tokens_input": 98,
+        "tokens_cache_read": 427906,
+        "tokens_cache_write": 181171,
+        "tokens_output": 17642,
+        "seconds": 229.6
+      },
+      "runs": 1
     },
     "review:warden": {
       "status": "FAIL",
@@ -77,5 +94,5 @@
       }
     }
   },
-  "updated_at": "2026-10-09T21:19:40Z"
+  "updated_at": "2026-10-09T21:24:04Z"
 }

@@ -1,5 +1,5 @@
 {
-  "about": "Written by yarn check-migrations --record. One entry per migration, in journal order, with the sha256 of its SQL. Append-only: never edit an entry; a recorded migration that changes fails verify.",
+  "about": "Written by yarn check-migrations --record. One entry per migration, in journal order, with the sha256 of its SQL. Never edit an entry: a recorded migration that changes fails verify. Only the last entry, for a migration no tier has applied, may be removed, in the commit that amends that migration (docs/developer-guides/migrations.md).",
   "migrations": [
     {
       "idx": 0,

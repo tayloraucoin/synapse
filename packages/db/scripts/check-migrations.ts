@@ -52,7 +52,7 @@ export type LockEntry = {
 
 type JournalEntry = { idx: number; tag: string; when: number };
 
-const IDENT_CHAR = /[A-Za-z0-9_$\u0080-￿]/;
+const IDENT_CHAR = /[A-Za-z0-9_$\u0080-\uFFFF]/;
 
 /**
  * Cuts SQL into top-level statements on `;`, the way Postgres reads it:
@@ -158,9 +158,10 @@ export function splitStatements(sql: string): {
       continue;
     }
     if (ch === "$" && !IDENT_CHAR.test(sql[i - 1] ?? "")) {
-      const tag = /^\$(?:[A-Za-z_\u0080-￿][A-Za-z0-9_\u0080-￿]*)?\$/.exec(
-        sql.slice(i),
-      )?.[0];
+      const tag =
+        /^\$(?:[A-Za-z_\u0080-\uFFFF][A-Za-z0-9_\u0080-\uFFFF]*)?\$/.exec(
+          sql.slice(i),
+        )?.[0];
       if (tag) {
         const from = line;
         const end = sql.indexOf(tag, i + tag.length);
@@ -200,6 +201,10 @@ const RULES: { rule: string; message: string; test: (s: string) => boolean }[] =
           String.raw`\bschema\s+(?:if\s+(?:not\s+)?exists\s+)?(?:${IDENT}\s*,\s*)*${AUTH}`,
           "i",
         ).test(s) ||
+        new RegExp(
+          String.raw`\bschema\s+(?:if\s+not\s+exists\s+)?authorization\s+${AUTH}`,
+          "i",
+        ).test(s) ||
         new RegExp(String.raw`\brename\s+to\s+${AUTH}`, "i").test(s),
     },
     {
@@ -237,8 +242,9 @@ const RULES: { rule: string; message: string; test: (s: string) => boolean }[] =
     },
     {
       rule: "search-path",
-      message: "sets a search_path in a statement that names auth",
-      test: (s) => /search_path/i.test(s) && new RegExp(AUTH, "i").test(s),
+      message:
+        "sets a search_path, which can point unqualified names at auth; name each object's schema instead",
+      test: (s) => /search_path/i.test(s),
     },
     {
       rule: "unicode-escape",
@@ -468,12 +474,15 @@ export function checkAppendOnly(
 
   const fresh = entries.slice(lock.entries.length);
   const recordedNow: string[] = [];
-  const intact = findings.length === 0;
+  // Recording stops at the first entry it refuses, so the lock stays a
+  // prefix of the journal and nothing later takes a refused entry's place.
+  let recordable = findings.length === 0;
   for (const entry of fresh) {
     const file = `${entry.tag}.sql`;
     const full = path.join(dir, file);
     const clean = options.authClean ? options.authClean(file) : true;
-    if (options.record && intact && clean && existsSync(full)) {
+    recordable = recordable && clean && existsSync(full);
+    if (options.record && recordable) {
       lock.entries.push({
         idx: entry.idx,
         tag: entry.tag,
@@ -486,7 +495,7 @@ export function checkAppendOnly(
         file,
         rule: "append-only",
         message: options.record
-          ? "was not recorded: fix the findings above first"
+          ? "was not recorded: fix the findings above, or the entry before it, first"
           : "is not recorded in the lock; once its SQL is final, run yarn check-migrations --record",
       });
     }
@@ -498,7 +507,7 @@ export function checkAppendOnly(
       `${JSON.stringify(
         {
           about:
-            "Written by yarn check-migrations --record. One entry per migration, in journal order, with the sha256 of its SQL. Append-only: never edit an entry; a recorded migration that changes fails verify.",
+            "Written by yarn check-migrations --record. One entry per migration, in journal order, with the sha256 of its SQL. Never edit an entry: a recorded migration that changes fails verify. Only the last entry, for a migration no tier has applied, may be removed, in the commit that amends that migration (docs/developer-guides/migrations.md).",
           migrations: lock.entries,
         },
         null,
@@ -515,11 +524,6 @@ export function runCheck(
   lockPath: string,
   options: { record?: boolean } = {},
 ): { files: number; findings: Finding[]; recorded: string[] } {
-  const files = existsSync(dir)
-    ? readdirSync(dir)
-        .filter((name) => name.endsWith(".sql"))
-        .sort()
-    : [];
   if (!existsSync(dir)) {
     return {
       files: 0,
@@ -533,6 +537,9 @@ export function runCheck(
       recorded: [],
     };
   }
+  const files = readdirSync(dir)
+    .filter((name) => name.endsWith(".sql"))
+    .sort();
   const auth = files.flatMap((name) =>
     findAuthDdl(name, readFileSync(path.join(dir, name), "utf8")),
   );
