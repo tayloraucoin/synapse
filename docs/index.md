@@ -1,6 +1,6 @@
 # The map
 
-Synapse's folders, the precedence ladder, what loads when and the token budget. Every agent reads this file first, every session. The host's own one-line-per-document index is [`README.md`](README.md); the generated tree is [`architecture/directory-map.md`](architecture/directory-map.md).
+Read first, every session. Per document: [`README.md`](README.md). Records from before the practice: [`decisions/imported/README.md`](decisions/imported/README.md).
 
 ## Layers
 
@@ -25,8 +25,8 @@ Enforced checks (lint, types, `yarn verify`, CI), then the session's explicit in
 2. **Architecture & placement** → [`docs/architecture/codebase-conventions.md`](architecture/codebase-conventions.md) (locked). Stack choices: [`docs/architecture/tech-stack.md`](architecture/tech-stack.md).
 3. **Domain guides** → [`docs/ai-guides/`](ai-guides/) govern their domain (tokens, typography, classnames, components, copy, db/RLS, tRPC) and sit **below** the conventions doc but **above** ad-hoc judgment.
 4. **App-specific rules** → the nearest [`AGENTS.md`](../apps/web/AGENTS.md). **Wins on conflict** with the conventions doc for that app (route topology, scope).
-5. **Ticket rulings** → each ticket's "Rulings this slice makes", summarised in [`TECHNICAL-DECISIONS.md`](specs/infrastructure/TECHNICAL-DECISIONS.md).
-6. **Shipped-work amendments** → [`DEVIATIONS.md`](specs/infrastructure/DEVIATIONS.md) + `TECHNICAL-DECISIONS.md`. On-disk reality + these logs override any stale spec text.
+5. **Ticket rulings** → each ticket's "Rulings this slice makes", summarised in [`TECHNICAL-DECISIONS.md`](decisions/imported/specs/infrastructure/TECHNICAL-DECISIONS.md).
+6. **Shipped-work amendments** → [`DEVIATIONS.md`](decisions/imported/specs/infrastructure/DEVIATIONS.md) + `TECHNICAL-DECISIONS.md`. On-disk reality + these logs override any stale spec text.
 
 ## What loads when
 

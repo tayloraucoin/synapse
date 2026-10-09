@@ -18,3 +18,8 @@ specs/_shared/epics/MIG-migration/assess.md
 apps/web/docs/product-rules.md
 specs/_status.md
 docs/index.md
+
+# Host landing pages, hand-written and never Prettier-clean; a pointer edit
+# must not become a whole-file reformat (record 0001; MIG-10 decides).
+README.md
+docs/README.md

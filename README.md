@@ -4,15 +4,15 @@ Yarn 4 + Turborepo monorepo for Synapse — a habit-tracking PWA built on the pr
 
 **For AI agents:** [`AGENTS.md`](AGENTS.md) is the canonical instruction spine — start there. (`CLAUDE.md` is a pointer to it.)
 
-> **Foundation complete, product not started.** All eleven tickets in [`docs/specs/infrastructure/`](docs/specs/infrastructure/) are done: the monorepo, the packages, the design system, the database, auth, the app scaffold, the typed API, the PWA plumbing, delivery, and the docs. Every route exists as a placeholder that names its screen. The feature epics — Setup, In Use, Review — build on top.
+> **Foundation complete, product not started.** All eleven tickets in [`docs/specs/infrastructure/`](docs/decisions/imported/specs/infrastructure/) are done: the monorepo, the packages, the design system, the database, auth, the app scaffold, the typed API, the PWA plumbing, delivery, and the docs. Every route exists as a placeholder that names its screen. The feature epics — Setup, In Use, Review — build on top.
 
 ## Essential docs
 
 | Doc | Purpose |
 | --- | --- |
 | [`AGENTS.md`](AGENTS.md) | Agent spine — precedence, guardrails, workflow |
-| [`docs/specs/infrastructure/README.md`](docs/specs/infrastructure/README.md) | **The foundation track** — process contract, precedence, locked scope, non-negotiables |
-| [`docs/specs/infrastructure/00-build-order.md`](docs/specs/infrastructure/00-build-order.md) | Ordered build queue and critical path |
+| [`docs/specs/infrastructure/README.md`](docs/decisions/imported/specs/infrastructure/README.md) | **The foundation track** — process contract, precedence, locked scope, non-negotiables |
+| [`docs/specs/infrastructure/00-build-order.md`](docs/decisions/imported/specs/infrastructure/00-build-order.md) | Ordered build queue and critical path |
 | [`docs/ux/ux-spec-v1.md`](docs/ux/ux-spec-v1.md) | Product behaviour source of truth (§0.3 rulings are signed) |
 | [`docs/ux/`](docs/ux/) | Epic and cross-cutting UX architecture, component handoff |
 | [`docs/README.md`](docs/README.md) | The documentation index — one line per document |
