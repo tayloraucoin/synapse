@@ -1,9 +1,5 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env.*local",
-    "**/.env"
-  ],
   "globalEnv": [
     "NODE_ENV",
     "SYN_LOG_DEBUG",
@@ -46,8 +42,7 @@
         "^build"
       ],
       "inputs": [
-        "$TURBO_DEFAULT$",
-        ".env*"
+        "$TURBO_DEFAULT$"
       ],
       "outputs": [
         ".next/**",
