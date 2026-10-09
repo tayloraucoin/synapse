@@ -16,6 +16,8 @@
 - [ASSUMPTION] MIG-15 is not in `depends_on`, although its own note asks for it. MIG-7 touches none of `cookies.ts`'s reads, and adding an unbuilt ticket would hold this one. The order written in the contract is MIG-7, then MIG-15 and MIG-19, which add MIG-7 to their own `depends_on` when they start.
 - The runbook the stack entry names is `docs/developer-guides/remove-supabase-auth.md`, not the toolkit's `docs/runbooks/remove/` path. That folder is copied from the toolkit byte for byte (`.prettierignore`), and `validateStack` needs a file that exists.
 - `@supabase/ssr` and `@supabase/supabase-js` left `apps/web/package.json`, and `@supabase/supabase-js` left `packages/api/package.json`: nothing there imports them now. `yarn.lock` lost the three workspace lines.
+- The root `package.json`, outside `planned_paths` because the file is shared, gained `test:auth-seam`, `check-stack` and `yarn check-stack` in verify. After Mason's review, `test:auth-seam` passes its arguments before the file (`node --test "$@" …`), so each criterion's `--test-name-pattern` now selects its own tests; before, every run ran all eight.
+- After Warden's review, `stack.auth.files` lists `packages/db/scripts/seed-users.ts`, so a removal that leaves the seeder fails `check-stack`; and the auth guide's pitfall row and its `AuthContext` section (which still named `admin` and `public.users.role`) say what the code does.
 - `docs/developer-guides/authentication.md` gained the new exports and the hard rule. The guide's older stale sections (the marketing paths) are left as they were.
 - [ASSUMPTION] The seam is the import. Method calls on the client the module returns (`supabase.auth.signInWithPassword` in the auth forms) stay where they are.
 

@@ -80,16 +80,50 @@
       }
     },
     "review:mason": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "manual",
-      "run": null
+      "run": {
+        "command": "yarn review:run mason MIG-7",
+        "exit": 0,
+        "at": "2026-10-09T20:57:14Z",
+        "head": "492020f05e496b60ccd785fbdb0d224f91b60ddc",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/review-mason.md",
+        "evidence_sha256": "47382dffec615ded378ebba2c968b21025e107fa6f940ab1648ad3361ea7dab5",
+        "contract_sha256": "3306af12f9425e00fbeaf95c7e34ec3acd69a13d6d7215cd705edfc311435845",
+        "criteria_sha256": "5236c5e00f71703afc98e3a77653d2c136b889ebd6f531bb3e226d4d8541993b",
+        "as_built_sha256": "5dcd89391703de71a037b348b4957e510a1920ff05289785004060f00dfe1d97",
+        "runner": "claude 2.1.295 (Claude Code) (role docs/roles/engineering/mason-cto-principal-dev.md; tools Read,Grep,Glob)",
+        "tokens_input": 130,
+        "tokens_cache_read": 624966,
+        "tokens_cache_write": 201321,
+        "tokens_output": 11753,
+        "seconds": 170.3
+      },
+      "runs": 1
     },
     "review:warden": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "manual",
-      "run": null
+      "run": {
+        "command": "yarn review:run warden MIG-7",
+        "exit": 0,
+        "at": "2026-10-09T21:00:14Z",
+        "head": "7588ddf3a2609bbfedd05135d0693a072bef21ac",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/review-warden.md",
+        "evidence_sha256": "500d5bb8400161f11b46b4143ce4d19a10e68fa6b4deaa69bccdd712fca584b5",
+        "contract_sha256": "3306af12f9425e00fbeaf95c7e34ec3acd69a13d6d7215cd705edfc311435845",
+        "criteria_sha256": "5236c5e00f71703afc98e3a77653d2c136b889ebd6f531bb3e226d4d8541993b",
+        "as_built_sha256": "5dcd89391703de71a037b348b4957e510a1920ff05289785004060f00dfe1d97",
+        "runner": "claude 2.1.295 (Claude Code) (role docs/roles/engineering/warden-security-privacy-engineer.md; tools Read,Grep,Glob)",
+        "tokens_input": 98,
+        "tokens_cache_read": 582096,
+        "tokens_cache_write": 85201,
+        "tokens_output": 11971,
+        "seconds": 159.8
+      },
+      "runs": 1
     }
   },
   "built_at": "2026-10-09T20:56:20Z",
-  "updated_at": "2026-10-09T20:56:46Z"
+  "updated_at": "2026-10-09T21:02:53Z"
 }

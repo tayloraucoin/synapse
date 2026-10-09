@@ -208,7 +208,8 @@
         "apps/web/app/auth",
         "apps/web/app/(auth)",
         "apps/web/app/(auth-pending)",
-        "apps/web/app/logout"
+        "apps/web/app/logout",
+        "packages/db/scripts/seed-users.ts"
       ],
       "env": [
         "NEXT_PUBLIC_SUPABASE_URL",

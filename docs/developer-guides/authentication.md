@@ -34,7 +34,7 @@ Canonical auth package. May import `@syn/db`, `@syn/types`, `@syn/utils`. Must *
 
 | Export | Purpose |
 |--------|---------|
-| `createBrowserClient()` | Env-resolving browser client; server-side only in practice (see below) |
+| `createBrowserClient()` | Env-resolving browser client; it throws in a browser bundle (the dynamic env read), so client code uses the next row |
 | `createBrowserClientFromCredentials(creds)` | The browser client from credentials the app read as literals; `@syn/auth/browser`, client-safe |
 | `AuthUser` / `AuthClient` | The signed-in person and the client, under this package's names; callers never import `@supabase/*` |
 | `createServerClient(cookies)` | Cookie-bound server client (RSC, route handlers, server actions) |
@@ -52,7 +52,7 @@ Only `@syn/auth` imports `@supabase/*`: `lint:boundaries` fails anywhere else (`
 ### Client / server split (hard rule)
 
 - **`browser.ts`** — the browser client from passed-in credentials; reached as `@syn/auth/browser`.
-- **`client.ts`** — browser only; never import from server code.
+- **`client.ts`** — `createBrowserClient()`, which resolves the env itself and so cannot run in a browser bundle; client code reaches `@syn/auth/browser` through `apps/web/lib/clients/supabase/client.ts` instead.
 - **`server.ts`** — cookie-bound; never import from `'use client'` components.
 - **`middleware.ts`** — `updateSession` only; consumed by app `proxy.ts`.
 
@@ -108,15 +108,15 @@ Called from each app's **`proxy.ts`** (Next.js 16 — **not** `middleware.ts`).
 `AuthContext` is defined in **`@syn/types`**:
 
 ```ts
+type AuthContextRole = "guest" | "service_role";
+
 interface AuthContext {
   userId: string;
-  role: "guest" | "admin" | "super_admin" | "service_role";
+  role: AuthContextRole;
 }
 ```
 
-`buildAuthContext()` maps a Supabase user + `public.users.role` into that shape. `@syn/api` `createContext()` calls it and passes the result to `@syn/db` `createRlsClient()`.
-
-App roles come from **`public.users.role`** (`guest` default). See [rls.md](./rls.md) for policy patterns.
+`buildAuthContext()` maps a signed-in `AuthUser` into that shape, always as `guest`: there is one person role, no `public.users.role` column and no admin read. `@syn/api` `createContext()` calls it and passes the result to `@syn/db` `createRlsClient()`. `service_role` comes only from `buildServiceRoleAuthContext()`, on system paths. See [rls.md](./rls.md) for policy patterns.
 
 ### Local dev: auth vs Postgres
 
@@ -344,7 +344,8 @@ Onboarding requires a verified email. Enforcement is layered — the strongest l
 |---------|----------|
 | Using `getSession()` for authz | Prefer `getUser()` — validates JWT server-side |
 | Setting cookies in RSC | RSC/server actions often can't `setAll`; rely on `proxy.ts` refresh |
-| Importing `server.ts` in client components | Hard boundary violation — use `client.ts` |
+| Importing `server.ts` in client components | Hard boundary violation — use the app's `lib/clients/supabase/client.ts`, which builds through `@syn/auth/browser` |
+| Importing `@supabase/*` outside `@syn/auth` | `lint:boundaries` fails it; take `AuthUser` and `AuthClient` from `@syn/auth` |
 | Querying `db` directly for user data | Use `ctx.rls.execute()` inside `protectedProcedure` |
 | Defaulting to service role | Only `buildServiceRoleAuthContext()` in explicit webhook/admin paths |
 | `middleware.ts` for session refresh | Use **`proxy.ts`** on Next.js 16 |

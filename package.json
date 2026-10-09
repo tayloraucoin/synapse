@@ -14,7 +14,7 @@
     "test:doc-links": "node --test scripts/check-doc-links.test.mjs",
     "check-turbo-env": "node scripts/check-turbo-env.mjs",
     "test:env-seam": "node --test scripts/check-env-seam.test.mjs",
-    "test:auth-seam": "node --test scripts/check-auth-seam.test.mjs",
+    "test:auth-seam": "node --test \"$@\" scripts/check-auth-seam.test.mjs",
     "emoji-data": "node scripts/copy-emoji-data.mjs",
     "web:dev": "yarn emoji-data && turbo run dev --filter=web",
     "web:dev:local": "yarn emoji-data && node scripts/print-local-urls.mjs 3000 && turbo run dev:local --filter=web",
