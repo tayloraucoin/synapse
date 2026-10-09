@@ -1,0 +1,7 @@
+{
+  "name": "fixture-case-added",
+  "path": "tooling/hooks/fixtures/sample.json",
+  "before": "{\n  \"hook\": \"bash-guard\",\n  \"cases\": [\n    {\n      \"rule\": \"push\",\n      \"expect\": \"deny\",\n      \"name\": \"plain push\",\n      \"command\": \"git push\"\n    },\n    {\n      \"rule\": \"push\",\n      \"expect\": \"allow\",\n      \"name\": \"status\",\n      \"command\": \"git status\"\n    }\n  ]\n}",
+  "after": "{\n  \"hook\": \"bash-guard\",\n  \"cases\": [\n    {\n      \"rule\": \"push\",\n      \"expect\": \"deny\",\n      \"name\": \"plain push\",\n      \"command\": \"git push\"\n    },\n    {\n      \"rule\": \"push\",\n      \"expect\": \"allow\",\n      \"name\": \"status\",\n      \"command\": \"git status\"\n    },\n    {\n      \"rule\": \"push\",\n      \"expect\": \"deny\",\n      \"name\": \"push with -C\",\n      \"command\": \"git -C . push\"\n    }\n  ]\n}",
+  "expect": "clean"
+}

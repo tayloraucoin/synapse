@@ -1,0 +1,8 @@
+{
+  "name": "settings-fixture-fail-flipped-to-pass",
+  "path": "tooling/fixtures/settings/sample.json",
+  "before": "{\"expect\": \"fail\", \"message\": \"x\", \"settings\": {}}",
+  "after": "{\"expect\": \"pass\", \"settings\": {}}",
+  "expect": "weakened",
+  "message": "flipped from fail to pass"
+}

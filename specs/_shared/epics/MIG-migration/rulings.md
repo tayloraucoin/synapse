@@ -105,3 +105,17 @@ Links the archive breaks (measured in a scratch clone with `yarn docs:check-link
 
 - Brief: "add a streak count to Today".
 - A fresh-context agent given only `CLAUDE.md` read `CLAUDE.md`, `AGENTS.md`, `docs/index.md`, `apps/web/docs/product-rules.md`, and answered: not allowed; `apps/web/docs/product-rules.md`, Product non-negotiables ("No streaks, no scores, no gamification"; "No numbers about the day on the execution tabs"; `/today` is LS-01). Passed, 2026-10-09.
+
+## Step 6: the base run (verify.md section 2)
+
+Run once on `f2bfeb1` in a detached worktree under `$TMPDIR`, 2026-10-09, unsandboxed with Taylor's yes; no env file in the worktree, so `build` ran as CI runs it (`SKIP_ENV_VALIDATION=true`). ESLint 9.39.5. The worktree was removed after.
+
+| Check      | Script                 | Exit at base | What happens                                                                 |
+| ---------- | ---------------------- | ------------ | ---------------------------------------------------------------------------- |
+| lint       | `yarn lint`            | 0            | Enters as written                                                            |
+| boundaries | `yarn lint:boundaries` | 0            | Enters as written                                                            |
+| types      | `yarn check-types`     | 0            | Enters as written                                                            |
+| test       | none at base           | —            | `node --test tests/smoke.test.ts` (verify.md 3.3); renaming the file exits 1 |
+| build      | `yarn build`           | 0            | Enters as written                                                            |
+
+No freeze; 53 did not apply.

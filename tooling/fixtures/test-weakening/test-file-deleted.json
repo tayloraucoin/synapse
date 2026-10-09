@@ -1,0 +1,8 @@
+{
+  "name": "test-file-deleted",
+  "path": "tooling/sample.test.ts",
+  "before": "import { test } from \"node:test\";\nimport assert from \"node:assert/strict\";\n\ntest(\"C1 sums two numbers\", () => {\n  assert.equal(1 + 1, 2);\n  assert.equal(2 + 2, 4);\n});\n",
+  "after": null,
+  "expect": "weakened",
+  "message": "was deleted"
+}

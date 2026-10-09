@@ -5,7 +5,7 @@ Synapse's folders, the precedence ladder, what loads when and the token budget. 
 ## Layers
 
 | Layer         | Where                                                                                                                                     | What it is                                                                                       | Loads                           |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------- |
+| --- | --- | --- | --- |
 | Agent context | `AGENTS.md`, `CLAUDE.md`, `.claude/rules/` (the practice's and `house-*`), nested `AGENTS.md` in `apps/web`, `packages/db`, `packages/ui` | What every agent is told                                                                         | always / by path                |
 | Workflows     | `workflows/`                                                                                                                              | How work moves: the prompt builder, tracks, stages, QA levels                                    | the builder when work starts    |
 | Specs         | `specs/` at the root: `_status.md`, `_shared/epics/`, `web/ux/`                                                                           | Tickets, contracts and the living truth, by the practice                                         | by ticket                       |
@@ -42,11 +42,12 @@ Enforced checks (lint, types, `yarn verify`, CI), then the session's explicit in
 
 This table is the CI contract read by `tooling/budget.ts`.
 
-| Build                   | Loads                                                                                                   | Cap (tokens) |
-| ----------------------- | ------------------------------------------------------------------------------------------------------- | ------------ |
-| UI build                | always 4,000 + design layer 5,000 + brief and package 2,000 + references 1,500 + one skill body 2,500   | 15,000       |
-| Non-UI build            | always 4,000 + path rules and nested `AGENTS.md` 1,500 + contract and cited spec 5,000                  | 10,500       |
-| Critic pass (forked)    | `canon-rubric.md` and canon §2 + the cited surface file + ≤3 exemplars (screenshots excluded)           | 6,000        |
+| Build                   | Loads                                                                                                 | Cap (tokens) |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- | ------------ |
+| UI build                | always 4,000 + design layer 5,000 + brief and package 2,000 + references 1,500 + one skill body 2,500 | 15,000       |
+| Non-UI build            | always 4,000 + path rules and nested `AGENTS.md` 1,500 + contract and cited spec 5,000                | 10,500       |
+| Critic pass (forked)    | `canon-rubric.md` and canon §2 + the cited surface file + ≤3 exemplars (screenshots excluded)         | 6,000        |
 | Evaluator pass (forked) | evaluator body 4,500 + contract and cited spec 5,000 + evidence index 500 (never the builder's summary) | 10,000       |
 
 A product's own design layer gets about 1,700 of the 5,000; `canon.md` takes the rest. A product `DESIGN.md` holds deltas, never restatements.
+

@@ -1,0 +1,7 @@
+{
+  "name": "fixture-json-deleted",
+  "path": "tooling/fixtures/specs/sample/case.json",
+  "before": "{\"expect\": \"fail\"}",
+  "after": null,
+  "expect": "weakened"
+}

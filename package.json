@@ -55,7 +55,9 @@
     "verify:fast": "node tooling/verify-fast.ts",
     "check-types:tooling": "tsc -p tooling",
     "cost": "node tooling/cost.ts",
-    "test:tooling": "node --test \"tooling/**/*.test.ts\""
+    "test:tooling": "node --test \"tooling/**/*.test.ts\"",
+    "test": "node --test tests/smoke.test.ts",
+    "verify": "yarn lint && yarn lint:boundaries && yarn check-types && yarn test && yarn build && yarn check-settings && yarn test:hooks && yarn check-specs && yarn check-test-weakening && yarn check-reviewers && yarn check-refs && yarn budget && yarn gen:agents --check && yarn check-types:tooling"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",

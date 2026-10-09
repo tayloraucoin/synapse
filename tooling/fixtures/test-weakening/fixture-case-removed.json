@@ -1,0 +1,8 @@
+{
+  "name": "fixture-case-removed",
+  "path": "tooling/hooks/fixtures/sample.json",
+  "before": "{\n  \"hook\": \"bash-guard\",\n  \"cases\": [\n    {\n      \"rule\": \"push\",\n      \"expect\": \"deny\",\n      \"name\": \"plain push\",\n      \"command\": \"git push\"\n    },\n    {\n      \"rule\": \"push\",\n      \"expect\": \"allow\",\n      \"name\": \"status\",\n      \"command\": \"git status\"\n    }\n  ]\n}",
+  "after": "{\n  \"hook\": \"bash-guard\",\n  \"cases\": [\n    {\n      \"rule\": \"push\",\n      \"expect\": \"allow\",\n      \"name\": \"status\",\n      \"command\": \"git status\"\n    }\n  ]\n}",
+  "expect": "weakened",
+  "message": "cases went from 2 to 1"
+}

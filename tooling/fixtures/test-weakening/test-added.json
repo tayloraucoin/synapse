@@ -1,0 +1,7 @@
+{
+  "name": "test-added",
+  "path": "tooling/sample.test.ts",
+  "before": "import { test } from \"node:test\";\nimport assert from \"node:assert/strict\";\n\ntest(\"C1 sums two numbers\", () => {\n  assert.equal(1 + 1, 2);\n  assert.equal(2 + 2, 4);\n});\n",
+  "after": "import { test } from \"node:test\";\nimport assert from \"node:assert/strict\";\n\ntest(\"C1 sums two numbers\", () => {\n  assert.equal(1 + 1, 2);\n  assert.equal(2 + 2, 4);\n});\n\ntest(\"C2 sums three numbers\", () => {\n  assert.equal(1 + 1 + 1, 3);\n});\n",
+  "expect": "clean"
+}
