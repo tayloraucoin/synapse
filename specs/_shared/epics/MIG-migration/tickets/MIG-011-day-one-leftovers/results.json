@@ -3,15 +3,76 @@
   "criteria_sha256": "2502cf46d06db47f5bdbcbcb14ecf7cdca4aa6d1faab9a603f8d1dcf3de4f0f3",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-ledger",
+        "exit": 0,
+        "at": "2026-10-09T20:32:05Z",
+        "head": "96efbe6532be93e8e33b2c89517311a97046a83e",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-011-day-one-leftovers/evidence/C1.log",
+        "evidence_sha256": "92649dd6e6406e6a49faa2e93ddaedfaeb7cdc5569ac605ae2e083ba82905c14"
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-ledger --bytes",
+        "exit": 0,
+        "at": "2026-10-09T20:32:06Z",
+        "head": "96efbe6532be93e8e33b2c89517311a97046a83e",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-011-day-one-leftovers/evidence/C2.log",
+        "evidence_sha256": "8c93b47242535ce6b006e0873120dca4fd816bde257ab05000acc7ad907ba8f8"
+      }
     }
   },
-  "updated_at": "2026-10-09T20:31:06Z"
+  "cost": {
+    "at": "2026-10-09T20:36:09Z",
+    "calls": 57,
+    "weighted": 945938,
+    "tokens_input": 116,
+    "tokens_cache_read": 6722032,
+    "tokens_cache_write": 100495,
+    "tokens_output": 29600,
+    "by_category": {
+      "build": {
+        "calls": 32,
+        "weighted": 513844
+      },
+      "proofs": {
+        "calls": 14,
+        "weighted": 235986
+      },
+      "captures": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "reviews": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "status": {
+        "calls": 2,
+        "weighted": 25703
+      },
+      "git": {
+        "calls": 8,
+        "weighted": 129109
+      },
+      "re-reading": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "other": {
+        "calls": 1,
+        "weighted": 41296
+      }
+    },
+    "context_last_call": 144034,
+    "threads": 1,
+    "headless_runs": 0,
+    "headless_weighted": 0
+  },
+  "updated_at": "2026-10-09T20:36:09Z"
 }
