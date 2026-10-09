@@ -1,0 +1,103 @@
+{
+  "hook": "session-start",
+  "kind": "context",
+  "limit": 600,
+  "cases": [
+    {
+      "rule": "line",
+      "expect": "allow",
+      "name": "the spine's commit and the brief status",
+      "input": {
+        "hook_event_name": "SessionStart",
+        "source": "startup",
+        "session_id": "fixture-session",
+        "cwd": "$ROOT"
+      },
+      "context": {
+        "spine": "2acf373 2026-10-02",
+        "brief": "Active: WEB-41 filter (open; left: C1 capture). Next: yarn status WEB-41."
+      },
+      "message": "as of 2acf373"
+    },
+    {
+      "rule": "line",
+      "expect": "allow",
+      "name": "uncommitted spine edits are named",
+      "input": {
+        "hook_event_name": "SessionStart",
+        "source": "startup",
+        "session_id": "fixture-session",
+        "cwd": "$ROOT"
+      },
+      "context": {
+        "spine": "2acf373 2026-10-02, plus 1 uncommitted edit(s): reread them",
+        "brief": "Active: none."
+      },
+      "message": "reread them"
+    },
+    {
+      "rule": "truncation",
+      "expect": "allow",
+      "name": "a long status is cut to 600 characters",
+      "input": {
+        "hook_event_name": "SessionStart",
+        "source": "startup",
+        "session_id": "fixture-session",
+        "cwd": "$ROOT"
+      },
+      "context": {
+        "spine": "2acf373 2026-10-02",
+        "brief": "Open elsewhere: WEB-1 (open), WEB-2 (open), WEB-3 (open), WEB-4 (open), WEB-5 (open), WEB-6 (open), WEB-7 (open), WEB-8 (open), WEB-9 (open), WEB-10 (open), WEB-11 (open), WEB-12 (open), WEB-13 (open), WEB-14 (open), WEB-15 (open), WEB-16 (open), WEB-17 (open), WEB-18 (open), WEB-19 (open), WEB-20 (open), WEB-21 (open), WEB-22 (open), WEB-23 (open), WEB-24 (open), WEB-25 (open), WEB-26 (open), WEB-27 (open), WEB-28 (open), WEB-29 (open), WEB-30 (open), WEB-31 (open), WEB-32 (open), WEB-33 (open), WEB-34 (open), WEB-35 (open), WEB-36 (open), WEB-37 (open), WEB-38 (open), WEB-39 (open), WEB-40 (open), WEB-41 (open), WEB-42 (open), WEB-43 (open), WEB-44 (open), WEB-45 (open), WEB-46 (open), WEB-47 (open), WEB-48 (open), WEB-49 (open), WEB-50 (open), WEB-51 (open), WEB-52 (open), WEB-53 (open), WEB-54 (open), WEB-55 (open), WEB-56 (open), WEB-57 (open), WEB-58 (open), WEB-59 (open), WEB-60 (open), WEB-61 (open), WEB-62 (open), WEB-63 (open), WEB-64 (open), WEB-65 (open), WEB-66 (open), WEB-67 (open), WEB-68 (open), WEB-69 (open), WEB-70 (open), WEB-71 (open), WEB-72 (open), WEB-73 (open), WEB-74 (open), WEB-75 (open), WEB-76 (open), WEB-77 (open), WEB-78 (open), WEB-79 (open)."
+      }
+    },
+    {
+      "rule": "never-json",
+      "expect": "allow",
+      "name": "a status that looks like JSON still prints as text",
+      "input": {
+        "hook_event_name": "SessionStart",
+        "source": "startup",
+        "session_id": "fixture-session",
+        "cwd": "$ROOT"
+      },
+      "context": {
+        "spine": "2acf373 2026-10-02",
+        "brief": "{\"active\": \"synthetic\"}"
+      },
+      "message": "Spine"
+    },
+    {
+      "rule": "resume",
+      "expect": "allow",
+      "name": "a resumed session gets the same line",
+      "input": {
+        "hook_event_name": "SessionStart",
+        "source": "resume",
+        "session_id": "fixture-session",
+        "cwd": "$ROOT"
+      },
+      "context": {
+        "spine": "2acf373 2026-10-02",
+        "brief": "Active: none."
+      },
+      "message": "Active: none."
+    },
+    {
+      "rule": "spine",
+      "expect": "allow",
+      "name": "docs/index.md is absent: only the spine files that exist are named",
+      "input": {
+        "hook_event_name": "SessionStart",
+        "source": "startup",
+        "session_id": "fixture-session",
+        "cwd": "$ROOT"
+      },
+      "context": {
+        "root": "apps/web",
+        "spine": "2acf373 2026-10-02",
+        "brief": "Active: none."
+      },
+      "message": "Spine (AGENTS.md, CLAUDE.md) as of 2acf373"
+    }
+  ]
+}

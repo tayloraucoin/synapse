@@ -1,0 +1,5 @@
+command: yarn test:tooling --test-name-pattern C1
+exit: 0
+---
+ℹ tests 3
+ℹ a later run rewrote this git-ignored log; the recorded hash no longer matches

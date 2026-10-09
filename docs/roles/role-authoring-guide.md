@@ -1,6 +1,18 @@
+---
+title: Guide — Authoring a Role Prompt
+description: Read before writing or materially revising any role prompt, or before making a role available as a subagent.
+layer: roles
+status: adopted
+thread:
+role: Plumb
+date: 2026-10-01
+last_reviewed: 2026-10-01
+supersedes:
+load_when:
+---
 # Guide — Authoring a Role Prompt
 
-> **How to use this file:** Read it before writing any new role in `docs/roles/`, and before materially revising an existing one. It codifies the conventions already carried by the 33 prompts in this directory — those files are the corpus this guide was derived from, and where a specific prompt and this guide disagree on a settled convention, the corpus wins and this guide gets amended. Everything here is a working contract for the *shape* of a role, never for the *content* of any particular one.
+> **How to use this file:** Read it before writing any new role in `docs/roles/`, and before materially revising an existing one. It codifies the conventions already carried by the role prompts in this directory — those files are the corpus this guide was derived from, and where a specific prompt and this guide disagree on a settled convention, the corpus wins and this guide gets amended. Everything here is a working contract for the *shape* of a role, never for the *content* of any particular one.
 
 ---
 
@@ -22,9 +34,9 @@ A role earns its place when there is a recurring class of question the founder w
 
 This is the first decision and it changes the header, §1, §5, and §7. Make it before drafting.
 
-**Project-bound** (all 33 current roles). The practitioner works *here*: they know the stack, the constitution, the cast, and the phase, so they never ask. They cite binding documents by name. Their standing context is a briefing they already hold.
+**Project-bound** (the default in a product repo). The practitioner works *here*: they know the stack, the constitution, the cast, and the phase, so they never ask. They cite binding documents by name. Their standing context is a briefing they already hold.
 
-**Universal.** The practitioner is portable — the same craft, convictions, and decision procedure, with every Synapse fact lifted out and replaced by an intake contract. They arrive knowing their trade and nothing about your project, and their first move is to ask for what they need in a bounded way.
+**Universal.** The practitioner is portable — the same craft, convictions, and decision procedure, with every project fact lifted out and replaced by an intake contract. They arrive knowing their trade and nothing about your project, and their first move is to ask for what they need in a bounded way.
 
 **The rule:** write project-bound when the role's judgment depends on this product's specifics — its constitution, its data sensitivity, its architecture, its cast. Write universal when the craft is genuinely context-independent and you want the role reusable across repos and clients. When in doubt, write it universal, then create a thin project-bound extension (§7) rather than forking the whole file.
 
@@ -32,14 +44,14 @@ This is the first decision and it changes the header, §1, §5, and §7. Make it
 
 | Element | Project-bound | Universal |
 |---|---|---|
-| Title line | `# Role Prompt — Name · Title, Synapse` | `# Role Prompt — Name · Title` |
+| Title line | `# Role Prompt — Name · Title, <Project>` | `# Role Prompt — Name · Title` |
 | How-to-use block | Names the actual companion docs (`codebase-conventions.md`, UX Handoff §11, etc.) | Names *kinds* of documents ("your architecture contract, your design system, the ticket") |
 | §1 relationship paragraph | "**Your relationship to this codebase/brand/product:** you wrote it…" — authorship and ownership of specific artifacts | "**Your relationship to the work:** …" — what they own by trade, no named artifacts |
 | §2 beliefs | May cite product law as conviction (never paywall the crisis) | Craft convictions only; product law arrives as intake |
 | §3.1 Authority check | Names the real precedence ladder and binding logs | States a generic precedence: *attached specs → project conventions → nearest local rules → your judgment*, and instructs the role to ask for the ladder once if it is not supplied |
 | §5 cross-references | Routes to the cast by name (Vesper, Vigil, Mason…) | Routes by function ("the design owner," "whoever owns verification") |
 | §7 Standing context | Product, stack, topology, workflow, phase — baked in | **Intake contract** instead: the 5–8 facts this role must have, what it assumes if they are not supplied, and how it labels those assumptions |
-| Placement | `docs/roles/<category>/` | `docs/roles/universal/` here; portable to any repo unchanged |
+| Placement | `docs/roles/<department>/` in the product repo | `docs/roles/<department>/` in the toolkit; portable to any repo unchanged |
 
 Everything else — the seven-section skeleton, the naming law, the voice rules, the closing line — is identical.
 
@@ -49,13 +61,15 @@ Everything else — the seven-section skeleton, the naming law, the voice rules,
 
 **The name.** One word, capitalized, drawn from old trades, monastic offices, instruments, or landmarks — the register the corpus already uses: Mason, Millwright, Wainwright, Sexton, Forge, Loom, Warden, Scribe, Vigil, Vesper, Cantor, Reeve, Crucible, Cairn, Hearth, Lantern, Limner, Quire, Antiphon, Lector, Tribune, Porter, Chancery. No human first names, no acronyms, no cute portmanteaus, no "AI" in the name.
 
-The name must be **explicable in one parenthetical** in §1 — 32 of 33 prompts contain some form of *"the name is deliberate"* followed by why the word fits the seat. If you cannot write that sentence convincingly, the name is wrong. The explanation should also place the role among the others metaphorically ("Mason framed this house, Vesper lit it, Vigil keeps watch; you are…") in project-bound roles; universal roles skip the cast placement and keep the etymology.
+The name must be **explicable in one parenthetical** in §1 — nearly every prompt in the corpus contains some form of *"the name is deliberate"* followed by why the word fits the seat. If you cannot write that sentence convincingly, the name is wrong. The explanation should also place the role among the others metaphorically ("Mason framed this house, Vesper lit it, Vigil keeps watch; you are…") in project-bound roles; universal roles skip the cast placement and keep the etymology.
 
-**The filename.** `Name—kebab-case-title-role-prompt.md`, using an em dash (`—`), not a hyphen. Examples: `Warden—security-privacy-engineer-role-prompt.md`, `Cairn—seo-paid-search-role-prompt.md`.
+**The filename.** `<name>-<kebab-case-title>.md`, lowercase ASCII, name first, no em dash and no `-role-prompt` suffix (`docs/decisions/records/0006-file-naming-and-filing.md`; CF-17 superseded the em-dash form). The human title, em dash included, lives in the `title` frontmatter field. Examples: `warden-security-privacy-engineer.md`, `cairn-seo-paid-search.md`.
 
-**The folder.** One of the existing categories — `engineering/`, `product-design/`, `marketing-growth/`, `operations-strategy/`, `science-clinical/`, `trust-legal-compliance/` — or `universal/` for portable roles. Adding a seventh category needs a real cluster behind it (two-plus roles that fit nowhere else), not a single orphan.
+**The folder.** Folders are departments — `engineering/`, `product-design/`, `marketing-growth/`, `operations-strategy/`, `science-clinical/`, `trust-legal-compliance/`. In the toolkit every role is universal, so there is no `universal/` folder (CF-21); project extensions live in each product repo at `docs/roles/_extensions/`. Adding a department needs a real cluster behind it (two-plus roles that fit nowhere else), not a single orphan.
 
-**After adding a role:** update the `roles/` section of [`docs/README.md`](../README.md) — it currently under-reports the roster — and run `yarn directory-map`.
+**The frontmatter.** Every role opens with the §2.7 block (`layer: roles`, `role: <Name>`, a `description` written as the injection trigger, usually the how-to-use block's first sentence, at most 400 characters). A role that should also run as a Claude Code subagent adds `subagent: true`, and `subagent_tools` when it must not inherit every tool (record 0008); `yarn gen:agents` then writes `.claude/agents/<name>.md`. Never edit that output by hand.
+
+**After adding a role:** add it to the department's `index.md` seat map, run `yarn lint:docs`, and run `yarn gen:agents` if it opts in as a subagent.
 
 ---
 
@@ -103,7 +117,7 @@ A flat scannable list of 8–14 specific refusals. Specificity is everything —
 
 Bolded-label bullets that eliminate re-briefing. Project-bound roles carry: **Product**, **Stack** or the domain equivalent, **Topology**, **Workflow**, **Phase**, and the role's own live constraints. Universal roles replace this with the intake contract (Appendix B).
 
-The section closes with **the tension you resolve daily** — one bullet naming the genuine conflict at the heart of the seat and how this person resolves it (agent velocity vs. architectural entropy; emotional resonance vs. comprehension). Present in 23 of 33 files and it is consistently the sharpest paragraph in them.
+The section closes with **the tension you resolve daily** — one bullet naming the genuine conflict at the heart of the seat and how this person resolves it (agent velocity vs. architectural entropy; emotional resonance vs. comprehension). Present in most of the corpus and consistently the sharpest paragraph in it.
 
 ### The closing line
 
@@ -114,9 +128,9 @@ After a final `---`, one italicized second-person paragraph: *"You are Name. \<t
 ## 5. Voice and format rules
 
 - **Second person throughout.** No third-person persona description anywhere.
-- **No emoji, ever.** Stated inside 29 of 33 prompts and it binds this guide too.
+- **No emoji, ever.** Stated inside nearly every prompt, and it binds this guide too.
 - **Prose where thinking is needed, structure where building is needed.** §1, §2, and §4 lean prose; §3, §5, §6, and §7 lean structured.
-- **Em dashes are fine in role prompts and internal docs.** The em-dash budget in `Cantor_ext—human-hand-mode.md` governs customer-facing copy only.
+- **Em dashes are fine in role prompt text and internal docs** (never in filenames). The em-dash budget in `cantor-ext-human-hand-mode.md` governs customer-facing copy only.
 - **Sentence case in headings**, bold for claim sentences, italics for consequence clauses and the closing line.
 - **Never re-litigate binding decisions** inside a role. If a role's craft genuinely conflicts with a settled rule, the role's instruction is to *route an amendment*, not to route around it — see Cantor §3.5 and Crucible §2.8 for the established handling.
 
@@ -138,29 +152,29 @@ After a final `---`, one italicized second-person paragraph: *"You are Name. \<t
 
 ## 7. Extensions and modes
 
-When a role needs a conditional posture rather than a permanent change, write an **extension** instead of editing the role: `Name_ext—mode-name.md`, same folder, its own numbering starting at `## 0. Why this mode exists`. An extension states its activation tag (`[HUMAN-HAND]`), what it adds, what it does **not** license, and how it changes severity thresholds. It runs *on top of* the base role — it never replaces it. `Cantor_ext—human-hand-mode.md` is the reference implementation.
+When a role needs a conditional posture rather than a permanent change, write an **extension** instead of editing the role: `<name>-ext-<mode>.md`, same folder, with `extends:` naming the base role's file, its own numbering starting at `## 0. Why this mode exists`. An extension states its activation tag (`[HUMAN-HAND]`), what it adds, what it does **not** license, and how it changes severity thresholds. It runs *on top of* the base role — it never replaces it. `cantor-ext-human-hand-mode.md` is the reference implementation.
 
-This is also the recommended way to project-bind a universal role: keep the portable file clean, add `Name_ext—synapse.md` carrying the standing context, the cast routing, and the binding-document ladder.
+This is also the recommended way to project-bind a universal role: keep the portable file clean, and add `docs/roles/_extensions/<name>-ext-<project>.md` in the product repo carrying the standing context, the cast routing, and the binding-document ladder.
 
 ---
 
 ## 8. Ship checklist
 
 1. Scope decided — project-bound or universal — and the header, §1, §3.1, §5, and §7 all reflect it consistently.
-2. Name passes the one-parenthetical test; filename uses the em dash; folder is correct.
+2. Name passes the one-parenthetical test; filename is ASCII kebab-case, name first; folder is the department; frontmatter passes `yarn lint:docs`.
 3. All seven sections present, in order, correctly numbered; how-to-use block carries the precedence sentence.
 4. At least one career stop is a scar with a named consequence.
 5. §3.4 tests are named and runnable; §6 refusals are specific; §7 closes with the daily tension.
 6. Boundary against the nearest existing role is stated in §5 (project-bound) or noted in the how-to-use block.
 7. Under ~160 lines. No emoji. Closing italic line present.
-8. `docs/README.md` roles section updated; `yarn directory-map` run.
+8. The department's `index.md` seat map updated; `yarn gen:agents` run if the role is a subagent.
 
 ---
 
 ## Appendix A — Skeleton (project-bound)
 
 ```markdown
-# Role Prompt — Name · Title, Synapse
+# Role Prompt — Name · Title, <Project>
 
 > **How to use this file:** Inject at the start of any thread that needs <the lens> — <the recurring question classes>. Companion documents (<the real doc names>) are typically attached alongside. **Where this file and those documents disagree on a factual or spec matter, the documents win.** Where they are silent, Name's judgment fills the gap. This file defines who is reading them and how that person thinks.
 

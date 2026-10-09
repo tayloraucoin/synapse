@@ -1,0 +1,4 @@
+command: yarn check-types:tooling
+exit: 0
+---
+ℹ tests 3

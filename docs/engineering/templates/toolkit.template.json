@@ -1,0 +1,253 @@
+{
+  "tier": "starter",
+  "specsRoot": "specs",
+  "apps": {
+    "web": {
+      "path": "apps/web",
+      "prefix": "WEB",
+      "designLayer": "apps/web/docs/design"
+    },
+    "docs": {
+      "path": "apps/docs",
+      "prefix": "DOC",
+      "designLayer": null
+    }
+  },
+  "toolkitPrefixes": ["PEM"],
+  "verify": {
+    "full": "yarn verify",
+    "fast": "yarn verify:fast"
+  },
+  "migrationsDir": null,
+  "branchPattern": "agent/{id}",
+  "protectedBranch": "main",
+  "reviewers": [
+    {
+      "glob": "**/migrations/**",
+      "role": "mason",
+      "why": "One-way door: an applied migration is immutable.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/schema/**",
+      "role": "mason",
+      "why": "One-way door: the data model's shape.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/*.sql",
+      "role": "mason",
+      "why": "One-way door: schema and data changes written as SQL.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/config/eslint/boundaries.js",
+      "role": "mason",
+      "why": "One-way door: the package boundary graph.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/*/package.json",
+      "role": "mason",
+      "why": "One-way door: a package's exports are its public API shape.",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/app/api/**",
+      "role": "mason",
+      "why": "One-way door: public API shape.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/billing/**",
+      "role": "mason",
+      "why": "One-way door: billing.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/auth/**",
+      "role": "mason",
+      "why": "One-way door: authorization topology.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/rls.ts",
+      "role": "mason",
+      "why": "One-way door: the bridge from a request's identity to row-level security.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/policies.ts",
+      "role": "mason",
+      "why": "One-way door: the policy factories every table's row-level security is built from.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/auth/**",
+      "role": "warden",
+      "why": "Authentication and authorization flows, sessions and recovery.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/proxy.ts",
+      "role": "warden",
+      "why": "The request gate every route passes through.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/env.ts",
+      "role": "warden",
+      "why": "The environment seam, where secrets enter.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/policies/**",
+      "role": "warden",
+      "why": "Deny-by-default access policies in the data layer.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/rls.ts",
+      "role": "warden",
+      "why": "Whose identity and role each user-scoped query runs as.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/policies.ts",
+      "role": "warden",
+      "why": "Deny-by-default access policies in the data layer, as one file.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/schema/**",
+      "role": "warden",
+      "why": "Personal data: what is stored, and at what fidelity.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/webhooks/**",
+      "role": "warden",
+      "why": "Third-party callbacks that must be verified.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/billing/**",
+      "role": "warden",
+      "why": "Payment credentials stay with the processor.",
+      "status": "draft"
+    },
+    {
+      "glob": ".claude/settings.json",
+      "role": "warden",
+      "why": "Agent permissions and the sandbox.",
+      "status": "draft"
+    },
+    {
+      "glob": "tooling/hooks/**",
+      "role": "warden",
+      "why": "The guards that enforce agent permissions.",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/{app,components}/**/*.tsx",
+      "role": "assay",
+      "why": "Rendered UI is scored against the canon rubric.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/ui/**",
+      "role": "assay",
+      "why": "Shared components render on every surface.",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/app/**/page.tsx",
+      "role": "threshold",
+      "why": "A surface: keyboard, focus and screen-reader paths.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/ui/src/**",
+      "role": "threshold",
+      "why": "An interactive component: its accessible name, roles and states.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/legal/**",
+      "role": "chancery",
+      "why": "Terms, privacy and consent text.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/consent/**",
+      "role": "chancery",
+      "why": "Consent capture and its wording.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/billing/**",
+      "role": "chancery",
+      "why": "Billing copy and what it promises.",
+      "status": "draft"
+    },
+    {
+      "imports": ["stripe", "@stripe/*"],
+      "role": "mason",
+      "why": "One-way door: billing, wherever the Stripe SDK is called.",
+      "status": "draft"
+    },
+    {
+      "imports": ["stripe", "@stripe/*"],
+      "role": "warden",
+      "why": "Payment credentials stay with the processor, wherever the Stripe SDK is called.",
+      "status": "draft"
+    },
+    {
+      "imports": ["stripe", "@stripe/*"],
+      "role": "chancery",
+      "why": "Billing copy and what it promises, wherever the Stripe SDK is called.",
+      "status": "draft"
+    },
+    {
+      "imports": ["@supabase/*", "next-auth", "@clerk/*", "better-auth"],
+      "role": "mason",
+      "why": "One-way door: authorization topology, wherever an auth SDK is called.",
+      "status": "draft"
+    },
+    {
+      "imports": ["@supabase/*", "next-auth", "@clerk/*", "better-auth"],
+      "role": "warden",
+      "why": "Sessions, identity and access, wherever an auth SDK is called.",
+      "status": "draft"
+    },
+    {
+      "imports": ["resend"],
+      "role": "warden",
+      "why": "Personal data: who is emailed and what the message holds.",
+      "status": "draft"
+    }
+  ],
+  "stack": {
+    "config": {
+      "files": ["packages/config"],
+      "env": [],
+      "dependencies": ["@pem/config"],
+      "boundaries": ["config"],
+      "locked": true,
+      "runbook": null
+    },
+    "ui": {
+      "files": ["packages/ui"],
+      "env": [],
+      "dependencies": [
+        "@pem/ui",
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge"
+      ],
+      "boundaries": ["ui"],
+      "locked": true,
+      "runbook": null
+    }
+  }
+}

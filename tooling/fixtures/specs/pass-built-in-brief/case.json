@@ -1,0 +1,6 @@
+{
+  "expect": "pass",
+  "lenient": {
+    "brief": "Active: WEB-1 filter (built; left: C2 check, C3 manual). Next: yarn status WEB-1."
+  }
+}

@@ -1,0 +1,7 @@
+command: yarn test:tooling --test-name-pattern C1
+exit: 0
+at: 2026-10-02T12:05:00Z
+head: 89abcdef0123456789abcdef0123456789abcdef
+tests: 3
+---
+ℹ tests 3

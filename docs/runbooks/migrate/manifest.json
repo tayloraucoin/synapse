@@ -1,0 +1,501 @@
+{
+  "_comment": "Day one's file list for a migrated repo (MIG T2; specs/_shared/epics/MIG-codebase-migration/technical/layer-1.md). The runbook walks it in order; tooling/check-refs.ts reads it under the overlay tiers. Installed into the target at this same path, so it lists itself. A path ending in / is a folder; {app} and {P} are filled at the run. copy: byte for byte from the toolkit checkout. derive: written from the interview's rulings, never copied.",
+  "when": {
+    "always": "every target",
+    "signal:next": "the target depends on next (assess S2)",
+    "signal:turbo": "the target has a turbo.json (assess S1)",
+    "signal:components-json": "the target has a components.json",
+    "signal:ci": "the target has CI config (assess C2); the verify step is added to it",
+    "ruling:house-lines": "the interview moved a human line about a file type into a house rule",
+    "ruling:settings": "each policy ruled team (settings.json) or operator (settings.local.json); the floor is always tracked",
+    "ruling:tier": "overlay, or overlay-local when the operator cannot commit harness files"
+  },
+  "entries": [
+    {
+      "group": "spine",
+      "path": "AGENTS.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "spine",
+      "path": "CLAUDE.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "spine",
+      "path": "docs/index.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "path-rules",
+      "path": ".claude/rules/specs.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "path-rules",
+      "path": ".claude/rules/docs.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "path-rules",
+      "path": ".claude/rules/deps.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "path-rules",
+      "path": ".claude/rules/ui.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "path-rules",
+      "path": ".claude/rules/ts.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "path-rules",
+      "path": ".claude/rules/testing.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "path-rules",
+      "path": ".claude/rules/next.md",
+      "mode": "derive",
+      "when": "signal:next"
+    },
+    {
+      "group": "path-rules",
+      "path": ".claude/rules/turbo.md",
+      "mode": "derive",
+      "when": "signal:turbo"
+    },
+    {
+      "group": "path-rules",
+      "path": ".claude/rules/house-*.md",
+      "mode": "derive",
+      "when": "ruling:house-lines"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/workflows/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/roles/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/design/README.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/design/workflow.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/design/skills.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/design/canon.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/design/canon-rubric.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/design/templates/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/engineering/codebase-conventions.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/engineering/tech-stack.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/engineering/templates/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/engineering/schemas/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/product/brief.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/product/cycle-charter.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/product/glossary.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/product/package.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/measurement/metrics/events.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/measurement/metrics/definitions.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/measurement/metrics/readout.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/measurement/metrics/experiment.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/measurement/evals/surface.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/measurement/evals/failure-modes.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/measurement/evals/judge.template.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/runbooks/onboard-agent.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "practice-docs",
+      "path": "docs/runbooks/migrate/manifest.json",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "skills",
+      "path": ".claude/skills/tk-batch/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "skills",
+      "path": ".claude/skills/tk-prompt/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "skills",
+      "path": ".claude/skills/shadcn/",
+      "mode": "derive",
+      "when": "signal:components-json"
+    },
+    {
+      "group": "subagents",
+      "path": ".claude/agents/",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/lib/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/hooks/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/git-hooks/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/contract.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/status.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/cost.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/spec-init.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/review-run.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/truth-promote.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/specs-archive.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/verify-fast.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/budget.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/check-specs.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/check-settings.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/check-refs.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/check-reviewers.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/check-test-weakening.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/gen-agents.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/doctor.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/lint-frontmatter.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/directory-map.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/test-hooks.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/hooks-install.ts",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/package.json",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/tsconfig.json",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/fixtures/settings/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/fixtures/specs/",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "tooling/refs-pending.json",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "tooling",
+      "path": "package.json",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "settings",
+      "path": ".claude/settings.json",
+      "mode": "derive",
+      "when": "ruling:settings"
+    },
+    {
+      "group": "settings",
+      "path": ".claude/settings.local.json",
+      "mode": "derive",
+      "when": "ruling:settings"
+    },
+    {
+      "group": "specs-root",
+      "path": "specs/_status.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "specs-root",
+      "path": "specs/{app}/ux/",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "specs-root",
+      "path": "specs/_shared/epics/{P}-migration/",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "decisions",
+      "path": "docs/decisions/records/README.md",
+      "mode": "copy",
+      "when": "always"
+    },
+    {
+      "group": "decisions",
+      "path": "docs/decisions/ledger.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "decisions",
+      "path": "docs/decisions/changelog.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "decisions",
+      "path": "docs/decisions/records/0001-adopt-the-practice.md",
+      "mode": "derive",
+      "when": "always"
+    },
+    {
+      "group": "layout",
+      "path": "toolkit.json",
+      "mode": "derive",
+      "when": "ruling:tier"
+    },
+    {
+      "group": "verify",
+      "path": ".github/workflows/",
+      "mode": "derive",
+      "when": "signal:ci"
+    }
+  ]
+}

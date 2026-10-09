@@ -1,0 +1,15 @@
+# The practice's files are copied from the toolkit byte for byte, and the
+# imported records are kept byte for byte (record 0001): the host's format
+# never rewrites them, so a later copy from the toolkit diffs clean.
+tooling/
+.claude/agents/
+docs/roles/
+docs/workflows/
+docs/design/
+docs/engineering/
+docs/measurement/
+docs/runbooks/
+docs/product/*.template.md
+docs/decisions/imported/
+docs/decisions/records/README.md
+specs/_shared/epics/MIG-migration/assess.md

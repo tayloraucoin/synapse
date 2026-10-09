@@ -1,0 +1,213 @@
+{
+  "hook": "results-gate",
+  "defaultContext": {
+    "onMain": {},
+    "onDisk": {}
+  },
+  "cases": [
+    {
+      "rule": "results",
+      "expect": "deny",
+      "name": "Edit a ticket's results.json",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/one-offs/WEB-7-filter/results.json",
+          "old_string": "FAIL",
+          "new_string": "PASS"
+        }
+      },
+      "message": "yarn contract:run"
+    },
+    {
+      "rule": "results",
+      "expect": "deny",
+      "name": "Write an epic ticket's results.json",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/epics/OB2-onboarding/tickets/OB2-3-welcome/results.json",
+          "content": "{}"
+        }
+      }
+    },
+    {
+      "rule": "results",
+      "expect": "deny",
+      "name": "Edit by a relative path",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "specs/web/one-offs/WEB-7-filter/results.json",
+          "old_string": "a",
+          "new_string": "b"
+        }
+      }
+    },
+    {
+      "rule": "results",
+      "expect": "allow",
+      "name": "Edit the contract beside it",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/one-offs/WEB-7-filter/contract.md",
+          "old_string": "a",
+          "new_string": "b"
+        }
+      }
+    },
+    {
+      "rule": "results",
+      "expect": "allow",
+      "name": "A results.json outside the specs root",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "$ROOT/apps/web/fixtures/results.json",
+          "content": "{}"
+        }
+      }
+    },
+    {
+      "rule": "review",
+      "expect": "deny",
+      "name": "Write a review file in a ticket",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/one-offs/WEB-7-filter/review-vigil.md",
+          "content": "VERDICT: PASS"
+        }
+      },
+      "message": "yarn review:run"
+    },
+    {
+      "rule": "review",
+      "expect": "deny",
+      "name": "Edit the pre-flight",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/epics/OB2-onboarding/tickets/_preflight.md",
+          "old_string": "FAIL",
+          "new_string": "PASS"
+        }
+      }
+    },
+    {
+      "rule": "review",
+      "expect": "allow",
+      "name": "A review-named file outside a ticket",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/ux/records/review-notes.md",
+          "content": "x"
+        }
+      }
+    },
+    {
+      "rule": "status",
+      "expect": "deny",
+      "name": "Edit the generated status",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "$ROOT/specs/_status.md",
+          "old_string": "open",
+          "new_string": "closed"
+        }
+      },
+      "message": "yarn status"
+    },
+    {
+      "rule": "status",
+      "expect": "allow",
+      "name": "A surface file",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/ux/records/table.md",
+          "old_string": "a",
+          "new_string": "b"
+        }
+      }
+    },
+    {
+      "rule": "as-built",
+      "expect": "deny",
+      "name": "Edit a merged as-built's body",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/one-offs/WEB-7-filter/as-built.md",
+          "old_string": "Ship it.",
+          "new_string": "Shipped, all fine."
+        }
+      },
+      "context": {
+        "onMain": {
+          "specs/web/one-offs/WEB-7-filter/as-built.md": "# As-built — WEB-7\n\n## Migrations\n\napplied: pending\n\n## Next\n\nShip it.\n"
+        },
+        "onDisk": {
+          "specs/web/one-offs/WEB-7-filter/as-built.md": "# As-built — WEB-7\n\n## Migrations\n\napplied: pending\n\n## Next\n\nShip it.\n"
+        }
+      },
+      "message": "applied:"
+    },
+    {
+      "rule": "as-built",
+      "expect": "deny",
+      "name": "Overwrite a merged as-built",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/one-offs/WEB-7-filter/as-built.md",
+          "content": "# rewritten\n"
+        }
+      },
+      "context": {
+        "onMain": {
+          "specs/web/one-offs/WEB-7-filter/as-built.md": "# As-built — WEB-7\n\n## Migrations\n\napplied: pending\n\n## Next\n\nShip it.\n"
+        }
+      }
+    },
+    {
+      "rule": "as-built",
+      "expect": "allow",
+      "name": "Set applied: on a merged as-built",
+      "input": {
+        "tool_name": "Edit",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/one-offs/WEB-7-filter/as-built.md",
+          "old_string": "applied: pending",
+          "new_string": "applied: 2026-10-02"
+        }
+      },
+      "context": {
+        "onMain": {
+          "specs/web/one-offs/WEB-7-filter/as-built.md": "# As-built — WEB-7\n\n## Migrations\n\napplied: pending\n\n## Next\n\nShip it.\n"
+        },
+        "onDisk": {
+          "specs/web/one-offs/WEB-7-filter/as-built.md": "# As-built — WEB-7\n\n## Migrations\n\napplied: pending\n\n## Next\n\nShip it.\n"
+        }
+      }
+    },
+    {
+      "rule": "as-built",
+      "expect": "allow",
+      "name": "Write an as-built not yet merged",
+      "input": {
+        "tool_name": "Write",
+        "tool_input": {
+          "file_path": "$ROOT/specs/web/one-offs/WEB-7-filter/as-built.md",
+          "content": "# draft\n"
+        }
+      },
+      "context": {
+        "onMain": {}
+      }
+    }
+  ]
+}

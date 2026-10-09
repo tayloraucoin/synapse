@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "results.schema.json",
+  "title": "results.json: a ticket's results, written only by tooling",
+  "description": "Written by yarn contract:init (every criterion FAIL), contract:run, contract:record, contract:add, contract:qa, contract:built, review:run and cost --record. check-specs validates every results.json against this file (A9, A13.2).",
+  "type": "object",
+  "required": ["id", "criteria_sha256", "criteria", "updated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "description": "The ticket's work-id, as in WEB-41 or OB2-3; equals the contract's id and the folder's prefix.",
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9]{1,4}-[1-9][0-9]*$"
+    },
+    "criteria_sha256": {
+      "description": "Hash of the contract's criteria set, frozen at init; only contract:add changes it.",
+      "$ref": "#/$defs/sha256"
+    },
+    "criteria": {
+      "description": "One entry per contract criterion, keyed by its id.",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/result" }
+    },
+    "built_at": {
+      "description": "When yarn contract:built said the code is in (audit R9). The ticket reads built until a criterion is recorded at or after it.",
+      "$ref": "#/$defs/timestamp"
+    },
+    "cost": { "$ref": "#/$defs/cost" },
+    "updated_at": { "$ref": "#/$defs/timestamp" }
+  },
+  "$defs": {
+    "cost": {
+      "description": "What the ticket's threads cost, written by yarn cost <id> --record (audit R4): one API call per message id; tokens weighted input 1, cache write 1.25, cache read 0.1, output 5 [estimate of cost, not the meter]; calls attributed to the ticket most recently named in a work command in their thread [estimate]; each classified by its first tool. Never any transcript text.",
+      "type": "object",
+      "required": [
+        "at",
+        "calls",
+        "weighted",
+        "tokens_input",
+        "tokens_cache_read",
+        "tokens_cache_write",
+        "tokens_output",
+        "by_category",
+        "context_last_call",
+        "threads",
+        "headless_runs",
+        "headless_weighted"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "at": { "$ref": "#/$defs/timestamp" },
+        "calls": { "type": "integer", "minimum": 0 },
+        "weighted": { "type": "integer", "minimum": 0 },
+        "tokens_input": { "type": "integer", "minimum": 0 },
+        "tokens_cache_read": { "type": "integer", "minimum": 0 },
+        "tokens_cache_write": { "type": "integer", "minimum": 0 },
+        "tokens_output": { "type": "integer", "minimum": 0 },
+        "by_category": {
+          "type": "object",
+          "required": [
+            "build",
+            "proofs",
+            "captures",
+            "reviews",
+            "status",
+            "git",
+            "re-reading",
+            "other"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "build": { "$ref": "#/$defs/costCategory" },
+            "proofs": { "$ref": "#/$defs/costCategory" },
+            "captures": { "$ref": "#/$defs/costCategory" },
+            "reviews": { "$ref": "#/$defs/costCategory" },
+            "status": { "$ref": "#/$defs/costCategory" },
+            "git": { "$ref": "#/$defs/costCategory" },
+            "re-reading": { "$ref": "#/$defs/costCategory" },
+            "other": { "$ref": "#/$defs/costCategory" }
+          }
+        },
+        "context_last_call": {
+          "description": "Input, cache read and cache write of the ticket's last main-thread call; null when every call was a subagent's.",
+          "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 0 }]
+        },
+        "threads": { "type": "integer", "minimum": 0 },
+        "headless_runs": {
+          "description": "review:run runs on record in results.json that carry cost fields: the last run per review criterion.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "headless_weighted": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "costCategory": {
+      "type": "object",
+      "required": ["calls", "weighted"],
+      "additionalProperties": false,
+      "properties": {
+        "calls": { "type": "integer", "minimum": 0 },
+        "weighted": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    },
+    "result": {
+      "type": "object",
+      "required": ["status", "evidence", "run"],
+      "additionalProperties": false,
+      "properties": {
+        "status": { "enum": ["PASS", "FAIL"] },
+        "evidence": { "enum": ["test", "check", "capture", "manual"] },
+        "run": {
+          "description": "The last run that set this status; null until one has.",
+          "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/run" }]
+        },
+        "runs": {
+          "description": "For a review: completed review:run runs that gave a verdict. The cap reads it: a second run only after a FAIL, a third only with --operator (WEB-12).",
+          "type": "integer",
+          "minimum": 1
+        },
+        "refused": {
+          "description": "Every review:run attempt a guard stopped before the reviewer ran, oldest first: when and why. A completed run never clears them.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["at", "reason"],
+            "additionalProperties": false,
+            "properties": {
+              "at": { "$ref": "#/$defs/timestamp" },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "run": {
+      "description": "A9's run record, plus HEAD (A13.2 B2) and, for a review, what it reviewed (B1) and what it cost.",
+      "type": "object",
+      "required": [
+        "command",
+        "exit",
+        "at",
+        "head",
+        "evidence_path",
+        "evidence_sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "command": { "type": "string", "minLength": 1 },
+        "exit": { "type": "integer" },
+        "at": { "$ref": "#/$defs/timestamp" },
+        "head": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "evidence_path": { "type": "string", "minLength": 1 },
+        "evidence_sha256": { "$ref": "#/$defs/sha256" },
+        "tests": {
+          "description": "Tests the runner reported for a test criterion; zero fails the criterion.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "contract_sha256": { "$ref": "#/$defs/sha256" },
+        "criteria_sha256": {
+          "description": "For a review: the criteria set it judged (the results' criteria_sha256 at the time). A criterion added later makes the PASS stale; nothing else does (WEB-12).",
+          "$ref": "#/$defs/sha256"
+        },
+        "as_built_sha256": { "$ref": "#/$defs/sha256" },
+        "runner": { "type": "string", "minLength": 1 },
+        "deferred": {
+          "description": "true when a manual criterion only a person can check was handed to the operator (contract:record --verdict deferred). It never holds the ticket; _status.md lists it under Operator checks.",
+          "type": "boolean"
+        },
+        "tokens_input": {
+          "description": "A review's cost, from the headless result's usage: uncached input tokens.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "tokens_cache_read": {
+          "description": "Input tokens read from the prompt cache.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "tokens_cache_write": {
+          "description": "Input tokens written to the prompt cache.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "tokens_output": {
+          "description": "Output tokens.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "seconds": {
+          "description": "Wall-clock seconds of the reviewer process, measured by review:run.",
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

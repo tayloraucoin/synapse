@@ -52,6 +52,11 @@ apps/web/public/emoji/
 # Exception: shared permission/sandbox rules are tracked so every worktree
 # inherits them on checkout. Machine-local churn stays in settings.local.json.
 !.claude/settings.json
+# The practice's path rules, house skills and generated subagents are tracked
+# too (record 0001); settings.local.json stays ignored under .claude/*.
+!.claude/rules/
+!.claude/skills/
+!.claude/agents/
 CLAUDE.local.md
 
 # Debug

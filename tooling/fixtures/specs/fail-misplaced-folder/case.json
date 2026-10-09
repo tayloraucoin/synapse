@@ -1,0 +1,4 @@
+{
+  "expect": "fail",
+  "message": "is not named <PREFIX>-<n>-<slug>"
+}

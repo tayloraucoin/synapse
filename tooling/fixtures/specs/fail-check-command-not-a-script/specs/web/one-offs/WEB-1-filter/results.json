@@ -1,0 +1,25 @@
+{
+  "id": "WEB-1",
+  "criteria_sha256": "1d22beadb004be968ae1e9351d4b4e24aefed734753941bfbd1ba3ecaaaa6990",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:tooling --test-name-pattern C1",
+        "exit": 0,
+        "at": "2026-10-02T12:00:00Z",
+        "head": "0123456789abcdef0123456789abcdef01234567",
+        "evidence_path": "tooling/fixtures/specs/fail-check-command-not-a-script/specs/web/one-offs/WEB-1-filter/evidence/C1.log",
+        "evidence_sha256": "5ddcfb150e16f8d76db62fd10728e84af2fbbc8fc1d364e433fda0417e83327e",
+        "tests": 3
+      }
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    }
+  },
+  "updated_at": "2026-10-02T12:00:00Z"
+}

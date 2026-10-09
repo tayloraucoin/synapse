@@ -1,0 +1,55 @@
+{
+  "id": "WEB-1",
+  "criteria_sha256": "78233598bdeac19b6984f5bcbfa954617fbc1b4f0c5d8b0f810cc6f526148091",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:tooling --test-name-pattern C1",
+        "exit": 0,
+        "at": "2026-10-02T12:00:00Z",
+        "head": "0123456789abcdef0123456789abcdef01234567",
+        "evidence_path": "tooling/fixtures/specs/fail-closing-with-review-fail/specs/web/one-offs/WEB-1-filter/evidence/C1.log",
+        "evidence_sha256": "5ddcfb150e16f8d76db62fd10728e84af2fbbc8fc1d364e433fda0417e83327e",
+        "tests": 3
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types:tooling",
+        "exit": 0,
+        "at": "2026-10-02T12:00:00Z",
+        "head": "0123456789abcdef0123456789abcdef01234567",
+        "evidence_path": "tooling/fixtures/specs/fail-closing-with-review-fail/specs/web/one-offs/WEB-1-filter/evidence/C2.log",
+        "evidence_sha256": "046a49f4b08b6347ec383b2a102d5def60bf6a442171df060b8cb3db24a07562"
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "manual",
+      "run": {
+        "command": "yarn contract:record WEB-1 C3 --evidence tooling/fixtures/specs/fail-closing-with-review-fail/specs/web/one-offs/WEB-1-filter/evidence/C3.log",
+        "exit": 0,
+        "at": "2026-10-02T12:00:00Z",
+        "head": "0123456789abcdef0123456789abcdef01234567",
+        "evidence_path": "tooling/fixtures/specs/fail-closing-with-review-fail/specs/web/one-offs/WEB-1-filter/evidence/C3.log",
+        "evidence_sha256": "b40f36ca1aaae675ea8efae80a53ef12ba75cdc718521fb1d57fd3150bbc0fc7"
+      }
+    },
+    "review:vigil": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null,
+      "refused": [
+        {
+          "at": "2026-10-02T11:50:00Z",
+          "reason": "write specs/web/one-offs/WEB-1-filter/as-built.md first (synthetic)"
+        }
+      ]
+    }
+  },
+  "updated_at": "2026-10-02T12:00:00Z"
+}
