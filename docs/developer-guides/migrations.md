@@ -16,7 +16,7 @@ yarn db:setup      # Re-apply platform SQL if needed (idempotent)
 
 ## Hand-authored migrations (when `db:generate` is blocked)
 
-Sometimes a migration is written by hand (complex re-keys, snapshot collisions, human-reviewed DDL). Examples: `0008_web_push_subscriptions.sql`, `0013`–`0017` (ONB slices). **A `.sql` file alone is not enough** — Drizzle only runs migrations listed in `migrations/meta/_journal.json`.
+Sometimes a migration is written by hand (complex re-keys, snapshot collisions, human-reviewed DDL). Examples: `0000`'s auth guard, and the hand-appended blocks in `0004`, `0006` and `0007`. **A `.sql` file alone is not enough** — Drizzle only runs migrations listed in `migrations/meta/_journal.json`.
 
 **Required steps for every hand-authored migration:**
 
@@ -42,10 +42,10 @@ Never run destructive migrations against production without explicit approval.
 
 `packages/db/scripts/check-migrations.ts` runs after `yarn build` in `yarn verify` and fails on two things (MIG-4):
 
-- **A statement that acts on the `auth` schema**, in any migration, whatever its file name. Allowed: a foreign key to `auth.users`, and calls to `auth.uid()`, `auth.role()`, `auth.jwt()` and `auth.email()`. The one exception is `0000`'s guarded stub, matched exactly; the unguarded `CREATE SCHEMA "auth"` that `drizzle-kit generate` re-emits fails. Put anything else for `auth` in `packages/db/supabase/setup`.
+- **A statement that acts on the `auth` schema**, in any migration, whatever its file name. Allowed: a foreign key to `auth.users`, and calls to `auth.uid()`, `auth.role()`, `auth.jwt()` and `auth.email()`. The one exception is `0000`'s guarded stub, matched exactly; the unguarded `CREATE SCHEMA "auth"` that `drizzle-kit generate` re-emits fails. Also failing: any `search_path` or `set_config` write, `SET ROLE` and `SESSION AUTHORIZATION`, `U&` escapes, and dynamic `EXECUTE` in a migration the lock does not already record with the same SQL. Put anything else for `auth`, and any dynamic SQL, in `packages/db/supabase/setup`.
 - **A break of the append-only rule.** `packages/db/migrations/migrations.lock.json` records each migration's journal entry and the sha256 of its SQL. A recorded migration that is edited, removed, renamed or given a new `when` fails, and so does one not yet recorded, a `.sql` file with no journal entry, or an entry with no file.
 
-After `yarn db:generate` (or a hand-authored migration), once the SQL is final, run `yarn check-migrations --record` and commit the lock with the migration. Recording only appends. It refuses while anything recorded has changed or while the new file touches `auth`. To amend the last migration while no tier has applied it, remove its entry, the lock's last, in the same commit, where the reviewer of the SQL sees it, then record again. Removing an earlier entry shifts every entry after it and fails. Never remove the entry of a migration a tier has applied: write a new migration.
+After `yarn db:generate` (or a hand-authored migration), once the SQL is final, run `yarn check-migrations --record` and commit the lock with the migration. Recording only appends. It refuses while anything recorded has changed or while the new file touches `auth`. To amend the last migration while no tier has applied it, remove its entry, the lock's last, in the same commit, where the reviewer of the SQL sees it, then record again. Removing an earlier entry shifts every entry after it and fails. Never remove the entry of a migration a tier has applied: write a new migration. A lost lock is restored from git; `--record` never starts a new baseline.
 
 ## Supabase coexistence gotchas
 

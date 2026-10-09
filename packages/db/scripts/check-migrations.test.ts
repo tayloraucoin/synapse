@@ -15,7 +15,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { test } from "node:test";
+import { after, test } from "node:test";
 import {
   findAuthDdl,
   isGuardedAuthStub,
@@ -41,16 +41,22 @@ const UNGUARDED = readFileSync(
   "utf8",
 );
 
+const roots: string[] = [];
+after(() => {
+  for (const root of roots) rmSync(root, { recursive: true, force: true });
+});
+
 /** A temp copy of the migrations folder and the lock, for one test to change. */
 function copyMigrations(): { dir: string; lock: string } {
   const root = mkdtempSync(path.join(tmpdir(), "check-migrations-"));
+  roots.push(root);
   const dir = path.join(root, "migrations");
   cpSync(MIGRATIONS_DIR, dir, { recursive: true });
   return { dir, lock: path.join(dir, path.basename(LOCK_PATH)) };
 }
 
-function rulesOf(sql: string): string[] {
-  return findAuthDdl("x.sql", sql).map((finding) => finding.rule);
+function rulesOf(sql: string, frozen = false): string[] {
+  return findAuthDdl("x.sql", sql, { frozen }).map((finding) => finding.rule);
 }
 
 /** 0000's guard statement, as the splitter cuts it. */
@@ -156,6 +162,14 @@ test("C2: every loosened guard fails", () => {
       'CREATE SCHEMA IF NOT EXISTS "auth"',
       'CREATE SCHEMA "auth"',
     ),
+    "a REFERENCES in the stub's columns": guard.replace(
+      "email text",
+      "email text REFERENCES public.users (email)",
+    ),
+    "a DEFAULT in the stub's columns": guard.replace(
+      "email text",
+      "email text DEFAULT now()",
+    ),
     "a nested dollar body": guard.replace(
       "email text",
       "email text DEFAULT $x$a$x$",
@@ -204,6 +218,15 @@ test("C2: each kind of DDL or write against auth fails", () => {
     "select set_config('search_path', 'auth', false)",
     "select set_config('search_path', 'au' || 'th', false)",
     "set search_path to scratch",
+    "select set_config('search' || '_path', 'auth', false)",
+    "set role supabase_auth_admin",
+    "set local role postgres",
+    "reset role",
+    "set session authorization supabase_auth_admin",
+    "do $$ begin execute format('create table %s.x (id int)', substr('xauthx', 2, 4)); end $$",
+    "do $$ begin execute format('create table %s.x (id int)', reverse('htua')); end $$",
+    "do $$ begin execute format('create table %s.x (id int)', concat('au', 'th')); end $$",
+    "do $$ begin execute format('create table %s%s.x (id int)', 'au', 'th'); end $$",
     "create function public.f() returns void language sql set search_path = auth as $$ delete from users $$",
     'create table U&"\\0061uth".x (id int)',
     "do $$ begin execute 'create table ' || 'au' || 'th.x (id int)'; end $$",
@@ -225,7 +248,6 @@ test("C2: a foreign key to auth.users and the four auth reads stay allowed", () 
     'CREATE TABLE "public"."author" ("auth" text NOT NULL)',
     "select 'authentication' as word",
     "-- a comment naming auth.users is ignored\nselect 1",
-    "do $$ begin execute format('DROP POLICY IF EXISTS %I ON storage.objects;', 'p'); end $$",
   ];
   for (const statement of statements) {
     assert.deepEqual(rulesOf(`${statement};`), [], statement);
@@ -452,6 +474,43 @@ test("C3: record stops at the first refused entry, so nothing later takes its pl
     .findings.filter((f) => f.rule === "append-only")
     .map((f) => f.file);
   assert.deepEqual(unrecorded, ["0012_touches_auth.sql", "0013_synthetic.sql"]);
+});
+
+test("C2: dynamic EXECUTE fails in a new migration, and only recorded SQL keeps it", () => {
+  const policies =
+    "do $$ declare n text := 'p'; begin execute format('DROP POLICY IF EXISTS %I ON storage.objects;', n); end $$;";
+  assert.deepEqual(rulesOf(policies), ["dynamic-sql"]);
+  assert.deepEqual(rulesOf(policies, true), []);
+  assert.deepEqual(
+    rulesOf("do $$ begin execute 'drop table au' || 'th.users'; end $$;", true),
+    ["dynamic-sql"],
+  );
+  assert.deepEqual(
+    rulesOf("grant execute on function public.f() to anon;"),
+    [],
+  );
+
+  const { dir, lock } = copyMigrations();
+  const file = path.join(dir, "0007_v1_2_additive.sql");
+  writeFileSync(file, `${readFileSync(file, "utf8")}\n`);
+  const rules = runCheck(dir, lock).findings.map((f) => `${f.file} ${f.rule}`);
+  assert.ok(
+    rules.includes("0007_v1_2_additive.sql dynamic-sql"),
+    rules.join("\n"),
+  );
+  assert.ok(
+    rules.includes("0007_v1_2_additive.sql append-only"),
+    rules.join("\n"),
+  );
+});
+
+test("C3: record refuses a missing lock instead of starting a new baseline", () => {
+  const { dir, lock } = copyMigrations();
+  rmSync(lock);
+  const refused = runCheck(dir, lock, { record: true });
+  assert.deepEqual(refused.recorded, []);
+  assert.ok(refused.findings.some((f) => f.rule === "lock"));
+  assert.throws(() => readFileSync(lock));
 });
 
 test("C4: yarn verify runs check-migrations and its tests after build", () => {

@@ -18,15 +18,15 @@
  * The append-only rule reads `meta/_journal.json` and the lock file in the
  * migrations folder (`migrations.lock.json`, where the folder's reviewer glob
  * reaches it), which records each migration's journal entry and the sha256 of
- * its SQL. A recorded migration that changed,
- * moved or went missing fails, and so does one not recorded yet:
- * `yarn check-migrations --record` appends the new entries once the SQL is
- * final, and never rewrites one already there.
+ * its SQL. A recorded migration that changed, moved or went missing fails, and
+ * so does one not recorded yet: `yarn check-migrations --record` appends the
+ * new entries once the SQL is final, and never rewrites one already there. It
+ * refuses to start over when the lock is gone: a lost lock is restored from
+ * git, never re-baselined.
  *
- * What a lexical check cannot see: SQL that a DO block builds at run time from
- * pieces that never spell `auth` (a name read from the catalogue, say). Dynamic
- * EXECUTE is flagged whenever it concatenates, escapes or names auth at all;
- * past that, the human who reads the SQL before `db:migrate` is the door.
+ * Dynamic EXECUTE builds SQL no lexical check can read, so a new migration may
+ * not run it; only SQL the lock already records keeps its reviewed form.
+ * Past the check, the human who reads the SQL before `db:migrate` is the door.
  */
 import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -190,106 +190,128 @@ export function splitStatements(sql: string): {
 const AUTH = String.raw`(?:"auth"(?!")|(?<![A-Za-z0-9_$"])auth(?![A-Za-z0-9_$"]))`;
 const IDENT = String.raw`(?:"(?:[^"]|"")*"|[A-Za-z_][A-Za-z0-9_$]*)`;
 
-const RULES: { rule: string; message: string; test: (s: string) => boolean }[] =
-  [
-    {
-      rule: "auth-schema",
-      message:
-        "names the auth schema (create, alter, drop, grant on, set schema, in schema)",
-      test: (s) =>
-        new RegExp(
-          String.raw`\bschema\s+(?:if\s+(?:not\s+)?exists\s+)?(?:${IDENT}\s*,\s*)*${AUTH}`,
-          "i",
-        ).test(s) ||
-        new RegExp(
-          String.raw`\bschema\s+(?:if\s+not\s+exists\s+)?authorization\s+${AUTH}`,
-          "i",
-        ).test(s) ||
-        new RegExp(String.raw`\brename\s+to\s+${AUTH}`, "i").test(s),
+const RULES: {
+  rule: string;
+  message: string;
+  test: (s: string, frozen: boolean) => boolean;
+}[] = [
+  {
+    rule: "auth-schema",
+    message:
+      "names the auth schema (create, alter, drop, grant on, set schema, in schema)",
+    test: (s) =>
+      new RegExp(
+        String.raw`\bschema\s+(?:if\s+(?:not\s+)?exists\s+)?(?:${IDENT}\s*,\s*)*${AUTH}`,
+        "i",
+      ).test(s) ||
+      new RegExp(
+        String.raw`\bschema\s+(?:if\s+not\s+exists\s+)?authorization\s+${AUTH}`,
+        "i",
+      ).test(s) ||
+      new RegExp(String.raw`\brename\s+to\s+${AUTH}`, "i").test(s),
+  },
+  {
+    rule: "auth-routine",
+    message:
+      "defines, alters, drops, grants, comments or triggers a routine in auth",
+    test: (s) =>
+      new RegExp(
+        String.raw`\b(?:function|procedure|routine|call)\s+(?:if\s+exists\s+)?${AUTH}\s*\.`,
+        "i",
+      ).test(s),
+  },
+  {
+    rule: "auth-object",
+    message:
+      "acts on an object in auth; only REFERENCES auth.users and auth.uid(), role(), jwt(), email() are allowed",
+    test: (s) => {
+      const rest = s
+        .replace(
+          new RegExp(
+            String.raw`\breferences\s+${AUTH}\s*\.\s*(?:"users"(?!")|users\b)`,
+            "gi",
+          ),
+          " ",
+        )
+        .replace(
+          new RegExp(
+            String.raw`${AUTH}\s*\.\s*(?:"(?:uid|role|jwt|email)"|(?:uid|role|jwt|email)\b)\s*\(\s*\)`,
+            "gi",
+          ),
+          " ",
+        );
+      return new RegExp(String.raw`${AUTH}\s*\.`, "i").test(rest);
     },
-    {
-      rule: "auth-routine",
-      message:
-        "defines, alters, drops, grants, comments or triggers a routine in auth",
-      test: (s) =>
-        new RegExp(
-          String.raw`\b(?:function|procedure|routine|call)\s+(?:if\s+exists\s+)?${AUTH}\s*\.`,
-          "i",
-        ).test(s),
-    },
-    {
-      rule: "auth-object",
-      message:
-        "acts on an object in auth; only REFERENCES auth.users and auth.uid(), role(), jwt(), email() are allowed",
-      test: (s) => {
-        const rest = s
-          .replace(
-            new RegExp(
-              String.raw`\breferences\s+${AUTH}\s*\.\s*(?:"users"(?!")|users\b)`,
-              "gi",
-            ),
-            " ",
-          )
-          .replace(
-            new RegExp(
-              String.raw`${AUTH}\s*\.\s*(?:"(?:uid|role|jwt|email)"|(?:uid|role|jwt|email)\b)\s*\(\s*\)`,
-              "gi",
-            ),
-            " ",
-          );
-        return new RegExp(String.raw`${AUTH}\s*\.`, "i").test(rest);
-      },
-    },
-    {
-      rule: "search-path",
-      message:
-        "sets a search_path, which can point unqualified names at auth; name each object's schema instead",
-      test: (s) => /search_path/i.test(s),
-    },
-    {
-      rule: "unicode-escape",
-      message:
-        "uses a U& escaped identifier or string, which can spell auth unseen",
-      test: (s) => /\bU&["']/i.test(s),
-    },
-    {
-      rule: "dynamic-sql",
-      message:
-        "runs dynamic SQL that names auth, concatenates, escapes or reads the schema catalogue",
-      test: (s) =>
-        /\bexecute\b(?!\s+(?:function|procedure)\b)/i.test(s) &&
-        (new RegExp(AUTH, "i").test(s) ||
-          /\|\||\\|\bchr\s*\(|\bU&|pg_namespace|regnamespace|\bschemata\b/i.test(
-            s,
-          )),
-    },
-  ];
+  },
+  {
+    rule: "session-setting",
+    message:
+      "sets search_path, a setting through set_config, or the role, any of which can point unqualified names at auth; name each object's schema instead",
+    test: (s) =>
+      /search_path|\bset_config\s*\(|\bset\s+(?:(?:local|session)\s+)?role\b|\breset\s+role\b|\bsession\s+authorization\b/i.test(
+        s,
+      ),
+  },
+  {
+    rule: "unicode-escape",
+    message:
+      "uses a U& escaped identifier or string, which can spell auth unseen",
+    test: (s) => /\bU&["']/i.test(s),
+  },
+  {
+    // Dynamic SQL builds text no check can read, so a new migration may not
+    // run it at all: it belongs in packages/db/supabase/setup. Content the
+    // lock already records (0007's storage policies) was reviewed as it
+    // stands, and still fails if it names auth, concatenates, escapes or
+    // reads the schema catalogue.
+    rule: "dynamic-sql",
+    message:
+      "runs dynamic SQL, whose text a check cannot read; put it in packages/db/supabase/setup",
+    test: (s, frozen) =>
+      /\bexecute\b(?!\s+(?:function|procedure|on)\b)/i.test(s) &&
+      (!frozen ||
+        new RegExp(AUTH, "i").test(s) ||
+        /\|\||\\|\bchr\s*\(|\bU&|pg_namespace|regnamespace|\bschemata\b/i.test(
+          s,
+        )),
+  },
+];
 
 /**
  * The guarded stub, exactly: a DO block whose body is one IF NOT EXISTS on
  * information_schema.tables for auth.users, then CREATE SCHEMA IF NOT EXISTS
- * auth and CREATE TABLE auth.users with a plain column list, and nothing else.
+ * auth and CREATE TABLE auth.users whose columns are each a name, a type and
+ * at most NOT NULL and PRIMARY KEY, and nothing else.
  */
+const STUB_COLUMN = String.raw`(?:"[a-z_][a-z0-9_]*"|[a-z_][a-z0-9_]*) [a-z_][a-z0-9_]*(?: \( [0-9]+ \))?(?: with(?:out)? time zone)?(?: not null| primary key)*`;
+
 export function isGuardedAuthStub(statement: string): boolean {
   const spaced = statement
     .replace(/\s*([(),;=])\s*/g, " $1 ")
     .replace(/\s+/g, " ")
     .trim();
   const match = new RegExp(
-    String.raw`^DO \$([A-Za-z_]*)\$ BEGIN IF NOT EXISTS \( SELECT 1 FROM information_schema\.tables WHERE table_schema = '([^']*)' AND table_name = '([^']*)' \) THEN CREATE SCHEMA IF NOT EXISTS ${AUTH} ; CREATE TABLE ${AUTH}\.(?:"users"|users) \( ((?:[^;$'()]|\( [0-9 ,]* \))+) \) ; END IF ; END(?: ;)? \$\1\$$`,
+    String.raw`^DO \$([A-Za-z_]*)\$ BEGIN IF NOT EXISTS \( SELECT 1 FROM information_schema\.tables WHERE table_schema = '([^']*)' AND table_name = '([^']*)' \) THEN CREATE SCHEMA IF NOT EXISTS ${AUTH} ; CREATE TABLE ${AUTH}\.(?:"users"|users) \( ${STUB_COLUMN}(?: , ${STUB_COLUMN})* \) ; END IF ; END(?: ;)? \$\1\$$`,
     "i",
   ).exec(spaced);
   return match !== null && match[2] === "auth" && match[3] === "users";
 }
 
-/** Every auth finding in one migration's SQL. */
-export function findAuthDdl(file: string, sql: string): Finding[] {
+/**
+ * Every auth finding in one migration's SQL. `frozen` is true when the lock
+ * already records this exact SQL (by its sha256, never its name).
+ */
+export function findAuthDdl(
+  file: string,
+  sql: string,
+  options: { frozen?: boolean } = {},
+): Finding[] {
   const { statements, unterminated } = splitStatements(sql);
   const findings: Finding[] = [];
   for (const statement of statements) {
     if (isGuardedAuthStub(statement.text)) continue;
     for (const { rule, message, test } of RULES) {
-      if (test(statement.text)) {
+      if (test(statement.text, options.frozen ?? false)) {
         findings.push({
           file,
           rule,
@@ -357,7 +379,8 @@ function readLock(lockPath: string): {
       finding: {
         file,
         rule: "lock",
-        message: "is missing; nothing is recorded as applied-safe",
+        message:
+          "is missing, so nothing is recorded; restore it from git (git checkout -- packages/db/migrations/migrations.lock.json): --record never starts a new baseline",
       },
     };
   }
@@ -389,7 +412,10 @@ function readLock(lockPath: string): {
 export function checkAppendOnly(
   dir: string,
   lockPath: string,
-  options: { record?: boolean; authClean?: (file: string) => boolean } = {},
+  options: {
+    record?: boolean;
+    authClean?: (file: string) => boolean;
+  } = {},
 ): { findings: Finding[]; recorded: string[] } {
   const findings: Finding[] = [];
   const { entries, finding } = readJournal(dir);
@@ -433,8 +459,8 @@ export function checkAppendOnly(
   });
 
   const lock = readLock(lockPath);
-  if (lock.finding && !(options.record && !existsSync(lockPath)))
-    findings.push(lock.finding);
+  const writing = options.record === true;
+  if (lock.finding) findings.push(lock.finding);
 
   lock.entries.forEach((recorded, position) => {
     const file = `${recorded.tag}.sql`;
@@ -482,7 +508,7 @@ export function checkAppendOnly(
     const full = path.join(dir, file);
     const clean = options.authClean ? options.authClean(file) : true;
     recordable = recordable && clean && existsSync(full);
-    if (options.record && recordable) {
+    if (writing && recordable) {
       lock.entries.push({
         idx: entry.idx,
         tag: entry.tag,
@@ -494,14 +520,14 @@ export function checkAppendOnly(
       findings.push({
         file,
         rule: "append-only",
-        message: options.record
+        message: writing
           ? "was not recorded: fix the findings above, or the entry before it, first"
           : "is not recorded in the lock; once its SQL is final, run yarn check-migrations --record",
       });
     }
   }
 
-  if (options.record && recordedNow.length > 0) {
+  if (writing && recordedNow.length > 0) {
     writeFileSync(
       lockPath,
       `${JSON.stringify(
@@ -540,9 +566,15 @@ export function runCheck(
   const files = readdirSync(dir)
     .filter((name) => name.endsWith(".sql"))
     .sort();
-  const auth = files.flatMap((name) =>
-    findAuthDdl(name, readFileSync(path.join(dir, name), "utf8")),
+  const recordedShas = new Set(
+    readLock(lockPath).entries.map((entry) => entry.sha256),
   );
+  const auth = files.flatMap((name) => {
+    const bytes = readFileSync(path.join(dir, name));
+    return findAuthDdl(name, bytes.toString("utf8"), {
+      frozen: recordedShas.has(sha256(bytes)),
+    });
+  });
   const flagged = new Set(auth.map((finding) => finding.file));
   const appendOnly = checkAppendOnly(dir, lockPath, {
     record: options.record,
@@ -563,9 +595,8 @@ export const MIGRATIONS_DIR = path.join(PACKAGE_DIR, "migrations");
 export const LOCK_PATH = path.join(MIGRATIONS_DIR, "migrations.lock.json");
 
 function main(argv: string[]): number {
-  const record = argv.includes("--record");
   const { files, findings, recorded } = runCheck(MIGRATIONS_DIR, LOCK_PATH, {
-    record,
+    record: argv.includes("--record"),
   });
   for (const file of recorded)
     console.log(`check-migrations: recorded ${file}`);
@@ -589,7 +620,9 @@ function main(argv: string[]): number {
   if (
     findings.some(
       (finding) =>
-        finding.rule.startsWith("auth") || finding.rule === "search-path",
+        finding.rule.startsWith("auth") ||
+        finding.rule === "session-setting" ||
+        finding.rule === "dynamic-sql",
     )
   ) {
     console.error(

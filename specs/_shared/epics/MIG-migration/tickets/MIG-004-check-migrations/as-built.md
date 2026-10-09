@@ -14,14 +14,18 @@
 - The lock moved from `packages/db/` into the migrations folder after Vigil's pre-flight (finding 6), so the `**/migrations/**` Mason glob reaches it without a `toolkit.json` row. drizzle-kit `generate` ("No schema changes") and `check` ("Everything's fine") were run against a scratch copy holding the lock.
 - [ASSUMPTION] The guarded stub is allowed in any migration, not only the first: it is matched by content, and its body can only no-op or abort on a database where `auth.users` exists. Narrower than the toolkit's model, which fails `create schema if not exists auth` and would fail 0000.
 - The toolkit's model misses `CREATE SCHEMA "auth"` (its `"auth"\b` never matches before a space), which is exactly the statement drizzle-kit emits. Here the quoted form is matched explicitly. The model's `auth.uid()` allowance is narrowed to `uid`, `role`, `jwt` and `email`, and `REFERENCES` to `auth.users`.
-- Added beyond the model: a dollar-quote and comment aware splitter that fails closed on anything unterminated, and rules for `search_path`, `U&` escapes and dynamic `EXECUTE` (concatenation, escapes, catalogue reads, or naming auth). 0007's `EXECUTE format(...)` on `storage.objects` passes.
+- Added beyond the model: a dollar-quote and comment aware splitter that fails closed on anything unterminated, and rules for session settings (`search_path`, `set_config`, `SET ROLE`, `SESSION AUTHORIZATION`), `U&` escapes and dynamic `EXECUTE`.
+- [ASSUMPTION] Dynamic `EXECUTE` fails closed after Warden's review. A new migration may not run it at all, and only SQL whose sha256 the lock already records keeps it (0007's storage policies, which pass `format` a plpgsql variable). Warden's proposed control, literal arguments only, would have failed 0007 and still passed `format('%s%s', 'au', 'th')`. Dynamic SQL goes in `packages/db/supabase/setup`.
+- `--record` refuses a missing lock (Warden). A `--init` was tried and dropped: with no lock nothing is frozen, so it stops at 0007. A lost lock is restored from git.
+- Review fixes, Mason: recording stops at the first refused entry; `CREATE SCHEMA AUTHORIZATION auth` and any `search_path` write fail; the C1 count follows the journal; the guide drops the two ad-hoc checks the tool supersedes and its advice to use a bare `CREATE SCHEMA IF NOT EXISTS "auth"`; the lock's `about` and the guide agree that only the last entry may be removed. Warden: the stub's columns are a name, a type and at most NOT NULL and PRIMARY KEY; tests remove their temp copies; the guide's stale hand-authored examples are corrected.
 - Planned paths grew: the test, the fixture, the lock, `packages/db/package.json` (the scripts run there, as in the toolkit), and `docs/developer-guides/migrations.md` (a section on the check and `--record`). The prompt's writes named only the script, its fixtures, the root `package.json` and the contract.
 - The pre-flight ran after the code was on disk (Vigil's note 13): `contract:init` refused a Q3 epic ticket without a pre-flight line, and the build had already started.
 - Vigil's note 12: the cite now names `rulings.md` and its `migrationsDir` row. The toolkit path sits in the Build notes, outside the repo.
 
 ## Not verified
 
-- Dynamic SQL that computes a name the text never spells (read from the catalogue some other way, for instance) is beyond a lexical check. The human reading the SQL before `db:migrate` stays the door.
+- Dynamic SQL in recorded migrations is held only by the heuristic (concatenation, escapes, catalogue reads, naming auth) and by the review it already had. The human reading the SQL before `db:migrate` stays the door.
+- Whether the migration role on Supabase could assume a role whose `search_path` is `auth` (Warden's consider) was not checked; `SET ROLE` fails regardless.
 - Nothing was applied to any database, local included.
 
 ## Next
