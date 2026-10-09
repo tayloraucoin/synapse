@@ -1,0 +1,23 @@
+# C5 — the auth paths in the running app
+
+Walked 2026-10-09 on `feature/pem-migration` with the MIG-7 change in the working tree, `next dev` (Turbopack) on `http://localhost:58636` (port 3000 held by the toolkit checkout's server), `DATABASE_ENVIRONMENT` from `apps/web/.env.local`.
+
+## What the builder walked
+
+| Step | Result |
+| --- | --- |
+| `GET /signin` | 200; the sign-in screen renders (Google, email, password, forgot, create an account); no console error. The form builds the browser client (`@syn/auth/browser`) only on submit, so this step does not exercise it; the signed-in walk below does |
+| `GET /` signed out | 200; `proxy.ts` ran `updateSession` on each request (`proxy.ts: 153ms` on the first, then 2 to 7 ms) |
+| `GET /settings/account` signed out | redirected to `/signin?next=%2Fsettings%2Faccount`: the shell layout's `getUser` through `@syn/auth` answers "no user" |
+| Invalid session: an `sb-<active ref>-auth-token` cookie holding no real token, then `GET /settings/account` | 307 to `/signin?next=%2Fsettings%2Faccount`; the sign-in screen shows, no console error. The server log carries a `TRPCError: UNAUTHORIZED` from the settings page's server caller before the redirect, the same as with no cookie at all; the bad cookie stays set. Both are today's behaviour: `proxy.ts`, `middleware.ts`, `server.ts`, `session.ts` and `trpc.ts` are untouched, and `packages/api/src/context.ts` changed in types only |
+| Browser chunks (`apps/web/.next/dev/static/chunks`) | no `@syn/auth` server module (`env.ts`, `admin.ts`); the only `SUPABASE_SECRET_KEY` text is a doc comment inside `@supabase/auth-js` |
+
+## What waits for Taylor
+
+Signing in sends the seeded password to the hosted staging Supabase project, not a local host, so the builder does not enter it. Steps, on the running app:
+
+1. Open `/signin`; sign in as `dev@synapse.test` with the password in `packages/db/scripts/seed-users.ts`. Expect the day view.
+2. Reload twice, and open `/settings/account`. Expect to stay signed in (the proxy refreshes the cookie).
+3. Sign out from settings. Expect `/signin`, and `/settings/account` to redirect there again.
+4. Come back after the access token has expired (an hour; or the next day on a phone). Expect to land signed in, the proxy having refreshed the session, with no bounce to sign-in.
+5. Sign up a new address and do not confirm it. Expect `/verify`, and any app route to send you back there.
