@@ -29,7 +29,6 @@ Sometimes a migration is written by hand (complex re-keys, snapshot collisions, 
 
 **Prevention — journal vs SQL file parity:** run `yarn check-migrations` (below) before committing migration work or after any hand-authored SQL. It fails on a `.sql` file with no journal entry and on an entry with no file.
 
-
 `drizzle-kit` reads `packages/db/.env`. Confirm `DATABASE_ENVIRONMENT` before migrating:
 
 ```bash
@@ -59,12 +58,12 @@ Policies are defined in TypeScript via `pgPolicy()` and emitted by `yarn db:gene
 
 ## Reverting changes
 
-| Situation | Action |
-|-----------|--------|
-| **Local dev** | `yarn db:reset` — drops `public`, re-migrates, setup, seed |
-| **Unapplied generated migration** | `drizzle-kit drop` in `packages/db` |
-| **Applied to shared env (staging/prod)** | Forward-fix with a new migration (append-only) |
-| **High-risk rollback** | Optional hand-written `migrations/down/<tag>.down.sql`, applied manually via `psql` |
+| Situation                                | Action                                                                              |
+| ---------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Local dev**                            | `yarn db:reset` — drops `public`, re-migrates, setup, seed                          |
+| **Unapplied generated migration**        | `drizzle-kit drop` in `packages/db`                                                 |
+| **Applied to shared env (staging/prod)** | Forward-fix with a new migration (append-only)                                      |
+| **High-risk rollback**                   | Optional hand-written `migrations/down/<tag>.down.sql`, applied manually via `psql` |
 
 Drizzle has no built-in down migrations. Never edit a migration that has been applied to a shared environment.
 
@@ -72,11 +71,10 @@ Drizzle has no built-in down migrations. Never edit a migration that has been ap
 
 Drizzle decides **which** migrations exist from `_journal.json`, then decides **which are pending** from `when` timestamps vs `drizzle.__drizzle_migrations.created_at` on the target DB. Two silent-failure modes:
 
-| Failure mode | Cause | Symptom |
-|--------------|-------|---------|
+| Failure mode              | Cause                                                     | Symptom                                                     |
+| ------------------------- | --------------------------------------------------------- | ----------------------------------------------------------- |
 | **Missing journal entry** | `.sql` committed without a matching `_journal.json` entry | Migrate succeeds instantly; SQL never runs; columns missing |
-| **Bad `when` ordering** | New entry's `when` ≤ last applied `created_at` on target | Migrate succeeds; that migration skipped; columns missing |
-
+| **Bad `when` ordering**   | New entry's `when` ≤ last applied `created_at` on target  | Migrate succeeds; that migration skipped; columns missing   |
 
 If `0003`/`0004` were hand-edited with placeholder timestamps like `1782000000001` and a later `db:generate` produces `0005` with a real (smaller) `when` (e.g. `1781895997280`), `yarn db:migrate` will report success but **silently skip** `0005` because its timestamp sorts before the last applied row.
 
@@ -96,8 +94,12 @@ If `0003`/`0004` were hand-edited with placeholder timestamps like `178200000000
 
 ```js
 await session.transaction(async (tx) => {
-  for await (const migration of migrations) {      // every pending file
-    if (!lastDbMigration || Number(lastDbMigration.created_at) < migration.folderMillis) {
+  for await (const migration of migrations) {
+    // every pending file
+    if (
+      !lastDbMigration ||
+      Number(lastDbMigration.created_at) < migration.folderMillis
+    ) {
       for (const stmt of migration.sql) await tx.execute(sql.raw(stmt));
       await tx.execute(sql`insert into ...__drizzle_migrations ...`);
     }
@@ -109,15 +111,15 @@ Splitting statements across two files therefore does **not** put them in two tra
 
 This matters for any statement Postgres forbids from sharing a transaction with its dependency. The one that has bitten this repo:
 
-| Statement | Constraint |
-|-----------|-----------|
+| Statement                | Constraint                                                                                                                                                     |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ALTER TYPE … ADD VALUE` | The new label cannot be **used** (inserted, cast, compared) until the transaction that added it has committed — `unsafe use of new value "x" of enum type "y"` |
 
-**Symptom:** `db:migrate` prints the two benign `NOTICE` lines (`schema "drizzle" already exists`, `relation "__drizzle_migrations" already exists` — these are normal on every re-run and are *never* the failure), then fails. The whole batch rolls back, so **nothing** is applied, not even the migrations before the offending one.
+**Symptom:** `db:migrate` prints the two benign `NOTICE` lines (`schema "drizzle" already exists`, `relation "__drizzle_migrations" already exists` — these are normal on every re-run and are _never_ the failure), then fails. The whole batch rolls back, so **nothing** is applied, not even the migrations before the offending one.
 
 **Procedure — applying an enum-add plus its first use (two passes):**
 
-1. Temporarily remove the *consuming* migration's entry from `migrations/meta/_journal.json`, leaving the `.sql` file on disk. Drizzle enumerates files from the journal, so this hides it without deleting anything.
+1. Temporarily remove the _consuming_ migration's entry from `migrations/meta/_journal.json`, leaving the `.sql` file on disk. Drizzle enumerates files from the journal, so this hides it without deleting anything.
 2. Run `yarn db:migrate` — the enum-add applies and **commits**.
 3. Restore the journal entry exactly as it was (`git diff migrations/meta/_journal.json` must come back empty).
 4. Run `yarn db:migrate` again — the consuming migration is now alone in its transaction and the label is already committed.
@@ -158,6 +160,6 @@ Authored by RUN-2 (`0007`), RUN-5 (`0008`) and RUN-15 (`0009`, the drops); revie
 
 Authored by FLO-2 with `drizzle-kit generate` (TD-46). No agent applied it to the local tier or any hosted one. It was applied on its own to a throwaway Postgres 15 cluster, with stand-ins for `users` and `category_color_key`, to check its constraints. Taylor applies it after `0010`, on each tier.
 
-1. **`0011_workflow` is purely additive and may run in the same `db:migrate` as `0004`–`0010`**, or alone after them. It creates one enum, `workflow_column_role` (`active`, `done`), and six owner-private tables: `workflow_views`, `workflow_columns`, `workflow_groups`, `workflow_tasks`, `workflow_templates`, `workflow_day_pins`. It alters no existing table and reuses `category_color_key` for a group's hue. Every `user_id` cascades. `workflow_tasks.column_id` is `ON DELETE RESTRICT`, so a column holding tasks cannot be deleted until they are moved. `group_id` is `SET NULL`, which puts the task in the lane *No group*. Two partial unique indexes hold *at most one active and one done column per view*.
+1. **`0011_workflow` is purely additive and may run in the same `db:migrate` as `0004`–`0010`**, or alone after them. It creates one enum, `workflow_column_role` (`active`, `done`), and six owner-private tables: `workflow_views`, `workflow_columns`, `workflow_groups`, `workflow_tasks`, `workflow_templates`, `workflow_day_pins`. It alters no existing table and reuses `category_color_key` for a group's hue. Every `user_id` cascades. `workflow_tasks.column_id` is `ON DELETE RESTRICT`, so a column holding tasks cannot be deleted until they are moved. `group_id` is `SET NULL`, which puts the task in the lane _No group_. Two partial unique indexes hold _at most one active and one done column per view_.
 2. **After `0011`, re-run `02_apply_triggers_rls.sql`** (or the whole platform setup). Its loop gives the six tables the `set_updated_at` trigger; the migration enables RLS itself, but no migration creates the trigger.
-3. **Nothing is seeded.** A person's two starter views (*Working*, *Queue*) are made on their first board read (TD-41, FLO-3).
+3. **Nothing is seeded.** A person's two starter views (_Working_, _Queue_) are made on their first board read (TD-41, FLO-3).
