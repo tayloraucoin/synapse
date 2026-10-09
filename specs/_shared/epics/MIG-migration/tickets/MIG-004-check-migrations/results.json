@@ -8,10 +8,10 @@
       "run": {
         "command": "yarn check-migrations",
         "exit": 0,
-        "at": "2026-10-09T21:25:23Z",
-        "head": "5cf1f5af6b1de9ac8bfdd4865301475c6afdf310",
+        "at": "2026-10-09T21:36:31Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C1.log",
-        "evidence_sha256": "017fdc1feaad69ec8ab8c73cb0eab6483d9ca77b1808fbcc37cc3cfbbf246a2c"
+        "evidence_sha256": "0a708b8d1fb2849dd8a13ad136173a4746a9be34b8a39ca2b8291f9aad245ad5"
       }
     },
     "C2": {
@@ -20,11 +20,11 @@
       "run": {
         "command": "yarn test:migrations",
         "exit": 0,
-        "at": "2026-10-09T21:25:24Z",
-        "head": "5cf1f5af6b1de9ac8bfdd4865301475c6afdf310",
+        "at": "2026-10-09T21:36:33Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C2.log",
-        "evidence_sha256": "63c09995d6fc955ffb3749805f29277156fbdece5365e6d17fba441371e2f997",
-        "tests": 16
+        "evidence_sha256": "36bda8158352411e2938016725df320d6e34cc1be6d3d8c403e985aa6bdfb9e7",
+        "tests": 18
       }
     },
     "C3": {
@@ -33,11 +33,11 @@
       "run": {
         "command": "yarn test:migrations",
         "exit": 0,
-        "at": "2026-10-09T21:25:24Z",
-        "head": "5cf1f5af6b1de9ac8bfdd4865301475c6afdf310",
+        "at": "2026-10-09T21:36:33Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C3.log",
-        "evidence_sha256": "63c09995d6fc955ffb3749805f29277156fbdece5365e6d17fba441371e2f997",
-        "tests": 16
+        "evidence_sha256": "36bda8158352411e2938016725df320d6e34cc1be6d3d8c403e985aa6bdfb9e7",
+        "tests": 18
       }
     },
     "C4": {
@@ -46,11 +46,11 @@
       "run": {
         "command": "yarn test:migrations",
         "exit": 0,
-        "at": "2026-10-09T21:25:24Z",
-        "head": "5cf1f5af6b1de9ac8bfdd4865301475c6afdf310",
+        "at": "2026-10-09T21:36:33Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C4.log",
-        "evidence_sha256": "63c09995d6fc955ffb3749805f29277156fbdece5365e6d17fba441371e2f997",
-        "tests": 16
+        "evidence_sha256": "36bda8158352411e2938016725df320d6e34cc1be6d3d8c403e985aa6bdfb9e7",
+        "tests": 18
       }
     },
     "review:mason": {
@@ -103,13 +103,60 @@
       "run": {
         "command": "yarn test:migrations",
         "exit": 0,
-        "at": "2026-10-09T21:25:24Z",
-        "head": "5cf1f5af6b1de9ac8bfdd4865301475c6afdf310",
+        "at": "2026-10-09T21:36:33Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C5.log",
-        "evidence_sha256": "63c09995d6fc955ffb3749805f29277156fbdece5365e6d17fba441371e2f997",
-        "tests": 16
+        "evidence_sha256": "36bda8158352411e2938016725df320d6e34cc1be6d3d8c403e985aa6bdfb9e7",
+        "tests": 18
       }
     }
   },
-  "updated_at": "2026-10-09T21:33:41Z"
+  "cost": {
+    "at": "2026-10-09T21:38:07Z",
+    "calls": 87,
+    "weighted": 2239209,
+    "tokens_input": 174,
+    "tokens_cache_read": 15389679,
+    "tokens_cache_write": 203070,
+    "tokens_output": 89246,
+    "by_category": {
+      "build": {
+        "calls": 50,
+        "weighted": 1314786
+      },
+      "proofs": {
+        "calls": 18,
+        "weighted": 505292
+      },
+      "captures": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "reviews": {
+        "calls": 5,
+        "weighted": 105684
+      },
+      "status": {
+        "calls": 5,
+        "weighted": 106871
+      },
+      "git": {
+        "calls": 7,
+        "weighted": 140615
+      },
+      "re-reading": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "other": {
+        "calls": 2,
+        "weighted": 65961
+      }
+    },
+    "context_last_call": 246609,
+    "threads": 1,
+    "headless_runs": 2,
+    "headless_weighted": 713934
+  },
+  "updated_at": "2026-10-09T21:38:07Z"
 }
