@@ -22,7 +22,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          # Full history: check-specs and check-test-weakening compare with
+          # origin/main, which a depth-2 pull-request checkout does not have.
+          fetch-depth: 0
 
       - name: Enable Corepack
         run: corepack enable
@@ -36,20 +38,14 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Lint (code quality)
-        run: yarn lint
-
-      - name: Lint (import boundaries)
-        run: yarn lint:boundaries
-
-      - name: Typecheck
-        run: yarn check-types
-
+      # One command, the same one an agent and a person run locally: the repo's
+      # lint, boundaries, types, smoke test and build, then the practice's checks
+      # (record 0001).
       # SKIP_ENV_VALIDATION because CI has no secrets and must not need any:
       # the build compiles against types, and @syn/db's client is a lazy proxy
       # that never opens a connection at build time. A CI that needed a
       # database would be a CI that cannot run on a fork's pull request.
-      - name: Build
-        run: yarn build
+      - name: Verify
+        run: yarn verify
         env:
           SKIP_ENV_VALIDATION: "true"
