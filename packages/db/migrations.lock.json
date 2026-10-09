@@ -1,0 +1,77 @@
+{
+  "about": "Written by yarn check-migrations --record. One entry per migration, in journal order, with the sha256 of its SQL. Append-only: never edit an entry; a recorded migration that changes fails verify.",
+  "migrations": [
+    {
+      "idx": 0,
+      "tag": "0000_brave_quicksilver",
+      "when": 1788579676005,
+      "sha256": "05e04d3f0587c7a4c392a72c4f8d5cf5ae30e3860d1930ecc1ced9ff50185dc3"
+    },
+    {
+      "idx": 1,
+      "tag": "0001_famous_titania",
+      "when": 1788637648134,
+      "sha256": "749cc072bc3104c2dd285f83a309f595559f85632d2a8c1d79411c16ec337c6f"
+    },
+    {
+      "idx": 2,
+      "tag": "0002_simple_blue_shield",
+      "when": 1788654855420,
+      "sha256": "d133fb0f0733fd70e0ae5e7046b7012e7cbd1eaedc61ecc4eb6133e035f6a8f0"
+    },
+    {
+      "idx": 3,
+      "tag": "0003_flaky_major_mapleleaf",
+      "when": 1788660743304,
+      "sha256": "a0d3f11c813453f18d31218154457dd3a166d5e011d496c928ae8c27164def1f"
+    },
+    {
+      "idx": 4,
+      "tag": "0004_block_templates_and_stacked_slots",
+      "when": 1789272577280,
+      "sha256": "29ec16faa88abbf96a4b8b850e4087eaaa1937945c73a1d7a0a8edc452a3cfd5"
+    },
+    {
+      "idx": 5,
+      "tag": "0005_profile_fixtures_day_blocks_journal",
+      "when": 1789278111045,
+      "sha256": "0bb6489a3366a0e1ebfbc2cde311ba383dcff87b24dd40c48f056272eea4f676"
+    },
+    {
+      "idx": 6,
+      "tag": "0006_retire_v1_model",
+      "when": 1789357054755,
+      "sha256": "d0f507de5174f111927cf446068839b3ac988376a3a999059e3c5f40f59c953d"
+    },
+    {
+      "idx": 7,
+      "tag": "0007_v1_2_additive",
+      "when": 1789597195235,
+      "sha256": "090fc8bb79b77c9b0ea4009624e287b545ecc6fb6b488208844c5404b8c199fb"
+    },
+    {
+      "idx": 8,
+      "tag": "0008_day_anchors_and_exclusions",
+      "when": 1789603402424,
+      "sha256": "2c32f593bbf0fc4f71c851bf31d691bbe6fff7e77950a5a4fafdbf09cde195d9"
+    },
+    {
+      "idx": 9,
+      "tag": "0009_v1_3_additive",
+      "when": 1790363591592,
+      "sha256": "38d2521063f13b6e12a6c27cc4f07e48d819fab862669ef1f58b6dd1b96967cd"
+    },
+    {
+      "idx": 10,
+      "tag": "0010_retirements",
+      "when": 1790372580647,
+      "sha256": "0ba442b1d0c881716094eb8485ab4314bc10b4cf64819171bf881d49d0694359"
+    },
+    {
+      "idx": 11,
+      "tag": "0011_workflow",
+      "when": 1791093294635,
+      "sha256": "3ec2ee65aa07573e628f1c5fa736c9a467adad09b424c005e43c846563209e16"
+    }
+  ]
+}

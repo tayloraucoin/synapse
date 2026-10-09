@@ -21,7 +21,9 @@
     "db:reset-user": "node --experimental-strip-types --no-warnings scripts/reset-user.ts",
     "db:seed": "tsx src/seed/index.ts",
     "db:seed-users": "tsx scripts/seed-users.ts",
-    "db:schema-reference": "node scripts/generate-schema-reference.mjs"
+    "db:schema-reference": "node scripts/generate-schema-reference.mjs",
+    "check-migrations": "node --experimental-strip-types --no-warnings scripts/check-migrations.ts",
+    "test:migrations": "node --experimental-strip-types --no-warnings --test scripts/check-migrations.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
