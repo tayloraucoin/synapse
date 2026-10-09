@@ -5,7 +5,7 @@
     "web": {
       "path": "apps/web",
       "prefix": "WEB",
-      "designLayer": null
+      "designLayer": "apps/web/docs/design"
     }
   },
   "toolkitPrefixes": [
