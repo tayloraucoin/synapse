@@ -3,15 +3,30 @@
   "criteria_sha256": "87162475e3e5c60053da7c8a5f74f75e0cff5ebd4ee6543bec450c592d778ce3",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:doc-links",
+        "exit": 0,
+        "at": "2026-10-09T20:26:58Z",
+        "head": "16fa7058d3b5d20990e3d9c61aa589558d1b0838",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-002-host-link-checker/evidence/C1.log",
+        "evidence_sha256": "9eaa0be49d58d11f4c95543d34d0129888f6f7f80812b2fa188c9de9ba79fdc4",
+        "tests": 7
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "manual",
-      "run": null
+      "run": {
+        "command": "yarn contract:record MIG-2 C2 --evidence specs/_shared/epics/MIG-migration/tickets/MIG-002-host-link-checker/evidence/C2.txt",
+        "exit": 0,
+        "at": "2026-10-09T20:27:16Z",
+        "head": "16fa7058d3b5d20990e3d9c61aa589558d1b0838",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-002-host-link-checker/evidence/C2.txt",
+        "evidence_sha256": "3de6de7a8252a66f27f82b6e4f179c12bc11eb27f310b63f80629530cc8ac3d7"
+      }
     }
   },
-  "updated_at": "2026-10-09T20:26:51Z"
+  "updated_at": "2026-10-09T20:27:16Z"
 }
