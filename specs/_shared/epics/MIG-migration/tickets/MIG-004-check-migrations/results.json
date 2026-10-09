@@ -3,24 +3,55 @@
   "criteria_sha256": "73a031451850bb0760b0af902fc9731679f10d0e6aa6c96ed9415ebac2600d4f",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:19:36Z",
+        "head": "9010684d23d01d4d4cbd174ed62b373446cb8f5d",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C1.log",
+        "evidence_sha256": "344eb47972e1817e31c52880771e4e85ee7b9ea4e8d4a250366a420a82a7fa5d"
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:19:37Z",
+        "head": "9010684d23d01d4d4cbd174ed62b373446cb8f5d",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C2.log",
+        "evidence_sha256": "855d27a3149eefb45a1b0ed993cac7528d3a15789ee33e73f05ca71cf7d4e8aa",
+        "tests": 15
+      }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:19:37Z",
+        "head": "9010684d23d01d4d4cbd174ed62b373446cb8f5d",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C3.log",
+        "evidence_sha256": "855d27a3149eefb45a1b0ed993cac7528d3a15789ee33e73f05ca71cf7d4e8aa",
+        "tests": 15
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:19:37Z",
+        "head": "9010684d23d01d4d4cbd174ed62b373446cb8f5d",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C4.log",
+        "evidence_sha256": "855d27a3149eefb45a1b0ed993cac7528d3a15789ee33e73f05ca71cf7d4e8aa",
+        "tests": 15
+      }
     },
     "review:mason": {
       "status": "FAIL",
@@ -33,10 +64,18 @@
       "run": null
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:19:37Z",
+        "head": "9010684d23d01d4d4cbd174ed62b373446cb8f5d",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C5.log",
+        "evidence_sha256": "855d27a3149eefb45a1b0ed993cac7528d3a15789ee33e73f05ca71cf7d4e8aa",
+        "tests": 15
+      }
     }
   },
-  "updated_at": "2026-10-09T20:45:45Z"
+  "updated_at": "2026-10-09T21:19:40Z"
 }
