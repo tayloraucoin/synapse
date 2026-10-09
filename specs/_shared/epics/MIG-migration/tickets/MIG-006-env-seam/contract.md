@@ -24,7 +24,6 @@ planned_paths:
   - "apps/web/eslint-suppressions.json"
   - "packages/*/eslint-suppressions.json"
   - "scripts/check-env-seam.test.mjs"
-  - "package.json"
 depends_on: [ MIG-3 ] # work-ids that must be built first (their own criteria PASS)
 out_of_scope:
   - "Changing any variable's name or value"

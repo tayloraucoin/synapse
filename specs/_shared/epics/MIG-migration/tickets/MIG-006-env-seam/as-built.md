@@ -13,7 +13,7 @@
 - Assess V3 counted 19 files. The lint run counts 13: V3's grep also took comments and the seam files.
 - Warden's consult added the public-names-only check, the root-only seam and the process-module import ban. All three are inside the contract's objective.
 - `apps/web/env.ts`'s header named `lib/env/resolve-tier-env.ts` as the second exception. That file only mentions the name in a comment. The header now names the two exceptions the rule names.
-- `planned_paths` narrowed from `apps/web/**` and `packages/**` to the files the ticket touches, so another thread's untracked file is not counted as this ticket's.
+- `planned_paths` narrowed from `apps/web/**` and `packages/**` to the files the ticket touches, so another thread's untracked file is not counted as this ticket's. The root `package.json` left the list once its one `test:env-seam` line was committed; the file is shared, and MIG-4's thread is editing it.
 - [ASSUMPTION] Each count only falls because ESLint fails one that rises. Re-running `--suppress-all` to raise a count shows up in the committed diff; no check compares against the base branch.
 
 ## Not verified
