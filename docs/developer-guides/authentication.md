@@ -34,7 +34,9 @@ Canonical auth package. May import `@syn/db`, `@syn/types`, `@syn/utils`. Must *
 
 | Export | Purpose |
 |--------|---------|
-| `createBrowserClient()` | Cookie-free Supabase client for `'use client'` components |
+| `createBrowserClient()` | Env-resolving browser client; server-side only in practice (see below) |
+| `createBrowserClientFromCredentials(creds)` | The browser client from credentials the app read as literals; `@syn/auth/browser`, client-safe |
+| `AuthUser` / `AuthClient` | The signed-in person and the client, under this package's names; callers never import `@supabase/*` |
 | `createServerClient(cookies)` | Cookie-bound server client (RSC, route handlers, server actions) |
 | `updateSession(request)` | Session refresh for app `proxy.ts` |
 | `getSession(client)` / `getUser(client)` | Server-side session reads; **prefer `getUser`** for authz |
@@ -43,8 +45,13 @@ Canonical auth package. May import `@syn/db`, `@syn/types`, `@syn/utils`. Must *
 | `buildSupabaseEnvForNextConfig()` | Collapses tier-specific env vars in `next.config.ts` |
 | `mapAuthError(error)` | Supabase errors → calm user-facing copy |
 
+### The vendor stays in this package (hard rule)
+
+Only `@syn/auth` imports `@supabase/*`: `lint:boundaries` fails anywhere else (`RESTRICTED_EXTERNAL` in `packages/config/eslint/boundaries.js`). The one named exception is `packages/db/scripts/seed-users.ts`, the local auth mirror's seeder; a mason and a warden reviewer glob reach it. `toolkit.json`'s `stack.auth` entry lists what the module owns, `yarn check-stack` keeps it whole, and [`remove-supabase-auth.md`](remove-supabase-auth.md) is how it would go.
+
 ### Client / server split (hard rule)
 
+- **`browser.ts`** — the browser client from passed-in credentials; reached as `@syn/auth/browser`.
 - **`client.ts`** — browser only; never import from server code.
 - **`server.ts`** — cookie-bound; never import from `'use client'` components.
 - **`middleware.ts`** — `updateSession` only; consumed by app `proxy.ts`.
@@ -348,11 +355,12 @@ Onboarding requires a verified email. Enforcement is layered — the strongest l
 
 ```
 packages/auth/src/
+├── browser.ts      # createBrowserClientFromCredentials (@syn/auth/browser)
 ├── client.ts       # createBrowserClient
 ├── server.ts       # createServerClient
 ├── middleware.ts   # updateSession
 ├── session.ts      # getSession, getUser
-├── context.ts      # buildAuthContext, buildServiceRoleAuthContext
+├── context.ts      # buildAuthContext, buildServiceRoleAuthContext, AuthUser, AuthClient
 ├── env.ts          # tier resolution + buildSupabaseEnvForNextConfig
 ├── auth-errors.ts  # mapAuthError
 └── index.ts

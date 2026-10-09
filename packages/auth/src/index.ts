@@ -20,12 +20,22 @@
  *
  *   import { mapAuthError } from "@syn/auth/errors";   // pure, client-safe
  *   import { buildAuthContext } from "@syn/auth/context"; // types + pure
+ *   import { createBrowserClientFromCredentials } from "@syn/auth/browser";
+ *                                                // the browser client
+ *
+ * THE VENDOR STAYS HERE. Only this package imports `@supabase/*`
+ * (`RESTRICTED_EXTERNAL` in packages/config/eslint/boundaries.js); callers
+ * take `AuthUser` and `AuthClient` from this barrel or `./context`.
  *
  * Server code may keep importing the barrel.
  */
 
 export { createAdminClient } from "./admin";
 export { createBrowserClient } from "./client";
+export {
+  createBrowserClientFromCredentials,
+  type PublicAuthCredentials,
+} from "./browser";
 export { createServerClient } from "./server";
 export { updateSession } from "./middleware";
 export {
@@ -40,8 +50,10 @@ export {
   buildAuthContext,
   buildServiceRoleAuthContext,
   type AppUserRole,
+  type AuthClient,
   type AuthContext,
   type AuthContextRole,
+  type AuthUser,
 } from "./context";
 export {
   buildSupabaseEnvForNextConfig,

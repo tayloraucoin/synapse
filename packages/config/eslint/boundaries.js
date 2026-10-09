@@ -11,7 +11,8 @@
  * - apps/* → apps/*: hard ban
  * - packages/* → apps/*: hard ban
  * - Restricted third-party deps (checkAllOrigins): drizzle/postgres → data layers;
- *   web-push → @syn/api; frimousse → @syn/ui
+ *   web-push → @syn/api; frimousse → @syn/ui; @supabase/* → @syn/auth, with
+ *   one named file exception (RESTRICTED_EXTERNAL_EXCEPTIONS)
  *
  * Phase 1 has no AI package. `@syn/ai` does not exist and is not anticipated here.
  *
@@ -154,6 +155,10 @@ const RESTRICTED_EXTERNAL = [
   { module: "postgres", owners: ["db"] },
   { module: "drizzle-kit", owners: ["db"] },
   { module: "web-push", owners: ["api"] },
+  // The auth SDKs stay behind @syn/auth: every Supabase client, session and
+  // identity type is reached through it (MIG-7). Callers take `AuthUser` and
+  // `AuthClient` from @syn/auth, never from the vendor.
+  { module: "@supabase/*", owners: ["auth"] },
   // Rendering engines stay behind @syn/ui's re-skin: the emoji picker, the
   // sortable (dnd-kit) and the passage editor (tiptap + its Markdown bridge).
   // An app or a service reaching for one directly would be a platform-bound
@@ -162,6 +167,23 @@ const RESTRICTED_EXTERNAL = [
   { module: "@dnd-kit/*", owners: ["ui"] },
   { module: "@tiptap/*", owners: ["ui"] },
   { module: "tiptap-markdown", owners: ["ui"] },
+];
+
+/**
+ * A file that may import one restricted module its zone does not own. Each is
+ * named here and nowhere else, and a mason and a warden reviewer glob in
+ * toolkit.json reach it (MIG-7). The override drops only that module's
+ * restriction for that file; every other boundary rule still applies to it.
+ */
+const RESTRICTED_EXTERNAL_EXCEPTIONS = [
+  {
+    // The local auth mirror's seeder: creates the dev account through the
+    // GoTrue admin API with the service-role key. It lives in @syn/db (the
+    // mirror is the database package's), which may not import @syn/auth, and
+    // its tier default (`local`) is the database's, not auth's.
+    file: "packages/db/scripts/seed-users.ts",
+    module: "@supabase/*",
+  },
 ];
 
 /**
@@ -176,7 +198,7 @@ const RESTRICTED_EXTERNAL_SOURCE_PATTERNS = RESTRICTED_EXTERNAL.flatMap(
   ({ module }) => [module, `${module}/**`],
 );
 
-function buildExternalDependencyRules() {
+function buildExternalDependencyRules(exemptModule) {
   const rules = [
     {
       allow: {
@@ -186,6 +208,7 @@ function buildExternalDependencyRules() {
   ];
 
   for (const { module, owners } of RESTRICTED_EXTERNAL) {
+    if (module === exemptModule) continue;
     const disallowedFrom = ALL_ZONE_TYPES.filter(
       (type) => !owners.includes(type),
     );
@@ -202,6 +225,23 @@ function buildExternalDependencyRules() {
   }
 
   return rules;
+}
+
+/** The rule's full setting; `exemptModule` drops one restriction (an exception). */
+function buildDependenciesRule(exemptModule) {
+  return [
+    "error",
+    {
+      default: "disallow",
+      checkAllOrigins: true,
+      message:
+        "{{from.type}} must not import {{to.type}} (codebase-conventions §6.2). Refactor — do not suppress.",
+      rules: [
+        ...buildDependencyRules(),
+        ...buildExternalDependencyRules(exemptModule),
+      ],
+    },
+  ];
 }
 
 /** @type {import("eslint").Linter.Config[]} */
@@ -271,19 +311,13 @@ export const boundariesConfig = [
       ],
     },
     rules: {
-      "boundaries/dependencies": [
-        "error",
-        {
-          default: "disallow",
-          checkAllOrigins: true,
-          message:
-            "{{from.type}} must not import {{to.type}} (codebase-conventions §6.2). Refactor — do not suppress.",
-          rules: [
-            ...buildDependencyRules(),
-            ...buildExternalDependencyRules(),
-          ],
-        },
-      ],
+      "boundaries/dependencies": buildDependenciesRule(),
     },
   },
+  ...RESTRICTED_EXTERNAL_EXCEPTIONS.map(({ file, module }) => ({
+    files: [file],
+    rules: {
+      "boundaries/dependencies": buildDependenciesRule(module),
+    },
+  })),
 ];

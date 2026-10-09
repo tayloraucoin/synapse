@@ -13,7 +13,6 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.1",
     "@syn/auth": "*",
     "@syn/constants": "*",
     "@syn/db": "*",

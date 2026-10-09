@@ -14,6 +14,7 @@
     "test:doc-links": "node --test scripts/check-doc-links.test.mjs",
     "check-turbo-env": "node scripts/check-turbo-env.mjs",
     "test:env-seam": "node --test scripts/check-env-seam.test.mjs",
+    "test:auth-seam": "node --test scripts/check-auth-seam.test.mjs",
     "emoji-data": "node scripts/copy-emoji-data.mjs",
     "web:dev": "yarn emoji-data && turbo run dev --filter=web",
     "web:dev:local": "yarn emoji-data && node scripts/print-local-urls.mjs 3000 && turbo run dev:local --filter=web",
@@ -51,6 +52,7 @@
     "check-reviewers": "node tooling/check-reviewers.ts",
     "check-specs": "node tooling/check-specs.ts",
     "check-refs": "node tooling/check-refs.ts",
+    "check-stack": "node tooling/check-stack.ts",
     "check-test-weakening": "node tooling/check-test-weakening.ts",
     "test:hooks": "node tooling/test-hooks.ts",
     "budget": "node tooling/budget.ts",
@@ -64,7 +66,7 @@
     "test:tooling": "node --test \"tooling/**/*.test.ts\"",
     "test": "turbo run test && yarn test:root",
     "test:root": "node --test \"tests/*.test.ts\"",
-    "verify": "yarn lint && yarn lint:boundaries && yarn check-types && yarn test && yarn build && yarn test:migrations && yarn check-migrations && yarn check-settings && yarn test:hooks && yarn check-specs && yarn check-test-weakening && yarn check-reviewers && yarn check-refs && yarn budget && yarn gen:agents --check && yarn check-types:tooling"
+    "verify": "yarn lint && yarn lint:boundaries && yarn check-types && yarn test && yarn build && yarn test:migrations && yarn check-migrations && yarn check-settings && yarn test:hooks && yarn check-specs && yarn check-test-weakening && yarn check-reviewers && yarn check-refs && yarn check-stack && yarn budget && yarn gen:agents --check && yarn check-types:tooling"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.0",

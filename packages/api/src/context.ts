@@ -1,6 +1,9 @@
-import type { SupabaseClient, User } from "@supabase/supabase-js";
-
-import { buildAuthContext, getUser } from "@syn/auth";
+import {
+  buildAuthContext,
+  getUser,
+  type AuthClient,
+  type AuthUser,
+} from "@syn/auth";
 import {
   createRlsClient,
   db,
@@ -20,14 +23,14 @@ import type { AuthContext } from "@syn/types";
  */
 
 export type Context = {
-  supabase: SupabaseClient;
-  user: User | null;
+  supabase: AuthClient;
+  user: AuthUser | null;
   authContext: AuthContext | null;
   rls: RlsClient | null;
 };
 
 export type CreateContextInput = {
-  supabase: SupabaseClient;
+  supabase: AuthClient;
 };
 
 /**

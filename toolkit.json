@@ -160,7 +160,68 @@
       "role": "warden",
       "why": "Sessions, identity and access, wherever an auth SDK is called.",
       "status": "draft"
+    },
+    {
+      "glob": "packages/db/scripts/seed-users.ts",
+      "role": "mason",
+      "why": "The one named exception to the auth seam: an auth SDK call outside @syn/auth (MIG-7).",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/db/scripts/seed-users.ts",
+      "role": "warden",
+      "why": "The local auth mirror's seeder: creates accounts with the service-role key.",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/lib/clients/supabase/**",
+      "role": "mason",
+      "why": "The browser auth client: the app side of @syn/auth's browser seam (MIG-7).",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/lib/clients/supabase/**",
+      "role": "warden",
+      "why": "The public credentials a browser bundle carries.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/api/src/context.ts",
+      "role": "mason",
+      "why": "One-way door: the request's identity to the RLS context every procedure runs as.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/api/src/context.ts",
+      "role": "warden",
+      "why": "Whose session each API request runs as.",
+      "status": "draft"
     }
   ],
-  "stack": {}
+  "stack": {
+    "auth": {
+      "files": [
+        "packages/auth",
+        "apps/web/proxy.ts",
+        "apps/web/lib/clients/supabase",
+        "apps/web/lib/auth",
+        "apps/web/app/auth",
+        "apps/web/app/(auth)",
+        "apps/web/app/(auth-pending)",
+        "apps/web/app/logout"
+      ],
+      "env": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "SUPABASE_SECRET_KEY"
+      ],
+      "dependencies": ["@syn/auth", "@supabase/ssr", "@supabase/supabase-js"],
+      "boundaries": ["auth"],
+      "locked": false,
+      "runbook": "docs/developer-guides/remove-supabase-auth.md"
+    }
+  }
 }

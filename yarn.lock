@@ -3426,7 +3426,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@syn/api@workspace:packages/api"
   dependencies:
-    "@supabase/supabase-js": "npm:^2.49.1"
     "@syn/auth": "npm:*"
     "@syn/config": "npm:*"
     "@syn/constants": "npm:*"
@@ -9517,8 +9516,6 @@ __metadata:
   dependencies:
     "@hookform/resolvers": "npm:^3.10.0"
     "@next/env": "npm:16.3.4"
-    "@supabase/ssr": "npm:^0.10.2"
-    "@supabase/supabase-js": "npm:^2.49.1"
     "@syn/api": "npm:*"
     "@syn/auth": "npm:*"
     "@syn/config": "npm:*"

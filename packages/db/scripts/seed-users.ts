@@ -2,6 +2,10 @@
 /**
  * Create test users via Supabase Auth Admin API (staging project by default).
  * The handle_new_user trigger creates public.users shadow rows on hosted Postgres.
+ *
+ * The one file outside @syn/auth that imports @supabase/* (MIG-7): named in
+ * RESTRICTED_EXTERNAL_EXCEPTIONS (packages/config/eslint/boundaries.js) and
+ * reached by a mason and a warden reviewer glob in toolkit.json.
  */
 import "dotenv/config";
 

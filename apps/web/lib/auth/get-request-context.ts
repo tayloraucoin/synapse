@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
-import type { User } from "@supabase/supabase-js";
 
 import {
   buildAuthContext,
   createServerClient,
   getUser,
   type AppUserRole,
+  type AuthUser,
 } from "@syn/auth";
 import {
   createRlsClient,
@@ -16,7 +16,7 @@ import {
 import type { AuthContext } from "@syn/types";
 
 export type RequestAuthContext = {
-  user: User;
+  user: AuthUser;
   appRole: AppUserRole;
   authContext: AuthContext;
   rls: RlsClient;
