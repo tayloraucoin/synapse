@@ -25,13 +25,8 @@ The canonical instructions for every agent (Claude Code, Cursor, Codex). `CLAUDE
 
 Node **22** (`.nvmrc`), Yarn **4.13.0** (`corepack enable && yarn install`); use `yarn`, never `npm` or `pnpm`. Env surface: [`.env.example`](.env.example).
 
-| Task                | Command                                                                                     |
-| ------------------- | ------------------------------------------------------------------------------------------- |
-| Verify (matches CI) | `yarn verify` · `yarn verify:fast` (changed files)                                          |
-| Dev servers         | `yarn dev` · `yarn web:dev` (:3000) · `yarn web:dev:local` (LAN) · `yarn docs:dev` (:3001)  |
-| Database            | `yarn db:generate` · `db:migrate` · `db:push` · `db:setup` · `db:reset` · `db:seed`         |
-| Tickets, docs       | `yarn contract:init` · `status` · `check-specs` · `budget` · `gen:agents` · `directory-map` |
-| Code checks         | `yarn lint` · `lint:boundaries` · `check-types` · `build` · `format` · `ui:storybook`       |
+- **Verify:** `yarn verify` (matches CI) · `verify:fast` (changed files). **Dev:** `yarn dev` · `web:dev` (:3000) · `web:dev:local` (LAN) · `docs:dev` (:3001).
+- **Database:** `yarn db:generate` · `db:migrate` · `db:push` · `db:setup` · `db:reset` · `db:seed`. **Tickets and docs:** `contract:init` · `status` · `check-specs` · `budget` · `gen:agents` · `directory-map`. **Code:** `lint` · `lint:boundaries` · `check-types` · `build` · `format` · `ui:storybook`.
 
 ## UI vocabulary (the constraint)
 
