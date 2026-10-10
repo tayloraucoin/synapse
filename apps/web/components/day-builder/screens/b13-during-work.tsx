@@ -79,7 +79,7 @@ export function ScreenBreaks({
   };
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       {loading ? <BuilderSkeleton /> : band === null ? null : <PreviewStrip preview={band} hue disabled={disabled} onGo={onGo} />}
 
       {!showRows ? (

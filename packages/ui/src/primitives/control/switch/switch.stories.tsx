@@ -18,7 +18,7 @@ export const Overview: Story = {
   render: function Overview() {
     const [on, setOn] = React.useState(true);
     return (
-      <div className="flex flex-col gap-(--space-4) p-(--space-6)">
+      <div className="flex flex-col gap-(--space-4) p-(--space-8)">
         <div className="flex items-center gap-(--space-3)">
           <Switch id="n1" checked={on} onCheckedChange={setOn} />
           <Label htmlFor="n1">Fixed-time item start</Label>

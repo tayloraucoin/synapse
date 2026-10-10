@@ -89,7 +89,7 @@ export function ScreenFixed({ api, disabled }: { api: DayBuilderApi; disabled: b
   const missingDays = confirm === null ? [] : plan.weekdays.filter((weekday) => !confirm.weekdays.includes(weekday));
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       {fixtures.length === 0 ? (
         <Text as="p" variant="secondary" tone="secondary">
           {COPY.b06.nothingYet}

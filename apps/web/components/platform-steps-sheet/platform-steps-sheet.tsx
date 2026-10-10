@@ -69,7 +69,7 @@ export function PlatformStepsSheet({
             {kind === "install" ? COPY.installIntro : COPY.notificationsIntro}
           </Text>
 
-          <ol className="flex list-decimal flex-col gap-(--space-2) ps-(--space-5)">
+          <ol className="flex list-decimal flex-col gap-(--space-2) ps-(--space-6)">
             {steps.map((step) => (
               <li key={step}>
                 <Text as="span" variant="body">

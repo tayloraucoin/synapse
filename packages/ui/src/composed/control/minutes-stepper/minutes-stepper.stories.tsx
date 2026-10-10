@@ -18,7 +18,7 @@ import { MinutesStepper } from "./minutes-stepper";
 const meta: Meta<typeof MinutesStepper> = {
   title: "Composed/Control/MinutesStepper",
   component: MinutesStepper,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -39,7 +39,7 @@ function Logged({ initial, min = 1, max = 120 }: { initial: number | null; min?:
         min={min}
         max={max}
       />
-      <ol className="text-text-secondary m-0 list-decimal ps-(--space-5) text-(length:--fs-caption)">
+      <ol className="text-text-secondary m-0 list-decimal ps-(--space-6) text-(length:--fs-caption)">
         {log.map((entry, index) => (
           <li key={index}>{entry}</li>
         ))}
@@ -160,7 +160,7 @@ export const Optimistic: StoryObj<OptimisticArgs> = {
           max={120}
         />
         {line === null ? null : <StatusLine variant="sync-issues" text={line} placement="inline" />}
-        <ol className="text-text-secondary m-0 list-decimal ps-(--space-5) text-(length:--fs-caption)">
+        <ol className="text-text-secondary m-0 list-decimal ps-(--space-6) text-(length:--fs-caption)">
           {log.map((entry, index) => (
             <li key={index}>{entry}</li>
           ))}

@@ -19,7 +19,7 @@ type Story = StoryObj<typeof InputGroup>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex max-w-sm flex-col gap-(--space-4) p-(--space-6)">
+    <div className="flex max-w-sm flex-col gap-(--space-4) p-(--space-8)">
       <InputGroup>
         <InputGroupInput placeholder="45" inputMode="numeric" aria-label="Capacity" />
         <InputGroupAddon align="inline-end">

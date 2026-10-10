@@ -109,7 +109,7 @@ export function TaskSheet({
       }
     >
       {task === undefined ? null : (
-        <div className="flex flex-col gap-(--space-5)">
+        <div className="flex flex-col gap-(--space-6)">
           {online ? null : <StatusLine variant="offline" placement="inline" />}
 
           <div className="flex flex-col gap-(--space-2)">

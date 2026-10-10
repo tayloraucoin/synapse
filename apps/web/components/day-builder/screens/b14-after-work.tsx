@@ -86,7 +86,7 @@ export function ScreenAfterWork({
   const showStarters = startedEmpty === true && starters.length > 0;
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       {loading || preview === null ? <BuilderSkeleton /> : <PreviewStrip preview={cutFromWorkEnd(preview)} hue disabled={disabled} onGo={onGo} />}
 
       <ListHeader list={list} nameLabel={COPY.b14.listName} newLabel={COPY.b14.newList} disabled={disabled} />

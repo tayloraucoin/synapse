@@ -14,7 +14,7 @@ type Story = StoryObj<typeof Label>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex flex-col gap-(--space-3) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-3) p-(--space-8)">
       <Label htmlFor="a">Habit name</Label>
       <input id="a" className="border-hairline h-(--target) rounded-(--radius) border px-(--space-3)" />
     </div>

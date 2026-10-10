@@ -83,7 +83,7 @@ export const StickyActionsWithLongContent: Story = {
   args: {
     total: 14,
     children: (
-      <ol className="m-0 flex list-decimal flex-col gap-(--space-3) ps-(--space-5)">
+      <ol className="m-0 flex list-decimal flex-col gap-(--space-3) ps-(--space-6)">
         {Array.from({ length: 40 }, (_, index) => (
           <li key={index}>
             <Text as="span" tone="secondary">

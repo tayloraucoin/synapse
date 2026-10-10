@@ -21,10 +21,10 @@ export const scheduleBlockVariants = cva(
           "border border-hairline bg-surface",
         passed:
           "border border-hairline bg-surface opacity-55",
-        active: "border-[1.5px] border-accent-500 bg-surface",
+        active: "border-[1.5px] border-now bg-surface",
         done: "border border-hairline bg-fill-muted",
         moved:
-          "border-[1.5px] border-violet-500 bg-surface",
+          "border-[1.5px] border-off-schedule bg-surface",
         /** UX v1.1 §10.1 *Not confirmed*: "Ghost outline" — a hairline, no fill. */
         ghost: "border border-dashed border-hairline bg-transparent opacity-55",
         /** UX v1.1 §6.1: the work container — the band's own fill, a hairline. */

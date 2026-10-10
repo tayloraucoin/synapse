@@ -13,7 +13,7 @@ import { excerptOf, firstLineOf } from "./excerpt";
 
 /**
  * One passage as a card — UX v1.2 §4.6 (RUN-9): the handle, the title (or the
- * first line of the body, plain), a two-line serif excerpt, the first image
+ * first line of the body, plain), a two-line excerpt, the first image
  * as a 44px thumbnail, the tag chips, and the menu (*Edit · Archive*).
  *
  * THE EXCERPT IS DECORATIVE: the Markdown stripped to text and clamped to two
@@ -63,7 +63,7 @@ export function PassageCard({
           </Text>
         </span>
         {excerpt === "" ? null : (
-          <p className="tabular-off text-text-secondary m-0 line-clamp-2 font-serif text-(length:--fs-secondary) leading-(--lh-secondary)">
+          <p className="tabular-off text-text-secondary m-0 line-clamp-2 text-(length:--fs-secondary) leading-(--lh-secondary)">
             {excerpt}
           </p>
         )}

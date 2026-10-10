@@ -43,7 +43,7 @@ const meta: Meta<typeof ThemeControl> = {
   decorators: [
     (Story) => (
       <ThemeProvider>
-        <div className="flex max-w-md flex-col gap-(--space-4) p-(--space-6)">
+        <div className="flex max-w-md flex-col gap-(--space-4) p-(--space-8)">
           <Story />
           <RootClassReadout />
         </div>

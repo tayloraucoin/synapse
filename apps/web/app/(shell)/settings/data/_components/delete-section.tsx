@@ -69,7 +69,7 @@ export function DeleteSection() {
   }
 
   return (
-    <section className="flex flex-col gap-(--space-2) border-hairline border-t pt-(--space-6)">
+    <section className="flex flex-col gap-(--space-2) border-hairline border-t pt-(--space-8)">
       <GroupHeading>{COPY.deleteHeading}</GroupHeading>
 
       <Text as="p" tone="secondary" className="max-w-(--measure)">

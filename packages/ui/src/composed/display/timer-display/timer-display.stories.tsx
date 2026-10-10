@@ -11,7 +11,7 @@ import { TimerDisplay } from "./timer-display";
 const meta: Meta<typeof TimerDisplay> = {
   title: "Composed/Display/TimerDisplay",
   component: TimerDisplay,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

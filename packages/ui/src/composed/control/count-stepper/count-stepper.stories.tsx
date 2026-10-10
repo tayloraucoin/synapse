@@ -11,7 +11,7 @@ import { CountStepper } from "./count-stepper";
 const meta: Meta<typeof CountStepper> = {
   title: "Composed/Control/CountStepper",
   component: CountStepper,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -54,7 +54,7 @@ function Logged({ initial, min = 1 }: { initial: number | null; min?: number }) 
           setLog((entries) => [...entries, `onCommit(${next})`]);
         }}
       />
-      <ol className="text-text-secondary m-0 list-decimal ps-(--space-5) text-(length:--fs-caption)">
+      <ol className="text-text-secondary m-0 list-decimal ps-(--space-6) text-(length:--fs-caption)">
         {log.map((entry, index) => (
           <li key={index}>{entry}</li>
         ))}
@@ -107,7 +107,7 @@ export const Optimistic: StoryObj<OptimisticArgs> = {
           }}
           onCommitError={() => setLog((entries) => [...entries, "reverted"])}
         />
-        <ol className="text-text-secondary m-0 list-decimal ps-(--space-5) text-(length:--fs-caption)">
+        <ol className="text-text-secondary m-0 list-decimal ps-(--space-6) text-(length:--fs-caption)">
           {log.map((entry, index) => (
             <li key={index}>{entry}</li>
           ))}

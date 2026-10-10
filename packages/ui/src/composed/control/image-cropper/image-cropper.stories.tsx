@@ -60,7 +60,7 @@ export const Cropping: StoryObj = {
     if (file === null) return <Text as="p">Preparing a sample image…</Text>;
 
     return (
-      <div className="flex flex-col gap-(--space-4) p-(--space-6)">
+      <div className="flex flex-col gap-(--space-4) p-(--space-8)">
         <ImageCropper
           file={file}
           onCrop={(blob) => setCropped(URL.createObjectURL(blob))}

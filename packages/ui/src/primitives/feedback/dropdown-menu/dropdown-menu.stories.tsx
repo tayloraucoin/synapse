@@ -22,7 +22,7 @@ type Story = StoryObj<typeof DropdownMenu>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="p-(--space-6)">
+    <div className="p-(--space-8)">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" aria-label="More">

@@ -100,7 +100,7 @@ export function DayTimeForm() {
       onSubmit={(event) => {
         void form.handleSubmit(onSubmit)(event);
       }}
-      className="flex flex-col gap-(--space-5)"
+      className="flex flex-col gap-(--space-6)"
     >
       {!online ? <StatusLine variant="offline" placement="inline" /> : null}
 

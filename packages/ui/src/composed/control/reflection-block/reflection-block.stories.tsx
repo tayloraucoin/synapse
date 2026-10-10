@@ -16,7 +16,7 @@ import { ReflectionBlock, type ReflectionAxis } from "./reflection-block";
 const meta: Meta<typeof ReflectionBlock> = {
   title: "Composed/Control/ReflectionBlock",
   component: ReflectionBlock,
-  decorators: [(Story) => <div className="max-w-lg p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-lg p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

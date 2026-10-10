@@ -15,7 +15,7 @@ type Story = StoryObj<typeof Kbd>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex flex-col gap-(--space-3) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-3) p-(--space-8)">
       <KbdGroup>
         <Kbd>G</Kbd>
         <Kbd>L</Kbd>

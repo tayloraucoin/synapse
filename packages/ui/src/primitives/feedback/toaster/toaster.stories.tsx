@@ -21,7 +21,7 @@ type Story = StoryObj<typeof Toaster>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex flex-col items-start gap-(--space-3) p-(--space-6)">
+    <div className="flex flex-col items-start gap-(--space-3) p-(--space-8)">
       <Button
         onClick={() =>
           toastUndo({

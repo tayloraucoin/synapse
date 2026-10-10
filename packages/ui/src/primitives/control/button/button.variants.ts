@@ -26,20 +26,20 @@ export const buttonVariants = cva(
     variants: {
       variant: {
         /** The one primary action on a screen. Ink fill, paper text. */
-        default: "bg-primary text-primary-foreground hover:bg-neutral-700",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
         /** Outlined. The counterpart action — Cancel, Keep editing. */
         secondary:
-          "border-hairline text-ink border bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800",
+          "border-input text-ink border bg-transparent hover:bg-surface",
         /** Text only. Inline actions — Undo, Bring back, Change. */
-        ghost: "text-ink bg-transparent hover:bg-neutral-100 dark:hover:bg-neutral-800",
+        ghost: "text-ink bg-transparent hover:bg-surface",
         /** Delete account, and nowhere else. */
         destructive:
-          "bg-destructive text-neutral-50 hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
       },
       size: {
         sm: "h-9 px-(--space-3)",
         md: "h-(--target) px-(--space-4)",
-        lg: "h-12 px-(--space-5)",
+        lg: "h-12 px-(--space-6)",
         /** Square. Requires `aria-label` — an icon never stands alone (§9.9). */
         icon: "size-(--target)",
       },

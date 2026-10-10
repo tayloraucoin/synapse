@@ -43,7 +43,7 @@ export function NowLine({
       <span
         className={cn(
           "absolute -start-3 top-1/2 size-1.5 -translate-y-1/2 rounded-full",
-          closed ? "bg-neutral-400" : "bg-accent-mark",
+          closed ? "bg-muted-foreground" : "bg-now",
         )}
       />
       <span

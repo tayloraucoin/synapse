@@ -45,7 +45,7 @@ export function BlockHeader({
       data-block-kind={kind}
       data-split={split ? "true" : undefined}
       className={cn(
-        "flex items-baseline gap-(--space-2) px-(--space-4) pt-(--space-6) pb-(--space-2)",
+        "flex items-baseline gap-(--space-2) px-(--space-4) pt-(--space-8) pb-(--space-2)",
         className,
       )}
     >

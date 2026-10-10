@@ -17,7 +17,7 @@ import { SortableHandle, SortableList } from "./sortable-list";
 const meta: Meta<typeof SortableList> = {
   title: "Composed/Control/SortableList",
   component: SortableList,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -58,7 +58,7 @@ function Demo({ initial, disabled = false }: { initial: Row[]; disabled?: boolea
           </>
         )}
       />
-      <ol className="text-text-secondary m-0 list-decimal ps-(--space-5) text-(length:--fs-caption)">
+      <ol className="text-text-secondary m-0 list-decimal ps-(--space-6) text-(length:--fs-caption)">
         {log.map((entry, index) => (
           <li key={index}>onReorder: {entry}</li>
         ))}

@@ -79,7 +79,7 @@ export function BuilderFrame({
   }
 
   return (
-    <div ref={rootRef} className="flex min-h-0 flex-1 flex-col gap-(--space-5)">
+    <div ref={rootRef} className="flex min-h-0 flex-1 flex-col gap-(--space-6)">
       <div className="flex items-center gap-(--space-3)">
         <Button variant="ghost" size="icon" aria-label={COPY.back} className="shrink-0" onClick={onBack}>
           <ArrowLeft className="size-5" aria-hidden="true" />

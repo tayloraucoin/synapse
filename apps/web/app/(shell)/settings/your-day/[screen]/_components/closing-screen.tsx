@@ -117,7 +117,7 @@ export function ClosingScreen({
       onSaved={onSaved}
       save={null}
     >
-      <div className="flex flex-col gap-(--space-6)">
+      <div className="flex flex-col gap-(--space-8)">
         {/* v1.3 R64: the profile's two times, read-only — each day plan sets its own. */}
         <section className="flex flex-col gap-(--space-1)">
           <ListRow

@@ -15,7 +15,7 @@ import { PriorityMark, type PriorityMarkValue } from "./priority-mark";
 const meta: Meta<typeof PriorityMark> = {
   title: "Composed/Display/PriorityMark",
   component: PriorityMark,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
   args: { value: 5 },
 };
 

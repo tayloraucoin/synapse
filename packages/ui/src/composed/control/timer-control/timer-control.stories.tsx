@@ -13,7 +13,7 @@ import { TimerControl } from "./timer-control";
 const meta: Meta<typeof TimerControl> = {
   title: "Composed/Control/TimerControl",
   component: TimerControl,
-  decorators: [(Story) => <div className="max-w-sm p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-sm p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -53,7 +53,7 @@ export const WithDisplay: StoryObj = {
     }, [status]);
 
     return (
-      <div className="flex max-w-sm flex-col gap-(--space-4) p-(--space-6)">
+      <div className="flex max-w-sm flex-col gap-(--space-4) p-(--space-8)">
         <TimerDisplay elapsedSec={elapsed} status={status} />
         <TimerControl
           status={status}

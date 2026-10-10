@@ -28,7 +28,7 @@ export function FreeTimeScreen({ onSaved }: { onSaved: () => void }) {
       embedded
       onSaved={onSaved}
     >
-      <div className="flex flex-col gap-(--space-6)">
+      <div className="flex flex-col gap-(--space-8)">
         <ScreenFreeTimeLandscape disabled={!online} onCount={noop} />
         <section className="flex flex-col gap-(--space-3)">
           <GroupHeading>{DAY_BUILDER_COPY.b15b.heading}</GroupHeading>

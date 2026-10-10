@@ -87,7 +87,7 @@ export function SlotRows({
   );
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       <section className="flex flex-col gap-(--space-2)">
         {placedAt(-1).map(renderPlaced)}
         {list.slots === null ? null : rows.length === 0 ? (

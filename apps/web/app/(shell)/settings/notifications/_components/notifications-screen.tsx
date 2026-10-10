@@ -95,7 +95,7 @@ export function NotificationsScreen() {
   const data = prefs.data;
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       <PermissionLine
         state={state}
         onTurnOn={() => void turnOn()}

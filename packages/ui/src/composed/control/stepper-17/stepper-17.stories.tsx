@@ -14,7 +14,7 @@ import { Stepper17, type Stepper17Value } from "./stepper-17";
 const meta: Meta<typeof Stepper17> = {
   title: "Composed/Control/Stepper17",
   component: Stepper17,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -80,7 +80,7 @@ export const Row: StoryObj = {
   render: function Render() {
     const [value, setValue] = React.useState<Stepper17Value | null>(4);
     return (
-      <div className="-mx-(--space-6) max-w-[343px]">
+      <div className="-mx-(--space-8) max-w-[343px]">
         <Stepper17 layout="row" label="Priority" value={value} onChange={setValue} />
       </div>
     );
@@ -118,7 +118,7 @@ export const Optimistic: StoryObj<OptimisticArgs> = {
           }}
           onCommitError={() => setLog((entries) => [...entries, "reverted"])}
         />
-        <ol className="text-text-secondary m-0 list-decimal ps-(--space-5) text-(length:--fs-caption)">
+        <ol className="text-text-secondary m-0 list-decimal ps-(--space-6) text-(length:--fs-caption)">
           {log.map((entry, index) => (
             <li key={index}>{entry}</li>
           ))}

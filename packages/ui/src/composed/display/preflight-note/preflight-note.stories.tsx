@@ -6,7 +6,7 @@ import { PreflightNote } from "./preflight-note";
 const meta: Meta<typeof PreflightNote> = {
   title: "Composed/Display/PreflightNote",
   component: PreflightNote,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

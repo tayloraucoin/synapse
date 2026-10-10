@@ -6,7 +6,7 @@ import { GroupHeading } from "./group-heading";
 const meta: Meta<typeof GroupHeading> = {
   title: "Composed/Display/GroupHeading",
   component: GroupHeading,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

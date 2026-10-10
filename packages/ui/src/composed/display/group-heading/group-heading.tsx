@@ -33,7 +33,7 @@ export function GroupHeading({
       variant="secondary"
       tone="secondary"
       weight={500}
-      className={cn("pt-(--space-5) pb-(--space-2)", className)}
+      className={cn("pt-(--space-6) pb-(--space-2)", className)}
     >
       {children}
       {count === undefined ? null : (

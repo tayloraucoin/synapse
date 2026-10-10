@@ -129,7 +129,7 @@ const BottomNavItem = React.forwardRef<HTMLAnchorElement, BottomNavItemProps>(
               <>
                 <span
                   aria-hidden="true"
-                  className="bg-accent-mark size-1.5 rounded-(--radius-full)"
+                  className="bg-now size-1.5 rounded-full"
                 />
                 <span className="sr-only">{dotLabel}</span>
               </>

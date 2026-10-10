@@ -22,14 +22,14 @@ import { getCuratedGlyph } from "./curated-glyphs";
 
 /** Static so Tailwind's scanner sees every class — see CategoryChip. */
 const GLYPH_TINT: Record<CategoryKey, string> = {
-  leaf: "text-cat-leaf-500",
-  sky: "text-cat-sky-500",
-  clay: "text-cat-clay-500",
-  rose: "text-cat-rose-500",
-  amber: "text-cat-amber-500",
-  slate: "text-cat-slate-500",
-  plum: "text-cat-plum-500",
-  moss: "text-cat-moss-500",
+  leaf: "text-category-leaf-dot",
+  sky: "text-category-sky-dot",
+  clay: "text-category-clay-dot",
+  rose: "text-category-rose-dot",
+  amber: "text-category-amber-dot",
+  slate: "text-category-slate-dot",
+  plum: "text-category-plum-dot",
+  moss: "text-category-moss-dot",
 };
 
 export type ItemIconSize = 20 | 24 | 48;
@@ -116,7 +116,7 @@ export function ItemIcon({
 
   return (
     <span aria-hidden="true" className={cn(box, calendar && "text-text-muted")}>
-      <span className="block size-1.5 rounded-full bg-edge" />
+      <span className="block size-1.5 bg-edge" />
     </span>
   );
 }

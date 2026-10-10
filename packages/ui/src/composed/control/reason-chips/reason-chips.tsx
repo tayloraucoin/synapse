@@ -79,7 +79,7 @@ export function ReasonChips({
               key={chip.key}
               className={cn(
                 "inline-flex min-h-(--target) cursor-pointer items-center",
-                "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 rounded-(--radius-full)",
+                "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 rounded-(--radius)",
                 disabled && "pointer-events-none opacity-40",
               )}
             >
@@ -94,7 +94,7 @@ export function ReasonChips({
               />
               <span
                 className={cn(
-                  "inline-flex h-8 items-center rounded-(--radius-full) border px-(--space-3)",
+                  "inline-flex h-8 items-center rounded-(--radius) border px-(--space-3)",
                   "text-(length:--fs-caption)",
                   "transition-colors duration-(--dur-state) ease-(--ease-settle)",
                   selected

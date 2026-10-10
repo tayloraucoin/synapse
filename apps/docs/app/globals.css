@@ -241,7 +241,7 @@
 }
 
 ::selection {
-  background-color: var(--accent-hover-surface);
+  background-color: var(--surface);
   color: var(--foreground);
 }
 

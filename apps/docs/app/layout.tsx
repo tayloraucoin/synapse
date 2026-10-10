@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Public_Sans } from "next/font/google";
 import { ThemeProvider } from "@syn/ui/providers/theme-provider";
 import { Sidebar } from "../components/shell/sidebar";
 import "./globals.css";
 
-/** The interface family; `preset.css` reads it as `--font-geist-sans`. */
-const geist = Geist({
+/** The interface family; `preset.css` reads it as `--font-public-sans`. */
+const publicSans = Public_Sans({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
+  variable: "--font-public-sans",
   display: "swap",
 });
 
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 /** Two columns: a full-height sidebar panel that scrolls on its own, and the page body. */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={geist.variable} suppressHydrationWarning>
+    <html lang="en" className={publicSans.variable} suppressHydrationWarning>
       <body>
         <ThemeProvider>
           <div className="md:flex">

@@ -11,7 +11,7 @@ import { TextDisclosureButton } from "./text-disclosure-button";
 const meta: Meta<typeof TextDisclosureButton> = {
   title: "Composed/Control/TextDisclosureButton",
   component: TextDisclosureButton,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

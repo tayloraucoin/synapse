@@ -36,12 +36,12 @@ export interface TextareaProps extends React.ComponentProps<"textarea"> {
   /** Default false — a drag handle is a decision the surface rarely wants. */
   resizable?: boolean;
   /**
-   * `serif` — UX v1.1 §5.2, §7.2: the orient frame's two lines and the
-   * journal's fields. Newsreader at body size, one row to start, growing,
-   * a hairline underneath rather than a box. The only serif control in the
-   * library (v1.1 §10.3: reflective surfaces only).
+   * `plain` — UX v1.1 §5.2, §7.2: the orient frame's two lines and the
+   * journal's fields. Body size, one row to start, growing, a hairline
+   * underneath rather than a box. Public Sans: the brand kit keeps
+   * Newsreader for Review screens only (WEB-1).
    */
-  variant?: "default" | "serif";
+  variant?: "default" | "plain";
   classes?: TextareaClasses;
 }
 
@@ -53,18 +53,18 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       helperText,
       error,
       variant = "default",
-      autoGrow = variant === "serif",
+      autoGrow = variant === "plain",
       resizable = false,
       classes,
       id,
-      rows = variant === "serif" ? 1 : 3,
+      rows = variant === "plain" ? 1 : 3,
       onChange,
       "aria-describedby": ariaDescribedBy,
       ...props
     },
     ref,
   ) {
-    const serif = variant === "serif";
+    const plain = variant === "plain";
     const generatedId = React.useId();
     const textareaId = id ?? generatedId;
     const helperId = `${textareaId}-helper`;
@@ -95,7 +95,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             className={cn(
               "mb-(--space-2)",
               // The prompt is a caption over the words (§5.2, §7.2).
-              serif && "text-text-secondary text-(length:--fs-caption) font-normal",
+              plain && "text-text-secondary text-(length:--fs-caption) font-normal",
               classes?.label,
             )}
           >
@@ -127,13 +127,13 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
             resizable ? "resize-y" : "resize-none",
             autoGrow && "overflow-hidden",
             /*
-             * Serif: paper, not a box — a hairline underneath, the reading
-             * face at body size, and a ceiling so forty pasted lines scroll
+             * Plain: paper, not a box — a hairline underneath, body
+             * size, and a ceiling so forty pasted lines scroll
              * inside rather than pushing the primary off the screen.
              */
-            serif && [
-              "font-serif text-(length:--fs-body) leading-relaxed",
-              "border-0 border-b border-hairline bg-transparent px-0 shadow-none",
+            plain && [
+              "text-(length:--fs-body) leading-(--lh-body)",
+              "border-0 border-b border-hairline bg-transparent px-0",
               "rounded-none focus-visible:border-ink",
               "max-h-[60vh] overflow-y-auto",
             ],

@@ -15,7 +15,7 @@ type Story = StoryObj<typeof Skeleton>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex max-w-md flex-col gap-(--space-3) p-(--space-6)">
+    <div className="flex max-w-md flex-col gap-(--space-3) p-(--space-8)">
       {[0, 1, 2, 3].map((row) => (
         <div key={row} className="flex min-h-(--row-min) items-center gap-(--space-3)">
           <Skeleton className="size-5" />

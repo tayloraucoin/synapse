@@ -17,10 +17,10 @@ import { useJournal, type JournalEntry } from "./use-journal";
  * something true to read back."
  *
  * Paper, one column. The person's prompts in order, each a caption over a
- * serif field that starts at one row and grows. Every field autosaves; the
+ * plain field that starts at one row and grows. Every field autosaves; the
  * status says *saved* in caption size and nothing louder. No finish button,
  * no word count, no timer, no ceremony. The back is the exit and always
- * works. A past day opened from Review is read-only: the answers as serif
+ * works. A past day opened from Review is read-only: the answers as plain
  * text under their captions with hairlines.
  *
  * UX v1.3 R54, §7.2 (DAY-12): when the last prompt has its answer, on a
@@ -42,7 +42,7 @@ export function JournalScreen({ initial, readOnly = false }: { initial: JournalE
     return (
       <div className="flex flex-col">
         {written.length === 0 ? (
-          <p className="font-serif text-(length:--fs-body) leading-relaxed text-text-secondary">{COPY.nothingWritten}</p>
+          <p className="text-(length:--fs-body) leading-relaxed text-text-secondary">{COPY.nothingWritten}</p>
         ) : (
           written.map((prompt) => (
             <figure key={prompt.key} className="border-hairline flex flex-col gap-(--space-2) border-t py-(--space-4)">
@@ -51,7 +51,7 @@ export function JournalScreen({ initial, readOnly = false }: { initial: JournalE
                   {prompt.label}
                 </Text>
               </figcaption>
-              <blockquote className="font-serif text-(length:--fs-body) leading-relaxed whitespace-pre-wrap">
+              <blockquote className="text-(length:--fs-body) leading-relaxed whitespace-pre-wrap">
                 {initial.answers[prompt.key]}
               </blockquote>
             </figure>
@@ -62,11 +62,11 @@ export function JournalScreen({ initial, readOnly = false }: { initial: JournalE
   }
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       {initial.prompts.map((prompt) => (
         <Textarea
           key={prompt.key}
-          variant="serif"
+          variant="plain"
           label={prompt.label}
           value={journal.answers[prompt.key] ?? ""}
           maxLength={JOURNAL_ANSWER_MAX}
@@ -80,7 +80,7 @@ export function JournalScreen({ initial, readOnly = false }: { initial: JournalE
           <Text as="span" variant="caption" tone="secondary">
             {COPY.aQuote}
           </Text>
-          <blockquote className="m-0 font-serif text-(length:--fs-body) leading-relaxed">
+          <blockquote className="m-0 text-(length:--fs-body) leading-relaxed">
             {COPY.quoted(quote.text)}
           </blockquote>
           <figcaption>

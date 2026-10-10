@@ -11,7 +11,7 @@ import { LinkCallout } from "./link-callout";
 const meta: Meta<typeof LinkCallout> = {
   title: "Composed/Display/LinkCallout",
   component: LinkCallout,
-  decorators: [(Story) => <div className="max-w-[375px] p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-[375px] p-(--space-8)"><Story /></div>],
   args: {
     title: "Focus",
     url: "https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ",

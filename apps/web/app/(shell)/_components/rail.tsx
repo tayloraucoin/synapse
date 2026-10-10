@@ -22,6 +22,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
+  SynapseMark,
   Text,
 } from "@syn/ui";
 import Link from "next/link";
@@ -44,7 +45,8 @@ export function Rail({ reviewHasPending, user }: RailProps) {
   return (
     <SidebarProvider>
       <Sidebar collapsible="none" aria-label="Main">
-        <SidebarHeader className="px-(--space-5) py-(--space-5)">
+        <SidebarHeader className="flex-row items-center gap-(--space-2) px-(--space-6) py-(--space-6)">
+          <SynapseMark />
           <Text as="span" variant="body" weight={500}>
             Synapse
           </Text>
@@ -70,7 +72,7 @@ export function Rail({ reviewHasPending, user }: RailProps) {
                       <>
                         <span
                           aria-hidden="true"
-                          className="bg-accent-mark ms-auto size-1.5 rounded-full"
+                          className="bg-now ms-auto size-1.5 rounded-full"
                         />
                         <span className="sr-only">{REVIEW_DOT_LABEL}</span>
                       </>
@@ -82,7 +84,7 @@ export function Rail({ reviewHasPending, user }: RailProps) {
           </SidebarMenu>
         </SidebarContent>
 
-        <SidebarFooter className="px-(--space-5) py-(--space-4)">
+        <SidebarFooter className="px-(--space-6) py-(--space-4)">
           <Link
             href={settingsRoute()}
             aria-label="Settings"

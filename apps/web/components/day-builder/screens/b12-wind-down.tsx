@@ -117,7 +117,7 @@ export function ScreenWindDown({
   const morning = plan.morning;
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       {shared && morning !== null ? (
         <div className="flex flex-wrap items-center justify-between gap-(--space-2)">
           <Text as="p" variant="secondary" tone="secondary" className="tabular-nums">

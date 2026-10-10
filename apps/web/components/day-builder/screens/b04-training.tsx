@@ -117,7 +117,7 @@ export function ScreenTraining({
   };
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       {asking ? (
         <LargeTargetRow
           label={COPY.b04.heading}

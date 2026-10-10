@@ -123,7 +123,7 @@ export function TierRadioRows({
               </label>
 
               {showChips ? (
-                <div className="ps-(--space-5) pb-(--space-3)">
+                <div className="ps-(--space-6) pb-(--space-3)">
                   <ReasonChips
                     reasons={reasons[row.tier]}
                     value={selectedReason}

@@ -1,31 +1,54 @@
 /**
  * Typed mirrors of the token names in `@syn/config/tailwind/preset.css`.
  *
- * These are NAMES, not values. The hex lives in the preset and nowhere else;
- * this module exists so a story, a swatch grid, or a future Expo style map can
- * enumerate the scales without re-typing them, and so a renamed token breaks
- * the build rather than rendering an empty swatch.
+ * These are NAMES, not values. Every value lives in the preset and nowhere
+ * else; this module exists so a story, a swatch grid, or a future Expo style
+ * map can enumerate the brand kit's tokens without re-typing them, and so a
+ * renamed token breaks the build rather than rendering an empty swatch.
+ * `yarn check-brand docs` holds these lists, the preset and the brand docs
+ * to one set of names.
  */
 
 import type { CategoryKey } from "@syn/types";
 
-export const NEUTRAL_STEPS = [
+/** The kit's four ramps; step 500 is the exact brand value in each hue. */
+export const RAMPS = ["neutral", "brand", "violet", "red"] as const;
+
+export const RAMP_STEPS = [
   50, 100, 200, 300, 400, 500, 600, 700, 800, 900,
 ] as const;
 
-export const ACCENT_STEPS = [
-  100, 200, 300, 400, 500, 600, 700, 800,
+export type RampName = (typeof RAMPS)[number];
+export type RampStep = (typeof RAMP_STEPS)[number];
+
+/** A raw step. Components never reference one: they reach it through a role. */
+export function rampToken(ramp: RampName, step: RampStep): string {
+  return `--syn-${ramp}-${step}`;
+}
+
+/**
+ * The kit's colour roles — the names components reference. Each flips under
+ * `.dark`, which is why no component writes a `dark:` colour.
+ */
+export const ROLE_TOKENS = [
+  "--background",
+  "--surface",
+  "--foreground",
+  "--muted-foreground",
+  "--border",
+  "--input",
+  "--primary",
+  "--primary-foreground",
+  "--now",
+  "--link",
+  "--off-schedule",
+  "--off-schedule-text",
+  "--destructive",
+  "--destructive-foreground",
+  "--destructive-text",
 ] as const;
 
-export const VIOLET_STEPS = ACCENT_STEPS;
-
-/** Authored in the official spec §9.3. */
-export const CATEGORY_AUTHORED_STEPS = [100, 500, 700] as const;
-
-/** Derived by `color-mix` — [PROPOSED, needs sign-off] per handoff §11 Q2. */
-export const CATEGORY_DERIVED_STEPS = [200, 800] as const;
-
-export const CATEGORY_STEPS = [100, 200, 500, 700, 800] as const;
+export type RoleToken = (typeof ROLE_TOKENS)[number];
 
 export const CATEGORY_KEYS = [
   "leaf",
@@ -38,45 +61,30 @@ export const CATEGORY_KEYS = [
   "moss",
 ] as const satisfies readonly CategoryKey[];
 
-export type NeutralStep = (typeof NEUTRAL_STEPS)[number];
-export type AccentStep = (typeof ACCENT_STEPS)[number];
-export type CategoryStep = (typeof CATEGORY_STEPS)[number];
-
-export function neutralToken(step: NeutralStep): string {
-  return `--syn-neutral-${step}`;
+/** A category's chip fill; the name on it is `foreground`. */
+export function categoryChipToken(key: CategoryKey): string {
+  return `--category-${key}-chip`;
 }
 
-export function accentToken(step: AccentStep): string {
-  return `--syn-accent-${step}`;
+/** A category's dot, and a Schedule block's leading edge. */
+export function categoryDotToken(key: CategoryKey): string {
+  return `--category-${key}-dot`;
 }
-
-export function violetToken(step: AccentStep): string {
-  return `--syn-violet-${step}`;
-}
-
-export function categoryToken(key: CategoryKey, step: CategoryStep): string {
-  return `--syn-cat-${key}-${step}`;
-}
-
-export const DESTRUCTIVE_TOKEN = "--syn-destructive-500";
 
 /**
- * The semantic layer — the names components actually reference. Both themes
- * resolve through these, which is why no component writes a `dark:` colour.
+ * Names from before the kit, kept as aliases of a role in the preset's
+ * marked block until a codemod retires them (WEB-1). New code uses the role.
  */
-export const SEMANTIC_TOKENS = [
-  "--paper",
-  "--ink",
-  "--surface",
-  "--hairline",
-  "--text-body",
-  "--text-secondary",
-  "--text-muted",
-  "--text-disabled",
-  "--accent-text",
-  "--accent-hover-surface",
-  "--violet-text",
-  "--violet-band",
-  "--violet-band-text",
-  "--destructive",
-] as const;
+export const LEGACY_ALIASES = {
+  "--paper": "--background",
+  "--ink": "--foreground",
+  "--hairline": "--border",
+  "--fill-muted": "--border",
+  "--edge": "--input",
+  "--text-body": "--foreground",
+  "--text-secondary": "--muted-foreground",
+  "--text-muted": "--muted-foreground",
+  "--text-disabled": "--muted-foreground",
+  "--accent-text": "--link",
+  "--violet-text": "--off-schedule-text",
+} as const satisfies Record<string, RoleToken>;

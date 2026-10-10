@@ -25,22 +25,17 @@ export {
 } from "./composed/control/theme-control";
 
 export {
-  ACCENT_STEPS,
-  CATEGORY_AUTHORED_STEPS,
-  CATEGORY_DERIVED_STEPS,
   CATEGORY_KEYS,
-  CATEGORY_STEPS,
-  DESTRUCTIVE_TOKEN,
-  NEUTRAL_STEPS,
-  SEMANTIC_TOKENS,
-  VIOLET_STEPS,
-  accentToken,
-  categoryToken,
-  neutralToken,
-  violetToken,
-  type AccentStep,
-  type CategoryStep,
-  type NeutralStep,
+  LEGACY_ALIASES,
+  RAMPS,
+  RAMP_STEPS,
+  ROLE_TOKENS,
+  categoryChipToken,
+  categoryDotToken,
+  rampToken,
+  type RampName,
+  type RampStep,
+  type RoleToken,
 } from "./branding";
 
 export {
@@ -575,6 +570,7 @@ export {
   TrustLine,
   type TrustLineProps,
 } from "./composed/display/trust-line";
+export { SynapseMark, type SynapseMarkProps } from "./composed/display/synapse-mark";
 
 /* ---- composed: Workflow's board (Workflow UX v0.1 §9, FLO-4) ---- */
 export { FiringMark, type FiringMarkProps } from "./composed/display/firing-mark";

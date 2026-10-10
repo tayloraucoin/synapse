@@ -251,7 +251,7 @@ export function ItemSheet({
             <SkeletonRow />
           </div>
         ) : (
-          <div className="flex flex-col gap-(--space-5)">
+          <div className="flex flex-col gap-(--space-6)">
             <Text as="p" variant="secondary" tone="secondary">
               {timeLine(item)}
             </Text>

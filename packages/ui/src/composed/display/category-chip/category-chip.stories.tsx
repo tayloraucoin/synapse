@@ -18,7 +18,7 @@ const KEYS: readonly CategoryKey[] = [
 const meta: Meta<typeof CategoryChip> = {
   title: "Composed/Display/CategoryChip",
   component: CategoryChip,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -36,7 +36,7 @@ export const Default: Story = {
  */
 export const AllHues: StoryObj = {
   render: () => (
-    <div className="flex flex-wrap gap-(--space-2) p-(--space-6)">
+    <div className="flex flex-wrap gap-(--space-2) p-(--space-8)">
       {KEYS.map((key) => (
         <CategoryChip key={key} categoryKey={key} name={key} />
       ))}

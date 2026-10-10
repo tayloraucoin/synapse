@@ -166,7 +166,7 @@ export function AppHeader({
             aria-label="Settings"
             onClick={avatar.onOpen}
             className={cn(
-              "inline-flex size-(--target) items-center justify-center rounded-(--radius-full)",
+              "inline-flex size-(--target) items-center justify-center rounded-(--radius)",
               "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",
             )}
           >

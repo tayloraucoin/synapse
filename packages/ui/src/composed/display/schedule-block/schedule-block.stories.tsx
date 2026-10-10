@@ -16,7 +16,7 @@ const meta: Meta<typeof ScheduleBlock> = {
   args: { timeZone: STORY_TIME_ZONE, onOpen: () => {} },
   decorators: [
     (Story) => (
-      <div className="relative h-64 w-80 p-(--space-6)">
+      <div className="relative h-64 w-80 p-(--space-8)">
         <Story />
       </div>
     ),

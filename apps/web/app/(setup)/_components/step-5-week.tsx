@@ -130,7 +130,7 @@ export function Step5Week({
         busy: finishing === "week",
       }}
     >
-      <div className="flex flex-col gap-(--space-6)">
+      <div className="flex flex-col gap-(--space-8)">
         <ul className="m-0 flex list-none flex-col p-0">
           {([0, 1, 2, 3, 4, 5, 6] as Weekday[]).map((weekday) => {
             const plan = planFor(weekday);

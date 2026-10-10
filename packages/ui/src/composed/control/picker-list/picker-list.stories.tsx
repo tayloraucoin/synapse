@@ -14,7 +14,7 @@ import { PickerList } from "./picker-list";
 const meta: Meta<typeof PickerList> = {
   title: "Composed/Control/PickerList",
   component: PickerList,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

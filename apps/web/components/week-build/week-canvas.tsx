@@ -99,7 +99,7 @@ export function WeekCanvas({
                   <>
                     <span
                       aria-hidden
-                      className="bg-accent-mark size-1.5 shrink-0 rounded-full"
+                      className="bg-now size-1.5 shrink-0 rounded-full"
                     />
                     <span className="sr-only">{COPY.mostBehind}</span>
                   </>

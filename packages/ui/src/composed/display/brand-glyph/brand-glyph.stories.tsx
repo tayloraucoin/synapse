@@ -11,7 +11,7 @@ import { BrandGlyph } from "./brand-glyph";
 const meta: Meta<typeof BrandGlyph> = {
   title: "Composed/Display/BrandGlyph",
   component: BrandGlyph,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

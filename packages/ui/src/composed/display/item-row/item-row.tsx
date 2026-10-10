@@ -46,14 +46,14 @@ import {
 
 /** Static so Tailwind emits all eight — see CategoryChip. */
 const EDGE: Record<CategoryKey, string> = {
-  leaf: "bg-cat-leaf-500",
-  sky: "bg-cat-sky-500",
-  clay: "bg-cat-clay-500",
-  rose: "bg-cat-rose-500",
-  amber: "bg-cat-amber-500",
-  slate: "bg-cat-slate-500",
-  plum: "bg-cat-plum-500",
-  moss: "bg-cat-moss-500",
+  leaf: "bg-category-leaf-dot",
+  sky: "bg-category-sky-dot",
+  clay: "bg-category-clay-dot",
+  rose: "bg-category-rose-dot",
+  amber: "bg-category-amber-dot",
+  slate: "bg-category-slate-dot",
+  plum: "bg-category-plum-dot",
+  moss: "bg-category-moss-dot",
 };
 
 /**
@@ -183,7 +183,7 @@ export function ItemRow({
         data-marker
         aria-label={`${item.title}${pinnedLabel}`}
         className={cn(
-          "flex min-h-(--space-6) items-center gap-(--space-2) ps-(--space-4) pe-(--space-4)",
+          "flex min-h-(--space-8) items-center gap-(--space-2) ps-(--space-4) pe-(--space-4)",
           className,
         )}
       >
@@ -370,7 +370,7 @@ export function ItemRow({
        * handles, so roving focus walks into them in order.
        */}
       {container && children !== undefined ? (
-        <ul className={cn("flex w-full flex-col ps-(--space-6)", classes?.children)}>
+        <ul className={cn("flex w-full flex-col ps-(--space-8)", classes?.children)}>
           {children}
         </ul>
       ) : null}

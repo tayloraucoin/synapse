@@ -53,7 +53,7 @@ export function ReviewTab() {
 
   return (
     <ScreenFrame>
-      <div className="flex flex-col gap-(--space-5)">
+      <div className="flex flex-col gap-(--space-6)">
         <ReviewRegion
           title={COPY.today}
           loading={day.isLoading}

@@ -14,7 +14,7 @@ import { OverflowCutList, type OverflowItem } from "./overflow-cut-list";
 const meta: Meta<typeof OverflowCutList> = {
   title: "Composed/Control/OverflowCutList",
   component: OverflowCutList,
-  decorators: [(Story) => <div className="max-w-xl p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-xl p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

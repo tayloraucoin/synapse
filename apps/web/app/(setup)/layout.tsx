@@ -27,7 +27,7 @@ export default async function SetupLayout({
   return (
     <main
       id="main"
-      className="mx-auto flex min-h-screen-safe w-full max-w-(--content-text) flex-col gap-(--space-5) p-(--space-4)"
+      className="mx-auto flex min-h-screen-safe w-full max-w-(--content-text) flex-col gap-(--space-6) p-(--space-4)"
     >
       {/* One navigation for the sequence: the tapped control shows pending (UX v1.3 R63; DAY-2). */}
       <StepNavigationProvider>{children}</StepNavigationProvider>

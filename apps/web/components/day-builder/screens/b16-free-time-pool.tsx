@@ -141,7 +141,7 @@ export function ScreenFreeTimePool({
   const offered = ranked.filter((habit) => !inPool.has(habit.id));
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       {roomLine === null ? null : (
         <Text as="p" tone="secondary" className="tabular-nums">
           {roomLine}

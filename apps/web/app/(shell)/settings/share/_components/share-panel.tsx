@@ -55,7 +55,7 @@ export function SharePanel({ url }: { url: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       <Text as="p" tone="secondary">
         {COPY.shareBody}
       </Text>

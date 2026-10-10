@@ -18,7 +18,7 @@ type Story = StoryObj<typeof Avatar>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex items-end gap-(--space-5) p-(--space-6)">
+    <div className="flex items-end gap-(--space-6) p-(--space-8)">
       <Avatar name="Taylor Aucoin" size={32} />
       <Avatar name="Taylor Aucoin" size={64} />
       <Avatar name="Taylor" size={64} />

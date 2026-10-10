@@ -19,7 +19,7 @@ export default meta;
 function Demo({ closed }: { closed: boolean }) {
   const [open, setOpen] = React.useState(false);
   return (
-    <div className="p-(--space-6)">
+    <div className="p-(--space-8)">
       <Button onClick={() => setOpen(true)}>Day options</Button>
       <ActionRowSheet
         open={open}

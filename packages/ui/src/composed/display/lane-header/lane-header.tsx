@@ -29,14 +29,14 @@ import { LANE_HEADER_COPY, type LaneHeaderCopy } from "./copy";
 
 /** Static so Tailwind emits all eight — see CategoryChip. */
 const EDGE: Record<CategoryKey, string> = {
-  leaf: "bg-cat-leaf-500",
-  sky: "bg-cat-sky-500",
-  clay: "bg-cat-clay-500",
-  rose: "bg-cat-rose-500",
-  amber: "bg-cat-amber-500",
-  slate: "bg-cat-slate-500",
-  plum: "bg-cat-plum-500",
-  moss: "bg-cat-moss-500",
+  leaf: "bg-category-leaf-dot",
+  sky: "bg-category-sky-dot",
+  clay: "bg-category-clay-dot",
+  rose: "bg-category-rose-dot",
+  amber: "bg-category-amber-dot",
+  slate: "bg-category-slate-dot",
+  plum: "bg-category-plum-dot",
+  moss: "bg-category-moss-dot",
 };
 
 export interface LaneHeaderProps {
@@ -110,7 +110,7 @@ export function LaneHeader({
       </button>
 
       {plain || hue === null ? null : (
-        <span aria-hidden="true" className={cn("h-5 w-0.5 shrink-0 rounded-(--radius-full)", EDGE[hue])} />
+        <span aria-hidden="true" className={cn("h-5 w-0.5 shrink-0", EDGE[hue])} />
       )}
 
       <Text as="span" variant="row-title" weight={500} truncate className="min-w-0">

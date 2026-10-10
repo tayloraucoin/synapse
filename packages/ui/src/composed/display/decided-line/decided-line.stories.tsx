@@ -7,7 +7,7 @@ const meta: Meta<typeof DecidedLine> = {
   title: "Composed/Display/DecidedLine",
   component: DecidedLine,
   args: { onChange: () => {} },
-  decorators: [(Story) => <div className="max-w-xl p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-xl p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

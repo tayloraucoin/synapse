@@ -20,14 +20,14 @@ import { Text } from "../../../primitives/typography/text";
 
 /** Static so Tailwind emits all eight — see CategoryChip. */
 const SEGMENT: Record<CategoryKey, string> = {
-  leaf: "bg-cat-leaf-500",
-  sky: "bg-cat-sky-500",
-  clay: "bg-cat-clay-500",
-  rose: "bg-cat-rose-500",
-  amber: "bg-cat-amber-500",
-  slate: "bg-cat-slate-500",
-  plum: "bg-cat-plum-500",
-  moss: "bg-cat-moss-500",
+  leaf: "bg-category-leaf-dot",
+  sky: "bg-category-sky-dot",
+  clay: "bg-category-clay-dot",
+  rose: "bg-category-rose-dot",
+  amber: "bg-category-amber-dot",
+  slate: "bg-category-slate-dot",
+  plum: "bg-category-plum-dot",
+  moss: "bg-category-moss-dot",
 };
 
 export interface CategorySegment {
@@ -62,7 +62,7 @@ export function CategoryBar({ segments, className }: CategoryBarProps) {
       <div
         role="img"
         aria-label={summary}
-        className="flex h-3 w-full gap-px overflow-hidden rounded-(--radius-full)"
+        className="flex h-3 w-full gap-px overflow-hidden rounded-(--radius)"
       >
         {segments.map((segment) => (
           <span

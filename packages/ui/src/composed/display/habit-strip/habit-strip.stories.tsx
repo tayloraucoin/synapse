@@ -47,7 +47,7 @@ export const Stacked: Story = { args: { layout: "stacked" } };
  */
 export const SquareVocabulary: StoryObj = {
   render: () => (
-    <div className="flex flex-wrap gap-(--space-4) p-(--space-6)">
+    <div className="flex flex-wrap gap-(--space-4) p-(--space-8)">
       {WEEK.map((state) => (
         <div key={state} className="flex flex-col items-center gap-(--space-1)">
           <StripSquare state={state} size={24} label={state} />
@@ -70,7 +70,7 @@ export const WithNotConfirmed: Story = {
 /** The eighth square beside the seven. */
 export const NotConfirmedSquare: StoryObj = {
   render: () => (
-    <div className="flex flex-wrap gap-(--space-4) p-(--space-6)">
+    <div className="flex flex-wrap gap-(--space-4) p-(--space-8)">
       {([...WEEK, "not-confirmed"] as const).map((state) => (
         <div key={state} className="flex flex-col items-center gap-(--space-1)">
           <StripSquare state={state} size={24} label={state} />

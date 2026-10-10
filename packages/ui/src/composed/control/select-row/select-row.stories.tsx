@@ -16,7 +16,7 @@ import { SelectRow, SelectRowList } from "./select-row";
 const meta: Meta<typeof SelectRow> = {
   title: "Composed/Control/SelectRow",
   component: SelectRow,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
   args: {
     icon: { kind: "emoji", value: "🚿" },
     title: "Shower",
@@ -40,7 +40,7 @@ export const Selected: Story = { args: { selected: true } };
  */
 export const SelectedBesideAPrimary: Story = {
   render: (args) => (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       <SelectRowList>
         <SelectRow {...args} selected />
         <SelectRow {...args} icon={{ kind: "emoji", value: "☕" }} title="Coffee" selected={false} />

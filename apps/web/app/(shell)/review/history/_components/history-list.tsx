@@ -74,7 +74,7 @@ export function HistoryList({ initial }: { initial: HistoryPage }) {
   }
 
   return (
-    <div className="flex flex-col gap-(--space-5) py-(--space-4)">
+    <div className="flex flex-col gap-(--space-6) py-(--space-4)">
       <div className="flex flex-col">
         {weeks.map((week) => (
           <WeekRow

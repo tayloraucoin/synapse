@@ -11,7 +11,7 @@ import { DateField } from "./date-field";
 const meta: Meta<typeof DateField> = {
   title: "Composed/Control/DateField",
   component: DateField,
-  decorators: [(Story) => <div className="max-w-xs p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-xs p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

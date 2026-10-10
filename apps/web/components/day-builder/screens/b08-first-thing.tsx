@@ -131,7 +131,7 @@ export function FirstThing({
       primaryLabel={COPY.continuePassages(count ?? 0)}
       save={null}
     >
-      <div className="flex flex-col gap-(--space-6)">
+      <div className="flex flex-col gap-(--space-8)">
         <section className="flex flex-col gap-(--space-3)">
           <GroupHeading>{COPY.passages}</GroupHeading>
           <PassageList onCountChange={setCount} />

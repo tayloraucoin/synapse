@@ -9,7 +9,7 @@ const meta: Meta<typeof ExpanderSection> = {
   title: "Composed/Display/ExpanderSection",
   component: ExpanderSection,
   parameters: { layout: "fullscreen" },
-  decorators: [(Story) => <div className="max-w-2xl py-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-2xl py-(--space-8)"><Story /></div>],
 };
 
 export default meta;

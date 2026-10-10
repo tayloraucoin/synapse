@@ -47,8 +47,8 @@ export function EmptyState({
   return (
     <Empty
       className={cn(
-        "gap-(--space-5) text-center",
-        density === "page" ? "py-(--space-7)" : "py-(--space-5)",
+        "gap-(--space-6) text-center",
+        density === "page" ? "py-(--space-12)" : "py-(--space-6)",
         className,
       )}
     >

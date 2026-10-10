@@ -15,7 +15,7 @@ type Story = StoryObj<typeof Popover>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="p-(--space-6)">
+    <div className="p-(--space-8)">
       <Popover>
         <PopoverTrigger asChild>
           <Button variant="secondary">Pick an icon</Button>

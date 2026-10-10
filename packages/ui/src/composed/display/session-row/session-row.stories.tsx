@@ -15,7 +15,7 @@ const meta: Meta<typeof SessionRow> = {
   },
   decorators: [
     (Story) => (
-      <ul className="max-w-md p-(--space-6)">
+      <ul className="max-w-md p-(--space-8)">
         <Story />
       </ul>
     ),

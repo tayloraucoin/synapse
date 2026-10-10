@@ -67,7 +67,7 @@ export function QuickPick({
         : COPY.setTheDay;
 
   return (
-    <div className="flex flex-col gap-(--space-4) pb-(--space-8)">
+    <div className="flex flex-col gap-(--space-4)">
       {!online ? <StatusLine variant="offline" placement="inline" /> : null}
 
       <div className="flex flex-col">

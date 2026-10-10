@@ -20,7 +20,7 @@ export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
     <TooltipProvider>
-      <div className="p-(--space-6)">
+      <div className="p-(--space-8)">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="secondary">Monday</Button>

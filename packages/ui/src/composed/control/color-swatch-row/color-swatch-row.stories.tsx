@@ -12,7 +12,7 @@ import { ColorSwatchRow, type ColorSwatchValue } from "./color-swatch-row";
 const meta: Meta<typeof ColorSwatchRow> = {
   title: "Composed/Control/ColorSwatchRow",
   component: ColorSwatchRow,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

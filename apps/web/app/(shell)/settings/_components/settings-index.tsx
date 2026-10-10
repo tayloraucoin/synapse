@@ -77,7 +77,7 @@ export function SettingsIndex({
     );
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       <ul className="flex flex-col">
         <ListRow
           as="li"

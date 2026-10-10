@@ -24,7 +24,7 @@ import { CardSummary } from "./card-summary";
 const meta: Meta<typeof Card> = {
   title: "Primitives/Layout/Card",
   component: Card,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

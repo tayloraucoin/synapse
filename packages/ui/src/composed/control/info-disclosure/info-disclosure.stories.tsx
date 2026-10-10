@@ -19,7 +19,7 @@ const FIVE: InfoDisclosureItem[] = [
 const meta: Meta<typeof InfoDisclosure> = {
   title: "Composed/Control/InfoDisclosure",
   component: InfoDisclosure,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
   args: {
     label: "What does each choice do?",
     items: FIVE,

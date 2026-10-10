@@ -196,7 +196,7 @@ export function YourDays({
 
   if (embedded) {
     return (
-      <div className="flex flex-col gap-(--space-5)">
+      <div className="flex flex-col gap-(--space-6)">
         {body}
         {line ? <HelperText error>{line}</HelperText> : null}
         {!online ? <HelperText>{COPY.offline}</HelperText> : null}
@@ -216,7 +216,7 @@ export function YourDays({
         disabled: list.length === 0,
       }}
     >
-      <div className="flex flex-col gap-(--space-5)">{body}</div>
+      <div className="flex flex-col gap-(--space-6)">{body}</div>
     </StepFrame>
   );
 }

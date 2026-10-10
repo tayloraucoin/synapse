@@ -100,7 +100,7 @@ export function OrientFrame({ initial }: { initial: OrientView }) {
 
   return (
     <main id="main" className="bg-paper text-ink flex min-h-dvh flex-col">
-      <div className="mx-auto flex w-full max-w-[64ch] flex-1 flex-col gap-(--space-6) px-(--space-4) pt-(--space-8) pb-(--space-8) wide:max-w-[720px]">
+      <div className="mx-auto flex w-full max-w-[64ch] flex-1 flex-col gap-(--space-8) px-(--space-4) wide:max-w-[720px]">
         <header className="flex flex-col gap-(--space-1)">
           {/* The level-1 heading is the caption above the reading (logged: a change from v1.1's a11y row). */}
           <Text as="h1" variant="caption" tone="secondary" tabIndex={-1}>
@@ -120,7 +120,7 @@ export function OrientFrame({ initial }: { initial: OrientView }) {
             label={COPY.todaysReading}
           />
         ) : (
-          <p className="tabular-off font-serif text-(length:--fs-body) leading-relaxed text-text-secondary">
+          <p className="tabular-off text-(length:--fs-body) leading-relaxed text-text-secondary">
             {COPY.nothingYet}
           </p>
         )}
@@ -153,7 +153,7 @@ export function OrientFrame({ initial }: { initial: OrientView }) {
                         {line.caption}
                       </Text>
                     </figcaption>
-                    <blockquote className="tabular-off m-0 font-serif text-(length:--fs-body) leading-relaxed whitespace-pre-wrap">
+                    <blockquote className="tabular-off m-0 text-(length:--fs-body) leading-relaxed whitespace-pre-wrap">
                       {line.text}
                     </blockquote>
                   </figure>
@@ -164,12 +164,12 @@ export function OrientFrame({ initial }: { initial: OrientView }) {
         ) : null}
 
         {fields.length === 0 ? null : (
-          <div className="flex flex-col gap-(--space-5)">
+          <div className="flex flex-col gap-(--space-6)">
             {fields.map((field, index) => (
               <Textarea
                 key={field.key}
                 ref={index === 0 ? firstFieldRef : undefined}
-                variant="serif"
+                variant="plain"
                 label={field.label}
                 value={frame.lines[field.key]}
                 maxLength={field.max}
@@ -185,7 +185,7 @@ export function OrientFrame({ initial }: { initial: OrientView }) {
           </div>
         )}
 
-        <div className="mt-auto flex flex-col gap-(--space-3) pt-(--space-6) pb-[env(safe-area-inset-bottom)]">
+        <div className="mt-auto flex flex-col gap-(--space-3) pt-(--space-8) pb-[env(safe-area-inset-bottom)]">
           {frame.setError ? <HelperText error>{frame.setError}</HelperText> : null}
           {/* The set needs the network; the words save whenever they can (§5.2). */}
           {frame.setsTheDay && !online ? <HelperText>{COPY.offline}</HelperText> : null}

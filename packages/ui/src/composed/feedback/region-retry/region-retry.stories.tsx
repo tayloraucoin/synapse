@@ -12,7 +12,7 @@ const meta: Meta<typeof RegionRetry> = {
   title: "Composed/Feedback/RegionRetry",
   component: RegionRetry,
   args: { onRetry: () => {} },
-  decorators: [(Story) => <div className="max-w-xl p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-xl p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

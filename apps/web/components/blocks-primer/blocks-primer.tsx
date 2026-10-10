@@ -84,7 +84,7 @@ export function BlocksPrimer() {
         {COPY.caption}
       </Text>
 
-      <div className="flex flex-col gap-(--space-5) wide:flex-row wide:items-start">
+      <div className="flex flex-col gap-(--space-6) wide:flex-row wide:items-start">
         <div className="min-w-0 wide:flex-1">
           {/* `pt`: room for the 7 AM label, which centres on the axis's top edge. */}
           <ScheduleAxis

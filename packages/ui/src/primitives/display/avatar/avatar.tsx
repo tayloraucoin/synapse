@@ -51,7 +51,7 @@ function Avatar({
       data-slot="avatar"
       data-size={size}
       className={cn(
-        "relative flex shrink-0 select-none overflow-hidden rounded-(--radius-full)",
+        "relative flex shrink-0 select-none overflow-hidden rounded-(--radius)",
         size === 64 ? "size-16" : "size-8",
         className,
       )}
@@ -70,12 +70,11 @@ function Avatar({
         delayMs={0}
         aria-label={label ?? name}
         className={cn(
-          "flex size-full items-center justify-center rounded-(--radius-full)",
-          "bg-neutral-200 text-neutral-700",
-          "dark:bg-neutral-700 dark:text-neutral-100",
-          "font-sans font-medium",
+          "flex size-full items-center justify-center rounded-(--radius)",
+          "bg-surface text-foreground",
+                    "font-sans font-medium",
           size === 64
-            ? "text-(length:--fs-heading)"
+            ? "text-(length:--fs-title)"
             : "text-(length:--fs-caption)",
         )}
       >

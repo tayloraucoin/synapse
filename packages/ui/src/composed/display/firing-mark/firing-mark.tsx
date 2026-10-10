@@ -29,7 +29,7 @@ export function FiringMark({ breathing = false, className }: FiringMarkProps) {
       aria-hidden="true"
       data-breathing={breathing || undefined}
       className={cn(
-        "bg-accent-mark inline-block size-2.5 shrink-0 rounded-(--radius-full)",
+        "bg-now inline-block size-2.5 shrink-0 rounded-full",
         breathing && "motion-safe:animate-breathe",
         className,
       )}

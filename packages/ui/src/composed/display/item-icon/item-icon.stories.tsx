@@ -8,7 +8,7 @@ import { ItemIcon } from "./item-icon";
 const meta: Meta<typeof ItemIcon> = {
   title: "Composed/Display/ItemIcon",
   component: ItemIcon,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -38,7 +38,7 @@ export const UnknownGlyph: Story = {
 
 export const Sizes: StoryObj = {
   render: () => (
-    <div className="flex items-end gap-(--space-4) p-(--space-6)">
+    <div className="flex items-end gap-(--space-4) p-(--space-8)">
       {([20, 24, 48] as const).map((size) => (
         <div key={size} className="flex flex-col items-center gap-(--space-1)">
           <ItemIcon
@@ -55,7 +55,7 @@ export const Sizes: StoryObj = {
 /** The whole curated table — what a person can pick is what a row can draw. */
 export const AllGlyphs: StoryObj = {
   render: () => (
-    <div className="flex flex-wrap gap-(--space-2) p-(--space-6)">
+    <div className="flex flex-wrap gap-(--space-2) p-(--space-8)">
       {CURATED_GLYPHS.map((glyph) => (
         <div
           key={glyph.name}

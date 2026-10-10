@@ -189,7 +189,7 @@ export function DaySheet({
           </div>
         }
       >
-        <div className="flex flex-col gap-(--space-5)">
+        <div className="flex flex-col gap-(--space-6)">
           {!online ? <StatusLine variant="offline" placement="inline" /> : null}
 
           {preview.isLoading ? (

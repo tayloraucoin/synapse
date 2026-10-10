@@ -3,37 +3,34 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 import { Caption, Text } from "../primitives/typography/text";
 import {
-  ACCENT_STEPS,
-  CATEGORY_DERIVED_STEPS,
   CATEGORY_KEYS,
-  CATEGORY_STEPS,
-  DESTRUCTIVE_TOKEN,
-  NEUTRAL_STEPS,
-  SEMANTIC_TOKENS,
-  accentToken,
-  categoryToken,
-  neutralToken,
-  violetToken,
+  LEGACY_ALIASES,
+  RAMPS,
+  RAMP_STEPS,
+  ROLE_TOKENS,
+  categoryChipToken,
+  categoryDotToken,
+  rampToken,
+  type RampName,
 } from "./tokens";
 
 /**
- * The token sheet. Toggle the toolbar theme to check both registers — the
- * raw scales are theme-independent by design, the semantic row is not.
+ * The token sheet, from the brand kit (WEB-1). Toggle the toolbar theme to
+ * check both registers — the raw ramps are theme-independent by design, the
+ * roles and the category pairs are not.
  *
  * Each swatch prints its token name and the hex the browser actually computed,
- * so a value that drifted from official spec §9.3 is visible rather than
+ * so a value that drifted from the kit's tokens.json is visible rather than
  * inferred.
  */
 
 /**
  * Read what the browser actually painted.
  *
- * Two steps, both necessary. A probe element resolves `var()` and
- * `color-mix()` down to a single computed colour — the derived category steps
- * are `color-mix(in oklch, …)`, which neither a canvas nor a regex can read in
- * source form. That computed colour then goes onto a 1x1 canvas, because
- * Chrome serialises an oklch mix as `oklch(…)` and pulling the numbers out of
- * that string yields a colour that is not the one on screen.
+ * Two steps, both necessary. A probe element resolves `var()` down to a
+ * single computed colour — the ramps are `oklch(…)`, which a regex cannot
+ * turn into the painted sRGB. That computed colour then goes onto a 1x1
+ * canvas, which hands back the bytes on screen.
  */
 function computedColor(token: string): string {
   const probe = document.createElement("span");
@@ -129,69 +126,61 @@ const meta: Meta = {
 
 export default meta;
 
+const RAMP_NOTES: Record<RampName, { title: string; note: string }> = {
+  neutral: {
+    title: "Neutral — warm paper to ink",
+    note: "50 is paper, the light background; 900 is ink, the text and the dark background.",
+  },
+  brand: {
+    title: "Brand — verdigris",
+    note: "500 is the brand value: lines, dots and the focus ring, never text. Text in the brand colour is link (600 light, 400 dark).",
+  },
+  violet: {
+    title: "Violet — off schedule",
+    note: "One meaning only: something happened outside its planned time. Never decoration.",
+  },
+  red: {
+    title: "Red — destructive",
+    note: "Delete account and nowhere else. Missed, errors and warnings are never red.",
+  },
+};
+
 export const Palette: StoryObj = {
   render: () => (
-    <div className="flex flex-col gap-(--space-7) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-12) p-(--space-8)">
       <Row
-        title="Neutral — warm ink and paper"
-        note="The ground. 50 is paper, 800 is ink, 900 is paper in dark."
+        title="Roles"
+        note="What components reference. These flip with the theme; the raw ramps below do not."
       >
-        {NEUTRAL_STEPS.map((step) => (
-          <Swatch key={step} token={neutralToken(step)} />
+        {ROLE_TOKENS.map((token) => (
+          <Swatch key={token} token={token} />
         ))}
       </Row>
 
       <Row
-        title="Accent — verdigris"
-        note="The now line, the now/soon marker, the focus ring, links, the active-timer border. Never a button fill, never a wash."
+        title="Categories"
+        note="Chip fill with the name in foreground, and the dot. Always printed beside the name."
       >
-        {ACCENT_STEPS.map((step) => (
-          <Swatch key={step} token={accentToken(step)} />
-        ))}
+        {CATEGORY_KEYS.flatMap((key) => [
+          <Swatch key={`${key}-chip`} token={categoryChipToken(key)} />,
+          <Swatch key={`${key}-dot`} token={categoryDotToken(key)} />,
+        ])}
       </Row>
 
-      <Row
-        title="Violet — off-schedule"
-        note="Time text, the moved-block border, shift bands. The only semantic colour with its own scale."
-      >
-        {ACCENT_STEPS.map((step) => (
-          <Swatch key={step} token={violetToken(step)} />
-        ))}
-      </Row>
-
-      <Row
-        title="Destructive — reserved"
-        note="Permitted on exactly one surface: Delete account. Not on 'Missed', which is neutral."
-      >
-        <Swatch token={DESTRUCTIVE_TOKEN} />
-      </Row>
-
-      {CATEGORY_KEYS.map((key) => (
-        <Row
-          key={key}
-          title={`Category — ${key}`}
-          note="100/500/700 are authored (§9.3). 200/800 are derived by color-mix and are [PROPOSED — needs sign-off]."
-        >
-          {CATEGORY_STEPS.map((step) => (
-            <Swatch
-              key={step}
-              token={categoryToken(key, step)}
-              note={
-                (CATEGORY_DERIVED_STEPS as readonly number[]).includes(step)
-                  ? "PROPOSED"
-                  : undefined
-              }
-            />
+      {RAMPS.map((ramp) => (
+        <Row key={ramp} title={RAMP_NOTES[ramp].title} note={RAMP_NOTES[ramp].note}>
+          {RAMP_STEPS.map((step) => (
+            <Swatch key={step} token={rampToken(ramp, step)} />
           ))}
         </Row>
       ))}
 
       <Row
-        title="Semantic"
-        note="What components reference. These flip with the theme; the raw scales above do not."
+        title="Legacy aliases"
+        note="Older names, each resolving to a role until a codemod retires them. Never used in new code."
       >
-        {SEMANTIC_TOKENS.map((token) => (
-          <Swatch key={token} token={token} />
+        {Object.entries(LEGACY_ALIASES).map(([alias, role]) => (
+          <Swatch key={alias} token={alias} note={`= ${role}`} />
         ))}
       </Row>
     </div>

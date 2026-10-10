@@ -79,7 +79,7 @@ export function ReviewWeek({
 
   return (
     <ScreenFrame prose>
-      <div className="flex flex-col gap-(--space-6) py-(--space-4)">
+      <div className="flex flex-col gap-(--space-8) py-(--space-4)">
         {/* One region, so the number and its sentence are announced together. */}
         <section
           aria-label={`${week.result?.percent ?? 0}%`}
@@ -207,7 +207,7 @@ export function ReviewWeek({
         {week.blockMinutes.length === 0 ? null : (
           <section className="flex flex-col gap-(--space-2)">
             <GroupHeading>{COPY.timeByBlock}</GroupHeading>
-            <div aria-hidden className="flex h-2 w-full overflow-hidden rounded-full">
+            <div aria-hidden className="flex h-2 w-full overflow-hidden rounded-(--radius)">
               {week.blockMinutes.map((segment, index) => (
                 <div
                   key={segment.kind}

@@ -13,7 +13,7 @@ const meta: Meta<typeof OAuthButton> = {
   title: "Composed/Control/OAuthButton",
   component: OAuthButton,
   args: { provider: "google", label: "Continue with Google", onClick: () => {} },
-  decorators: [(Story) => <div className="max-w-sm p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-sm p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

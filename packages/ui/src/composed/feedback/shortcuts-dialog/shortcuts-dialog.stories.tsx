@@ -28,7 +28,7 @@ export const Interactive: StoryObj = {
   render: function Render() {
     const [open, setOpen] = React.useState(false);
     return (
-      <div className="p-(--space-6)">
+      <div className="p-(--space-8)">
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Show shortcuts
         </Button>

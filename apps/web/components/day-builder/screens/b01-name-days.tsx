@@ -99,7 +99,7 @@ export function ScreenNameDays({ api, disabled }: { api: DayBuilderApi; disabled
   };
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       {plan.sortOrder === 0 ? (
         <Text as="p" variant="secondary" tone="secondary">
           {COPY.b01.helper}

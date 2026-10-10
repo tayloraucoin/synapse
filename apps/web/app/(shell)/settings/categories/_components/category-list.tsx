@@ -78,7 +78,7 @@ export function CategoryList() {
               as="li"
               leading={
                 <span
-                  className={`inline-block size-4 rounded-full bg-cat-${category.key}-500`}
+                  className={`inline-block size-4 rounded-full bg-category-${category.key}-dot`}
                 >
                   <span className="sr-only">{category.key}</span>
                 </span>

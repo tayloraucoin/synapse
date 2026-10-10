@@ -32,7 +32,7 @@ export const Default: StoryObj = {
   render: function Render() {
     const [open, setOpen] = React.useState(false);
     return (
-      <div className="p-(--space-6)">
+      <div className="p-(--space-8)">
         <Button onClick={() => setOpen(true)}>Open</Button>
         <ResponsiveSheet
           open={open}
@@ -59,7 +59,7 @@ export const Tall: StoryObj = {
   render: function Render() {
     const [open, setOpen] = React.useState(false);
     return (
-      <div className="p-(--space-6)">
+      <div className="p-(--space-8)">
         <Button onClick={() => setOpen(true)}>Open tall</Button>
         <ResponsiveSheet
           open={open}
@@ -83,7 +83,7 @@ export const DirtyGuard: StoryObj = {
     const [open, setOpen] = React.useState(false);
     const [asking, setAsking] = React.useState(false);
     return (
-      <div className="p-(--space-6)">
+      <div className="p-(--space-8)">
         <Button onClick={() => setOpen(true)}>Open a dirty form</Button>
         <ResponsiveSheet
           open={open}
@@ -119,7 +119,7 @@ export const ReturnFocus: StoryObj = {
     const [open, setOpen] = React.useState(false);
     const menuRef = React.useRef<HTMLButtonElement>(null);
     return (
-      <div className="flex gap-(--space-3) p-(--space-6)">
+      <div className="flex gap-(--space-3) p-(--space-8)">
         <Button ref={menuRef} variant="ghost">
           View options
         </Button>

@@ -1,162 +1,161 @@
 /**
- * Synapse design tokens — official UX spec §9.3–§9.7, in CC's Tailwind v4 idiom.
+ * Synapse design tokens — the brand kit (Design System artifact
+ * EhNLGGfozdciR27ukmtmxL, project/tokens.json), in CC's Tailwind v4 idiom.
+ * WEB-1 re-mapped this file to the kit; where the kit and an older spec
+ * disagree, the kit wins.
  *
- * This is `packages/config/tailwind/preset.css`, the file the v2 component
- * handoff §6.2 writes as `ui/styles/tokens.css` (README § Handoff path remap).
- * It is the ONE place a hex value is permitted in this repository. Every
- * component references a token name; a hex outside this file is a defect.
+ * It is the ONE place a raw colour value is permitted in this repository.
+ * Every component references a role; a raw value outside this file is a
+ * defect, and `yarn check-brand shape` fails on one.
  *
- * Three layers: raw scales (--syn-*) → semantic (--paper, --ink, …) → shadcn
- * bridge (--background, …), with `.dark` overriding the semantic and bridge
- * layers and `@theme inline` exposing them to Tailwind's utilities.
+ * Three layers:
+ *   1. raw ramps (--syn-neutral|brand|violet|red-*), the kit's exact OKLCH,
+ *      theme-independent and never referenced by a component;
+ *   2. the kit's roles (--background, --surface, --foreground, --now, --link,
+ *      --category-<hue>-chip, …), which flip under `.dark`;
+ *   3. the shadcn bridge (--card, --popover, --accent, --ring, …), pointed at
+ *      the roles, plus a marked block of legacy aliases (--paper, --ink, …)
+ *      that keep older class names resolving to a role until a codemod
+ *      retires them.
+ * `@theme inline` exposes roles, bridge and aliases to Tailwind's utilities.
+ * There is no shadow token: rows are separated with `border`.
  *
  * Consumers: `packages/ui/src/styles/globals.css` imports this after
  * `@import "tailwindcss"`, and `apps/web/app/globals.css` imports both. The
- * `@custom-variant dark` declaration lives in `globals.css`, next to the
- * Tailwind import it depends on (CC's placement).
+ * `@custom-variant dark` declaration lives in `globals.css`.
  */
 
 :root {
-  /* ---- RAW: neutral (warm ink and paper) ---- */
-  --syn-neutral-50:  #FAFAF8;
-  --syn-neutral-100: #F3F2EE;
-  --syn-neutral-200: #E7E5DF;
-  --syn-neutral-300: #D2CFC7;
-  --syn-neutral-400: #A6A299;
-  --syn-neutral-500: #78746C;
-  --syn-neutral-600: #57534C;
-  --syn-neutral-700: #3B3834;
-  --syn-neutral-800: #25231F;
-  --syn-neutral-900: #151412;
+  /* ---- 1. RAW: warm neutral (paper to ink) ---- */
+  --syn-neutral-50:  oklch(0.9845 0.0026 106.45);
+  --syn-neutral-100: oklch(0.9630 0.0053 106.50);
+  --syn-neutral-200: oklch(0.9246 0.0055 95.10);
+  --syn-neutral-300: oklch(0.8542 0.0056 95.11);
+  --syn-neutral-400: oklch(0.7245 0.0072 97.39);
+  --syn-neutral-500: oklch(0.5856 0.0076 97.43);
+  --syn-neutral-600: oklch(0.4705 0.0080 97.48);
+  --syn-neutral-700: oklch(0.3558 0.0069 95.25);
+  --syn-neutral-800: oklch(0.2561 0.0057 91.59);
+  --syn-neutral-900: oklch(0.1916 0.0043 84.59);
 
-  /* ---- RAW: accent (verdigris) ---- */
-  --syn-accent-100: #E4F1EE; --syn-accent-200: #C3E1DB; --syn-accent-300: #94C8BE; --syn-accent-400: #5FAA9C;
-  --syn-accent-500: #2F8F80; --syn-accent-600: #24736A; --syn-accent-700: #1C5A53; --syn-accent-800: #14423D;
+  /* ---- 1. RAW: verdigris (brand-500 is the brand value) ---- */
+  --syn-brand-50:  oklch(0.9741 0.0109 182.88);
+  --syn-brand-100: oklch(0.8988 0.0320 179.39);
+  --syn-brand-200: oklch(0.8222 0.0502 180.20);
+  --syn-brand-300: oklch(0.7432 0.0663 180.91);
+  --syn-brand-400: oklch(0.6675 0.0812 180.79);
+  --syn-brand-500: oklch(0.5905 0.0912 180.61);
+  --syn-brand-600: oklch(0.5077 0.0785 181.11);
+  --syn-brand-700: oklch(0.4246 0.0659 180.56);
+  --syn-brand-800: oklch(0.3439 0.0540 180.12);
+  --syn-brand-900: oklch(0.2587 0.0404 181.68);
 
-  /* ---- RAW: violet (off-schedule) ---- */
-  --syn-violet-100: #EFEAF8; --syn-violet-200: #DCD2F0; --syn-violet-300: #BFAEE1; --syn-violet-400: #9E88CE;
-  --syn-violet-500: #7C63B8; --syn-violet-600: #644D9A; --syn-violet-700: #4D3B78; --syn-violet-800: #372A57;
+  /* ---- 1. RAW: off-schedule violet ---- */
+  --syn-violet-50:  oklch(0.9745 0.0134 295.33);
+  --syn-violet-100: oklch(0.8915 0.0441 295.52);
+  --syn-violet-200: oklch(0.8093 0.0708 295.78);
+  --syn-violet-300: oklch(0.7271 0.0942 295.26);
+  --syn-violet-400: oklch(0.6438 0.1159 295.34);
+  --syn-violet-500: oklch(0.5621 0.1294 295.49);
+  --syn-violet-600: oklch(0.4855 0.1121 295.56);
+  --syn-violet-700: oklch(0.4120 0.0938 294.88);
+  --syn-violet-800: oklch(0.3340 0.0764 295.59);
+  --syn-violet-900: oklch(0.2599 0.0592 296.46);
 
-  /* ---- RAW: destructive (one surface: Delete account) ---- */
-  --syn-destructive-500: #B4463C;
+  /* ---- 1. RAW: destructive red (one surface: Delete account) ---- */
+  --syn-red-50:  oklch(0.9752 0.0122 29.87);
+  --syn-red-100: oklch(0.8895 0.0497 28.90);
+  --syn-red-200: oklch(0.8011 0.0793 27.68);
+  --syn-red-300: oklch(0.7159 0.1065 28.64);
+  --syn-red-400: oklch(0.6287 0.1293 28.34);
+  --syn-red-500: oklch(0.5411 0.1453 28.05);
+  --syn-red-600: oklch(0.4715 0.1258 27.82);
+  --syn-red-700: oklch(0.4007 0.1043 28.12);
+  --syn-red-800: oklch(0.3302 0.0842 28.59);
+  --syn-red-900: oklch(0.2596 0.0654 28.04);
 
-  /* ---- RAW: category hues (100 / 500 / 700 per spec; 200 / 800 are PROPOSED — see §11 Q2) ---- */
-  --syn-cat-leaf-100:  #E6F0E4; --syn-cat-leaf-500:  #4F8A5B; --syn-cat-leaf-700:  #2F5A38;
-  --syn-cat-sky-100:   #E4EDF6; --syn-cat-sky-500:   #4B7FB3; --syn-cat-sky-700:   #2C5478;
-  --syn-cat-clay-100:  #F6E8E2; --syn-cat-clay-500:  #C0714F; --syn-cat-clay-700:  #7E4530;
-  --syn-cat-rose-100:  #F7E6EA; --syn-cat-rose-500:  #B85C74; --syn-cat-rose-700:  #7B3A4B;
-  --syn-cat-amber-100: #F8EFDD; --syn-cat-amber-500: #C2923A; --syn-cat-amber-700: #7C5B1F;
-  --syn-cat-slate-100: #E8EAEE; --syn-cat-slate-500: #6B7689; --syn-cat-slate-700: #434B5A;
-  --syn-cat-plum-100:  #F0E7F1; --syn-cat-plum-500:  #8E5A93; --syn-cat-plum-700:  #5C3860;
-  --syn-cat-moss-100:  #EDEFE0; --syn-cat-moss-500:  #7E8B3F; --syn-cat-moss-700:  #4F5826;
-  /* [PROPOSED — needs sign-off] dark-theme chip pairings derived, not authored: 800 = 500 mixed 60% into neutral-900; 200 = 100 mixed 25% into 500. */
-  --syn-cat-leaf-800:  color-mix(in oklch, var(--syn-cat-leaf-500)  40%, var(--syn-neutral-900));
-  --syn-cat-leaf-200:  color-mix(in oklch, var(--syn-cat-leaf-100)  75%, var(--syn-cat-leaf-500));
-  --syn-cat-sky-800:   color-mix(in oklch, var(--syn-cat-sky-500)   40%, var(--syn-neutral-900));
-  --syn-cat-sky-200:   color-mix(in oklch, var(--syn-cat-sky-100)   75%, var(--syn-cat-sky-500));
-  --syn-cat-clay-800:  color-mix(in oklch, var(--syn-cat-clay-500)  40%, var(--syn-neutral-900));
-  --syn-cat-clay-200:  color-mix(in oklch, var(--syn-cat-clay-100)  75%, var(--syn-cat-clay-500));
-  --syn-cat-rose-800:  color-mix(in oklch, var(--syn-cat-rose-500)  40%, var(--syn-neutral-900));
-  --syn-cat-rose-200:  color-mix(in oklch, var(--syn-cat-rose-100)  75%, var(--syn-cat-rose-500));
-  --syn-cat-amber-800: color-mix(in oklch, var(--syn-cat-amber-500) 40%, var(--syn-neutral-900));
-  --syn-cat-amber-200: color-mix(in oklch, var(--syn-cat-amber-100) 75%, var(--syn-cat-amber-500));
-  --syn-cat-slate-800: color-mix(in oklch, var(--syn-cat-slate-500) 40%, var(--syn-neutral-900));
-  --syn-cat-slate-200: color-mix(in oklch, var(--syn-cat-slate-100) 75%, var(--syn-cat-slate-500));
-  --syn-cat-plum-800:  color-mix(in oklch, var(--syn-cat-plum-500)  40%, var(--syn-neutral-900));
-  --syn-cat-plum-200:  color-mix(in oklch, var(--syn-cat-plum-100)  75%, var(--syn-cat-plum-500));
-  --syn-cat-moss-800:  color-mix(in oklch, var(--syn-cat-moss-500)  40%, var(--syn-neutral-900));
-  --syn-cat-moss-200:  color-mix(in oklch, var(--syn-cat-moss-100)  75%, var(--syn-cat-moss-500));
+  /* ---- 2. ROLES (light) — the kit's names ---- */
+  --background: var(--syn-neutral-50);          /* the page: paper */
+  --surface: var(--syn-neutral-100);            /* the one raised layer: sheets, the Review card, hover */
+  --foreground: var(--syn-neutral-900);         /* body text and headings */
+  --muted-foreground: var(--syn-neutral-600);   /* times, counts, reasons, helper copy */
+  --border: var(--syn-neutral-200);             /* hairlines; decorative, carries no meaning alone */
+  --input: var(--syn-neutral-500);              /* field and checkbox boundary, 3:1 on both grounds */
+  --primary: var(--syn-neutral-900);            /* the one filled button: ink, never teal */
+  --primary-foreground: var(--syn-neutral-50);
+  --now: var(--syn-brand-500);                  /* now line, current-item dot, focus ring; never text, never a fill */
+  --link: var(--syn-brand-600);                 /* links and the few words in the brand colour */
+  --off-schedule: var(--syn-violet-500);        /* marker for anything done outside its planned time */
+  --off-schedule-text: var(--syn-violet-600);   /* the words "Off schedule" and their time */
+  --destructive: var(--syn-red-500);            /* Delete account's fill, and nowhere else */
+  --destructive-foreground: var(--syn-neutral-50);
+  --destructive-text: var(--syn-red-600);       /* the warning sentence above Delete account */
 
-  /* ---- SEMANTIC (light) — the names this document uses ---- */
-  --paper: var(--syn-neutral-50);
-  --ink: var(--syn-neutral-800);
-  --surface: var(--syn-neutral-100);          /* sheets, skeleton */
-  --hairline: var(--syn-neutral-200);
-  --text-body: var(--syn-neutral-600);
-  --text-secondary: var(--syn-neutral-500);
-  --text-muted: var(--syn-neutral-400);       /* large text only */
-  --text-disabled: var(--syn-neutral-300);
-  --accent: var(--syn-accent-500);            /* now line, markers, ring — never text */
-  --accent-text: var(--syn-accent-600);
-  --accent-hover-surface: var(--syn-accent-100);
-  --violet: var(--syn-violet-500);            /* borders */
-  --violet-text: var(--syn-violet-600);
-  --violet-band: var(--syn-violet-100);
-  --violet-band-text: var(--syn-violet-700);
-  --destructive: var(--syn-destructive-500);
-  --scrim: rgba(21, 20, 18, 0.4);
-  --shadow-overlay: 0 8px 24px rgba(21, 20, 18, 0.12);
-  --chip-bg-step: 100; --chip-fg-step: 700;   /* category chip pairing, light */
-
-  /*
-   * ---- SEMANTIC, added by the composed layer ----
-   *
-   * `@syn/ui/AGENTS.md`: "No `dark:` colours. Tones map to semantic tokens
-   * that already flip." Three pairings the handoff's §6.2 states in prose but
-   * never named, so every component that needed one was reaching for a
-   * `dark:` variant instead:
-   *
-   *   --edge        control outlines: neutral-300 / neutral-600
-   *   --fill-muted  filled-but-quiet surfaces: neutral-200 / neutral-700
-   *   --chip-*      the eight category chip pairings, resolved
-   *
-   * The chip pairs exist because `--chip-bg-step` above cannot work: Tailwind
-   * needs a whole class name at build time, and a variable holding the string
-   * "100" produces no utility. These name the resolved colour instead, so
-   * `bg-chip-leaf` is one class that is already correct in both themes.
-   */
-  --edge: var(--syn-neutral-300);
-  --fill-muted: var(--syn-neutral-200);
-
-  --chip-leaf-bg:  var(--syn-cat-leaf-100);  --chip-leaf-fg:  var(--syn-cat-leaf-700);
-  --chip-sky-bg:   var(--syn-cat-sky-100);   --chip-sky-fg:   var(--syn-cat-sky-700);
-  --chip-clay-bg:  var(--syn-cat-clay-100);  --chip-clay-fg:  var(--syn-cat-clay-700);
-  --chip-rose-bg:  var(--syn-cat-rose-100);  --chip-rose-fg:  var(--syn-cat-rose-700);
-  --chip-amber-bg: var(--syn-cat-amber-100); --chip-amber-fg: var(--syn-cat-amber-700);
-  --chip-slate-bg: var(--syn-cat-slate-100); --chip-slate-fg: var(--syn-cat-slate-700);
-  --chip-plum-bg:  var(--syn-cat-plum-100);  --chip-plum-fg:  var(--syn-cat-plum-700);
-  --chip-moss-bg:  var(--syn-cat-moss-100);  --chip-moss-fg:  var(--syn-cat-moss-700);
+  /* Categories: a chip fill (text on it is foreground) and a dot (also a
+     Schedule block's leading edge). Always printed beside the name. The kit
+     gives these per theme in sRGB. */
+  --category-leaf-chip:  #D6E9D6; --category-leaf-dot:  #59985B;
+  --category-sky-chip:   #CFE7F6; --category-sky-dot:   #3590BF;
+  --category-clay-chip:  #F6DDD2; --category-clay-dot:  #BC6F4C;
+  --category-rose-chip:  #F7DBE0; --category-rose-dot:  #BD687D;
+  --category-amber-chip: #EEE1CC; --category-amber-dot: #A97E2C;
+  --category-slate-chip: #DFE3E9; --category-slate-dot: #79889A;
+  --category-plum-chip:  #EDDCF1; --category-plum-dot:  #A36FAF;
+  --category-moss-chip:  #E1E5D8; --category-moss-dot:  #818C63;
 
   /*
    * ---- BLOCK HUES — UX v1.3 R47, §3.1, §10.2, TD-29 (DAY-3) ----
-   * A band's wash and its label, keyed by kind onto the category scales, so
-   * no new colour enters the palette: the wash is the 100 step, the label the
-   * 700 on it (the chip pairing, AA at caption size); dark swaps to 800 / 200
-   * as the chips do. PLANNING SURFACES ONLY — the primer, the builder's B7,
-   * B13, B14, B17, screen 5 — never `/today` or the Schedule, which keep
-   * their monochrome bands. Sleep is not a kind: the quiet band at both ends.
-   * [PROPOSED — needs sign-off, v1.3 §13 #31] the kind-to-hue mapping:
-   * orient slate · morning leaf · training clay · prep amber · transition
-   * amber · work sky · break moss · activity plum · wind-down rose.
+   * A band's wash, keyed by kind onto the category chips, so no new colour
+   * enters the palette; its label is foreground, as on a chip. PLANNING
+   * SURFACES ONLY — the primer, the builder's B7, B13, B14, B17, screen 5 —
+   * never `/today` or the Schedule. Sleep is not a kind: the quiet band at
+   * both ends. [PROPOSED — needs sign-off, v1.3 §13 #31] the kind-to-hue
+   * mapping: orient slate · morning leaf · training clay · prep amber ·
+   * transition amber · work sky · break moss · activity plum · wind-down rose.
    */
-  --block-orient:     var(--syn-cat-slate-100); --block-orient-label:     var(--syn-cat-slate-700);
-  --block-morning:    var(--syn-cat-leaf-100);  --block-morning-label:    var(--syn-cat-leaf-700);
-  --block-training:   var(--syn-cat-clay-100);  --block-training-label:   var(--syn-cat-clay-700);
-  --block-prep:       var(--syn-cat-amber-100); --block-prep-label:       var(--syn-cat-amber-700);
-  --block-work:       var(--syn-cat-sky-100);   --block-work-label:       var(--syn-cat-sky-700);
-  --block-break:      var(--syn-cat-moss-100);  --block-break-label:      var(--syn-cat-moss-700);
-  --block-transition: var(--syn-cat-amber-100); --block-transition-label: var(--syn-cat-amber-700);
-  --block-activity:   var(--syn-cat-plum-100);  --block-activity-label:   var(--syn-cat-plum-700);
-  --block-wind-down:  var(--syn-cat-rose-100);  --block-wind-down-label:  var(--syn-cat-rose-700);
-  --block-sleep:      var(--syn-neutral-200);   --block-sleep-label:      var(--text-secondary);
+  --block-orient:     var(--category-slate-chip);
+  --block-morning:    var(--category-leaf-chip);
+  --block-training:   var(--category-clay-chip);
+  --block-prep:       var(--category-amber-chip);
+  --block-work:       var(--category-sky-chip);
+  --block-break:      var(--category-moss-chip);
+  --block-transition: var(--category-amber-chip);
+  --block-activity:   var(--category-plum-chip);
+  --block-wind-down:  var(--category-rose-chip);
+  --block-sleep:      var(--border);
+  --block-label:      var(--foreground);
+  --block-sleep-label: var(--muted-foreground);
 
-  /* ---- TYPOGRAPHY ---- */
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-newsreader), Georgia, serif;
+  /* The placeholder mark's fixed inks (kit assets/Logos): ink disc and
+     brand-500 rule in light, paper disc and brand-400 rule in dark. */
+  --logo-disc: var(--syn-neutral-900);
+  --logo-rule: var(--syn-brand-500);
+
+  /* The dimmed ground behind a modal sheet: ink at 40%. */
+  --scrim: color-mix(in oklch, var(--syn-neutral-900) 40%, transparent);
+
+  /* ---- TYPOGRAPHY — kit `type` ---- */
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: var(--font-newsreader), "Iowan Old Style", Georgia, serif;   /* Review screens only */
   /* UX v1.2 §10.2 — every emoji slot renders through one stack (RUN-7). */
   --font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  --fs-caption: 0.75rem;   --lh-caption: 1.2;
-  --fs-secondary: 0.875rem; --lh-secondary: 1.4;
-  --fs-body: 1rem;         --lh-body: 1.5;
-  --fs-row-title: 1.125rem; --lh-row-title: 1.4;
-  --fs-heading: 1.375rem;  --lh-heading: 1.3;
-  --fs-review-headline: 1.75rem; --fs-review-headline-wide: 2.25rem; --lh-review-headline: 1.2;
+  /* Interface (Public Sans; weights 400, 500, 600 only) */
+  --fs-title: 22px;   --lh-title: 28px;   --fw-title: 600;   --ls-title: -0.01em;
+  --fs-heading: 17px; --lh-heading: 24px; --fw-heading: 600;
+  --fs-body: 15px;    --lh-body: 22px;    --fw-body: 400;
+  --fs-label: 13px;   --lh-label: 18px;   --fw-label: 500;
+  --fs-figure: 13px;  --lh-figure: 18px;  --fw-figure: 500;   /* always tabular-nums */
+  --fs-caption: 12px; --lh-caption: 16px; --fw-caption: 400;
+  /* Review (Newsreader; optical size follows the size) */
+  --fs-review-title: 26px; --lh-review-title: 32px; --fw-review-title: 500;
+  --fs-review-body: 17px;  --lh-review-body: 26px;  --fw-review-body: 400;
+  /* Product delta (apps/web DESIGN.md): the focus timer's figure. */
   --fs-timer: 2rem;
   --measure: 64ch;
 
-  /* ---- SPACING (4px base; only these steps) ---- */
+  /* ---- SPACING — kit `spacing` (4px base; only these steps) ---- */
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
-  --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --space-6: 24px; --space-8: 32px; --space-12: 48px;
   --row-min: 56px; --target: 44px;
   --content-text: 720px; --content-canvas: 960px;
   --header-h: 56px; --tabbar-h: 56px; --rail-w: 220px; --sheet-w: 420px;
@@ -164,122 +163,91 @@
      `minmax(--board-col-wide, 1.5fr)`, the rest `minmax(--board-col, 1fr)`. */
   --board-col-wide: 320px; --board-col: 240px;
 
-  /* ---- RADII ---- */
-  --radius: 6px; --radius-sheet: 10px; --radius-full: 9999px;
+  /* ---- RADII — kit `radius`. Nothing is a pill; only the mark, a category
+     dot and the current-item dot are round. ---- */
+  --radius-control: 6px;   /* buttons, fields, chips, checkboxes */
+  --radius-sheet: 10px;    /* sheets and the Review card */
+  --radius: var(--radius-control);
 
   /* ---- MOTION ---- */
   --ease-settle: cubic-bezier(0.2, 0, 0, 1);
   --dur-state: 120ms; --dur-sheet: 200ms;
-  /* The firing mark's breath (Workflow UX v0.1 §3.3, §6; TD-42) — the one long
-     duration in the product. It does NOT collapse under reduced motion like
-     the two above: the animation is never attached there (`motion-safe:` only),
-     so the still mark is at full opacity rather than frozen mid-breath. */
+  /* The running thread's dot (kit voice.md, Workflow; Workflow UX v0.1 §3.3,
+     §6; TD-42) — the one moving thing in the product, the now line in another
+     form. It does NOT collapse under reduced motion like the two above: the
+     animation is never attached there (`motion-safe:` only). */
   --dur-breathe: 2400ms;
 
-  /* ---- shadcn bridge (light) — official spec §9.7 map ---- */
-  --background: var(--syn-neutral-50);
-  --foreground: var(--syn-neutral-800);
-  --card: var(--syn-neutral-50);
-  --card-foreground: var(--syn-neutral-800);
-  --popover: var(--syn-neutral-100);
-  --popover-foreground: var(--syn-neutral-800);
-  --primary: var(--syn-neutral-800);          /* ink, not accent */
-  --primary-foreground: var(--syn-neutral-50);
-  --secondary: var(--syn-neutral-100);
-  --secondary-foreground: var(--syn-neutral-800);
-  --muted: var(--syn-neutral-100);
-  --muted-foreground: var(--syn-neutral-500);
-  /*
-   * NOTE — this REDECLARES the semantic `--accent` above (accent-500) as the
-   * pale hover surface. The bridge wins, so `var(--accent)` anywhere resolves
-   * to accent-100, not the marker teal. For the now line, the now/soon dot and
-   * the active-timer border, use the `accent-mark` utility (mapped to
-   * accent-500 in `@theme inline` below) or `--syn-accent-500` directly.
-   * Kept as handoff §6.2 wrote it; flagged for Vesper.
-   */
-  --accent: var(--syn-accent-100);            /* hover surfaces only */
-  --accent-foreground: var(--syn-accent-700);
-  --destructive: var(--syn-destructive-500);
-  --destructive-foreground: var(--syn-neutral-50);
-  --border: var(--syn-neutral-200);
-  --input: var(--syn-neutral-300);
-  --ring: var(--syn-accent-500);
-  --sidebar: var(--syn-neutral-50);
-  --sidebar-foreground: var(--syn-neutral-800);
-  --sidebar-primary: var(--syn-neutral-800);
-  --sidebar-primary-foreground: var(--syn-neutral-50);
-  --sidebar-accent: var(--syn-neutral-100);
-  --sidebar-accent-foreground: var(--syn-neutral-800);
-  --sidebar-border: var(--syn-neutral-200);
-  --sidebar-ring: var(--syn-accent-500);
+  /* ---- 3. shadcn bridge — every name points at a role ---- */
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--foreground);
+  --muted: var(--surface);
+  --accent: var(--surface);                 /* hover and pressed fills; never verdigris */
+  --accent-foreground: var(--foreground);
+  --ring: var(--now);
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--surface);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--now);
   --sidebar-width: var(--rail-w);
+
+  /*
+   * ---- 3. LEGACY ALIASES (WEB-1) ----
+   * Names from before the kit, each pointed at the kit role it now means so
+   * the existing class names resolve correctly. New code uses the role names;
+   * a drafted follow-up codemods these away. Never add to this block.
+   */
+  --paper: var(--background);
+  --ink: var(--foreground);
+  --hairline: var(--border);
+  --fill-muted: var(--border);
+  --edge: var(--input);
+  --text-body: var(--foreground);
+  --text-secondary: var(--muted-foreground);
+  --text-muted: var(--muted-foreground);
+  --text-disabled: var(--muted-foreground);
+  --accent-text: var(--link);
+  --violet-text: var(--off-schedule-text);
+  --fs-secondary: var(--fs-label);   --lh-secondary: var(--lh-label);
+  --fs-row-title: var(--fs-heading); --lh-row-title: var(--lh-heading);
 }
 
 .dark {
-  --paper: var(--syn-neutral-900);
-  --ink: var(--syn-neutral-100);
-  --surface: var(--syn-neutral-800);
-  --hairline: color-mix(in srgb, var(--syn-neutral-400) 40%, transparent);
-  --text-body: var(--syn-neutral-200);
-  --text-secondary: var(--syn-neutral-300);
-  --text-muted: var(--syn-neutral-400);
-  --text-disabled: var(--syn-neutral-500);
-  --accent-text: var(--syn-accent-300);
-  --accent-hover-surface: var(--syn-accent-800);
-  --violet-text: var(--syn-violet-300);
-  --violet-band: var(--syn-violet-800);
-  --violet-band-text: var(--syn-violet-200);
-  --chip-bg-step: 800; --chip-fg-step: 200;
-
-  --edge: var(--syn-neutral-600);
-  --fill-muted: var(--syn-neutral-700);
-
-  --chip-leaf-bg:  var(--syn-cat-leaf-800);  --chip-leaf-fg:  var(--syn-cat-leaf-200);
-  --chip-sky-bg:   var(--syn-cat-sky-800);   --chip-sky-fg:   var(--syn-cat-sky-200);
-  --chip-clay-bg:  var(--syn-cat-clay-800);  --chip-clay-fg:  var(--syn-cat-clay-200);
-  --chip-rose-bg:  var(--syn-cat-rose-800);  --chip-rose-fg:  var(--syn-cat-rose-200);
-  --chip-amber-bg: var(--syn-cat-amber-800); --chip-amber-fg: var(--syn-cat-amber-200);
-  --chip-slate-bg: var(--syn-cat-slate-800); --chip-slate-fg: var(--syn-cat-slate-200);
-  --chip-plum-bg:  var(--syn-cat-plum-800);  --chip-plum-fg:  var(--syn-cat-plum-200);
-  --chip-moss-bg:  var(--syn-cat-moss-800);  --chip-moss-fg:  var(--syn-cat-moss-200);
-
-  /* Block hues, dark — the chips' 800 / 200 pairing (DAY-3, TD-29). */
-  --block-orient:     var(--syn-cat-slate-800); --block-orient-label:     var(--syn-cat-slate-200);
-  --block-morning:    var(--syn-cat-leaf-800);  --block-morning-label:    var(--syn-cat-leaf-200);
-  --block-training:   var(--syn-cat-clay-800);  --block-training-label:   var(--syn-cat-clay-200);
-  --block-prep:       var(--syn-cat-amber-800); --block-prep-label:       var(--syn-cat-amber-200);
-  --block-work:       var(--syn-cat-sky-800);   --block-work-label:       var(--syn-cat-sky-200);
-  --block-break:      var(--syn-cat-moss-800);  --block-break-label:      var(--syn-cat-moss-200);
-  --block-transition: var(--syn-cat-amber-800); --block-transition-label: var(--syn-cat-amber-200);
-  --block-activity:   var(--syn-cat-plum-800);  --block-activity-label:   var(--syn-cat-plum-200);
-  --block-wind-down:  var(--syn-cat-rose-800);  --block-wind-down-label:  var(--syn-cat-rose-200);
-  --block-sleep:      var(--syn-neutral-700);   --block-sleep-label:      var(--text-secondary);
-
+  /* ---- 2. ROLES (dark) ---- */
   --background: var(--syn-neutral-900);
+  --surface: var(--syn-neutral-800);
   --foreground: var(--syn-neutral-100);
-  --card: var(--syn-neutral-800);
-  --card-foreground: var(--syn-neutral-100);
-  --popover: var(--syn-neutral-700);
-  --popover-foreground: var(--syn-neutral-100);
+  --muted-foreground: var(--syn-neutral-400);
+  --border: var(--syn-neutral-700);
+  --input: var(--syn-neutral-500);
   --primary: var(--syn-neutral-100);
   --primary-foreground: var(--syn-neutral-900);
-  --secondary: var(--syn-neutral-700);
-  --secondary-foreground: var(--syn-neutral-100);
-  --muted: var(--syn-neutral-700);
-  --muted-foreground: var(--syn-neutral-300);
-  --accent: var(--syn-accent-800);
-  --accent-foreground: var(--syn-accent-200);
-  --border: var(--syn-neutral-600);
-  --input: var(--syn-neutral-600);
-  --ring: var(--syn-accent-400);
-  --sidebar: var(--syn-neutral-900);
-  --sidebar-foreground: var(--syn-neutral-100);
-  --sidebar-primary: var(--syn-neutral-100);
-  --sidebar-primary-foreground: var(--syn-neutral-900);
-  --sidebar-accent: var(--syn-neutral-800);
-  --sidebar-accent-foreground: var(--syn-neutral-100);
-  --sidebar-border: var(--syn-neutral-600);
-  --sidebar-ring: var(--syn-accent-400);
+  --now: var(--syn-brand-400);
+  --link: var(--syn-brand-400);
+  --off-schedule: var(--syn-violet-400);
+  --off-schedule-text: var(--syn-violet-300);
+  --destructive: var(--syn-red-500);
+  --destructive-foreground: var(--syn-neutral-50);
+  --destructive-text: var(--syn-red-300);
+  --logo-disc: var(--syn-neutral-50);
+  --logo-rule: var(--syn-brand-400);
+
+  --category-leaf-chip:  #2A3A2A; --category-leaf-dot:  #82BC83;
+  --category-sky-chip:   #233845; --category-sky-dot:   #67B5E1;
+  --category-clay-chip:  #453026; --category-clay-dot:  #E09675;
+  --category-rose-chip:  #452E33; --category-rose-dot:  #E190A2;
+  --category-amber-chip: #3F3320; --category-amber-dot: #CCA45E;
+  --category-slate-chip: #32363B; --category-slate-dot: #9EACBE;
+  --category-plum-chip:  #3E3041; --category-plum-dot:  #C796D2;
+  --category-moss-chip:  #34372C; --category-moss-dot:  #A6B08A;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -287,25 +255,54 @@
 }
 
 @theme inline {
-  /* bridge → Tailwind colour utilities (bg-background, text-muted-foreground, …) */
+  /* roles → utilities (bg-background, text-muted-foreground, bg-now, text-link, …) */
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-now: var(--now);
+  --color-link: var(--link);
+  --color-off-schedule: var(--off-schedule);
+  --color-off-schedule-text: var(--off-schedule-text);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-text: var(--destructive-text);
+  --color-category-leaf-chip: var(--category-leaf-chip);   --color-category-leaf-dot: var(--category-leaf-dot);
+  --color-category-sky-chip: var(--category-sky-chip);     --color-category-sky-dot: var(--category-sky-dot);
+  --color-category-clay-chip: var(--category-clay-chip);   --color-category-clay-dot: var(--category-clay-dot);
+  --color-category-rose-chip: var(--category-rose-chip);   --color-category-rose-dot: var(--category-rose-dot);
+  --color-category-amber-chip: var(--category-amber-chip); --color-category-amber-dot: var(--category-amber-dot);
+  --color-category-slate-chip: var(--category-slate-chip); --color-category-slate-dot: var(--category-slate-dot);
+  --color-category-plum-chip: var(--category-plum-chip);   --color-category-plum-dot: var(--category-plum-dot);
+  --color-category-moss-chip: var(--category-moss-chip);   --color-category-moss-dot: var(--category-moss-dot);
+  /* `bg-block-<kind>` · `text-block-label` — planning surfaces only (TD-29). */
+  --color-block-orient: var(--block-orient);
+  --color-block-morning: var(--block-morning);
+  --color-block-training: var(--block-training);
+  --color-block-prep: var(--block-prep);
+  --color-block-work: var(--block-work);
+  --color-block-break: var(--block-break);
+  --color-block-transition: var(--block-transition);
+  --color-block-activity: var(--block-activity);
+  --color-block-wind-down: var(--block-wind-down);
+  --color-block-sleep: var(--block-sleep);
+  --color-block-label: var(--block-label);
+  --color-block-sleep-label: var(--block-sleep-label);
+
+  /* bridge → utilities */
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
   --color-ring: var(--ring);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
@@ -316,71 +313,51 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* semantic names → utilities (bg-paper, text-ink, border-hairline, text-accent-text, …) */
+  /* legacy aliases → utilities (bg-paper, text-ink, border-hairline, …); see :root */
   --color-paper: var(--paper);
   --color-ink: var(--ink);
-  --color-surface: var(--surface);
   --color-hairline: var(--hairline);
   --color-edge: var(--edge);
   --color-fill-muted: var(--fill-muted);
-  --color-chip-leaf-bg: var(--chip-leaf-bg);   --color-chip-leaf-fg: var(--chip-leaf-fg);
-  --color-chip-sky-bg: var(--chip-sky-bg);     --color-chip-sky-fg: var(--chip-sky-fg);
-  --color-chip-clay-bg: var(--chip-clay-bg);   --color-chip-clay-fg: var(--chip-clay-fg);
-  --color-chip-rose-bg: var(--chip-rose-bg);   --color-chip-rose-fg: var(--chip-rose-fg);
-  --color-chip-amber-bg: var(--chip-amber-bg); --color-chip-amber-fg: var(--chip-amber-fg);
-  --color-chip-slate-bg: var(--chip-slate-bg); --color-chip-slate-fg: var(--chip-slate-fg);
-  --color-chip-plum-bg: var(--chip-plum-bg);   --color-chip-plum-fg: var(--chip-plum-fg);
-  --color-chip-moss-bg: var(--chip-moss-bg);   --color-chip-moss-fg: var(--chip-moss-fg);
-  /* `bg-block-<kind>` · `text-block-<kind>-label` — planning surfaces only (TD-29). */
-  --color-block-orient: var(--block-orient);         --color-block-orient-label: var(--block-orient-label);
-  --color-block-morning: var(--block-morning);       --color-block-morning-label: var(--block-morning-label);
-  --color-block-training: var(--block-training);     --color-block-training-label: var(--block-training-label);
-  --color-block-prep: var(--block-prep);             --color-block-prep-label: var(--block-prep-label);
-  --color-block-work: var(--block-work);             --color-block-work-label: var(--block-work-label);
-  --color-block-break: var(--block-break);           --color-block-break-label: var(--block-break-label);
-  --color-block-transition: var(--block-transition); --color-block-transition-label: var(--block-transition-label);
-  --color-block-activity: var(--block-activity);     --color-block-activity-label: var(--block-activity-label);
-  --color-block-wind-down: var(--block-wind-down);   --color-block-wind-down-label: var(--block-wind-down-label);
-  --color-block-sleep: var(--block-sleep);           --color-block-sleep-label: var(--block-sleep-label);
   --color-text-body: var(--text-body);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
   --color-text-disabled: var(--text-disabled);
   --color-accent-text: var(--accent-text);
-  --color-accent-mark: var(--syn-accent-500);
-  --color-violet-mark: var(--syn-violet-500);
+  --color-accent-mark: var(--now);
   --color-violet-text: var(--violet-text);
-  --color-violet-band: var(--violet-band);
-  --color-violet-band-text: var(--violet-band-text);
+  --color-violet-mark: var(--off-schedule);
 
-  /* raw scales → utilities (bg-neutral-100, border-accent-500, bg-cat-leaf-500, …) */
-  --color-neutral-50: var(--syn-neutral-50);   --color-neutral-100: var(--syn-neutral-100);
-  --color-neutral-200: var(--syn-neutral-200); --color-neutral-300: var(--syn-neutral-300);
-  --color-neutral-400: var(--syn-neutral-400); --color-neutral-500: var(--syn-neutral-500);
-  --color-neutral-600: var(--syn-neutral-600); --color-neutral-700: var(--syn-neutral-700);
-  --color-neutral-800: var(--syn-neutral-800); --color-neutral-900: var(--syn-neutral-900);
-  --color-accent-100: var(--syn-accent-100); --color-accent-200: var(--syn-accent-200);
-  --color-accent-300: var(--syn-accent-300); --color-accent-400: var(--syn-accent-400);
-  --color-accent-500: var(--syn-accent-500); --color-accent-600: var(--syn-accent-600);
-  --color-accent-700: var(--syn-accent-700); --color-accent-800: var(--syn-accent-800);
-  --color-violet-100: var(--syn-violet-100); --color-violet-200: var(--syn-violet-200);
-  --color-violet-300: var(--syn-violet-300); --color-violet-400: var(--syn-violet-400);
-  --color-violet-500: var(--syn-violet-500); --color-violet-600: var(--syn-violet-600);
-  --color-violet-700: var(--syn-violet-700); --color-violet-800: var(--syn-violet-800);
-  --color-cat-leaf-100: var(--syn-cat-leaf-100);   --color-cat-leaf-200: var(--syn-cat-leaf-200);   --color-cat-leaf-500: var(--syn-cat-leaf-500);   --color-cat-leaf-700: var(--syn-cat-leaf-700);   --color-cat-leaf-800: var(--syn-cat-leaf-800);
-  --color-cat-sky-100: var(--syn-cat-sky-100);     --color-cat-sky-200: var(--syn-cat-sky-200);     --color-cat-sky-500: var(--syn-cat-sky-500);     --color-cat-sky-700: var(--syn-cat-sky-700);     --color-cat-sky-800: var(--syn-cat-sky-800);
-  --color-cat-clay-100: var(--syn-cat-clay-100);   --color-cat-clay-200: var(--syn-cat-clay-200);   --color-cat-clay-500: var(--syn-cat-clay-500);   --color-cat-clay-700: var(--syn-cat-clay-700);   --color-cat-clay-800: var(--syn-cat-clay-800);
-  --color-cat-rose-100: var(--syn-cat-rose-100);   --color-cat-rose-200: var(--syn-cat-rose-200);   --color-cat-rose-500: var(--syn-cat-rose-500);   --color-cat-rose-700: var(--syn-cat-rose-700);   --color-cat-rose-800: var(--syn-cat-rose-800);
-  --color-cat-amber-100: var(--syn-cat-amber-100); --color-cat-amber-200: var(--syn-cat-amber-200); --color-cat-amber-500: var(--syn-cat-amber-500); --color-cat-amber-700: var(--syn-cat-amber-700); --color-cat-amber-800: var(--syn-cat-amber-800);
-  --color-cat-slate-100: var(--syn-cat-slate-100); --color-cat-slate-200: var(--syn-cat-slate-200); --color-cat-slate-500: var(--syn-cat-slate-500); --color-cat-slate-700: var(--syn-cat-slate-700); --color-cat-slate-800: var(--syn-cat-slate-800);
-  --color-cat-plum-100: var(--syn-cat-plum-100);   --color-cat-plum-200: var(--syn-cat-plum-200);   --color-cat-plum-500: var(--syn-cat-plum-500);   --color-cat-plum-700: var(--syn-cat-plum-700);   --color-cat-plum-800: var(--syn-cat-plum-800);
-  --color-cat-moss-100: var(--syn-cat-moss-100);   --color-cat-moss-200: var(--syn-cat-moss-200);   --color-cat-moss-500: var(--syn-cat-moss-500);   --color-cat-moss-700: var(--syn-cat-moss-700);   --color-cat-moss-800: var(--syn-cat-moss-800);
-
-  /* type, radius, motion → utilities */
+  /* type → utilities (text-title, text-label, text-review-title, …) */
   --font-sans: var(--font-sans);
   --font-serif: var(--font-serif);
   --font-emoji: var(--font-emoji);
-  --radius-sm: var(--radius); --radius-md: var(--radius); --radius-lg: var(--radius); --radius-xl: var(--radius-sheet);
+  --text-title: var(--fs-title);
+  --text-title--line-height: var(--lh-title);
+  --text-title--font-weight: var(--fw-title);
+  --text-title--letter-spacing: var(--ls-title);
+  --text-heading: var(--fs-heading);
+  --text-heading--line-height: var(--lh-heading);
+  --text-heading--font-weight: var(--fw-heading);
+  --text-body: var(--fs-body);
+  --text-body--line-height: var(--lh-body);
+  --text-label: var(--fs-label);
+  --text-label--line-height: var(--lh-label);
+  --text-label--font-weight: var(--fw-label);
+  --text-figure: var(--fs-figure);
+  --text-figure--line-height: var(--lh-figure);
+  --text-figure--font-weight: var(--fw-figure);
+  --text-caption: var(--fs-caption);
+  --text-caption--line-height: var(--lh-caption);
+  --text-review-title: var(--fs-review-title);
+  --text-review-title--line-height: var(--lh-review-title);
+  --text-review-title--font-weight: var(--fw-review-title);
+  --text-review-body: var(--fs-review-body);
+  --text-review-body--line-height: var(--lh-review-body);
+
+  /* radius, motion → utilities */
+  --radius-sm: var(--radius-control); --radius-md: var(--radius-control); --radius-lg: var(--radius-control);
+  --radius-xl: var(--radius-sheet);
   --ease-settle: var(--ease-settle);
   --breakpoint-wide: 768px;                    /* the one break: `wide:` variant */
 }

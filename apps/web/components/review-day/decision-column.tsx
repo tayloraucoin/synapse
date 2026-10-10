@@ -125,7 +125,7 @@ export function DecisionColumn({
   const hasBlocks = day.blocks.length > 0;
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       {hasBlocks ? (
         <>
           {day.toDecide.length === 0 ? null : (

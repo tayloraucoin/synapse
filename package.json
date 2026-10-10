@@ -54,6 +54,7 @@
     "check-specs": "node tooling/check-specs.ts",
     "check-refs": "node tooling/check-refs.ts",
     "check-stack": "node tooling/check-stack.ts",
+    "check-brand": "node tooling/check-brand.ts",
     "check-test-weakening": "node tooling/check-test-weakening.ts",
     "test:hooks": "node tooling/test-hooks.ts",
     "budget": "node tooling/budget.ts",

@@ -119,7 +119,7 @@ export function NewViewSheet({
       }
     >
       <form
-        className="flex flex-col gap-(--space-5)"
+        className="flex flex-col gap-(--space-6)"
         onSubmit={(event) => {
           event.preventDefault();
           submit();

@@ -6,7 +6,7 @@ import { LoadingText } from "./loading-text";
 const meta: Meta<typeof LoadingText> = {
   title: "Composed/Feedback/LoadingText",
   component: LoadingText,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

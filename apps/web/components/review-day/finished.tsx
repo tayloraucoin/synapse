@@ -61,7 +61,7 @@ export function Finished({
 
   return (
     <ScreenFrame prose>
-      <div className="flex flex-col gap-(--space-5)">
+      <div className="flex flex-col gap-(--space-6)">
         {/*
          * One region, so the number and its sentence are announced together.
          */}

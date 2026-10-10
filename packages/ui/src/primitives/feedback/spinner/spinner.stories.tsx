@@ -15,7 +15,7 @@ type Story = StoryObj<typeof Spinner>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex items-center gap-(--space-4) p-(--space-6)">
+    <div className="flex items-center gap-(--space-4) p-(--space-8)">
       <Spinner />
       <span className="text-text-secondary">
         <Spinner />

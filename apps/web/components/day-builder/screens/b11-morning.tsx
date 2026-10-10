@@ -233,7 +233,7 @@ export function ScreenMorning({
   };
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       <Text as="p" tone="secondary" className="tabular-nums">
         {roomLine}
       </Text>

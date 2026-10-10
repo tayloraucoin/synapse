@@ -15,7 +15,7 @@ type Story = StoryObj<typeof HelperText>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex flex-col gap-(--space-3) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-3) p-(--space-8)">
       <HelperText>A rough range is fine.</HelperText>
       <HelperText error>Give it a name.</HelperText>
     </div>

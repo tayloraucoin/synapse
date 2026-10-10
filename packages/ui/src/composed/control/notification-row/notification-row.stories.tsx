@@ -17,7 +17,7 @@ const meta: Meta<typeof NotificationRow> = {
   parameters: { layout: "fullscreen" },
   decorators: [
     (Story) => (
-      <div className="divide-hairline max-w-xl divide-y p-(--space-6)">
+      <div className="divide-hairline max-w-xl divide-y p-(--space-8)">
         <Story />
       </div>
     ),

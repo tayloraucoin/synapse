@@ -10,7 +10,7 @@ const meta: Meta<typeof WindowSpan> = {
   parameters: { layout: "fullscreen" },
   decorators: [
     (Story) => (
-      <div className="relative h-64 w-80 p-(--space-6)">
+      <div className="relative h-64 w-80 p-(--space-8)">
         <Story />
       </div>
     ),

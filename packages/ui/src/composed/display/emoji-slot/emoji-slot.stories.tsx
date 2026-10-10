@@ -12,7 +12,7 @@ import { EmojiSlot } from "./emoji-slot";
 const meta: Meta<typeof EmojiSlot> = {
   title: "Composed/Display/EmojiSlot",
   component: EmojiSlot,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

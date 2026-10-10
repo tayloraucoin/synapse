@@ -18,13 +18,13 @@ type Story = StoryObj<typeof Badge>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex flex-wrap items-center gap-(--space-3) p-(--space-6)">
+    <div className="flex flex-wrap items-center gap-(--space-3) p-(--space-8)">
       <Badge variant="outline">Deep work</Badge>
       <Badge variant="outline">archived</Badge>
       <Badge variant="text">anytime</Badge>
       <Badge
         variant="outline"
-        className="bg-cat-leaf-100 text-cat-leaf-700 dark:bg-cat-leaf-800 dark:text-cat-leaf-200 border-transparent"
+        className="bg-category-leaf-chip text-foreground border-transparent"
       >
         Movement
       </Badge>

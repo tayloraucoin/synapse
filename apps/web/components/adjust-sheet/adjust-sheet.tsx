@@ -103,7 +103,7 @@ export function AdjustSheet({ open, onOpenChange, date, entry, bandDragDeltaMin,
           </div>
         }
       >
-        <div className="flex flex-col gap-(--space-6)">
+        <div className="flex flex-col gap-(--space-8)">
           {!online ? <StatusLine variant="offline" placement="inline" /> : null}
 
           {adjust.loading ? (

@@ -159,7 +159,7 @@ export function RoutineSection({ pick, disabled }: { pick: QuickPickApi; disable
             </div>
             {/* UX v1.2 §3.5, §5.3 (RUN-13): the versions as tabs under the title; a tap sets the row's minutes. */}
             {item.versions !== null && item.versions.length >= 2 ? (
-              <div role="tablist" aria-label={COPY.version} className="flex flex-wrap gap-(--space-1) ps-(--space-8)">
+              <div role="tablist" aria-label={COPY.version} className="flex flex-wrap gap-(--space-1)">
                 {item.versions.map((version) => {
                   const current = pick.lengthOf(item.id) === version.minutes;
                   return (

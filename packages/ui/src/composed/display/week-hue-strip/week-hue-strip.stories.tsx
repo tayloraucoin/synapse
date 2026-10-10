@@ -10,7 +10,7 @@ import { WeekHueStrip, type WeekHueStripProps } from "./week-hue-strip";
 const meta: Meta<typeof WeekHueStrip> = {
   title: "Composed/Display/WeekHueStrip",
   component: WeekHueStrip,
-  decorators: [(Story) => <div className="max-w-[375px] p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-[375px] p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

@@ -10,7 +10,7 @@
  * Search key and, on iOS, the clear affordance people already expect.
  *
  * THE VALUE NEVER TOUCHES THE BORDER (T13.2; DAY-1). The glyph's slot ends
- * at `--space-3` + 16px; the input's start padding is `--space-7` (48px),
+ * at `--space-3` + 16px; the input's start padding is `--space-12` (48px),
  * which is at least `--space-3` beyond it. WebKit draws `type="search"` with
  * its own `searchfield` appearance, which discards author padding on iOS —
  * the value then sets against the border in the walkthrough's screenshots —
@@ -93,7 +93,7 @@ export function SearchField({
         className={cn(
           "border-hairline bg-paper text-ink h-(--target) w-full appearance-none rounded-(--radius) border",
           // The glyph's slot (`--space-3` + 16px), then at least `--space-3` of air.
-          "ps-(--space-7) text-(length:--fs-body)",
+          "ps-(--space-12) text-(length:--fs-body)",
           hasValue && !disabled ? "pe-(--target)" : "pe-(--space-3)",
           "placeholder:text-text-secondary",
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",

@@ -196,7 +196,7 @@ export function BlockEditor({ templateId, embedded = false, exitHref }: BlockEdi
                   editor.patch({ name: event.target.value });
                 }}
                 classes={{
-                  input: "border-transparent px-0 text-(length:--fs-heading) font-semibold",
+                  input: "border-transparent px-0 text-(length:--fs-title) font-semibold",
                 }}
               />
             }

@@ -98,14 +98,15 @@
  * document and the read-only passage (the orient frame's carousel) are the
  * same tiptap document under this one class, so the words look the same being
  * written and being read, and nothing is ever `dangerouslySetInnerHTML`.
- * Newsreader at body size; a quote is a hairline on the left; a list is a
+ * Public Sans at body size (the brand kit keeps Newsreader for Review
+ * screens only); a quote is a hairline on the left; a list is a
  * plain bullet; a link is underlined ink (colour never alone, §9.3). Five
  * marks and nodes — bold, italic, quote, list, link — and no heading, image,
  * colour or table, because those extensions are not installed.
  */
 @layer components {
   .prose-passage {
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-size: var(--fs-body);
     line-height: var(--lh-body);
     font-variant-numeric: normal;
@@ -130,7 +131,7 @@
   }
   .prose-passage ul {
     margin: 0;
-    padding-inline-start: var(--space-5);
+    padding-inline-start: var(--space-6);
     list-style: disc;
   }
   .prose-passage li + li {

@@ -16,7 +16,7 @@ import { TierRadioRows } from "./tier-radio-rows";
 const meta: Meta<typeof TierRadioRows> = {
   title: "Composed/Control/TierRadioRows",
   component: TierRadioRows,
-  decorators: [(Story) => <div className="max-w-lg p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-lg p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

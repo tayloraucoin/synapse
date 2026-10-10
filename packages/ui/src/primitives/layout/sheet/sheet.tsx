@@ -6,7 +6,7 @@
  * feature ticket) is what picks between them. `SheetPanel` at the bottom of
  * this file is the prop-based form.
  *
- * TOKEN BINDINGS: surface --paper, scrim --scrim, shadow --shadow-overlay,
+ * TOKEN BINDINGS: surface --paper, scrim --scrim, no shadow (the hairline border lifts it),
  * width --sheet-w.
  *
  * A11y: Radix's focus trap, Esc-to-close, and focus-return are untouched.
@@ -73,7 +73,7 @@ function SheetContent({
       <SheetPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          "fixed z-50 flex flex-col gap-(--space-4) bg-paper shadow-(--shadow-overlay) transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500",
+          "fixed z-50 flex flex-col gap-(--space-4) border-hairline bg-surface transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500",
           side === "right" &&
             "inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-(--sheet-w)",
           side === "left" &&

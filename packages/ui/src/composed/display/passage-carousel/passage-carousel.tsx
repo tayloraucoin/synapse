@@ -198,7 +198,7 @@ export function PassageCarousel({
               <span
                 aria-hidden="true"
                 className={cn(
-                  "block size-2 rounded-full transition-colors duration-(--dur-state)",
+                  "block size-2 transition-colors duration-(--dur-state)",
                   at === current ? "bg-ink" : "bg-edge",
                 )}
               />
@@ -233,7 +233,7 @@ function Slide({
         <Text as="span" variant="caption" tone="secondary">
           {PASSAGE_CAROUSEL_COPY.quoteCaption}
         </Text>
-        <blockquote className="tabular-off m-0 font-serif text-(length:--fs-row-title) leading-(--lh-row-title)">
+        <blockquote className="tabular-off m-0 text-(length:--fs-row-title) leading-(--lh-row-title)">
           “{slide.text}”
         </blockquote>
         {slide.attribution === null ? null : (

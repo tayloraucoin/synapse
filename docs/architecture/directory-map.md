@@ -655,6 +655,8 @@ docs/
     directory-map.md
     drizzle-orm-conventions.md
     tech-stack.md
+  archive/
+    branding-guide.md
   decisions/
     imported/
       roles/
@@ -1776,6 +1778,10 @@ packages/
             index.ts
             state-word.stories.tsx
             state-word.tsx
+          synapse-mark/
+            index.ts
+            synapse-mark.stories.tsx
+            synapse-mark.tsx
           tag/
             index.ts
             tag.stories.tsx
@@ -2228,6 +2234,9 @@ specs/
         brief.md
         rulings.md
   web/
+    one-offs/
+      WEB-001-rebrand-to-kit/
+        contract.md
     ux/
       _global/
         copy-register.md
@@ -2841,6 +2850,7 @@ tooling/
     toolkit.ts
     work-ids.ts
   budget.ts
+  check-brand.ts
   check-refs.ts
   check-reviewers.ts
   check-settings.ts

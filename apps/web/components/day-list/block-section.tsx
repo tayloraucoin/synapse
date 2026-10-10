@@ -336,7 +336,7 @@ export function UnblockedSection({
   const rowProps = { planMode: mode === "plan", timeZone, hasUndo, onToggleDone, onUndo, onOpen };
   return (
     <section>
-      <Text as="h2" variant="secondary" tone="secondary" weight={500} className="px-(--space-4) pt-(--space-6) pb-(--space-2)">
+      <Text as="h2" variant="secondary" tone="secondary" weight={500} className="px-(--space-4) pt-(--space-8) pb-(--space-2)">
         {COPY.alsoToday}
       </Text>
       <ul className="flex flex-col">

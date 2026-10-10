@@ -15,7 +15,7 @@ type Story = StoryObj<typeof CollapsiblePanel>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="max-w-md p-(--space-6)">
+    <div className="max-w-md p-(--space-8)">
       <CollapsiblePanel trigger={<span>3 not assigned today</span>}>
         <p className="text-text-secondary m-0 py-(--space-2)">
           Trimmed to fit 45 min. These don&apos;t count.

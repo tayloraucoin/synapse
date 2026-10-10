@@ -124,7 +124,7 @@ export function ScreenWork({
   const after = between(four.workEnd, api.times.lightsOut);
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       <LargeTargetRow
         label={COPY.b03.heading}
         layout="stacked"
@@ -148,7 +148,7 @@ export function ScreenWork({
       />
 
       {choice !== "work" ? null : (
-        <div className="flex flex-col gap-(--space-5)">
+        <div className="flex flex-col gap-(--space-6)">
           <WorkFields
             value={four}
             disabled={disabled}

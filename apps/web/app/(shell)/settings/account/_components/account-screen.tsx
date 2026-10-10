@@ -37,7 +37,7 @@ export function AccountScreen({
   const [signOutOpen, setSignOutOpen] = React.useState(false);
 
   return (
-    <div className="flex flex-col gap-(--space-6)">
+    <div className="flex flex-col gap-(--space-8)">
       <AccountPhoto name={name} />
 
       <AccountForm initialName={name} initialEmail={email} />

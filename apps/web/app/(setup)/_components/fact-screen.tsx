@@ -97,7 +97,7 @@ export function FactScreen({
 
   if (bare) {
     return (
-      <div className="flex flex-col gap-(--space-5)">
+      <div className="flex flex-col gap-(--space-6)">
         {children}
         {error ? <HelperText error>{error}</HelperText> : null}
       </div>
@@ -106,7 +106,7 @@ export function FactScreen({
 
   if (embedded) {
     return (
-      <div className="flex flex-col gap-(--space-5)">
+      <div className="flex flex-col gap-(--space-6)">
         <Heading tabIndex={-1}>{heading}</Heading>
         {body === undefined ? null : (
           <Text as="p" tone="secondary">

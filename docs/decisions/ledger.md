@@ -184,4 +184,5 @@ One line per `## ` heading in the nine logs above, in file order: the heading ve
 
 ## Rulings without a record
 
+- WEB-1: the brand kit (Design System artifact `EhNLGGfozdciR27ukmtmxL`) is the source of the app's colour, type, shape, mark and voice; `preset.css` holds its raw ramps, its roles and the shadcn bridge, older token names stay as aliases until a codemod, Public Sans replaces Geist, Newsreader is Review screens only, there is no shadow and no pill, and the mark is a placeholder to replace before launch. Why: the operator's kit wins where it and the repo disagree. [`branding-guide.md`](../ux/branding-guide.md), 2026-10-09.
 - MIG-5: the workspace test runner is Vitest 5.0.3, exact, per workspace with tests, run by `yarn test` through Turbo and failing on zero test files; `node:test` stays for the root `tests/`, `tooling/` and `scripts/`. Why: workspace source uses extensionless and `@syn/*` TypeScript imports `node:test` cannot load unaided, and the React workspaces need a DOM. [`changelog.md`](changelog.md), 2026-10-09.

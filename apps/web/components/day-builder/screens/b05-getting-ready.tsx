@@ -81,7 +81,7 @@ export function ScreenGettingReady({
 
   if (list.templateId === null || list.slots === null || startedEmpty === null) {
     return (
-      <div className="flex flex-col gap-(--space-5)">
+      <div className="flex flex-col gap-(--space-6)">
         <ListHeader list={list} nameLabel={COPY.b05.listName} newLabel={COPY.b05.newList} disabled={disabled} />
         {list.missing ? null : <BuilderSkeleton />}
       </div>
@@ -96,7 +96,7 @@ export function ScreenGettingReady({
   const showStarters = (startedEmpty || addOpen) && starters.length > 0;
 
   return (
-    <div className="flex flex-col gap-(--space-5)">
+    <div className="flex flex-col gap-(--space-6)">
       <ListHeader list={list} nameLabel={COPY.b05.listName} newLabel={COPY.b05.newList} disabled={disabled} />
 
       {showStarters ? (

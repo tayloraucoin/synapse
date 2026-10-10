@@ -81,7 +81,7 @@ export function ReflectionsSection({
   );
 
   return (
-    <div className="flex flex-col gap-(--space-6)">
+    <div className="flex flex-col gap-(--space-8)">
       {day.reflectionItems.map((entry) => (
         <ReflectionBlock
           key={entry.item.id}

@@ -17,7 +17,7 @@ const SIZES = ["sm", "md", "lg"] as const;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex flex-col gap-(--space-5) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-6) p-(--space-8)">
       {VARIANTS.map((variant) => (
         <div key={variant} className="flex flex-col gap-(--space-2)">
           <p className="text-text-muted m-0 font-sans text-(length:--fs-caption)">

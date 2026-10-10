@@ -52,7 +52,7 @@ export function ArchivedSheet({
         </div>
       }
     >
-      <div className="flex flex-col gap-(--space-5)">
+      <div className="flex flex-col gap-(--space-6)">
         {online ? null : <StatusLine variant="offline" placement="inline" />}
         {error === null ? null : <HelperText error>{error}</HelperText>}
 

@@ -1,99 +1,117 @@
 # Typography — which component, and when
 
-**Authority:** official UX spec §9.4 (the scale and the two families), v2
-component handoff §5.1 (the `Text` contract). This guide is how to pick; those
-two are why.
+**Authority:** the operator's brand kit (Design System artifact
+`EhNLGGfozdciR27ukmtmxL`, `tokens.json` → `type`), carried into `preset.css` by
+WEB-1, and the v2 component handoff §5.1 (the `Text` contract). This guide is
+how to pick; those two are why. `yarn check-brand docs` holds the ramp below to
+the preset.
 
 ---
 
 ## The rule in one line
 
 **Every piece of text is a `Text`.** A bare `<p>`, `<span>`, or `<h1>` with a
-`className` is how a scale drifts — one surface at 15px, another at 16px, and
-no one able to say which is right.
+`className` is how a scale drifts.
 
 ---
 
 ## Two families, each with one job
 
-| Family | Variable | Where |
-|---|---|---|
-| **Geist Sans** | `--font-sans` | The interface. Every label, row, button, time, setting. |
-| **Newsreader** | `--font-serif` | The reflective surfaces only: the Day Review header, the Week Review header, the adherence sentence and its formula, reflection notes as typed. |
+| Family          | Variable                                                           | Where                                                                                            |
+| --------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Public Sans** | `--font-sans` (`next/font`, `--font-public-sans`)                  | The interface. Every label, row, button, time, setting. Weights 400, 500 and 600, and no others. |
+| **Newsreader**  | `--font-serif` (`next/font`, `--font-newsreader`, optical size on) | Review screens only: the Day Review and Week Review titles and their written summary.            |
 
-Newsreader **never** appears on the List or the Schedule. That is the "ceremony
-where bandwidth exists" rule made visible: the execution tabs are for someone
-who has asked not to think, and a serif there is the product clearing its
-throat.
+Newsreader appears nowhere else: not on the List, the Schedule, the journal,
+the orient frame or a passage. Its arrival is how the product says the day is
+over.
+
+---
+
+## The ramp
+
+| Style          | Size | Leading | Weight       | Use                                       |
+| -------------- | ---- | ------- | ------------ | ----------------------------------------- |
+| `title`        | 22px | 28px    | 600, -0.01em | the day or screen name; one per screen    |
+| `heading`      | 17px | 24px    | 600          | sheet titles and section names            |
+| `body`         | 15px | 22px    | 400          | item names and running copy               |
+| `label`        | 13px | 18px    | 500          | buttons, tabs, chips and states           |
+| `figure`       | 13px | 18px    | 500          | times, counts and percentages, tabular    |
+| `caption`      | 12px | 16px    | 400          | reasons and provenance under an item      |
+| `review-title` | 26px | 32px    | 500          | a Day or Week Review's title (Newsreader) |
+| `review-body`  | 17px | 26px    | 400          | a Review's written summary (Newsreader)   |
+
+Each is a `--fs-*` and `--lh-*` pair in the preset and a Tailwind utility
+(`text-title`, `text-label`, …). One product delta sits outside the ramp:
+`--fs-timer` (2rem), the focus timer's figure only.
 
 ---
 
 ## Choosing a variant
 
+The `Text` variant names predate the kit; each now resolves to a kit style.
+
 ```
 Is it the one heading on the screen?
-├── yes → <Heading>            (h1, 1.375rem/1.3, weight 600)
+├── yes → <Heading>            variant="heading" → the kit's title (22/28, 600)
 └── no
-    ├── Is it a row's title?   → variant="row-title"  (1.125rem/1.4, weight 500)
-    ├── Is it the reflective surface's headline or its sentence?
-    │   ├── headline           → variant="review-headline"  (Newsreader 1.75rem, 2.25rem wide)
-    │   └── sentence           → variant="review-sentence"  (Newsreader 1rem/1.5)
+    ├── Is it a row's title?   → variant="row-title" → the kit's heading (17/24)
+    ├── Is it a Review's title or its summary?
+    │   ├── title              → variant="review-headline" → review-title (Newsreader 26/32, 500)
+    │   └── summary            → variant="review-sentence" → review-body (Newsreader 17/26)
     ├── Is it a second line — template name, section span, "from Thu"?
-    │                          → <Meta>   (0.875rem, secondary tone)
+    │                          → <Meta>   variant="secondary" → the kit's label (13/18)
     ├── Is it the smallest thing — a helper line, a square's label?
-    │                          → <Caption> (0.75rem, secondary tone)
-    └── otherwise              → variant="body" (1rem/1.5), the default
+    │                          → <Caption> → caption (12/16)
+    └── otherwise              → variant="body" → body (15/22), the default
 ```
 
-There is **no all-caps variant and no eyebrow**. Official spec §9.4: no
-all-caps labels, no tracked-out eyebrows. If you want one, the answer is no.
+There is **no all-caps variant, no eyebrow and no single-word italic.** Labels
+are sentence case.
 
 ---
 
 ## The presets
 
-| Preset | Is | Use for |
-|---|---|---|
-| `<Heading>` | `as="h1" variant="heading" tone="ink"` | The one screen heading. Pass `as="h2"` for every heading after the first — the size does not change, the level is document structure. |
-| `<Caption>` | `variant="caption" tone="secondary"` | Helper text, the quiet weighting line under a tier name, a strip square's label. |
-| `<Meta>` | `variant="secondary" tone="secondary"` | The muted second line: the applied template, a section's span, *from Thu*. |
+| Preset      | Is                                     | Use for                                                                   |
+| ----------- | -------------------------------------- | ------------------------------------------------------------------------- |
+| `<Heading>` | `as="h1" variant="heading" tone="ink"` | The one screen heading. Pass `as="h2"` for every heading after the first. |
+| `<Caption>` | `variant="caption" tone="secondary"`   | Helper text, a tier's weighting line, a strip square's label.             |
+| `<Meta>`    | `variant="secondary" tone="secondary"` | The muted second line: the applied template, a section's span.            |
 
 ---
 
 ## Tones
 
-`ink · body · secondary · muted · accent · violet` — each maps to a semantic
-token that already flips inside `.dark`, so **a component never writes a
-`dark:` colour**.
+| Tone                 | Role                | Holds                       |
+| -------------------- | ------------------- | --------------------------- |
+| `ink`, `body`        | `foreground`        | 17.62:1 light, 16.55:1 dark |
+| `secondary`, `muted` | `muted-foreground`  | 6.51:1 light, 7.55:1 dark   |
+| `accent`             | `link`              | 5.33:1 light, 6.33:1 dark   |
+| `violet`             | `off-schedule-text` | 6.38:1 light, 7.41:1 dark   |
 
-- `muted` is `neutral-400` in both themes and passes AA **at large sizes only**
-  (official spec §9.3). Use it on `row-title` and up, or where an accessible
-  name carries the meaning.
-- `violet` means **off-schedule and nothing else**. It is the one semantic
-  colour with its own scale precisely because it carries meaning alone; using
-  it decoratively spends that.
-- `accent` is for a link or the word beside a now/soon marker. The accent never
-  fills a surface.
+Every tone holds 4.5:1 on `background` and `surface` in both themes, so no tone
+is "large text only". `violet` means off schedule and nothing else. `accent` is
+a link or a word in the brand colour; text is never set in brand-500.
 
 ---
 
 ## Tabular figures
 
-**On by default, everywhere** — `body` sets `font-variant-numeric: tabular-nums`
-globally. A column of times that does not align is the defect this prevents.
-
-Opt **out** for prose with `tabular={false}` (the adherence sentence, a
-reflection note). There is no opt-in, because the default is already on.
+**On by default, everywhere**: `body` sets `font-variant-numeric: tabular-nums`
+globally, so every time, count and percentage holds its column. Opt out for
+prose with `tabular={false}`.
 
 ---
 
 ## Common mistakes
 
-| Wrong | Right | Why |
-|---|---|---|
-| `<p className="text-sm text-neutral-500">` | `<Meta as="p">` | A raw class is a scale that drifts. |
-| `<Text className="text-[17px]">` | a variant | 17px is not on the scale (§9.4). |
-| `<Heading>` twice on one screen | `<Heading>` then `<Heading as="h2">` | One `h1` per screen (cross-cutting §11). |
-| Newsreader on a day row | `font-sans` | §9.4: the reflective surfaces only. |
-| `<Text tone="violet">` for emphasis | `tone="ink"` + weight | Violet means off-schedule. |
-| `space-y-(--space-3)` on `Text` children | `flex flex-col gap-(--space-3)` | `Text` ships `m-0`, which wins. See [classnames.md](classnames.md). |
+| Wrong                                      | Right                                | Why                                                                 |
+| ------------------------------------------ | ------------------------------------ | ------------------------------------------------------------------- |
+| `<p className="text-sm text-neutral-500">` | `<Meta as="p">`                      | A raw class is a scale that drifts, and a raw step skips the role.  |
+| `<Text className="text-[14px]">`           | a variant                            | 14px is not on the ramp.                                            |
+| `<Heading>` twice on one screen            | `<Heading>` then `<Heading as="h2">` | One `h1` per screen.                                                |
+| Newsreader on a day row or a journal field | `font-sans`                          | Newsreader is Review screens only.                                  |
+| `font-bold`                                | `weight={600}`                       | The kit uses 400, 500 and 600, no others.                           |
+| `<Text tone="violet">` for emphasis        | `tone="ink"` + weight                | Violet means off schedule.                                          |
+| `space-y-(--space-3)` on `Text` children   | `flex flex-col gap-(--space-3)`      | `Text` ships `m-0`, which wins. See [classnames.md](classnames.md). |
