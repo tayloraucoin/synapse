@@ -3,16 +3,31 @@
   "$comment": "Repo-scoped Claude Code rules. TRACKED IN GIT so every worktree inherits them on checkout. Machine-wide baseline lives in ~/.claude/settings.json.",
   "$comment-database": "The database rules encode the track's non-negotiable: an agent authors SQL and stops. db:reset and any drop are denied outright; every hosted write asks. db:reset also refuses non-local tiers in its own script (packages/db/scripts/reset-local-db.ts) — two independent guards, because this one is a config file someone can edit.",
   "$comment-network": "curl/wget are allowed because sandbox.network below is the real boundary — the OS-level proxy restricts them to allowedDomains. URL-shaped allow patterns like Bash(curl http://x/ *) are fragile and bypassed by flag order, redirects, or protocol; domain enforcement belongs in the sandbox.",
-  "$comment-practice": "Merged in migrate step 5 (record 0001): every host block kept; the floor rows added beside them, each written once; the two team hooks. The push deny, bash-guard and stop-gate are the operator rows, in settings.local.json.",
+  "$comment-practice": "PEM's settings are the default (docs/pem/adaptations/2026-10-09-migration-kept-host-versions.md). Synapse's adjustments: the Supabase, Vercel and Fonts hosts, the npx/turbo/curl/wget allows, these comments. The push deny, bash-guard and stop-gate are the operator rows, in settings.local.json (record 0001, rulings 22).",
   "permissions": {
     "allow": [
       "Bash(yarn *)",
+      "Bash(node tooling/*)",
+      "Bash(corepack *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(git ls-files *)",
+      "Bash(git rev-parse *)",
+      "Bash(git branch *)",
+      "Bash(git switch *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git restore *)",
+      "Bash(git stash *)",
+      "Bash(git mv *)",
+      "Bash(git worktree *)",
       "Bash(npx tsx *)",
       "Bash(npx eslint *)",
       "Bash(npx prettier *)",
       "Bash(npx tsc *)",
       "Bash(npx shadcn *)",
-      "Bash(corepack *)",
       "Bash(tsc *)",
       "Bash(eslint *)",
       "Bash(prettier *)",
@@ -21,40 +36,54 @@
       "Bash(wget *)"
     ],
     "deny": [
-      "Bash(*db:reset*)",
-      "Bash(*db:drop*)",
-      "Bash(*supabase db reset*)",
-      "Bash(*drizzle-kit drop*)",
-      "Bash(*DROP SCHEMA*)",
-      "Bash(*DROP DATABASE*)",
+      "Bash(git reset --hard)",
       "Bash(git reset --hard *)",
       "Bash(git clean *)",
       "Bash(git branch -D *)",
       "Bash(git filter-branch *)",
+      "Bash(npm publish)",
       "Bash(npm publish *)",
+      "Bash(npm login)",
       "Bash(npm login *)",
+      "Bash(yarn npm publish)",
+      "Bash(yarn npm publish *)",
+      "Bash(yarn npm login)",
+      "Bash(yarn npm login *)",
+      "Bash(rm -rf /*)",
+      "Bash(rm -rf ~*)",
+      "Bash(dropdb *)",
+      "Bash(*db:reset*)",
+      "Bash(*db:drop*)",
+      "Bash(*supabase db reset*)",
+      "Bash(*drizzle-kit drop*)",
+      "Bash(*prisma migrate reset*)",
+      "Bash(*DROP SCHEMA*)",
+      "Bash(*DROP DATABASE*)",
+      "Read(**/.env)",
       "Read(**/.env.local)",
       "Read(**/.env.*.local)",
       "Read(**/.env.development)",
       "Read(**/.env.staging)",
       "Read(**/.env.production)",
-      "Read(**/.env)",
       "Read(**/secrets/**)",
       "Read(**/*.pem)",
       "Read(~/.ssh/**)",
-      "Read(~/.aws/**)",
-      "Bash(yarn npm publish *)",
-      "Bash(yarn npm login *)"
+      "Read(~/.aws/**)"
     ],
     "ask": [
+      "Bash(gh pr create *)",
+      "Bash(gh pr merge *)",
+      "Bash(vercel *)",
+      "Bash(yarn dlx *)",
       "Bash(*db:migrate*)",
       "Bash(*db:push*)",
       "Bash(*db:seed*)",
       "Bash(*db:setup*)",
+      "Bash(*db:local:reset*)",
+      "Bash(*supabase db push*)",
       "Bash(*drizzle-kit migrate*)",
       "Bash(*drizzle-kit push*)",
-      "Bash(*db:local:reset*)",
-      "Bash(*supabase db push*)"
+      "Bash(*prisma migrate deploy*)"
     ]
   },
   "hooks": {
@@ -88,6 +117,7 @@
     "allowUnsandboxedCommands": true,
     "network": {
       "$comment": "No api.anthropic.com: Phase 1 has no AI package and nothing in this repository calls a model. Add it when that changes, not before.",
+      "allowLocalBinding": true,
       "allowedDomains": [
         "localhost",
         "127.0.0.1",
@@ -109,14 +139,22 @@
     },
     "filesystem": {
       "allowWrite": [
+        "~/.yarn",
         "~/.cache/yarn",
         "~/Library/Caches/Yarn",
-        "~/.yarn",
         "~/.npm"
       ],
       "denyRead": [
         "~/.ssh",
-        "~/.aws"
+        "~/.aws",
+        "./**/.env",
+        "./**/.env.local",
+        "./**/.env.*.local",
+        "./**/.env.development",
+        "./**/.env.staging",
+        "./**/.env.production",
+        "./**/secrets",
+        "./**/*.pem"
       ]
     }
   }

@@ -18,3 +18,4 @@ Synapse works the practice's way. The practice is Product Engineering Mastery (P
 | Date       | Adaptation                                                                                 |
 | ---------- | ------------------------------------------------------------------------------------------ |
 | 2026-10-09 | [The docs app, brought in after the migration](adaptations/2026-10-09-docs-app-in-migration.md) |
+| 2026-10-09 | [The migration kept the host's version of every derived file](adaptations/2026-10-09-migration-kept-host-versions.md) |

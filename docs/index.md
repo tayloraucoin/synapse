@@ -1,40 +1,53 @@
-# The map
+---
+title: The practice — map
+description: "Read first in every session. The map of the practice in Synapse: what each layer holds, which wins when two disagree, what loads always versus on trigger, and the context budget per build."
+layer: decisions
+status: ruling
+thread: P-A
+role: Plumb
+date: 2026-10-01
+last_reviewed: 2026-10-09
+supersedes:
+load_when: always
+---
 
-Read first, every session. Per document: [`README.md`](README.md). Records from before the practice: [`decisions/imported/README.md`](decisions/imported/README.md).
+# The practice
+
+How Synapse is built: the practice (PEM `62d344b`, the default for every shared file) and the product's own layers. Measurement and runbooks: `docs/measurement/`, `docs/runbooks/`, on request.
 
 ## Layers
 
-| Layer         | Where                                                                                                                                     | What it is                                                                                       | Loads                           |
+| Layer | Where | What it is | Loads |
 | --- | --- | --- | --- |
-| Agent context | `AGENTS.md`, `CLAUDE.md`, `.claude/rules/` (the practice's and `house-*`), nested `AGENTS.md` in `apps/web`, `packages/db`, `packages/ui` | What every agent is told                                                                         | always / by path                |
-| Workflows     | `workflows/`                                                                                                                              | How work moves: the prompt builder, tracks, stages, QA levels                                    | the builder when work starts    |
-| Specs         | `specs/` at the root: `_status.md`, `_shared/epics/`, `web/ux/`                                                                           | Tickets, contracts and the living truth, by the practice                                         | by ticket                       |
-| UX source     | `ux/` (its `README.md` is the index)                                                                                                      | Product behaviour until it is promoted to `specs/web/ux/` (layer 3, part 9)                      | by the ladder                   |
-| Architecture  | `architecture/`: conventions (locked), tech stack, Drizzle conventions, the generated map                                                 | Placement and stack, Synapse's own contract                                                      | on placement                    |
-| Domain guides | `ai-guides/`, `developer-guides/`                                                                                                         | Tokens, typography, components, copy, db and RLS, tRPC; environments, database, migrations, auth | by the `house-*` rules          |
-| Decisions     | `decisions/`: `ledger.md`, `changelog.md`, `records/`, `imported/`                                                                        | Why the rules are what they are; `imported/` archives what the practice replaced                 | grep on demand                  |
-| Roles         | `roles/`; `.claude/agents/` is generated from them                                                                                        | One prompt per seat                                                                              | injected, or as a subagent      |
-| Practice      | `design/`, `engineering/`, `measurement/`, `runbooks/`; checks in `tooling/`                                                              | The canon, the practice's templates and conventions (as reference)                               | by path on UI files; on request |
-| Product       | `product/`, `reviews/`                                                                                                                    | Walkthrough notes, the value proposition, the build review                                       | when shaping                    |
+| Agent context | `AGENTS.md`, `CLAUDE.md`, `.claude/rules/` (with `house-*`), nested `AGENTS.md` | What every agent is told | always / by path |
+| Workflows | `docs/workflows/` | How work moves: the prompt builder (the front door), `tracks/`, shared `stages/`, QA levels | the builder when work starts; the rest on request |
+| Specs | `specs/`: `_status.md`, `_shared/epics/`, `web/ux/` (the living truth) | Tickets, contracts, how the app works now | by ticket |
+| UX source | `docs/ux/`, until MIG-1 promotes it | Behaviour of areas not yet promoted | by the ladder |
+| Decisions | `docs/decisions/`: `ledger.md`, `records/`, `changelog.md`, `imported/` | Why the rules are what they are; `imported/` archives what the practice replaced | grep on demand |
+| Roles | `docs/roles/<department>/` | One prompt per seat; `.claude/agents/` is generated from them | injected, or as a subagent |
+| Design | `docs/design/`; the product layer in `apps/web/docs/design/` | What UI is built and judged by | by path on UI files |
+| Engineering | `docs/engineering/`; Synapse's older `architecture/`, `ai-guides/`, `developer-guides/` | Conventions, the stack; checks in `tooling/` | on request; checks always |
+| Product | `docs/product/`, `apps/web/docs/product-rules.md` | Framing templates; Synapse's product notes | when shaping |
 
 ## Precedence (highest first)
 
-Enforced checks (lint, types, `yarn verify`, CI), then the session's explicit instruction (the agent names any rule it breaks). Then Synapse's own order, carried verbatim (record 0001):
+1. **Enforced checks.** Lint, types, tests, `yarn verify`, CI.
+2. **The session's explicit instruction.** The agent names any rule the instruction breaks.
+3. **The design layer.** `canon.md` is the floor. The product's DESIGN, tokens, components, states and anti-patterns (`apps/web/docs/design/`) and `apps/web/docs/product-rules.md` may tighten it, never loosen it.
+4. **Accepted decisions** in `docs/decisions/`, including the imported `TECHNICAL-DECISIONS.md` and `DEVIATIONS.md` logs: on-disk reality and these logs beat any stale spec text.
+5. **The brief, the UX spec and the contract.** `specs/web/ux/`, or `docs/ux/` for an area not yet promoted. They may request an exception; they never grant one. Stage files (`docs/workflows/stages/`) sit at rung 2 with the session's instruction: their interview mode governs behaviour, never law.
+6. **References.**
+7. **Role judgment.** It fills silences, labeled as judgment.
 
-1. **Product behaviour** → `docs/ux/ux-spec-v1.md` (its **§0.3 rulings are signed**), then the three epic documents and `docs/ux/synapse_navigation_and_system_ux_architecture.md` for their own screens, then `docs/ux/synapse_ui_component_needs_and_handoff_v2.md` for component contracts.
-2. **Architecture & placement** → [`docs/architecture/codebase-conventions.md`](architecture/codebase-conventions.md) (locked). Stack choices: [`docs/architecture/tech-stack.md`](architecture/tech-stack.md).
-3. **Domain guides** → [`docs/ai-guides/`](ai-guides/) govern their domain (tokens, typography, classnames, components, copy, db/RLS, tRPC) and sit **below** the conventions doc but **above** ad-hoc judgment.
-4. **App-specific rules** → the nearest [`AGENTS.md`](../apps/web/AGENTS.md). **Wins on conflict** with the conventions doc for that app (route topology, scope).
-5. **Ticket rulings** → each ticket's "Rulings this slice makes", summarised in [`TECHNICAL-DECISIONS.md`](decisions/imported/specs/infrastructure/TECHNICAL-DECISIONS.md).
-6. **Shipped-work amendments** → [`DEVIATIONS.md`](decisions/imported/specs/infrastructure/DEVIATIONS.md) + `TECHNICAL-DECISIONS.md`. On-disk reality + these logs override any stale spec text.
+A nested `AGENTS.md` adds rules for its folder, never loosening these.
 
 ## What loads when
 
 - **Always**, the repo's share of each session (≤4,000 tokens; the tool's own prompt, tools and built-in skills come on top): `AGENTS.md` (≤100 lines), `CLAUDE.md` (shim, ≤20 lines), this file (≤80 lines), the skill and subagent listings (≤12 model-invocable skills, descriptions ≤400 characters), and SessionStart hook output (≤150).
 - **By path:**
-  - `.claude/rules/ui.md` on UI files loads `canon.md` and the product design layer; `ts.md`, `testing.md`, `next.md`, `turbo.md`, `docs.md`, `specs.md` and `deps.md` load on their globs.
+  - `.claude/rules/ui.md` on UI files loads `canon.md` and the product design layer; `ts.md`, `testing.md`, `next.md`, `turbo.md`, `docs.md`, `specs.md`, `deps.md` and the `house-*` rules load on their globs.
   - Nested `AGENTS.md` files load in `apps/` and `packages/`.
-- **By trigger:** `tk-motion` on motion work; `shadcn` on component work; references through `docs/references/README.md`, at most 3 files per task.
+- **By trigger:** `tk-motion` on motion work; `shadcn` on component work; references through `docs/references/README.md`, at most 3 files per task. Not in Synapse yet (PEM's knowledge body).
 - **On request:** roles, templates (when filling one), runbooks, decisions (grep the ledger), prompts, workflows.
 - **Never:** `docs/research/` (A11: a Frame, Research or UX prompt may attach one file as `[research: <why>]` when nothing distilled covers it; never a build thread); `docs/references/_meta/` outside a library batch; `PROVENANCE.md` outside a disputed finding; `docs/_generated/`; every `README.md` under `docs/` except the references router and `docs/workflows/README.md`.
 
@@ -42,12 +55,17 @@ Enforced checks (lint, types, `yarn verify`, CI), then the session's explicit in
 
 This table is the CI contract read by `tooling/budget.ts`.
 
-| Build                   | Loads                                                                                                 | Cap (tokens) |
-| ----------------------- | ----------------------------------------------------------------------------------------------------- | ------------ |
-| UI build                | always 4,000 + design layer 5,000 + brief and package 2,000 + references 1,500 + one skill body 2,500 | 15,000       |
-| Non-UI build            | always 4,000 + path rules and nested `AGENTS.md` 1,500 + contract and cited spec 5,000                | 10,500       |
-| Critic pass (forked)    | `canon-rubric.md` and canon §2 + the cited surface file + ≤3 exemplars (screenshots excluded)         | 6,000        |
-| Evaluator pass (forked) | evaluator body 4,500 + contract and cited spec 5,000 + evidence index 500 (never the builder's summary) | 10,000       |
+| Build | Loads | Cap (tokens) |
+| --- | --- | --- |
+| UI build | always 4,000 + design layer 5,000 + brief and package 2,000 + references 1,500 + one skill body 2,500 | 15,000 |
+| Non-UI build | always 4,000 + path rules and nested `AGENTS.md` 1,500 + contract and cited spec 5,000 | 10,500 |
+| Critic pass (forked) | `canon-rubric.md` and canon §2 + the cited surface file + ≤3 exemplars (screenshots excluded) | 6,000 |
+| Evaluator pass (forked) | evaluator body 4,500 + contract and cited spec 5,000 + evidence index 500 (never the builder's summary) | 10,000 |
 
 A product's own design layer gets about 1,700 of the 5,000; `canon.md` takes the rest. A product `DESIGN.md` holds deltas, never restatements.
 
+## Changing the practice
+
+- Amend the file. A change to a file that came from PEM also gets an entry in `docs/pem/adaptations/`.
+- Add a `changelog.md` entry; a ledger line only for a ruling others will cite; a record in `records/` only for a choice that is hard to undo.
+- Nothing lives in two places.

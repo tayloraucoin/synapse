@@ -1,83 +1,57 @@
 # Synapse
 
-Yarn 4 + Turborepo monorepo for Synapse — a habit-tracking PWA built on the promise that **only you can see your data, not the people who built this**. Web now, Expo later.
+A habit-tracking PWA built on the promise that **only you can see your data, not the people who built this**. Web now, Expo later. It is built the practice's way: Product Engineering Mastery (PEM), adopted in place ([`docs/pem/`](docs/pem/README.md)).
 
-**For AI agents:** [`AGENTS.md`](AGENTS.md) is the canonical instruction spine — start there. (`CLAUDE.md` is a pointer to it.)
+## Where to start
 
-> **Foundation complete, product not started.** All eleven tickets in [`docs/specs/infrastructure/`](docs/decisions/imported/specs/infrastructure/) are done: the monorepo, the packages, the design system, the database, auth, the app scaffold, the typed API, the PWA plumbing, delivery, and the docs. Every route exists as a placeholder that names its screen. The feature epics — Setup, In Use, Review — build on top.
+| You are                      | Open                                                                               |
+| ---------------------------- | ---------------------------------------------------------------------------------- |
+| A person                     | [`docs/README.md`](docs/README.md), organised by the question you arrive with      |
+| Asking how the layers relate | [`docs/index.md`](docs/index.md), the map agents read                              |
+| Asking what is being built   | [`specs/_status.md`](specs/_status.md), the live state of every ticket             |
+| An AI agent                  | [`AGENTS.md`](AGENTS.md), the contract; `CLAUDE.md` imports it and `docs/index.md` |
 
-## Essential docs
-
-| Doc | Purpose |
-| --- | --- |
-| [`AGENTS.md`](AGENTS.md) | Agent spine — precedence, guardrails, workflow |
-| [`docs/specs/infrastructure/README.md`](docs/decisions/imported/specs/infrastructure/README.md) | **The foundation track** — process contract, precedence, locked scope, non-negotiables |
-| [`docs/specs/infrastructure/00-build-order.md`](docs/decisions/imported/specs/infrastructure/00-build-order.md) | Ordered build queue and critical path |
-| [`docs/ux/ux-spec-v1.md`](docs/ux/ux-spec-v1.md) | Product behaviour source of truth (§0.3 rulings are signed) |
-| [`docs/ux/`](docs/ux/) | Epic and cross-cutting UX architecture, component handoff |
-| [`docs/README.md`](docs/README.md) | The documentation index — one line per document |
-| [`docs/architecture/codebase-conventions.md`](docs/architecture/codebase-conventions.md) | The placement/naming/package-graph contract (locked) |
-| [`docs/architecture/tech-stack.md`](docs/architecture/tech-stack.md) | Canonical stack choices + pinned versions |
-| [`docs/developer-guides/environments.md`](docs/developer-guides/environments.md) | Tiers, and the setup checklists for Supabase, Vercel, GitHub, and local |
-
-## Repository layout
-
-### Apps (`apps/`)
-
-| App | Status | Role |
-| --- | --- | --- |
-| `web` | Active | The Synapse PWA — the only product surface in Phase 1 |
-| `mobile` | Seam only | README placeholder — Expo in Phase 1.5 |
-
-### Packages (`packages/`)
-
-Shared libraries use the `@syn/*` scope.
-
-| Package | Role |
-| --- | --- |
-| `@syn/config` | ESLint, Prettier, Tailwind preset, TSConfig bases (subpath exports) |
-| `@syn/types`, `@syn/constants`, `@syn/utils`, `@syn/validators`, `@syn/observability` | Platform-pure capability layers |
-| `@syn/ui` | Shared web components (Radix + Tailwind, Storybook-first) — the one web-only package |
-| `@syn/db` | Drizzle schema, client, migrations, the RLS bridge |
-| `@syn/auth` | Supabase Auth clients, session refresh, the AuthContext bridge |
-| `@syn/api`, `@syn/hooks` | tRPC routers + services, and platform-pure headless hooks |
-
-Phase 1 has no AI package, no billing, no marketing site.
+This README only gets you running.
 
 ## Prerequisites
 
-- **Node 22** — use `.nvmrc` (`nvm use` or equivalent)
-- **Yarn 4.13.0** — `corepack enable`, then `yarn install`
+| Tool | Version | Set up                                 |
+| ---- | ------- | -------------------------------------- |
+| Node | 22      | `.nvmrc` (`nvm use`)                   |
+| Yarn | 4.13.0  | `corepack enable`, then `yarn install` |
 
-`yarn install` refuses to run if the `packageManager` field and your global Yarn disagree. The fix is `corepack enable`, not a global Yarn install.
+`yarn install` refuses to run if the `packageManager` field and your global Yarn disagree. The fix is `corepack enable`, not a global Yarn install. Environment variables: [`.env.example`](.env.example).
 
-## Commands
-
-From the repo root:
+## Run it
 
 ```sh
 yarn install
-yarn dev              # all workspaces in dev mode
-yarn web:dev          # the web app on :3000
-yarn build            # build all workspaces
-yarn lint             # code-quality lint, per package
-yarn lint:boundaries  # import-boundary lint, from the root
-yarn check-types      # tsc --noEmit, per package
-yarn format           # prettier --write
+yarn doctor       # is this machine ready? names the fix for anything broken
+yarn web:dev      # the app, at http://localhost:3000
+yarn docs:dev     # docs/ and specs/ as a site, at http://localhost:3001
+yarn verify       # everything CI runs
 ```
 
-Verify the way CI does, in this order:
+- **On a phone:** `yarn web:dev:local` binds the app to every interface and prints its LAN URLs.
+- **Database:** the commands are wired at the root and target `@syn/db`; see [`packages/db/SETUP.md`](packages/db/SETUP.md). An agent never runs one against a hosted tier; it authors the SQL and a person applies it.
+- **Storybook:** `yarn ui:storybook` is the design system's workshop.
 
-```sh
-yarn lint && yarn lint:boundaries && yarn check-types && yarn build
-```
+## Layout
 
-Database commands are wired at the root and target `@syn/db` — see [`packages/db/SETUP.md`](packages/db/SETUP.md). **An agent never runs one against a hosted tier**; it authors the SQL and a human applies it.
+| Path                | What                                                                                      |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| `apps/web`          | The Synapse PWA, the only product surface in Phase 1                                      |
+| `apps/docs`         | Renders `docs/` and `specs/` in the browser                                               |
+| `apps/mobile`       | A seam: README only, Expo in Phase 1.5                                                    |
+| `packages/config`   | `@syn/config` — ESLint (code, boundaries), Prettier, the Tailwind preset, tsconfig bases  |
+| `packages/types`, `constants`, `utils`, `validators`, `observability` | Platform-pure capability layers         |
+| `packages/db`       | `@syn/db` — Drizzle schema, client, migrations, the RLS bridge                            |
+| `packages/auth`     | `@syn/auth` — Supabase Auth clients, session refresh                                      |
+| `packages/api`, `packages/hooks` | `@syn/api` (tRPC routers and services), `@syn/hooks` (platform-pure hooks)   |
+| `packages/ui`       | `@syn/ui` — shared web components (Radix + Tailwind, Storybook-first)                     |
+| `docs/`             | The practice and Synapse's own docs. Start at [`docs/index.md`](docs/index.md)            |
+| `specs/`            | Tickets, contracts and the living UX truth (`specs/web/ux/`)                              |
+| `tooling/`          | The checks `yarn verify` runs, the hooks in `.claude/settings.json`, and `yarn doctor`    |
+| `.claude/`          | Path rules, generated subagents (`agents/`, never edited by hand), skills                 |
 
-Storybook (`yarn ui:storybook`) is the design system's workshop. Docs upkeep is `yarn directory-map` and `yarn docs:check-links`.
-
-## Package alias
-
-Workspace packages are referenced as `@syn/<name>` and resolved by Yarn workspaces — never by relative path across a package boundary. The import graph is layered and acyclic, enforced by `yarn lint:boundaries`:
-
-`config` → `constants` / `types` / `observability` → `utils` → `validators` → `db` → `auth` → `api` → `hooks` → `ui` → `apps`
+Phase 1 has no AI package, no billing, no marketing site.
