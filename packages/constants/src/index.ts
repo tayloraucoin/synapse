@@ -13,10 +13,13 @@
 
 export {
   BLOCK_KINDS,
+  BLOCK_KIND_VALUES,
   BLOCK_KIND_WORDS,
   DEFAULT_BLOCK_ORDER,
+  NEW_BLOCK_KINDS,
   PLACEABLE_KINDS,
   TRAINING_PLACEMENTS,
+  USE_ADDED_BLOCK_KINDS,
   type BlockKindValue,
   type TrainingPlacementValue,
 } from "./block-kinds";
@@ -110,8 +113,20 @@ export {
 } from "./motion";
 export {
   NOTIFICATION_CATALOGUE,
+  NOTIFICATION_KINDS,
   type NotificationCatalogueEntry,
+  type NotificationKindValue,
 } from "./notification-catalogue";
+export {
+  BLOCK_FILLS,
+  CLIENT_COLOR_KEYS,
+  DONE_SOURCES,
+  MEAL_LINK_KINDS,
+  SLOT_EVENT_KINDS,
+  TODO_TYPES,
+  WORK_SIZES,
+  WORK_TIERS,
+} from "./planner-values";
 export { PLACED_ROW_ICONS, type PlacedRowKey } from "./placed-rows";
 export { SCHEDULE_SHAPE_ICONS, type ScheduleShapeValue } from "./schedule-shapes";
 export {

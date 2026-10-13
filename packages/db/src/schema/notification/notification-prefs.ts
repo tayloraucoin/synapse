@@ -28,6 +28,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import { NOTIFICATION_KINDS } from "@syn/constants";
 import type { NotificationKind } from "@syn/types";
 
 import { enumValues } from "../enum-values";
@@ -37,28 +38,13 @@ import { users } from "../user/users";
 
 /**
  * The nine rows of official spec §8.2, N1…N9 in order, then UX v1.1 §9.1's
- * three (`block_start`, `fixture_start`, `devices_off`). Moved in DYN-1; the
- * `ADD VALUE`s ship in `0004`; the scheduler writes them from DYN-20.
+ * three (`block_start`, `fixture_start`, `devices_off`), UX v1.2's
+ * `journal_reminder` (0007) and USE's `todo_reminder` (USE-2, `0012`). The
+ * values are spelled once, in `NOTIFICATION_KINDS` (`@syn/constants`).
  */
 export const notificationKindEnum = pgEnum(
   "notification_kind",
-  enumValues<NotificationKind>()([
-    "item_start",
-    "window_open",
-    "window_closing",
-    "review_reminder",
-    "pending_review",
-    "week_build",
-    "week_ready",
-    "timer_running",
-    "calendar_item",
-    "block_start",
-    "fixture_start",
-    "devices_off",
-    // UX v1.2 §9 N2 (R38) — the journal reminder. Moved in RUN-1; the
-    // `ADD VALUE` ships in `0007`; sent from RUN-6.
-    "journal_reminder",
-  ]),
+  enumValues<NotificationKind>()(NOTIFICATION_KINDS),
 );
 
 export const notificationPrefs = pgTable(

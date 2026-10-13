@@ -102,6 +102,20 @@ export type {
 } from "./domain/view";
 
 export type {
+  AddedBlockKind,
+  BlockFill,
+  ClientColorKey,
+  DoneSource,
+  MealLinkKind,
+  NewBlockKind,
+  SlotEventKind,
+  StoredBlockKind,
+  TodoType,
+  WorkSize,
+  WorkTier,
+} from "./domain/planner";
+
+export type {
   WorkflowBoardView,
   WorkflowColumnRole,
   WorkflowColumnView,

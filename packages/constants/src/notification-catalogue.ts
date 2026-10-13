@@ -22,23 +22,34 @@
  * N1a/N1c/N1d; their `n` is a citation number, not a §8.2 row.
  */
 
+/**
+ * Every `notification_kind` value, in the enum's order; `@syn/db` builds the
+ * pgEnum from this list. `todo_reminder` is USE's (USE-2), added in `0012`.
+ */
+export const NOTIFICATION_KINDS = [
+  "item_start",
+  "window_open",
+  "window_closing",
+  "review_reminder",
+  "pending_review",
+  "week_build",
+  "week_ready",
+  "timer_running",
+  "calendar_item",
+  "block_start",
+  "fixture_start",
+  "devices_off",
+  "journal_reminder",
+  "todo_reminder",
+] as const;
+
+export type NotificationKindValue = (typeof NOTIFICATION_KINDS)[number];
+
 export type NotificationCatalogueEntry = {
   /** N1…N9 — the row in official spec §8.2; 10–12 — UX v1.1 §9.1's additions; 13 — UX v1.2 §9's N2. */
   readonly n: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
-  readonly kind:
-    | "item_start"
-    | "window_open"
-    | "window_closing"
-    | "review_reminder"
-    | "pending_review"
-    | "week_build"
-    | "week_ready"
-    | "timer_running"
-    | "calendar_item"
-    | "block_start"
-    | "fixture_start"
-    | "devices_off"
-    | "journal_reminder";
+  /** `todo_reminder` has no row: USE's reminders are set per to-do. */
+  readonly kind: Exclude<NotificationKindValue, "todo_reminder">;
   readonly defaultEnabled: boolean;
   readonly phase: 1 | 2;
 };

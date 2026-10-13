@@ -10,11 +10,14 @@
  * - A TYPO fails at the declaration, with the fix in the message:
  *   `Type '"task_apointment"' is not assignable to type 'ItemType'. Did you
  *   mean '"task_appointment"'?`
- * - An OMISSION fails at the first consumer rather than here: the return type
- *   becomes the sentinel tuple `["MISSING_ENUM_VALUE", <the missing member>]`,
- *   which `pgEnum` accepts, so the sentinel surfaces in the column's type and
- *   every insert of a real value stops compiling. Less direct, still a red
- *   build — and the sentinel's name is in the error, so the cause is legible.
+ * - An OMISSION fails at the declaration too (USE-2; it used to fail only at
+ *   the first insert, which a table no service writes yet never reaches): the
+ *   argument must then also carry a `missing` key naming the absent members,
+ *   so the error reads `Property 'missing' is missing … { missing: "todos" }`.
+ * - An EXTRA value is a value outside the union, so it is the typo case.
+ *
+ * The list may be a `@syn/constants` tuple (`enumValues<TodoType>()(TODO_TYPES)`),
+ * which is how an enum's values are spelled once (USE-2).
  *
  * The generated SQL is unchanged; the call is an identity at runtime.
  *
@@ -29,14 +32,15 @@ type Missing<TUnion extends string, TValues extends readonly string[]> = Exclude
   TValues[number]
 >;
 
-type Exhaustive<TUnion extends string, TValues extends readonly TUnion[]> = [
+/** Satisfied by any argument when nothing is missing; otherwise names the gap. */
+type Complete<TUnion extends string, TValues extends readonly string[]> = [
   Missing<TUnion, TValues>,
 ] extends [never]
-  ? TValues
-  : readonly ["MISSING_ENUM_VALUE", Missing<TUnion, TValues>];
+  ? unknown
+  : { readonly missing: Missing<TUnion, TValues> };
 
 export function enumValues<TUnion extends string>() {
   return <const TValues extends readonly [TUnion, ...TUnion[]]>(
-    values: TValues,
-  ): Exhaustive<TUnion, TValues> => values as Exhaustive<TUnion, TValues>;
+    values: TValues & Complete<TUnion, TValues>,
+  ): TValues => values;
 }

@@ -242,7 +242,12 @@ export type CategoryKey =
 export type IconValue =
   | { kind: "emoji"; value: string }
   | { kind: "curated"; value: string; colorKey: CategoryKey | null }
-  | { kind: "image"; value: string };
+  | { kind: "image"; value: string }
+  /**
+   * USE (USE-2): a Lucide icon by name, coloured by a palette key or a
+   * `#rrggbb` hex (the icon picker). jsonb, so no SQL changes.
+   */
+  | { kind: "lucide"; value: string; color: string };
 
 /** TimerSession.source — §3.7. */
 export type TimerSessionSource = "timer" | "manual";
@@ -294,7 +299,9 @@ export type NotificationKind =
    * UX v1.2 §9 N2, R38 — one push at `journal_reminder_time`, sent only when
    * the journal is on, the reminder is on, and tonight's entry is empty.
    */
-  | "journal_reminder";
+  | "journal_reminder"
+  /** USE (USE-2): a to-do's reminder; the `ADD VALUE` ships in `0012`. */
+  | "todo_reminder";
 
 /** DataExport.status — official spec §7.6, Epic 1 ST-10. */
 export type ExportStatus = "preparing" | "ready" | "expired" | "failed";
