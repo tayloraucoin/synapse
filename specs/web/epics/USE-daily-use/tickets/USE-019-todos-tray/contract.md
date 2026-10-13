@@ -1,14 +1,14 @@
 ---
 id: "USE-19"
 size: medium
-objective: "The To-dos tray opens in place under Now's header: rows with box, icon, title and either the bell and reminder time or \"From <weekday>\", then Add a to-do; empty, from a reminder (tinted, time in ink), loading, a failed list and a failed check each as decided, and the reminder's lock-screen preview, all through useTodos on fixtures"
+objective: 'The To-dos tray opens in place under Now''s header: rows with box, icon, title and either the bell and reminder time or "From <weekday>", then Add a to-do; empty, from a reminder (tinted, time in ink), loading, a failed list and a failed check each as decided, and the reminder''s lock-screen preview, all through useTodos on fixtures'
 slice_type: "a shared collapsible list with its own data region; risks a count anywhere, the tray covering the block instead of pushing it, a carried to-do lost or labelled wrong, the tray's failure taking the screen with it, and a reminder's body with words added"
 non_negotiables:
-  - "Never a count, open or closed; an empty tray holds only \"Add a to-do\", and closed it reads \"To-dos\" alone (D-USE-26)."
+  - 'Never a count, open or closed; an empty tray holds only "Add a to-do", and closed it reads "To-dos" alone (D-USE-26).'
   - "Open, the tray pushes the screen down; nothing covers the day, and the block stays live."
   - "The to-dos load as their own region (useTodos): their loading or failure never blanks the block, and the block's never blanks them."
-  - "Which to-dos show and in what order is a pure function in @syn/utils: reminders first by time, then the rest oldest first; an unchecked to-do from an earlier day reads \"From <weekday>\"."
-  - "A failure is ink, never red: \"Not saved. Try again.\" under a row, \"To-dos didn't load. Try again.\" for the list."
+  - 'Which to-dos show and in what order is a pure function in @syn/utils: reminders first by time, then the rest oldest first; an unchecked to-do from an earlier day reads "From <weekday>".'
+  - 'A failure is ink, never red: "Not saved. Try again." under a row, "To-dos didn''t load. Try again." for the list.'
   - "A reminder's body is the to-do's title exactly, nothing added."
   - "Only @syn/ui components (Collapsible, Checkbox, InlineAddRow, SkeletonRow) and preset tokens."
 devs_call: "File split inside components/planner/todos-tray/; the tint's fade (about two seconds, none under reduced motion); the lock-screen preview's drawing."
@@ -58,23 +58,23 @@ out_of_scope:
   - "Desk Today's open To-dos section: work Today's ticket; the tray on Review the day: its own ticket"
 criteria:
   - id: C1
-    statement: "Open on Now at 7:14: \"To-dos\" and a chevron up; Call the mechanic with its phone icon, a bell and \"10:00\" muted; Library books with its bag icon and \"From Sunday\"; then \"+ Add a to-do\"; Wellness pushed down below"
+    statement: 'Open on Now at 7:14: "To-dos" and a chevron up; Call the mechanic with its phone icon, a bell and "10:00" muted; Library books with its bag icon and "From Sunday"; then "+ Add a to-do"; Wellness pushed down below'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-019-todos-tray/evidence/open-402.png"
   - id: C2
-    statement: "With no to-dos the open tray holds only \"+ Add a to-do\", no message, no illustration, no count"
+    statement: 'With no to-dos the open tray holds only "+ Add a to-do", no message, no illustration, no count'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-019-todos-tray/evidence/empty-402.png"
   - id: C3
-    statement: "Opened from a reminder at 10:00 the tray is open with Call the mechanic tinted and \"10:00\" in ink and semibold beside the bell, the Work block pushed down"
+    statement: 'Opened from a reminder at 10:00 the tray is open with Call the mechanic tinted and "10:00" in ink and semibold beside the bell, the Work block pushed down'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-019-todos-tray/evidence/from-a-reminder-402.png"
   - id: C4
-    statement: "The reminder preview at /dev/parts shows a lock screen with one Synapse notification whose body is \"Call the mechanic\" and nothing else"
+    statement: 'The reminder preview at /dev/parts shows a lock screen with one Synapse notification whose body is "Call the mechanic" and nothing else'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-019-todos-tray/evidence/notification-402.png"
   - id: C5
-    statement: "trayTodos orders reminders by time then the rest oldest first, labels an unchecked to-do from Sunday \"From Sunday\" on Monday and one past a week \"From 3 Oct\", keeps a checked one until the day ends, and reminderBody returns the title unchanged"
+    statement: 'trayTodos orders reminders by time then the rest oldest first, labels an unchecked to-do from Sunday "From Sunday" on Monday and one past a week "From 3 Oct", keeps a checked one until the day ends, and reminderBody returns the title unchanged'
     evidence: test
     command: "yarn test"
   - id: C6

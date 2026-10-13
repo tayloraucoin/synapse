@@ -1,10 +1,10 @@
 ---
 id: "USE-25"
 size: small
-objective: "Complete <Block> with items left settles the block into the close card: ×, the check tile in the block's colour, \"<Block> complete\", Next as two rows, Start <next> and the named disclosure \"Not done: …\", which opens each item left with Later and Leave, Later moving it by D-USE-70's rule with Undo; the day's last block reads \"Nothing after this today.\", then Now's empty state"
-slice_type: "a closing card with one-tap moves; risks a count or a \"missed\", Later landing somewhere other than D-USE-70's rule or changing the usual week, Undo that leaves a trace, and the card shown for an all-done block"
+objective: 'Complete <Block> with items left settles the block into the close card: ×, the check tile in the block''s colour, "<Block> complete", Next as two rows, Start <next> and the named disclosure "Not done: …", which opens each item left with Later and Leave, Later moving it by D-USE-70''s rule with Undo; the day''s last block reads "Nothing after this today.", then Now''s empty state'
+slice_type: 'a closing card with one-tap moves; risks a count or a "missed", Later landing somewhere other than D-USE-70''s rule or changing the usual week, Undo that leaves a trace, and the card shown for an all-done block'
 non_negotiables:
-  - "No count anywhere, no second person, nothing red, nothing says missed; the disclosure names the items (\"Not done: Meditate, Cold bath\")."
+  - 'No count anywhere, no second person, nothing red, nothing says missed; the disclosure names the items ("Not done: Meditate, Cold bath").'
   - "Later puts the item at the end of the next block of the same kind today, else at the end of the next block, for today only; laterTarget in @syn/utils decides it, and with no next block Later is not offered."
   - "Undo restores the item to its block exactly, removing the slot Later wrote; Leave writes nothing."
   - "The card is only for a block closed with items left; an all-done block keeps USE-20's footer, and ?state=all-done resolves to that footer."
@@ -57,15 +57,15 @@ out_of_scope:
   - "Offline queueing beyond the fixture server: the offline persistence ticket (wave 3)"
 criteria:
   - id: C1
-    statement: "Complete Wellness at 7:40 with Meditate and Cold bath left: the rows give way to the card with ×, the leaf check tile, \"Wellness complete\", \"Next\", a clay dot \"Training\" \"8:00\", a ring \"then Breakfast\" \"9:00\", Start Training and \"Not done: Meditate, Cold bath\" closed"
+    statement: 'Complete Wellness at 7:40 with Meditate and Cold bath left: the rows give way to the card with ×, the leaf check tile, "Wellness complete", "Next", a clay dot "Training" "8:00", a ring "then Breakfast" "9:00", Start Training and "Not done: Meditate, Cold bath" closed'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-025-block-complete-close-card/evidence/not-done-closed-402.png"
   - id: C2
-    statement: "Opened after Later on Meditate: Meditate muted over \"Moved to the end of Training\" with Undo; Cold bath with Later and Leave"
+    statement: 'Opened after Later on Meditate: Meditate muted over "Moved to the end of Training" with Undo; Cold bath with Later and Leave'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-025-block-complete-close-card/evidence/not-done-open-402.png"
   - id: C3
-    statement: "The day's last block at 21:40: ×, the tinted check tile, \"Wind-down complete\", \"Nothing after this today.\" and an outline See the whole day; no Next, no Start, no disclosure"
+    statement: 'The day''s last block at 21:40: ×, the tinted check tile, "Wind-down complete", "Nothing after this today." and an outline See the whole day; no Next, no Start, no disclosure'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-025-block-complete-close-card/evidence/last-block-402.png"
   - id: C4

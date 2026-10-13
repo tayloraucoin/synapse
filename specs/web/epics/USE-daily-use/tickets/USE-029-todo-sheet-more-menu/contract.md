@@ -10,7 +10,7 @@ non_negotiables:
   - "Past days cannot be picked; today is ringed in ink; the picked day is a filled ink disc."
   - "MonthGrid is presentational in @syn/ui (days, marks, picked, onPick), with a story per state, an exports subpath and a components.md row; nothing domain-aware enters it."
   - "Only @syn/ui components (DropdownMenu, ResponsiveSheet, Toaster) and preset tokens; back on the left in the step."
-devs_call: "MonthGrid's keyboard model (arrow keys by day and week, Page Up and Down by month); the step's title for each entry (\"Give it a day\", \"Remind on\"); the toast words."
+devs_call: 'MonthGrid''s keyboard model (arrow keys by day and week, Page Up and Down by month); the step''s title for each entry ("Give it a day", "Remind on"); the toast words.'
 cites:
   - "specs/web/epics/USE-daily-use/ux/day/todo-sheet/states/more-open.md"
   - "specs/web/epics/USE-daily-use/ux/interactions/move-to/states/pick-a-day.md"
@@ -41,15 +41,15 @@ depends_on:
   - "USE-10"
   - "USE-28"
 out_of_scope:
-  - "Move to… and its Pick a day consequence row and \"Move to <day>\": the Move to ticket, on this MonthGrid"
+  - 'Move to… and its Pick a day consequence row and "Move to <day>": the Move to ticket, on this MonthGrid'
   - "Days already set marked under the number: the Move to ticket passes the marks; here no marks are passed"
 criteria:
   - id: C1
-    statement: "··· open on Call the mechanic: a right-aligned menu headed \"Call the mechanic\" with Give it a day…, Mark done, a rule, and Delete to-do with \"Gone from the tray and any block. Undo in the toast.\", all in ink"
+    statement: '··· open on Call the mechanic: a right-aligned menu headed "Call the mechanic" with Give it a day…, Mark done, a rule, and Delete to-do with "Gone from the tray and any block. Undo in the toast.", all in ink'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-029-todo-sheet-more-menu/evidence/more-open-402.png"
   - id: C2
-    statement: "Give it a day… shows a step with back on the left, \"October 2026\" with ‹ and ›, Monday-first weekdays, 1 to 11 faded, 12 ringed in ink and 15 picked as a filled ink disc"
+    statement: 'Give it a day… shows a step with back on the left, "October 2026" with ‹ and ›, Monday-first weekdays, 1 to 11 faded, 12 ringed in ink and 15 picked as a filled ink disc'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-029-todo-sheet-more-menu/evidence/give-it-a-day-402.png"
   - id: C3

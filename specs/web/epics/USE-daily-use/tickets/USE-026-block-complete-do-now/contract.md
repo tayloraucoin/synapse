@@ -1,7 +1,7 @@
 ---
 id: "USE-26"
 size: small
-objective: "Each item left on the close card gains Do now beside Later and Leave, with its consequence in words before the tap: \"Fits by 7:55\" when it fits, \"Training would start 8:05\" when it would run past the end; Do now reopens the block on Now with that item lifted and, past the end, extends the block and slides the rest of today by the overrun, on fixtures"
+objective: 'Each item left on the close card gains Do now beside Later and Leave, with its consequence in words before the tap: "Fits by 7:55" when it fits, "Training would start 8:05" when it would run past the end; Do now reopens the block on Now with that item lifted and, past the end, extends the block and slides the rest of today by the overrun, on fixtures'
 slice_type: "a consequence preview and a day-wide write; risks a line that disagrees with what the tap does, a slide that changes the usual week or moves a pinned event, a slide computed from the item alone instead of the items above it, and red in a consequence"
 non_negotiables:
   - "The line and the tap come from the same pure functions in @syn/utils, so what the line says is what happens."
@@ -47,7 +47,7 @@ out_of_scope:
   - "Undo for a slide: not drawn; Make room's ticket"
 criteria:
   - id: C1
-    statement: "At 7:45 with the disclosure open: Meditate · 10 min with \"Fits by 7:55\", Cold bath · 10 min with \"Training would start 8:05\", each with Do now (ink border), Later and Leave"
+    statement: 'At 7:45 with the disclosure open: Meditate · 10 min with "Fits by 7:55", Cold bath · 10 min with "Training would start 8:05", each with Do now (ink border), Later and Leave'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-026-block-complete-do-now/evidence/not-done-do-now-402.png"
   - id: C2

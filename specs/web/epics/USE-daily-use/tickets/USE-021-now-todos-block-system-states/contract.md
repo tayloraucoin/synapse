@@ -1,12 +1,12 @@
 ---
 id: "USE-21"
 size: small
-objective: "Now runs a To-dos block like any block, its rows each a to-do with its emoji and the card's meta naming where it came from, and shows its system states: offline with one StatusLine and everything working, a check that fails online reverting with \"Not saved. Try again.\", still skeleton rows while loading, and each region failing on its own, on fixtures"
+objective: 'Now runs a To-dos block like any block, its rows each a to-do with its emoji and the card''s meta naming where it came from, and shows its system states: offline with one StatusLine and everything working, a check that fails online reverting with "Not saved. Try again.", still skeleton rows while loading, and each region failing on its own, on fixtures'
 slice_type: "a block form plus the screen's system states; risks a checked to-do left in the tray, an undone one lost at the block's end, offline treated as an error, a red failure, a shimmering or spinning load, and one failed region blanking the other"
 non_negotiables:
   - "Checking a To-dos block's row checks the to-do itself; it leaves the tray. An undone one returns to To-dos with no day once the block ends (USE-9's isReturned)."
-  - "Offline is not an error: one StatusLine, \"Offline. Checks are saved on this phone.\", and every check, Start, Pause and Done still works; counts keep running."
-  - "A failed check online reverts the box and shows \"Not saved.\" and \"Try again\" in ink under the row; never red, no icon, no Toaster."
+  - 'Offline is not an error: one StatusLine, "Offline. Checks are saved on this phone.", and every check, Start, Pause and Done still works; counts keep running.'
+  - 'A failed check online reverts the box and shows "Not saved." and "Try again" in ink under the row; never red, no icon, no Toaster.'
   - "Loading: header, tray line and tabs real at once; still skeleton rows in the block's rhythm; no spinner, never shimmering (A-14)."
   - "Each region fails on its own: the block's RegionRetry leaves the tray live, the tray's failure leaves the block live."
   - "Only @syn/ui components (StatusLine, RegionRetry, SkeletonRow) and preset tokens."
@@ -54,23 +54,23 @@ out_of_scope:
   - "Running's count while offline: USE-23 draws the card; this ticket proves the clock keeps counting"
 criteria:
   - id: C1
-    statement: "Errands at 11:22: a moss bar, \"To-dos · 10:00 to 12:30\", three done rows each with its emoji and length, the card \"Return the parcel\" with \"15 min · 11:20 · a to-do since Tue\", Start and Done, then Pick up the prescription"
+    statement: 'Errands at 11:22: a moss bar, "To-dos · 10:00 to 12:30", three done rows each with its emoji and length, the card "Return the parcel" with "15 min · 11:20 · a to-do since Tue", Start and Done, then Pick up the prescription'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-021-now-todos-block-system-states/evidence/todos-block-402.png"
   - id: C2
-    statement: "Offline mid-Wellness: one StatusLine with the cloud-off glyph and \"Offline. Checks are saved on this phone.\" under the header, above the tray; the block as online"
+    statement: 'Offline mid-Wellness: one StatusLine with the cloud-off glyph and "Offline. Checks are saved on this phone." under the header, above the tray; the block as online'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-021-now-todos-block-system-states/evidence/offline-402.png"
   - id: C3
-    statement: "A failed check on Cold bath: the box empty again and \"Not saved.\" with an underlined \"Try again\" under it, in ink"
+    statement: 'A failed check on Cold bath: the box empty again and "Not saved." with an underlined "Try again" under it, in ink'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-021-now-todos-block-system-states/evidence/error-on-check-402.png"
   - id: C4
-    statement: "Loading: \"Now\", the tray line and the tabs, and below them a header bar, a card-shaped block and two rows as still skeletons, with no spinner and no Done or Start"
+    statement: 'Loading: "Now", the tray line and the tabs, and below them a header bar, a card-shaped block and two rows as still skeletons, with no spinner and no Done or Start'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-021-now-todos-block-system-states/evidence/loading-402.png"
   - id: C5
-    statement: "The block failing alone: RegionRetry under the header with \"Today didn't load.\", \"Timers that were running keep their time; nothing is lost.\" and Try again, the tray working above it"
+    statement: 'The block failing alone: RegionRetry under the header with "Today didn''t load.", "Timers that were running keep their time; nothing is lost." and Try again, the tray working above it'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-021-now-todos-block-system-states/evidence/partial-block-402.png"
   - id: C6

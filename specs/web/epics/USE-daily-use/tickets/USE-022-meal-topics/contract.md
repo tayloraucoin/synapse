@@ -1,7 +1,7 @@
 ---
 id: "USE-22"
 size: medium
-objective: "A meal on Now offers \"Watching while eating\": the saved topics as chips led by their icons, a pick filling one chip in ink and showing a LinkCallout \"Open in YouTube\" for that topic, and Edit topics opening the Meal topics sheet, where topics are listed, added, edited with the icon picker, reordered and deleted with Undo, on fixtures"
+objective: 'A meal on Now offers "Watching while eating": the saved topics as chips led by their icons, a pick filling one chip in ink and showing a LinkCallout "Open in YouTube" for that topic, and Edit topics opening the Meal topics sheet, where topics are listed, added, edited with the icon picker, reordered and deleted with Undo, on fixtures'
 slice_type: "a block form plus a list-editing sheet; risks a YouTube link offered before a pick, a pick that leaks into the next meal, a link built wrong for its kind, red or a YouTube logo on the callout, and a second icon picker"
 non_negotiables:
   - "No link until a topic is picked; a pick holds for this meal only and the next meal starts with none (D-USE-72)."
@@ -57,15 +57,15 @@ out_of_scope:
   - "Real writes: the wiring (wave 3)"
 criteria:
   - id: C1
-    statement: "Breakfast at 9:02 with nothing picked: the meal glyph header, the card with Done alone, \"Watching while eating\" with Edit topics, \"Pick one before opening YouTube.\" and four outlined chips each led by its icon; no link"
+    statement: 'Breakfast at 9:02 with nothing picked: the meal glyph header, the card with Done alone, "Watching while eating" with Edit topics, "Pick one before opening YouTube." and four outlined chips each led by its icon; no link'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-022-meal-topics/evidence/meal-pick-topic-402.png"
   - id: C2
-    statement: "Agent workflows picked: its chip filled in ink, \"Picked for this meal. Tap another to change.\", and a LinkCallout with the play tile, \"Open in YouTube\", \"Agent workflows · saved playlist\" and ↗; no red, no logo"
+    statement: 'Agent workflows picked: its chip filled in ink, "Picked for this meal. Tap another to change.", and a LinkCallout with the play tile, "Open in YouTube", "Agent workflows · saved playlist" and ↗; no red, no logo'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-022-meal-topics/evidence/meal-topic-picked-402.png"
   - id: C3
-    statement: "Edit topics opens the sheet over a scrim: × on the left, \"Meal topics\", its line, each topic with its icon on a kind chip, name, \"Playlist · …\", \"Channel · …\" or \"Search · …\" and a grip, then Add a topic; the canvas caption is not shipped"
+    statement: 'Edit topics opens the sheet over a scrim: × on the left, "Meal topics", its line, each topic with its icon on a kind chip, name, "Playlist · …", "Channel · …" or "Search · …" and a grip, then Add a topic; the canvas caption is not shipped'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-022-meal-topics/evidence/meal-topics-sheet-402.png"
   - id: C4

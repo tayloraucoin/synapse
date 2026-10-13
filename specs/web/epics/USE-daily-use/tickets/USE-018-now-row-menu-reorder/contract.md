@@ -9,7 +9,7 @@ non_negotiables:
   - "Move down is disabled on the last undone row and Move up on the first; they are the grip's tap and keyboard fallback."
   - "The menu has a keyboard and screen-reader path: the row's context-menu key or a More action opens it."
   - "Only @syn/ui components (SortableList, DropdownMenu, Toaster) and preset tokens; the dragged row has no shadow (D-USE-17)."
-devs_call: "Long-press timing (the platform's, about 500 ms); the scrim's lifted-row clone; Toaster wording for Not today's Undo (\"<item> is off today.\" with Undo)."
+devs_call: 'Long-press timing (the platform''s, about 500 ms); the scrim''s lifted-row clone; Toaster wording for Not today''s Undo ("<item> is off today." with Undo).'
 cites:
   - "specs/web/epics/USE-daily-use/ux/day/now/states/row-long-press.md"
   - "specs/web/epics/USE-daily-use/ux/day/now/states/reordering.md"
@@ -62,7 +62,7 @@ criteria:
     evidence: test
     command: "yarn test"
   - id: C5
-    statement: "From the keyboard, a row's More action opens the same menu and Escape returns focus to the row; the grip is named \"Reorder <item>\""
+    statement: 'From the keyboard, a row''s More action opens the same menu and Escape returns focus to the row; the grip is named "Reorder <item>"'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-018-now-row-menu-reorder/evidence/keyboard.txt"
   - id: C6

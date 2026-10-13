@@ -2,16 +2,16 @@
 id: "USE-27"
 size: medium
 objective: "/today/schedule shows the whole day on the phone: the date, the To-dos tray, the day column at 96 px an hour with each block's bullets, done blocks faded, the now line and one verdigris edge on the block under way; checks, running and firing marks; the All day strip on a checklist day; a meeting as one band inside its block; and the empty, loading, error, partial and offline states, on fixtures"
-slice_type: "a read-only day view; risks a second \"this moment\" mark, firing drawn in verdigris, a meeting splitting its block, colour alone telling a mark, a now line that drifts from the minute, and a failed region blanking the other"
+slice_type: 'a read-only day view; risks a second "this moment" mark, firing drawn in verdigris, a meeting splitting its block, colour alone telling a mark, a now line that drifts from the minute, and a failed region blanking the other'
 non_negotiables:
   - "Verdigris marks this moment only: the now line, the block under way's edge, the running dot (D-P02). Firing is a clay dot in a fill-muted halo, never verdigris (D-USE-49)."
   - "One edge at a time: the block under way, or on a checklist day the strip until a set-time block is under way."
   - "A meeting inside a block is one plum band at its time; the block keeps one header and no item is split."
-  - "Marks are never colour alone: a check is a check, running carries \"· running\", firing its words."
-  - "No count, streak or \"missed\"; nothing is asked here."
+  - 'Marks are never colour alone: a check is a check, running carries "· running", firing its words.'
+  - 'No count, streak or "missed"; nothing is asked here.'
   - "Composes @syn/ui's ScheduleAxis, ScheduleBlock and NowLine and USE-19's tray; only preset tokens; never shimmering, no spinner."
   - "Each region loads and fails on its own, as Now's partial."
-devs_call: "Whether the day column lives in components/planner (Review the day and desk Today will reuse it) and its split; the scroll-to-now on a re-tap and on \"t\"; the running ring's pulse (100 % to 40 %, 2 s; still under reduced motion)."
+devs_call: 'Whether the day column lives in components/planner (Review the day and desk Today will reuse it) and its split; the scroll-to-now on a re-tap and on "t"; the running ring''s pulse (100 % to 40 %, 2 s; still under reduced motion).'
 cites:
   - "specs/web/epics/USE-daily-use/ux/day/schedule/index.md"
   - "specs/web/epics/USE-daily-use/ux/day/schedule/words-and-access.md"
@@ -61,23 +61,23 @@ out_of_scope:
   - "The desk's 1440 column: it scales from this page at --content-text beside the rail; desk Today's day column is its own ticket"
 criteria:
   - id: C1
-    statement: "At 10:20 on Monday: \"Monday, 12 October\", the closed tray, hours 7 to 13 at 96 px an hour, Wellness, Training and Breakfast faded, Work with its verdigris edge and tier captions over sky bullets, Lunch's dashed band, and the now tag \"10:20\" with its line"
+    statement: 'At 10:20 on Monday: "Monday, 12 October", the closed tray, hours 7 to 13 at 96 px an hour, Wellness, Training and Breakfast faded, Work with its verdigris edge and tier captions over sky bullets, Lunch''s dashed band, and the now tag "10:20" with its line'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-027-schedule-day/evidence/during-go-402.png"
   - id: C2
-    statement: "Checked items carry a 10 px check in their block's colour, the running item a verdigris dot in a ring with \"· running\", planned items a dot"
+    statement: 'Checked items carry a 10 px check in their block''s colour, the running item a verdigris dot in a ring with "· running", planned items a dot'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-027-schedule-day/evidence/checks-and-running-402.png"
   - id: C3
-    statement: "Sunday at 11:20: the All day strip above the rail with \"Sunday\", the Checklist tag and its boxes (Meal prep checked and faded), Lunch with Sam 13:00 to 14:30 with its lock, and the now line"
+    statement: 'Sunday at 11:20: the All day strip above the rail with "Sunday", the Checklist tag and its boxes (Meal prep checked and faded), Lunch with Sam 13:00 to 14:30 with its lock, and the now line'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-027-schedule-day/evidence/checklist-day-402.png"
   - id: C4
-    statement: "A meeting at 10:30 is one plum band across Work with a lock, \"[Design sync]\" and \"10:30 to 11:00 · Meeting\"; Work keeps one header, its items above and below the band"
+    statement: 'A meeting at 10:30 is one plum band across Work with a lock, "[Design sync]" and "10:30 to 11:00 · Meeting"; Work keeps one header, its items above and below the band'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-027-schedule-day/evidence/meeting-inside-a-block-402.png"
   - id: C5
-    statement: "The day failing alone shows RegionRetry with \"The day didn't load.\" and Try again under the title, the tray live; offline shows one StatusLine \"Offline. Changes are saved on this phone and sync later.\" above the tray"
+    statement: 'The day failing alone shows RegionRetry with "The day didn''t load." and Try again under the title, the tray live; offline shows one StatusLine "Offline. Changes are saved on this phone and sync later." above the tray'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-027-schedule-day/evidence/error-and-offline-402.png"
   - id: C6

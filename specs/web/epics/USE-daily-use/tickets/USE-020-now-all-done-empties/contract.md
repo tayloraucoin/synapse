@@ -1,7 +1,7 @@
 ---
 id: "USE-20"
 size: small
-objective: "When a block is all done Now keeps its rows faded and floats a footer, \"<Block> complete\", \"Next: <Block>, <time>\" and Start <Block>, with the add row while time is left and the quiet ahead line when done early; an empty Break offers End break; and after the day's last block Now reads \"The day's blocks are done.\" with the tray open, on fixtures"
+objective: 'When a block is all done Now keeps its rows faded and floats a footer, "<Block> complete", "Next: <Block>, <time>" and Start <Block>, with the add row while time is left and the quiet ahead line when done early; an empty Break offers End break; and after the day''s last block Now reads "The day''s blocks are done." with the tray open, on fixtures'
 slice_type: "end-of-block and empty forms of Now; risks a count or a minutes-ahead figure, starting early moving the next block's span, a stale footer after a row is unchecked, and a close card shown where the footer belongs"
 non_negotiables:
   - "No numbers about the day: no count of what was done or left, no minutes ahead; only block names, times and lengths."
@@ -58,23 +58,23 @@ out_of_scope:
   - "Storing the block in focus on the server: the blocks-and-days wiring (wave 3)"
 criteria:
   - id: C1
-    statement: "Wellness all done at 7:34: every row checked and faded, \"Took 12 min · Change\" under Cold bath, no card and no grips, and the footer with the check circle, \"Wellness complete\", \"Next: Training, 8:00\" and Start Training"
+    statement: 'Wellness all done at 7:34: every row checked and faded, "Took 12 min · Change" under Cold bath, no card and no grips, and the footer with the check circle, "Wellness complete", "Next: Training, 8:00" and Start Training'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-020-now-all-done-empties/evidence/all-done-start-next-402.png"
   - id: C2
-    statement: "With time left, \"+ Add to Wellness\" and \"Free until 8:00\" sit above the footer"
+    statement: 'With time left, "+ Add to Wellness" and "Free until 8:00" sit above the footer'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-020-now-all-done-empties/evidence/all-done-add-more-402.png"
   - id: C3
-    statement: "Done before the end, the footer adds \"Done before 8:00. Starting early is fine: Training keeps its end, 8:57.\" and, under Start Training, \"Or a to-do until 8:00\""
+    statement: 'Done before the end, the footer adds "Done before 8:00. Starting early is fine: Training keeps its end, 8:57." and, under Start Training, "Or a to-do until 8:00"'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-020-now-all-done-empties/evidence/ahead-402.png"
   - id: C4
-    statement: "An empty Break at 15:02 shows the cup glyph, \"Break\", \"15:00 to 15:10\", ··· and End break on the fade; no card, no rows, no Done"
+    statement: 'An empty Break at 15:02 shows the cup glyph, "Break", "15:00 to 15:10", ··· and End break on the fade; no card, no rows, no Done'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-020-now-all-done-empties/evidence/empty-break-402.png"
   - id: C5
-    statement: "At 18:40 after the last block Now shows the tray open, then \"The day's blocks are done.\" and See the whole day, with no block header"
+    statement: 'At 18:40 after the last block Now shows the tray open, then "The day''s blocks are done." and See the whole day, with no block header'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-020-now-all-done-empties/evidence/empty-no-blocks-402.png"
   - id: C6

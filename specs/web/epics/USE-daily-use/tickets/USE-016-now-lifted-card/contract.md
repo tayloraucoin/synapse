@@ -1,7 +1,7 @@
 ---
 id: "USE-16"
 size: medium
-objective: "On the phone, /today after Ready, go is Now for a non-work block: the header, the closed To-dos line, the block's header and rows, the current item lifted with Start and Done, Done recording the planned length with \"Took n min · Change\" and the time-taken sheet, and a tapped row made current, all on fixtures through useNow"
+objective: 'On the phone, /today after Ready, go is Now for a non-work block: the header, the closed To-dos line, the block''s header and rows, the current item lifted with Start and Done, Done recording the planned length with "Took n min · Change" and the time-taken sheet, and a tapped row made current, all on fixtures through useNow'
 slice_type: "the first go-mode screen and its data hook; risks a current item or block computed in the component instead of a pure function, Done storing nothing or the clock's figure instead of the plan, a count of what is left, and a desk layout guessed at a phone width"
 non_negotiables:
   - "Only the active block shows; no count of what is left anywhere, no second person, nothing red (C-USE-now-4)."
@@ -65,19 +65,19 @@ out_of_scope:
   - "Swap and Edit (the Item sheet): its own ticket"
 criteria:
   - id: C1
-    statement: "At 402 mid-Wellness: \"Now\" and the avatar, the closed To-dos line, the leaf bar with \"Wellness\" and \"7:05 to 8:00\" and ··· alone, three faded done rows, Meditate lifted with its icon, verdigris dot, \"10 min · 7:10\", Start and Done, then Cold bath with its grip, and Now current in the tabs"
+    statement: 'At 402 mid-Wellness: "Now" and the avatar, the closed To-dos line, the leaf bar with "Wellness" and "7:05 to 8:00" and ··· alone, three faded done rows, Meditate lifted with its icon, verdigris dot, "10 min · 7:10", Start and Done, then Cold bath with its grip, and Now current in the tabs'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/success-402.png"
   - id: C2
-    statement: "After Done on Meditate, it sits checked and faded in place with \"Took 10 min · Change\" under it, and Cold bath is lifted"
+    statement: 'After Done on Meditate, it sits checked and faded in place with "Took 10 min · Change" under it, and Cold bath is lifted'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/done-next-lifts-402.png"
   - id: C3
-    statement: "Cold bath tapped: it is lifted with \"10 min · 7:20\" and Meditate is back to a row in its own place; nothing is reordered"
+    statement: 'Cold bath tapped: it is lifted with "10 min · 7:20" and Meditate is back to a row in its own place; nothing is reordered'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/row-tapped-402.png"
   - id: C4
-    statement: "Change opens the sheet over a scrim: × on the left, \"Start the cold bath · planned 2 min\", \"Time taken\", the MinutesStepper at 2 and Save"
+    statement: 'Change opens the sheet over a scrim: × on the left, "Start the cold bath · planned 2 min", "Time taken", the MinutesStepper at 2 and Save'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/time-taken-sheet-402.png"
   - id: C5
@@ -93,7 +93,7 @@ criteria:
     evidence: test
     command: "yarn test"
   - id: C8
-    statement: "The accessibility tree names the lifted card \"Meditate, now\", Done \"Done, Meditate\", a row's box \"Cold bath, 10 min\", the row \"Cold bath, make current\", the grip \"Reorder Cold bath\" and ··· \"Wellness options\", with the block's name as the level-1 heading"
+    statement: 'The accessibility tree names the lifted card "Meditate, now", Done "Done, Meditate", a row''s box "Cold bath, 10 min", the row "Cold bath, make current", the grip "Reorder Cold bath" and ··· "Wellness options", with the block''s name as the level-1 heading'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/a11y.txt"
   - id: C9

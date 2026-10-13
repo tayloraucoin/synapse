@@ -1,10 +1,10 @@
 ---
 id: "USE-17"
 size: small
-objective: "Now's other block forms on the phone: the ··· pull-down \"<Block>, today\", the quiet \"Planned to end at <time>\" once a block runs past its end, a meal with no topics between blocks, the List before Ready, go, and Checklist blocks, with and without a span, on fixtures through useNow"
+objective: 'Now''s other block forms on the phone: the ··· pull-down "<Block>, today", the quiet "Planned to end at <time>" once a block runs past its end, a meal with no topics between blocks, the List before Ready, go, and Checklist blocks, with and without a span, on fixtures through useNow'
 slice_type: "variants of one screen; risks a late block turning a colour or saying late, a checklist that lifts a card, an all-day checklist that hides a set-time block, and the List tab label picked in the component instead of from the day record"
 non_negotiables:
-  - "Behind is one muted line, \"Planned to end at <time>\"; nothing changes colour and no word for late appears (product rules)."
+  - 'Behind is one muted line, "Planned to end at <time>"; nothing changes colour and no word for late appears (product rules).'
   - "A Checklist block has no card, no lengths, no times and no Start; a checked row fades in place and nothing lifts."
   - "On a checklist day a set-time block is the active block while it runs, and the checklist returns after it (D-USE-72), decided by activeBlock in @syn/utils."
   - "Before Ready, go is read from the day record (readyAt null); the tab reads List and the title is the date."
@@ -57,27 +57,27 @@ out_of_scope:
   - "Schedule's content behind See the whole day: USE-27"
 criteria:
   - id: C1
-    statement: "··· shows filled ink and a pull-down titled \"Wellness, today\" with Complete Wellness, Edit block, a separator and See the whole day, each with its icon, with no scrim"
+    statement: '··· shows filled ink and a pull-down titled "Wellness, today" with Complete Wellness, Edit block, a separator and See the whole day, each with its icon, with no scrim'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-017-now-block-forms/evidence/header-menu-402.png"
   - id: C2
-    statement: "At 8:04 in Wellness one muted line \"Planned to end at 8:00\" sits under the span; the bar, the card and the rows look as at 7:14"
+    statement: 'At 8:04 in Wellness one muted line "Planned to end at 8:00" sits under the span; the bar, the card and the rows look as at 7:14'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-017-now-block-forms/evidence/behind-402.png"
   - id: C3
-    statement: "At 9:02 Breakfast shows the fork-and-knife glyph in the bar's place, \"9:00 to 9:30\", and one card on a neutral tile with \"30 min · 9:00\" and a full-width Done, no Start, no rows"
+    statement: 'At 9:02 Breakfast shows the fork-and-knife glyph in the bar''s place, "9:00 to 9:30", and one card on a neutral tile with "30 min · 9:00" and a full-width Done, no Start, no rows'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-017-now-block-forms/evidence/transition-402.png"
   - id: C4
-    statement: "Before Ready, go the title is \"Monday, 12 October\", the tab reads List, the blocks are listed with bar, name and span (Breakfast muted with no bar), and Review the day floats on the footer fade"
+    statement: 'Before Ready, go the title is "Monday, 12 October", the tab reads List, the blocks are listed with bar, name and span (Breakfast muted with no bar), and Review the day floats on the footer fade'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-017-now-block-forms/evidence/before-ready-go-402.png"
   - id: C5
-    statement: "A Checklist block reads \"10:00 to 13:00 · Checklist\" and lists every item with a box and a grip, no card, no lengths, Water the plants checked and faded"
+    statement: 'A Checklist block reads "10:00 to 13:00 · Checklist" and lists every item with a box and a grip, no card, no lengths, Water the plants checked and faded'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-017-now-block-forms/evidence/checklist-block-402.png"
   - id: C6
-    statement: "On a checklist day at 11:20 the header reads \"All day · Checklist · next: Lunch with Sam, 13:00\" with the rows and Add to the checklist"
+    statement: 'On a checklist day at 11:20 the header reads "All day · Checklist · next: Lunch with Sam, 13:00" with the rows and Add to the checklist'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-017-now-block-forms/evidence/sunday-checklist-402.png"
   - id: C7
