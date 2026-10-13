@@ -10,7 +10,7 @@ is ordinary.
 
 <!-- BEGIN:generated-tree -->
 
-_Generated 2026-10-09 · 2082 files (noise collapsed) · `yarn directory-map` to refresh._
+_Generated 2026-10-13 · 2973 files (noise collapsed) · `yarn directory-map` to refresh._
 
 ```
 .claude/
@@ -81,6 +81,408 @@ apps/
   mobile/
     README.md  # a deliberate empty seam. Do not scaffold
   web/
+    _legacy/
+      app/
+        (setup)/
+          _components/
+            copy.ts
+            fact-screen.tsx
+            focus-setup-card.tsx
+            habit-setup-card.tsx
+            setup-cards.tsx
+            step-1-shape.tsx
+            step-2-blocks.tsx
+            step-3-work-days.tsx
+            step-4-days.tsx
+            step-5-week.tsx
+            step-frame.tsx
+            use-card-entries.ts
+            workout-setup-card.tsx
+          setup/
+            [step]/
+              loading.tsx
+              page.tsx
+          layout.tsx
+        (shell)/
+          _components/
+            app-shell.tsx
+            nav-items.ts
+            rail.tsx
+            shell-context.tsx
+            status-line-slot.tsx
+            tab-bar.tsx
+            timer-title.tsx
+          day/
+            [date]/
+              item/
+                [id]/
+                  page.tsx
+              journal/
+                page.tsx
+              schedule/
+                page.tsx
+              page.tsx
+          orient/
+            page.tsx
+          review/
+            _components/
+              review-tab.tsx
+            day/
+              [date]/
+                page.tsx
+            history/
+              _components/
+                copy.ts
+                history-list.tsx
+              page.tsx
+            week/
+              [week]/
+                habit/
+                  [id]/
+                    page.tsx
+                page.tsx
+            page.tsx
+          settings/
+            _components/
+              copy.ts
+              settings-index.tsx
+            about/
+              _components/
+                copy.ts
+                feedback-form.tsx
+                shortcuts-table.tsx
+              page.tsx
+            account/
+              _components/
+                account-form.tsx
+                account-photo.tsx
+                account-screen.tsx
+                password-section.tsx
+              page.tsx
+            appearance/
+              _components/
+                appearance-form.tsx
+              page.tsx
+            categories/
+              _components/
+                category-list-header.tsx
+                category-list.tsx
+              page.tsx
+            data/
+              _components/
+                copy.ts
+                delete-section.tsx
+                export-section.tsx
+              page.tsx
+            day/
+              _components/
+                day-time-form.tsx
+              page.tsx
+            habits/
+              _components/
+                copy.ts
+                library-header.tsx
+                library.tsx
+              [id]/
+                _components/
+                  habit-detail-header.tsx
+                  habit-detail.tsx
+                page.tsx
+              page.tsx
+            notifications/
+              _components/
+                notifications-screen.tsx
+              page.tsx
+            reasons/
+              _components/
+                reason-sheet.tsx
+                reasons-screen.tsx
+              page.tsx
+            share/
+              _components/
+                share-panel.tsx
+              page.tsx
+            week/
+              _components/
+                current-week.tsx
+              [week]/
+                page.tsx
+              page.tsx
+            your-day/
+              _components/
+                copy.ts
+                your-day-list.tsx
+              [screen]/
+                _components/
+                  closing-screen.tsx
+                  commitments-screen.tsx
+                  each-morning-screen.tsx
+                  focuses-screen.tsx
+                  free-time-screen.tsx
+                  training-screen.tsx
+                  your-day-screen.tsx
+                page.tsx
+              block/
+                [kind]/
+                  _components/
+                    kind-editor.tsx
+                  page.tsx
+              order/
+                _components/
+                  block-order.tsx
+                page.tsx
+              page.tsx
+            page.tsx
+          today/
+            _components/
+              today-screen.tsx
+            schedule/
+              page.tsx
+            page.tsx
+          workflow/
+            _components/
+              copy.ts
+            [view]/
+              _components/
+                archived-sheet.tsx
+                closed-earlier.tsx
+                column-tabs.tsx
+                columns-sheet.tsx
+                lane-menu.tsx
+                new-view-sheet.tsx
+                save-template-dialog.tsx
+                task-menu.tsx
+                task-sheet.tsx
+                use-task-sheet.ts
+                use-view-settings.ts
+                use-workflow-board.ts
+                view-menu.tsx
+                view-tabs.tsx
+                workflow-board.tsx
+                workflow-title.tsx
+              loading.tsx
+              page.tsx
+            loading.tsx
+            page.tsx
+      components/
+        adjust-sheet/
+          adjust-sheet.tsx
+          copy.ts
+          index.ts
+          use-adjust.ts
+        block-editor/
+          add-sheet.tsx
+          apply-changes-dialog.tsx
+          block-editor.tsx
+          block-strip.tsx
+          copy.ts
+          editor-footer.tsx
+          index.ts
+          slot-sheet.tsx
+          use-block-editor.ts
+        blocks-primer/
+          block-legend.tsx
+          blocks-primer.tsx
+          copy.ts
+          index.ts
+        category-sheet/
+          category-sheet.tsx
+          copy.ts
+          index.ts
+        confirm-yesterday/
+          confirm-yesterday-panel.tsx
+          copy.ts
+          index.ts
+        day-builder/
+          screens/
+            b01-name-days.tsx
+            b02-times.tsx
+            b03-work.tsx
+            b04-training.tsx
+            b05-getting-ready.tsx
+            b06-fixed.tsx
+            b07-so-far.tsx
+            b08-first-thing.tsx
+            b09-landscape.tsx
+            b10-ranked.tsx
+            b11-morning.tsx
+            b12-wind-down.tsx
+            b13-during-work.tsx
+            b14-after-work.tsx
+            b15a-free-time-landscape.tsx
+            b15b-free-time-ranked.tsx
+            b16-free-time-pool.tsx
+            b17-review.tsx
+          builder-frame.tsx
+          builder-skeleton.tsx
+          clock.ts
+          copy.ts
+          day-builder.tsx
+          day-plan-card.tsx
+          index.ts
+          list-header.tsx
+          preview-strip.tsx
+          preview.ts
+          slot-rows.tsx
+          use-day-builder.ts
+          use-list-screen.ts
+          use-plan-preview.ts
+          use-prep-steps.ts
+          work-fields.tsx
+          your-days.tsx
+        day-header-sheet/
+          copy.ts
+          day-header-sheet.tsx
+          index.ts
+          library-pick-sheet.tsx
+          wake-time-sheet.tsx
+        day-list/
+          block-section.tsx
+          copy.ts
+          day-list-header.tsx
+          day-list.tsx
+          index.ts
+          pool-sheet.tsx
+          use-day-list.ts
+          use-landing.ts
+        fixture-sheet/
+          copy.ts
+          fixture-sheet.tsx
+          index.ts
+        habit-day-sheet/
+          copy.ts
+          habit-day-sheet.tsx
+          index.ts
+        habit-sheet/
+          copy.ts
+          habit-sheet.tsx
+          icon-chooser.tsx
+          index.ts
+          quick-habit-sheet.tsx
+          use-habit-sheet.ts
+        item-sheet/
+          copy.ts
+          index.ts
+          item-sheet.tsx
+          manual-time-sheet.tsx
+          use-item-sheet.ts
+        journal/
+          copy.ts
+          index.ts
+          journal-screen.tsx
+          use-journal.ts
+        journal-settings/
+          index.ts
+          journal-settings.tsx
+        landscape-chooser/
+          copy.ts
+          index.ts
+          landscape-chooser.tsx
+          landscape-sheet.tsx
+          use-landscape.ts
+        links/
+          copy.ts
+          index.ts
+          link-list.tsx
+          link-sheet.tsx
+          use-links.ts
+        one-off-sheet/
+          index.ts
+          one-off-sheet.tsx
+        orient-frame/
+          copy.ts
+          index.ts
+          orient-frame.tsx
+          use-orient-frame.ts
+        page-frame/
+          index.ts
+          page-frame.tsx
+          sheet-host.tsx
+          shell-page-header.tsx
+          shell-status-line.tsx
+        passages/
+          copy.ts
+          excerpt.ts
+          index.ts
+          passage-card.tsx
+          passage-list.tsx
+          passage-sheet.tsx
+          use-passages.ts
+        platform-steps-sheet/
+          copy.ts
+          index.ts
+          platform-steps-sheet.tsx
+        quick-pick/
+          copy.ts
+          index.ts
+          quick-pick.tsx
+          sections.tsx
+          summary-row.tsx
+          use-quick-pick.ts
+        reminder-prompt/
+          copy.ts
+          index.ts
+          reminder-prompt.tsx
+          use-reminder-prompt.ts
+        review-day/
+          copy.ts
+          decision-column.tsx
+          finished.tsx
+          index.ts
+          reflections-section.tsx
+          review-day.tsx
+          traded-up-sheet.tsx
+          use-review-day.ts
+        review-week/
+          carried-sheet.tsx
+          copy.ts
+          habit-detail.tsx
+          index.ts
+          review-week.tsx
+          shifts-sheet.tsx
+        schedule-canvas/
+          copy.ts
+          index.ts
+          layout.ts
+          schedule-canvas.tsx
+          shift-sheet.tsx
+        shortcuts-host/
+          index.ts
+          shortcuts-host.tsx
+        week-build/
+          copy.ts
+          day-sheet.tsx
+          index.ts
+          week-canvas.tsx
+          week-header.tsx
+          week-keys.ts
+        zone-switch-dialog/
+          copy.ts
+          index.ts
+          zone-switch-dialog.tsx
+      lib/
+        entry/
+          launch-count.ts
+        hooks/
+          use-back.ts
+          use-device-zone.ts
+          use-elapsed.ts
+          use-global-shortcuts.ts
+          use-icon-upload.ts
+          use-leave-guard.ts
+          use-local-draft.ts
+          use-pull-to-refresh.ts
+          use-roving-focus.ts
+          use-scroll-memory.ts
+          use-sheet.ts
+          use-submit-shortcut.ts
+          use-undo-window.ts
+        image/
+          reencode.ts
+        keyboard/
+          shortcuts.ts
+        stores/
+          use-timer-store.ts
     app/
       _components/
         landing/
@@ -123,188 +525,25 @@ apps/
             sign-up-form.tsx
           page.tsx
         layout.tsx
-      (setup)/
-        _components/
-          copy.ts
-          fact-screen.tsx  # one first-run screen's two frames — the sequence (StepFrame) and Settings → Your day (embedded)
-          focus-setup-card.tsx  # one focus (v1.2 §4.12): a blank glyph by default, a week count, usual days with Flexible; creates on the first fact
-          habit-setup-card.tsx  # one habit ranked (v1.2 §4.9, TD-11): matters, usually (the slot's length), up to three versions; every control writes its own fact
-          setup-cards.tsx
-          step-1-shape.tsx
-          step-2-blocks.tsx  # screen 2 — the blocks primer (v1.3 §4.2): the example day and the legend, one read, no skip
-          step-3-work-days.tsx
-          step-4-days.tsx  # screen 4 — mounts YourDays (the day builder, components/day-builder); Continue · n days moves to 5; ?edit= opens a plan's review
-          step-5-week.tsx  # screen 5 — the seven weekday rows and the mode question (v1.3 §4.5); Open today / Plan this week first complete first run with morning_mode and pre-fill the week from the plans
-          step-frame.tsx
-          use-card-entries.ts
-          workout-setup-card.tsx  # one workout of the rotation (v1.2 §4.10, TD-12): type chips fill name and glyph when empty; where, and the travel beside the length; creates on the first fact
-        setup/
-          [step]/
-            loading.tsx
-            page.tsx
-        layout.tsx
       (shell)/
         _components/
           app-shell.tsx
+          copy.ts
           nav-items.ts
           rail.tsx
-          shell-context.tsx
           shell-providers.tsx
-          status-line-slot.tsx
           tab-bar.tsx
           theme-sync.tsx
-          timer-title.tsx
-        day/
-          [date]/
-            item/
-              [id]/
-                page.tsx
-            journal/
-              page.tsx
-            schedule/
-              page.tsx
-            page.tsx
-        orient/
-          page.tsx
         review/
-          _components/
-            review-tab.tsx
-          day/
-            [date]/
-              page.tsx
-          history/
-            _components/
-              copy.ts
-              history-list.tsx
-            page.tsx
-          week/
-            [week]/
-              habit/
-                [id]/
-                  page.tsx
-              page.tsx
-          page.tsx
-        settings/
-          _components/
-            copy.ts
-            settings-index.tsx
-          about/
-            _components/
-              copy.ts
-              feedback-form.tsx
-              shortcuts-table.tsx
-            page.tsx
-          account/
-            _components/
-              account-form.tsx
-              account-photo.tsx
-              account-screen.tsx
-              password-section.tsx
-            page.tsx
-          appearance/
-            _components/
-              appearance-form.tsx
-            page.tsx
-          categories/
-            _components/
-              category-list-header.tsx
-              category-list.tsx
-            page.tsx
-          data/
-            _components/
-              copy.ts
-              delete-section.tsx
-              export-section.tsx
-            page.tsx
-          day/
-            _components/
-              day-time-form.tsx
-            page.tsx
-          habits/
-            _components/
-              copy.ts
-              library-header.tsx
-              library.tsx
-            [id]/
-              _components/
-                habit-detail-header.tsx
-                habit-detail.tsx
-              page.tsx
-            page.tsx
-          notifications/
-            _components/
-              notifications-screen.tsx
-            page.tsx
-          reasons/
-            _components/
-              reason-sheet.tsx
-              reasons-screen.tsx
-            page.tsx
-          share/
-            _components/
-              share-panel.tsx
-            page.tsx
-          week/
-            _components/
-              current-week.tsx
-            [week]/
-              page.tsx
-            page.tsx
-          your-day/
-            _components/
-              copy.ts
-              your-day-list.tsx  # the twelve first-run screens as a list (v1.1 §4.14); block-kind rows open the editor for their kind
-            [screen]/
-              _components/
-                closing-screen.tsx  # Settings → Closing the day: the two times read-only (each plan's), wind-down starter rows, the journal (JournalSettings)
-                commitments-screen.tsx
-                each-morning-screen.tsx
-                focuses-screen.tsx
-                free-time-screen.tsx
-                training-screen.tsx
-                your-day-screen.tsx
-              page.tsx
-            block/
-              [kind]/
-                _components/
-                  kind-editor.tsx
-                page.tsx
-            order/
-              _components/
-                block-order.tsx
-              page.tsx
-            page.tsx
           page.tsx
         today/
           _components/
-            today-screen.tsx
+            copy.ts
+            push-check.tsx
           schedule/
             page.tsx
           page.tsx
-        workflow/
-          _components/
-            copy.ts
-          [view]/
-            _components/
-              archived-sheet.tsx
-              closed-earlier.tsx
-              column-tabs.tsx
-              columns-sheet.tsx
-              lane-menu.tsx
-              new-view-sheet.tsx
-              save-template-dialog.tsx
-              task-menu.tsx
-              task-sheet.tsx
-              use-task-sheet.ts
-              use-view-settings.ts
-              use-workflow-board.ts  # the board's one cache entry: the wanted-state toggle (latest press wins), lanes and next built once, and moveTask — every move's one path, with an undo that restores lane, column, place and firing
-              view-menu.tsx
-              view-tabs.tsx
-              workflow-board.tsx
-              workflow-title.tsx
-            loading.tsx
-            page.tsx
-          loading.tsx
+        week/
           page.tsx
         layout.tsx  # THE auth gate
       api/
@@ -348,209 +587,14 @@ apps/
       not-found.tsx
       page.tsx  # the landing page when signed out; the §4.2 entry tree when signed in
     components/
-      adjust-sheet/
-        adjust-sheet.tsx
-        copy.ts
-        index.ts
-        use-adjust.ts  # Adjust's four answers feeding one server preview (v1.1 §6.6); Set sends the fingerprint; nothing is inferred
-      block-editor/
-        add-sheet.tsx
-        apply-changes-dialog.tsx
-        block-editor.tsx
-        block-strip.tsx  # the editor's strip (v1.1 §3.11): the layer in editor mode — reorder through moveSlot, resize and gap through saveSlot, nothing clamped
-        copy.ts
-        editor-footer.tsx
-        index.ts
-        slot-sheet.tsx  # the editor's one form; the same-position question with three answers lives in its footer
-        use-block-editor.ts  # the block editor's state (v1.1 §3.11): the autosave queue, and the client walk — stackBlock over the page's SlotViews, so the footer never fetches
-      blocks-primer/
-        block-legend.tsx
-        blocks-primer.tsx  # the example day on the 28px axis (7:00–22:30, sleep shortened beneath), hued bands with one label lane, and the legend
-        copy.ts
-        index.ts
-      category-sheet/
-        category-sheet.tsx
-        copy.ts
-        index.ts
-      confirm-yesterday/
-        confirm-yesterday-panel.tsx
-        copy.ts
-        index.ts
-      day-builder/
-        screens/
-          b01-name-days.tsx
-          b02-times.tsx
-          b03-work.tsx  # B3 — the plan's own work: the four facts written as dayPlan.update({ work }); the §13 #32 preselection; never 'type'
-          b04-training.tsx  # B4 — the workout cards above, a row per workout on this day, several placements, an order list where two share one
-          b05-getting-ready.tsx
-          b06-fixed.tsx
-          b07-so-far.tsx
-          b08-first-thing.tsx
-          b09-landscape.tsx
-          b10-ranked.tsx  # B10 and Settings → Ranked: one HabitSetupCard per morning slot in tick order; Done collapses in place; nothing reorders here
-          b11-morning.tsx  # B11 — the routine against the room: computeBudget's number stated as room, the greedy fill by rank, the matters cell on each row, and the same/varies question once on the first plan
-          b12-wind-down.tsx  # B12 — the wind-down list with its starters ticked in, the placed rows, the first plan's journal group, and a later plan's shared routine taken by reference
-          b13-during-work.tsx
-          b14-after-work.tsx
-          b15a-free-time-landscape.tsx
-          b15b-free-time-ranked.tsx
-          b16-free-time-pool.tsx
-          b17-review.tsx
-        builder-frame.tsx
-        builder-skeleton.tsx
-        clock.ts
-        copy.ts
-        day-builder.tsx  # the nine-screen builder (v1.2 §4.13): one plan held by useDayBuilder, every screen writes as it goes, Next moves, Save Day A completes
-        day-plan-card.tsx
-        index.ts
-        list-header.tsx
-        preview-strip.tsx  # the strip B7 and the review both draw — axis at 96px/h, bands (hued on planning surfaces), slack, items, travel ends
-        preview.ts  # the builder's client preview — the whole day through stackBlock, the one arithmetic; a band per training entry (DAY-6's mirror); cutAtWorkEnd for B7; nothing here writes a block or an item
-        slot-rows.tsx
-        use-day-builder.ts  # the builder's state — the plan from the service's response (TD-21 clocks), the templates with usedBy, the habits, the fixtures; a chained patch
-        use-list-screen.ts  # 13d/13e/13h's writes: a list created on arrival once per plan and kind, chosen by FK never copied, slots saved per change
-        use-plan-preview.ts
-        use-prep-steps.ts  # a step list's writes (prep, wind-down, after work): a tick creates the step and its slot at once, queued per row so a second tap is never a second create (S7.5)
-        work-fields.tsx  # the work's four facts — kind chips, Working by, Until about, what gives — controlled; B3 draws it
-        your-days.tsx  # the list of plans (sequence and Settings): DayPlanCards, Build another day, first arrival opens the builder at once
-      day-header-sheet/
-        copy.ts
-        day-header-sheet.tsx
-        index.ts
-        library-pick-sheet.tsx
-        wake-time-sheet.tsx
-      day-list/
-        block-section.tsx  # one block's rows (v1.1 §6.1): the work container with nested fixtures, the devices-off marker, the confirm-in-the-morning rows
-        copy.ts
-        day-list-header.tsx
-        day-list.tsx
-        index.ts
-        pool-sheet.tsx
-        use-day-list.ts
-        use-landing.ts
-      fixture-sheet/
-        copy.ts
-        fixture-sheet.tsx
-        index.ts
-      habit-day-sheet/
-        copy.ts
-        habit-day-sheet.tsx  # Edit today's (v1.1 §6.4): the day, never the habit; no clamp on Takes
-        index.ts
-      habit-sheet/
-        copy.ts
-        habit-sheet.tsx
-        icon-chooser.tsx
-        index.ts
-        quick-habit-sheet.tsx  # the habit sheet's quick modes (v1.2 S7.3): emoji, name, range — a step before work, a morning habit, a wind-down habit
-        use-habit-sheet.ts
-      item-sheet/
-        copy.ts
-        index.ts
-        item-sheet.tsx
-        manual-time-sheet.tsx
-        use-item-sheet.ts
-      journal/
-        copy.ts
-        index.ts
-        journal-screen.tsx  # the journal (v1.1 §7.2): the person's prompts over serif fields that autosave; no finish, no count, no starter phrase
-        use-journal.ts
-      journal-settings/
-        index.ts
-        journal-settings.tsx  # the journal's switch, prompts and reminder — one component for the builder's B12 and Settings → Closing the day
-      landscape-chooser/
-        copy.ts
-        index.ts
-        landscape-chooser.tsx
-        landscape-sheet.tsx
-        use-landscape.ts  # the landscape's single commit (W4): ticks are local, Continue writes the habits then the morning template's slots — never a fit number
-      links/
-        copy.ts
-        index.ts
-        link-list.tsx
-        link-sheet.tsx
-        use-links.ts  # the person's links — the kind is the server's, nothing is fetched; remove archives optimistically
-      one-off-sheet/
-        index.ts
-        one-off-sheet.tsx
-      orient-frame/
-        copy.ts
-        index.ts
-        orient-frame.tsx  # the first screen of the morning (v1.1 §5.2): the person's words, one line to write, one primary — no time, no count, no chrome
-        use-orient-frame.ts
-      page-frame/
-        index.ts
-        page-frame.tsx
-        sheet-host.tsx
-        shell-page-header.tsx
-        shell-status-line.tsx
-      passages/
-        copy.ts
-        excerpt.ts  # the card's decorative excerpt — Markdown stripped to text; the body itself is only ever rendered by the read-only editor
-        index.ts
-        passage-card.tsx
-        passage-list.tsx  # the passages in cycle order — sortable cards, an archive with a five-second undo; screen 6 and Settings mount the same list
-        passage-sheet.tsx  # a passage's sheet (v1.2 §4.6, TD-15): title, the five-control editor, four image tiles uploaded on add, tags; writes on Save
-        use-passages.ts  # the list's writes at once: reorder on drop, archive with undo through restore
-      platform-steps-sheet/
-        copy.ts
-        index.ts
-        platform-steps-sheet.tsx
-      quick-pick/
-        copy.ts
-        index.ts
-        quick-pick.tsx
-        sections.tsx
-        summary-row.tsx
-        use-quick-pick.ts  # the quick-pick's answers and the live budget line (v1.1 §5.3); Set the day sends only what changed
-      reminder-prompt/
-        copy.ts
-        index.ts
-        reminder-prompt.tsx
-        use-reminder-prompt.ts
       resume-guard/
         index.ts
         resume-guard.tsx
-      review-day/
-        copy.ts
-        decision-column.tsx
-        finished.tsx
-        index.ts
-        reflections-section.tsx
-        review-day.tsx
-        traded-up-sheet.tsx
-        use-review-day.ts
-      review-week/
-        carried-sheet.tsx
-        copy.ts
-        habit-detail.tsx
-        index.ts
-        review-week.tsx
-        shifts-sheet.tsx
-      schedule-canvas/
-        copy.ts
-        index.ts
-        layout.ts  # the Schedule's arithmetic, pure: bands, slack, the work container, blocks, ghosts only once the original time has passed (v1.1 §6.5)
-        schedule-canvas.tsx  # the editable Schedule (v1.1 §6.5): the layer's intents as DYN-6's writes; a pin asks, the morning band goes to Adjust, a record has no layer
-        shift-sheet.tsx
       session-expired-dialog/
         copy.ts
         index.ts
         session-expired-dialog.tsx
         session-watcher.tsx
-      shortcuts-host/
-        index.ts
-        shortcuts-host.tsx
-      week-build/
-        copy.ts
-        day-sheet.tsx  # one day's plan by block (v1.1 §4.13): every write is assignBlocks with the whole assignment; the sheet never reconciles
-        index.ts
-        week-canvas.tsx
-        week-header.tsx
-        week-keys.ts
-      zone-switch-dialog/
-        copy.ts
-        index.ts
-        zone-switch-dialog.tsx
     content/
       landing.ts  # the landing page's copy deck (SYS-6). Surface prose lives here, never inline
     docs/
@@ -578,7 +622,6 @@ apps/
         supabase/
           client.ts
       entry/
-        launch-count.ts
         resolve-entry-for-request.ts
         resolve-entry.ts  # the cross-cutting §4.2 decision tree, as a pure function
       env/
@@ -586,27 +629,10 @@ apps/
       forms/
         use-synapse-form.ts
       hooks/
-        use-back.ts
-        use-device-zone.ts
         use-dismissed.ts
-        use-elapsed.ts
-        use-global-shortcuts.ts
-        use-icon-upload.ts
-        use-leave-guard.ts
-        use-local-draft.ts
         use-now.ts
         use-online.ts
-        use-pull-to-refresh.ts
         use-remembered-toggle.ts
-        use-roving-focus.ts
-        use-scroll-memory.ts
-        use-sheet.ts
-        use-submit-shortcut.ts
-        use-undo-window.ts
-      image/
-        reencode.ts
-      keyboard/
-        shortcuts.ts
       pwa/
         install-detection.ts
         permission-state.ts
@@ -617,7 +643,6 @@ apps/
       stores/
         .gitkeep
         README.md  # the client-state rule, and why there is no Zustand store yet
-        use-timer-store.ts
       trpc/
         client.ts
         provider.tsx
@@ -857,6 +882,15 @@ docs/
           TECHNICAL-DECISIONS.md
         README.md
         spec-system-guide.md
+      ux/
+        epic1_setup_ux_architecture.md
+        epic2_in_use_ux_architecture.md
+        epic3_review_ux_architecture.md
+        README.md
+        synapse_ui_component_needs_and_handoff.md
+        ux-spec-v1.1.md
+        ux-spec-v1.2.md
+        ux-spec-v1.md
       agents-md-2026-10-09.md
       agents-md-apps-web-2026-10-09.md
       agents-md-packages-db-2026-10-09.md
@@ -883,7 +917,12 @@ docs/
       README.md
       states.template.md
       tokens.template.md
+      ux-boards.template.md
+      ux-interaction.template.md
+      ux-narrative.template.md
       ux-overview.template.md
+      ux-state.template.md
+      ux-surface-index.template.md
       ux-surface.template.md
     canon-rubric.md
     canon.md
@@ -924,8 +963,17 @@ docs/
   pem/
     adaptations/
       2026-10-09-docs-app-in-migration.md
+      2026-10-09-migration-kept-host-versions.md
+      2026-10-09-narrative-ux-spec.md
+      2026-10-09-operator-notes.md
+      2026-10-12-paper-ux-ledger.md
+      adaptation.template.md
     README.md
   product/
+    operator-notes/
+      2026-10-09-day-to-day-use.md
+      2026-10-10-workflow-at-a-desk.md
+      README.md
     2026-09-11-taylor-ux-review-notes.md
     2026-09-11-vesper-questions-for-ux-v1.1.md
     2026-09-12-app-walkthrough-feedback-v1.0.md
@@ -936,10 +984,17 @@ docs/
     cycle-charter.template.md
     glossary.template.md
     marketing-changelog.md
+    operator-notes.template.md
     package.template.md
     phase-2-collection.md
     ux-v1.1-thread-primer.md
     value-proposition.md
+  research/
+    platform-apis/
+      google-calendar-api.md
+      linear-api.md
+    ui-patterns/
+      responsive-layout-and-breakpoints.md
   reviews/
     2026-09-06-full-build-review.md
   roles/
@@ -1001,18 +1056,11 @@ docs/
     onboard-agent.md
   ux/
     branding-guide.md
-    epic1_setup_ux_architecture.md
-    epic2_in_use_ux_architecture.md
-    epic3_review_ux_architecture.md
     landing-page-ux.md
     README.md
     synapse_navigation_and_system_ux_architecture.md
     synapse_ui_component_needs_and_handoff_v2.md
-    synapse_ui_component_needs_and_handoff.md
-    ux-spec-v1.1.md
-    ux-spec-v1.2.md
     ux-spec-v1.3.md
-    ux-spec-v1.md
     workflow-ux-spec-v0.1.md
   workflows/
     stages/
@@ -1050,159 +1098,165 @@ docs/
 packages/
   api/
     src/
+      _legacy/
+        routers/
+          adjust.ts
+          category.ts
+          day-plan.ts
+          day.ts
+          fixture.ts
+          habit.ts
+          item.ts
+          journal.ts
+          link.ts
+          passage.ts
+          quote.ts
+          reason.ts
+          review.ts
+          shell.ts
+          template.ts
+          timer.ts
+          week.ts
+          workflow.ts
+        services/
+          day/
+            add-from-library.ts
+            adjust-day.ts
+            apply-template-changes.ts
+            apply-work-type.ts
+            bring-back.ts
+            carry-item.ts
+            choose-alternate.ts
+            choose-from-pool.ts
+            close-day.ts
+            confirm-day.ts
+            copy-week.ts
+            do-now.ts
+            edit-habit-day.ts
+            get-day.ts
+            get-item.ts
+            habit-item.ts
+            item-fields.ts
+            journal.ts
+            lay-out-day.ts
+            manual-time.ts
+            materialize-day.ts
+            move-item.ts
+            one-off.ts
+            orient.ts
+            prefill-week.ts
+            preview-fit.ts
+            quick-pick.ts
+            reading.ts
+            reflow-block.ts
+            set-done.ts
+            timer.ts
+            today.ts
+            trade-workouts.ts
+            undo-eligibility.ts
+            untouched.ts
+            week-view.ts
+            wind-down.ts
+          jobs/
+            auto-close-days.ts
+            notify.ts
+          library/
+            archive-habit.ts
+            ensure-reason-set.ts
+            get-habit.ts
+            habit-usage.ts
+            links.ts
+            list-habits.ts
+            list-reasons.ts
+            passages.ts
+            placed-habits.ts
+            save-category.ts
+            save-habit.ts
+            save-reason.ts
+            starter-library.ts
+            to-view.ts
+          notifications/
+            block-pushes.ts
+          plan/
+            anchors.ts
+            day-plans.ts
+            fit.ts
+            fixtures.ts
+            most-used-template.ts
+            save-slot.ts
+            templates.ts
+            to-view.ts
+          review/
+            confirm-last-night.ts
+            decide.ts
+            decision-state.ts
+            finish-review.ts
+            get-review-day.ts
+            get-review-history.ts
+            get-review-week.ts
+            habit-week.ts
+            pending-days.ts
+            save-changes.ts
+            to-scored.ts
+          shell/
+            settings-counts.ts
+            status.ts
+          user/
+            apply-pending-settings.ts
+            complete-first-run.ts
+          workflow/
+            apply-role-effects.ts
+            archive-group.ts
+            archive-task.ts
+            archive-view.ts
+            cells.ts
+            day-context.ts
+            ensure-defaults.ts
+            get-board.ts
+            list-archived.ts
+            list-closed-tasks.ts
+            list-views.ts
+            move-task.ts
+            pin-group-today.ts
+            remove-column.ts
+            reorder-groups.ts
+            rule-error.ts
+            save-columns.ts
+            save-group.ts
+            save-task.ts
+            save-template.ts
+            save-view.ts
+            set-column-role.ts
+            set-firing.ts
+            start-task.ts
+            to-view.ts
       routers/
-        adjust.ts
         asset.ts
-        category.ts
-        day-plan.ts
-        day.ts
         feedback.ts
-        fixture.ts
-        habit.ts
-        item.ts
-        journal.ts
-        link.ts
         notification.ts
-        passage.ts
-        quote.ts
-        reason.ts
-        review.ts
-        shell.ts
-        template.ts
-        timer.ts
         user.ts
-        week.ts
-        workflow.ts  # one router nested by noun — view, column, group, task, template (TD-40); a rule refused is BAD_REQUEST with its code, never FORBIDDEN
       services/
         asset/
           create-upload-url.ts
           storage.ts
-        day/
-          add-from-library.ts  # Add from the library: a habit-day item at the end of a block, re-flowed; no block on an unstructured day
-          adjust-day.ts  # Adjust — scope computed, preview then commit with a fingerprint, one shifts row of the right kind, undo per decision (b)
-          apply-template-changes.ts
-          apply-work-type.ts  # Working today (v1.2 §3.9): a work-day type onto a Rarely day through the materialiser, and the reverse — not_today, items parked, the day's work anchors cleared; nothing scored
-          bring-back.ts
-          carry-item.ts
-          choose-alternate.ts  # one of, after the pick (v1.1 §6.3): the row takes the other member; the block re-flows
-          choose-from-pool.ts
-          close-day.ts
-          confirm-day.ts  # Set the day — resolves the pools, walks once, writes original_scheduled_start for the first and only time
-          copy-week.ts
-          do-now.ts
-          edit-habit-day.ts
-          get-day.ts
-          get-item.ts
-          habit-item.ts  # a habit as a pick- or plan-made item, its version resolved (v1.2 §3.5), and the workout with its two travel rows — one writer for the pick, the trade and the week build (v1.2 §3.7)
-          item-fields.ts
-          journal.ts
-          lay-out-day.ts  # the whole day's arithmetic — chains stackBlock per kind, forward from wake, backward to work and lights-out. Pure; build and confirm both call it
-          manual-time.ts
-          materialize-day.ts  # THE materialiser, by block (v1.1 §11.11). Reconciles, never rebuilds; pooled blocks hold nothing; originals only for fixtures and pins
-          move-item.ts
-          one-off.ts
-          orient.ts  # the frame's read, and the wake stamp that rides in it — once per day (R11)
-          prefill-week.ts
-          preview-fit.ts
-          quick-pick.ts
-          reading.ts
-          reflow-block.ts  # the one re-lay of a set day (v1.1 §6.3–6.5): fixed points as pins, the rest walked forward; two columns written, never the original
-          set-done.ts
-          timer.ts
-          today.ts
-          trade-workouts.ts  # the week build's training swap (R25): both days' workout items, refused on a set day
-          undo-eligibility.ts  # the three refusals an undo of any shifts row meets — ten minutes, a later shift, done anyway; Adjust's undo reads it
-          untouched.ts  # the two predicates that decide what materialisation may rewrite — item and block
-          week-view.ts
-          wind-down.ts
         jobs/
-          auto-close-days.ts
           expire-exports.ts
-          notify.ts  # the notification scans: the four start kinds in one job gated on confirmed_at and grouped by the minute (v1.1 §9), then N4–N6; quiet after Day Complete on every query
           run-scheduled-jobs.ts  # the job registry — empty until the feature epics land
-        library/
-          archive-habit.ts
-          ensure-reason-set.ts
-          get-habit.ts
-          habit-usage.ts
-          links.ts
-          list-habits.ts
-          list-reasons.ts
-          passages.ts
-          placed-habits.ts
-          save-category.ts
-          save-habit.ts
-          save-reason.ts
-          starter-library.ts
-          to-view.ts
         notifications/
-          block-pushes.ts  # the seam confirmDay calls: the scan model is the delivery (v1.1 §9, DYN-20), so it reports the block boundaries ahead and writes nothing
           build-payload.ts
           deliver.ts
           fan-out.ts  # the one named RLS bypass, for the sessionless scheduler
           list-prefs.ts
           web-push.ts
-        plan/
-          anchors.ts  # which profile time a block kind walks from, and in which direction — the only reader of that mapping
-          day-plans.ts
-          fit.ts  # the fit at planning time (v1.1 §3.10): computeBudget over the profile and the orient/prep templates — first run's last screen reads it
-          fixtures.ts
-          most-used-template.ts
-          save-slot.ts  # THE same-position rule (v1.1 §3.5): multitask or one-of at one position, else SamePositionError. Every slot write pays it
-          templates.ts
-          to-view.ts  # one stackBlock walk per template; startClock is derived here, never stored
-        review/
-          confirm-last-night.ts  # confirm yesterday from the review (v1.1 §7.3): the morning's rule on the review's own day; never a reason
-          decide.ts
-          decision-state.ts
-          finish-review.ts
-          get-review-day.ts
-          get-review-history.ts
-          get-review-week.ts  # the week read: adherence from the resolver, and v1.1 §8.2's counts, time by block and reflections derived from the rows, never stored
-          habit-week.ts
-          pending-days.ts
-          save-changes.ts
-          to-scored.ts
-        shell/
-          settings-counts.ts
-          status.ts
         system/
           quotes.ts
           send-feedback.ts
         user/
-          apply-pending-settings.ts
           avatar.ts
           build-export.ts
-          complete-first-run.ts  # the one write that ends first run: marks the row, stores the overflow mode, pre-fills the current week
           delete-account.ts
           preferences.ts
           request-export.ts
-        workflow/
-          apply-role-effects.ts
-          archive-group.ts
-          archive-task.ts
-          archive-view.ts
-          cells.ts
-          day-context.ts
-          ensure-defaults.ts
-          get-board.ts
-          list-archived.ts
-          list-closed-tasks.ts
-          list-views.ts
-          move-task.ts  # THE move (TD-35): column, lane and place in one transaction, dense per cell, the role effects; every caller — menu, keys, sheet, undo, drag — sends a place here
-          pin-group-today.ts
-          remove-column.ts
-          reorder-groups.ts
-          rule-error.ts
-          save-columns.ts
-          save-group.ts
-          save-task.ts
-          save-template.ts
-          save-view.ts
-          set-column-role.ts
-          set-firing.ts
-          start-task.ts
-          to-view.ts
       context.ts
       index.ts
       root.ts
@@ -1236,6 +1290,7 @@ packages/
       boundaries.js  # the import matrix. Diverges from CC's copy — see TECHNICAL-DECISIONS
       next.js
       no-emoji.js  # UX v1.2 R29 as lint: no emoji in any copy.ts; a glyph is IconValue data on the person's nouns (TD-20)
+      no-legacy.js
       process-env.js
       react-internal.js
       spacing.js
@@ -1263,6 +1318,7 @@ packages/
       motion.ts
       notification-catalogue.ts
       placed-rows.ts
+      planner-values.ts
       schedule-shapes.ts
       starter-library.ts
       storage-buckets.ts
@@ -1278,8 +1334,8 @@ packages/
     tsconfig.json
   db/
     migrations/
-      <12 migration .sql files, 0000–0011 — append-only, human-reviewed before a hosted migrate>
-      meta/ <13 drizzle snapshot files + _journal.json>
+      <13 migration .sql files, 0000–0012 — append-only, human-reviewed before a hosted migrate>
+      meta/ <14 drizzle snapshot files + _journal.json>
       migrations.lock.json
     scripts/
       fixtures/
@@ -1324,6 +1380,18 @@ packages/
           index.ts
           template-slots.ts
           templates.ts
+        planner/
+          block-changes.ts
+          block-items.ts
+          blocks.ts
+          day-events.ts
+          day-records.ts
+          index.ts
+          meal-topics.ts
+          saved-colours.ts
+          slot-events.ts
+          slots.ts
+          todos.ts
         rls/
           helpers.ts
           standard-policies.ts  # three factories, all owner-private. No admin-read exists
@@ -1337,6 +1405,10 @@ packages/
           index.ts
           user-avatars.ts
           users.ts
+        work/
+          clients.ts
+          index.ts
+          work-items.ts
         workflow/  # Workflow's six tables (Epic 7, TD-33): views own their columns, a task is in one cell, firing is two timestamps, templates are snapshots, day pins are today's
           index.ts
           workflow-columns.ts
@@ -1403,6 +1475,7 @@ packages/
     src/
       domain/
         domain.ts  # schema-shaped unions, snake_case, fixed by v2 handoff §3.5
+        planner.ts
         ui-state.ts  # presentational unions, kebab-case; derived per render, never stored
         view.ts  # what a component receives — never a DB row
         workflow.ts
@@ -2160,6 +2233,8 @@ scripts/
   print-local-urls.mjs
 specs/
   _shared/
+    audits/
+      2026-10-09-pem-default.md
     epics/
       MIG-migration/
         tickets/
@@ -2234,9 +2309,898 @@ specs/
         brief.md
         rulings.md
   web/
+    epics/
+      USE-daily-use/
+        prompts/
+          .gitkeep
+        refs/
+          paper-map/
+            p-3-0-notes.md
+            p-3-0.tsv
+            p-4-0-notes.md
+            p-4-0.tsv
+            p-6-0-notes.md
+            p-6-0.tsv
+            README.md
+          passion-planner-weekly-spread.jpg
+        research/
+          what-exists.md
+        technical/
+          calls.md
+          data-contract.md
+          one-way-doors.md
+          placement.md
+          rabbit-holes.md
+          README.md
+          test-shape.md
+        tickets/
+          USE-001-legacy-move/
+            contract.md
+            results.json
+          USE-002-schema-0012-rls/
+            contract.md
+          USE-003-record-validators/
+            contract.md
+          USE-004-shell-rail-tabs/
+            contract.md
+          USE-005-derive-clock/
+            contract.md
+          USE-006-repeat-rule-day-read/
+            contract.md
+          _preflight.md
+          .gitkeep
+        ux/
+          account/
+            avatar-menu/
+              captures/
+                installed-402.png
+                no-photo-402.png
+                not-installed-402.png
+              states/
+                installed.md
+                no-photo.md
+                not-installed.md
+                offline.md
+              index.md
+              words-and-access.md
+            install-sheet/
+              captures/
+                android-402.png
+                browser-prompt-402.png
+                iphone-402.png
+                other-browser-402.png
+              states/
+                android.md
+                browser-prompt.md
+                installed.md
+                iphone.md
+                other-browser.md
+              index.md
+              words-and-access.md
+            profile-sheet/
+              captures/
+                crop-402.png
+                default-402.png
+                no-photo-402.png
+                not-saved-402.png
+                uploading-402.png
+              states/
+                crop.md
+                default.md
+                no-photo.md
+                not-saved.md
+                uploading.md
+              index.md
+              words-and-access.md
+            settings/
+              captures/
+                client-sheet-402.png
+                clients-on-402.png
+                connections-402.png
+                workspace-per-project-402.png
+              states/
+                client-sheet.md
+                clients-on.md
+                connecting.md
+                connections.md
+                empty.md
+                error.md
+                loading.md
+                offline.md
+                workspace-per-project.md
+              index.md
+              words-and-access.md
+            overview.md
+          boards/
+            use-daily-use/
+              archive-1.md
+              archive-2.md
+              archive-3.md
+              block-complete.md
+              block-view.md
+              evening.md
+              item-sheet-see-step-11.md
+              now-cont.md
+              now.md
+              orient.md
+              ready-go-hand-off.md
+              review-the-day-cont.md
+              review-the-day.md
+              running-and-done.md
+              schedule.md
+              step-0.md
+              to-dos-tray-and-reminder.md
+              work-block-cont-2.md
+              work-block-cont.md
+              work-block.md
+            use-set-up/
+              account.md
+              archive.md
+              block-view-from-set-my-days.md
+              item-sheet-cont.md
+              item-sheet.md
+              new-block-sheet.md
+              set-my-days-cont-2.md
+              set-my-days-cont.md
+              set-my-days.md
+              to-do-sheet.md
+            use-work/
+              archive-a-week-strip.md
+              archive-b-accordion.md
+              archive-c-planner-page.md
+              block-panel.md
+              phone-editing-and-this-week.md
+              phone-today.md
+              today-at-a-desk.md
+              today-edges.md
+              week.md
+          day/
+            block-complete/
+              captures/
+                all-done-402.png
+                last-block-402.png
+                not-done-closed-402.png
+                not-done-do-now-402.png
+                not-done-open-402.png
+              states/
+                all-done.md
+                last-block.md
+                not-done-closed.md
+                not-done-do-now.md
+                not-done-open.md
+              index.md
+              words-and-access.md
+            block-view/
+              captures/
+                checked-swipe-402.png
+                checklist-editing-402.png
+                current-402.png
+                edit-dragging-402.png
+                editing-monday-402.png
+                editing-offline-402.png
+                empty-402.png
+                empty-new-block-402.png
+                error-402.png
+                header-menu-402.png
+                life-set-402.png
+                loading-402.png
+                meal-editing-402.png
+                offline-402.png
+                overflow-402.png
+                past-402.png
+                removed-undo-402.png
+                set-work-402.png
+                success-402.png
+                todos-add-open-402.png
+                todos-dated-plan-402.png
+                todos-pool-402.png
+                todos-sunday-reset-402.png
+                training-editing-402.png
+                true-break-402.png
+                wellness-editing-402.png
+                work-add-to-a-tier-402.png
+                work-tiers-402.png
+              states/
+                checked-swipe.md
+                checklist-editing.md
+                current.md
+                edit-dragging.md
+                editing-monday.md
+                editing-offline.md
+                empty.md
+                error.md
+                header-menu.md
+                life-set.md
+                loading.md
+                meal-editing.md
+                offline.md
+                overflow.md
+                partial.md
+                past.md
+                removed-undo.md
+                set-work.md
+                success.md
+                todos-add-open.md
+                todos-dated-plan.md
+                todos-pool.md
+                todos-sunday-reset.md
+                training-editing.md
+                true-break.md
+                wellness-editing.md
+                work-add-to-a-tier.md
+                work-tiers.md
+              by-kind.md
+              index.md
+              words-and-access.md
+            close-the-day/
+              captures/
+                journal-402.png
+              states/
+                empty.md
+                journal.md
+                offline.md
+                read-only.md
+              built-and-words.md
+              index.md
+            decisions/
+              D-USE-1-24.md
+              D-USE-103-112.md
+              D-USE-113-118.md
+              D-USE-25-37.md
+              D-USE-38-41.md
+              D-USE-42-48.md
+              D-USE-49-55.md
+              D-USE-56-58.md
+              D-USE-59-65.md
+              D-USE-66-69.md
+              D-USE-70-75.md
+              D-USE-76-79.md
+              D-USE-80-87.md
+              D-USE-88-92.md
+              D-USE-93-102.md
+            item-sheet/
+              captures/
+                at-a-set-time-402.png
+                default-402.png
+                linear-done-402.png
+                linear-failed-402.png
+                linear-item-from-now-402.png
+                linear-linked-402.png
+                linear-more-open-402.png
+                linear-off-402.png
+                linear-priority-402.png
+                linear-search-402.png
+                linear-syncing-402.png
+                more-open-402.png
+                size-and-length-402.png
+                sub-issue-alone-402.png
+                swap-402.png
+                swap-empty-402.png
+                tier-and-sessions-402.png
+                while-firing-402.png
+                work-more-open-402.png
+              states/
+                at-a-set-time.md
+                default.md
+                linear-done.md
+                linear-failed.md
+                linear-item-from-now.md
+                linear-linked.md
+                linear-more-open.md
+                linear-off.md
+                linear-priority.md
+                linear-search.md
+                linear-syncing.md
+                loading.md
+                more-open.md
+                offline.md
+                size-and-length.md
+                sub-issue-alone.md
+                swap-empty.md
+                swap.md
+                tier-and-sessions.md
+                while-firing.md
+                work-more-open.md
+              index.md
+              words-and-access.md
+            now/
+              captures/
+                ahead-402.png
+                all-done-add-more-402.png
+                all-done-start-next-402.png
+                before-ready-go-402.png
+                behind-402.png
+                checklist-block-402.png
+                done-next-lifts-402.png
+                empty-break-402.png
+                empty-no-blocks-402.png
+                error-on-check-402.png
+                header-menu-402.png
+                meal-pick-topic-402.png
+                meal-topic-picked-402.png
+                offline-402.png
+                reordering-402.png
+                row-long-press-402.png
+                row-tapped-402.png
+                success-402.png
+                sunday-checklist-402.png
+                todos-block-402.png
+                transition-402.png
+              states/
+                ahead.md
+                all-done-add-more.md
+                all-done-start-next.md
+                before-ready-go.md
+                behind.md
+                checklist-block.md
+                done-next-lifts.md
+                empty-break.md
+                empty-no-blocks.md
+                error-on-check.md
+                header-menu.md
+                loading.md
+                meal-pick-topic.md
+                meal-topic-picked.md
+                offline.md
+                partial.md
+                reordering.md
+                row-long-press.md
+                row-tapped.md
+                success.md
+                sunday-checklist.md
+                todos-block.md
+                transition.md
+              index.md
+              words-and-access.md
+            open/
+              open-1.md
+              open-2.md
+              open-3.md
+              open-4-cont.md
+              open-4.md
+              open-5-cont.md
+              open-5.md
+              open-6.md
+              open-7.md
+              open-8.md
+              open-9.md
+            orient/
+              captures/
+                empty-402.png
+                error-402.png
+                last-night-open-402.png
+                late-402.png
+                loading-402.png
+                offline-402.png
+                passage-open-402.png
+                success-402.png
+              states/
+                empty.md
+                error.md
+                last-night-open.md
+                late.md
+                lingering.md
+                loading.md
+                offline.md
+                passage-open.md
+                skipped.md
+                success.md
+              index.md
+            review-the-day/
+              captures/
+                after-swap-undo-402.png
+                empty-402.png
+                error-402.png
+                first-edit-402.png
+                first-mornings-402.png
+                late-402.png
+                late-passed-open-402.png
+                loading-402.png
+                no-work-402.png
+                no-work-add-to-primary-402.png
+                no-work-open-this-week-402.png
+                offline-402.png
+                success-1440.png
+                success-402.png
+                sunday-checklist-and-plans-402.png
+                sunday-making-the-checklist-402.png
+                sunday-nothing-set-402.png
+                sunday-now-line-402.png
+                tray-open-402.png
+              states/
+                after-ready-go.md
+                after-swap-undo.md
+                empty.md
+                error.md
+                first-edit.md
+                first-mornings.md
+                late-passed-open.md
+                late.md
+                loading.md
+                no-work-add-to-primary.md
+                no-work-open-this-week.md
+                no-work.md
+                offline.md
+                partial.md
+                success.md
+                sunday-checklist-and-plans.md
+                sunday-making-the-checklist.md
+                sunday-nothing-set.md
+                sunday-now-line.md
+                tray-open.md
+              index.md
+              words-and-access.md
+            running/
+              captures/
+                counting-down-402.png
+                done-on-a-running-row-402.png
+                done-well-over-402.png
+                over-a-minute-or-more-402.png
+                over-under-a-minute-402.png
+                paused-402.png
+                running-row-focused-402.png
+                several-running-402.png
+                time-taken-sheet-402.png
+                timed-done-402.png
+                timed-over-warning-402.png
+                took-change-402.png
+              states/
+                counting-down.md
+                done-on-a-running-row.md
+                done-well-over.md
+                over-a-minute-or-more.md
+                over-under-a-minute.md
+                paused.md
+                running-row-focused.md
+                several-running.md
+                time-taken-sheet.md
+                timed-done.md
+                timed-over-warning.md
+                took-change.md
+              index.md
+              words-and-access.md
+            schedule/
+              captures/
+                checklist-day-402.png
+                checks-and-running-402.png
+                during-go-402.png
+                meeting-inside-a-block-402.png
+              states/
+                checklist-day.md
+                checks-and-running.md
+                during-go.md
+                empty.md
+                error.md
+                loading.md
+                meeting-inside-a-block.md
+                offline.md
+                partial.md
+              index.md
+              words-and-access.md
+            todo-sheet/
+              captures/
+                default-402.png
+                more-open-402.png
+                not-installed-402.png
+                notifications-off-402.png
+                reminder-on-402.png
+                repeats-open-402.png
+                type-open-402.png
+              states/
+                default.md
+                error.md
+                loading.md
+                more-open.md
+                not-installed.md
+                notifications-off.md
+                offline.md
+                reminder-on.md
+                repeats-open.md
+                type-open.md
+              index.md
+              words-and-access.md
+            todos/
+              captures/
+                empty-402.png
+                from-a-reminder-402.png
+                notification-402.png
+                open-402.png
+              states/
+                closed.md
+                empty.md
+                error.md
+                from-a-reminder.md
+                loading.md
+                notification.md
+                offline.md
+                open.md
+              index.md
+              words-and-access.md
+            now-work.md
+            overview.md
+          dev-notes/
+            captures/
+              life-and-todos-colours-402.png
+            blocks-and-todos-model.md
+            colours-for-a-new-thread.md
+            first-wake-loop-board.md
+            google-calendar.md
+            how-we-got-here.md
+            how-work-fills-a-block.md
+            later-and-for-technical.md
+            life-and-todos.md
+            meeting-inside-a-work-block.md
+            notes-and-description.md
+            over-by-how-much.md
+            several-running.md
+            size-and-length.md
+            timers-across-devices.md
+            timers-through-the-day.md
+            training-for.md
+            what-stays-at-the-desk.md
+          interactions/
+            add/
+              captures/
+                add-sheet-402.png
+                from-linear-by-size-402.png
+                new-task-402.png
+                save-to-the-pool-402.png
+              states/
+                add-sheet.md
+                from-linear-by-size.md
+                new-task.md
+                save-to-the-pool.md
+              index.md
+            add-from-the-rail/
+              captures/
+                add-sheet-402.png
+                rail-drag-402.png
+              states/
+                add-sheet.md
+                rail-drag.md
+              index.md
+            captures/
+              firing-still-firing-402.png
+              first-wake-loop-overview-board.png
+              meal-topics-with-icons-402.png
+              sessions-this-session-or-all-402.png
+              start-while-one-runs-ask-402.png
+            copy-from/
+              captures/
+                copied-undo-402.png
+                copy-picker-402.png
+                replace-confirm-402.png
+              states/
+                copied-undo.md
+                copy-picker.md
+                replace-confirm.md
+              index.md
+            icon-picker/
+              captures/
+                bad-hex-402.png
+                custom-colour-402.png
+                emoji-suggested-402.png
+                icon-tab-402.png
+                no-name-yet-402.png
+                saved-colours-402.png
+              states/
+                bad-hex.md
+                custom-colour.md
+                emoji-suggested.md
+                icon-tab.md
+                no-name-yet.md
+                saved-colours.md
+              index.md
+            later-start/
+              captures/
+                cut-some-402.png
+                slide-402.png
+              states/
+                cut-some.md
+                slide.md
+              index.md
+            linear-status/
+              captures/
+                change-status-402.png
+                status-sheet-402.png
+              states/
+                change-status.md
+                status-sheet.md
+              index.md
+            make-room/
+              captures/
+                sheet-402.png
+              states/
+                sheet.md
+              index.md
+            move-to/
+              captures/
+                linear-work-item-402.png
+                moved-undo-402.png
+                no-block-of-its-kind-402.png
+                pick-a-day-402.png
+                plain-item-402.png
+                work-move-to-402.png
+              states/
+                linear-work-item.md
+                moved-undo.md
+                no-block-of-its-kind.md
+                pick-a-day.md
+                plain-item.md
+                work-move-to.md
+              index.md
+            place-from-the-pool/
+              captures/
+                doesnt-fit-402.png
+                place-sheet-402.png
+                placed-undo-402.png
+                pool-sheet-402.png
+              states/
+                doesnt-fit.md
+                place-sheet.md
+                placed-undo.md
+                pool-sheet.md
+              index.md
+              phone.md
+            ready-go/
+              captures/
+                checklist-day-402.png
+                first-go-ever-402.png
+                late-wake-402.png
+                not-yet-started-402.png
+                offline-402.png
+                reopened-later-402.png
+                welcome-402.png
+              states/
+                checklist-day.md
+                first-go-ever.md
+                late-wake.md
+                not-yet-started.md
+                offline.md
+                reopened-later.md
+                welcome.md
+              index.md
+            spread/
+              captures/
+                across-the-week-1728.png
+                across-the-week-402.png
+                days-and-tier-402.png
+              states/
+                across-the-week/
+                  1728.md
+                  402.md
+                days-and-tier.md
+              index.md
+            add-event.md
+            firing.md
+            first-wake-loop.md
+            index.md
+            meal-topics.md
+            sessions.md
+            start-while-one-runs.md
+            step-away.md
+          narrative/
+            01-the-day.md
+            02-setting-your-days.md
+            03-the-morning.md
+            04-go-mode.md
+            05-paper-and-open.md
+            06-work-at-a-desk.md
+          set-my-days/
+            new-block-sheet/
+              captures/
+                checklist-402.png
+                clash-402.png
+                custom-recurrence-402.png
+                error-402.png
+                from-a-tapped-time-402.png
+                invalid-402.png
+                meal-402.png
+                repeats-menu-402.png
+                todos-kind-402.png
+                transition-402.png
+                wellness-402.png
+                work-402.png
+              states/
+                checklist.md
+                clash.md
+                custom-recurrence.md
+                error.md
+                from-a-tapped-time.md
+                invalid.md
+                meal.md
+                repeats-menu.md
+                todos-kind.md
+                transition.md
+                wellness.md
+                work.md
+              index.md
+              words-and-access.md
+            set-my-days/
+              captures/
+                add-event-402.png
+                copy-offer-402.png
+                day-menu-402.png
+                day-own-change-402.png
+                empty-day-402.png
+                empty-first-day-402.png
+                error-402.png
+                event-inside-work-402.png
+                event-own-block-402.png
+                google-events-402.png
+                install-offer-402.png
+                item-icons-402.png
+                loading-402.png
+                offline-402.png
+                out-of-bounds-402.png
+                overlap-402.png
+                plus-menu-402.png
+                plus-menu-empty-day-402.png
+                saved-402.png
+                tap-a-time-402.png
+                the-day-1024.png
+                the-day-402.png
+                the-week-402.png
+                usual-change-reaches-402.png
+                usual-saturday-402.png
+                usual-thursday-evening-402.png
+                usual-week-402.png
+              states/
+                add-event.md
+                copy-offer.md
+                day-menu.md
+                day-own-change.md
+                empty-day.md
+                empty-first-day.md
+                error.md
+                event-inside-work.md
+                event-own-block.md
+                google-events.md
+                install-offer.md
+                item-icons.md
+                loading.md
+                offline.md
+                out-of-bounds.md
+                overlap.md
+                plus-menu.md
+                saved.md
+                tap-a-time.md
+                the-day.md
+                the-week.md
+                usual-change-reaches.md
+                usual-saturday.md
+                usual-thursday-evening.md
+                usual-week.md
+              index.md
+              layout.md
+              words-and-access.md
+            overview.md
+          work/
+            block-panel/
+              captures/
+                non-work-block-1728.png
+                work-block-1728.png
+              states/
+                checking-today.md
+                non-work-block.md
+                work-block.md
+              index.md
+              words-and-access.md
+            this-week/
+              captures/
+                client-filter-402.png
+                linear-connected-402.png
+                linear-not-connected-402.png
+                pool-empty-402.png
+                pool-search-402.png
+                the-day-402.png
+              states/
+                client-filter.md
+                clients-off.md
+                error.md
+                linear-connected.md
+                linear-not-connected.md
+                loading.md
+                no-work-block.md
+                offline.md
+                past-day.md
+                pool-empty.md
+                pool-search.md
+                the-day.md
+              index.md
+              pool-sheet-anatomy.md
+              words-and-access.md
+            today/
+              captures/
+                brought-back-1728.png
+                brought-back-402.png
+                done-for-today-402.png
+                error-402.png
+                everything-firing-402.png
+                later-work-block-402.png
+                linear-failed-402.png
+                linear-updating-402.png
+                loading-402.png
+                meeting-coming-up-402.png
+                meeting-lifted-402.png
+                no-work-slotted-402.png
+                nothing-planned-1728.png
+                nothing-planned-402.png
+                offline-402.png
+                opened-day-1728.png
+                over-the-range-402.png
+                past-a-cap-402.png
+                paused-402.png
+                primary-only-402.png
+                prompt-sent-1728.png
+                prompt-sent-402.png
+                running-1728.png
+                running-402.png
+                stepped-away-1728.png
+                stepped-away-402.png
+                thumb-firing-402.png
+                urgent-above-primary-402.png
+                waiting-402.png
+                work-menu-402.png
+                working-1728.png
+                working-402.png
+              states/
+                before-ready-go.md
+                brought-back.md
+                done-for-today.md
+                error.md
+                everything-firing.md
+                later-work-block.md
+                linear-failed.md
+                linear-updating.md
+                loading.md
+                meeting-coming-up.md
+                meeting-lifted.md
+                no-work-slotted.md
+                not-a-work-block.md
+                nothing-planned.md
+                offline.md
+                opened-day.md
+                over-the-range.md
+                past-a-cap.md
+                paused.md
+                primary-only.md
+                prompt-sent.md
+                running.md
+                stepped-away.md
+                thumb-firing.md
+                urgent-above-primary.md
+                waiting.md
+                work-menu.md
+                working.md
+              index.md
+              words-and-access.md
+            week/
+              captures/
+                priority-lens-1728.png
+                time-lens-1728.png
+              states/
+                empty-week.md
+                error.md
+                linear-tab.md
+                loading.md
+                offline.md
+                past-day.md
+                pool-empty.md
+                priority-lens.md
+                time-lens.md
+              index.md
+              pool-panel.md
+              pool-rows.md
+              popovers.md
+              words-and-access.md
+            overview.md
+          .gitkeep
+        brief.md
     one-offs/
       WEB-001-rebrand-to-kit/
         contract.md
+        results.json
     ux/
       _global/
         copy-register.md
@@ -2257,8 +3221,11 @@ specs/
       .gitkeep
   _status.md
 tests/
+  legacy-move.test.ts
   smoke.test.ts
   test-runner.test.ts
+  use-rls.test.ts
+  use-shell.test.ts
 tooling/
   fixtures/
     settings/
@@ -2533,12 +3500,156 @@ tooling/
               records/
                 table.md
         case.json
+      fail-ledger-board-not-in-index/
+        specs/
+          web/
+            epics/
+              WK1-work/
+                ux/
+                  boards/
+                    use-work.md
+                  dev-notes/
+                    what-stays-at-the-desk.md
+                  interactions/
+                    firing.md
+                  work/
+                    today/
+                      states/
+                        everything-firing.md
+                        loading.md
+                        working.md
+                      index.md
+                brief.md
+        case.json
+      fail-ledger-boards-with-target/
+        specs/
+          web/
+            epics/
+              WK1-work/
+                ux/
+                  boards/
+                    use-work.md
+                  dev-notes/
+                    what-stays-at-the-desk.md
+                  interactions/
+                    firing.md
+                  work/
+                    today/
+                      states/
+                        everything-firing.md
+                        loading.md
+                        working.md
+                      index.md
+                brief.md
+        case.json
+      fail-ledger-carrier-does-not-list/
+        specs/
+          web/
+            epics/
+              WK1-work/
+                ux/
+                  boards/
+                    use-work.md
+                  dev-notes/
+                    what-stays-at-the-desk.md
+                  interactions/
+                    firing.md
+                  work/
+                    today/
+                      states/
+                        everything-firing.md
+                        loading.md
+                        working.md
+                      index.md
+                brief.md
+        case.json
+      fail-ledger-not-picked-without-d-line/
+        specs/
+          web/
+            epics/
+              WK1-work/
+                ux/
+                  boards/
+                    use-work.md
+                  dev-notes/
+                    what-stays-at-the-desk.md
+                  interactions/
+                    firing.md
+                  work/
+                    today/
+                      states/
+                        everything-firing.md
+                        loading.md
+                        working.md
+                      index.md
+                brief.md
+        case.json
+      fail-ledger-state-without-boards/
+        specs/
+          web/
+            epics/
+              WK1-work/
+                ux/
+                  boards/
+                    use-work.md
+                  dev-notes/
+                    what-stays-at-the-desk.md
+                  interactions/
+                    firing.md
+                  work/
+                    today/
+                      states/
+                        everything-firing.md
+                        loading.md
+                        working.md
+                      index.md
+                brief.md
+        case.json
+      fail-ledger-superseded-without-ruling/
+        specs/
+          web/
+            epics/
+              WK1-work/
+                ux/
+                  boards/
+                    use-work.md
+                  dev-notes/
+                    what-stays-at-the-desk.md
+                  interactions/
+                    firing.md
+                  work/
+                    today/
+                      states/
+                        everything-firing.md
+                        loading.md
+                        working.md
+                      index.md
+                brief.md
+        case.json
       fail-misplaced-folder/
         specs/
           web/
             one-offs/
               filter-without-id/
                 contract.md
+        case.json
+      fail-narrative-over-cap/
+        specs/
+          web/
+            epics/
+              OB2-onboarding/
+                ux/
+                  narrative.md
+                brief.md
+        case.json
+      fail-narrative-with-target/
+        specs/
+          web/
+            epics/
+              OB2-onboarding/
+                ux/
+                  narrative.md
+                brief.md
         case.json
       fail-pass-without-run-record/
         specs/
@@ -2729,6 +3840,38 @@ tooling/
             ux/
               records/
                 table.md
+        case.json
+      pass-ledger-desk-and-phone/
+        specs/
+          web/
+            epics/
+              WK1-work/
+                ux/
+                  boards/
+                    use-work.md
+                  dev-notes/
+                    what-stays-at-the-desk.md
+                  interactions/
+                    firing.md
+                  work/
+                    today/
+                      states/
+                        everything-firing.md
+                        loading.md
+                        working.md
+                      index.md
+                brief.md
+        case.json
+      pass-narrative-in-ux/
+        specs/
+          web/
+            epics/
+              OB2-onboarding/
+                ux/
+                  narrative/
+                    evening.md
+                  narrative.md
+                brief.md
         case.json
       pass-open-one-off/
         specs/
