@@ -96,11 +96,14 @@ Colocation rule (drizzle-orm-conventions §3): an enum used by one table lives i
  * - A TYPO fails at the declaration, with the fix in the message:
  *   `Type '"task_apointment"' is not assignable to type 'ItemType'. Did you
  *   mean '"task_appointment"'?`
- * - An OMISSION fails at the first consumer rather than here: the return type
- *   becomes the sentinel tuple `["MISSING_ENUM_VALUE", <the missing member>]`,
- *   which `pgEnum` accepts, so the sentinel surfaces in the column's type and
- *   every insert of a real value stops compiling. Less direct, still a red
- *   build — and the sentinel's name is in the error, so the cause is legible.
+ * - An OMISSION fails at the declaration too (USE-2; it used to fail only at
+ *   the first insert, which a table no service writes yet never reaches): the
+ *   argument must then also carry a `missing` key naming the absent members,
+ *   so the error reads `Property 'missing' is missing … { missing: "todos" }`.
+ * - An EXTRA value is a value outside the union, so it is the typo case.
+ *
+ * The list may be a `@syn/constants` tuple (`enumValues<TodoType>()(TODO_TYPES)`),
+ * which is how an enum's values are spelled once (USE-2).
  *
  * The generated SQL is unchanged; the call is an identity at runtime.
  *
@@ -115,16 +118,17 @@ type Missing<TUnion extends string, TValues extends readonly string[]> = Exclude
   TValues[number]
 >;
 
-type Exhaustive<TUnion extends string, TValues extends readonly TUnion[]> = [
+/** Satisfied by any argument when nothing is missing; otherwise names the gap. */
+type Complete<TUnion extends string, TValues extends readonly string[]> = [
   Missing<TUnion, TValues>,
 ] extends [never]
-  ? TValues
-  : readonly ["MISSING_ENUM_VALUE", Missing<TUnion, TValues>];
+  ? unknown
+  : { readonly missing: Missing<TUnion, TValues> };
 
 export function enumValues<TUnion extends string>() {
   return <const TValues extends readonly [TUnion, ...TUnion[]]>(
-    values: TValues,
-  ): Exhaustive<TUnion, TValues> => values as Exhaustive<TUnion, TValues>;
+    values: TValues & Complete<TUnion, TValues>,
+  ): TValues => values;
 }
 
 // packages/db/src/schema/enums.ts
@@ -143,12 +147,14 @@ export function enumValues<TUnion extends string>() {
  */
 import { pgEnum } from "drizzle-orm/pg-core";
 
+import { BLOCK_KIND_VALUES, NEW_BLOCK_KINDS } from "@syn/constants";
 import type {
   BlockKind,
   CategoryKey,
   FixtureKind,
   ItemType,
   MissTier,
+  NewBlockKind,
   Scheduling,
   TimeMode,
   WorkoutLocation,
@@ -205,21 +211,22 @@ export const itemTypeEnum = pgEnum(
  * `transition` is UX v1.3 R48, TD-25. The TypeScript side moved in DAY-3 to
  * keep the workspace building; the `ALTER TYPE … ADD VALUE` ships in
  * migration `0009` (DAY-4). Nothing writes the value before then.
+ *
+ * USE (USE-2): `wellness`, `life`, `todos` and `evening` join, by `ADD VALUE`
+ * in `0012`, which writes no row with them. The values are spelled once, in
+ * `BLOCK_KIND_VALUES` (`@syn/constants`).
  */
 export const blockKindEnum = pgEnum(
   "block_kind",
-  enumValues<BlockKind>()([
-    "orient",
-    "morning",
-    "training",
-    "prep",
-    "work",
-    "break",
-    "transition",
-    "activity",
-    "wind_down",
-  ]),
+  enumValues<BlockKind>()(BLOCK_KIND_VALUES),
 );
+
+/*
+ * The New block sheet's seven (D-USE-34) are `block_kind` values with no enum
+ * of their own. This call proves `NEW_BLOCK_KINDS` and `NewBlockKind` agree;
+ * it does nothing at runtime.
+ */
+enumValues<NewBlockKind>()(NEW_BLOCK_KINDS);
 
 /** §3.5, §3.7. `template_slots`, `day_items`. */
 export const timeModeEnum = pgEnum(
@@ -322,12 +329,14 @@ export const authUsers = authSchema.table("users", {
  */
 import { pgEnum } from "drizzle-orm/pg-core";
 
+import { BLOCK_KIND_VALUES, NEW_BLOCK_KINDS } from "@syn/constants";
 import type {
   BlockKind,
   CategoryKey,
   FixtureKind,
   ItemType,
   MissTier,
+  NewBlockKind,
   Scheduling,
   TimeMode,
   WorkoutLocation,
@@ -384,21 +393,22 @@ export const itemTypeEnum = pgEnum(
  * `transition` is UX v1.3 R48, TD-25. The TypeScript side moved in DAY-3 to
  * keep the workspace building; the `ALTER TYPE … ADD VALUE` ships in
  * migration `0009` (DAY-4). Nothing writes the value before then.
+ *
+ * USE (USE-2): `wellness`, `life`, `todos` and `evening` join, by `ADD VALUE`
+ * in `0012`, which writes no row with them. The values are spelled once, in
+ * `BLOCK_KIND_VALUES` (`@syn/constants`).
  */
 export const blockKindEnum = pgEnum(
   "block_kind",
-  enumValues<BlockKind>()([
-    "orient",
-    "morning",
-    "training",
-    "prep",
-    "work",
-    "break",
-    "transition",
-    "activity",
-    "wind_down",
-  ]),
+  enumValues<BlockKind>()(BLOCK_KIND_VALUES),
 );
+
+/*
+ * The New block sheet's seven (D-USE-34) are `block_kind` values with no enum
+ * of their own. This call proves `NEW_BLOCK_KINDS` and `NewBlockKind` agree;
+ * it does nothing at runtime.
+ */
+enumValues<NewBlockKind>()(NEW_BLOCK_KINDS);
 
 /** §3.5, §3.7. `template_slots`, `day_items`. */
 export const timeModeEnum = pgEnum(
@@ -637,6 +647,8 @@ export const users = pgTable(
 
     // UX v1.1 §3.3 — "when your morning runs long, what gives?" (0005).
     anchorDirection: anchorDirectionEnum("anchor_direction"),
+    // USE (0012) — Work shows clients only once they are switched on.
+    clientsEnabled: boolean("clients_enabled").notNull().default(false),
     // UX v1.1 §3.1 — the person's order for the six non-placeable kinds (0005).
     // JSON shape: BlockKind[] — see @syn/types.
     blockOrder: jsonb("block_order")
@@ -3535,6 +3547,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
+import { NOTIFICATION_KINDS } from "@syn/constants";
 import type { NotificationKind } from "@syn/types";
 
 import { enumValues } from "../enum-values";
@@ -3544,28 +3557,13 @@ import { users } from "../user/users";
 
 /**
  * The nine rows of official spec §8.2, N1…N9 in order, then UX v1.1 §9.1's
- * three (`block_start`, `fixture_start`, `devices_off`). Moved in DYN-1; the
- * `ADD VALUE`s ship in `0004`; the scheduler writes them from DYN-20.
+ * three (`block_start`, `fixture_start`, `devices_off`), UX v1.2's
+ * `journal_reminder` (0007) and USE's `todo_reminder` (USE-2, `0012`). The
+ * values are spelled once, in `NOTIFICATION_KINDS` (`@syn/constants`).
  */
 export const notificationKindEnum = pgEnum(
   "notification_kind",
-  enumValues<NotificationKind>()([
-    "item_start",
-    "window_open",
-    "window_closing",
-    "review_reminder",
-    "pending_review",
-    "week_build",
-    "week_ready",
-    "timer_running",
-    "calendar_item",
-    "block_start",
-    "fixture_start",
-    "devices_off",
-    // UX v1.2 §9 N2 (R38) — the journal reminder. Moved in RUN-1; the
-    // `ADD VALUE` ships in `0007`; sent from RUN-6.
-    "journal_reminder",
-  ]),
+  enumValues<NotificationKind>()(NOTIFICATION_KINDS),
 );
 
 export const notificationPrefs = pgTable(

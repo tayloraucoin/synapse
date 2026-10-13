@@ -134,6 +134,8 @@ export const users = pgTable(
 
     // UX v1.1 §3.3 — "when your morning runs long, what gives?" (0005).
     anchorDirection: anchorDirectionEnum("anchor_direction"),
+    // USE (0012) — Work shows clients only once they are switched on.
+    clientsEnabled: boolean("clients_enabled").notNull().default(false),
     // UX v1.1 §3.1 — the person's order for the six non-placeable kinds (0005).
     // JSON shape: BlockKind[] — see @syn/types.
     blockOrder: jsonb("block_order")

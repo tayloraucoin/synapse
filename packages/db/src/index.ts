@@ -36,23 +36,34 @@ export {
 export * from "./schema";
 
 import {
+  blockChanges,
+  blockItems,
+  blocks,
   categories,
+  clients,
   dataExports,
   dayBlocks,
+  dayEvents,
   dayItems,
+  dayRecords,
   days,
   feedbackMessages,
   fixtures,
   habits,
   journalEntries,
   links,
+  mealTopics,
   misses,
   notificationPrefs,
   reasons,
+  savedColours,
   shifts,
+  slotEvents,
+  slots,
   templateSlots,
   templates,
   timerSessions,
+  todos,
   userAvatars,
   users,
   webPushSubscriptions,
@@ -62,6 +73,7 @@ import {
   workflowTasks,
   workflowTemplates,
   workflowViews,
+  workItems,
 } from "./schema";
 
 /**
@@ -126,3 +138,29 @@ export type NewWorkflowTemplate = typeof workflowTemplates.$inferInsert;
 /** `…Row`, not `WorkflowView`: the `…View` suffix is the view models' in `@syn/types`. */
 export type WorkflowViewRow = typeof workflowViews.$inferSelect;
 export type NewWorkflowViewRow = typeof workflowViews.$inferInsert;
+
+// USE (USE-2, 0012): the planner and Work. No service reads them before wave 3.
+export type Block = typeof blocks.$inferSelect;
+export type NewBlock = typeof blocks.$inferInsert;
+export type BlockChange = typeof blockChanges.$inferSelect;
+export type NewBlockChange = typeof blockChanges.$inferInsert;
+export type BlockItem = typeof blockItems.$inferSelect;
+export type NewBlockItem = typeof blockItems.$inferInsert;
+export type Client = typeof clients.$inferSelect;
+export type NewClient = typeof clients.$inferInsert;
+export type DayEvent = typeof dayEvents.$inferSelect;
+export type NewDayEvent = typeof dayEvents.$inferInsert;
+export type DayRecord = typeof dayRecords.$inferSelect;
+export type NewDayRecord = typeof dayRecords.$inferInsert;
+export type MealTopic = typeof mealTopics.$inferSelect;
+export type NewMealTopic = typeof mealTopics.$inferInsert;
+export type SavedColour = typeof savedColours.$inferSelect;
+export type NewSavedColour = typeof savedColours.$inferInsert;
+export type Slot = typeof slots.$inferSelect;
+export type NewSlot = typeof slots.$inferInsert;
+export type SlotEvent = typeof slotEvents.$inferSelect;
+export type NewSlotEvent = typeof slotEvents.$inferInsert;
+export type Todo = typeof todos.$inferSelect;
+export type NewTodo = typeof todos.$inferInsert;
+export type WorkItem = typeof workItems.$inferSelect;
+export type NewWorkItem = typeof workItems.$inferInsert;

@@ -9,7 +9,7 @@ import {
 } from "./helpers";
 
 /**
- * Three factories, and deliberately only three.
+ * Four factories, and deliberately only four.
  *
  * Conscious Connections has eight, because it has couples, admins, and
  * catalogues an admin writes. Synapse has one shape of user data — yours,
@@ -56,6 +56,41 @@ export function ownerPrivateCrudPolicies({
       for: "delete",
       to: authenticatedRole,
       using: access,
+    }),
+  ];
+}
+
+/**
+ * Owner-private and append-only — the owner reads and inserts; nobody updates
+ * or deletes through the app (USE-2, `slot_events`). A record of what happened
+ * is never rewritten: a correction is a new row. Deleting the owner still
+ * cascades the rows away, because a foreign key's action is not a policy.
+ */
+export function ownerAppendOnlyPolicies({
+  prefix,
+  ownerColumn,
+}: PolicyOptions) {
+  const access = isOwner(ownerColumn);
+  return [
+    pgPolicy(`${prefix}_select`, {
+      for: "select",
+      to: authenticatedRole,
+      using: access,
+    }),
+    pgPolicy(`${prefix}_insert`, {
+      for: "insert",
+      to: authenticatedRole,
+      withCheck: access,
+    }),
+    pgPolicy(`${prefix}_update`, {
+      for: "update",
+      to: authenticatedRole,
+      using: denyAuthenticated,
+    }),
+    pgPolicy(`${prefix}_delete`, {
+      for: "delete",
+      to: authenticatedRole,
+      using: denyAuthenticated,
     }),
   ];
 }

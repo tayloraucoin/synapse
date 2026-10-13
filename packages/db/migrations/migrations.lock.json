@@ -72,6 +72,12 @@
       "tag": "0011_workflow",
       "when": 1791093294635,
       "sha256": "3ec2ee65aa07573e628f1c5fa736c9a467adad09b424c005e43c846563209e16"
+    },
+    {
+      "idx": 12,
+      "tag": "0012_use_daily",
+      "when": 1791920498491,
+      "sha256": "6f6dcf4969c0a228d16d397c277fbd57b2b75967f03e83381d3d1c3cf8365e46"
     }
   ]
 }
