@@ -29,7 +29,7 @@ const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
  * Mirrors @syn/auth's getLocalSupabaseUrl: the local stack's URL when the
  * local tier opts in, "" otherwise; a URL that is not this machine's is refused.
  */
-function getLocalSupabaseUrl(env: NodeJS.ProcessEnv = process.env): string {
+function getLocalSupabaseUrl(env: NodeJS.ProcessEnv): string {
   if (resolveDbEnvironment(env) !== "local") return "";
   const url = (env.NEXT_PUBLIC_SUPABASE_URL_LOCAL ?? "").trim();
   if (!url) return "";
@@ -94,7 +94,7 @@ const admin = createClient(url, serviceKey, {
 });
 
 const tier = resolveDbEnvironment();
-const authSource = getLocalSupabaseUrl()
+const authSource = LOCAL_HOSTS.has(new URL(url).hostname)
   ? "local stack"
   : tier === "production"
     ? "production"

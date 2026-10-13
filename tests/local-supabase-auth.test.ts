@@ -37,7 +37,11 @@ const resolve = (vars: Record<string, string>) => ({
 test("C1: the local tier reads the _LOCAL values when NEXT_PUBLIC_SUPABASE_URL_LOCAL is set, and staging when it is not", () => {
   assert.deepEqual(
     resolve({ DATABASE_ENVIRONMENT: "local", ...hosted, ...local }),
-    { url: "http://127.0.0.1:54321", key: "local-publishable", secret: "local-secret" },
+    {
+      url: "http://127.0.0.1:54321",
+      key: "local-publishable",
+      secret: "local-secret",
+    },
   );
   assert.deepEqual(resolve({ DATABASE_ENVIRONMENT: "local", ...hosted }), {
     url: "https://staging-ref.supabase.co",
@@ -58,8 +62,22 @@ test("C1: the local tier reads the _LOCAL values when NEXT_PUBLIC_SUPABASE_URL_L
 
 test("C2: staging and production ignore _LOCAL, and a _LOCAL URL that is not this machine is refused by name", () => {
   for (const [tier, expected] of [
-    ["staging", { url: "https://staging-ref.supabase.co", key: "staging-publishable", secret: "staging-secret" }],
-    ["production", { url: "https://live-ref.supabase.co", key: "live-publishable", secret: "live-secret" }],
+    [
+      "staging",
+      {
+        url: "https://staging-ref.supabase.co",
+        key: "staging-publishable",
+        secret: "staging-secret",
+      },
+    ],
+    [
+      "production",
+      {
+        url: "https://live-ref.supabase.co",
+        key: "live-publishable",
+        secret: "live-secret",
+      },
+    ],
   ] as const) {
     assert.deepEqual(
       resolve({ DATABASE_ENVIRONMENT: tier, ...hosted, ...local }),
@@ -79,7 +97,10 @@ test("C2: staging and production ignore _LOCAL, and a _LOCAL URL that is not thi
     assert.throws(
       () =>
         getSupabaseUrl(
-          env({ DATABASE_ENVIRONMENT: "local", NEXT_PUBLIC_SUPABASE_URL_LOCAL: bad }),
+          env({
+            DATABASE_ENVIRONMENT: "local",
+            NEXT_PUBLIC_SUPABASE_URL_LOCAL: bad,
+          }),
         ),
       /NEXT_PUBLIC_SUPABASE_URL_LOCAL must point at this machine/,
     );

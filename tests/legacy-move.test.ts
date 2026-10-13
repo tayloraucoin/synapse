@@ -35,7 +35,10 @@ test("C1: the live route folders are the auth, api, legal and logout groups and 
   const useRoutes = ["layout.tsx", "today", "week", "review"];
   const shell = readdirSync(at("apps/web/app/(shell)")).filter(isRoute);
   assert.ok(shell.includes("today"));
-  assert.deepEqual(shell.filter((name) => !useRoutes.includes(name)), []);
+  assert.deepEqual(
+    shell.filter((name) => !useRoutes.includes(name)),
+    [],
+  );
   assert.equal(existsSync(at("apps/web/app/(setup)")), false);
 });
 
