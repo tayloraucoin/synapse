@@ -75,7 +75,7 @@ Run a local Postgres. Migration `0000`'s guarded block creates a minimal `auth.u
 
 ### Option D (offline, recommended for agents) — the Supabase stack on this machine
 
-The Supabase CLI (`supabase` 2.119.0, a devDependency here) runs Postgres and Auth in Docker; `supabase/config.toml` at the root holds its config (WEB-2). Postgres listens on 54322, which `LOCAL_DATABASE_URL` already names, and it carries the real `auth` schema, so the FK and the trigger behave as they do on a hosted tier; 0000's guard sees `auth` and skips the stub.
+The Supabase CLI (`supabase` 2.119.0, a devDependency here) runs Postgres and Auth in Docker; `supabase/config.toml` at the root holds its config (WEB-2). Postgres listens on 54422 and Auth on 54421 (the 544xx range, so another project's stack can keep the CLI's default 543xx); `LOCAL_DATABASE_URL` names 54422, and it carries the real `auth` schema, so the FK and the trigger behave as they do on a hosted tier; 0000's guard sees `auth` and skips the stub.
 
 1. Start Docker, then `yarn db:local:up`. `yarn db:local:status` prints the API URL and the two keys.
 2. Set `NEXT_PUBLIC_SUPABASE_URL_LOCAL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL` and `SUPABASE_SECRET_KEY_LOCAL` in `apps/web/.env.local`, and the URL and secret in `packages/db/.env`. With `DATABASE_ENVIRONMENT=local` and the URL set, `@syn/auth` reads the local stack; unset, it reads staging as before. A URL that is not localhost or 127.0.0.1 is refused.
