@@ -52,6 +52,10 @@ const rawEnv = createEnv({
     SUPABASE_SECRET_KEY_STAGING: z.string().min(1).optional(),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
     SUPABASE_SECRET_KEY: z.string().min(1).optional(),
+    // The local Supabase stack's secret (WEB-2), read only when the local tier
+    // opts in with NEXT_PUBLIC_SUPABASE_URL_LOCAL.
+    SUPABASE_SERVICE_ROLE_KEY_LOCAL: z.string().min(1).optional(),
+    SUPABASE_SECRET_KEY_LOCAL: z.string().min(1).optional(),
 
     // Web Push (VAPID) — the private half. INF-9 sends with it.
     VAPID_PRIVATE_KEY: z.string().min(1).optional(),
@@ -74,6 +78,10 @@ const rawEnv = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+    // The local Supabase stack (WEB-2): setting the URL opts the local tier in.
+    NEXT_PUBLIC_SUPABASE_URL_LOCAL: z.string().url().optional(),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL: z.string().min(1).optional(),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL: z.string().min(1).optional(),
 
     // This app's public origin, per tier. The `local` value is ignored — see
     // resolveSiteUrl.
@@ -110,6 +118,8 @@ const rawEnv = createEnv({
     SUPABASE_SECRET_KEY_STAGING: process.env.SUPABASE_SECRET_KEY_STAGING,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+    SUPABASE_SERVICE_ROLE_KEY_LOCAL: process.env.SUPABASE_SERVICE_ROLE_KEY_LOCAL,
+    SUPABASE_SECRET_KEY_LOCAL: process.env.SUPABASE_SECRET_KEY_LOCAL,
     VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
     VAPID_SUBJECT: process.env.VAPID_SUBJECT,
     CRON_SECRET: process.env.CRON_SECRET,
@@ -125,6 +135,11 @@ const rawEnv = createEnv({
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_SUPABASE_URL_LOCAL: process.env.NEXT_PUBLIC_SUPABASE_URL_LOCAL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL:
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL:
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL,
     NEXT_PUBLIC_SITE_URL_LOCAL: process.env.NEXT_PUBLIC_SITE_URL_LOCAL,
     NEXT_PUBLIC_SITE_URL_STAGING: process.env.NEXT_PUBLIC_SITE_URL_STAGING,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
