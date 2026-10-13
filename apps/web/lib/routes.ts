@@ -138,6 +138,16 @@ export function legalTermsRoute(): string {
   return "/legal/terms";
 }
 
+/* ------------------------------------------------------------------ dev -- */
+
+/**
+ * The capture host for parts no screen holds yet (USE-7). `state` names one
+ * registered part; none lists them all. Not found in a production build.
+ */
+export function devPartsRoute(state?: string): string {
+  return state ? `/dev/parts?state=${encodeURIComponent(state)}` : "/dev/parts";
+}
+
 /* --------------------------------------------------------------- helper -- */
 
 /** Append a status flag to a path that may already carry a query. */
