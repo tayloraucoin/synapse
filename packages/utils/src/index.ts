@@ -164,6 +164,42 @@ export {
   type StripPart,
 } from "./planner";
 
+/* ---- the room engine: Make room, A later start, a late wake (USE-35) ---- */
+export {
+  DAY_END_MIN,
+  ITEM_GIVES_AT_MOST,
+  LATER_START_OFFER_MIN,
+  ORIENT_DEFAULT_MIN,
+  applyChanges,
+  cutAndSlide,
+  findRoom,
+  layoutFromWake,
+  moveLater,
+  offerLaterStart,
+  planRoom,
+  slideDay,
+  type BlockMove,
+  type CutSummary,
+  type DayChange,
+  type FindRoom,
+  type MoveLaterSummary,
+  type RoomBlock,
+  type RoomCandidate,
+  type RoomDay,
+  type RoomEvent,
+  type RoomLockReason,
+  type RoomOccurrence,
+  type RoomPlan,
+  type RoomRefusal,
+  type RoomResult,
+  type RoomSlot,
+  type RoomSummary,
+  type RoomTake,
+  type SetTimeSplit,
+  type SlideSummary,
+  type WakeSummary,
+} from "./planner";
+
 /* ---- work (USE-8) ---- */
 export {
   compareInTiers,
@@ -210,3 +246,4 @@ export {
   type TodoPoolTodo,
 } from "./planner";
 export { resolveClient, type ClientConnection, type ClientItem } from "./work";
+
