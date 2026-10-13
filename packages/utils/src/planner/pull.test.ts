@@ -22,7 +22,11 @@ const block = (
   ...extra,
 });
 
-const todo = (todoId: string, lengthMin: number | null = 15, extra: Partial<PullTodo> = {}): PullTodo => ({
+const todo = (
+  todoId: string,
+  lengthMin: number | null = 15,
+  extra: Partial<PullTodo> = {},
+): PullTodo => ({
   todoId,
   lengthMin,
   remindAt: null,
@@ -32,7 +36,10 @@ const todo = (todoId: string, lengthMin: number | null = 15, extra: Partial<Pull
 describe("C3: each From to-dos block fills in start order, oldest first, walking past what doesn't fit", () => {
   it("fills the earlier block first, whatever the array order", () => {
     const pulled = pullTodos({
-      blocks: [block("late", "14:00", "14:30"), block("early", "10:00", "10:30")],
+      blocks: [
+        block("late", "14:00", "14:30"),
+        block("early", "10:00", "10:30"),
+      ],
       pool: [todo("a", 30), todo("b", 30)],
     });
     expect(pulled).toEqual([
@@ -46,13 +53,22 @@ describe("C3: each From to-dos block fills in start order, oldest first, walking
       blocks: [block("b1", "10:00", "11:00")],
       pool: [todo("oldest", 10), todo("middle", 10), todo("newest", 10)],
     });
-    expect(pulled.map((slot) => slot.todoId)).toEqual(["oldest", "middle", "newest"]);
+    expect(pulled.map((slot) => slot.todoId)).toEqual([
+      "oldest",
+      "middle",
+      "newest",
+    ]);
   });
 
   it("walks on past a to-do too long for the minutes left", () => {
     const pulled = pullTodos({
       blocks: [block("b1", "10:00", "10:45")],
-      pool: [todo("a", 30), todo("long", 30), todo("short", 15), todo("more", 5)],
+      pool: [
+        todo("a", 30),
+        todo("long", 30),
+        todo("short", 15),
+        todo("more", 5),
+      ],
     });
     expect(pulled.map((slot) => slot.todoId)).toEqual(["a", "short"]);
   });
@@ -87,9 +103,7 @@ describe("C4: slots already in a block count, nothing is taken twice, reminders 
       ],
       pool: [todo("a", 20), todo("b", 15), todo("c", 10)],
     });
-    expect(pulled).toEqual([
-      { blockId: "b1", todoId: "b", sortOrder: 5 },
-    ]);
+    expect(pulled).toEqual([{ blockId: "b1", todoId: "b", sortOrder: 5 }]);
   });
 
   it("never takes one already slotted, in any block", () => {

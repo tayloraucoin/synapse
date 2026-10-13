@@ -144,6 +144,26 @@ export {
   type RepeatRule,
 } from "./planner";
 
+/* ---- set-up arithmetic: new blocks, re-flow, the usual week (USE-33) ---- */
+export {
+  boundsEdge,
+  dayStrip,
+  defaultWeek,
+  eventLanding,
+  firstFreeTime,
+  isOwnChange,
+  overlaps,
+  reflowItems,
+  tappedSlot,
+  usualChangeReach,
+  usualDay,
+  type BlockOverlap,
+  type EventLanding,
+  type Reflow,
+  type ReflowItem,
+  type StripPart,
+} from "./planner";
+
 /* ---- work (USE-8) ---- */
 export {
   compareInTiers,
@@ -167,6 +187,14 @@ export {
   type WorkTier,
 } from "./work";
 
+/* ---- how a Linear status is drawn and what it does (USE-32) ---- */
+export {
+  statusEffect,
+  statusFill,
+  type LinearStateLike,
+  type StatusEffect,
+} from "./work";
+
 /* ---- the to-do pool, the pull, and whose work it is (USE-9) ---- */
 export {
   PULL_DEFAULT_LENGTH_MIN,
@@ -181,8 +209,4 @@ export {
   type TodoPoolSlot,
   type TodoPoolTodo,
 } from "./planner";
-export {
-  resolveClient,
-  type ClientConnection,
-  type ClientItem,
-} from "./work";
+export { resolveClient, type ClientConnection, type ClientItem } from "./work";

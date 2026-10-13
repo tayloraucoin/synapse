@@ -91,8 +91,14 @@ describe("C2: the pool holds undated, undone, unarchived to-dos not in a live sl
     const pool = todoPool({
       todos: [todo("t")],
       slots: [
-        slot("t", { onDate: "2026-10-11", blockEnd: new Date("2026-10-11T20:00:00Z") }),
-        slot("t", { onDate: "2026-10-12", blockEnd: new Date("2026-10-12T20:00:00Z") }),
+        slot("t", {
+          onDate: "2026-10-11",
+          blockEnd: new Date("2026-10-11T20:00:00Z"),
+        }),
+        slot("t", {
+          onDate: "2026-10-12",
+          blockEnd: new Date("2026-10-12T20:00:00Z"),
+        }),
       ],
       now: after,
     });
@@ -103,7 +109,10 @@ describe("C2: the pool holds undated, undone, unarchived to-dos not in a live sl
     const pool = todoPool({
       todos: [todo("t")],
       slots: [
-        slot("t", { onDate: "2026-10-12", blockEnd: new Date("2026-10-12T20:00:00Z") }),
+        slot("t", {
+          onDate: "2026-10-12",
+          blockEnd: new Date("2026-10-12T20:00:00Z"),
+        }),
         slot("t"),
       ],
       now: before,
@@ -114,7 +123,12 @@ describe("C2: the pool holds undated, undone, unarchived to-dos not in a live sl
   it("a slot for a later day holds its to-do too", () => {
     const pool = todoPool({
       todos: [todo("t")],
-      slots: [slot("t", { onDate: "2026-10-15", blockEnd: new Date("2026-10-15T20:00:00Z") })],
+      slots: [
+        slot("t", {
+          onDate: "2026-10-15",
+          blockEnd: new Date("2026-10-15T20:00:00Z"),
+        }),
+      ],
       now: after,
     });
     expect(pool).toEqual([]);
