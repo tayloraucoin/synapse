@@ -106,7 +106,7 @@ Wave 1, after the schema ticket. The README's contract-first rule says the shape
 - **Gotchas:**
   - Mirror 0012's CHECKs exactly: one of rrule or on_date; one slot target; tier only with a work item; `ends_at > starts_at`.
   - `24:00` is a valid end and an invalid start.
-  - The rrule check is shape only (`FREQ=` and known parts). The expander rejects what it cannot run.
+  - The rrule text is two RFC 5545 lines, `DTSTART;VALUE=DATE:YYYYMMDD` then `RRULE:FREQ=…` (the start anchors INTERVAL and COUNT; decided with USE-6). The check is shape only: both lines, `FREQ=` and known parts. USE-6's expander rejects what it cannot run.
   - A `slotEventInput` carries the device's `at`. The server's two-minute and day-window test is not a zod rule.
   - Records strip unknown keys (zod's default), never pass them through, so a renamed column shows up as a missing required key, not a silent extra.
 - **Model:** Opus 5.5 at medium. A smaller model drifts from 0012's constraints or admits the old kinds.
