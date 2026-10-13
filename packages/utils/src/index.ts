@@ -166,3 +166,23 @@ export {
   type WorkSize,
   type WorkTier,
 } from "./work";
+
+/* ---- the to-do pool, the pull, and whose work it is (USE-9) ---- */
+export {
+  PULL_DEFAULT_LENGTH_MIN,
+  isReturned,
+  pullTodos,
+  todoPool,
+  type PullBlock,
+  type PullSlot,
+  type PullTodo,
+  type PulledSlot,
+  type TodoPoolEntry,
+  type TodoPoolSlot,
+  type TodoPoolTodo,
+} from "./planner";
+export {
+  resolveClient,
+  type ClientConnection,
+  type ClientItem,
+} from "./work";

@@ -18,3 +18,8 @@ export {
 } from "./fit";
 export { countSessions, nextSession, type SessionSlot } from "./sessions";
 export { pickWhileItFires, type ReminderTodo } from "./while-it-fires";
+export {
+  resolveClient,
+  type ClientConnection,
+  type ClientItem,
+} from "./client";
