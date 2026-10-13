@@ -143,3 +143,26 @@ export {
   type RepeatPreset,
   type RepeatRule,
 } from "./planner";
+
+/* ---- work (USE-8) ---- */
+export {
+  compareInTiers,
+  countSessions,
+  firstDayWithRoom,
+  fitInBlock,
+  nextSession,
+  pickWhileItFires,
+  resolveWorkNext,
+  tierRank,
+  topMinutes,
+  type BlockFit,
+  type BlockFitDay,
+  type BlockFitSlot,
+  type BlockSpan,
+  type NextSlot,
+  type ReminderTodo,
+  type SessionSlot,
+  type WorkNext,
+  type WorkSize,
+  type WorkTier,
+} from "./work";

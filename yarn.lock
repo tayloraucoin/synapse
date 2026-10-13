@@ -3809,6 +3809,7 @@ __metadata:
   resolution: "@syn/utils@workspace:packages/utils"
   dependencies:
     "@syn/config": "npm:*"
+    "@syn/constants": "npm:*"
     eslint: "npm:^9.39.1"
     typescript: "npm:5.9.2"
     vitest: "npm:5.0.3"
