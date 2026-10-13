@@ -125,3 +125,21 @@ export {
   type Span,
   type StepAwayHold,
 } from "./planner";
+
+/* ---- repeat rules, and the day read from them (USE-6) ---- */
+export {
+  occurrences,
+  occursOn,
+  parseRule,
+  presetRule,
+  readDay,
+  type DayBlock,
+  type DayBlockChange,
+  type DayOccurrence,
+  type DayRead,
+  type DaySlot,
+  type ParsedRule,
+  type RepeatFreq,
+  type RepeatPreset,
+  type RepeatRule,
+} from "./planner";
