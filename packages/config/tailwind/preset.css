@@ -359,5 +359,6 @@
   --radius-sm: var(--radius-control); --radius-md: var(--radius-control); --radius-lg: var(--radius-control);
   --radius-xl: var(--radius-sheet);
   --ease-settle: var(--ease-settle);
-  --breakpoint-wide: 768px;                    /* the one break: `wide:` variant */
+  --breakpoint-wide: 768px;                    /* sheets: `wide:` variant */
+  --breakpoint-split: 1024px;                  /* the desk: `split:` variant, rail vs tabs (D-USE-93) */
 }

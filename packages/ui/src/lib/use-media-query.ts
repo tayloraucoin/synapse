@@ -24,14 +24,28 @@ export function useMediaQuery(query: string): boolean {
 }
 
 /**
- * The one break — cross-cutting §2.1, v2 handoff D7. Compact under 768px, wide
- * at 768px and above. Tablets in portrait get compact, tablets in landscape get
- * wide. There is no second breakpoint and there will not be one.
+ * The sheet break — cross-cutting §2.1, v2 handoff D7. Compact under 768px,
+ * wide at 768px and above; `ResponsiveSheet` switches here.
  *
  * Matches the `wide:` Tailwind variant (`--breakpoint-wide: 768px`), so a
  * component that switches structure in JS and a stylesheet that switches
  * presentation in CSS agree.
+ *
+ * There are two breaks now (D-USE-93): 768 for sheets, and 1024 for the desk
+ * (`useIsSplit`). No third.
  */
 export function useIsWide(): boolean {
   return useMediaQuery("(min-width: 768px)");
+}
+
+/**
+ * The desk break — D-USE-93. From 1024px the rail and the desk surfaces show;
+ * below it the phone's tabs (768 to 1023 included, D-USE-74).
+ *
+ * Matches the `split:` Tailwind variant (`--breakpoint-split: 1024px`). The
+ * shell's chrome switches on the variant, never on this: like every hook here
+ * it reads false on the server, and the server must not guess the width.
+ */
+export function useIsSplit(): boolean {
+  return useMediaQuery("(min-width: 1024px)");
 }

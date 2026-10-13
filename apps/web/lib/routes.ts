@@ -89,6 +89,38 @@ export function todayRoute(): string {
   return "/today";
 }
 
+/** Today's timeline: the rail's Schedule and the phone's Schedule tab. */
+export function todayScheduleRoute(): string {
+  return "/today/schedule";
+}
+
+/**
+ * The two focused screens the shell already knows (USE-4): no rail, no tabs.
+ * Their pages land with their own tickets; each new focused path joins
+ * `isFocusedPath` in the shell's `nav-items.ts`.
+ */
+export function orientRoute(): string {
+  return "/orient";
+}
+
+export function todayReviewRoute(): string {
+  return "/today/review";
+}
+
+/* ----------------------------------------------------------------- week -- */
+
+/** The desk's Week (D-USE-93); below 1024 the phone reaches it through Set my days. */
+export function weekRoute(): string {
+  return "/week";
+}
+
+/* --------------------------------------------------------------- review -- */
+
+/** The phone's Review tab. */
+export function reviewRoute(): string {
+  return "/review";
+}
+
 /* ---------------------------------------------------------------- legal -- */
 
 /**

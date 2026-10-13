@@ -11,7 +11,19 @@
  */
 
 export { cn } from "./lib/cn";
-export { useIsWide, useMediaQuery } from "./lib/use-media-query";
+export { useIsSplit, useIsWide, useMediaQuery } from "./lib/use-media-query";
+
+/**
+ * The shell's nav icons (USE-4). Apps take lucide through here, one name per
+ * job, so the icon set stays this package's to swap.
+ */
+export {
+  AlignLeftIcon as ScheduleIcon,
+  CalendarDaysIcon as WeekIcon,
+  NotebookPenIcon as ReviewIcon,
+  SunIcon as TodayIcon,
+  type LucideIcon,
+} from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
 export { ThemeProvider } from "./providers/theme-provider";

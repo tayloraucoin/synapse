@@ -14,3 +14,4 @@ One role per token (the brand kit, WEB-1; full table in `docs/ai-guides/brand-to
 **Space:** `--space-1` `2` `3` `4` `6` `8` `12`; widths `--content-text`, `--content-canvas`, `--measure`.
 **Radius:** `--radius-control` controls and chips, `--radius-sheet` sheets; no pill.
 **Elevation:** none; `border` separates, `--scrim` dims behind a sheet.
+**Breaks:** `--breakpoint-wide` 768 for sheets (`wide:`, `useIsWide`); `--breakpoint-split` 1024 for the desk, rail vs tabs (`split:`, `useIsSplit`, D-USE-93). No third.
