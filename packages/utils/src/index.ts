@@ -109,3 +109,19 @@ export {
   toStripWeek,
   type StripSquare,
 } from "./review/strip";
+
+/* ---- the clock, derived from slot events (USE-5) ---- */
+export {
+  EVENT_AHEAD_LIMIT_MS,
+  checkEventTime,
+  clockAt,
+  deriveClock,
+  type ClockEvent,
+  type DayClock,
+  type DeriveClockOptions,
+  type EventTimeCheck,
+  type SlotClock,
+  type SlotClockState,
+  type Span,
+  type StepAwayHold,
+} from "./planner";
