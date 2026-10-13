@@ -24,6 +24,13 @@ export {
   SunIcon as TodayIcon,
   type LucideIcon,
 } from "lucide-react";
+
+/** USE's row glyphs (USE-10), one name per job. */
+export {
+  CheckIcon as DoneIcon,
+  ChevronRightIcon as DisclosureIcon,
+  PauseIcon as StepAwayIcon,
+} from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
 export { ThemeProvider } from "./providers/theme-provider";
@@ -481,6 +488,9 @@ export {
   type TemplateUsageRowProps,
 } from "./composed/display/template-usage-row";
 export {
+  CountdownFace,
+  type CountdownFaceProps,
+  type CountdownOverLevel,
   TimerDisplay,
   type TimerDisplayProps,
 } from "./composed/display/timer-display";
@@ -587,6 +597,16 @@ export { SynapseMark, type SynapseMarkProps } from "./composed/display/synapse-m
 /* ---- composed: Workflow's board (Workflow UX v0.1 §9, FLO-4) ---- */
 export { FiringMark, type FiringMarkProps } from "./composed/display/firing-mark";
 export { FiringToggle, type FiringToggleProps } from "./composed/control/firing-toggle";
+
+/* ---- composed: USE's shared day parts (USE-10) ---- */
+export { HueSquare, type HueSquareProps, type SquareHue } from "./composed/display/hue-square";
+export { LinearLine, type LinearLineProps } from "./composed/display/linear-line";
+export {
+  LinearStatusGlyph,
+  LinearStatusShape,
+  type LinearStatusShapeProps,
+  type LinearStatusType,
+} from "./composed/display/linear-status-shape";
 export {
   TaskRow,
   TaskRowSkeleton,

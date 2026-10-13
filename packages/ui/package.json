@@ -555,6 +555,22 @@
       "types": "./src/composed/control/firing-toggle/index.ts",
       "default": "./src/composed/control/firing-toggle/index.ts"
     },
+    "./linear-status-shape": {
+      "types": "./src/composed/display/linear-status-shape/index.ts",
+      "default": "./src/composed/display/linear-status-shape/index.ts"
+    },
+    "./linear-line": {
+      "types": "./src/composed/display/linear-line/index.ts",
+      "default": "./src/composed/display/linear-line/index.ts"
+    },
+    "./countdown-face": {
+      "types": "./src/composed/display/timer-display/countdown-face.tsx",
+      "default": "./src/composed/display/timer-display/countdown-face.tsx"
+    },
+    "./hue-square": {
+      "types": "./src/composed/display/hue-square/index.ts",
+      "default": "./src/composed/display/hue-square/index.ts"
+    },
     "./task-row": {
       "types": "./src/composed/display/task-row/index.ts",
       "default": "./src/composed/display/task-row/index.ts"

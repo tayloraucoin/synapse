@@ -11,15 +11,14 @@
  * and changes nothing itself — the board owns the optimistic state and sends
  * a *set*, never a toggle (TD-36).
  *
- * Off: a 10px ring, 1.5px `border-edge`. On: the `FiringMark`, breathing. It is
- * one element, so the ring filling to the mark runs `--dur-state` (120ms).
+ * Off: a 10px ring, 1.5px `border-edge`. On: the `FiringMark` in its halo,
+ * breathing (D-USE-49). The ring filling to the dot runs `--dur-state` (120ms).
  * Focus-visible is the product's ring on the control (the global
  * `:focus-visible` rule).
  */
 "use client";
 
 import * as React from "react";
-
 import { cn } from "../../../lib/cn";
 import { FiringMark } from "../../display/firing-mark";
 
@@ -54,6 +53,7 @@ export function FiringToggle({
     >
       <FiringMark
         breathing={pressed}
+        halo={pressed}
         className={cn(
           "border-[1.5px] transition-colors duration-(--dur-state) ease-(--ease-settle)",
           pressed

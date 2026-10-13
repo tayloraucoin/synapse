@@ -90,6 +90,11 @@
   --destructive: var(--syn-red-500);            /* Delete account's fill, and nowhere else */
   --destructive-foreground: var(--syn-neutral-50);
   --destructive-text: var(--syn-red-600);       /* the warning sentence above Delete account */
+  /* USE (D-USE-38, D-USE-49, D-USE-79; USE-10). Each a named bend of
+     "nothing red on the tabs": */
+  --alert: var(--syn-red-500);                  /* "needs you now": the Urgent square and chip, Blocked, Paused */
+  --firing-text: var(--syn-red-700);            /* "firing · n min": dark rust, never an alarm */
+  --warning-text: #845A0F;                      /* a timer under a minute over; a due badge two days out */
 
   /* Categories: a chip fill (text on it is foreground) and a dot (also a
      Schedule block's leading edge). Always printed beside the name. The kit
@@ -102,6 +107,9 @@
   --category-slate-chip: #DFE3E9; --category-slate-dot: #79889A;
   --category-plum-chip:  #EDDCF1; --category-plum-dot:  #A36FAF;
   --category-moss-chip:  #E1E5D8; --category-moss-dot:  #818C63;
+  /* Life's yellow, the ninth hue (D-USE-38, D-USE-79): its light dot is
+     2.3:1, a named exception to the 3:1 floor; the name always beside it. */
+  --category-yellow-chip: #F6EDC4; --category-yellow-dot: #C9A227;
 
   /*
    * ---- BLOCK HUES — UX v1.3 R47, §3.1, §10.2, TD-29 (DAY-3) ----
@@ -237,6 +245,9 @@
   --destructive: var(--syn-red-500);
   --destructive-foreground: var(--syn-neutral-50);
   --destructive-text: var(--syn-red-300);
+  --alert: var(--syn-red-400);
+  --firing-text: var(--syn-red-300);
+  --warning-text: #E3B667;
   --logo-disc: var(--syn-neutral-50);
   --logo-rule: var(--syn-brand-400);
 
@@ -248,6 +259,7 @@
   --category-slate-chip: #32363B; --category-slate-dot: #9EACBE;
   --category-plum-chip:  #3E3041; --category-plum-dot:  #C796D2;
   --category-moss-chip:  #34372C; --category-moss-dot:  #A6B08A;
+  --category-yellow-chip: #3E3510; --category-yellow-dot: #DBBC33;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -271,6 +283,9 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive-text: var(--destructive-text);
+  --color-alert: var(--alert);
+  --color-firing-text: var(--firing-text);
+  --color-warning-text: var(--warning-text);
   --color-category-leaf-chip: var(--category-leaf-chip);   --color-category-leaf-dot: var(--category-leaf-dot);
   --color-category-sky-chip: var(--category-sky-chip);     --color-category-sky-dot: var(--category-sky-dot);
   --color-category-clay-chip: var(--category-clay-chip);   --color-category-clay-dot: var(--category-clay-dot);
@@ -279,6 +294,7 @@
   --color-category-slate-chip: var(--category-slate-chip); --color-category-slate-dot: var(--category-slate-dot);
   --color-category-plum-chip: var(--category-plum-chip);   --color-category-plum-dot: var(--category-plum-dot);
   --color-category-moss-chip: var(--category-moss-chip);   --color-category-moss-dot: var(--category-moss-dot);
+  --color-category-yellow-chip: var(--category-yellow-chip); --color-category-yellow-dot: var(--category-yellow-dot);
   /* `bg-block-<kind>` · `text-block-label` — planning surfaces only (TD-29). */
   --color-block-orient: var(--block-orient);
   --color-block-morning: var(--block-morning);

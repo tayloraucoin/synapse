@@ -1,4 +1,10 @@
 import type * as React from "react";
+import { createElement } from "react";
+import {
+  BlockBandAndHeaderForms,
+  TierAndItemForms,
+  WorkRowForms,
+} from "./day-parts";
 
 /**
  * The parts registry (USE-7): the capture host `/dev/parts` renders a part
@@ -25,3 +31,8 @@ export function partNames(): string[] {
 }
 
 /* ---- Registered parts: one line per part, added by its ticket ---- */
+registerPart("work-row", () => createElement(WorkRowForms)); // USE-10
+registerPart("tier-and-item", () => createElement(TierAndItemForms)); // USE-10
+registerPart("block-band-and-header", () =>
+  createElement(BlockBandAndHeaderForms),
+); // USE-10
