@@ -57,7 +57,6 @@ export {
 } from "./context";
 export {
   buildSupabaseEnvForNextConfig,
-  getLocalSupabaseUrl,
   getSupabaseAnonKey,
   getSupabaseServiceRoleKey,
   getSupabaseUrl,

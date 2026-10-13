@@ -43,11 +43,11 @@ Two pieces make that work, and both are in this package:
 
 ## 2. Tiers
 
-| Tier           | App database                | Auth source                                                    | How                       |
-| -------------- | --------------------------- | -------------------------------------------------------------- | ------------------------- |
-| **Local**      | local Postgres              | **staging** Supabase Auth, or the local stack's (§3, Option D) | see §3 — this is the trap |
-| **Staging**    | staging Supabase project    | staging Supabase Auth                                          | standard                  |
-| **Production** | production Supabase project | production Supabase Auth                                       | standard                  |
+| Tier           | App database                | Auth source               | How                       |
+| -------------- | --------------------------- | ------------------------- | ------------------------- |
+| **Local**      | local Postgres              | **staging** Supabase Auth | see §3 — this is the trap |
+| **Staging**    | staging Supabase project    | staging Supabase Auth     | standard                  |
+| **Production** | production Supabase project | production Supabase Auth  | standard                  |
 
 Each tier has its own URLs in `packages/db/.env` (see `.env.example`). Use the **session pooler (port 5432)** for migrations and the **transaction pooler (6543)** for app runtime — `client.ts` already sets `prepare: false`, which the transaction pooler requires.
 
@@ -59,7 +59,7 @@ Each tier has its own URLs in `packages/db/.env` (see `.env.example`). Use the *
 
 The trap is a hard Postgres rule: **a foreign key cannot span two databases.** `public.users.id` → `auth.users(id)` is a real FK, so whatever database holds your `public.*` tables **must also hold the `auth.users` you authenticate against**. Put `public.*` in a local Postgres and `auth.users` in staging and the migration fails with _"relation auth.users does not exist"_ — or you drop the FK and silently lose referential integrity.
 
-Three clean ways to satisfy "local app data + staging auth", in order of preference, and a fourth that keeps auth local too:
+Three clean ways to satisfy "local app data + staging auth", in order of preference:
 
 ### Option A (recommended) — a Supabase branch off staging
 
@@ -72,17 +72,6 @@ Set the local URLs to the staging database and never run a destructive migration
 ### Option C — fully local Postgres, with the auth stub
 
 Run a local Postgres. Migration `0000`'s guarded block creates a minimal `auth.users` stub so the FK resolves, and `ensureLocalUserFromSupabaseAuth()` (`src/local-dev/`) inserts the stub row on the first authenticated request, so a staging JWT can be used against local data. This is the offline path.
-
-### Option D (offline, recommended for agents) — the Supabase stack on this machine
-
-The Supabase CLI (`supabase` 2.119.0, a devDependency here) runs Postgres and Auth in Docker; `supabase/config.toml` at the root holds its config (WEB-2). Postgres listens on 54322, which `LOCAL_DATABASE_URL` already names, and it carries the real `auth` schema, so the FK and the trigger behave as they do on a hosted tier; 0000's guard sees `auth` and skips the stub.
-
-1. Start Docker, then `yarn db:local:up`. `yarn db:local:status` prints the API URL and the two keys.
-2. Set `NEXT_PUBLIC_SUPABASE_URL_LOCAL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL` and `SUPABASE_SECRET_KEY_LOCAL` in `apps/web/.env.local`, and the URL and secret in `packages/db/.env`. With `DATABASE_ENVIRONMENT=local` and the URL set, `@syn/auth` reads the local stack; unset, it reads staging as before. A URL that is not localhost or 127.0.0.1 is refused.
-3. Run §4 against it: `db:migrate`, `db:setup`, `db:seed-users`, then `db:seed`. The dev account is created confirmed through the admin API, and email confirmation is off locally.
-4. `yarn db:local:down` stops the stack; its data stays in Docker volumes until `supabase stop --no-backup`.
-
-Email and password only: Google sign-in is not configured on the local stack.
 
 **Never raw-INSERT into `auth.users` on a hosted tier.** Supabase's own invariants (encrypted_password, confirmation tokens, identities) would not be set, and local logins would behave unlike staging. Always go through `auth.admin.createUser()` so the trigger fires and the shadow row appears exactly the way it will in production.
 

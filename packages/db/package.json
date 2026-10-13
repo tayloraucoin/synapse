@@ -22,9 +22,6 @@
     "db:seed": "tsx src/seed/index.ts",
     "db:seed-users": "tsx scripts/seed-users.ts",
     "db:schema-reference": "node scripts/generate-schema-reference.mjs",
-    "db:local:up": "supabase start --workdir ../..",
-    "db:local:down": "supabase stop --workdir ../..",
-    "db:local:status": "supabase status --workdir ../..",
     "check-migrations": "node --experimental-strip-types --no-warnings scripts/check-migrations.ts",
     "test:migrations": "node --experimental-strip-types --no-warnings --test scripts/check-migrations.test.ts"
   },
@@ -42,7 +39,6 @@
     "dotenv": "^16.4.7",
     "drizzle-kit": "0.31.10",
     "eslint": "^9.39.1",
-    "supabase": "2.119.0",
     "tsx": "^4",
     "typescript": "5.9.2"
   }
