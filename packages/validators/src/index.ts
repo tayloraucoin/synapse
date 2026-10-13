@@ -384,3 +384,88 @@ export {
   type MoveItemInput,
   type PreviewFitInput,
 } from "./adjust";
+
+/*
+ * USE (USE-3): the planner's and Work's records and writes, one shape per
+ * `0012_use_daily` table. The Lucide icon arm and `colourValueSchema` are in
+ * `./icon`.
+ */
+
+export { colourValueSchema } from "./icon";
+
+export {
+  NAME_NEEDED,
+  blockChangeInput,
+  blockChangeRecord,
+  blockFillSchema,
+  blockItemInput,
+  blockItemRecord,
+  blockKindValueSchema,
+  blockRecord,
+  dayEventInput,
+  dayEventRecord,
+  dayRecordRecord,
+  editBlockInput,
+  endTimeSchema,
+  instantSchema,
+  lengthMinutesSchema,
+  mealLinkKindSchema,
+  mealTopicInput,
+  mealTopicRecord,
+  newBlockInput,
+  newBlockKindSchema,
+  newTransitionInput,
+  placeSlotInput,
+  plannerNameSchema,
+  rruleSchema,
+  savedColourInput,
+  savedColourRecord,
+  slotEventInput,
+  slotEventKindSchema,
+  slotEventRecord,
+  slotRecord,
+  sortOrderSchema,
+  startTimeSchema,
+  workTierSchema,
+  type BlockChangeInput,
+  type BlockChangeRecord,
+  type BlockItemInput,
+  type BlockItemRecord,
+  type BlockRecord,
+  type DayEventInput,
+  type DayEventRecord,
+  type DayRecordRecord,
+  type EditBlockInput,
+  type MealTopicInput,
+  type MealTopicRecord,
+  type NewBlockInput,
+  type NewTransitionInput,
+  type PlaceSlotInput,
+  type SavedColourInput,
+  type SavedColourRecord,
+  type SlotEventInput,
+  type SlotEventRecord,
+  type SlotRecord,
+} from "./planner";
+
+export {
+  todoInput,
+  todoRecord,
+  todoTypeSchema,
+  type TodoInput,
+  type TodoRecord,
+} from "./todo";
+
+export {
+  clientColorKeySchema,
+  clientInput,
+  clientRecord,
+  doneSourceSchema,
+  workItemInput,
+  workItemRecord,
+  workSizeSchema,
+  type ClientInput,
+  type ClientRecord,
+  type WorkItemInput,
+  type WorkItemRecord,
+} from "./work";
