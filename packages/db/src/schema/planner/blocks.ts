@@ -32,10 +32,8 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-
 import { BLOCK_FILLS } from "@syn/constants";
 import type { BlockFill, IconValue } from "@syn/types";
-
 import { enumValues } from "../enum-values";
 import { blockKindEnum } from "../enums";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
@@ -96,7 +94,10 @@ export const blocks = pgTable(
       "blocks_rrule_or_on_date_check",
       sql`num_nonnulls(${table.rrule}, ${table.onDate}) = 1`,
     ),
-    check("blocks_ends_after_starts_check", sql`${table.endsAt} > ${table.startsAt}`),
+    check(
+      "blocks_ends_after_starts_check",
+      sql`${table.endsAt} > ${table.startsAt}`,
+    ),
     index("blocks_user_id_idx").on(table.userId),
     ...ownerPrivateCrudPolicies({
       prefix: "blocks",

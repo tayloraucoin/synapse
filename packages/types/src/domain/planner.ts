@@ -26,13 +26,7 @@ export type StoredBlockKind = BlockKind | AddedBlockKind;
  * kind `transition`, and the old kinds stay for the old rows.
  */
 export type NewBlockKind =
-  | "wellness"
-  | "training"
-  | "work"
-  | "life"
-  | "todos"
-  | "break"
-  | "evening";
+  "wellness" | "training" | "work" | "life" | "todos" | "break" | "evening";
 
 /** Block.fill — set items, Work's tiers for the day, or the To-dos pull rule. */
 export type BlockFill = "set_items" | "tasks_for_the_day" | "from_todos";
@@ -62,12 +56,7 @@ export type DoneSource = "synapse" | "linear";
 
 /** Client.color_key — D-USE-95's six. Every tile also carries its letter. */
 export type ClientColorKey =
-  | "rose"
-  | "leaf"
-  | "amber"
-  | "moss"
-  | "slate"
-  | "ink";
+  "rose" | "leaf" | "amber" | "moss" | "slate" | "ink";
 
 /** MealTopic.link_kind — D-USE-28, D-USE-30: one link per topic. */
 export type MealLinkKind = "playlist" | "channel" | "search";

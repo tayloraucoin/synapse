@@ -16,10 +16,8 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-
 import { MEAL_LINK_KINDS } from "@syn/constants";
 import type { IconValue, MealLinkKind } from "@syn/types";
-
 import { enumValues } from "../enum-values";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";

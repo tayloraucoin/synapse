@@ -31,17 +31,18 @@ import {
   uuid,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
-
 import { DONE_SOURCES, WORK_SIZES } from "@syn/constants";
 import type { DoneSource, IconValue, WorkSize } from "@syn/types";
-
 import { enumValues } from "../enum-values";
 import { slots } from "../planner/slots";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { clients } from "./clients";
 
-export const workSizeEnum = pgEnum("work_size", enumValues<WorkSize>()(WORK_SIZES));
+export const workSizeEnum = pgEnum(
+  "work_size",
+  enumValues<WorkSize>()(WORK_SIZES),
+);
 
 export const doneSourceEnum = pgEnum(
   "done_source",

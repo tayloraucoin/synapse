@@ -27,10 +27,8 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-
 import { SLOT_EVENT_KINDS } from "@syn/constants";
 import type { SlotEventKind } from "@syn/types";
-
 import { enumValues } from "../enum-values";
 import { ownerAppendOnlyPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";

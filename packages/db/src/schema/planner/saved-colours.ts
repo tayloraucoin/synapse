@@ -14,7 +14,6 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 

@@ -17,9 +17,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-
 import type { IconValue } from "@syn/types";
-
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 
@@ -46,7 +44,10 @@ export const dayEvents = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
   },
   (table) => [
-    check("day_events_ends_after_starts_check", sql`${table.endsAt} > ${table.startsAt}`),
+    check(
+      "day_events_ends_after_starts_check",
+      sql`${table.endsAt} > ${table.startsAt}`,
+    ),
     index("day_events_user_id_on_date_idx").on(table.userId, table.onDate),
     index("day_events_user_id_idx").on(table.userId),
     ...ownerPrivateCrudPolicies({

@@ -27,10 +27,8 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-
 import { WORK_TIERS } from "@syn/constants";
 import type { WorkTier } from "@syn/types";
-
 import { enumValues } from "../enum-values";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
@@ -41,7 +39,10 @@ import { slotEvents } from "./slot-events";
 import { todos } from "./todos";
 
 /** Work's order for a day, highest first (D-USE-31). */
-export const workTierEnum = pgEnum("work_tier", enumValues<WorkTier>()(WORK_TIERS));
+export const workTierEnum = pgEnum(
+  "work_tier",
+  enumValues<WorkTier>()(WORK_TIERS),
+);
 
 export const slots = pgTable(
   "slots",
@@ -88,7 +89,10 @@ export const slots = pgTable(
     check("slots_length_min_check", sql`${table.lengthMin} > 0`),
     check("slots_took_min_check", sql`${table.tookMin} >= 0`),
     unique("slots_work_item_id_on_date_key").on(table.workItemId, table.onDate),
-    unique("slots_block_item_id_on_date_key").on(table.blockItemId, table.onDate),
+    unique("slots_block_item_id_on_date_key").on(
+      table.blockItemId,
+      table.onDate,
+    ),
     unique("slots_todo_id_on_date_key").on(table.todoId, table.onDate),
     index("slots_block_id_on_date_idx").on(table.blockId, table.onDate),
     index("slots_user_id_on_date_idx").on(table.userId, table.onDate),

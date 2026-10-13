@@ -22,17 +22,18 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-
 import { TODO_TYPES } from "@syn/constants";
 import type { IconValue, TodoType } from "@syn/types";
-
 import { enumValues } from "../enum-values";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { slots } from "./slots";
 
 /** Home, Errand, Call, Digital, Other — a context, as Getting Things Done has them. */
-export const todoTypeEnum = pgEnum("todo_type", enumValues<TodoType>()(TODO_TYPES));
+export const todoTypeEnum = pgEnum(
+  "todo_type",
+  enumValues<TodoType>()(TODO_TYPES),
+);
 
 export const todos = pgTable(
   "todos",

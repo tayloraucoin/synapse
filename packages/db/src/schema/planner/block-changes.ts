@@ -21,7 +21,6 @@ import {
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
-
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { blocks } from "./blocks";
@@ -50,7 +49,10 @@ export const blockChanges = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
   },
   (table) => [
-    unique("block_changes_block_id_on_date_key").on(table.blockId, table.onDate),
+    unique("block_changes_block_id_on_date_key").on(
+      table.blockId,
+      table.onDate,
+    ),
     check(
       "block_changes_skipped_or_times_check",
       sql`${table.skipped} OR (${table.startsAt} IS NOT NULL AND ${table.endsAt} IS NOT NULL)`,

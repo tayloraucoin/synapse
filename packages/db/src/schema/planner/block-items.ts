@@ -23,9 +23,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-
 import type { IconValue } from "@syn/types";
-
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
 import { blocks } from "./blocks";
@@ -65,7 +63,10 @@ export const blockItems = pgTable(
       sql`NOT ${table.isTransition} OR (${table.atTime} IS NOT NULL AND ${table.lengthMin} IS NOT NULL)`,
     ),
     check("block_items_length_min_check", sql`${table.lengthMin} > 0`),
-    index("block_items_block_id_sort_order_idx").on(table.blockId, table.sortOrder),
+    index("block_items_block_id_sort_order_idx").on(
+      table.blockId,
+      table.sortOrder,
+    ),
     index("block_items_user_id_idx").on(table.userId),
     ...ownerPrivateCrudPolicies({
       prefix: "block_items",
