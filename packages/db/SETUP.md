@@ -19,15 +19,15 @@ Two guards back that rule up:
 
 Supabase **automatically creates and manages** several Postgres schemas the moment a project exists. You do not create or migrate these — Supabase does:
 
-| Schema | What is in it | Who manages it |
-|---|---|---|
-| `auth` | `auth.users`, `auth.sessions`, `auth.identities`, … | **Supabase Auth** |
-| `storage` | `storage.buckets`, `storage.objects` | **Supabase Storage** |
-| `realtime` | replication bookkeeping | **Supabase Realtime** |
-| `vault`, `extensions`, … | secrets, extensions | **Supabase** |
-| `public` | **everything in this package** | **us** |
+| Schema                   | What is in it                                       | Who manages it        |
+| ------------------------ | --------------------------------------------------- | --------------------- |
+| `auth`                   | `auth.users`, `auth.sessions`, `auth.identities`, … | **Supabase Auth**     |
+| `storage`                | `storage.buckets`, `storage.objects`                | **Supabase Storage**  |
+| `realtime`               | replication bookkeeping                             | **Supabase Realtime** |
+| `vault`, `extensions`, … | secrets, extensions                                 | **Supabase**          |
+| `public`                 | **everything in this package**                      | **us**                |
 
-`auth.users` is the canonical user record (id, email, encrypted password, provider identities, confirmation state). **We never write to it, never store passwords, and never migrate it.** Our `public.users` is a *shadow* table whose primary key **is** a foreign key to `auth.users(id)`. It exists so the rest of the schema can foreign-key to a `public` row with app-specific columns while Supabase Auth stays the source of truth for identity.
+`auth.users` is the canonical user record (id, email, encrypted password, provider identities, confirmation state). **We never write to it, never store passwords, and never migrate it.** Our `public.users` is a _shadow_ table whose primary key **is** a foreign key to `auth.users(id)`. It exists so the rest of the schema can foreign-key to a `public` row with app-specific columns while Supabase Auth stays the source of truth for identity.
 
 Two pieces make that work, and both are in this package:
 
@@ -43,11 +43,11 @@ Two pieces make that work, and both are in this package:
 
 ## 2. Tiers
 
-| Tier | App database | Auth source | How |
-|---|---|---|---|
-| **Local** | local Postgres | **staging** Supabase Auth, or the local stack's (§3, Option D) | see §3 — this is the trap |
-| **Staging** | staging Supabase project | staging Supabase Auth | standard |
-| **Production** | production Supabase project | production Supabase Auth | standard |
+| Tier           | App database                | Auth source                                                    | How                       |
+| -------------- | --------------------------- | -------------------------------------------------------------- | ------------------------- |
+| **Local**      | local Postgres              | **staging** Supabase Auth, or the local stack's (§3, Option D) | see §3 — this is the trap |
+| **Staging**    | staging Supabase project    | staging Supabase Auth                                          | standard                  |
+| **Production** | production Supabase project | production Supabase Auth                                       | standard                  |
 
 Each tier has its own URLs in `packages/db/.env` (see `.env.example`). Use the **session pooler (port 5432)** for migrations and the **transaction pooler (6543)** for app runtime — `client.ts` already sets `prepare: false`, which the transaction pooler requires.
 
@@ -55,22 +55,26 @@ Each tier has its own URLs in `packages/db/.env` (see `.env.example`). Use the *
 
 ## 3. The local-uses-staging-auth trap (and how not to get bitten)
 
-> **Goal:** develop against *real* staging users, so logins and JWTs just work, while keeping app data isolated and disposable.
+> **Goal:** develop against _real_ staging users, so logins and JWTs just work, while keeping app data isolated and disposable.
 
-The trap is a hard Postgres rule: **a foreign key cannot span two databases.** `public.users.id` → `auth.users(id)` is a real FK, so whatever database holds your `public.*` tables **must also hold the `auth.users` you authenticate against**. Put `public.*` in a local Postgres and `auth.users` in staging and the migration fails with *"relation auth.users does not exist"* — or you drop the FK and silently lose referential integrity.
+The trap is a hard Postgres rule: **a foreign key cannot span two databases.** `public.users.id` → `auth.users(id)` is a real FK, so whatever database holds your `public.*` tables **must also hold the `auth.users` you authenticate against**. Put `public.*` in a local Postgres and `auth.users` in staging and the migration fails with _"relation auth.users does not exist"_ — or you drop the FK and silently lose referential integrity.
 
 Three clean ways to satisfy "local app data + staging auth", in order of preference, and a fourth that keeps auth local too:
 
 ### Option A (recommended) — a Supabase branch off staging
+
 Use a Supabase preview/dev branch of the staging project. You get a real `auth` schema seeded from staging plus an isolated `public` you can wipe freely. The FK stays inside one database, logins use real users, and resets never touch staging.
 
 ### Option B — point local entirely at staging
+
 Set the local URLs to the staging database and never run a destructive migration from a laptop. Simplest auth story, no data isolation. A stopgap, not a workflow.
 
 ### Option C — fully local Postgres, with the auth stub
+
 Run a local Postgres. Migration `0000`'s guarded block creates a minimal `auth.users` stub so the FK resolves, and `ensureLocalUserFromSupabaseAuth()` (`src/local-dev/`) inserts the stub row on the first authenticated request, so a staging JWT can be used against local data. This is the offline path.
 
 ### Option D (offline, recommended for agents) — the Supabase stack on this machine
+
 The Supabase CLI (`supabase` 2.119.0, a devDependency here) runs Postgres and Auth in Docker; `supabase/config.toml` at the root holds its config (WEB-2). Postgres listens on 54322, which `LOCAL_DATABASE_URL` already names, and it carries the real `auth` schema, so the FK and the trigger behave as they do on a hosted tier; 0000's guard sees `auth` and skips the stub.
 
 1. Start Docker, then `yarn db:local:up`. `yarn db:local:status` prints the API URL and the two keys.
