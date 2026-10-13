@@ -24,6 +24,8 @@ operator_review: false
 planned_paths:
   - "apps/web/lib/data/"
   - "apps/web/lib/fixtures/"
+  - "apps/web/app/(dev)/parts/"
+  - "apps/web/lib/routes.ts"
   - "apps/web/package.json"
   - "apps/web/vitest.config.ts"
   - "apps/web/turbo.json"
@@ -59,7 +61,11 @@ criteria:
     evidence: test
     command: "yarn test"
   - id: C6
-    statement: "No file under apps/web/lib/data or apps/web/lib/fixtures imports @syn/db, @syn/api or the tRPC client, and no file outside them imports lib/fixtures except lib/data"
+    statement: "No file under apps/web/lib/data or apps/web/lib/fixtures imports @syn/db, @syn/api or the tRPC client, and nothing outside them imports lib/fixtures except lib/data and app/(dev)/"
+    evidence: test
+    command: "yarn test"
+  - id: C8
+    statement: "/dev/parts renders the part a ?state= names from the parts registry, lists every registered name when none is given, and is not found in a production build"
     evidence: test
     command: "yarn test"
   - id: C7
@@ -87,6 +93,7 @@ Wave 1, after USE-3 and USE-5, parallel to USE-8 and USE-9. The README's contrac
   - `lib/fixtures/scenarios/`: `Scenario { name; now: string; records; mode: "ready" | "loading" | "error" }`, a registry, `resolveScenario(name: string | null): Scenario`. The base set: `default` (a Monday at 10:20 with Wellness, a Work block holding Urgent, Primary, Secondary and Stretch items, Lunch, a To-dos block, a daily reminder and a to-do pool), `empty`, `loading`, `error`.
   - `lib/data/use-today.ts`: `useToday(dateKey)`. It returns the query and `today: { occurrences: readDay(...), clock: deriveClock(...), records }`, derived in `select`, never stored.
   - `lib/data/use-slot-events.ts`: `useSlotEvents()`, a mutation over `writeSlotEvents`, with `stepAway()` and `resumeAll(stepAwayId)` composing the batch from the derived clock.
+  - `app/(dev)/parts/page.tsx`: the capture host for parts no screen holds yet. `lib/fixtures/parts.ts` is a registry, `registerPart(name, render)`, that each wave 2 ticket appends to. `?state=<name>` renders one part inside the shell's frame; no name lists them all. It calls `notFound()` when `env.NODE_ENV` (from `env.ts`, never `process.env`) is production. `routes.ts` gains `devParts(state?)`.
   - `lib/data/source.ts`: the one place a hook gets its server, the scenario from `?state=` (nuqs).
 - **Per path:**
   - `lib/fixtures/server.test.ts`: C2, C3 and C4, one `describe` per criterion.
