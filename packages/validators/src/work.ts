@@ -12,7 +12,8 @@ import {
 /**
  * Work (USE-3): the work pool's items and the clients they belong to. Tiers
  * slot an item into a day (D-USE-31; `placeSlotInput`). Linear's and Google's
- * wire shapes are their own tickets'; only the columns Work shows are here.
+ * wire shapes are in `linear.ts` and `google.ts` (USE-32); only the columns
+ * Work shows are here.
  */
 
 export const workSizeSchema = z.enum(WORK_SIZES);
@@ -57,25 +58,39 @@ export const workItemRecord = z.object({
   doneSource: doneSourceSchema.nullable(),
   archivedAt: instantSchema.nullable(),
   linearIdentifier: z.string().nullable(),
+  /** 0012's link to a placed issue (USE-32); both null when unlinked. */
+  linearConnectionId: z.string().uuid().nullable(),
+  linearIssueId: z.string().nullable(),
 });
 
 export type WorkItemRecord = z.infer<typeof workItemRecord>;
 
-export const workItemInput = z
-  .object({
-    title: plannerNameSchema,
-    notes: z.string().trim().max(4000).nullish(),
-    icon: iconValueSchema.nullish(),
-    size: workSizeSchema.nullish(),
-    lengthMinMin: lengthMinutesSchema.nullish(),
-    lengthMaxMin: lengthMinutesSchema.nullish(),
-    dueOn: dateKeySchema.nullish(),
-    clientId: z.string().uuid().nullish(),
-    parentWorkItemId: z.string().uuid().nullish(),
-  })
-  .superRefine(refineLengthRange);
+const workItemFields = z.object({
+  title: plannerNameSchema,
+  notes: z.string().trim().max(4000).nullish(),
+  icon: iconValueSchema.nullish(),
+  size: workSizeSchema.nullish(),
+  lengthMinMin: lengthMinutesSchema.nullish(),
+  lengthMaxMin: lengthMinutesSchema.nullish(),
+  dueOn: dateKeySchema.nullish(),
+  clientId: z.string().uuid().nullish(),
+  parentWorkItemId: z.string().uuid().nullish(),
+});
+
+export const workItemInput = workItemFields.superRefine(refineLengthRange);
 
 export type WorkItemInput = z.infer<typeof workItemInput>;
+
+/**
+ * A change to a work item (USE-32): any of its fields, the range checked when
+ * both ends are sent. The server checks a lone end against the stored other.
+ */
+export const editWorkItemInput = workItemFields
+  .partial()
+  .extend({ id: z.string().uuid() })
+  .superRefine(refineLengthRange);
+
+export type EditWorkItemInput = z.infer<typeof editWorkItemInput>;
 
 export const clientRecord = z.object({
   id: z.string().uuid(),
@@ -99,3 +114,18 @@ export const clientInput = z.object({
 });
 
 export type ClientInput = z.infer<typeof clientInput>;
+
+/** The clients' order as dragged (USE-32): every id once, top first. */
+export const clientOrderInput = z.object({
+  ids: z
+    .array(z.string().uuid())
+    .min(1)
+    .refine((ids) => new Set(ids).size === ids.length, "Each client once."),
+});
+
+export type ClientOrderInput = z.infer<typeof clientOrderInput>;
+
+/** Settings' Clients switch: `users.clients_enabled`. */
+export const clientsEnabledInput = z.object({ enabled: z.boolean() });
+
+export type ClientsEnabledInput = z.infer<typeof clientsEnabledInput>;

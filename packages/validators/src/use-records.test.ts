@@ -505,6 +505,8 @@ const samples = {
       dueOn: "2026-10-20",
       clientId: ID2,
       parentWorkItemId: null,
+      linearConnectionId: null,
+      linearIssueId: null,
       doneAt: null,
       doneSource: null,
       archivedAt: null,

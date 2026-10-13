@@ -321,6 +321,8 @@ export type BlockChangeInput = z.infer<typeof blockChangeInput>;
  * ---- Block items ----
  */
 
+const TRANSITION_NEEDS_TIME = "A transition needs a start and a length.";
+
 export const blockItemRecord = z.object({
   ...rowStamps,
   blockId: z.string().uuid(),
@@ -335,32 +337,56 @@ export const blockItemRecord = z.object({
 
 export type BlockItemRecord = z.infer<typeof blockItemRecord>;
 
+const blockItemFields = z.object({
+  blockId: z.string().uuid(),
+  title: plannerNameSchema,
+  icon: iconValueSchema.nullish(),
+  isTransition: z.boolean().default(false),
+  atTime: startTimeSchema.nullish(),
+  lengthMin: lengthMinutesSchema.nullish(),
+  meal: z.boolean().default(false),
+  sortOrder: sortOrderSchema,
+});
+
 /** `block_items_transition_has_time_and_length_check` on a transition row. */
-export const blockItemInput = z
-  .object({
-    blockId: z.string().uuid(),
-    title: plannerNameSchema,
-    icon: iconValueSchema.nullish(),
-    isTransition: z.boolean().default(false),
-    atTime: startTimeSchema.nullish(),
-    lengthMin: lengthMinutesSchema.nullish(),
-    meal: z.boolean().default(false),
-    sortOrder: sortOrderSchema,
+export const blockItemInput = blockItemFields.superRefine((value, ctx) => {
+  if (value.isTransition && (value.atTime == null || value.lengthMin == null)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["atTime"],
+      message: TRANSITION_NEEDS_TIME,
+    });
+  }
+});
+
+export type BlockItemInput = z.infer<typeof blockItemInput>;
+
+/**
+ * A change to one block item (USE-32; Make it Monday's usual). Absent is
+ * unchanged, so the transition check refuses only a time or length cleared
+ * on a row sent as a transition; the server checks the rest against the row.
+ */
+export const editBlockItemInput = blockItemFields
+  .partial()
+  .extend({
+    id: z.string().uuid(),
+    isTransition: z.boolean().optional(),
+    meal: z.boolean().optional(),
   })
   .superRefine((value, ctx) => {
     if (
-      value.isTransition &&
-      (value.atTime == null || value.lengthMin == null)
+      value.isTransition === true &&
+      (value.atTime === null || value.lengthMin === null)
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["atTime"],
-        message: "A transition needs a start and a length.",
+        message: TRANSITION_NEEDS_TIME,
       });
     }
   });
 
-export type BlockItemInput = z.infer<typeof blockItemInput>;
+export type EditBlockItemInput = z.infer<typeof editBlockItemInput>;
 
 /*
  * ---- Slots: a block item, a to-do or a work item in a block on a date ----
@@ -419,6 +445,48 @@ export const placeSlotInput = z
   });
 
 export type PlaceSlotInput = z.infer<typeof placeSlotInput>;
+
+/** Which sessions a tier change moves (D-USE-57): this one, or every one. */
+export const sessionsChoiceSchema = z.enum(["this", "all"]);
+
+/**
+ * The one slot-edit write (USE-16's fields, USE-32's beside them): check off
+ * or uncheck, Change's `took_min`, reorder, skip, move block, day or tier,
+ * change the length. Absent is unchanged. A tier change on a session names
+ * This session or All sessions; a sessions choice with no tier is refused.
+ * Only a work slot takes a tier: the server checks it against the stored
+ * target (`slots_tier_only_for_work_check`).
+ */
+export const slotUpdateInput = z
+  .object({
+    id: z.string().uuid(),
+    doneAt: instantSchema.nullish(),
+    /** `slots_took_min_check`: `>= 0`. */
+    tookMin: z.number().int().min(0).nullish(),
+    sortOrder: sortOrderSchema.optional(),
+    skipped: z.boolean().optional(),
+    blockId: z.string().uuid().optional(),
+    tier: workTierSchema.nullish(),
+    sessions: sessionsChoiceSchema.optional(),
+    onDate: dateKeySchema.optional(),
+    lengthMin: lengthMinutesSchema.nullish(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.sessions !== undefined && value.tier == null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["sessions"],
+        message: "Choose a tier to move the sessions to.",
+      });
+    }
+  });
+
+export type SlotUpdateInput = z.infer<typeof slotUpdateInput>;
+
+/** Remove from today, or a session's ×: the slot goes, the item stays. */
+export const removeSlotInput = z.object({ id: z.string().uuid() });
+
+export type RemoveSlotInput = z.infer<typeof removeSlotInput>;
 
 /*
  * ---- Slot events: the append-only clock ----

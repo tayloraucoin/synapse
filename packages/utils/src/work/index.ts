@@ -23,3 +23,9 @@ export {
   type ClientConnection,
   type ClientItem,
 } from "./client";
+export {
+  statusEffect,
+  statusFill,
+  type LinearStateLike,
+  type StatusEffect,
+} from "./linear-status";

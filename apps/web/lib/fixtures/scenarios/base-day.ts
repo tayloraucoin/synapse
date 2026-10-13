@@ -200,6 +200,8 @@ const workItems = [
     doneAt: null,
     doneSource: null,
     archivedAt: null,
+    linearConnectionId: null,
+    linearIssueId: null,
     ...item,
   }),
 );
