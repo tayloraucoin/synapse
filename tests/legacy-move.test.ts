@@ -30,8 +30,12 @@ test("C1: the live route folders are the auth, api, legal and logout groups and 
     "legal",
     "logout",
   ]);
+  // The shell holds Today and the routes USE redraws as it lands (USE-4: week
+  // and review, new pages, not the old folders); nothing else comes back.
+  const useRoutes = ["layout.tsx", "today", "week", "review"];
   const shell = readdirSync(at("apps/web/app/(shell)")).filter(isRoute);
-  assert.deepEqual(shell.sort(), ["layout.tsx", "today"]);
+  assert.ok(shell.includes("today"));
+  assert.deepEqual(shell.filter((name) => !useRoutes.includes(name)), []);
   assert.equal(existsSync(at("apps/web/app/(setup)")), false);
 });
 
