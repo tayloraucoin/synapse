@@ -1,0 +1,33 @@
+{
+  "id": "WEB-2",
+  "criteria_sha256": "23b7c7fce91effbdbd8bec042e340fcb4fab00ec40b85cec41da0c67de51f5af",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    }
+  },
+  "built_at": "2026-10-13T20:31:06Z",
+  "updated_at": "2026-10-13T20:31:06Z"
+}

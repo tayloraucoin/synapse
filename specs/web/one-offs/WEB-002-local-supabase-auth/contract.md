@@ -12,7 +12,7 @@ non_negotiables:
   - "No hosted database is touched; db:reset and db:push stay local-only (house rules)."
 devs_call: "The Supabase CLI as a root devDependency or a documented install; the script names (db:local:up, db:local:down); whether the local keys live in .env.example as Supabase's published local demo values or are printed by the up script; ports kept at the CLI defaults (54321 API, 54322 Postgres, which LOCAL_DATABASE_URL already uses)."
 cites:
-  - "packages/db/SETUP.md"
+  - "DB setup guide §3, the local-uses-staging-auth trap"
 truth_files: "none: developer tooling, no product behaviour changes"
 qa: Q1 # touches auth env resolution; dev-only and opt-in, so Q1 per the operator's QA spend, flagged once
 reviewers: []
@@ -29,7 +29,7 @@ planned_paths:
   - "apps/web/lib/env/resolve-tier-env.ts"
   - "packages/db/src/connection-env.ts"
   - "packages/db/scripts/seed-users.ts"
-  - "packages/db/SETUP.md"
+  - "DB setup guide §3, the local-uses-staging-auth trap"
   - ".env.example"
   - "specs/web/one-offs/WEB-002-local-supabase-auth/evidence/"
 depends_on: []
