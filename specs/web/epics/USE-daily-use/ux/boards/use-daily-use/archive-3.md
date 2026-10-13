@@ -1,0 +1,45 @@
+---
+page: "USE — daily use"
+page_id: "p-3-0"
+file: "01M49AX02VV4SSBKNCN6NRTS6Y"
+row: "Row label · Archive 3"
+mapped: 2026-10-12
+status: approved
+---
+
+# USE — daily use · Archive 3
+
+y 25320, notes at y 26250 (all named "Frame", told by x). The row label reads: "Archive · earlier states / Running over and paused (round 1): superseded by round 2's over in two bands and paused, pulsing. Review the day, Sunday nothing set, centred: superseded by the top version. Meal topics sheet: superseded by the one with icons."
+
+| Artboard                                         | x    | y     | Status         | Carried by                                        | Ruling                                                                                                                                   |
+| ------------------------------------------------ | ---- | ----- | -------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `Row label · Archive 3`                          | -560 | 25320 | row label      | —                                                 |                                                                                                                                          |
+| `running / over / 402 / light`                   | 0    | 25320 | superseded     | `day/running/states/over-a-minute-or-more.md`     | D-USE-29, D-USE-72 (round 2's over in two bands; `day/running/states/over-under-a-minute.md` too)                                        |
+| `Frame`                                          | 0    | 26250 | note           | `day/running/states/over-a-minute-or-more.md`     |                                                                                                                                          |
+| `running / paused / 402 / light`                 | 482  | 25320 | superseded     | `day/running/states/paused.md`                    | D-USE-29, D-USE-72 (paused, pulsing)                                                                                                     |
+| `Frame`                                          | 482  | 26250 | note           | `day/running/states/paused.md`                    |                                                                                                                                          |
+| `review-day / sunday, nothing set / 402 / light` | 964  | 25320 | superseded     | `day/review-the-day/states/sunday-nothing-set.md` | D-USE-30 (the choice under the title; redrawn as `sunday, nothing set, top`)                                                             |
+| `Frame`                                          | 964  | 26250 | note           | `day/review-the-day/states/sunday-nothing-set.md` |                                                                                                                                          |
+| `meal-topics sheet / default / 402 / light`      | 1446 | 25320 | superseded     | `interactions/meal-topics.md`                     | D-USE-30 (topics take an icon; redrawn as `meal-topics sheet / with icons`)                                                              |
+| `Frame`                                          | 1446 | 26250 | note           | `interactions/meal-topics.md`                     |                                                                                                                                          |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node 82N-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node 8QP-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node 91Q-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node 9ZJ-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node AXC-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node BLZ-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node DA5-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node DBR-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node DUF-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node EHE-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node EXM-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node FN3-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node GX8-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node IED-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node JA8-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node F7N-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node MAV-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node N9A-0) |
+| `Emptied notes board (safe to delete)`           | 0    | 26700 | safe to delete | —                                                 | open-8, Board layout (approved 2026-10-10): the wave notes boards were split into notes under each frame; this one is empty (node OO7-0) |
+
+The nineteen `Emptied notes board (safe to delete)` artboards at x 0, y 26700 hold no text and no layers; Paper reports them stacked at one place, told apart by node ID. Nothing in them is spec; each can be deleted from the canvas, which needs no D-line (open-8's Board layout named them).

@@ -1,0 +1,97 @@
+name	x	y	w	h	node_id	row_label
+Progress	0	-700	3536	106	12TA-0	
+Row label · Today at a desk	-560	0	440	220	ZX5-0	Row label · Today at a desk
+today / working, firing in place / 1728 / light	0	0	1728	1117	YJU-0	Row label · Today at a desk
+today / running, work clock, add menu / 1728 / light	1808	0	1728	1117	100Z-0	Row label · Today at a desk
+today / prompt sent, both firing, Next lifts / 1728 / light	3616	0	1728	1117	11OF-0	Row label · Today at a desk
+today / brought back, Next follows order, Done / 1728 / light	5424	0	1728	1117	11YE-0	Row label · Today at a desk
+today / stepped away / 1728 / light	7232	0	1728	1117	12CG-0	Row label · Today at a desk
+Note · today / working	0	1157	1728	126	ZXD-0	Row label · Today at a desk
+Note · today / running	1808	1157	1728	146	11O6-0	Row label · Today at a desk
+Note · today / prompt sent	3616	1157	1728	126	128I-0	Row label · Today at a desk
+Note · today / brought back, Done	5424	1157	1728	146	128L-0	Row label · Today at a desk
+Note · today / stepped away	7232	1157	1728	146	12T3-0	Row label · Today at a desk
+Row label · Today, edges	-560	1440	440	220	11O2-0	Row label · Today, edges
+today / nothing planned, pool docked / 1728 / light	0	1440	1728	1117	10AN-0	Row label · Today, edges
+day / Tue 13, opened from Week / 1728 / light	1808	1440	1728	1117	ZR1-0	Row label · Today, edges
+Note · today / nothing planned	0	2597	1728	126	11O9-0	Row label · Today, edges
+Note · day / opened from Week	1808	2597	1728	106	ZXM-0	Row label · Today, edges
+Row label · Week	-560	2880	440	220	12T6-0	Row label · Week
+week / priority lens, add on hover / 1728 / light	0	2880	1728	1117	YPX-0	Row label · Week
+week / time lens / 1728 / light	1808	2880	1728	1117	YYV-0	Row label · Week
+week / spread a big task / 1728 / light	3616	2880	1728	1117	11BY-0	Row label · Week
+Note · week / priority lens	0	4037	1728	146	ZXG-0	Row label · Week
+Note · week / time lens	1808	4037	1728	106	ZXJ-0	Row label · Week
+Note · week / spread	3616	4037	1728	126	11OC-0	Row label · Week
+Row label · Block panel	-560	4320	440	220	ZX9-0	Row label · Block panel
+block-panel / work block, from Time / 1728 / light	0	4320	1728	1117	Z87-0	Row label · Block panel
+block-panel / non-work block, from Time / 1728 / light	1808	4320	1728	1117	ZHB-0	Row label · Block panel
+Note · block-panel / work	0	5477	1728	106	ZXP-0	Row label · Block panel
+Note · block-panel / non-work	1808	5477	1728	106	ZXS-0	Row label · Block panel
+Row label · Phone, Today	-560	5760	440	226	1546-0	Row label · Phone, Today
+phone-today / A: working, firing in place, rec. / 402 / light	0	5760	402	874	12TD-0	Row label · Phone, Today
+phone-today / B: Next strip kept / 402 / light	482	5760	402	874	12XR-0	Row label · Phone, Today
+phone-today / running, work time, step away / 402 / light	964	5760	402	874	132F-0	Row label · Phone, Today
+phone-today / prompt sent, both firing, Next lifts / 402 / light	1446	5760	402	874	137S-0	Row label · Phone, Today
+phone-today / stepped away, Resume all / 402 / light	1928	5760	402	874	13DC-0	Row label · Phone, Today
+phone-today / brought back, Next follows order, Done / 402 / light	2410	5760	402	874	13I7-0	Row label · Phone, Today
+phone-today / firing with a thumb, ring 44, swipe right / 402 / light	2892	5760	402	874	13O5-0	Row label · Phone, Today
+phone-today / everything firing / 402 / light	3374	5760	402	874	13T1-0	Row label · Phone, Today
+phone-today / no work slotted / 402 / light	3856	5760	402	874	13X6-0	Row label · Phone, Today
+phone-today / nothing planned, left open / 402 / light	4338	5760	402	874	141F-0	Row label · Phone, Today
+phone-today / offline / 402 / light	4820	5760	402	874	145O-0	Row label · Phone, Today
+phone-today / Not updated in Linear, Try again / 402 / light	5302	5760	402	874	149X-0	Row label · Phone, Today
+phone-today / paused, one item / 402 / light	5784	5760	402	874	156I-0	Row label · Phone, Today
+phone-today / running, over the range / 402 / light	6266	5760	402	874	15B2-0	Row label · Phone, Today
+phone-today / Start while one runs, ask / 402 / light	6748	5760	402	874	15FM-0	Row label · Phone, Today
+phone-today / row long-press, work menu / 402 / light	7230	5760	402	874	15KX-0	Row label · Phone, Today
+phone-today / Done for today, a session, Undo / 402 / light	7712	5760	402	874	15P6-0	Row label · Phone, Today
+phone-today / Linear updating, closed in Linear / 402 / light	8194	5760	402	874	15TF-0	Row label · Phone, Today
+phone-today / loading / 402 / light	8676	5760	402	874	15ZU-0	Row label · Phone, Today
+phone-today / error, Today didn't load / 402 / light	9158	5760	402	874	161Y-0	Row label · Phone, Today
+phone-today / Lunch, work still firing / 402 / light	9640	5760	402	874	1642-0	Row label · Phone, Today
+phone-today / item sheet, while firing / 402 / light	10122	5760	402	874	167K-0	Row label · Phone, Today
+Notes · phone, Today (row 5)	0	6674	5704	222	154E-0	Row label · Phone, Today
+Notes · phone, Today (row 5, cont.)	5784	6674	4740	162	1736-0	Row label · Phone, Today
+Row label · Phone, editing and This week	-560	7200	440	236	154A-0	Row label · Phone, editing and This week
+phone-edit / + Add, four choices / 402 / light	0	7200	402	874	14HF-0	Row label · Phone, editing and This week
+phone-edit / new task, tier, size, days / 402 / light	482	7200	402	874	14J1-0	Row label · Phone, editing and This week
+phone-edit / item sheet, tier and sessions / 402 / light	964	7200	402	874	14KL-0	Row label · Phone, editing and This week
+phone-edit / sub-issue, placed alone / 402 / light	1446	7200	402	874	14L5-0	Row label · Phone, editing and This week
+this-week / A: pool sheet, tap to place, rec. / 402 / light	1928	7200	402	874	14LP-0	Row label · Phone, editing and This week
+this-week / A: place sheet, days and tier / 402 / light	2410	7200	402	874	14M9-0	Row label · Phone, editing and This week
+this-week / B: placing mode, tap a tier / 402 / light	2892	7200	402	874	14YO-0	Row label · Phone, editing and This week
+this-week / client filter sheet / 402 / light	3374	7200	402	874	14MT-0	Row label · Phone, editing and This week
+this-week / spread across the week / 402 / light	3856	7200	402	874	14ND-0	Row label · Phone, editing and This week
+this-week / From Linear, not connected / 402 / light	4338	7200	402	874	14NX-0	Row label · Phone, editing and This week
+this-week / pool empty / 402 / light	4820	7200	402	874	14OH-0	Row label · Phone, editing and This week
+this-week / the day, work tiers, Pool entry / 402 / light	5302	7200	402	874	16AO-0	Row label · Phone, editing and This week
+this-week / placed, Undo / 402 / light	5784	7200	402	874	16CT-0	Row label · Phone, editing and This week
+this-week / From Linear, connected / 402 / light	6266	7200	402	874	16EX-0	Row label · Phone, editing and This week
+this-week / pool search / 402 / light	6748	7200	402	874	16G5-0	Row label · Phone, editing and This week
+this-week / place, doesn't fit / 402 / light	7230	7200	402	874	16HD-0	Row label · Phone, editing and This week
+phone-edit / tier, this session or all / 402 / light	7712	7200	402	874	16IL-0	Row label · Phone, editing and This week
+phone-edit / item sheet ··· menu / 402 / light	8194	7200	402	874	16JT-0	Row label · Phone, editing and This week
+phone-edit / new task, save to the pool / 402 / light	8676	7200	402	874	16L1-0	Row label · Phone, editing and This week
+this-week / spread, days and tier / 402 / light	9158	7200	402	874	16M9-0	Row label · Phone, editing and This week
+settings / connections, clients on / 402 / light	9640	7200	402	874	16NH-0	Row label · Phone, editing and This week
+settings / Linear workspace, client per project / 402 / light	10122	7200	402	874	16OP-0	Row label · Phone, editing and This week
+settings / client, name colour logo / 402 / light	10604	7200	402	874	170H-0	Row label · Phone, editing and This week
+Dev note · What stays at the desk, and the phone's answer	11086	7200	402	874	153N-0	Row label · Phone, editing and This week
+Notes · phone, editing and This week (row 6)	0	8114	5704	202	154F-0	Row label · Phone, editing and This week
+Notes · phone, editing and This week (row 6, cont.)	5302	8114	6186	162	1737-0	Row label · Phone, editing and This week
+Archive · A: week strip (Today A, Week A-)	-560	9000	440	220	YIY-0	Archive · A: week strip (Today A, Week A-)
+today / A: week strip, one firing / 1728 / light	0	9000	1728	1117	XAC-0	Archive · A: week strip (Today A, Week A-)
+week / A: tier matrix, pool open / 1728 / light	1808	9000	1728	1117	XV8-0	Archive · A: week strip (Today A, Week A-)
+Note · today / A	0	10157	1728	126	YJB-0	Archive · A: week strip (Today A, Week A-)
+Note · week / A	1808	10157	1728	126	YJF-0	Archive · A: week strip (Today A, Week A-)
+Archive · B: accordion (Today C, Week A-)	-560	10440	440	220	YJ3-0	Archive · B: accordion (Today C, Week A-)
+today / B: accordion week, one firing / 1728 / light	0	10440	1728	1117	XGE-0	Archive · B: accordion (Today C, Week A-)
+week / B: calendar week, pool open / 1728 / light	1808	10440	1728	1117	Y19-0	Archive · B: accordion (Today C, Week A-)
+Note · today / B	0	11597	1728	106	YJI-0	Archive · B: accordion (Today C, Week A-)
+Note · week / B	1808	11597	1728	126	YJL-0	Archive · B: accordion (Today C, Week A-)
+Archive · C: planner page (Today B, Week D)	-560	11880	440	220	YJ7-0	Archive · C: planner page (Today B, Week D)
+today / C: planner page, one firing / 1728 / light	0	11880	1728	1117	XNQ-0	Archive · C: planner page (Today B, Week D)
+week / C: pool over Today, planner page / 1728 / light	1808	11880	1728	1117	YBQ-0	Archive · C: planner page (Today B, Week D)
+Note · today / C	0	13037	1728	106	YJO-0	Archive · C: planner page (Today B, Week D)
+Note · week / C	1808	13037	1728	106	YJR-0	Archive · C: planner page (Today B, Week D)
