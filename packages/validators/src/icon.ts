@@ -28,7 +28,10 @@ export const colourValueSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .regex(/^(#[0-9a-f]{6}|[a-z]+(_[a-z]+)*)$/, "Use a palette colour or #rrggbb.");
+  .regex(
+    /^(#[0-9a-f]{6}|[a-z]+(_[a-z]+)*)$/,
+    "Use a palette colour or #rrggbb.",
+  );
 
 /**
  * `IconValue` as a discriminated union — the same four arms `@syn/types`
