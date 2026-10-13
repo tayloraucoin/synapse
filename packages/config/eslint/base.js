@@ -2,8 +2,8 @@ import js from "@eslint/js";
 import eslintConfigPrettier from "eslint-config-prettier";
 import turboPlugin from "eslint-plugin-turbo";
 import tseslint from "typescript-eslint";
-
 import { noEmojiRules } from "./no-emoji.js";
+import { noLegacyConfig } from "./no-legacy.js";
 import { processEnvConfig } from "./process-env.js";
 
 /**
@@ -29,6 +29,7 @@ export const config = [
     rules: noEmojiRules,
   },
   ...processEnvConfig,
+  ...noLegacyConfig,
   {
     ignores: ["dist/**"],
   },

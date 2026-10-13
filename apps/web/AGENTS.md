@@ -25,17 +25,16 @@ Cross-cutting §4.1, and every one has a builder in
 [`lib/routes.ts`](lib/routes.ts). **A hardcoded path anywhere else in this app
 is a defect.**
 
-The two `/legal/*` pages sit outside all three groups on purpose: a privacy
+The two `/legal/*` pages sit outside the route groups on purpose: a privacy
 policy a person has to sign in to read is not a privacy policy, and both the
 landing footer and About link to them.
 
-### The three route groups
+### The route groups
 
-| Group     | Gate                                                | Frame                                                         |
-| --------- | --------------------------------------------------- | ------------------------------------------------------------- |
-| `(auth)`  | redirects a **signed-in** person to `/`             | one centred column, `max-w-sm`                                |
-| `(setup)` | a verified session                                  | the sequence; deliberately does **not** re-run the entry tree |
-| `(shell)` | **the auth gate** — session → verified → entry tree | skip link + `main#main`; the chrome arrives with Epic 2       |
+| Group     | Gate                                                | Frame                                                       |
+| --------- | --------------------------------------------------- | ----------------------------------------------------------- |
+| `(auth)`  | redirects a **signed-in** person to `/`             | one centred column, `max-w-sm`                              |
+| `(shell)` | **the auth gate** — session → verified → entry tree | no chrome until USE-4; the old app is in `_legacy/` (USE-1) |
 
 ---
 
@@ -44,7 +43,7 @@ landing footer and About link to them.
 ```
 app/
   _components/     client leaves shared across routes, "use client" line 1
-  (auth)/ (setup)/ (shell)/   route groups
+  (auth)/ (auth-pending)/ (shell)/   route groups
   api/             route handlers — the enumerated tRPC exceptions only
 lib/
   routes.ts        every path in the app

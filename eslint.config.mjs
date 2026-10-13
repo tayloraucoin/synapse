@@ -17,6 +17,8 @@ export default [
       "**/storybook-static/**",
       "**/dist/**",
       "**/.turbo/**",
+      // USE-1: the old app, kept for reference; nothing lints it.
+      "**/_legacy/**",
     ],
   },
   {

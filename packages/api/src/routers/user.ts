@@ -1,20 +1,16 @@
 import { TRPCError } from "@trpc/server";
-
 import {
-  completeFirstRunInput,
   deleteAccountInput,
   exportDownloadInput,
   setAvatarInput,
   updatePreferencesInput,
 } from "@syn/validators";
-
 import {
   isOwnedAssetPath,
   readAvatar,
   removeAvatar,
   setAvatar,
 } from "../services/user/avatar";
-import { completeFirstRun } from "../services/user/complete-first-run";
 import { deleteAccount } from "../services/user/delete-account";
 import {
   readPreferences,
@@ -62,20 +58,6 @@ export const userRouter = router({
       }
       return row;
     }),
-
-  /**
-   * The fit screen's *Open today* / *Plan this week first* (v1.1 §4.12).
-   * Writes the overflow mode, marks the row, pre-fills the week. Idempotent,
-   * so a double submit is not an error.
-   */
-  completeFirstRun: protectedProcedure
-    .input(completeFirstRunInput)
-    .mutation(async ({ ctx, input }) =>
-      // `overflowMode` is accepted and ignored (UX v1.2 §3.10; removed in RUN-13).
-      completeFirstRun(ctx.rls, ctx.authContext.userId, {
-        morningMode: input?.morningMode,
-      }),
-    ),
 
   /** The account photo's stored path, or null. ST-01 and the header read it. */
   avatar: protectedProcedure.query(async ({ ctx }) =>

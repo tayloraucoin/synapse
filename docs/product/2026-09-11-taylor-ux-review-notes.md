@@ -96,7 +96,7 @@
 
 **Reflection**
 
-- Confirmed on disk: slots are stored as absolute `offsetStartMin` from the anchor ([`template-slots.ts`](../../packages/db/src/schema/plan/template-slots.ts), [`save-slot.ts`](../../packages/api/src/services/plan/save-slot.ts)). Gaps exist implicitly (the space between one slot's end and the next's start) but nothing owns them, so nothing lets you resize them, and inserting a slot mid-template means re-entering every downstream start.
+- Confirmed on disk: slots are stored as absolute `offsetStartMin` from the anchor ([`template-slots.ts`](../../packages/db/src/schema/plan/template-slots.ts), [`save-slot.ts`](../../packages/api/src/_legacy/services/plan/save-slot.ts)). Gaps exist implicitly (the space between one slot's end and the next's start) but nothing owns them, so nothing lets you resize them, and inserting a slot mid-template means re-entering every downstream start.
 - The spec *intended* stacking — §4.4 says "start defaults to the end of the previous slot (so a template builds like a stack)" — but only as a default at insert time. Once set, offsets are independent.
 - The cleaner model is **durations + gaps, offsets derived**: each slot carries `gap_before_min` (default 0), and `offset_start` is computed by walking the stack. Fixed-time slots (appointments) become pins the stack flows around. Shift-forward gets cheaper still. This is a data-model change but a contained one; materialisation already recomputes absolute times from offsets.
 - The resizable gap in the editor is the right affordance for it and fits the "one screen that earns density" rule.

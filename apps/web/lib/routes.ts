@@ -5,13 +5,14 @@
  * here, and every link, redirect, notification deep-link, and test follows.
  * The map is cross-cutting §4.1; every entry there has a builder here.
  *
+ * Cut to the live routes by the legacy move (USE-1): the old app's builders
+ * went with its pages. USE's routes are added here as each surface lands.
+ *
  * Builders take already-validated inputs. `dateRoute("2026-13-40")` will
  * happily produce a URL — validation belongs at the boundary that reads the
  * segment (`dateKeySchema` / `weekKeySchema` in `@syn/validators`), which is
  * where a bad value can be turned into a 404 rather than a broken link.
  */
-
-import type { BlockKind } from "@syn/types";
 
 /* ---------------------------------------------------------------- entry -- */
 
@@ -82,238 +83,10 @@ export function assetRoute(storedPath: string): string {
   return `/api/assets/${storedPath}`;
 }
 
-/* ---------------------------------------------------------------- setup -- */
-
-/** UX v1.3 §4's five screens (R45, TD-31; DAY-8). `step` is 1–5; the page 404s on anything else. */
-export function setupRoute(step: number, options?: { edit?: string }): string {
-  const base = `/setup/${step}`;
-  // RUN-13: *Edit Day A* opens screen 4's builder on that plan's review.
-  return options?.edit ? `${base}?edit=${encodeURIComponent(options.edit)}` : base;
-}
-
-/* ------------------------------------------------------------ execution -- */
-
-/** The orient frame — the first screen of the morning (UX v1.1 §5.1, DYN-13). */
-export function orientRoute(): string {
-  return "/orient";
-}
+/* ---------------------------------------------------------------- today -- */
 
 export function todayRoute(): string {
   return "/today";
-}
-
-/**
- * The Schedule's one option (UX v1.1 §10.4, DYN-16): `move` opens it in
- * move mode — a tap lifts, a tap drops — the long-press fallback the day
- * header sheet's *Edit today* row reaches.
- */
-export type ScheduleRouteOptions = { move?: boolean };
-
-export const SCHEDULE_MOVE_MODE_PARAM = "mode";
-export const SCHEDULE_MOVE_MODE_VALUE = "move";
-
-function scheduleQuery(options?: ScheduleRouteOptions): string {
-  return options?.move ? `?${SCHEDULE_MOVE_MODE_PARAM}=${SCHEDULE_MOVE_MODE_VALUE}` : "";
-}
-
-export function todayScheduleRoute(options?: ScheduleRouteOptions): string {
-  return `/today/schedule${scheduleQuery(options)}`;
-}
-
-/** A past or future day. `date` is `YYYY-MM-DD`. */
-export function dayRoute(date: string): string {
-  return `/day/${date}`;
-}
-
-export function dayScheduleRoute(date: string, options?: ScheduleRouteOptions): string {
-  return `/day/${date}/schedule${scheduleQuery(options)}`;
-}
-
-/** The journal — UX v1.1 §7.2 (DYN-18); read-only for a past day from Review. */
-export function journalRoute(date: string): string {
-  return `/day/${date}/journal`;
-}
-
-/** The item sheet, addressable because a notification deep-links to it. */
-export function dayItemRoute(date: string, id: string): string {
-  return `/day/${date}/item/${id}`;
-}
-
-/* --------------------------------------------------------------- review -- */
-
-export function reviewRoute(): string {
-  return "/review";
-}
-
-export function reviewDayRoute(date: string): string {
-  return `/review/day/${date}`;
-}
-
-/** `week` is `YYYY-Www` (ISO week). */
-export function reviewWeekRoute(week: string): string {
-  return `/review/week/${week}`;
-}
-
-export function reviewWeekHabitRoute(week: string, id: string): string {
-  return `/review/week/${week}/habit/${id}`;
-}
-
-export function reviewHistoryRoute(): string {
-  return "/review/history";
-}
-
-/* ------------------------------------------------------------- workflow -- */
-
-/**
- * Workflow — the fourth peer (Workflow UX spec v0.1 §5, W1; FLO-5). Resolves
- * to the last view opened, else the first (FLO-6).
- */
-export function workflowRoute(): string {
-  return "/workflow";
-}
-
-/**
- * One view's board, WF-01. `column` is compact's shown column (`?col=`, FLO-8);
- * `add` is the `n` key's hand-off — the board opens an add row and clears it.
- */
-export function workflowViewRoute(viewId: string, options?: { column?: string; add?: boolean }): string {
-  const path = `${workflowRoute()}/${viewId}`;
-  const query = new URLSearchParams();
-  if (options?.column) query.set("col", options.column);
-  if (options?.add) query.set("add", "1");
-  const search = query.toString();
-  return search === "" ? path : `${path}?${search}`;
-}
-
-/** The view id in a Workflow board path, or null on the root route. */
-export function workflowViewIdOf(path: string): string | null {
-  if (!isWorkflowPath(path)) return null;
-  const [, , viewId] = path.split("?")[0]?.split("/") ?? [];
-  return viewId === undefined || viewId === "" ? null : viewId;
-}
-
-/**
- * Is this path Workflow's? The one scope check the tab highlight, the entry
- * tree's orient exemption (W16) and the shortcut hook share, so none of them
- * writes the prefix itself.
- */
-export function isWorkflowPath(path: string): boolean {
-  const root = workflowRoute();
-  return path === root || path.startsWith(`${root}/`) || path.startsWith(`${root}?`);
-}
-
-/* ------------------------------------------------------------- settings -- */
-
-export function settingsRoute(): string {
-  return "/settings";
-}
-
-export function settingsAccountRoute(): string {
-  return "/settings/account";
-}
-
-export function settingsHabitsRoute(): string {
-  return "/settings/habits";
-}
-
-export function settingsHabitRoute(id: string): string {
-  return `/settings/habits/${id}`;
-}
-
-/*
- * Settings → Your day (UX v1.3 §4.6; DAY-8): the first run's screens and the
- * builder's parts without the frame. The fact screens are embedded; the
- * block-kind rows open the block editor for that kind (`block/{kind}`);
- * *Block order* is its own list (`order`).
- */
-export type YourDayScreen =
-  | "shape"
-  | "work-days"
-  /** UX v1.2 §4.16 (RUN-12): the day plans and the builder, embedded. */
-  | "your-days"
-  /** UX v1.3 §4.6 (DAY-12): passages, links, the quote, the three lines — B8's screen. */
-  | "first-thing"
-  /** UX v1.3 §4.6 (DAY-8): the landscape and the ranking, embedded. */
-  | "morning-habits"
-  | "ranked"
-  /** UX v1.3 §4.6 (DAY-12): free time's landscape and ranking — B15a and B15b. */
-  | "free-time"
-  /** UX v1.2 §4.16 (RUN-11): the workouts and the focuses, embedded. */
-  | "training"
-  | "commitments"
-  | "closing-the-day"
-  | "focuses"
-  /** UX v1.3 §4.6 (DAY-12): the mode question, alone. */
-  | "each-morning";
-
-export const YOUR_DAY_SCREENS: readonly YourDayScreen[] = [
-  "shape",
-  "work-days",
-  "your-days",
-  "first-thing",
-  "morning-habits",
-  "ranked",
-  "free-time",
-  "training",
-  "commitments",
-  "closing-the-day",
-  "focuses",
-  "each-morning",
-];
-
-export function settingsYourDayRoute(): string {
-  return "/settings/your-day";
-}
-
-export function settingsYourDayScreenRoute(screen: YourDayScreen): string {
-  return `/settings/your-day/${screen}`;
-}
-
-/** With a template id, the editor opens on that template; without, the kind's page decides. */
-export function settingsYourDayBlockRoute(kind: BlockKind, templateId?: string): string {
-  const base = `/settings/your-day/block/${kind}`;
-  return templateId ? `${base}?t=${encodeURIComponent(templateId)}` : base;
-}
-
-export function settingsYourDayOrderRoute(): string {
-  return "/settings/your-day/order";
-}
-
-/** Without a week, the week build opens on the current one. */
-export function settingsWeekRoute(week?: string): string {
-  return week ? `/settings/week/${week}` : "/settings/week";
-}
-
-export function settingsCategoriesRoute(): string {
-  return "/settings/categories";
-}
-
-export function settingsReasonsRoute(): string {
-  return "/settings/reasons";
-}
-
-export function settingsNotificationsRoute(): string {
-  return "/settings/notifications";
-}
-
-export function settingsDayRoute(): string {
-  return "/settings/day";
-}
-
-export function settingsAppearanceRoute(): string {
-  return "/settings/appearance";
-}
-
-export function settingsDataRoute(): string {
-  return "/settings/data";
-}
-
-export function settingsShareRoute(): string {
-  return "/settings/share";
-}
-
-export function settingsAboutRoute(): string {
-  return "/settings/about";
 }
 
 /* ---------------------------------------------------------------- legal -- */
