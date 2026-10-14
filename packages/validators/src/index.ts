@@ -461,6 +461,22 @@ export {
   type SlotRecord,
 } from "./planner";
 
+/* USE-12: the morning's reads and the lines' write, as Orient reads them. */
+export {
+  journalEntryRecord,
+  linkRecord,
+  morningLinesInput,
+  morningLinesRecord,
+  passageRecord,
+  quoteRecord,
+  type JournalEntryRecord,
+  type LinkRecord,
+  type MorningLinesInput,
+  type MorningLinesRecord,
+  type PassageRecord,
+  type QuoteRecord,
+} from "./morning";
+
 export {
   todoInput,
   todoRecord,

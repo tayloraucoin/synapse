@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ScreenFrame, Text } from "@syn/ui";
+import { DayEntryGate } from "../_components/day-entry-gate";
 import { TabHeader } from "../_components/tab-header";
 import { TODAY_COPY as COPY } from "./_components/copy";
 import { NowScreen } from "./_components/now/now-screen";
@@ -12,21 +13,27 @@ export const metadata: Metadata = { title: COPY.title };
  * desk's /today is work Today's ticket, so from 1024 it is still the muted
  * placeholder and the push check (USE-1): notifications have nowhere else
  * to be turned on while Settings is legacy.
+ *
+ * It is Now in the day's entry tree (USE-12): a day not yet oriented goes to
+ * Orient, one before Ready, go to Review the day, one before Start to the
+ * welcome.
  */
 export default function TodayPage() {
   return (
-    <main id="main" className="flex flex-1 flex-col">
-      <TabHeader title={<TodayTitle />} />
-      <div className="split:hidden">
-        <NowScreen />
-      </div>
-      <ScreenFrame className="hidden flex-col gap-(--space-4) split:flex">
-        <Text as="p" variant="body" tone="muted">
-          {COPY.placeholder}
-        </Text>
-        <PushCheck />
-      </ScreenFrame>
-    </main>
+    <DayEntryGate here="now">
+      <main id="main" className="flex flex-1 flex-col">
+        <TabHeader title={<TodayTitle />} />
+        <div className="split:hidden">
+          <NowScreen />
+        </div>
+        <ScreenFrame className="hidden flex-col gap-(--space-4) split:flex">
+          <Text as="p" variant="body" tone="muted">
+            {COPY.placeholder}
+          </Text>
+          <PushCheck />
+        </ScreenFrame>
+      </main>
+    </DayEntryGate>
   );
 }
 

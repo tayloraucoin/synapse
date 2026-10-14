@@ -111,3 +111,8 @@ export {
   type SlideSummary,
   type WakeSummary,
 } from "./room";
+export {
+  resolveDayEntry,
+  type DayEntry,
+  type DayEntryRecord,
+} from "./day-entry";

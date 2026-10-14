@@ -4,6 +4,12 @@ import type {
   BlockRecord,
   ClientRecord,
   DayEventRecord,
+  DayRecordRecord,
+  JournalEntryRecord,
+  LinkRecord,
+  MorningLinesRecord,
+  PassageRecord,
+  QuoteRecord,
   SavedColourRecord,
   SlotEventRecord,
   SlotRecord,
@@ -35,6 +41,18 @@ export interface FixtureRecords {
   slotEvents: SlotEventRecord[];
   /** Custom colours saved for reuse (USE-11), any order; reads sort newest first. */
   savedColours: SavedColourRecord[];
+  /** `users.usual_wake_time`: "Up at" (USE-12). */
+  usualWakeTime: string;
+  /** One per date: the orient, Ready, go and close stamps (USE-12). */
+  dayRecords: DayRecordRecord[];
+  /** The morning reading, its links and the quote on its day (USE-12). */
+  passages: PassageRecord[];
+  links: LinkRecord[];
+  quotes: QuoteRecord[];
+  /** Orient's three lines, one per date. */
+  morningLines: MorningLinesRecord[];
+  /** Evenings written; "Last night" reads the day before's. */
+  journalEntries: JournalEntryRecord[];
   /** The signed-in person behind the avatar (USE-83). */
   account: AccountView;
 }

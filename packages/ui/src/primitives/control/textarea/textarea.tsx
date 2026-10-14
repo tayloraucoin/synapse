@@ -77,7 +77,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
       const node = innerRef.current;
       if (!autoGrow || !node) return;
       node.style.height = "auto";
-      node.style.height = `${node.scrollHeight}px`;
+      // `scrollHeight` leaves out the border; a border-box field adds it back,
+      // or the last line sits one hairline short and a scrollbar shows.
+      const border = node.offsetHeight - node.clientHeight;
+      node.style.height = `${node.scrollHeight + border}px`;
     }, [autoGrow]);
 
     React.useEffect(resize, [resize, props.value, props.defaultValue]);

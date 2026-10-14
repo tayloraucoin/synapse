@@ -19,6 +19,11 @@
  *
  * `slides: []` renders the caller's `empty` — the frame decides what an
  * unread morning says.
+ *
+ * CLAMPED (USE-12, D-USE-9): Orient's form. Each passage reads as plain text
+ * in the serif, cut to four lines with an ellipsis; `trailing` ("Read all")
+ * sits at the dots' row's trailing edge and the dots move to the leading
+ * edge. The full text is the reader's (USE-13).
  */
 "use client";
 
@@ -53,6 +58,10 @@ export interface PassageCarouselProps {
   resolveImageUrl?: (key: string) => string | null;
   /** What an empty morning shows. */
   empty?: React.ReactNode;
+  /** Cut each passage to four lines of plain text (Orient's reading). */
+  clamp?: boolean;
+  /** With `clamp`, at the dots' row's trailing edge: "Read all". */
+  trailing?: React.ReactNode;
   label?: string;
   className?: string;
 }
@@ -65,6 +74,8 @@ export function PassageCarousel({
   onIndexChange,
   resolveImageUrl,
   empty = null,
+  clamp = false,
+  trailing,
   label = PASSAGE_CAROUSEL_COPY.region,
   className,
 }: PassageCarouselProps) {
@@ -158,7 +169,7 @@ export function PassageCarousel({
         {reducedMotion ? (
           // Crossfade: only the current slide is in the flow; it fades in.
           <div key={slides[current]?.id} className="motion-safe:animate-in motion-safe:fade-in duration-200">
-            <Slide slide={slides[current]} resolveImageUrl={resolveImageUrl} position={current + 1} count={count} />
+            <Slide slide={slides[current]} resolveImageUrl={resolveImageUrl} position={current + 1} count={count} clamp={clamp} />
           </div>
         ) : (
           <div
@@ -171,14 +182,33 @@ export function PassageCarousel({
                 aria-hidden={at !== current ? true : undefined}
                 className="w-full shrink-0"
               >
-                <Slide slide={slide} resolveImageUrl={resolveImageUrl} position={at + 1} count={count} />
+                <Slide slide={slide} resolveImageUrl={resolveImageUrl} position={at + 1} count={count} clamp={clamp} />
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {count > 1 ? (
+      {clamp ? (
+        // Orient's row: decorative dots at the leading edge (the region's
+        // arrows move passages; dots are not tab stops), "Read all" trailing.
+        <div className="flex min-h-(--target) items-center justify-between gap-(--space-3)">
+          <div aria-hidden="true" className="flex gap-(--space-2)">
+            {count > 1
+              ? slides.map((slide, at) => (
+                  <span
+                    key={slide.id}
+                    className={cn(
+                      "block size-2 rounded-full",
+                      at === current ? "bg-foreground" : "bg-fill-muted",
+                    )}
+                  />
+                ))
+              : null}
+          </div>
+          {trailing}
+        </div>
+      ) : count > 1 ? (
         <div role="tablist" aria-label={PASSAGE_CAROUSEL_COPY.dots} className="flex justify-center gap-(--space-2)">
           {slides.map((slide, at) => (
             <button
@@ -215,11 +245,13 @@ function Slide({
   resolveImageUrl,
   position,
   count,
+  clamp,
 }: {
   slide: PassageSlide | undefined;
   resolveImageUrl: PassageCarouselProps["resolveImageUrl"];
   position: number;
   count: number;
+  clamp: boolean;
 }) {
   if (slide === undefined) return null;
 
@@ -233,7 +265,12 @@ function Slide({
         <Text as="span" variant="caption" tone="secondary">
           {PASSAGE_CAROUSEL_COPY.quoteCaption}
         </Text>
-        <blockquote className="tabular-off m-0 text-(length:--fs-row-title) leading-(--lh-row-title)">
+        <blockquote
+          className={cn(
+            "tabular-off m-0 text-(length:--fs-row-title) leading-(--lh-row-title)",
+            clamp && "line-clamp-4",
+          )}
+        >
           “{slide.text}”
         </blockquote>
         {slide.attribution === null ? null : (
@@ -267,7 +304,24 @@ function Slide({
       <Text as="span" variant="caption" tone="secondary">
         {slide.title}
       </Text>
-      <RichTextEditor valueMd={slide.bodyMd} readOnly />
+      {clamp ? (
+        <Text as="p" variant="review-sentence" className="line-clamp-4">
+          {plainTextOf(slide.bodyMd)}
+        </Text>
+      ) : (
+        <RichTextEditor valueMd={slide.bodyMd} readOnly />
+      )}
     </article>
   );
+}
+
+/** A passage's Markdown as one run of plain text, for the clamped form. */
+function plainTextOf(md: string): string {
+  return md
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "")
+    .replace(/(\*\*|__|\*|_|~~|`)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }

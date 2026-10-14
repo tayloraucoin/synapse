@@ -1,5 +1,8 @@
-import { checkEventTime, dayWindow } from "@syn/utils";
+import { addDays, checkEventTime, dayWindow } from "@syn/utils";
 import {
+  dayRecordRecord,
+  morningLinesInput,
+  morningLinesRecord,
   placeSlotInput,
   savedColourInput,
   savedColourRecord,
@@ -8,6 +11,9 @@ import {
   slotRecord,
   slotUpdateInput,
   type PlaceSlotInput,
+  type DayRecordRecord,
+  type MorningLinesInput,
+  type MorningLinesRecord,
   type SavedColourInput,
   type SavedColourRecord,
   type SlotEventInput,
@@ -15,6 +21,11 @@ import {
   type SlotRecord,
   type SlotUpdateInput,
 } from "@syn/validators";
+import type {
+  MorningDayRecords,
+  MorningRecords,
+  ReadingRecords,
+} from "@/lib/data/morning-records";
 import type { TodayRecords } from "@/lib/data/today-records";
 import type { AccountView } from "@/lib/data/use-account";
 import type { FixtureRecords } from "./records";
@@ -71,6 +82,30 @@ export class FixtureReadError extends Error {
   }
 }
 
+/** Orient's reading, failing on its own (`reading: "error"`) until retried. */
+export class FixtureReadingError extends Error {
+  constructor() {
+    super("The morning's reading could not be read.");
+    this.name = "FixtureReadingError";
+  }
+}
+
+/** A write with no connection (`offline`): it waits on the device. */
+export class FixtureOfflineError extends Error {
+  constructor() {
+    super("No connection.");
+    this.name = "FixtureOfflineError";
+  }
+}
+
+/** A morning-lines write the router would refuse. */
+export class MorningLinesRefusal extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "MorningLinesRefusal";
+  }
+}
+
 export interface FixtureServer {
   readToday(dateKey: string): Promise<TodayRecords>;
   writeSlotEvents(inputs: SlotEventInput[]): Promise<SlotEventRecord[]>;
@@ -88,8 +123,22 @@ export interface FixtureServer {
   removeSavedColour(id: string): Promise<void>;
   /** The account behind the avatar (USE-83); offline it is already on the device. */
   readAccount(): Promise<AccountView>;
+  /** The reading alone (USE-12): it may wait or fail while the rest reads. */
+  readReading(dateKey: string): Promise<ReadingRecords>;
+  /** The date's lines and the evening before's journal. */
+  readMorningDay(dateKey: string): Promise<MorningDayRecords>;
+  /** Both together: `{ passages, quote, links, lines, lastNight }`. */
+  readMorning(dateKey: string): Promise<MorningRecords>;
+  /** The open is the wake: `orientedAt` is written once, never moved. */
+  stampOrient(dateKey: string, at: string): Promise<DayRecordRecord>;
+  /** Only the lines sent change. */
+  writeMorningLines(patch: MorningLinesInput): Promise<MorningLinesRecord>;
   /** The `error` scenario's retry: reads succeed from here on. */
   recover(): void;
+  /** The reading's own retry (`reading: "error"`). */
+  recoverReading(): void;
+  /** The connection is back: writes go through (`offline`). */
+  reconnect(): void;
 }
 
 function windowFor(records: FixtureRecords, dateKey: string) {
@@ -115,6 +164,33 @@ function readRecords(records: FixtureRecords, dateKey: string): TodayRecords {
     todos: records.todos,
     dayEvents: records.dayEvents.filter((event) => event.onDate === dateKey),
     slotEvents: records.slotEvents.filter((event) => slotIds.has(event.slotId)),
+    dayRecord:
+      records.dayRecords.find((record) => record.onDate === dateKey) ?? null,
+    usualWakeTime: records.usualWakeTime,
+  });
+}
+
+function readReadingRecords(
+  records: FixtureRecords,
+  dateKey: string,
+): ReadingRecords {
+  return structuredClone({
+    passages: [...records.passages].sort((a, b) => a.sortOrder - b.sortOrder),
+    quote: records.quotes.find((quote) => quote.onDate === dateKey) ?? null,
+    links: [...records.links].sort((a, b) => a.sortOrder - b.sortOrder),
+  });
+}
+
+function readMorningDayRecords(
+  records: FixtureRecords,
+  dateKey: string,
+): MorningDayRecords {
+  const yesterday = addDays(dateKey, -1);
+  return structuredClone({
+    lines: records.morningLines.find((row) => row.onDate === dateKey) ?? null,
+    lastNight:
+      records.journalEntries.find((entry) => entry.onDate === yesterday) ??
+      null,
   });
 }
 
@@ -133,6 +209,8 @@ export function createFixtureServer(
 ): FixtureServer {
   const records = structuredClone(scenario.records);
   let failing = scenario.mode === "error";
+  let readingFails = scenario.reading === "error";
+  let offline = scenario.offline === true;
 
   function checkOne(raw: SlotEventInput): SlotEventInput {
     const parsed = slotEventInput.safeParse(raw);
@@ -161,7 +239,7 @@ export function createFixtureServer(
     return input;
   }
 
-  return {
+  const server: FixtureServer = {
     readToday(dateKey) {
       if (scenario.mode === "loading") return new Promise(() => {});
       if (failing) return Promise.reject(new FixtureReadError());
@@ -204,6 +282,10 @@ export function createFixtureServer(
       } catch (error) {
         return Promise.reject(error);
       }
+    },
+
+    readAccount() {
+      return Promise.resolve(structuredClone(records.account));
     },
 
     writeSlots(raw) {
@@ -261,10 +343,6 @@ export function createFixtureServer(
       });
       records.slots.push(record);
       return Promise.resolve(structuredClone(record));
-    },
-
-    readAccount() {
-      return Promise.resolve(structuredClone(records.account));
     },
 
     listSavedColours() {
@@ -327,8 +405,88 @@ export function createFixtureServer(
       return Promise.resolve();
     },
 
+    readReading(dateKey) {
+      if (scenario.reading === "loading") return new Promise(() => {});
+      if (readingFails) return Promise.reject(new FixtureReadingError());
+      return Promise.resolve(readReadingRecords(records, dateKey));
+    },
+
+    readMorningDay(dateKey) {
+      return Promise.resolve(readMorningDayRecords(records, dateKey));
+    },
+
+    async readMorning(dateKey) {
+      const [reading, day] = await Promise.all([
+        server.readReading(dateKey),
+        server.readMorningDay(dateKey),
+      ]);
+      return { ...reading, ...day };
+    },
+
+    stampOrient(dateKey, at) {
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      const stamp = now().toISOString();
+      const row = records.dayRecords.find((r) => r.onDate === dateKey);
+      if (row) {
+        // A second open keeps the first wake.
+        if (row.orientedAt === null) {
+          row.orientedAt = at;
+          row.updatedAt = stamp;
+        }
+        return Promise.resolve(structuredClone(dayRecordRecord.parse(row)));
+      }
+      const record = dayRecordRecord.parse({
+        id: crypto.randomUUID(),
+        createdAt: stamp,
+        updatedAt: stamp,
+        onDate: dateKey,
+        orientedAt: at,
+        readyAt: null,
+        closedAt: null,
+      });
+      records.dayRecords.push(record);
+      return Promise.resolve(structuredClone(record));
+    },
+
+    writeMorningLines(raw) {
+      const parsed = morningLinesInput.safeParse(raw);
+      if (!parsed.success) {
+        return Promise.reject(
+          new MorningLinesRefusal(
+            parsed.error.issues[0]?.message ?? "Invalid lines.",
+          ),
+        );
+      }
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      const { onDate, ...patch } = parsed.data;
+      let row = records.morningLines.find((r) => r.onDate === onDate);
+      if (!row) {
+        row = morningLinesRecord.parse({
+          onDate,
+          grateful: null,
+          intention: null,
+          todayAsISeeIt: null,
+        });
+        records.morningLines.push(row);
+      }
+      // Only the keys sent change.
+      for (const [key, value] of Object.entries(patch)) {
+        if (value !== undefined) Object.assign(row, { [key]: value });
+      }
+      return Promise.resolve(structuredClone(row));
+    },
+
     recover() {
       failing = false;
     },
+
+    recoverReading() {
+      readingFails = false;
+    },
+
+    reconnect() {
+      offline = false;
+    },
   };
+  return server;
 }

@@ -3,6 +3,7 @@ import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
+import { ORIENT_SCENARIOS } from "./orient-morning";
 
 /**
  * Scenarios: one named set of records per `?state=` (canon C-P08). This file
@@ -24,6 +25,16 @@ export interface Scenario {
    * "time-taken:…"). Later tickets add their menus and sheets to `open`.
    */
   view?: ScenarioView;
+  /**
+   * Whether Start was tapped on this device today (USE-12): it has no column
+   * and is remembered per device. Unset is started, so a surface's scenario
+   * lands on Now; Orient's set it false.
+   */
+  startedOnDevice?: boolean;
+  /** Orient's reading alone waits or fails; everything else reads. */
+  reading?: "loading" | "error";
+  /** No connection: reads come from cache, writes wait (USE-12). */
+  offline?: boolean;
   /** Stands the install check on a device for a capture (USE-83); unset, the device's own. */
   install?: InstallOverride;
   /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */
@@ -100,6 +111,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
     mode: "ready",
     view: { open: `time-taken:${NOW_IDS.items.startColdBath}` },
   }),
+  // ---- Orient (USE-12): the Monday before it is opened ----
+  ...ORIENT_SCENARIOS,
   // ---- The avatar menu and the Install sheet (USE-83) ----
   ...ACCOUNT_SCENARIOS,
 };

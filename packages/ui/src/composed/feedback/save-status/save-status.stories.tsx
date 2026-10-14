@@ -28,7 +28,7 @@ export const Failed: Story = { args: { status: "failed", onRetry: () => {} } };
 export const AllStates: StoryObj = {
   render: () => (
     <div className="flex flex-col gap-(--space-2) p-(--space-8)">
-      {(["idle", "saving", "saved", "retrying", "failed"] as SaveStatus[]).map(
+      {(["idle", "saving", "saved", "waiting", "retrying", "failed"] as SaveStatus[]).map(
         (status) => (
           <SaveStatusText key={status} status={status} onRetry={() => {}} />
         ),

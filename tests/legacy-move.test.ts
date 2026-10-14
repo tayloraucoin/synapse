@@ -31,8 +31,9 @@ test("C1: the live route folders are the auth, api, legal and logout groups and 
     "logout",
   ]);
   // The shell holds Today and the routes USE redraws as it lands (USE-4: week
-  // and review, new pages, not the old folders); nothing else comes back.
-  const useRoutes = ["layout.tsx", "today", "week", "review"];
+  // and review, new pages, not the old folders; USE-12: orient, reworked from
+  // the legacy frame); nothing else comes back.
+  const useRoutes = ["layout.tsx", "today", "week", "review", "orient"];
   const shell = readdirSync(at("apps/web/app/(shell)")).filter(isRoute);
   assert.ok(shell.includes("today"));
   assert.deepEqual(
@@ -44,8 +45,8 @@ test("C1: the live route folders are the auth, api, legal and logout groups and 
 
 test("C9: every moved route folder, router and job is under _legacy/, so a deletion fails", () => {
   const web = "apps/web/_legacy/app";
+  // orient came back by git mv and is owned live from USE-12.
   for (const name of [
-    "orient",
     "today",
     "day",
     "review",

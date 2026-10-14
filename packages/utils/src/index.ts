@@ -250,6 +250,13 @@ export { resolveClient, type ClientConnection, type ClientItem } from "./work";
 /* ---- the icon picker's suggestions (USE-11) ---- */
 export { suggestIcons, type IconSuggestEntry } from "./planner";
 
+/* ---- where the day's first screen goes (USE-12) ---- */
+export {
+  resolveDayEntry,
+  type DayEntry,
+  type DayEntryRecord,
+} from "./planner";
+
 /* ---- Now: the active block and the current item (USE-16) ---- */
 export {
   activeBlock,

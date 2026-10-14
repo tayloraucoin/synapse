@@ -4,6 +4,7 @@ import type {
   BlockRecord,
   ClientRecord,
   DayEventRecord,
+  DayRecordRecord,
   SlotEventRecord,
   SlotRecord,
   TodoRecord,
@@ -34,4 +35,8 @@ export interface TodayRecords {
   dayEvents: DayEventRecord[];
   /** The events of the date's slots. */
   slotEvents: SlotEventRecord[];
+  /** The date's orient, Ready, go and close stamps; none before the first open (USE-12). */
+  dayRecord: DayRecordRecord | null;
+  /** "Up at", `HH:MM`: the day lays out from the wake against it. */
+  usualWakeTime: string;
 }

@@ -2,6 +2,11 @@ import {
   blockItemRecord,
   blockRecord,
   clientRecord,
+  dayRecordRecord,
+  journalEntryRecord,
+  linkRecord,
+  passageRecord,
+  quoteRecord,
   savedColourRecord,
   slotEventRecord,
   slotRecord,
@@ -358,6 +363,92 @@ export const baseAccount = {
   photoUrl: PLACEHOLDER_PHOTO,
 };
 
+/*
+ * ---- The morning (USE-12): Orient's reading, links and last night ----
+ * Every passage, link, quote and line is a [placeholder].
+ */
+
+const passages = [
+  {
+    title: "Morning reading",
+    bodyMd:
+      "Begin where the feet are. The breath has kept time all night without being asked. Before the list and before the clock there is only this: cool air, a held breath, the weight of the body on the floor, and the slow return of the room as the light comes up behind the blinds.",
+  },
+  {
+    title: "Morning reading",
+    bodyMd:
+      "Nothing has to be decided yet. The day will ask its questions soon enough; for now the kettle, the window, and one long exhale are enough to be getting on with.",
+  },
+].map((passage, n) =>
+  passageRecord.parse({
+    id: fixtureId(0, n + 1),
+    ...stamps,
+    ...passage,
+    images: [],
+    sortOrder: n,
+  }),
+);
+
+const links = [
+  { title: "Morning calm", url: "https://open.spotify.com/playlist/morning-calm" },
+  { title: "Cold bath", url: "https://open.spotify.com/playlist/cold-bath" },
+].map((link, n) =>
+  linkRecord.parse({
+    id: fixtureId(0, n + 11),
+    ...stamps,
+    ...link,
+    kind: "spotify",
+    sortOrder: n,
+  }),
+);
+
+const quotes = [
+  quoteRecord.parse({
+    id: fixtureId(0, 21),
+    ...stamps,
+    onDate: BASE_DATE,
+    text: "The morning is the one hour that belongs to no one else.",
+    attribution: "A placeholder",
+  }),
+];
+
+/** Sunday's evening, read back on Monday as "Last night". */
+const journalEntries = [
+  journalEntryRecord.parse({
+    onDate: "2026-10-11",
+    answers: {
+      make_happen_tomorrow: "Finish the Primary before lunch and leave the desk by six.",
+      visualisation: "A slow start, a long walk, and the hard part done early.",
+      looking_forward: "The cold bath, and dinner with the light still out.",
+    },
+  }),
+];
+
+/** The base day was opened at 6:55 and readied at 7:05, and Start was tapped. */
+const dayRecords = [
+  dayRecordRecord.parse({
+    id: fixtureId(0, 31),
+    ...stamps,
+    onDate: BASE_DATE,
+    orientedAt: onBase("06:55"),
+    readyAt: onBase("07:05"),
+    closedAt: null,
+  }),
+];
+
+/** The morning's rows, shared by every scenario unless it says otherwise. */
+export function morningRecords() {
+  return structuredClone({
+    usualWakeTime: "07:00",
+    dayRecords,
+    passages,
+    links,
+    quotes,
+    morningLines: [],
+    journalEntries,
+  });
+}
+
 /** The base day's rows; a scenario copies them, never shares them. */
 export function baseRecords(): FixtureRecords {
   return structuredClone({
@@ -373,6 +464,7 @@ export function baseRecords(): FixtureRecords {
     dayEvents: [],
     slotEvents,
     savedColours,
+    ...morningRecords(),
     account: baseAccount,
   });
 }
@@ -392,6 +484,10 @@ export function emptyRecords(): FixtureRecords {
     dayEvents: [],
     slotEvents: [],
     savedColours: [],
+    ...morningRecords(),
+    passages: [],
+    quotes: [],
+    journalEntries: [],
     account: { ...baseAccount },
   };
 }

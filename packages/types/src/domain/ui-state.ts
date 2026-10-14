@@ -67,8 +67,17 @@ export type DayMode = "live" | "record" | "plan";
 /** One break at 768px — cross-cutting §2.1. */
 export type Layout = "compact" | "wide";
 
-/** The canvas autosave indicator — Epic 1 §10. */
-export type SaveStatus = "idle" | "saving" | "saved" | "retrying" | "failed";
+/**
+ * The canvas autosave indicator — Epic 1 §10. `waiting`: offline, kept on the
+ * device until the connection is back (USE-12, `_global/offline-and-sync.md`).
+ */
+export type SaveStatus =
+  | "idle"
+  | "saving"
+  | "saved"
+  | "waiting"
+  | "retrying"
+  | "failed";
 
 /** Which Day Review the person is in — Epic 3 DR-01. */
 export type ReviewMode = "live" | "pending" | "edit";

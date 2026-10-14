@@ -8,6 +8,7 @@ import {
 import { AccountPart } from "./account-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { NowPart, type NowPartState } from "./now-parts";
+import { OrientPart, type OrientPartState } from "./orient-parts";
 
 /**
  * The parts registry (USE-7): the capture host `/dev/parts` renders a part
@@ -73,4 +74,15 @@ for (const state of [
   "install-other-browser",
 ]) {
   registerPart(state, () => createElement(AccountPart)); // USE-83
+}
+// USE-12: Orient's states, `orient-<state>` (the /orient scenarios).
+for (const state of [
+  "success",
+  "late",
+  "empty",
+  "loading",
+  "error",
+  "offline",
+] satisfies OrientPartState[]) {
+  registerPart(`orient-${state}`, () => createElement(OrientPart, { state })); // USE-12
 }

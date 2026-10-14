@@ -107,6 +107,11 @@ export function todayReviewRoute(): string {
   return "/today/review";
 }
 
+/** The welcome after Ready, go (USE-20 builds it): Start goes on to Now. */
+export function todayReadyRoute(): string {
+  return "/today/ready";
+}
+
 /* ----------------------------------------------------------------- week -- */
 
 /** The desk's Week (D-USE-93); below 1024 the phone reaches it through Set my days. */

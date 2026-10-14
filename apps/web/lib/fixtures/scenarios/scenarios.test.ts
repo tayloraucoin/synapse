@@ -6,6 +6,12 @@ import {
   blockRecord,
   clientRecord,
   dayEventRecord,
+  dayRecordRecord,
+  journalEntryRecord,
+  linkRecord,
+  morningLinesRecord,
+  passageRecord,
+  quoteRecord,
   savedColourRecord,
   slotEventRecord,
   slotRecord,
@@ -21,7 +27,7 @@ const SCHEMAS: {
   [
     K in Exclude<
       keyof FixtureRecords,
-      "timeZone" | "dayCloseTime" | "account"
+      "timeZone" | "dayCloseTime" | "account" | "usualWakeTime"
     >
   ]: z.ZodTypeAny;
 } = {
@@ -35,6 +41,13 @@ const SCHEMAS: {
   dayEvents: dayEventRecord,
   slotEvents: slotEventRecord,
   savedColours: savedColourRecord,
+  // USE-12 (C9): every morning record parses too.
+  dayRecords: dayRecordRecord,
+  passages: passageRecord,
+  links: linkRecord,
+  quotes: quoteRecord,
+  morningLines: morningLinesRecord,
+  journalEntries: journalEntryRecord,
 };
 
 describe("C1: every scenario record parses with its @syn/validators schema", () => {

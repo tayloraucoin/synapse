@@ -56,10 +56,12 @@ const PIXEL =
     '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="320"><rect x="1" y="1" width="638" height="318" fill="none" stroke="currentColor" stroke-dasharray="6 6"/></svg>',
   );
 
-function Demo({ slides }: { slides: PassageSlide[] }) {
+function Demo({ slides, clamp = false }: { slides: PassageSlide[]; clamp?: boolean }) {
   const [index, setIndex] = React.useState(0);
   return (
     <PassageCarousel
+      clamp={clamp}
+      trailing={clamp ? <Text as="span" tone="accent" weight={500}>Read all</Text> : undefined}
       slides={slides}
       index={index}
       onIndexChange={setIndex}
@@ -78,6 +80,9 @@ export const One: StoryObj = { render: () => <Demo slides={PASSAGES.slice(0, 1)}
 export const Many: StoryObj = { render: () => <Demo slides={PASSAGES} /> };
 
 export const QuoteDay: StoryObj = { render: () => <Demo slides={[QUOTE]} /> };
+
+/** Orient's form (USE-12): four lines, dots leading, "Read all" trailing. */
+export const Clamped: StoryObj = { render: () => <Demo slides={[...PASSAGES, QUOTE]} clamp /> };
 
 export const Empty: StoryObj = { render: () => <Demo slides={[]} /> };
 
