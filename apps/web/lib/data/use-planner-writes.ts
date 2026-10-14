@@ -190,7 +190,6 @@ export function usePlannerWrites() {
       if (online) invalidate();
     });
     // invalidate reads only stable values.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queue, online]);
 
   const mutation = useMutation<unknown, Error, PlannerCall>({
