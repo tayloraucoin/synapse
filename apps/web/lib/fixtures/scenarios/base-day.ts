@@ -135,6 +135,7 @@ const blockItems = [
     atTime: null,
     lengthMin: null,
     meal: false,
+    onDate: null,
     ...item,
   }),
 );
@@ -241,6 +242,7 @@ const todos = [
 const slotDefaults = {
   ...stamps,
   onDate: BASE_DATE,
+  skipped: false,
   blockItemId: null,
   todoId: null,
   workItemId: null,

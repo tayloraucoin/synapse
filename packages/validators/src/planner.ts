@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   BLOCK_FILLS,
   BLOCK_KIND_VALUES,
+  EVENT_TAGS,
   MEAL_LINK_KINDS,
   NEW_BLOCK_KINDS,
   SLOT_EVENT_KINDS,
@@ -10,6 +11,7 @@ import {
 import { colourValueSchema, iconValueSchema } from "./icon";
 import { dateKeySchema } from "./keys";
 import { clockTimeSchema } from "./preferences";
+import { weekdaySchema } from "./template";
 
 /**
  * The planner's records and writes (USE-3): one Zod shape per `0012_use_daily`
@@ -130,6 +132,8 @@ export const blockFillSchema = z.enum(BLOCK_FILLS);
 export const workTierSchema = z.enum(WORK_TIERS);
 export const slotEventKindSchema = z.enum(SLOT_EVENT_KINDS);
 export const mealLinkKindSchema = z.enum(MEAL_LINK_KINDS);
+/** Add event's Work or Personal (D-USE-42); `0013`'s `event_tag`. */
+export const eventTagSchema = z.enum(EVENT_TAGS);
 
 /*
  * ---- Rules 0012 enforces, as refinements ----
@@ -300,7 +304,8 @@ export const blockChangeInput = z
   .object({
     blockId: z.string().uuid(),
     onDate: dateKeySchema,
-    skipped: z.boolean().default(false),
+    /** Absent is the column's default, false. */
+    skipped: z.boolean().optional(),
     startsAt: startTimeSchema.nullish(),
     endsAt: endTimeSchema.nullish(),
   })
@@ -332,6 +337,8 @@ export const blockItemRecord = z.object({
   atTime: startTimeSchema.nullable(),
   lengthMin: lengthMinutesSchema.nullable(),
   meal: z.boolean(),
+  /** `0013`: the one date it is in its block ("This day only"); null is every date. */
+  onDate: dateKeySchema.nullable(),
   sortOrder: sortOrderSchema,
 });
 
@@ -345,6 +352,7 @@ const blockItemFields = z.object({
   atTime: startTimeSchema.nullish(),
   lengthMin: lengthMinutesSchema.nullish(),
   meal: z.boolean().default(false),
+  onDate: dateKeySchema.nullish(),
   sortOrder: sortOrderSchema,
 });
 
@@ -396,6 +404,8 @@ export const slotRecord = z.object({
   ...rowStamps,
   blockId: z.string().uuid(),
   onDate: dateKeySchema,
+  /** `0013`: a set item left out on this date (Remove for today, Not today). */
+  skipped: z.boolean(),
   sortOrder: sortOrderSchema,
   blockItemId: z.string().uuid().nullable(),
   todoId: z.string().uuid().nullable(),
@@ -417,6 +427,8 @@ export const placeSlotInput = z
   .object({
     blockId: z.string().uuid(),
     onDate: dateKeySchema,
+    /** Absent is the column's default, false. */
+    skipped: z.boolean().optional(),
     sortOrder: sortOrderSchema,
     blockItemId: z.string().uuid().nullish(),
     todoId: z.string().uuid().nullish(),
@@ -539,27 +551,93 @@ export type SlotEventInput = z.infer<typeof slotEventInput>;
 
 export const dayEventRecord = z.object({
   ...rowStamps,
-  onDate: dateKeySchema,
+  onDate: dateKeySchema.nullable(),
+  rrule: rruleSchema.nullable(),
   title: z.string(),
   icon: iconValueSchema.nullable(),
   startsAt: startTimeSchema,
   endsAt: endTimeSchema,
+  tag: eventTagSchema,
+  notes: z.string().nullable(),
+  color: colourValueSchema.nullable(),
+  clientId: z.string().uuid().nullable(),
 });
 
 export type DayEventRecord = z.infer<typeof dayEventRecord>;
 
-/** Add event's write: "Name needed" with no name, as the sheet's. */
+/**
+ * Add event's write: "Name needed" with no name, as the sheet's. One date or
+ * one repeat rule, exactly one (`0013`'s `day_events_rrule_or_on_date_check`);
+ * the desk popover's Work or Personal and Client, the phone sheet's Colour
+ * and Notes (D-USE-42, D-USE-102). Null colour is plum.
+ */
 export const dayEventInput = z
   .object({
-    onDate: dateKeySchema,
+    onDate: dateKeySchema.nullish(),
+    rrule: rruleSchema.nullish(),
     title: plannerNameSchema,
     icon: iconValueSchema.nullish(),
     startsAt: startTimeSchema,
     endsAt: endTimeSchema,
+    tag: eventTagSchema.default("personal"),
+    notes: z.string().trim().max(2000).nullish(),
+    color: colourValueSchema.nullish(),
+    clientId: z.string().uuid().nullish(),
   })
+  .superRefine(refineOneRepeat)
   .superRefine(refineEndsAfterStarts);
 
 export type DayEventInput = z.infer<typeof dayEventInput>;
+
+/*
+ * ---- Day bounds: Up at and Lights out (`0013`'s `day_bounds`) ----
+ */
+
+/** Set my days' words when Lights out is not after Up at. */
+export const LIGHTS_OUT_AFTER_UP_AT = "Lights out comes after Up at.";
+
+export const dayBoundsRecord = z.object({
+  ...rowStamps,
+  /** Monday 0 to Sunday 6; null on a date's own row. */
+  weekday: weekdaySchema.nullable(),
+  onDate: dateKeySchema.nullable(),
+  upAt: startTimeSchema,
+  lightsOut: startTimeSchema,
+});
+
+export type DayBoundsRecord = z.infer<typeof dayBoundsRecord>;
+
+/**
+ * A weekday's usual, or one date's own controls: exactly one
+ * (`day_bounds_weekday_or_on_date_check`), and Lights out after Up at
+ * (`day_bounds_lights_out_after_up_at_check`). A date's row wins over its
+ * weekday's.
+ */
+export const dayBoundsInput = z
+  .object({
+    weekday: weekdaySchema.nullish(),
+    onDate: dateKeySchema.nullish(),
+    upAt: startTimeSchema,
+    lightsOut: startTimeSchema,
+  })
+  .superRefine((value, ctx) => {
+    if ((value.weekday == null) === (value.onDate == null)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["weekday"],
+        message: "Choose a weekday or one date.",
+      });
+    }
+    if (value.lightsOut <= value.upAt) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["lightsOut"],
+        message: LIGHTS_OUT_AFTER_UP_AT,
+      });
+    }
+  });
+
+export type DayBoundsInput = z.infer<typeof dayBoundsInput>;
 
 /*
  * ---- Day records: one per date (`day_records_user_id_on_date_key`) ----

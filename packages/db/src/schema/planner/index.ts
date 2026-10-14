@@ -5,6 +5,7 @@ export * from "./todos";
 export * from "./slots";
 export * from "./slot-events";
 export * from "./day-events";
+export * from "./day-bounds";
 export * from "./day-records";
 export * from "./meal-topics";
 export * from "./saved-colours";

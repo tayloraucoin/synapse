@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   blockChangeInput,
   blockChangeRecord,
+  blockItemInput,
   blockItemRecord,
   blockRecord,
+  dayBoundsInput,
+  dayBoundsRecord,
+  dayEventInput,
   dayEventRecord,
   dayRecordRecord,
   mealTopicRecord,
@@ -408,6 +412,7 @@ const samples = {
       atTime: "08:00:00",
       lengthMin: 15,
       meal: false,
+      onDate: null,
       sortOrder: 1,
     },
   ],
@@ -433,6 +438,7 @@ const samples = {
       ...stamps,
       blockId: ID2,
       onDate: "2026-10-13",
+      skipped: false,
       sortOrder: 0,
       blockItemId: null,
       todoId: null,
@@ -461,10 +467,25 @@ const samples = {
     {
       ...stamps,
       onDate: "2026-10-13",
+      rrule: null,
       title: "Dentist",
       icon: null,
       startsAt: "14:00:00",
       endsAt: "14:30:00",
+      tag: "personal",
+      notes: null,
+      color: null,
+      clientId: null,
+    },
+  ],
+  dayBoundsRecord: [
+    dayBoundsRecord,
+    {
+      ...stamps,
+      weekday: 0,
+      onDate: null,
+      upAt: "06:30:00",
+      lightsOut: "22:30:00",
     },
   ],
   dayRecordRecord: [
@@ -534,5 +555,113 @@ describe("C6: every record parses a sample row and drops a key it does not know"
       title: "Training",
     };
     expect(blockRecord.safeParse(renamed).success).toBe(false);
+  });
+});
+
+/** USE-14's C4: `0013`'s new fields, and each CHECK it adds refused here. */
+describe("USE-14 C4: day bounds, an event's repeat and tag, a dated item, a skipped slot", () => {
+  const bounds = { weekday: 0, upAt: "06:30", lightsOut: "22:30" };
+
+  it("takes a weekday's usual or one date's own Up at and Lights out", () => {
+    expect(dayBoundsInput.safeParse(bounds).success).toBe(true);
+    expect(
+      dayBoundsInput.safeParse({
+        ...without(bounds, "weekday"),
+        onDate: "2026-10-14",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("refuses a bounds row with both a weekday and a date, or neither", () => {
+    expect(
+      dayBoundsInput.safeParse({ ...bounds, onDate: "2026-10-14" }).success,
+    ).toBe(false);
+    expect(dayBoundsInput.safeParse(without(bounds, "weekday")).success).toBe(
+      false,
+    );
+  });
+
+  it("refuses a weekday outside 0 to 6", () => {
+    expect(dayBoundsInput.safeParse({ ...bounds, weekday: 7 }).success).toBe(
+      false,
+    );
+  });
+
+  it.each(["22:30", "06:30", "05:00"])(
+    "refuses Lights out at %s with Up at 22:30 in Set my days' words",
+    (lightsOut) => {
+      const result = dayBoundsInput.safeParse({
+        ...bounds,
+        upAt: "22:30",
+        lightsOut,
+      });
+      expect(messages(result)).toContain("Lights out comes after Up at.");
+    },
+  );
+
+  const event = {
+    title: "Dentist",
+    startsAt: "14:00",
+    endsAt: "14:30",
+    onDate: "2026-10-14",
+  };
+
+  it("takes an event on one date or on a repeat rule, with its new fields", () => {
+    const parsed = dayEventInput.parse(event);
+    expect(parsed.tag).toBe("personal");
+    expect(
+      dayEventInput.safeParse({
+        ...without(event, "onDate"),
+        rrule: RRULE,
+        tag: "work",
+        clientId: ID,
+        notes: "Bring the forms.",
+        color: null,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("refuses an event with both a date and a repeat rule, or neither", () => {
+    expect(dayEventInput.safeParse({ ...event, rrule: RRULE }).success).toBe(
+      false,
+    );
+    expect(dayEventInput.safeParse(without(event, "onDate")).success).toBe(
+      false,
+    );
+  });
+
+  it.each(["social", "home", ""])("refuses the tag %j", (tag) => {
+    expect(dayEventInput.safeParse({ ...event, tag }).success).toBe(false);
+  });
+
+  it("takes a block item on one date only, or on every date", () => {
+    const item = { blockId: ID, title: "Swim", sortOrder: 0 };
+    expect(blockItemInput.parse(item).onDate).toBeUndefined();
+    expect(blockItemInput.parse({ ...item, onDate: "2026-10-14" }).onDate).toBe(
+      "2026-10-14",
+    );
+    expect(
+      blockItemInput.safeParse({ ...item, onDate: "14 Oct" }).success,
+    ).toBe(false);
+  });
+
+  it("places a slot with or without skipped", () => {
+    const slot = {
+      blockId: ID,
+      onDate: "2026-10-14",
+      sortOrder: 0,
+      blockItemId: ID2,
+    };
+    expect(placeSlotInput.safeParse(slot).success).toBe(true);
+    expect(placeSlotInput.parse({ ...slot, skipped: true }).skipped).toBe(true);
+  });
+
+  it("refuses a record without the new fields", () => {
+    const [, row] = samples.slotRecord;
+    expect(slotRecord.safeParse(without(row, "skipped")).success).toBe(false);
+    const [, eventRow] = samples.dayEventRecord;
+    expect(dayEventRecord.safeParse(without(eventRow, "tag")).success).toBe(
+      false,
+    );
   });
 });

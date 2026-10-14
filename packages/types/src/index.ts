@@ -106,6 +106,7 @@ export type {
   BlockFill,
   ClientColorKey,
   DoneSource,
+  EventTag,
   MealLinkKind,
   NewBlockKind,
   SlotEventKind,

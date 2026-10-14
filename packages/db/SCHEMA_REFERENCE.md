@@ -149,13 +149,13 @@ import { pgEnum } from "drizzle-orm/pg-core";
 
 import { BLOCK_KIND_VALUES, NEW_BLOCK_KINDS } from "@syn/constants";
 import type {
-  BlockKind,
   CategoryKey,
   FixtureKind,
   ItemType,
   MissTier,
   NewBlockKind,
   Scheduling,
+  StoredBlockKind,
   TimeMode,
   WorkoutLocation,
 } from "@syn/types";
@@ -214,11 +214,12 @@ export const itemTypeEnum = pgEnum(
  *
  * USE (USE-2): `wellness`, `life`, `todos` and `evening` join, by `ADD VALUE`
  * in `0012`, which writes no row with them. The values are spelled once, in
- * `BLOCK_KIND_VALUES` (`@syn/constants`).
+ * `BLOCK_KIND_VALUES` (`@syn/constants`), and checked against
+ * `StoredBlockKind`; `BlockKind` stays the old kinds the old UI maps.
  */
 export const blockKindEnum = pgEnum(
   "block_kind",
-  enumValues<BlockKind>()(BLOCK_KIND_VALUES),
+  enumValues<StoredBlockKind>()(BLOCK_KIND_VALUES),
 );
 
 /*
@@ -331,13 +332,13 @@ import { pgEnum } from "drizzle-orm/pg-core";
 
 import { BLOCK_KIND_VALUES, NEW_BLOCK_KINDS } from "@syn/constants";
 import type {
-  BlockKind,
   CategoryKey,
   FixtureKind,
   ItemType,
   MissTier,
   NewBlockKind,
   Scheduling,
+  StoredBlockKind,
   TimeMode,
   WorkoutLocation,
 } from "@syn/types";
@@ -396,11 +397,12 @@ export const itemTypeEnum = pgEnum(
  *
  * USE (USE-2): `wellness`, `life`, `todos` and `evening` join, by `ADD VALUE`
  * in `0012`, which writes no row with them. The values are spelled once, in
- * `BLOCK_KIND_VALUES` (`@syn/constants`).
+ * `BLOCK_KIND_VALUES` (`@syn/constants`), and checked against
+ * `StoredBlockKind`; `BlockKind` stays the old kinds the old UI maps.
  */
 export const blockKindEnum = pgEnum(
   "block_kind",
-  enumValues<BlockKind>()(BLOCK_KIND_VALUES),
+  enumValues<StoredBlockKind>()(BLOCK_KIND_VALUES),
 );
 
 /*

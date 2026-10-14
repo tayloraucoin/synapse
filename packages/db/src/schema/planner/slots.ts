@@ -7,6 +7,8 @@
  * - Exactly one target (`slots_one_target_check`).
  * - `tier` only on a work item's slot (`slots_tier_only_for_work_check`).
  * - Each target at most once per date: one item, one block a day.
+ * - `skipped` (USE-14, `0013`): a set item left out on that date (Remove for
+ *   today, Not today). The item stays in its block; the date's slot says no.
  * - A session is one work slot on one day. Its Done is this row's `done_at`,
  *   never the task's (D-USE-57, D-USE-65).
  *
@@ -17,6 +19,7 @@
  */
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   date,
   index,
@@ -58,6 +61,7 @@ export const slots = pgTable(
     doneAt: timestamp("done_at", { withTimezone: true }),
     lengthMin: smallint("length_min"),
     onDate: date("on_date").notNull(),
+    skipped: boolean("skipped").notNull().default(false),
     sortOrder: smallint("sort_order").notNull(),
     tier: workTierEnum("tier"),
     /** A plain Done's Change (D-USE-13); null reads the clock. */

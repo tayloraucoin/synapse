@@ -8,12 +8,17 @@
  * (D-USE-34). A transition outside every block is a `blocks` row of kind
  * `transition`.
  *
+ * ONE DATE ONLY (USE-14, `0013`): an item with `on_date` is in its block on
+ * that date alone ("This day only", D-USE-33); null is every date the block
+ * runs. A swap for one date is a skipped slot plus a dated item.
+ *
  * POLICIES: owner-private CRUD.
  */
 import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  date,
   index,
   jsonb,
   pgTable,
@@ -47,6 +52,8 @@ export const blockItems = pgTable(
     isTransition: boolean("is_transition").notNull().default(false),
     lengthMin: smallint("length_min"),
     meal: boolean("meal").notNull().default(false),
+    /** The one date this item is in its block; null is every date. */
+    onDate: date("on_date"),
     sortOrder: smallint("sort_order").notNull(),
     title: text("title").notNull(),
 

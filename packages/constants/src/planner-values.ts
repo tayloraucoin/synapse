@@ -69,3 +69,6 @@ export const CLIENT_COLOR_KEYS = [
 
 /** MealTopic.link_kind. */
 export const MEAL_LINK_KINDS = ["playlist", "channel", "search"] as const;
+
+/** DayEvent.tag: Add event's Work or Personal (D-USE-42); USE-14's `0013`. */
+export const EVENT_TAGS = ["work", "personal"] as const;

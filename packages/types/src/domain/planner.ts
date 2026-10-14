@@ -60,3 +60,9 @@ export type ClientColorKey =
 
 /** MealTopic.link_kind — D-USE-28, D-USE-30: one link per topic. */
 export type MealLinkKind = "playlist" | "channel" | "search";
+
+/**
+ * DayEvent.tag — Add event's Work or Personal (D-USE-42); USE-14's `0013`.
+ * 0012's rows read as personal.
+ */
+export type EventTag = "work" | "personal";
