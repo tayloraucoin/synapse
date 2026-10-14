@@ -1,13 +1,19 @@
 import { checkEventTime, dayWindow } from "@syn/utils";
 import {
+  placeSlotInput,
   savedColourInput,
   savedColourRecord,
   slotEventInput,
   slotEventRecord,
+  slotRecord,
+  slotUpdateInput,
+  type PlaceSlotInput,
   type SavedColourInput,
   type SavedColourRecord,
   type SlotEventInput,
   type SlotEventRecord,
+  type SlotRecord,
+  type SlotUpdateInput,
 } from "@syn/validators";
 import type { TodayRecords } from "@/lib/data/today-records";
 import type { FixtureRecords } from "./records";
@@ -45,6 +51,17 @@ export class SavedColourRefusal extends Error {
   }
 }
 
+/** A slot write the router would refuse (USE-16). */
+export class SlotWriteRefusal extends Error {
+  readonly reason: "invalid" | "unknown" | "duplicate";
+
+  constructor(reason: SlotWriteRefusal["reason"], message: string) {
+    super(message);
+    this.name = "SlotWriteRefusal";
+    this.reason = reason;
+  }
+}
+
 /** The `error` scenario's read, until retried. */
 export class FixtureReadError extends Error {
   constructor() {
@@ -56,6 +73,11 @@ export class FixtureReadError extends Error {
 export interface FixtureServer {
   readToday(dateKey: string): Promise<TodayRecords>;
   writeSlotEvents(inputs: SlotEventInput[]): Promise<SlotEventRecord[]>;
+  /**
+   * Places a slot (`placeSlotInput`, a set item's slot on its first touch),
+   * or with `id` changes one (`slotUpdateInput`). Returns the slot as stored.
+   */
+  writeSlots(input: PlaceSlotInput | SlotUpdateInput): Promise<SlotRecord>;
   /** Saved colours, newest (highest `sortOrder`) first. */
   listSavedColours(): Promise<SavedColourRecord[]>;
   /** Adds a colour, or with `id` changes one; a hex saved twice is refused. */
@@ -91,6 +113,15 @@ function readRecords(records: FixtureRecords, dateKey: string): TodayRecords {
     dayEvents: records.dayEvents.filter((event) => event.onDate === dateKey),
     slotEvents: records.slotEvents.filter((event) => slotIds.has(event.slotId)),
   });
+}
+
+function refuseSlot(
+  reason: SlotWriteRefusal["reason"],
+  error: { issues: { message: string }[] },
+): Promise<never> {
+  return Promise.reject(
+    new SlotWriteRefusal(reason, error.issues[0]?.message ?? "Invalid slot."),
+  );
 }
 
 export function createFixtureServer(
@@ -170,6 +201,63 @@ export function createFixtureServer(
       } catch (error) {
         return Promise.reject(error);
       }
+    },
+
+    writeSlots(raw) {
+      const stamp = now().toISOString();
+      if ("id" in raw) {
+        const parsed = slotUpdateInput.safeParse(raw);
+        if (!parsed.success) return refuseSlot("invalid", parsed.error);
+        // Sessions move a work item's tier (USE-8's); not a slot column.
+        const { id, ...change } = parsed.data;
+        delete change.sessions;
+        const row = records.slots.find((slot) => slot.id === id);
+        if (!row) {
+          return Promise.reject(
+            new SlotWriteRefusal("unknown", "No slot with that id."),
+          );
+        }
+        // Only the keys sent change; `null` clears (doneAt, tookMin).
+        for (const [key, value] of Object.entries(change)) {
+          if (value !== undefined) Object.assign(row, { [key]: value });
+        }
+        row.updatedAt = stamp;
+        return Promise.resolve(structuredClone(slotRecord.parse(row)));
+      }
+      const parsed = placeSlotInput.safeParse(raw);
+      if (!parsed.success) return refuseSlot("invalid", parsed.error);
+      const input = parsed.data;
+      // One slot per set item on a date: a second place is refused.
+      const clash =
+        input.blockItemId != null &&
+        records.slots.some(
+          (slot) =>
+            slot.blockItemId === input.blockItemId &&
+            slot.onDate === input.onDate,
+        );
+      if (clash) {
+        return Promise.reject(
+          new SlotWriteRefusal("duplicate", "That item is already placed."),
+        );
+      }
+      const record = slotRecord.parse({
+        id: crypto.randomUUID(),
+        createdAt: stamp,
+        updatedAt: stamp,
+        blockId: input.blockId,
+        onDate: input.onDate,
+        skipped: input.skipped ?? false,
+        sortOrder: input.sortOrder,
+        blockItemId: input.blockItemId ?? null,
+        todoId: input.todoId ?? null,
+        workItemId: input.workItemId ?? null,
+        tier: input.tier ?? null,
+        lengthMin: input.lengthMin ?? null,
+        tookMin: null,
+        doneAt: null,
+      });
+      records.slots.push(record);
+      return Promise.resolve(structuredClone(record));
     },
 
     listSavedColours() {

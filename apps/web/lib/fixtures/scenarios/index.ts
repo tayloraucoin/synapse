@@ -1,5 +1,6 @@
 import type { FixtureRecords } from "../records";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
+import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 
 /**
  * Scenarios: one named set of records per `?state=` (canon C-P08). This file
@@ -15,9 +16,23 @@ export interface Scenario {
   records: FixtureRecords;
   /** `loading` never settles; `error` rejects until retried. */
   mode: ScenarioMode;
+  /**
+   * The UI a capture starts in (USE-16), read once through `source.ts`: the
+   * item made current, and what is open, as `<what>:<item id>` ("took:…",
+   * "time-taken:…"). Later tickets add their menus and sheets to `open`.
+   */
+  view?: ScenarioView;
+}
+
+export interface ScenarioView {
+  currentItemId?: string;
+  open?: string;
 }
 
 export const DEFAULT_SCENARIO = "default";
+
+/** Wellness's first three items, checked by 7:14 on Now's Monday. */
+const WELLNESS_DONE = ["peeAndWeigh", "water", "startColdBath"] as const;
 
 const SCENARIOS: Record<string, () => Scenario> = {
   default: () => ({
@@ -43,6 +58,41 @@ const SCENARIOS: Record<string, () => Scenario> = {
     now: BASE_NOW,
     records: baseRecords(),
     mode: "error",
+  }),
+  // ---- Now (USE-16): Taylor's Monday, mid-Wellness ----
+  success: () => ({
+    name: "success",
+    now: onNowDay("07:14"),
+    records: nowDayRecords(WELLNESS_DONE),
+    mode: "ready",
+  }),
+  "done-next-lifts": () => ({
+    name: "done-next-lifts",
+    now: onNowDay("07:20"),
+    records: nowDayRecords([...WELLNESS_DONE, "meditate"]),
+    mode: "ready",
+    view: { open: `took:${NOW_IDS.items.meditate}` },
+  }),
+  "row-tapped": () => ({
+    name: "row-tapped",
+    now: onNowDay("07:14"),
+    records: nowDayRecords(WELLNESS_DONE),
+    mode: "ready",
+    view: { currentItemId: NOW_IDS.items.coldBath },
+  }),
+  "took-change": () => ({
+    name: "took-change",
+    now: onNowDay("07:14"),
+    records: nowDayRecords(WELLNESS_DONE),
+    mode: "ready",
+    view: { open: `took:${NOW_IDS.items.startColdBath}` },
+  }),
+  "time-taken-sheet": () => ({
+    name: "time-taken-sheet",
+    now: onNowDay("07:14"),
+    records: nowDayRecords(WELLNESS_DONE),
+    mode: "ready",
+    view: { open: `time-taken:${NOW_IDS.items.startColdBath}` },
   }),
 };
 

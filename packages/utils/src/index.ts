@@ -249,3 +249,12 @@ export { resolveClient, type ClientConnection, type ClientItem } from "./work";
 
 /* ---- the icon picker's suggestions (USE-11) ---- */
 export { suggestIcons, type IconSuggestEntry } from "./planner";
+
+/* ---- Now: the active block and the current item (USE-16) ---- */
+export {
+  activeBlock,
+  currentItem,
+  nextItem,
+  type NowBlockSpan,
+  type NowItem,
+} from "./planner";

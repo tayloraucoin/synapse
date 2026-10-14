@@ -31,6 +31,11 @@ export {
   ChevronRightIcon as DisclosureIcon,
   PauseIcon as StepAwayIcon,
 } from "lucide-react";
+/** Now's glyphs (USE-16): the grip on an undone row, the closed tray's chevron. */
+export {
+  ChevronDownIcon as ExpandIcon,
+  GripVerticalIcon as ReorderIcon,
+} from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
 export { ThemeProvider } from "./providers/theme-provider";

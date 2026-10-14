@@ -6,6 +6,7 @@ import {
   WorkRowForms,
 } from "./day-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
+import { NowPart, type NowPartState } from "./now-parts";
 
 /**
  * The parts registry (USE-7): the capture host `/dev/parts` renders a part
@@ -49,4 +50,14 @@ for (const state of [
   registerPart(`icon-picker-${state}`, () =>
     createElement(IconPickerPart, { state }),
   ); // USE-11
+}
+// USE-16: Now's states on Taylor's Monday, `now-<state>` (the /today scenarios).
+for (const state of [
+  "success",
+  "done-next-lifts",
+  "row-tapped",
+  "took-change",
+  "time-taken-sheet",
+] satisfies NowPartState[]) {
+  registerPart(`now-${state}`, () => createElement(NowPart, { state })); // USE-16
 }

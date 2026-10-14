@@ -71,6 +71,13 @@ export {
 } from "./usual-week";
 export { suggestIcons, type IconSuggestEntry } from "./icon-suggest";
 export {
+  activeBlock,
+  currentItem,
+  nextItem,
+  type NowBlockSpan,
+  type NowItem,
+} from "./now-block";
+export {
   DAY_END_MIN,
   ITEM_GIVES_AT_MOST,
   LATER_START_OFFER_MIN,
