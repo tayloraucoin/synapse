@@ -5,6 +5,7 @@ import {
   blockItemRecord,
   blockRecord,
   clientRecord,
+  dayBoundsRecord,
   dayEventRecord,
   dayRecordRecord,
   journalEntryRecord,
@@ -18,10 +19,12 @@ import {
   todoRecord,
   workItemRecord,
 } from "@syn/validators";
+import { deriveSetUpDay } from "@/lib/data/use-set-up-day";
 import type { FixtureRecords } from "../records";
 import { createFixtureServer, FixtureReadError } from "../server";
 import { BASE_DATE } from "./base-day";
 import { DEFAULT_SCENARIO, resolveScenario, scenarioNames } from "./index";
+import { SET_UP_NOW } from "./set-up";
 
 const SCHEMAS: {
   [
@@ -39,6 +42,8 @@ const SCHEMAS: {
   clients: clientRecord,
   todos: todoRecord,
   dayEvents: dayEventRecord,
+  // USE-36 (C1): the set-up scenarios' bounds too.
+  dayBounds: dayBoundsRecord,
   slotEvents: slotEventRecord,
   savedColours: savedColourRecord,
   // USE-12 (C9): every morning record parses too.
@@ -125,5 +130,110 @@ describe("C5: ?state= names resolve to scenarios", () => {
     expect(resolveScenario("default").records.blocks.length).toBe(
       a.records.blocks.length + 1,
     );
+  });
+});
+
+describe("C1 (USE-36): the set-up scenarios read back as the boards draw them", () => {
+  async function week(name: string, ref: string) {
+    const scenario = resolveScenario(name);
+    const server = createFixtureServer(scenario, () => new Date(SET_UP_NOW));
+    const records = await server.readWeek(ref);
+    return records.days.map((day) => deriveSetUpDay(day, records.timeZone));
+  }
+  const names = (day: { blocks: { block: { name: string } }[] }) =>
+    day.blocks.map((b) => b.block.name);
+
+  it("set-up-usual is usual-week.md's seven rows", async () => {
+    const days = await week("set-up-usual", "usual");
+    const weekday = [
+      "Wellness",
+      "Training",
+      "Breakfast",
+      "Work",
+      "Lunch",
+      "Work",
+    ];
+    expect(days.map((day) => day.bounds)).toEqual([
+      ...Array(5).fill({ upAt: "07:00", lightsOut: "22:30" }),
+      { upAt: "08:00", lightsOut: "23:00" },
+      null,
+    ]);
+    expect(names(days[0]!)).toEqual([...weekday, "Evening"]);
+    expect(names(days[1]!)).toEqual([
+      ...weekday,
+      "Climbing [placeholder]",
+      "Evening",
+    ]);
+    expect(names(days[2]!)).toEqual([
+      "Wellness",
+      "Rest",
+      "Breakfast",
+      "Work",
+      "Lunch",
+      "Work",
+      "Evening",
+    ]);
+    expect(names(days[3]!)).toEqual([
+      ...weekday,
+      "Dinner with friends [placeholder]",
+      "Evening",
+    ]);
+    expect(names(days[4]!)).toEqual([...weekday, "Errands", "Evening"]);
+    expect(names(days[5]!)).toEqual([
+      "Wellness",
+      "Breakfast",
+      "Errands",
+      "Lunch",
+      "Out with friends [placeholder]",
+      "Evening",
+    ]);
+    expect(names(days[6]!)).toEqual(["Sunday checklist", "Sunday reset"]);
+    // Sunday is "All day": no bounds, so no strip.
+    expect(days[6]!.strip).toEqual([]);
+    expect(days[0]!.strip[0]).toMatchObject({ part: "orient" });
+    expect(
+      days.every((day) => day.overlaps.length === 0 || day.weekday === 6),
+    ).toBe(true);
+  });
+
+  it("set-up-this-week is the-week.md's 12 to 18 Oct", async () => {
+    const days = await week("set-up-this-week", "2026-W42");
+    expect(days.map((day) => day.date)).toEqual([
+      "2026-10-12",
+      "2026-10-13",
+      "2026-10-14",
+      "2026-10-15",
+      "2026-10-16",
+      "2026-10-17",
+      "2026-10-18",
+    ]);
+    expect(days.map((day) => day.isSet)).toEqual([
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+    ]);
+    const monday = days[0]!;
+    const work = monday.blocks.find((b) => b.block.kind === "work")!;
+    expect(work.slots.map((slot) => slot.tier)).toEqual([
+      "primary",
+      "primary",
+      "secondary",
+      "stretch",
+    ]);
+    expect(monday.records.workItems).toHaveLength(4);
+    expect(days[1]!.records.slots).toEqual([]);
+    expect(days[3]!.events.map((event) => event.title)).toEqual([
+      "Dentist [placeholder]",
+    ]);
+    expect(names(days[6]!)).toEqual(["Sunday checklist"]);
+  });
+
+  it("set-up-first-day has nothing set", async () => {
+    const days = await week("set-up-first-day", "usual");
+    expect(days.every((day) => !day.isSet)).toBe(true);
   });
 });

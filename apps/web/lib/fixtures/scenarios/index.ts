@@ -4,6 +4,7 @@ import { ACCOUNT_SCENARIOS } from "./account";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { ORIENT_SCENARIOS } from "./orient-morning";
+import { SET_UP_SCENARIOS } from "./set-up";
 
 /**
  * Scenarios: one named set of records per `?state=` (canon C-P08). This file
@@ -115,6 +116,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...ORIENT_SCENARIOS,
   // ---- The avatar menu and the Install sheet (USE-83) ----
   ...ACCOUNT_SCENARIOS,
+  // ---- Setting up the days (USE-36): the usual week, this week, the first day ----
+  ...SET_UP_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {

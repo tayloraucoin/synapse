@@ -10,10 +10,10 @@ import {
   slotEventRecord,
   slotRecord,
   slotUpdateInput,
-  type PlaceSlotInput,
   type DayRecordRecord,
   type MorningLinesInput,
   type MorningLinesRecord,
+  type PlaceSlotInput,
   type SavedColourInput,
   type SavedColourRecord,
   type SlotEventInput,
@@ -28,6 +28,7 @@ import type {
 } from "@/lib/data/morning-records";
 import type { TodayRecords } from "@/lib/data/today-records";
 import type { AccountView } from "@/lib/data/use-account";
+import { createPlannerServer, type PlannerServer } from "./planner";
 import type { FixtureRecords } from "./records";
 import type { Scenario } from "./scenarios";
 
@@ -106,7 +107,7 @@ export class MorningLinesRefusal extends Error {
   }
 }
 
-export interface FixtureServer {
+export interface FixtureServer extends PlannerServer {
   readToday(dateKey: string): Promise<TodayRecords>;
   writeSlotEvents(inputs: SlotEventInput[]): Promise<SlotEventRecord[]>;
   /**
@@ -239,7 +240,23 @@ export function createFixtureServer(
     return input;
   }
 
+  const planner = createPlannerServer({
+    records,
+    now,
+    isOffline: () => offline,
+    offlineError: () => new FixtureOfflineError(),
+  });
+
   const server: FixtureServer = {
+    // The set-up area's reads and writes (USE-36).
+    ...planner,
+
+    readWeek(week) {
+      if (scenario.mode === "loading") return new Promise(() => {});
+      if (failing) return Promise.reject(new FixtureReadError());
+      return planner.readWeek(week);
+    },
+
     readToday(dateKey) {
       if (scenario.mode === "loading") return new Promise(() => {});
       if (failing) return Promise.reject(new FixtureReadError());

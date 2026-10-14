@@ -3,6 +3,7 @@ import type {
   BlockItemRecord,
   BlockRecord,
   ClientRecord,
+  DayBoundsRecord,
   DayEventRecord,
   DayRecordRecord,
   JournalEntryRecord,
@@ -41,6 +42,8 @@ export interface FixtureRecords {
   slotEvents: SlotEventRecord[];
   /** Custom colours saved for reuse (USE-11), any order; reads sort newest first. */
   savedColours: SavedColourRecord[];
+  /** Each weekday's usual Up at and Lights out, and a date's own (USE-36). */
+  dayBounds: DayBoundsRecord[];
   /** `users.usual_wake_time`: "Up at" (USE-12). */
   usualWakeTime: string;
   /** One per date: the orient, Ready, go and close stamps (USE-12). */

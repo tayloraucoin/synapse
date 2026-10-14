@@ -390,7 +390,10 @@ const passages = [
 );
 
 const links = [
-  { title: "Morning calm", url: "https://open.spotify.com/playlist/morning-calm" },
+  {
+    title: "Morning calm",
+    url: "https://open.spotify.com/playlist/morning-calm",
+  },
   { title: "Cold bath", url: "https://open.spotify.com/playlist/cold-bath" },
 ].map((link, n) =>
   linkRecord.parse({
@@ -417,7 +420,8 @@ const journalEntries = [
   journalEntryRecord.parse({
     onDate: "2026-10-11",
     answers: {
-      make_happen_tomorrow: "Finish the Primary before lunch and leave the desk by six.",
+      make_happen_tomorrow:
+        "Finish the Primary before lunch and leave the desk by six.",
       visualisation: "A slow start, a long walk, and the hard part done early.",
       looking_forward: "The cold bath, and dinner with the light still out.",
     },
@@ -462,6 +466,7 @@ export function baseRecords(): FixtureRecords {
     clients,
     todos,
     dayEvents: [],
+    dayBounds: [],
     slotEvents,
     savedColours,
     ...morningRecords(),
@@ -482,6 +487,7 @@ export function emptyRecords(): FixtureRecords {
     clients: [],
     todos: [],
     dayEvents: [],
+    dayBounds: [],
     slotEvents: [],
     savedColours: [],
     ...morningRecords(),
