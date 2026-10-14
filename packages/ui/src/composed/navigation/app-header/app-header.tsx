@@ -50,6 +50,11 @@ export interface AppHeaderProps {
   /** "times in Vancouver" — shown only while the day's zone differs. */
   zoneLabel?: string;
   avatar?: { name: string; imageUrl: string | null; onOpen: () => void };
+  /**
+   * The app's own account control in the avatar's place: the avatar menu's
+   * trigger (USE-83, D-USE-5), which owns its button. Wins over `avatar`.
+   */
+  account?: React.ReactNode;
   classes?: AppHeaderClasses;
   className?: string;
 }
@@ -64,6 +69,7 @@ export function AppHeader({
   dateContext,
   zoneLabel,
   avatar,
+  account,
   classes,
   className,
 }: AppHeaderProps) {
@@ -160,7 +166,7 @@ export function AppHeader({
             {action.label}
           </Button>
         )}
-        {avatar === undefined ? null : (
+        {account !== undefined ? account : avatar === undefined ? null : (
           <button
             type="button"
             aria-label="Settings"

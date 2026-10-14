@@ -121,6 +121,44 @@ export function reviewRoute(): string {
   return "/review";
 }
 
+/* -------------------------------------------------------------- account -- */
+
+/**
+ * Set my days (USE-39 builds the page): the avatar menu's first row. The
+ * params are USE-39's; the menu opens it on the week.
+ */
+export function daysRoute(params: { week?: string; day?: string } = {}): string {
+  const query = new URLSearchParams();
+  if (params.week) query.set("week", params.week);
+  if (params.day) query.set("day", params.day);
+  const search = query.toString();
+  return search ? `/days?${search}` : "/days";
+}
+
+/** Settings (USE-85 builds it): the avatar menu's last row. */
+export function settingsRoute(): string {
+  return "/settings";
+}
+
+/**
+ * The sheets a screen opens over itself by `?sheet=` (the shell's sheet host).
+ * The value names the sheet; the path stays the screen beneath.
+ */
+export type SheetName = "install" | "profile" | "meal-topics";
+
+/** `path` with `?sheet=<name>` set, keeping its other query. */
+export function sheetRoute(path: string, sheet: SheetName): string {
+  const [base = "", search = ""] = path.split("?");
+  const query = new URLSearchParams(search);
+  query.set("sheet", sheet);
+  return `${base}?${query.toString()}`;
+}
+
+/** The Install sheet over `path` (USE-83): the menu's row and the offer's How. */
+export function installSheetRoute(path: string): string {
+  return sheetRoute(path, "install");
+}
+
 /* ---------------------------------------------------------------- legal -- */
 
 /**

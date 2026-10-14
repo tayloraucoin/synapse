@@ -19,7 +19,10 @@ import { DEFAULT_SCENARIO, resolveScenario, scenarioNames } from "./index";
 
 const SCHEMAS: {
   [
-    K in Exclude<keyof FixtureRecords, "timeZone" | "dayCloseTime">
+    K in Exclude<
+      keyof FixtureRecords,
+      "timeZone" | "dayCloseTime" | "account"
+    >
   ]: z.ZodTypeAny;
 } = {
   blocks: blockRecord,

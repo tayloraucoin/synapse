@@ -15,9 +15,6 @@ const COPY = {
   unknown: (name: string) => `No part named “${name}”.`,
 };
 
-/** The rail's name on a capture: no session here, so a fixed one. */
-const CAPTURE_USER = { name: "Synapse", imageUrl: null };
-
 /**
  * The capture host (USE-7): a part no screen holds yet, rendered alone in
  * the shell's frame by its `?state=` name. No name lists every registered
@@ -35,7 +32,7 @@ export default async function DevPartsPage({
   const render = name ? findPart(name) : undefined;
 
   return (
-    <AppShell user={CAPTURE_USER}>
+    <AppShell>
       <main id="main" className="flex flex-1 flex-col">
         {render ? render() : <PartList unknown={name} />}
       </main>

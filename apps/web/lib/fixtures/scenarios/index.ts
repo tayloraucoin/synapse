@@ -1,4 +1,6 @@
+import type { InstallOverride } from "@/lib/pwa/use-install-state";
 import type { FixtureRecords } from "../records";
+import { ACCOUNT_SCENARIOS } from "./account";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 
@@ -22,6 +24,10 @@ export interface Scenario {
    * "time-taken:…"). Later tickets add their menus and sheets to `open`.
    */
   view?: ScenarioView;
+  /** Stands the install check on a device for a capture (USE-83); unset, the device's own. */
+  install?: InstallOverride;
+  /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */
+  accountMenuOpen?: boolean;
 }
 
 export interface ScenarioView {
@@ -94,6 +100,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
     mode: "ready",
     view: { open: `time-taken:${NOW_IDS.items.startColdBath}` },
   }),
+  // ---- The avatar menu and the Install sheet (USE-83) ----
+  ...ACCOUNT_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {

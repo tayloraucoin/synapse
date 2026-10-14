@@ -10,6 +10,7 @@ import type {
   TodoRecord,
   WorkItemRecord,
 } from "@syn/validators";
+import type { AccountView } from "@/lib/data/use-account";
 
 /**
  * What the fixture server holds (USE-7). Every list is a `@syn/validators`
@@ -34,4 +35,6 @@ export interface FixtureRecords {
   slotEvents: SlotEventRecord[];
   /** Custom colours saved for reuse (USE-11), any order; reads sort newest first. */
   savedColours: SavedColourRecord[];
+  /** The signed-in person behind the avatar (USE-83). */
+  account: AccountView;
 }

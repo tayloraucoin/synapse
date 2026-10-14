@@ -36,6 +36,19 @@ export {
   ChevronDownIcon as ExpandIcon,
   GripVerticalIcon as ReorderIcon,
 } from "lucide-react";
+/** The account's glyphs (USE-83): the avatar menu's rows and the install steps. */
+export {
+  CalendarRangeIcon as SetMyDaysIcon,
+  CompassIcon as OpenInSafariIcon,
+  EllipsisIcon as SafariMoreIcon,
+  EllipsisVerticalIcon as ChromeMenuIcon,
+  SettingsIcon,
+  ShareIcon as SafariShareIcon,
+  SquarePlusIcon as AddToHomeScreenIcon,
+  TvMinimalPlayIcon as MealTopicsIcon,
+  UserIcon as ProfileIcon,
+  XIcon as CloseIcon,
+} from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
 export { ThemeProvider } from "./providers/theme-provider";
@@ -139,6 +152,7 @@ export {
 } from "./primitives/control/toggle-group";
 export {
   Avatar,
+  avatarInitial,
   type AvatarProps,
   type AvatarSize,
 } from "./primitives/display/avatar";

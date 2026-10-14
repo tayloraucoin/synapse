@@ -343,6 +343,21 @@ const savedColours = ["#3d5a80", "#d4893a", "#6a4c93", "#2f6f62"].map(
     }),
 );
 
+/**
+ * The account on the boards (USE-83): "Taylor Aucoin", with a photo. The
+ * photo is a drawn [placeholder] in warm tones, inline so a capture needs no
+ * network; the no-photo scenario clears it.
+ */
+const PLACEHOLDER_PHOTO = `data:image/svg+xml,${encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect width="40" height="40" fill="hsl(27 37% 50%)"/><circle cx="20" cy="16" r="7" fill="hsl(25 42% 38%)"/><path d="M6 40c2-9 8-13 14-13s12 4 14 13z" fill="hsl(25 42% 38%)"/></svg>',
+)}`;
+
+export const baseAccount = {
+  name: "Taylor Aucoin",
+  email: "taylor@example.com",
+  photoUrl: PLACEHOLDER_PHOTO,
+};
+
 /** The base day's rows; a scenario copies them, never shares them. */
 export function baseRecords(): FixtureRecords {
   return structuredClone({
@@ -358,6 +373,7 @@ export function baseRecords(): FixtureRecords {
     dayEvents: [],
     slotEvents,
     savedColours,
+    account: baseAccount,
   });
 }
 
@@ -376,5 +392,6 @@ export function emptyRecords(): FixtureRecords {
     dayEvents: [],
     slotEvents: [],
     savedColours: [],
+    account: { ...baseAccount },
   };
 }

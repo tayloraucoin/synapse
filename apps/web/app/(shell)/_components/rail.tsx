@@ -7,14 +7,14 @@
  * The current item is shaded `--color-surface` and set in medium weight, and
  * carries `aria-current="page"`: shape and weight as well as colour.
  *
- * THE FOOTER IS NOT A CONTROL. The avatar and the name sit there; the
- * avatar-menu ticket makes them the menu's trigger, so this ships no dead
- * button.
+ * THE FOOTER IS THE AVATAR MENU'S TRIGGER at the desk (USE-83, D-USE-89):
+ * the avatar and the name, one button, opening the same menu upward.
  */
 "use client";
 
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
-  Avatar,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -25,14 +25,11 @@ import {
   SidebarProvider,
   Text,
 } from "@syn/ui";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+import { AccountMenu } from "./account";
 import { SHELL_COPY as COPY } from "./copy";
 import { RAIL_ITEMS, tabForPath } from "./nav-items";
-import type { ShellUser } from "./app-shell";
 
-export function Rail({ user }: { user: ShellUser }) {
+export function Rail() {
   const active = tabForPath(usePathname());
 
   return (
@@ -71,11 +68,8 @@ export function Rail({ user }: { user: ShellUser }) {
           </SidebarMenu>
         </SidebarContent>
 
-        <SidebarFooter className="border-border mx-(--space-3) flex-row items-center gap-(--space-3) border-t px-(--space-3) py-(--space-4)">
-          <Avatar src={user.imageUrl} name={user.name} />
-          <Text as="span" variant="body" truncate>
-            {user.name}
-          </Text>
+        <SidebarFooter className="border-border mx-(--space-3) border-t px-(--space-1) py-(--space-3)">
+          <AccountMenu trigger="rail" />
         </SidebarFooter>
       </Sidebar>
     </SidebarProvider>

@@ -5,6 +5,7 @@ import {
   TierAndItemForms,
   WorkRowForms,
 } from "./day-parts";
+import { AccountPart } from "./account-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { NowPart, type NowPartState } from "./now-parts";
 
@@ -60,4 +61,16 @@ for (const state of [
   "time-taken-sheet",
 ] satisfies NowPartState[]) {
   registerPart(`now-${state}`, () => createElement(NowPart, { state })); // USE-16
+}
+// USE-83: the avatar menu and the Install sheet, by their scenario names.
+for (const state of [
+  "account-menu",
+  "account-installed",
+  "account-no-photo",
+  "install-iphone",
+  "install-android",
+  "install-browser-prompt",
+  "install-other-browser",
+]) {
+  registerPart(state, () => createElement(AccountPart)); // USE-83
 }

@@ -16,6 +16,7 @@ import {
   type SlotUpdateInput,
 } from "@syn/validators";
 import type { TodayRecords } from "@/lib/data/today-records";
+import type { AccountView } from "@/lib/data/use-account";
 import type { FixtureRecords } from "./records";
 import type { Scenario } from "./scenarios";
 
@@ -85,6 +86,8 @@ export interface FixtureServer {
     input: SavedColourInput & { id?: string },
   ): Promise<SavedColourRecord>;
   removeSavedColour(id: string): Promise<void>;
+  /** The account behind the avatar (USE-83); offline it is already on the device. */
+  readAccount(): Promise<AccountView>;
   /** The `error` scenario's retry: reads succeed from here on. */
   recover(): void;
 }
@@ -258,6 +261,10 @@ export function createFixtureServer(
       });
       records.slots.push(record);
       return Promise.resolve(structuredClone(record));
+    },
+
+    readAccount() {
+      return Promise.resolve(structuredClone(records.account));
     },
 
     listSavedColours() {
