@@ -1,6 +1,8 @@
 /** The placeholder Today's strings (USE-1). No second person (product rules). */
 export const TODAY_COPY = {
   title: "Today",
+  /** The phone's tab word for the same place (USE-4). */
+  phoneTitle: "Now",
   placeholder: "Today is being rebuilt.",
   push: {
     turnOn: "Turn on notifications",
