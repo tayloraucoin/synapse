@@ -4,6 +4,7 @@ import type {
   BlockRecord,
   ClientRecord,
   DayEventRecord,
+  SavedColourRecord,
   SlotEventRecord,
   SlotRecord,
   TodoRecord,
@@ -31,4 +32,6 @@ export interface FixtureRecords {
   todos: TodoRecord[];
   dayEvents: DayEventRecord[];
   slotEvents: SlotEventRecord[];
+  /** Custom colours saved for reuse (USE-11), any order; reads sort newest first. */
+  savedColours: SavedColourRecord[];
 }

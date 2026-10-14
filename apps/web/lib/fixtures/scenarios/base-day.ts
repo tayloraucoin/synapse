@@ -2,6 +2,7 @@ import {
   blockItemRecord,
   blockRecord,
   clientRecord,
+  savedColourRecord,
   slotEventRecord,
   slotRecord,
   todoRecord,
@@ -328,6 +329,17 @@ const slotEvents = [
   }),
 );
 
+/** Four custom colours, newest (highest `sortOrder`) first as Saved shows them (USE-11). */
+const savedColours = ["#3d5a80", "#d4893a", "#6a4c93", "#2f6f62"].map(
+  (hex, n) =>
+    savedColourRecord.parse({
+      id: fixtureId(9, n + 1),
+      ...stamps,
+      hex,
+      sortOrder: n,
+    }),
+);
+
 /** The base day's rows; a scenario copies them, never shares them. */
 export function baseRecords(): FixtureRecords {
   return structuredClone({
@@ -342,6 +354,7 @@ export function baseRecords(): FixtureRecords {
     todos,
     dayEvents: [],
     slotEvents,
+    savedColours,
   });
 }
 
@@ -359,5 +372,6 @@ export function emptyRecords(): FixtureRecords {
     todos: [],
     dayEvents: [],
     slotEvents: [],
+    savedColours: [],
   };
 }

@@ -5,6 +5,7 @@ import {
   TierAndItemForms,
   WorkRowForms,
 } from "./day-parts";
+import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 
 /**
  * The parts registry (USE-7): the capture host `/dev/parts` renders a part
@@ -36,3 +37,16 @@ registerPart("tier-and-item", () => createElement(TierAndItemForms)); // USE-10
 registerPart("block-band-and-header", () =>
   createElement(BlockBandAndHeaderForms),
 ); // USE-10
+// USE-11: the icon picker's six drawn states, `icon-picker-<state>`.
+for (const state of [
+  "emoji-suggested",
+  "no-name-yet",
+  "icon-tab",
+  "custom-colour",
+  "bad-hex",
+  "saved-colours",
+] satisfies IconPickerPartState[]) {
+  registerPart(`icon-picker-${state}`, () =>
+    createElement(IconPickerPart, { state }),
+  ); // USE-11
+}

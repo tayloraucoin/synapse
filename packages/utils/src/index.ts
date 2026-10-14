@@ -247,3 +247,5 @@ export {
 } from "./planner";
 export { resolveClient, type ClientConnection, type ClientItem } from "./work";
 
+/* ---- the icon picker's suggestions (USE-11) ---- */
+export { suggestIcons, type IconSuggestEntry } from "./planner";

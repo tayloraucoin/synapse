@@ -167,6 +167,10 @@
       "types": "./src/composed/control/color-swatch-row/index.ts",
       "default": "./src/composed/control/color-swatch-row/index.ts"
     },
+    "./colour-popover": {
+      "types": "./src/composed/control/colour-popover/index.ts",
+      "default": "./src/composed/control/colour-popover/index.ts"
+    },
     "./count-stepper": {
       "types": "./src/composed/control/count-stepper/index.ts",
       "default": "./src/composed/control/count-stepper/index.ts"
@@ -182,6 +186,10 @@
     "./ellipses-menu": {
       "types": "./src/composed/control/ellipses-menu/index.ts",
       "default": "./src/composed/control/ellipses-menu/index.ts"
+    },
+    "./icon-picker": {
+      "types": "./src/composed/control/icon-picker/index.ts",
+      "default": "./src/composed/control/icon-picker/index.ts"
     },
     "./image-cropper": {
       "types": "./src/composed/control/image-cropper/index.ts",

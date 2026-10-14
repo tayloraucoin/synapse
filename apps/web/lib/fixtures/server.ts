@@ -1,7 +1,11 @@
 import { checkEventTime, dayWindow } from "@syn/utils";
 import {
+  savedColourInput,
+  savedColourRecord,
   slotEventInput,
   slotEventRecord,
+  type SavedColourInput,
+  type SavedColourRecord,
   type SlotEventInput,
   type SlotEventRecord,
 } from "@syn/validators";
@@ -30,6 +34,17 @@ export class SlotEventRefusal extends Error {
   }
 }
 
+/** A saved colour write the router would refuse (USE-11). */
+export class SavedColourRefusal extends Error {
+  readonly reason: "invalid" | "unknown" | "duplicate";
+
+  constructor(reason: SavedColourRefusal["reason"], message: string) {
+    super(message);
+    this.name = "SavedColourRefusal";
+    this.reason = reason;
+  }
+}
+
 /** The `error` scenario's read, until retried. */
 export class FixtureReadError extends Error {
   constructor() {
@@ -41,6 +56,13 @@ export class FixtureReadError extends Error {
 export interface FixtureServer {
   readToday(dateKey: string): Promise<TodayRecords>;
   writeSlotEvents(inputs: SlotEventInput[]): Promise<SlotEventRecord[]>;
+  /** Saved colours, newest (highest `sortOrder`) first. */
+  listSavedColours(): Promise<SavedColourRecord[]>;
+  /** Adds a colour, or with `id` changes one; a hex saved twice is refused. */
+  writeSavedColour(
+    input: SavedColourInput & { id?: string },
+  ): Promise<SavedColourRecord>;
+  removeSavedColour(id: string): Promise<void>;
   /** The `error` scenario's retry: reads succeed from here on. */
   recover(): void;
 }
@@ -148,6 +170,66 @@ export function createFixtureServer(
       } catch (error) {
         return Promise.reject(error);
       }
+    },
+
+    listSavedColours() {
+      return Promise.resolve(
+        structuredClone(
+          [...records.savedColours].sort((a, b) => b.sortOrder - a.sortOrder),
+        ),
+      );
+    },
+
+    writeSavedColour(raw) {
+      const parsed = savedColourInput.safeParse(raw);
+      if (!parsed.success) {
+        return Promise.reject(
+          new SavedColourRefusal(
+            "invalid",
+            parsed.error.issues[0]?.message ?? "Invalid saved colour.",
+          ),
+        );
+      }
+      const input = parsed.data;
+      // saved_colours_user_id_hex_key: one row per hex.
+      const clash = records.savedColours.find(
+        (row) => row.hex === input.hex && row.id !== raw.id,
+      );
+      if (clash) {
+        return Promise.reject(
+          new SavedColourRefusal("duplicate", "That colour is already saved."),
+        );
+      }
+      const stamp = now().toISOString();
+      if (raw.id !== undefined) {
+        const row = records.savedColours.find((r) => r.id === raw.id);
+        if (!row) {
+          return Promise.reject(
+            new SavedColourRefusal("unknown", "No saved colour with that id."),
+          );
+        }
+        Object.assign(row, input, { updatedAt: stamp });
+        return Promise.resolve(structuredClone(row));
+      }
+      const record = savedColourRecord.parse({
+        id: crypto.randomUUID(),
+        createdAt: stamp,
+        updatedAt: stamp,
+        ...input,
+      });
+      records.savedColours.push(record);
+      return Promise.resolve(structuredClone(record));
+    },
+
+    removeSavedColour(id) {
+      const index = records.savedColours.findIndex((row) => row.id === id);
+      if (index === -1) {
+        return Promise.reject(
+          new SavedColourRefusal("unknown", "No saved colour with that id."),
+        );
+      }
+      records.savedColours.splice(index, 1);
+      return Promise.resolve();
     },
 
     recover() {

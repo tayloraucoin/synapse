@@ -17,5 +17,6 @@ Inventory: `packages/ui/src/`, stories beside.
 | Linear status  | `LinearStatusShape` (Linear's colour, its word); `LinearLine` |
 | Running clock  | `CountdownFace`; "over" always beside the figure              |
 | Tier heading   | `GroupHeading` `leading` with a `HueSquare`, beside its word  |
+| Icon           | `IconPicker`, a step in its sheet; `ColourPopover` for custom |
 
 Forbidden: a toast confirming a visible save; `dark:` colour classes.

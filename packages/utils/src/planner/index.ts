@@ -69,6 +69,7 @@ export {
   usualChangeReach,
   usualDay,
 } from "./usual-week";
+export { suggestIcons, type IconSuggestEntry } from "./icon-suggest";
 export {
   DAY_END_MIN,
   ITEM_GIVES_AT_MOST,

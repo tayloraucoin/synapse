@@ -787,6 +787,26 @@ export {
   type ColorSwatchValue,
 } from "./composed/control/color-swatch-row";
 export {
+  BAD_HEX_WORDS,
+  ColourPopover,
+  displayHex,
+  parseHex,
+  readableOnPaper,
+  type ColourPopoverProps,
+} from "./composed/control/colour-popover";
+export {
+  COLOUR_WORDS,
+  ICON_PICKER_WORDS,
+  IconPicker,
+  type ColourPanel,
+  type IconPick,
+  type IconPickerInitial,
+  type IconPickerProps,
+  type IconPickerTab,
+  type IconSuggestCandidate,
+  type SavedColour,
+} from "./composed/control/icon-picker";
+export {
   CountStepper,
   type CountStepperProps,
 } from "./composed/control/count-stepper";

@@ -6,6 +6,7 @@ import {
   blockRecord,
   clientRecord,
   dayEventRecord,
+  savedColourRecord,
   slotEventRecord,
   slotRecord,
   todoRecord,
@@ -30,6 +31,7 @@ const SCHEMAS: {
   todos: todoRecord,
   dayEvents: dayEventRecord,
   slotEvents: slotEventRecord,
+  savedColours: savedColourRecord,
 };
 
 describe("C1: every scenario record parses with its @syn/validators schema", () => {
