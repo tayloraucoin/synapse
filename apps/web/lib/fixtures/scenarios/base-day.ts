@@ -233,6 +233,7 @@ const todos = [
     onDate: null,
     rrule: null,
     remindAt: null,
+    remindOn: null,
     doneAt: null,
     archivedAt: null,
     ...todo,

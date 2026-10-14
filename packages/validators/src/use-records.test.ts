@@ -19,7 +19,7 @@ import {
   slotEventRecord,
   slotRecord,
 } from "./planner";
-import { todoRecord } from "./todo";
+import { todoInput, todoRecord } from "./todo";
 import { clientRecord, workItemInput, workItemRecord } from "./work";
 
 /** USE-3's criteria, one `describe` each (the contract's C1 to C6). */
@@ -428,6 +428,7 @@ const samples = {
       onDate: "2026-10-14",
       rrule: null,
       remindAt: "09:30:00",
+      remindOn: null,
       doneAt: null,
       archivedAt: null,
     },
@@ -663,5 +664,37 @@ describe("USE-14 C4: day bounds, an event's repeat and tag, a dated item, a skip
     expect(dayEventRecord.safeParse(without(eventRow, "tag")).success).toBe(
       false,
     );
+  });
+});
+
+/** USE-30's C3: the reminder's day on a to-do with none (D-USE-37). */
+describe("USE-30 C3: a to-do's remindOn, a date key or null", () => {
+  const [, row] = samples.todoRecord;
+  const todo = { title: "Call the dentist", type: "call" };
+
+  it("a record takes a date key or null, and refuses a bad date", () => {
+    expect(todoRecord.parse({ ...row, remindOn: "2026-10-15" }).remindOn).toBe(
+      "2026-10-15",
+    );
+    expect(todoRecord.parse(row).remindOn).toBeNull();
+    expect(todoRecord.safeParse({ ...row, remindOn: "15 Oct" }).success).toBe(
+      false,
+    );
+  });
+
+  it("a record without the field is refused", () => {
+    expect(todoRecord.safeParse(without(row, "remindOn")).success).toBe(false);
+  });
+
+  it("the sheet's write takes a day, null or none, and refuses a bad date", () => {
+    expect(
+      todoInput.parse({ ...todo, remindAt: "12:30", remindOn: "2026-10-15" })
+        .remindOn,
+    ).toBe("2026-10-15");
+    expect(todoInput.safeParse({ ...todo, remindOn: null }).success).toBe(true);
+    expect(todoInput.safeParse(todo).success).toBe(true);
+    expect(
+      todoInput.safeParse({ ...todo, remindOn: "2026-13-01" }).success,
+    ).toBe(false);
   });
 });

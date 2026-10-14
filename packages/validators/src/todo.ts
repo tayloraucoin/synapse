@@ -31,6 +31,8 @@ export const todoRecord = z.object({
   rrule: rruleSchema.nullable(),
   /** A wall-clock time in `users.timezone` (`todo_reminder`). */
   remindAt: startTimeSchema.nullable(),
+  /** `0014`: the reminder's day for a to-do with none (D-USE-37). */
+  remindOn: dateKeySchema.nullable(),
   doneAt: instantSchema.nullable(),
   archivedAt: instantSchema.nullable(),
 });
@@ -50,6 +52,8 @@ export const todoInput = z.object({
   onDate: dateKeySchema.nullish(),
   rrule: rruleSchema.nullish(),
   remindAt: startTimeSchema.nullish(),
+  /** The At row's day: Today, Tomorrow or Pick a day… (D-USE-69). */
+  remindOn: dateKeySchema.nullish(),
 });
 
 export type TodoInput = z.infer<typeof todoInput>;

@@ -3,6 +3,10 @@
  * in the pool; with one, it is planned for that day. A daily reminder is a
  * to-do with a daily rule and a `remind_at`.
  *
+ * A REMINDER'S DAY (USE-30, `0014`): `remind_on` is the day the reminder
+ * comes when the to-do keeps no day of its own (D-USE-37); the to-do stays in
+ * the tray. `remind_at` stays the time.
+ *
  * `type` is a fact about the to-do, never a block filter: any to-do can go in
  * any To-dos block (D-USE-35). Notes on every to-do (D-USE-35).
  *
@@ -56,6 +60,8 @@ export const todos = pgTable(
     onDate: date("on_date"),
     /** A wall-clock time in `users.timezone` (`todo_reminder`). */
     remindAt: time("remind_at"),
+    /** The reminder's day; null reminds on `on_date` or by the rule. */
+    remindOn: date("remind_on"),
     /** RFC 5545, one rule; null does not repeat. */
     rrule: text("rrule"),
     title: text("title").notNull(),
