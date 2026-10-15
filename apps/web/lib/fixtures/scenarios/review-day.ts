@@ -233,10 +233,15 @@ const todos = [
   }),
 );
 
-/** The Monday as Review the day draws it: oriented at 6:55, not readied. */
+/**
+ * The Monday as Review the day draws it: oriented at 6:55, not readied. With
+ * `orientedAt` a late wake (USE-38): nothing else changes, and the layout
+ * from the wake is derived on read.
+ */
 export function reviewDayRecords({
   work = true,
-}: { work?: boolean } = {}): FixtureRecords {
+  orientedAt = "06:55",
+}: { work?: boolean; orientedAt?: string } = {}): FixtureRecords {
   const monday = nowDayRecords([]);
   return structuredClone({
     ...monday,
@@ -251,7 +256,7 @@ export function reviewDayRecords({
         ...stamps,
         id: R.dayRecord,
         onDate: BASE_DATE,
-        orientedAt: onNowDay("06:55"),
+        orientedAt: onNowDay(orientedAt),
         readyAt: null,
         closedAt: null,
       }),
@@ -264,6 +269,16 @@ const SEEN = [RAIL_HINT, FIRST_CHANGE];
 
 /** The swap from the Item sheet, staged on load (after-swap-undo.md). */
 const SWAP_TO_YOGA = { id: R.items.workout, withId: R.items.yoga };
+
+/**
+ * A late wake at 8:10, now 8:10. [ASSUMPTION] The later-start sheet's
+ * once-a-day flag is pinned seen by its own ticket (USE-41), which does
+ * not exist yet; these frames stay as drawn.
+ */
+const LATE = {
+  now: onNowDay("08:10"),
+  records: reviewDayRecords({ orientedAt: "08:10" }),
+} satisfies Partial<Scenario>;
 
 function review(name: string, extra: Partial<Scenario> = {}): () => Scenario {
   return () => ({
@@ -313,4 +328,12 @@ export const REVIEW_SCENARIOS: Record<string, () => Scenario> = {
   }),
   "review-partial-day": review("review-partial-day", { mode: "error" }),
   "review-offline": review("review-offline", { offline: true }),
+  // USE-38: woke at 8:10 against Up at 7:00 (D-USE-8's morning). Wellness
+  // folds into "Planned before 8:10"; Training runs 8:15 to 8:57.
+  "review-late": review("review-late", LATE),
+  // USE-38: the passed row opened to Wellness's card.
+  "review-late-passed-open": review("review-late-passed-open", {
+    ...LATE,
+    view: { open: "passed" },
+  }),
 };

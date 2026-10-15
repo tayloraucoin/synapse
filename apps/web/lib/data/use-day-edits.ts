@@ -3,9 +3,15 @@
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { IconValue, WorkTier } from "@syn/types";
-import { clockFromMinutes, clockToMinutes } from "@syn/utils";
+import {
+  clockFromMinutes,
+  clockToMinutes,
+  moveLater,
+  type DayChange,
+} from "@syn/utils";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import { deriveToday } from "./derive-today";
+import { lateWakeOf, roomDayOf } from "./late-wake";
 import { useDataSource } from "./source";
 import type { TodayRecords } from "./today-records";
 import {
@@ -16,6 +22,7 @@ import {
   type ItemUndoStep,
 } from "./use-item-sheet";
 import { usePlannerWrites } from "./use-planner-writes";
+import { ORIENT_LENGTH_MIN } from "./use-review-day";
 import { todayQueryKey } from "./use-today";
 
 /**
@@ -67,6 +74,8 @@ export interface DayEdit {
   swapped?: { item: string; block: string; endsAt: string };
   /** A removed block's name, for its Toaster. */
   removed?: string;
+  /** A passed block moved later, for its Toaster: "Wellness moved to 8:15." */
+  movedLater?: { block: string; startsAt: string };
 }
 
 function occurrenceOf(records: TodayRecords, blockId: string) {
@@ -255,6 +264,61 @@ export async function writeDayReorder(
   return { undo: [{ kind: "token", token: moved.undo }] };
 }
 
+/** The engine's today-only block changes, written one by one, each undoable. */
+async function writeDayChanges(
+  server: DayEditsServer,
+  changes: readonly DayChange[],
+): Promise<ItemUndoStep[]> {
+  const undo: ItemUndoStep[] = [];
+  for (const change of changes) {
+    if (
+      change.kind !== "block_times" &&
+      change.kind !== "block_off" &&
+      change.kind !== "block_usual"
+    ) {
+      throw new Error(`A ${change.kind} change is not written here.`);
+    }
+    const written = await server.writeBlockChange({
+      blockId: change.blockId,
+      onDate: change.onDate,
+      ...(change.kind === "block_off" ? { skipped: true } : {}),
+      ...(change.kind === "block_times"
+        ? { startsAt: change.startsAt, endsAt: change.endsAt }
+        : {}),
+    });
+    undo.push({ kind: "token", token: written.undo });
+  }
+  return undo;
+}
+
+/**
+ * Move later (USE-38; D-USE-69): a block the late wake passed comes back
+ * right after Orient at the wake, keeping its length, and the blocks after
+ * it slide by that length, through the engine's `moveLater`. Today only.
+ */
+export async function writeDayMoveLater(
+  server: DayEditsServer,
+  records: TodayRecords,
+  blockId: string,
+): Promise<DayEdit> {
+  const today = deriveToday(records);
+  const wake = lateWakeOf(today);
+  if (wake === null) throw new Error("The day started as planned.");
+  const day = roomDayOf(today);
+  const result = moveLater(day, {
+    blockId,
+    orientEnd: wake.wokeAt + ORIENT_LENGTH_MIN,
+  });
+  if (result.kind !== "plan") throw new Error("That block can't move later.");
+  const name =
+    today.occurrences.blocks.find((entry) => entry.block.id === blockId)?.block
+      .name ?? "";
+  return {
+    undo: await writeDayChanges(server, result.plan.changes),
+    movedLater: { block: name, startsAt: result.plan.summary.startsAt },
+  };
+}
+
 /* ---------------------------------------------------------------- hook -- */
 
 /** Each edit's steps by token, for the life of the page. */
@@ -325,6 +389,8 @@ export function useDayEdits(
       run((s, records) => writeDayRemove(s, records, target)),
     reorder: (blockId: string, ids: string[]) =>
       run((s, records) => writeDayReorder(s, records, blockId, ids)),
+    moveLater: (blockId: string) =>
+      run((s, records) => writeDayMoveLater(s, records, blockId)),
     /** An edit's Undo: its steps back, after any write still out. Once only. */
     undo: async (token: string) => {
       const steps = edits.get(token);

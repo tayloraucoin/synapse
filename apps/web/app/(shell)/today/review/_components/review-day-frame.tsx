@@ -24,6 +24,7 @@ import { fadeNavigate } from "../../_components/fade-navigate";
 import { REVIEW_DAY_COPY as COPY } from "./copy";
 import { EmptyWork } from "./empty-work";
 import { FirstChangeLine } from "./first-change-line";
+import { PassedRow } from "./passed-row";
 import { RailPlus } from "./rail-plus";
 import { useReviewEdits } from "./use-review-edits";
 
@@ -51,6 +52,10 @@ import { useReviewEdits } from "./use-review-edits";
  * a band swiped away, an empty Work block's Add rows, the rail + at the next
  * free time with its first-mornings hint, and the first-change line under
  * the header on the first change ever.
+ *
+ * A late wake (USE-38) lays the column out from the wake, and the blocks it
+ * passed fold into one row under the tray that opens to Move later and
+ * Leave; nothing reads late.
  */
 export function ReviewDayFrame() {
   const router = useRouter();
@@ -113,6 +118,16 @@ export function ReviewDayFrame() {
         {edits.firstChangeLine ? <FirstChangeLine dateKey={dateKey} /> : null}
 
         <TodosTray defaultOpen={seeded === "todos"} />
+
+        {/* A late wake (USE-38): the passed blocks, folded under the tray. */}
+        {view?.late && view.late.passed.length > 0 ? (
+          <PassedRow
+            wokeAt={view.late.wokeAt}
+            passed={view.late.passed}
+            onMoveLater={(blockId) => void edits.moveLater(blockId)}
+            defaultOpen={seeded === "passed"}
+          />
+        ) : null}
 
         <div
           data-day-scroller

@@ -3,9 +3,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { WORK_TIERS } from "@syn/constants";
 import type { StoredBlockKind, WorkTier } from "@syn/types";
-import { clockMinutes } from "@syn/utils";
+import { clockFromMinutes, clockMinutes, layoutFromWake } from "@syn/utils";
 import type { DayRecordRecord } from "@syn/validators";
 import type { Today } from "./derive-today";
+import { lateWakeOf, roomDayOf } from "./late-wake";
 import { useDataSource } from "./source";
 import { isAllDay } from "./use-now";
 import { todayQueryKey, useToday } from "./use-today";
@@ -18,6 +19,11 @@ import { todayQueryKey, useToday } from "./use-today";
  * line sits at the day's Up at.
  *
  * Ready, go writes `readyAt` once; the server keeps the first (D-USE-71).
+ *
+ * A LATE WAKE (USE-38; late.md) lays the day out from the wake, on read and
+ * never stored: Orient's line at the wake, a block under way starting after
+ * it and keeping its end, and every block that ended by then folded out of
+ * the column into `passed`. Nothing marks a passed block; it is words.
  */
 
 /** Orient's length on the column [ASSUMPTION: set-up-times' five minutes]. */
@@ -50,15 +56,30 @@ export interface ReviewBlock {
   tiers: ReviewTier[];
 }
 
+/** A block that ended by Orient's end on a late wake, at its planned times. */
+export interface ReviewPassedBlock {
+  id: string;
+  kind: StoredBlockKind;
+  name: string;
+  /** "HH:MM", as planned for the date. */
+  startsAt: string;
+  endsAt: string;
+}
+
 export interface ReviewDayView {
   dateKey: string;
   timeZone: string;
   /** The column's hours, minutes from midnight, on whole hours. */
   startMin: number;
   endMin: number;
-  /** Orient's locked line at Up at; null when the day has no wake time. */
+  /** Orient's locked line at Up at, or at a late wake; null with no wake time. */
   orient: { atMin: number; lengthMin: number } | null;
   blocks: ReviewBlock[];
+  /**
+   * A late wake: the wake as "HH:MM" and the blocks it passed, in order;
+   * null on a day that starts as planned.
+   */
+  late: { wokeAt: string; passed: ReviewPassedBlock[] } | null;
   /** Ready, go already given today. */
   readied: boolean;
 }
@@ -155,12 +176,15 @@ export function deriveReviewDay(today: Today): ReviewDayView {
       };
     });
   const wake = records.usualWakeTime;
-  const starts = blocks.map((block) => clockMinutes(block.startsAt));
-  const ends = blocks.map((block) => clockMinutes(block.endsAt));
+  const laid = lateLayout(today, blocks);
+  const shown = laid?.blocks ?? blocks;
+  const starts = shown.map((block) => clockMinutes(block.startsAt));
+  const ends = shown.map((block) => clockMinutes(block.endsAt));
+  const orientAt = laid?.wokeAt ?? (wake ? clockMinutes(wake) : null);
   const first = Math.min(
-    ...(wake ? [clockMinutes(wake)] : []),
+    ...(orientAt !== null ? [orientAt] : []),
     ...starts,
-    ...(starts.length === 0 && !wake ? [7 * 60] : []),
+    ...(starts.length === 0 && orientAt === null ? [7 * 60] : []),
   );
   const last = Math.max(first + 60, ...ends);
   return {
@@ -168,11 +192,60 @@ export function deriveReviewDay(today: Today): ReviewDayView {
     timeZone: records.timeZone,
     startMin: Math.floor(first / 60) * 60,
     endMin: Math.min(24 * 60, Math.ceil(last / 60) * 60),
-    orient: wake
-      ? { atMin: clockMinutes(wake), lengthMin: ORIENT_LENGTH_MIN }
+    orient:
+      orientAt !== null
+        ? { atMin: orientAt, lengthMin: ORIENT_LENGTH_MIN }
+        : null,
+    blocks: shown,
+    late: laid
+      ? { wokeAt: clockFromMinutes(laid.wokeAt), passed: laid.passed }
       : null,
-    blocks,
     readied: records.dayRecord?.readyAt != null,
+  };
+}
+
+/**
+ * The day laid out from a late wake (`layoutFromWake`, USE-35): the passed
+ * blocks out of the column, the one under way moved to start after Orient.
+ * Null when Orient opened by Up at.
+ */
+function lateLayout(
+  today: Today,
+  blocks: ReviewBlock[],
+): {
+  wokeAt: number;
+  blocks: ReviewBlock[];
+  passed: ReviewPassedBlock[];
+} | null {
+  const wake = lateWakeOf(today);
+  if (wake === null) return null;
+  const plan = layoutFromWake(roomDayOf(today), wake);
+  const folded = new Set(plan.summary.folded);
+  const moved = new Map(
+    plan.summary.moves.map((move) => [move.blockId, move.to]),
+  );
+  return {
+    wokeAt: wake.wokeAt,
+    blocks: blocks
+      .filter((block) => !folded.has(block.id))
+      .map((block) => {
+        const to = moved.get(block.id);
+        return to === undefined ? block : { ...block, startsAt: to };
+      }),
+    passed: plan.summary.folded.flatMap((id) => {
+      const block = blocks.find((entry) => entry.id === id);
+      return block
+        ? [
+            {
+              id: block.id,
+              kind: block.kind,
+              name: block.name,
+              startsAt: block.startsAt,
+              endsAt: block.endsAt,
+            },
+          ]
+        : [];
+    }),
   };
 }
 

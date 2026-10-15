@@ -16,12 +16,14 @@ import { useFirstTime } from "@/lib/data/use-first-time";
 import type { ReviewDayView } from "@/lib/data/use-review-day";
 import { useUndoToast } from "@/lib/hooks/use-undo-toast";
 import { REVIEW_EDITS_COPY as COPY } from "./edits-copy";
+import { REVIEW_LATE_COPY } from "./late-copy";
 
 /**
  * Review the day's edits on the frame (USE-37): every change goes through
  * `useDayEdits` (today only, with Undo in the Toaster above Ready, go); the
  * first change ever shows the first-change line; the rail + sits at the next
- * free time with its hint until Got it or the first drag.
+ * free time with its hint until Got it or the first drag. A late wake's
+ * Move later goes the same way (USE-38).
  *
  * A scenario's `view.staged` swap is the Item sheet's landing, run once
  * when the day has read, its Toaster held for the capture.
@@ -77,6 +79,20 @@ export function useReviewEdits(
       });
   }
 
+  /** A passed block back after Orient (USE-38), with Undo in the Toaster. */
+  function moveLater(blockId: string) {
+    return edits.moveLater(blockId).then(({ token, movedLater }) => {
+      if (!movedLater) return;
+      showToast({
+        text: REVIEW_LATE_COPY.movedLater(
+          movedLater.block,
+          movedLater.startsAt,
+        ),
+        onUndo: () => void edits.undo(token),
+      });
+    });
+  }
+
   const plusAtMin =
     view === undefined
       ? null
@@ -93,6 +109,7 @@ export function useReviewEdits(
   return {
     edits,
     swipeAway,
+    moveLater,
     firstChangeLine: showsFirstChangeLine({
       seenBefore,
       changedThisVisit: changed,

@@ -3,14 +3,16 @@
 import { ReviewDayFrame } from "@/app/(shell)/today/review/_components";
 import { PinnedScenarioProvider } from "@/lib/data/source";
 
-/** Review the day's frames (USE-31, USE-37), one scenario each, for the capture host. */
+/** Review the day's frames (USE-31, USE-37, USE-38), one scenario each, for the capture host. */
 export type ReviewPartState =
   | "success"
   | "tray-open"
   | "first-mornings"
   | "first-edit"
   | "after-swap-undo"
-  | "no-work";
+  | "no-work"
+  | "late"
+  | "late-passed-open";
 
 export function ReviewPart({ state }: { state: ReviewPartState }) {
   return (

@@ -24,7 +24,7 @@ The "Planned before 8:10" row opened. A state of Review the day, not a step of "
 ## What the person can do
 
 - **Move later:** puts the passed block back on today's column. Decided (D-USE-69) where it lands (the note: "still open (overview, Open)"). Default: right after Orient at the wake, with the blocks after it sliding by its length, as "Slide the day back" does (the engine shared with Make room, [`../../../interactions/make-room/index.md`](../../../interactions/make-room/index.md)), and an Undo Toaster; the alternative is the end of the day.
-- **Leave:** the block stays folded and is not run; nothing is marked [ASSUMPTION: the card goes and the row keeps its name].
+- **Leave:** the block stays folded and is not run; nothing is marked [ASSUMPTION: the card goes and the row keeps its name]. With every card left the row folds closed; Leave holds for the visit and writes nothing, so a reopened screen shows the card again [ASSUMPTION, USE-38].
 - Tap the row's heading to fold it again.
 
 ## Words
