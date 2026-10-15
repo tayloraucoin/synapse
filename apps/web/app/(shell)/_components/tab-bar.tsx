@@ -16,9 +16,10 @@ import { BottomNav, BottomNavItem, BottomNavList } from "@syn/ui";
 import { requestScrollToNow } from "@/lib/hooks/use-scroll-to-now";
 import { SHELL_COPY as COPY } from "./copy";
 import { tabForPath, tabItems } from "./nav-items";
+import { useBlockViewFrom } from "./use-block-view-from";
 
 export function TabBar({ firstTab = "Now" }: { firstTab?: "Now" | "List" }) {
-  const active = tabForPath(usePathname());
+  const active = tabForPath(usePathname(), null, useBlockViewFrom());
 
   return (
     <BottomNav aria-label={COPY.tabsLabel}>

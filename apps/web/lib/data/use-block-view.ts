@@ -17,8 +17,31 @@ import type { WeekRecords } from "./week-records";
  * a write anywhere in set-up shows here at once.
  */
 
+/**
+ * One row of the block (USE-48): a set item, or the date's own item, with
+ * its slot on the date when it has one. Transitions are bands, not rows.
+ */
+export interface BlockViewItem {
+  /** The block item's id. */
+  id: string;
+  title: string;
+  /** The planned length: the slot's, else the item's. */
+  lengthMin: number | null;
+  atTime: string | null;
+  /** The planned start, "HH:MM", from `reflowItems`. */
+  startsAt: string;
+  /** The date's place: the slot's order, else the item's. */
+  sortOrder: number;
+  slotId: string | null;
+  done: boolean;
+  /** The date's own item (added from the day), not the weekday's. */
+  onDate: string | null;
+}
+
 export interface BlockView {
   block: SetUpBlock;
+  /** The rows in the day's order, each with its planned start. */
+  items: BlockViewItem[];
   /** Events whose time falls inside the block (D-USE-31), pinned as bands. */
   events: DayEventRecord[];
   reflow: Reflow;
@@ -40,20 +63,85 @@ export function deriveBlockView(
     (event) =>
       event.startsAt >= block.startsAt && event.startsAt < block.endsAt,
   );
+  const rows = block.items.map((item, index) => {
+    const slot = block.slots.find((row) => row.blockItemId === item.id);
+    return {
+      item,
+      slot: slot ?? null,
+      sortOrder: slot?.sortOrder ?? index,
+      lengthMin: slot?.lengthMin ?? item.lengthMin,
+    };
+  });
+  const reflow = reflowRows(block, rows, events);
+  const startOf = new Map(reflow.placed.map((p) => [p.id, p.startsAt]));
   return {
     block,
-    events,
-    reflow: reflowItems({
-      startsAt: block.startsAt,
-      endsAt: block.endsAt,
-      items: block.items.map((item) => ({
+    items: rows
+      .filter(({ item }) => !item.isTransition)
+      .map(({ item, slot, sortOrder, lengthMin }) => ({
         id: item.id,
-        lengthMin: item.lengthMin,
+        title: item.title,
+        lengthMin,
         atTime: item.atTime,
+        startsAt: startOf.get(item.id) ?? block.startsAt,
+        sortOrder,
+        slotId: slot?.id ?? null,
+        done: slot?.doneAt != null,
+        onDate: item.onDate,
       })),
-      bands: events,
-    }),
+    events,
+    reflow,
     day,
+  };
+}
+
+function reflowRows(
+  block: SetUpBlock,
+  rows: readonly {
+    item: { id: string; atTime: string | null };
+    lengthMin: number | null;
+  }[],
+  events: readonly DayEventRecord[],
+): Reflow {
+  return reflowItems({
+    startsAt: block.startsAt,
+    endsAt: block.endsAt,
+    items: rows.map(({ item, lengthMin }) => ({
+      id: item.id,
+      lengthMin,
+      atTime: item.atTime,
+    })),
+    bands: events,
+  });
+}
+
+/**
+ * The rows in another order, their times flowed again (USE-48): a drop
+ * shown before it saves, and Edit's held drag. A row `ids` does not name
+ * keeps its place after the named ones.
+ */
+export function inOrderOf(
+  view: BlockView,
+  ids: readonly string[],
+): { items: BlockViewItem[]; reflow: Reflow } {
+  const rank = new Map(ids.map((id, index) => [id, index]));
+  const ordered = [...view.items].sort(
+    (a, b) =>
+      (rank.get(a.id) ?? ids.length) - (rank.get(b.id) ?? ids.length) ||
+      a.sortOrder - b.sortOrder,
+  );
+  const reflow = reflowRows(
+    view.block,
+    ordered.map((row) => ({ item: row, lengthMin: row.lengthMin })),
+    view.events,
+  );
+  const startOf = new Map(reflow.placed.map((p) => [p.id, p.startsAt]));
+  return {
+    items: ordered.map((row) => ({
+      ...row,
+      startsAt: startOf.get(row.id) ?? row.startsAt,
+    })),
+    reflow,
   };
 }
 

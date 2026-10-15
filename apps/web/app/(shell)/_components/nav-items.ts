@@ -18,8 +18,10 @@ import {
 } from "@syn/ui";
 import {
   isJournalPath,
+  isTodayBlockPath,
   orientRoute,
   reviewRoute,
+  TODAY_BLOCK_FROM_PARAM,
   TODAY_DATE_PARAM,
   todayReadyRoute,
   todayReviewRoute,
@@ -27,6 +29,7 @@ import {
   todayRoute,
   todayScheduleRoute,
   weekRoute,
+  type TodayBlockFrom,
 } from "@/lib/routes";
 
 export type ShellTab = "today" | "week" | "schedule" | "review";
@@ -77,9 +80,17 @@ export const TAB_ITEMS: readonly NavItem[] = tabItems();
 export function tabForPath(
   pathname: string,
   search: URLSearchParams | null = null,
+  fallbackFrom: TodayBlockFrom | null = null,
 ): ShellTab | null {
   const is = (route: string) =>
     pathname === route || pathname.startsWith(`${route}/`);
+  // Block view from Schedule keeps Schedule selected (current.md).
+  if (
+    isTodayBlockPath(pathname) &&
+    blockViewFrom(search, fallbackFrom) === "schedule"
+  ) {
+    return "schedule";
+  }
   if (is(todayScheduleRoute())) return "schedule";
   if (is(weekRoute())) return "week";
   if (is(reviewRoute())) return "review";
@@ -100,8 +111,31 @@ export function isPushedPath(pathname: string): boolean {
   return pathname === days || pathname.startsWith(`${days}/`);
 }
 
-/** A focused screen renders with no rail and no tabs. */
-export function isFocusedPath(pathname: string): boolean {
+/**
+ * Where a Block view was opened (USE-48): the `from` param, else the
+ * scenario's (a `?state=` capture's default), else null (Now's Edit block).
+ */
+export function blockViewFrom(
+  search: URLSearchParams | null,
+  fallback: TodayBlockFrom | null = null,
+): TodayBlockFrom | null {
+  const from = search?.get(TODAY_BLOCK_FROM_PARAM);
+  return from === "review" || from === "schedule" ? from : fallback;
+}
+
+/**
+ * A focused screen renders with no rail and no tabs. Block view is focused
+ * when opened from Review the day, itself focused; from Schedule and Now
+ * the tabs stay (current.md) [ASSUMPTION: from Now, Now selected].
+ */
+export function isFocusedPath(
+  pathname: string,
+  search: URLSearchParams | null = null,
+  fallbackFrom: TodayBlockFrom | null = null,
+): boolean {
+  if (isTodayBlockPath(pathname)) {
+    return blockViewFrom(search, fallbackFrom) === "review";
+  }
   return (
     isJournalPath(pathname) ||
     FOCUSED_ROUTES.some(

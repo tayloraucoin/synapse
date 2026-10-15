@@ -28,9 +28,14 @@ import {
 import { AccountMenu } from "./account";
 import { SHELL_COPY as COPY } from "./copy";
 import { RAIL_ITEMS, tabForPath } from "./nav-items";
+import { useBlockViewFrom } from "./use-block-view-from";
 
 export function Rail() {
-  const active = tabForPath(usePathname(), useSearchParams());
+  const active = tabForPath(
+    usePathname(),
+    useSearchParams(),
+    useBlockViewFrom(),
+  );
 
   return (
     <SidebarProvider className="min-h-0">

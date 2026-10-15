@@ -2,6 +2,7 @@ import type * as React from "react";
 import { createElement } from "react";
 import { AccountPart } from "./account-parts";
 import { AddPart, type AddPartState } from "./add-parts";
+import { BlockViewPart } from "./block-view-parts";
 import {
   BlockBandAndHeaderForms,
   TierAndItemForms,
@@ -18,6 +19,7 @@ import { OrientPart, type OrientPartState } from "./orient-parts";
 import { ReadyPart, type ReadyPartState } from "./ready-parts";
 import { ReviewPart, type ReviewPartState } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
+import { BLOCK_VIEW_SCENARIOS } from "./scenarios/block-view";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { NEW_BLOCK_SCENARIOS } from "./scenarios/new-block";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
@@ -276,4 +278,8 @@ for (const state of Object.keys(WEEK_SCENARIOS)) {
 // USE-86: Connections with clients on and its two sheets, by their scenario names.
 for (const state of Object.keys(SETTINGS_SCENARIOS)) {
   registerPart(state, () => createElement(SettingsClientsPart)); // USE-86
+}
+// USE-48: Block view from the day, under the block-view scenarios' names.
+for (const state of Object.keys(BLOCK_VIEW_SCENARIOS)) {
+  registerPart(state, () => createElement(BlockViewPart)); // USE-48
 }

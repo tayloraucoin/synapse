@@ -73,6 +73,8 @@ export {
 export { CoffeeIcon as BreakIcon } from "lucide-react";
 // USE-46: the New block sheet's icon tile with no icon set.
 export { SmileIcon as NoIconIcon } from "lucide-react";
+/** Block view's "Icon and colour" (USE-48): a dotted circle. */
+export { CircleDashedIcon as IconAndColourIcon } from "lucide-react";
 /** The account's glyphs (USE-83): the avatar menu's rows and the install steps. */
 export {
   CalendarRangeIcon as SetMyDaysIcon,

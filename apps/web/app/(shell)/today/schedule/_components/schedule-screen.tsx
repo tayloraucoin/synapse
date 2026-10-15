@@ -24,7 +24,12 @@ import {
   type ScheduleEvent,
 } from "@/lib/data/use-schedule";
 import { useScrollToNow } from "@/lib/hooks/use-scroll-to-now";
-import { daysRoute, todayBlockRoute, todayReviewRoute } from "@/lib/routes";
+import {
+  daysRoute,
+  todayBlockRoute,
+  todayReviewRoute,
+  withSearch,
+} from "@/lib/routes";
 import { NowTodosTray } from "../../_components/now/now-todos-tray";
 import { SCHEDULE_COPY as COPY } from "./copy";
 
@@ -99,9 +104,10 @@ export function ScheduleScreen() {
     scrollToNow();
   }, [view, scrollToNow]);
 
-  /** A path with this screen's query kept, so `?state=` travels. */
-  const kept = (path: string) => `${path}${window.location.search}`;
-  const openBlock = (id: string) => router.push(kept(todayBlockRoute(id)));
+  const openBlock = (id: string) =>
+    router.push(
+      withSearch(todayBlockRoute(id, "schedule"), window.location.search),
+    );
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-(--content-text) flex-1 flex-col">

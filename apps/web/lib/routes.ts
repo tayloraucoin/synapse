@@ -118,9 +118,40 @@ export function todayScheduleRoute(): string {
 /**
  * A block on today's date: the Block view, from Now's Edit block, Review the
  * day and Schedule (block-view/index.md, `/today/block/{id}` [PROPOSED]).
+ * `from` says where it was opened (USE-48): the breadcrumb goes back there,
+ * and from Schedule the tabs show with Schedule selected; unset is Now.
  */
-export function todayBlockRoute(blockId: string): string {
-  return `/today/block/${encodeURIComponent(blockId)}`;
+export type TodayBlockFrom = "review" | "schedule";
+
+/** The query key `todayBlockRoute`'s `from` writes. */
+export const TODAY_BLOCK_FROM_PARAM = "from";
+
+export function todayBlockRoute(
+  blockId: string,
+  from?: TodayBlockFrom,
+): string {
+  const path = `/today/block/${encodeURIComponent(blockId)}`;
+  return from === undefined
+    ? path
+    : `${path}?${TODAY_BLOCK_FROM_PARAM}=${from}`;
+}
+
+/** Whether a path is a Block view from the day. */
+export function isTodayBlockPath(pathname: string): boolean {
+  return pathname.startsWith("/today/block/");
+}
+
+/**
+ * A path with the current query kept under its own (`?state=` travels), the
+ * path's own keys winning: `withSearch(todayBlockRoute(id, "review"),
+ * "?state=success")` is `…?state=success&from=review`.
+ */
+export function withSearch(path: string, search: string): string {
+  const [base = "", own = ""] = path.split("?");
+  const query = new URLSearchParams(search);
+  for (const [key, value] of new URLSearchParams(own)) query.set(key, value);
+  const joined = query.toString();
+  return joined ? `${base}?${joined}` : base;
 }
 
 /**

@@ -5,6 +5,7 @@ import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
 import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
+import { BLOCK_VIEW_SCENARIOS } from "./block-view";
 import { CLOSE_THE_DAY_SCENARIOS } from "./close-the-day";
 import { INTEGRATION_SCENARIOS } from "./integrations";
 import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
@@ -94,9 +95,10 @@ export interface Scenario {
   linearClosesOnSync?: string[];
   /**
    * Where the screen was opened from (USE-44): "review" stands for
-   * `?from=review`, so a past day's journal reads as Review opens it.
+   * `?from=review`, so a past day's journal reads as Review opens it;
+   * USE-48: Block view's crumb, focus and tabs, "schedule" with the tabs.
    */
-  openedFrom?: "review";
+  openedFrom?: "review" | "schedule";
   /**
    * One-time lines counted as already seen on this scenario (USE-37's rail
    * hint and first-change line), so a capture of another state is not
@@ -254,6 +256,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...ITEM_SHEET_SCENARIOS,
   // ---- Schedule (USE-27): during go, the marks, the checklist day, a meeting ----
   ...SCHEDULE_SCENARIOS,
+  // ---- Block view from the day (USE-48): checked, removed, Edit, current, past ----
+  ...BLOCK_VIEW_SCENARIOS,
   // ---- Close the day (USE-44): writing, empty, offline, read only ----
   ...CLOSE_THE_DAY_SCENARIOS,
   // ---- The To-do sheet (USE-28): its six drawn states, a failed change, offline ----

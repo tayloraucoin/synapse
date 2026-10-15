@@ -17,6 +17,7 @@ import {
   orientRoute,
   todayBlockRoute,
   todayReadyRoute,
+  withSearch,
 } from "@/lib/routes";
 import { dateTitle } from "../../_components/now/copy";
 import { useDayEntryGate } from "../../../_components/day-entry-gate";
@@ -139,7 +140,14 @@ export function ReviewDayFrame() {
               orient={view.orient}
               blocks={view.blocks}
               timeZone={view.timeZone}
-              onBlock={(id) => router.push(kept(todayBlockRoute(id)))}
+              onBlock={(id) =>
+                router.push(
+                  withSearch(
+                    todayBlockRoute(id, "review"),
+                    window.location.search,
+                  ),
+                )
+              }
               onBullet={(_blockId, itemId) =>
                 router.push(
                   itemSheetRoute(

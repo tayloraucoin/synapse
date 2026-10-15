@@ -28,6 +28,7 @@ import { Rail } from "./rail";
 import { useMarkShellPainted } from "./day-entry-gate";
 import { SheetHost, SheetOpenerProvider } from "./sheet-host";
 import { TabBar } from "./tab-bar";
+import { useBlockViewFrom } from "./use-block-view-from";
 
 export interface AppShellProps {
   children: React.ReactNode;
@@ -35,6 +36,8 @@ export interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  // Block view from Review the day is focused; from Schedule it keeps the tabs.
+  const blockFrom = useBlockViewFrom();
   // The phone's first tab reads "List" before Ready, go, from the day record
   // (D-USE-5, USE-17); "Now" while it is read.
   const phase = useDayPhase(useTodayKey());
@@ -42,7 +45,7 @@ export function AppShell({ children }: AppShellProps) {
   useMarkShellPainted();
   const pushed = isPushedPath(pathname);
 
-  if (isFocusedPath(pathname)) {
+  if (isFocusedPath(pathname, null, blockFrom)) {
     return (
       <SheetOpenerProvider>
         <div className="bg-background flex min-h-dvh flex-col">{children}</div>

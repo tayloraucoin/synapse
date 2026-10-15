@@ -30,3 +30,13 @@ export const OverTitle: Story = {
     </header>
   ),
 };
+
+/** Block view's crumb (USE-48): the way back, then the screen in ink. */
+export const WithCurrent: Story = {
+  args: {
+    label: "Today",
+    href: "#",
+    ariaLabel: "Back to Today",
+    current: "Wellness",
+  },
+};
