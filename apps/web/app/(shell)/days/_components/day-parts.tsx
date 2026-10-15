@@ -2,9 +2,20 @@
 
 import * as React from "react";
 import {
+  AddEventIcon,
   AddIcon,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   CloseIcon,
   cn,
+  CopyFromIcon,
+  DeleteIcon,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -15,6 +26,7 @@ import {
   MoreIcon,
   NewBlockIcon,
   NewTransitionIcon,
+  ResetToUsualIcon,
   SavedBlockIcon,
   StatusLine,
   Text,
@@ -25,7 +37,8 @@ import { DAYS_COPY as COPY } from "./copy";
 
 /**
  * The day's own parts (USE-39; layout.md 4 and 5): the chips, the bounds
- * fields, the ··· button, the + and its menu, and the install offer.
+ * fields, the ··· and its menu, the + and its menu, the install offer, and
+ * Clear's one ask (USE-42).
  */
 
 /* ---------------------------------------------------------------- chips -- */
@@ -135,6 +148,7 @@ export function BoundsField({
   suggestion,
   onCommit,
   stacked = false,
+  disabled = false,
 }: {
   label: string;
   /** The saved time, or the draft, "HH:MM"; null shows the suggestion. */
@@ -143,6 +157,8 @@ export function BoundsField({
   onCommit: (value: string) => void;
   /** Labelled above (the empty first day), not inline. */
   stacked?: boolean;
+  /** Offline (D-USE-82): faded and inert. */
+  disabled?: boolean;
 }) {
   const id = React.useId();
   const [typed, setTyped] = React.useState<string | null>(null);
@@ -172,6 +188,7 @@ export function BoundsField({
         id={id}
         type="time"
         value={shown}
+        disabled={disabled}
         onChange={(event) => setTyped(event.target.value)}
         onBlur={commit}
         onKeyDown={(event) => {
@@ -184,7 +201,7 @@ export function BoundsField({
             // Not every browser opens it from a click; focus still types.
           }
         }}
-        className="absolute inset-0 w-full cursor-pointer opacity-0"
+        className="absolute inset-0 w-full cursor-pointer opacity-0 disabled:cursor-default"
       />
     </span>
   );
@@ -204,7 +221,10 @@ export function BoundsField({
     );
   }
   return (
-    <div className="flex h-9 shrink-0 items-center gap-(--space-2) rounded-(--radius-control) border border-border px-(--space-3) text-(length:--fs-body) whitespace-nowrap focus-within:border-foreground focus-within:ring-1 focus-within:ring-foreground">
+    <div
+      data-disabled={disabled || undefined}
+      className="flex h-9 shrink-0 items-center gap-(--space-2) rounded-(--radius-control) border border-border px-(--space-3) text-(length:--fs-body) whitespace-nowrap focus-within:border-foreground focus-within:ring-1 focus-within:ring-foreground data-disabled:opacity-45"
+    >
       <label htmlFor={id}>
         <Text as="span" variant="secondary" tone="muted">
           {label}
@@ -216,25 +236,134 @@ export function BoundsField({
 }
 
 /**
- * The day's ··· (layout.md 4). Its menu, Copy from…, Reset to usual and
- * Clear this day, is Set my days part 2's (USE-42); until then the button
- * holds its place and takes no tap [ASSUMPTION].
+ * The day's ··· (day-menu.md, D-USE-87): a dropdown under the round button,
+ * right-aligned, titled with the day ("Monday, 12 October", or "Every
+ * Monday"): Copy from…, Reset to usual <weekday> (This week only, once the
+ * day differs from its usual), a separator, then Clear this day in ink,
+ * never red, disabled with no blocks. Event is the +'s. The button takes an
+ * ink ring while open. Copy from's picker is its own ticket's; until then
+ * the row shows and takes no tap [ASSUMPTION]. Offline the button is faded
+ * and inert (D-USE-82).
  */
-export function DayMenuButton({ day }: { day: string }) {
+export function DayMenu({
+  title,
+  day,
+  resetTo,
+  canClear,
+  disabled,
+  defaultOpen = false,
+  onReset,
+  onClear,
+}: {
+  title: string;
+  /** The weekday's name, for the button's name. */
+  day: string;
+  /** "Monday" when Reset to usual shows; null hides it. */
+  resetTo: string | null;
+  canClear: boolean;
+  disabled: boolean;
+  defaultOpen?: boolean;
+  onReset: () => void;
+  onClear: () => void;
+}) {
+  const [open, setOpen] = React.useState(false);
+  // Seeded after mount, so the server and the first paint agree.
+  React.useEffect(() => {
+    if (defaultOpen && !disabled) setOpen(true);
+  }, [defaultOpen, disabled]);
+
+  const row =
+    "flex min-h-(--target) items-center gap-(--space-3) px-(--space-4) py-(--space-2)";
+  const icon = "size-4 shrink-0 text-muted-foreground";
   return (
-    <button
-      type="button"
-      aria-label={COPY.dayMenu(day)}
-      disabled
-      className="inline-flex size-(--target) shrink-0 items-center justify-center rounded-full disabled:cursor-default"
-    >
-      <span
-        aria-hidden="true"
-        className="flex size-8 items-center justify-center rounded-full bg-surface text-foreground"
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+      <DropdownMenuTrigger
+        aria-label={COPY.dayMenu(day)}
+        disabled={disabled}
+        className="group inline-flex size-(--target) shrink-0 items-center justify-center rounded-full focus-visible:outline-none disabled:cursor-default"
       >
-        <MoreIcon className="size-4" />
-      </span>
-    </button>
+        <span
+          aria-hidden="true"
+          className={cn(
+            "flex size-8 items-center justify-center rounded-full bg-surface text-foreground",
+            "group-focus-visible:ring-2 group-focus-visible:ring-ring",
+            "group-data-[state=open]:ring-2 group-data-[state=open]:ring-foreground",
+            "group-disabled:opacity-45",
+          )}
+        >
+          <MoreIcon className="size-4" />
+        </span>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        sideOffset={4}
+        className="w-64 rounded-(--radius-sheet) bg-background p-0 py-(--space-1) shadow-menu motion-reduce:animate-none"
+      >
+        <DropdownMenuLabel className="px-(--space-4) pt-(--space-2) pb-(--space-1) text-(length:--fs-caption) font-medium text-muted-foreground">
+          {title}
+        </DropdownMenuLabel>
+        <DropdownMenuItem disabled className={row}>
+          <CopyFromIcon aria-hidden="true" className={icon} />
+          <Text as="span" variant="body" weight={500}>
+            {COPY.copyFrom}
+          </Text>
+        </DropdownMenuItem>
+        {resetTo !== null ? (
+          <DropdownMenuItem onSelect={onReset} className={row}>
+            <ResetToUsualIcon aria-hidden="true" className={icon} />
+            <Text as="span" variant="body" weight={500}>
+              {COPY.resetTo(resetTo)}
+            </Text>
+          </DropdownMenuItem>
+        ) : null}
+        <DropdownMenuSeparator className="mx-(--space-4) my-(--space-1)" />
+        <DropdownMenuItem
+          disabled={!canClear}
+          onSelect={onClear}
+          className={row}
+        >
+          <DeleteIcon
+            aria-hidden="true"
+            className="size-4 shrink-0 text-foreground"
+          />
+          <Text as="span" variant="body" weight={500} tone="ink">
+            {COPY.clearDay}
+          </Text>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/**
+ * Clear's one ask (day-menu.md, D-USE-87): Replace's form (D-USE-32), an
+ * AlertDialog "Clear Monday, 12 October?" naming what goes, Clear in ink
+ * and Cancel. A Toaster with Undo follows.
+ */
+export function ClearDialog({
+  open,
+  words,
+  onOpenChange,
+  onClear,
+}: {
+  open: boolean;
+  words: { title: string; body: string };
+  onOpenChange: (open: boolean) => void;
+  onClear: () => void;
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent className="motion-reduce:animate-none">
+        <AlertDialogHeader>
+          <AlertDialogTitle>{words.title}</AlertDialogTitle>
+          <AlertDialogDescription>{words.body}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{COPY.cancel}</AlertDialogCancel>
+          <AlertDialogAction onClick={onClear}>{COPY.clear}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
@@ -252,20 +381,24 @@ interface PlusRow {
 /**
  * The + (plus-menu.md): a round 56 px ink button that turns to × while its
  * menu is open, a dropdown above it (D-USE-28) titled "Add to <weekday>":
- * Block, Transition, a separator, From a saved block. Event is This week's
- * (USE-42). From a saved block's picker is the Copy from ticket's; until
- * then the row shows and takes no tap [ASSUMPTION].
+ * Block, Transition, in This week Event (USE-42), a separator, From a
+ * saved block. Event's sheet is the Add event ticket's and From a saved
+ * block's picker the Copy from ticket's; until then each row shows and
+ * takes no tap [ASSUMPTION].
  */
 export function PlusMenu({
   day,
   disabled,
   defaultOpen = false,
+  event = false,
   onBlock,
   onTransition,
 }: {
   day: string;
   disabled: boolean;
   defaultOpen?: boolean;
+  /** This week: Event, at a set time on this date only. */
+  event?: boolean;
   onBlock: () => void;
   onTransition: () => void;
 }) {
@@ -288,6 +421,16 @@ export function PlusMenu({
       icon: NewTransitionIcon,
       onSelect: onTransition,
     },
+    ...(event
+      ? [
+          {
+            label: COPY.event,
+            line: COPY.eventLine,
+            icon: AddEventIcon,
+            disabled: true,
+          },
+        ]
+      : []),
     {
       label: COPY.fromSaved,
       line: COPY.fromSavedLine,

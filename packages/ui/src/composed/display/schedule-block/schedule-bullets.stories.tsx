@@ -175,3 +175,15 @@ export const RunningAndFiring: Story = {
     ],
   },
 };
+
+/** Item icons (USE-42; item-icons.md): an icon takes the dot's place; "+2 more" stays text. */
+export const ItemIcons: Story = {
+  args: {
+    bullets: [
+      { id: "1", label: "Pee and weigh", tone: "dot", icon: "⚖️" },
+      { id: "2", label: "Water", tone: "dot", icon: "💧" },
+      { id: "3", label: "Drive to the YMCA", tone: "transition", icon: "🚗" },
+    ],
+    moreCount: 2,
+  },
+};

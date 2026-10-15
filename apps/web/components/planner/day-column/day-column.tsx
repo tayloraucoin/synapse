@@ -1,13 +1,16 @@
 "use client";
 
 import * as React from "react";
-import type { StoredBlockKind, WorkTier } from "@syn/types";
+import type { IconValue, StoredBlockKind, WorkTier } from "@syn/types";
 import {
   BULLET_CELL_PX,
   BULLET_GAP_X_PX,
   BULLET_GAP_Y_PX,
   BULLET_LINE_PX,
   cn,
+  EditIcon,
+  HueSquare,
+  IconTile,
   LockedIcon,
   MealIcon,
   NowLine,
@@ -15,10 +18,12 @@ import {
   ScheduleBullets,
   Text,
   type ScheduleBullet,
+  type SquareHue,
 } from "@syn/ui";
 import {
   bulletCellsPerLine,
   bulletGrid,
+  clockFromMinutes,
   clockMinutes,
   type ScheduleMark,
 } from "@syn/utils";
@@ -37,6 +42,7 @@ import {
 } from "./copy";
 import { HUE_CHECK } from "./mark-hue";
 import { MeetingBand } from "./meeting-band";
+import { useBlockDrag } from "./use-block-drag";
 import { useContentWidth } from "./use-content-width";
 import { useSwipeAway } from "./use-swipe-away";
 
@@ -66,6 +72,12 @@ import { useSwipeAway } from "./use-swipe-away";
  * and `now` (the rail tag and its faint line). With no `onBullet` the
  * bullets are words the block's button describes, not controls.
  *
+ * SET MY DAYS (USE-42) adds, each optional: an item's `icon` in place of
+ * its dot, a tier's coloured square (`tierHue`), a block's `marker` ("This
+ * day only" with a pencil), `ringed` (just changed) and `moved` (the ink
+ * edge), `overlaps` drawn side by side at half width with their one line,
+ * and `onMoveBlock`, a held block dragged in time.
+ *
  * Named apart from `@syn/ui`'s legacy `ScheduleOverlays`; it composes
  * `ScheduleAxis` and does not fork it.
  */
@@ -76,6 +88,8 @@ export interface DayColumnItem {
   tone: "dot" | "transition";
   /** Schedule's mark; unset, a planned dot. */
   mark?: ScheduleMark;
+  /** The item's own icon, in place of the dot (USE-42); null keeps the dot. */
+  icon?: IconValue | null;
 }
 
 export interface DayColumnTier {
@@ -129,6 +143,27 @@ export interface DayColumnBlock {
    * its kind's colour and no fill, its line and "Change its time".
    */
   edge?: { line: string; actionLabel: string; onAction: () => void };
+  /** A muted caption at the head's trailing edge with a pencil: "This day only" (D-USE-33). */
+  marker?: string;
+  /** Just changed: ringed in ink (usual-change-reaches.md). */
+  ringed?: boolean;
+  /** Just moved by a drag: an ink edge (overlap.md). */
+  moved?: boolean;
+}
+
+/**
+ * Two blocks that share time (D-USE-33): side by side at half width, `a`
+ * left and `b` right, neither moved; the line under them names it and its
+ * one fix.
+ */
+export interface DayColumnOverlap {
+  a: string;
+  b: string;
+  /** The minute the line sits at: under the pair. */
+  atMin: number;
+  line: string;
+  actionLabel: string;
+  onAction: () => void;
 }
 
 export interface DayColumnProps {
@@ -161,6 +196,12 @@ export interface DayColumnProps {
   onRail?: (atMin: number) => void;
   /** The slot a tap marked: a dashed ink outline, its time tag on the rail. */
   tapped?: { startsAt: string; endsAt: string } | null;
+  /** Each tier's sub-head leads with its square in this hue (Set my days). */
+  tierHue?: Record<WorkTier, SquareHue>;
+  /** Blocks sharing time, side by side with their line (USE-42). */
+  overlaps?: readonly DayColumnOverlap[];
+  /** A held block dragged in time, snapped minutes; unset, nothing drags. */
+  onMoveBlock?: (blockId: string, deltaMin: number) => void;
 }
 
 /* ---- the column's geometry (success.md) ---- */
@@ -237,10 +278,23 @@ export function DayColumn({
   openLines = [],
   onRail,
   tapped = null,
+  tierHue,
+  overlaps = [],
+  onMoveBlock,
 }: DayColumnProps) {
   const [ref, width] = useContentWidth<HTMLDivElement>();
   const cellsPerLine = cellsPerLineFor(width);
   const { className: swipeClassName, ...swipe } = useSwipeAway(onSwipeAway);
+  const dragging = useBlockDrag({
+    pxPerHour: DAY_COLUMN_PX_PER_HOUR,
+    onMove: onMoveBlock,
+  });
+  // The first pair a block is in sets its lane; a lone block has none.
+  const lanes = new Map<string, Lane>();
+  for (const pair of overlaps) {
+    if (!lanes.has(pair.a)) lanes.set(pair.a, "start");
+    if (!lanes.has(pair.b)) lanes.set(pair.b, "end");
+  }
 
   return (
     <div
@@ -285,26 +339,32 @@ export function DayColumn({
           />
         ) : null}
         {blocks.map((block) => {
-          const top = pxOf(clockMinutes(block.startsAt) - hours.startMin);
+          const lifted =
+            dragging.drag?.id === block.id ? dragging.drag.deltaMin : null;
+          const top = pxOf(
+            clockMinutes(block.startsAt) + (lifted ?? 0) - hours.startMin,
+          );
           const height = pxOf(
             clockMinutes(block.endsAt) - clockMinutes(block.startsAt),
           );
+          const lane = lanes.get(block.id) ?? null;
+          const common = {
+            block,
+            topPx: top,
+            heightPx: height,
+            lane,
+            lifted: lifted !== null,
+            drag: dragging.handlers(block.id),
+            onOpen: () => onBlock(block.id),
+          };
           return block.form === "meal" ? (
-            <MealBand
-              key={block.id}
-              block={block}
-              topPx={top}
-              heightPx={height}
-              onOpen={() => onBlock(block.id)}
-            />
+            <MealBand key={block.id} {...common} />
           ) : (
             <BlockCard
               key={block.id}
-              block={block}
-              topPx={top}
-              heightPx={height}
-              cellsPerLine={cellsPerLine}
-              onOpen={() => onBlock(block.id)}
+              {...common}
+              cellsPerLine={lane === null ? cellsPerLine : 1}
+              tierHue={tierHue}
               onBullet={
                 onBullet ? (itemId) => onBullet(block.id, itemId) : undefined
               }
@@ -316,6 +376,16 @@ export function DayColumn({
             />
           );
         })}
+        {overlaps.map((pair) => (
+          <OverlapLine
+            key={`${pair.a}:${pair.b}`}
+            pair={pair}
+            topPx={pxOf(pair.atMin - hours.startMin)}
+          />
+        ))}
+        {dragging.drag !== null ? (
+          <DragTag drag={dragging.drag} blocks={blocks} hours={hours} />
+        ) : null}
         {events.map((event) => (
           <EventCard
             key={event.id}
@@ -446,21 +516,49 @@ function OrientLine({
   );
 }
 
+/** A block's half when it shares time with another (D-USE-33). */
+type Lane = "start" | "end";
+
 interface PlacedProps {
   block: DayColumnBlock;
   topPx: number;
   heightPx: number;
   onOpen: () => void;
+  lane?: Lane | null;
+  /** Held and following the pointer. */
+  lifted?: boolean;
+  /** The drag's pointer handlers, when blocks move here. */
+  drag?: React.HTMLAttributes<HTMLElement>;
 }
 
+/** The space between two blocks side by side. */
+const LANE_GAP_PX = 4;
+
 /** The box a block or meal sits in: its span, less the breath before the next. */
-function placed(topPx: number, heightPx: number): React.CSSProperties {
+function placed(
+  topPx: number,
+  heightPx: number,
+  lane: Lane | null = null,
+): React.CSSProperties {
+  const half = `calc((100% - ${GUTTER_PX}px - ${LANE_GAP_PX}px) / 2)`;
   return {
     top: `${topPx}px`,
     height: `${Math.max(0, heightPx - BLOCK_GAP_PX)}px`,
-    insetInlineStart: `${GUTTER_PX}px`,
-    insetInlineEnd: 0,
+    insetInlineStart:
+      lane === "end"
+        ? `calc(${GUTTER_PX}px + ${half} + ${LANE_GAP_PX}px)`
+        : `${GUTTER_PX}px`,
+    insetInlineEnd: lane === "start" ? `calc(${half} + ${LANE_GAP_PX}px)` : 0,
   };
+}
+
+/** Lifted: above the rest, with the lift's shadow; draggable blocks hold no callout. */
+function dragClass(lifted: boolean, drag: PlacedProps["drag"]) {
+  return cn(
+    drag?.onPointerDown &&
+      "touch-manipulation select-none [-webkit-touch-callout:none]",
+    lifted && "z-10 shadow-menu",
+  );
 }
 
 /** The button under everything, carrying the tap and the block's name. */
@@ -491,9 +589,21 @@ function stateClass(state: DayColumnBlock["state"]) {
   return null;
 }
 
-function BlockHead({ block }: { block: DayColumnBlock }) {
+function BlockHead({
+  block,
+  stacked = false,
+}: {
+  block: DayColumnBlock;
+  /** At half width the span goes under the name (overlap.md). */
+  stacked?: boolean;
+}) {
   return (
-    <div className="flex h-5.5 min-w-0 items-baseline gap-(--space-2)">
+    <div
+      className={cn(
+        "flex min-w-0",
+        stacked ? "flex-col" : "h-5.5 items-baseline gap-(--space-2)",
+      )}
+    >
       <Text as="span" variant="body" weight={600} truncate>
         {block.name}
       </Text>
@@ -506,7 +616,26 @@ function BlockHead({ block }: { block: DayColumnBlock }) {
       >
         {spanLabel(block.startsAt, block.endsAt)}
       </Text>
+      {block.marker ? (
+        <span
+          data-block-marker
+          className="ms-auto flex shrink-0 items-center gap-(--space-1) self-center text-muted-foreground"
+        >
+          <EditIcon aria-hidden="true" className="size-3" />
+          <Text as="span" variant="caption" tone="muted">
+            {block.marker}
+          </Text>
+        </span>
+      ) : null}
     </div>
+  );
+}
+
+/** The marked edges a block can carry, ink, never colour alone. */
+function markClass(block: DayColumnBlock) {
+  return cn(
+    block.ringed && "ring-2 ring-foreground",
+    block.moved && "border border-foreground",
   );
 }
 
@@ -556,8 +685,13 @@ function BlockCard({
   onOpen,
   onBullet,
   empty,
+  lane = null,
+  lifted = false,
+  drag,
+  tierHue,
 }: PlacedProps & {
   cellsPerLine: number;
+  tierHue?: Record<WorkTier, SquareHue>;
   onBullet: ((itemId: string) => void) | undefined;
   /** Drawn under the head in place of the items (an empty Work block). */
   empty?: React.ReactNode;
@@ -568,6 +702,9 @@ function BlockCard({
     id: item.id,
     label: item.label,
     tone: item.tone,
+    ...(item.icon
+      ? { icon: <IconTile icon={item.icon} variant="bare" /> }
+      : {}),
     ...markOf(item),
     ...(onBullet
       ? {
@@ -576,7 +713,12 @@ function BlockCard({
         }
       : {}),
   });
-  const places = segmentPlaces(block, heightPx);
+  // At half width the span takes a second line under the name.
+  const places = segmentPlaces(block, heightPx).map((place, index) =>
+    index === 0 && lane !== null
+      ? { ...place, roomPx: place.roomPx - BULLET_LINE_PX }
+      : place,
+  );
   const start = clockMinutes(block.startsAt);
   const items = (place: SegmentPlace) =>
     block.form === "work" ? (
@@ -585,6 +727,7 @@ function BlockCard({
         roomPx={place.roomPx}
         hue={hue}
         bullet={bullet}
+        tierHue={tierHue}
       />
     ) : (
       <ItemGrid
@@ -606,7 +749,10 @@ function BlockCard({
       data-block-id={block.id}
       data-state={block.state ?? undefined}
       data-edge={block.edge ? "dashed" : undefined}
-      style={placed(topPx, heightPx)}
+      data-lane={lane ?? undefined}
+      data-marked={block.ringed ? "ringed" : block.moved ? "moved" : undefined}
+      style={placed(topPx, heightPx, lane)}
+      {...drag}
       className={cn(
         "absolute flex overflow-hidden rounded-(--radius-control)",
         // Kept, not run: a dashed edge in its kind's colour, no fill (D-USE-32).
@@ -614,6 +760,8 @@ function BlockCard({
           ? cn("border border-dashed", HUE_BORDER[hue])
           : HUE_CHIP[hue],
         stateClass(block.state),
+        markClass(block),
+        dragClass(lifted, drag),
       )}
     >
       <CoverButton
@@ -633,7 +781,7 @@ function BlockCard({
         />
       )}
       <div className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-(--space-1) pt-(--space-2) ps-(--space-3) pe-(--space-2) pb-(--space-1) [&_button]:pointer-events-auto">
-        <BlockHead block={block} />
+        <BlockHead block={block} stacked={lane !== null} />
         <div id={`${listId}-0`}>
           {block.edge ? (
             <EdgeLine edge={block.edge} />
@@ -746,11 +894,13 @@ function WorkTiers({
   roomPx,
   hue,
   bullet,
+  tierHue,
 }: {
   tiers: DayColumnSegment["tiers"];
   roomPx: number;
   hue: BlockHue;
   bullet: (item: DayColumnItem) => ScheduleBullet;
+  tierHue?: Record<WorkTier, SquareHue>;
 }) {
   const { rows, more } = fitWorkRows(tiers, roomPx);
   if (rows.length === 0 && more === 0) return null;
@@ -769,8 +919,9 @@ function WorkTiers({
             variant="caption"
             tone="muted"
             weight={500}
-            className="flex h-5 items-end"
+            className="flex h-5 items-center gap-(--space-1)"
           >
+            {tierHue ? <HueSquare hue={tierHue[group.tier]} /> : null}
             {COPY.tier[group.tier]}
           </Text>
           <ScheduleBullets
@@ -787,20 +938,35 @@ function WorkTiers({
 }
 
 /** A meal: a dashed band, the fork and knife, the name and its span. */
-function MealBand({ block, topPx, heightPx, onOpen }: PlacedProps) {
+function MealBand({
+  block,
+  topPx,
+  heightPx,
+  onOpen,
+  lane = null,
+  lifted = false,
+  drag,
+}: PlacedProps) {
   return (
     <div
       data-day-meal
       data-block-id={block.id}
       data-state={block.state ?? undefined}
-      style={placed(topPx, heightPx)}
+      data-lane={lane ?? undefined}
+      data-marked={block.ringed ? "ringed" : block.moved ? "moved" : undefined}
+      style={placed(topPx, heightPx, lane)}
+      {...drag}
       className={cn(
         "absolute flex rounded-(--radius-control) border",
         // Under way, the one verdigris edge takes the dashes' place [ASSUMPTION].
         block.state === "now"
           ? "border-solid border-now"
-          : "border-dashed border-border",
+          : block.moved
+            ? "border-solid border-foreground bg-background"
+            : "border-dashed border-border",
         block.state === "done" ? "opacity-45" : null,
+        block.ringed && "ring-2 ring-foreground",
+        dragClass(lifted, drag),
       )}
     >
       <CoverButton
@@ -812,14 +978,23 @@ function MealBand({ block, topPx, heightPx, onOpen }: PlacedProps) {
         )}
         onOpen={onOpen}
       />
-      <div className="pointer-events-none relative flex h-(--target) max-h-full min-w-0 items-center gap-(--space-2) ps-(--space-3) pe-(--space-2)">
-        <MealIcon
-          aria-hidden="true"
-          className="size-3.5 shrink-0 text-muted-foreground"
-        />
-        <Text as="span" variant="secondary" weight={500} truncate>
-          {block.name}
-        </Text>
+      <div
+        className={cn(
+          "pointer-events-none relative flex min-w-0 ps-(--space-3) pe-(--space-2)",
+          lane === null
+            ? "h-(--target) max-h-full items-center gap-(--space-2)"
+            : "flex-col py-(--space-1)",
+        )}
+      >
+        <span className="flex min-w-0 items-center gap-(--space-2)">
+          <MealIcon
+            aria-hidden="true"
+            className="size-3.5 shrink-0 text-muted-foreground"
+          />
+          <Text as="span" variant="secondary" weight={500} truncate>
+            {block.name}
+          </Text>
+        </span>
         <Text
           as="span"
           variant="secondary"
@@ -875,5 +1050,63 @@ function EventCard({
         </Text>
       </div>
     </div>
+  );
+}
+
+/**
+ * The overlap's one line under the pair (D-USE-33): "Overlaps Training,
+ * 8:30 to 8:57." and its one fix, "Start at 8:57", ink and underlined. It
+ * stays until the overlap is gone.
+ */
+function OverlapLine({
+  pair,
+  topPx,
+}: {
+  pair: DayColumnOverlap;
+  topPx: number;
+}) {
+  return (
+    <div
+      data-overlap-line
+      style={{ top: `${topPx}px`, insetInlineStart: `${GUTTER_PX}px` }}
+      className="absolute end-0 flex min-h-6 items-center justify-between gap-(--space-2) bg-background"
+    >
+      <Text as="p" variant="secondary">
+        {pair.line}
+      </Text>
+      <button
+        type="button"
+        data-no-drag
+        onClick={pair.onAction}
+        className="shrink-0 cursor-pointer rounded-(--radius-control) text-(length:--fs-secondary) font-semibold text-foreground underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      >
+        {pair.actionLabel}
+      </button>
+    </div>
+  );
+}
+
+/** While a block is held, its new start on the rail, as a tapped slot's tag. */
+function DragTag({
+  drag,
+  blocks,
+  hours,
+}: {
+  drag: { id: string; deltaMin: number };
+  blocks: readonly DayColumnBlock[];
+  hours: DayColumnProps["hours"];
+}) {
+  const block = blocks.find((b) => b.id === drag.id);
+  if (!block) return null;
+  const startMin = clockMinutes(block.startsAt) + drag.deltaMin;
+  return (
+    <span
+      aria-hidden="true"
+      data-drag-tag
+      style={{ top: `${pxOf(startMin - hours.startMin)}px` }}
+      className="absolute start-0 z-10 -translate-y-1/2 rounded-(--radius-control) bg-foreground px-(--space-1) text-(length:--fs-caption) leading-(--lh-caption) font-medium text-background tabular-nums"
+    >
+      {clockLabel(clockFromMinutes(Math.max(0, startMin)))}
+    </span>
   );
 }

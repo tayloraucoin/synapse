@@ -11,7 +11,8 @@ import { DAYS_COPY as COPY } from "./copy";
  * heading (words-and-access.md).
  */
 export interface DaysHeaderProps {
-  crumb: { label: string; href: string; ariaLabel: string };
+  /** None in the 1024 day pane: the week beside it is the way back (the-day.md). */
+  crumb: { label: string; href: string; ariaLabel: string } | null;
   title: string;
   save: React.ReactNode;
   /** Changes when the view does, so focus moves to the new title. */
@@ -25,19 +26,24 @@ export function DaysHeader({ crumb, title, save, focusKey }: DaysHeaderProps) {
   }, [focusKey]);
   return (
     <header className="flex flex-col gap-(--space-1) px-(--space-4) pt-(--space-4)">
-      <div className="flex min-h-6 items-center justify-between gap-(--space-2)">
-        <Breadcrumb
-          label={crumb.label}
-          href={crumb.href}
-          ariaLabel={crumb.ariaLabel}
-        />
-        {save}
+      {crumb !== null ? (
+        <div className="flex min-h-6 items-center justify-between gap-(--space-2)">
+          <Breadcrumb
+            label={crumb.label}
+            href={crumb.href}
+            ariaLabel={crumb.ariaLabel}
+          />
+          {save}
+        </div>
+      ) : null}
+      <div className="flex items-center justify-between gap-(--space-2)">
+        <h1 ref={ref} tabIndex={-1} className="outline-none">
+          <Text as="span" variant="heading">
+            {title}
+          </Text>
+        </h1>
+        {crumb === null ? save : null}
       </div>
-      <h1 ref={ref} tabIndex={-1} className="outline-none">
-        <Text as="span" variant="heading">
-          {title}
-        </Text>
-      </h1>
     </header>
   );
 }

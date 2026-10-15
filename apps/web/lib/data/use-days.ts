@@ -2,7 +2,13 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { parseAsString, useQueryStates } from "nuqs";
-import { weekDates, weekdayIndex, weekKeyOf } from "@syn/utils";
+import {
+  dateKeyIn,
+  defaultWeek,
+  weekDates,
+  weekdayIndex,
+  weekKeyOf,
+} from "@syn/utils";
 import { useDataSource } from "./source";
 import { useOpeningWeek } from "./use-week";
 import type { WeekRef } from "./week-records";
@@ -58,8 +64,29 @@ export function resolveDaysPlace({
   };
 }
 
+/**
+ * The day the 1024 list-detail selects when the URL names none (the-day.md,
+ * D-USE-39 (3)): a day is always selected, today, or from Sunday evening
+ * the week's first day. A week without today opens on its first day; the
+ * usual week on today's weekday [ASSUMPTION].
+ */
+export function openingDay({
+  dates,
+  now,
+  timeZone,
+}: {
+  dates: readonly string[];
+  now: Date;
+  timeZone: string;
+}): number {
+  const today = dateKeyIn(now, timeZone);
+  if (dates.length > 0) return Math.max(0, dates.indexOf(today));
+  return defaultWeek(now, timeZone) === "this" ? 0 : weekdayIndex(today);
+}
+
 export function useDaysPlace() {
-  const { scenario } = useDataSource();
+  const source = useDataSource();
+  const { scenario } = source;
   const { opens, thisWeek } = useOpeningWeek();
   const [params, setParams] = useQueryStates({
     week: parseAsString,
@@ -78,6 +105,14 @@ export function useDaysPlace() {
   });
   return {
     ...place,
+    /** The 1024 day pane's day: the open one, else the opening rule's. */
+    splitDay:
+      place.day ??
+      openingDay({
+        dates: place.dates,
+        now: source.now(),
+        timeZone: scenario.records.timeZone,
+      }),
     /** Another week: the switch and the stepper keep the week view. */
     showWeek: (week: WeekRef) =>
       void setParams({ week, day: null }, { history: "replace" }),
@@ -86,6 +121,12 @@ export function useDaysPlace() {
       void setParams(
         { week: place.week, day: String(day) },
         { history: "push" },
+      ),
+    /** At 1024 a row selects its day in place (list-detail). */
+    selectDay: (day: number) =>
+      void setParams(
+        { week: place.week, day: String(day) },
+        { history: "replace" },
       ),
   };
 }

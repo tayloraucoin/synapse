@@ -1,4 +1,5 @@
 import {
+  blockChangeRecord,
   blockItemRecord,
   blockRecord,
   dayBoundsRecord,
@@ -551,8 +552,14 @@ export interface SetUpScenarioStart {
   week?: "usual" | "this";
   /** A day open, Monday 0; unset, the week. */
   day?: number;
-  /** The + menu open on load. */
-  menu?: "plus";
+  /** The + menu, the day's ···, or Clear's ask open on load (USE-42). */
+  menu?: "plus" | "day" | "clear";
+  /** A usual change to this block, made in its Block view, arriving on load (USE-42). */
+  reach?: string;
+  /** The block just moved by a drag: its ink edge (overlap.md). */
+  moved?: string;
+  /** The day's Toaster stays, for its capture. */
+  holdToast?: boolean;
   /** A tapped slot marked at this time, as the New block sheet opens there. */
   tapAt?: string;
   /** The column scrolled so this time is at its top. */
@@ -634,6 +641,147 @@ function days(
   ];
 }
 
+/* -------------------------------------------- This week's frames (USE-42) -- */
+
+const emoji = (value: string) => ({ kind: "emoji" as const, value });
+
+/** item-icons.md: each item's icon; work items their Linear project's emoji [placeholder]. */
+const ITEM_ICONS: Record<string, string> = {
+  [I.peeAndWeigh]: "⚖️",
+  [I.water]: "💧",
+  [I.startColdBath]: "🚿",
+  [I.meditate]: "🧘",
+  [I.stretch]: "🤸",
+  [I.driveToGym]: "🚗",
+  [I.workout]: "🏋️",
+  [I.driveHome]: "🚗",
+};
+const WORK_ICONS: Record<string, string> = {
+  [SET_UP_IDS.workItems.syncSpec]: "🛰️",
+  [SET_UP_IDS.workItems.paperHandoff]: "🎨",
+  [SET_UP_IDS.workItems.retryBackoff]: "🛰️",
+  [SET_UP_IDS.workItems.linearBacklog]: "💼",
+};
+
+/** The same records with the items' icons set. */
+function withIcons(records: FixtureRecords): FixtureRecords {
+  return {
+    ...records,
+    blockItems: records.blockItems.map((row) =>
+      ITEM_ICONS[row.id] ? { ...row, icon: emoji(ITEM_ICONS[row.id]!) } : row,
+    ),
+    workItems: records.workItems.map((row) =>
+      WORK_ICONS[row.id] ? { ...row, icon: emoji(WORK_ICONS[row.id]!) } : row,
+    ),
+  };
+}
+
+function blockChange(
+  n: number,
+  blockId: string,
+  onDate: string,
+  startsAt: string,
+  endsAt: string,
+) {
+  return blockChangeRecord.parse({
+    ...stamps,
+    id: fixtureId(9, 100 + n),
+    blockId,
+    onDate,
+    skipped: false,
+    startsAt,
+    endsAt,
+  });
+}
+
+/**
+ * day-menu.md: Monday 12 differs from its usual, so Reset to usual shows;
+ * the afternoon's Work runs to 15:30, below the frame's fold [ASSUMPTION].
+ */
+function mondayChangedRecords(): FixtureRecords {
+  const records = setUpThisWeekRecords();
+  return {
+    ...records,
+    blockChanges: [
+      blockChange(1, B.workAfternoon, "2026-10-12", "13:00", "15:30"),
+    ],
+  };
+}
+
+/** overlap.md: Breakfast dragged to 8:30 on Monday 12, onto Training. */
+function overlapRecords(): FixtureRecords {
+  const records = withIcons(setUpThisWeekRecords());
+  return {
+    ...records,
+    blockChanges: [blockChange(2, B.breakfast, "2026-10-12", "08:30", "09:00")],
+  };
+}
+
+/**
+ * day-own-change.md: Thursday 15's Training is its own (Workout: swim for
+ * gym, the set item skipped on the date); its Work holds this week's tiers
+ * as Monday's [placeholder].
+ */
+function thursdayOwnRecords(): FixtureRecords {
+  const records = withIcons(setUpThisWeekRecords());
+  const thursday = "2026-10-15";
+  const slotOf = (n: number, change: Record<string, unknown>) =>
+    slotRecord.parse({
+      ...stamps,
+      id: id(3, n),
+      onDate: thursday,
+      skipped: false,
+      sortOrder: 0,
+      blockItemId: null,
+      todoId: null,
+      workItemId: null,
+      tier: null,
+      lengthMin: null,
+      tookMin: null,
+      doneAt: null,
+      ...change,
+    });
+  const work = records.slots
+    .filter((slot) => slot.onDate === "2026-10-12")
+    .map((slot, index) =>
+      slotOf(11 + index, {
+        blockId: slot.blockId,
+        sortOrder: slot.sortOrder,
+        workItemId: slot.workItemId,
+        tier: slot.tier,
+      }),
+    );
+  return {
+    ...records,
+    blockItems: [
+      ...records.blockItems,
+      blockItemRecord.parse({
+        ...stamps,
+        id: id(2, 90),
+        blockId: B.training,
+        title: "Workout: swim",
+        icon: emoji("🏊"),
+        isTransition: false,
+        atTime: null,
+        lengthMin: 37,
+        meal: false,
+        onDate: thursday,
+        sortOrder: 1,
+      }),
+    ],
+    slots: [
+      ...records.slots,
+      ...work,
+      slotOf(20, {
+        blockId: B.training,
+        blockItemId: I.workout,
+        skipped: true,
+        sortOrder: 1,
+      }),
+    ],
+  };
+}
+
 /** Up at moved from 7:00 to 6:45: the edit Saving, Saved and Not saved catch. */
 const STAGED_MONDAY = { upAt: "06:45", lightsOut: "22:30" };
 
@@ -708,6 +856,47 @@ export const DAYS_SCENARIOS: Record<string, () => Scenario> =
         seen: [],
         install: { phone: true, standalone: false, platform: "iphone" },
       },
+    ),
+    // USE-42: This week, the menus, the reach, an own change, overlap, offline.
+    days("the-week", setUpThisWeekRecords, { week: "this" }),
+    days("the-day", setUpThisWeekRecords, { week: "this", day: 0 }),
+    days("item-icons", () => withIcons(setUpThisWeekRecords()), {
+      week: "this",
+      day: 0,
+    }),
+    days("plus-menu", setUpThisWeekRecords, {
+      week: "this",
+      day: 0,
+      menu: "plus",
+    }),
+    days("day-menu", mondayChangedRecords, {
+      week: "this",
+      day: 0,
+      menu: "day",
+    }),
+    days("clear-confirm", setUpThisWeekRecords, {
+      week: "this",
+      day: 0,
+      menu: "clear",
+    }),
+    days("usual-change-reaches", () => withIcons(setUpUsualRecords()), {
+      week: "usual",
+      day: 3,
+      reach: B.wellness,
+      holdToast: true,
+    }),
+    days("day-own-change", thursdayOwnRecords, { week: "this", day: 3 }),
+    days("overlap", overlapRecords, {
+      week: "this",
+      day: 0,
+      moved: B.breakfast,
+    }),
+    // [ASSUMPTION] `offline` is Now's; this frame takes the `days-` prefix.
+    days(
+      "days-offline",
+      () => withIcons(setUpUsualRecords()),
+      { week: "usual", day: 3 },
+      { offline: true },
     ),
   ]);
 

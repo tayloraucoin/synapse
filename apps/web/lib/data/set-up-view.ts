@@ -5,6 +5,7 @@ import type {
   DayColumnItem,
   DayColumnTier,
 } from "@/components/planner";
+import type { DayColumnOverlap } from "@/components/planner/day-column";
 import type { SetUpBlock, SetUpDay } from "./use-set-up-day";
 
 /**
@@ -218,8 +219,16 @@ export interface SetUpColumnBlock extends DayColumnBlock {
   outOfBounds?: "before_up_at" | "after_lights_out";
 }
 
+/** An overlap as the column draws it; the caller wires the fix (D-USE-33). */
+export interface SetUpOverlap extends Omit<DayColumnOverlap, "onAction"> {
+  /** The later block takes this start, keeping its length. */
+  fixStartsAt: string;
+}
+
 export interface SetUpColumn {
   hours: { startMin: number; endMin: number };
+  /** From the hook's `overlaps`, in words. */
+  overlaps: SetUpOverlap[];
   orient: { atMin: number; lengthMin: number; label?: string } | null;
   blocks: SetUpColumnBlock[];
   /** "Free until 19:00." in each open hour or more, near the time it names. */
@@ -239,6 +248,8 @@ function itemOf(item: SetUpBlock["items"][number]): DayColumnItem {
     id: item.id,
     label: item.title,
     tone: item.isTransition ? "transition" : "dot",
+    // item-icons.md: an item's icon replaces its dot; none keeps the dot.
+    icon: item.icon,
   };
 }
 
@@ -257,6 +268,8 @@ function tiersOf(day: SetUpDay, b: SetUpBlock): DayColumnTier[] {
             ? `${title} · ${work.linearIdentifier}`
             : title,
           tone: "dot",
+          // D-USE-31: its Linear project's emoji, carried as the item's icon [ASSUMPTION].
+          icon: work?.icon ?? null,
         };
       });
     return items.length > 0 ? [{ tier, items }] : [];
@@ -275,6 +288,8 @@ function usualLines(b: SetUpBlock, weekday: number): string[] | undefined {
   }
   return undefined;
 }
+
+export const THIS_DAY_ONLY = "This day only";
 
 export const EDGE_LINE = {
   before_up_at: "Before Up at. Kept, not run.",
@@ -339,8 +354,25 @@ export function setUpColumn(day: SetUpDay): SetUpColumn {
       tiers,
       ...(lines ? { lines } : {}),
       ...(b.edge ? { outOfBounds: b.edge } : {}),
+      // D-USE-33: a marker, never in the usual week.
+      ...(day.date !== null && b.ownChange ? { marker: THIS_DAY_ONLY } : {}),
     };
   });
+
+  const nameOf = (blockId: string) =>
+    timed.find((b) => b.block.id === blockId)?.block.name ?? "";
+  const endOf = (blockId: string) => {
+    const b = timed.find((x) => x.block.id === blockId);
+    return b ? clockMinutes(b.endsAt) : 0;
+  };
+  const overlaps = day.overlaps.map((pair): SetUpOverlap => ({
+    a: pair.a,
+    b: pair.b,
+    atMin: Math.max(endOf(pair.a), endOf(pair.b)),
+    line: `Overlaps ${nameOf(pair.a)}, ${spanWords(pair.startsAt, pair.endsAt)}.`,
+    actionLabel: `Start at ${clockWords(pair.fixStartsAt)}`,
+    fixStartsAt: pair.fixStartsAt,
+  }));
 
   const openLines: SetUpColumn["openLines"] = [];
   if (upAt !== null && lightsOut !== null) {
@@ -361,10 +393,71 @@ export function setUpColumn(day: SetUpDay): SetUpColumn {
     }
   }
 
-  return { hours: { startMin, endMin }, orient, blocks, openLines, allDay };
+  return {
+    hours: { startMin, endMin },
+    orient,
+    blocks,
+    openLines,
+    allDay,
+    overlaps,
+  };
 }
 
 /** A tapped minute on the rail, as "HH:MM", within the column. */
 export function railClock(minutes: number): string {
   return clockFromMinutes(Math.max(0, Math.min(24 * 60 - 1, minutes)));
+}
+
+/* --------------------------------------------------------- the words -- */
+
+/** A day's number: 15 from "2026-10-15". */
+function dayNumber(date: string): number {
+  return Number(date.slice(8));
+}
+
+/**
+ * A usual-week change's Toaster (D-USE-33; usual-change-reaches.md): the
+ * change, the date that follows and the exception; with the day begun,
+ * only the change.
+ */
+export function reachWords({
+  blockName,
+  weekday,
+  follows,
+}: {
+  blockName: string;
+  weekday: number;
+  follows: string | null;
+}): string {
+  const name = weekdayName(weekday);
+  const change = `${blockName} changed for every ${name}.`;
+  if (follows === null) return change;
+  return `${change} This week's ${name} ${dayNumber(follows)} follows, except blocks changed on that day.`;
+}
+
+/** "a, b and c", each name once. */
+function namesOnce(names: readonly string[]): string {
+  return listWords([...new Set(names)]);
+}
+
+/** Clear's AlertDialog (day-menu.md; Replace's form, D-USE-32) [PROPOSED words]. */
+export function clearWords(day: SetUpDay): {
+  title: string;
+  body: string;
+  done: string;
+} {
+  const title = dayTitle(day);
+  // As Replace says it: "Thursday's Wellness and Work go."
+  const whose = `${weekdayName(day.weekday)}'s`;
+  const lower = day.date === null ? title.replace("Every", "every") : title;
+  return {
+    title: `Clear ${lower}?`,
+    body: `${whose} ${namesOnce(day.blocks.map((b) => b.block.name))} go.`,
+    done: `${title} cleared.`,
+  };
+}
+
+/** Reset to usual's Toaster (day-menu.md) [PROPOSED words]. */
+export function resetWords(day: Pick<SetUpDay, "weekday" | "date">): string {
+  return `${dayTitle(day)} is the usual ${weekdayName(day.weekday)} again.`;
 }

@@ -30,16 +30,26 @@ import { DAYS_COPY as COPY } from "./copy";
  * stepper ("Every week" with its arrows kept in place but hidden, so the
  * list never jumps), then seven rows, each its bounds, a strip in kind
  * colours and one line in words, never a count. A row opens its day (A).
+ * A day not set offers Copy from… in the chevron's place. At 1024 the list
+ * is the week pane and the open day's row is selected: the muted fill and
+ * an ink edge at the leading side, not colour alone (the-day.md).
  */
 export interface WeekViewProps {
   place: DaysPlace;
   onWeek: (week: string) => void;
   onDay: (day: number) => void;
+  /** The 1024 week pane's selected day; unset on the phone. */
+  selected?: number | null;
 }
 
 type Which = "usual" | "this";
 
-export function WeekView({ place, onWeek, onDay }: WeekViewProps) {
+export function WeekView({
+  place,
+  onWeek,
+  onDay,
+  selected = null,
+}: WeekViewProps) {
   const { week, isError, retry } = useWeek(place.week);
   const dated = place.week !== "usual";
   const range = weekRangeWords(place.dates);
@@ -122,13 +132,18 @@ export function WeekView({ place, onWeek, onDay }: WeekViewProps) {
               ))
             : week.days.map((day) => (
                 <li key={day.weekday} className="border-b border-border">
-                  <WeekRow day={day} onOpen={() => onDay(day.weekday)} />
+                  <WeekRow
+                    day={day}
+                    selected={selected === day.weekday}
+                    onOpen={() => onDay(day.weekday)}
+                  />
                 </li>
               ))}
         </ul>
       )}
 
-      {dated ? (
+      {/* The pane beside it is the column, so the hint is the phone's. */}
+      {dated && selected === null ? (
         <Text
           as="p"
           variant="secondary"
@@ -170,20 +185,45 @@ function StepButton({
   );
 }
 
-/** One day: its name in a 110 px slot, its bounds, a chevron; the strip; its line. */
-function WeekRow({ day, onOpen }: { day: SetUpDay; onOpen: () => void }) {
+/**
+ * One day: its name in a 110 px slot, its bounds, a chevron; the strip; its
+ * line. The row's button covers it; Copy from… sits on top as its own.
+ */
+function WeekRow({
+  day,
+  selected,
+  onOpen,
+}: {
+  day: SetUpDay;
+  selected: boolean;
+  onOpen: () => void;
+}) {
   const line = rowLine(day);
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      aria-label={rowName(day)}
+    <div
+      data-selected={selected || undefined}
       className={cn(
-        "flex w-full cursor-pointer flex-col gap-(--space-2) px-(--space-4) py-(--space-4) text-start",
-        "hover:bg-surface focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset",
+        "relative flex w-full flex-col gap-(--space-2) px-(--space-4) py-(--space-4)",
+        selected ? "bg-fill-muted" : "has-[>button:hover]:bg-surface",
       )}
     >
-      <span className="flex w-full items-center gap-(--space-2)">
+      {selected ? (
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-0 start-0 w-0.5 bg-foreground"
+        />
+      ) : null}
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={rowName(day)}
+        aria-current={selected ? "date" : undefined}
+        className="absolute inset-0 cursor-pointer focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-inset"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none flex w-full items-center gap-(--space-2)"
+      >
         <Text
           as="span"
           variant="row-title"
@@ -192,21 +232,42 @@ function WeekRow({ day, onOpen }: { day: SetUpDay; onOpen: () => void }) {
         >
           {rowDayLabel(day)}
         </Text>
-        <Text as="span" variant="secondary" tone="muted" className="flex-1">
+        <Text
+          as="span"
+          variant="secondary"
+          tone="muted"
+          className="flex-1 whitespace-nowrap"
+        >
           {rowBounds(day)}
         </Text>
-        <DisclosureIcon
-          aria-hidden="true"
-          className="size-4 shrink-0 text-muted-foreground"
-        />
+        {day.isSet ? (
+          <DisclosureIcon
+            aria-hidden="true"
+            className="size-4 shrink-0 text-muted-foreground"
+          />
+        ) : (
+          // Copy from's picker is its own ticket's; until then a tap opens the day [ASSUMPTION].
+          <span
+            data-copy-from
+            className="inline-flex h-8 shrink-0 items-center rounded-(--radius-control) border border-border bg-background px-(--space-3) text-(length:--fs-secondary) font-semibold text-foreground"
+          >
+            {COPY.copyFrom}
+          </span>
+        )}
       </span>
       {day.strip.length > 0 ? <DayStrip parts={day.strip} /> : null}
       {line !== "" ? (
-        <Text as="span" variant="secondary" tone="muted">
+        <Text
+          as="span"
+          variant="secondary"
+          tone="muted"
+          aria-hidden="true"
+          className="pointer-events-none"
+        >
           {line}
         </Text>
       ) : null}
-    </button>
+    </div>
   );
 }
 

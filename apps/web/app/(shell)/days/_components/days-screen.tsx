@@ -20,8 +20,10 @@ import { WeekView } from "./week-view";
  * Set my days (USE-39; set-my-days/index.md): pushed from the avatar menu,
  * it opens on the week (B) and a day pushes from it (A) with "‹ Week"
  * (D-USE-49). Every edit saves as made through one write queue, and the
- * header's SaveStatus reads it. Below 1024 and every width for now, the
- * phone's push; the 1024 list-detail is part 2's (USE-42).
+ * header's SaveStatus reads it. Below 1024, 768 to 1023 included, the
+ * phone's push; from 1024 list-detail (USE-42; D-USE-39 (3), D-USE-83): a
+ * fixed 320 week pane beside a flexible day pane, a day always selected.
+ * The pane count is read from the viewport; inside a pane, its own width.
  */
 export function DaysScreen() {
   const place = useDaysPlace();
@@ -29,6 +31,7 @@ export function DaysScreen() {
   const offline = useIsOffline();
   const { scenario } = useDataSource();
   const offer = useInstallOffer();
+  const split = useIsSplit();
 
   // Hidden offline (D-USE-82); while loading and on error the day leaves it out.
   const save = offline ? null : (
@@ -38,6 +41,51 @@ export function DaysScreen() {
       hold={scenario.setUp?.holdSaved ?? false}
     />
   );
+
+  if (split) {
+    const day = place.splitDay;
+    return (
+      <div className="flex h-dvh min-h-0">
+        <section
+          aria-label={COPY.weekPane}
+          className="flex w-80 shrink-0 flex-col overflow-y-auto border-e border-border"
+        >
+          <DaysHeader
+            crumb={{
+              label: COPY.now,
+              href: todayRoute(),
+              ariaLabel: COPY.backToNow,
+            }}
+            title={COPY.title}
+            save={null}
+            focusKey="split"
+          />
+          <div className="pt-(--space-4)">
+            <WeekView
+              place={place}
+              onWeek={place.showWeek}
+              onDay={place.selectDay}
+              selected={day}
+            />
+          </div>
+        </section>
+        <section
+          aria-label={COPY.dayPane}
+          className="@container flex min-w-0 flex-1 flex-col"
+        >
+          <DayView
+            key={`${place.week}:${day}`}
+            place={{ ...place, day, date: place.dates[day] ?? null }}
+            writes={writes}
+            save={save}
+            onDay={place.selectDay}
+            offer={null}
+            pane
+          />
+        </section>
+      </div>
+    );
+  }
 
   if (place.day === null) {
     return (

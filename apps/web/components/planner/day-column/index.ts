@@ -8,6 +8,7 @@ export {
   type DayColumnBlock,
   type DayColumnEvent,
   type DayColumnItem,
+  type DayColumnOverlap,
   type DayColumnProps,
   type DayColumnSegment,
   type DayColumnTier,

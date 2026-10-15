@@ -97,6 +97,11 @@ export {
   SmartphoneIcon as HomeScreenOfferIcon,
   SquareIcon as NewBlockIcon,
 } from "lucide-react";
+/** Set my days' ··· (USE-42): Copy from… and Reset to usual. */
+export {
+  CopyIcon as CopyFromIcon,
+  RotateCcwIcon as ResetToUsualIcon,
+} from "lucide-react";
 /** Now's system states (USE-21): the offline line's cloud. */
 export { CloudOffIcon as OfflineIcon } from "lucide-react";
 /** The Profile sheet's glyphs (USE-84): the crop step's back, the not-saved line. */

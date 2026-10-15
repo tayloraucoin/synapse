@@ -3,13 +3,28 @@
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
-import { RegionRetry, Skeleton, Text } from "@syn/ui";
-import { boundsEdge, clockMinutes, tappedSlot } from "@syn/utils";
-import { DAY_COLUMN_PX_PER_HOUR, DayColumn } from "@/components/planner";
+import { UNDO_SHORT_MS } from "@syn/constants";
+import { RegionRetry, Skeleton, Text, toast } from "@syn/ui";
 import {
+  boundsEdge,
+  clockFromMinutes,
+  clockMinutes,
+  tappedSlot,
+  weekKeyOf,
+} from "@syn/utils";
+import {
+  DAY_COLUMN_PX_PER_HOUR,
+  DayColumn,
+  OfflineLine,
+} from "@/components/planner";
+import { TIER_HUE } from "@/components/work";
+import {
+  clearWords,
   dayTitle,
   EDGE_LINE,
   railClock,
+  reachWords,
+  resetWords,
   setUpColumn,
   weekdayName,
 } from "@/lib/data/set-up-view";
@@ -18,12 +33,18 @@ import { useSetUpColumnRead, type DaysPlace } from "@/lib/data/use-days";
 import type { usePlannerWrites } from "@/lib/data/use-planner-writes";
 import type { SetUpDay } from "@/lib/data/use-set-up-day";
 import { useWeek } from "@/lib/data/use-week";
+import {
+  ABOVE_FOOTER_TOASTER,
+  AboveFooterToaster,
+  useUndoToast,
+} from "@/lib/hooks/use-undo-toast";
 import { daysRoute, newBlockSheetRoute } from "@/lib/routes";
 import { DAYS_COPY as COPY } from "./copy";
 import {
   BoundsField,
+  ClearDialog,
   DayChips,
-  DayMenuButton,
+  DayMenu,
   PlusMenu,
   type DayChip,
 } from "./day-parts";
@@ -36,6 +57,14 @@ import { DaysHeader } from "./days-header";
  * the foot. A day with nothing set holds the two bounds fields instead, and
  * no column or + until both are set (empty-first-day.md). The column is its
  * own read: loading and error stay in it while the rest paints.
+ *
+ * USE-42: in the 1024 day pane (`pane`) the chips and "‹ Week" drop, since
+ * the week beside it does their job; the ··· holds Copy from…, Reset to
+ * usual and Clear this day; a held block drags in time, and an overlap
+ * shows side by side with its one fix; a usual change names its reach in a
+ * Toaster; offline the day's own controls are faded and inert and the +
+ * gives way to the StatusLine (D-USE-82). Reach, overlaps and own changes
+ * come from the set-up hooks.
  */
 export interface DayViewProps {
   place: DaysPlace & { day: number };
@@ -45,13 +74,26 @@ export interface DayViewProps {
   onDay: (day: number) => void;
   /** The install offer, when it shows, bottom left beside the +. */
   offer: React.ReactNode;
+  /** The 1024 day pane: no chips, no crumb (the-day.md). */
+  pane?: boolean;
 }
 
 type Bounds = { upAt: string; lightsOut: string };
+/** What a planner write hands back: its Undo, and a usual change's reach. */
+type PlannerWrite = Awaited<
+  ReturnType<DayViewProps["writes"]["editBlock"]>
+>;
 
 const CHIP_LETTERS = ["M", "T", "W", "T", "F", "S", "S"] as const;
 
-export function DayView({ place, writes, save, onDay, offer }: DayViewProps) {
+export function DayView({
+  place,
+  writes,
+  save,
+  onDay,
+  offer,
+  pane = false,
+}: DayViewProps) {
   const { week } = useWeek(place.week);
   const day = week?.days[place.day];
   const titleDay = { weekday: place.day, date: place.date };
@@ -78,19 +120,25 @@ export function DayView({ place, writes, save, onDay, offer }: DayViewProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <DaysHeader
-        crumb={{
-          label: COPY.week,
-          href: daysRoute({ week: place.week }),
-          ariaLabel: COPY.backToWeek,
-        }}
+        crumb={
+          pane
+            ? null
+            : {
+                label: COPY.week,
+                href: daysRoute({ week: place.week }),
+                ariaLabel: COPY.backToWeek,
+              }
+        }
         title={dayTitle(titleDay)}
         save={regionQuiet ? save : null}
         // Focus lands on the title when the day opens, not as the chips move.
         focusKey="day"
       />
-      <div className="pt-(--space-3)">
-        <DayChips chips={chips} value={place.day} onChange={onDay} />
-      </div>
+      {pane ? null : (
+        <div className="pt-(--space-3)">
+          <DayChips chips={chips} value={place.day} onChange={onDay} />
+        </div>
+      )}
       {day === undefined ? (
         <div
           aria-busy="true"
@@ -117,6 +165,11 @@ export function DayView({ place, writes, save, onDay, offer }: DayViewProps) {
       )}
     </div>
   );
+}
+
+/** The open day as the words read it. */
+function titleOf(place: DaysPlace & { day: number }) {
+  return { weekday: place.day, date: place.date };
 }
 
 /** Where a bounds write goes: the weekday in the usual week, else the date. */
@@ -231,6 +284,15 @@ function SetDay({
   const start = scenario.setUp;
   const bounds = useBoundsDraft(place, day.bounds, writes);
   const [sheet] = useQueryStates({ sheet: parseAsString, at: parseAsString });
+  const offline = !writes.online;
+  const undoToast = useUndoToast();
+  const hold = start?.day === place.day && start?.holdToast === true;
+  // The block just changed (ringed) and the one just moved (the ink edge).
+  const [changed, setChanged] = React.useState<string | null>(null);
+  const [moved, setMoved] = React.useState<string | null>(
+    start?.day === place.day ? (start.moved ?? null) : null,
+  );
+  const [clearing, setClearing] = React.useState(false);
 
   // The column reads the bounds as typed, so Orient moves with Up at at once.
   const upAt = bounds.value("upAt");
@@ -284,6 +346,113 @@ function SetDay({
 
   const ready = !column.isLoading && !column.isError;
   const dayName = weekdayName(place.day);
+  const ref =
+    place.date === null ? { weekday: place.day } : { date: place.date };
+
+  /** A usual change names its reach (D-USE-33); See it opens the date that follows. */
+  const showReach = (write: PlannerWrite, blockId: string) => {
+    setChanged(blockId);
+    if (!write.reach) return;
+    const { follows, weekday } = write.reach;
+    const blockName =
+      day.blocks.find((b) => b.block.id === blockId)?.block.name ?? "";
+    toast(reachWords({ blockName, weekday, follows }), {
+      toasterId: ABOVE_FOOTER_TOASTER,
+      duration: hold ? Infinity : UNDO_SHORT_MS,
+      ...(follows !== null
+        ? {
+            action: {
+              label: COPY.seeIt,
+              onClick: () =>
+                router.push(
+                  daysRoute({ week: weekKeyOf(follows), day: follows }),
+                ),
+            },
+          }
+        : {}),
+    });
+  };
+
+  /**
+   * One block to new times, nothing else moved (D-USE-33): in This week the
+   * date's change, never the usual block; in the usual week the block, with
+   * its reach named.
+   */
+  const moveTo = (blockId: string, startMin: number) => {
+    const b = day.blocks.find((x) => x.block.id === blockId);
+    if (!b) return;
+    const length = clockMinutes(b.endsAt) - clockMinutes(b.startsAt);
+    const from = Math.max(0, Math.min(24 * 60 - length, startMin));
+    const startsAt = clockFromMinutes(from);
+    const endsAt = clockFromMinutes(from + length);
+    setMoved(blockId);
+    if (place.date !== null && b.block.rrule !== null) {
+      void writes
+        .writeBlockChange({ blockId, onDate: place.date, startsAt, endsAt })
+        .catch(() => {});
+    } else if (place.date !== null) {
+      void writes.editBlock({ id: blockId, startsAt, endsAt }).catch(() => {});
+    } else {
+      void writes
+        .editBlock({ id: blockId, startsAt, endsAt }, { weekday: place.day })
+        .then((write) => showReach(write, blockId))
+        .catch(() => {});
+    }
+  };
+
+  const reset = () => {
+    if (place.date === null) return;
+    void writes
+      .resetDay({ date: place.date })
+      .then((write) =>
+        undoToast({
+          text: resetWords(titleOf(place)),
+          onUndo: () => void writes.undo(write.undo),
+        }),
+      )
+      .catch(() => {});
+  };
+  const clearWordsNow = clearWords(day);
+  const clear = () => {
+    setClearing(false);
+    void writes
+      .clearDay(ref)
+      .then((write) =>
+        undoToast({
+          text: clearWordsNow.done,
+          onUndo: () => void writes.undo(write.undo),
+          ...(hold ? { durationMs: Infinity } : {}),
+        }),
+      )
+      .catch(() => {});
+  };
+
+  // A usual change made in a block (its Block view), arriving on load (`?state=`).
+  const staged = React.useRef(false);
+  const reachRef = React.useRef(showReach);
+  reachRef.current = showReach;
+  const reachOf = start?.day === place.day ? start.reach : undefined;
+  React.useEffect(() => {
+    if (staged.current || reachOf === undefined || place.date !== null) return;
+    const b = day.blocks.find((x) => x.block.id === reachOf);
+    if (!b) return;
+    staged.current = true;
+    void writes
+      .editBlock(
+        { id: b.block.id, startsAt: b.startsAt },
+        { weekday: place.day },
+      )
+      .then((write) => reachRef.current(write, b.block.id))
+      .catch(() => {});
+    // Once, on open: the ref holds it to one write.
+  }, [reachOf, day.blocks, place.date, place.day, writes]);
+
+  // Clear's ask, open on load (`?state=clear-confirm`).
+  React.useEffect(() => {
+    if (start?.day === place.day && start.menu === "clear" && ready) {
+      setClearing(true);
+    }
+  }, [start?.day, start?.menu, place.day, ready]);
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col">
@@ -291,16 +460,34 @@ function SetDay({
         <BoundsField
           label={COPY.upAt}
           value={upAt}
+          disabled={offline}
           onCommit={(next) => bounds.commit({ upAt: next })}
         />
         <BoundsField
           label={COPY.lightsOut}
           value={lightsOut}
+          disabled={offline}
           onCommit={(next) => bounds.commit({ lightsOut: next })}
         />
         <span className="flex-1" />
-        <DayMenuButton day={dayName} />
+        <DayMenu
+          title={dayTitle(titleOf(place))}
+          day={dayName}
+          // [ASSUMPTION] Shown in This week only, once the day differs from its usual.
+          resetTo={place.date !== null && day.ownChange ? dayName : null}
+          canClear={day.blocks.length > 0}
+          disabled={offline || !ready}
+          defaultOpen={start?.day === place.day && start.menu === "day"}
+          onReset={reset}
+          onClear={() => setClearing(true)}
+        />
       </div>
+      <ClearDialog
+        open={clearing}
+        words={clearWordsNow}
+        onOpenChange={setClearing}
+        onClear={clear}
+      />
 
       {view.allDay.map((b) => (
         <Text
@@ -322,6 +509,8 @@ function SetDay({
             ready
               ? view.blocks.map((b) => ({
                   ...b,
+                  ringed: b.id === changed,
+                  moved: b.id === moved,
                   ...(b.outOfBounds
                     ? {
                         edge: {
@@ -343,6 +532,26 @@ function SetDay({
               : []
           }
           openLines={ready ? view.openLines : []}
+          tierHue={TIER_HUE}
+          overlaps={
+            ready
+              ? view.overlaps.map((pair) => ({
+                  ...pair,
+                  // The one fix: the later block starts at the earlier one's end.
+                  onAction: () =>
+                    moveTo(pair.b, clockMinutes(pair.fixStartsAt)),
+                }))
+              : []
+          }
+          // D-USE-82: no drag offline; moving a block is the day's own edit.
+          onMoveBlock={
+            ready && !offline
+              ? (blockId, deltaMin) => {
+                  const b = day.blocks.find((x) => x.block.id === blockId);
+                  if (b) moveTo(blockId, clockMinutes(b.startsAt) + deltaMin);
+                }
+              : undefined
+          }
           tapped={ready ? tapped : null}
           onRail={
             ready
@@ -394,17 +603,30 @@ function SetDay({
         </DayColumn>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end gap-(--space-3) px-(--space-4) pb-(--space-4)">
-        <div className="pointer-events-auto min-w-0 flex-1">{offer}</div>
-        <div className="pointer-events-auto shrink-0">
-          <PlusMenu
-            day={dayName}
-            disabled={!ready}
-            defaultOpen={start?.menu === "plus"}
-            onBlock={() => sheetAt()}
-            onTransition={() => sheetAt(undefined, "transition")}
-          />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col px-(--space-4) pb-(--space-4)">
+        <div className="pointer-events-auto">
+          <AboveFooterToaster />
         </div>
+        {offline ? (
+          // D-USE-82: the + gives way to the line; a block still opens.
+          <div className="pointer-events-auto -mx-(--space-4) -mb-(--space-4)">
+            <OfflineLine text={COPY.offline} />
+          </div>
+        ) : (
+          <div className="flex items-end gap-(--space-3)">
+            <div className="pointer-events-auto min-w-0 flex-1">{offer}</div>
+            <div className="pointer-events-auto shrink-0">
+              <PlusMenu
+                day={dayName}
+                disabled={!ready}
+                event={place.date !== null}
+                defaultOpen={start?.menu === "plus"}
+                onBlock={() => sheetAt()}
+                onTransition={() => sheetAt(undefined, "transition")}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

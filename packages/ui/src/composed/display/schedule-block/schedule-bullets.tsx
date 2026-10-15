@@ -21,6 +21,10 @@
  * "· running" after the words; `firing`, a clay dot in a muted halo, the
  * words receded, never the now colour (D-USE-49). `markLabel` is read, not
  * seen ("done"); `suffix` is seen.
+ *
+ * ITEM ICONS (USE-42): a bullet's `icon`, drawn by the caller, takes the
+ * dot's or the dash's place at its own width; a transition keeps its italic.
+ * A mark other than the planned dot wins over the icon.
  */
 "use client";
 
@@ -49,6 +53,8 @@ export interface ScheduleBullet {
   suffix?: string;
   /** Read after the words, not seen: "done". */
   markLabel?: string;
+  /** The item's own icon in place of the dot or dash (aria-hidden by the caller). */
+  icon?: React.ReactNode;
 }
 
 export interface ScheduleBulletsProps {
@@ -161,12 +167,23 @@ export function ScheduleBullets({
         const receded = bullet.mark === "check" || bullet.mark === "firing";
         const face = (
           <>
-            <Mark
-              tone={bullet.tone}
-              mark={bullet.mark}
-              dotClassName={dotClassName}
-              checkClassName={checkClassName}
-            />
+            {bullet.icon !== undefined &&
+            (bullet.mark === undefined || bullet.mark === "dot") ? (
+              <span
+                aria-hidden="true"
+                data-bullet-icon
+                className="flex h-4 shrink-0 items-center justify-center"
+              >
+                {bullet.icon}
+              </span>
+            ) : (
+              <Mark
+                tone={bullet.tone}
+                mark={bullet.mark}
+                dotClassName={dotClassName}
+                checkClassName={checkClassName}
+              />
+            )}
             <span
               className={cn(
                 "truncate",

@@ -43,6 +43,23 @@ export const DAYS_COPY = {
   transitionLine: "A drive, a meal, a move between blocks",
   fromSaved: "From a saved block",
   fromSavedLine: "One from another day, with its items",
+  /** This week only (plus-menu.md). */
+  event: "Event",
+  eventLine: "At a set time, this date only",
+  /** The day's ··· (day-menu.md, D-USE-87). */
+  copyFrom: "Copy from…",
+  resetTo: (weekday: string) => `Reset to usual ${weekday}`,
+  clearDay: "Clear this day",
+  cancel: "Cancel",
+  clear: "Clear",
+  undo: "Undo",
+  /** A usual change names its reach (usual-change-reaches.md). */
+  seeIt: "See it",
+  /** Offline (offline.md, D-USE-82). */
+  offline: "Offline. Changes wait until the connection is back.",
+  /** The 1024 list-detail's panes (the-day.md). */
+  weekPane: "The week",
+  dayPane: "The day",
   /** The header's SaveStatus (saved.md). */
   saving: "Saving",
   saved: "Saved",
