@@ -77,6 +77,104 @@ export const ITEM_SHEET_COPY = {
     madeUsual: (name: string, dateKey: string) =>
       `${name} is ${weekdayForDayKey(dateKey)}'s usual now.`,
   },
+  /**
+   * A work item's sheet (USE-65; size-and-length.md, work-more-open.md, the
+   * size dev note). No second person; lengths are the only numbers.
+   */
+  work: {
+    tier: {
+      urgent: "Urgent",
+      primary: "Primary",
+      secondary: "Secondary",
+      stretch: "Stretch",
+    },
+    session: (n: number, of: number) => `session ${n} of ${of}`,
+    pool: "In the pool",
+    size: "Size",
+    sizeAside: "Linear's estimate, both ways",
+    sizes: {
+      quick: "Quick",
+      small: "Small",
+      medium: "Medium",
+      large: "Large",
+      huge: "Huge",
+    },
+    length: "Length",
+    exact: "Exact",
+    range: "Range",
+    from: "From",
+    to: "to",
+    toName: "To",
+    shorter: "Shorter",
+    longer: "Longer",
+    /** "Set from Medium; change it freely. The day plans with 2 h, the top of the range." */
+    helper: (size: string | null, top: string | null, isRange: boolean) =>
+      [
+        size === null ? null : `Set from ${size}; change it freely.`,
+        top === null
+          ? null
+          : `The day plans with ${top}${isRange ? ", the top of the range" : ""}.`,
+      ]
+        .filter((line) => line !== null)
+        .join(" "),
+    huge: "Bigger than a block. Split it?",
+    orMore: "or more",
+    when: "When",
+    whenName: (value: string) => `When, ${value}. Move to`,
+    today: "Today",
+    start: "Start",
+    done: "Done",
+    doneForToday: "Done for today",
+    more: (name: string) => `More for ${name}`,
+    menu: {
+      markDone: "Mark the task done",
+      /** "Closes Wed's and Thu's sessions and the Linear issue". */
+      markDoneLine: (days: readonly string[], linked: boolean) => {
+        const issue = linked ? "the Linear issue" : null;
+        if (days.length === 0) return issue === null ? null : `Closes ${issue}`;
+        const list =
+          days.length === 1
+            ? `${days[0]}'s session`
+            : `${days
+                .slice(0, -1)
+                .map((day) => `${day}'s`)
+                .join(", ")} and ${days.at(-1)}'s sessions`;
+        return `Closes ${list}${issue === null ? "" : ` and ${issue}`}`;
+      },
+      backToPool: "Back to the pool",
+      spread: "Spread across the week",
+      openInLinear: "Open in Linear",
+      remove: "Remove from Synapse",
+      removeLine: "The Linear issue stays as it is",
+    },
+    toast: {
+      done: (name: string) => `${name} done.`,
+      doneForToday: (next: { n: number; day: string } | null) =>
+        next === null
+          ? "Done for today."
+          : `Done for today. Session ${next.n} is ${next.day}.`,
+      taskDone: (name: string) => `${name} is done, every session closed.`,
+      backToPool: (name: string) => `${name} is back in the pool.`,
+      removed: (name: string) => `${name} is removed from Synapse.`,
+    },
+    /**
+     * The ask (USE-60; start-while-one-runs.md) as Today words it, for Start
+     * on the sheet [ASSUMPTION: Today's words are route-local, so the sheet
+     * keeps its own until they have a shared home].
+     */
+    ask: {
+      title: (title: string) => `Start ${title}`,
+      lead: (running: string) =>
+        `One item is in hand at a time. ${running} is running; it moves to:`,
+      group: (running: string) => `Where ${running} goes`,
+      firing: "Firing",
+      firingLine: "Its prompt is out; firing time starts now",
+      paused: "Paused",
+      pausedLine: "Work time held; Resume from its row",
+      cancel: "Cancel",
+      start: "Start",
+    },
+  },
   /** Not found: the item is no longer on today. */
   gone: "This item is no longer on today.",
 } as const;

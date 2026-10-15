@@ -18,6 +18,9 @@
  * FOCUS. On open it moves to the item's name (a heading); × and Escape close
  * to the screen beneath, focus back on the opener (C-USE-item-sheet-5).
  *
+ * A work item's id hands the sheet to WorkItemSheet (USE-65), which keeps
+ * this route, close and focus return.
+ *
  * A scenario's `view.open` stands a capture in a step (`item:more`,
  * `item:swap`, `item:icon`); `&view=swap` in the route opens Swap, as Now's
  * long-press Swap does.
@@ -36,12 +39,17 @@ import {
   toastUndo,
 } from "@syn/ui";
 import { useDataSource } from "@/lib/data/source";
-import { useItemSheet, type SwapRow } from "@/lib/data/use-item-sheet";
+import {
+  useIsWorkItem,
+  useItemSheet,
+  type SwapRow,
+} from "@/lib/data/use-item-sheet";
 import { IconPickerStep } from "../icon-picker-step";
 import { NowBlockMenu } from "../now-block-menu";
 import { ITEM_SHEET_COPY as COPY } from "./copy";
 import { PlainItemFields } from "./plain-item-fields";
 import { SwapStep } from "./swap-step";
+import { WorkItemSheet } from "./work-item-sheet";
 
 type Step = "fields" | "icon" | "swap";
 
@@ -83,6 +91,8 @@ export function ItemSheet({
     if (openRef.current) void setParams({ id: copy });
   });
   const { view } = sheet;
+  // A work item's sheet is its own (USE-65); the route and the close are these.
+  const isWork = useIsWorkItem(id);
 
   const [step, setStep] = React.useState<Step>("fields");
   const [announce, setAnnounce] = React.useState("");
@@ -248,6 +258,19 @@ export function ItemSheet({
         />
       </div>
     );
+
+  if (isWork && id !== null) {
+    return (
+      <WorkItemSheet
+        open={open}
+        id={id}
+        onClose={() => close(false)}
+        returnFocusRef={returnRef}
+        seededMore={seeded === "more"}
+        onMoveTo={onMoveTo}
+      />
+    );
+  }
 
   const title = view?.item.title ?? COPY.gone;
 

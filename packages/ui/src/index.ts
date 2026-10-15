@@ -1063,3 +1063,6 @@ export {
 } from "./composed/control/weekday-chips";
 /** A meeting inside the Work block (USE-62): the band and the lifted meeting. */
 export { CalendarIcon as MeetingIcon } from "lucide-react";
+
+/** A work item's ··· › Open in Linear (USE-65). */
+export { ExternalLinkIcon as OpenInLinearIcon } from "lucide-react";

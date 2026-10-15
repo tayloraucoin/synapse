@@ -2,15 +2,37 @@
 
 import * as React from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import type { IconValue, StoredBlockKind } from "@syn/types";
+import type {
+  IconValue,
+  StoredBlockKind,
+  WorkSize,
+  WorkTier,
+} from "@syn/types";
 import { clockFromMinutes, clockToMinutes, reflowItems } from "@syn/utils";
 import type { BlockItemRecord } from "@syn/validators";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import { deriveToday, type Today } from "./derive-today";
+import {
+  deriveWorkSheet,
+  undoWorkSheetWrite,
+  writeBackToPool,
+  writeLength,
+  writeMarkTaskDone,
+  writeNotes,
+  writeRemoveFromSynapse,
+  writeSize,
+  writeTier,
+  type WorkSheetServer,
+  type WorkSheetView,
+  type WorkSheetWrite,
+} from "./item-sheet-work";
 import { useDataSource } from "./source";
 import type { TodayRecords } from "./today-records";
+import { linearQueryKey, useLinear } from "./use-linear";
 import { usePlannerWrites } from "./use-planner-writes";
+import { poolQueryKey, usePool } from "./use-pool";
 import { todayQueryKey } from "./use-today";
+import { weekQueryKey } from "./use-week";
 
 /**
  * The Item sheet's data (USE-64; day/item-sheet): one plain item on today's
@@ -667,5 +689,108 @@ export function useItemSheet(
         queryKey: todayQueryKey(scenario),
       });
     },
+  };
+}
+
+/* ---------------------------------------------------------- work item -- */
+
+/** The id names a work item, not an item of a block: the sheet hands over (USE-65). */
+export function useIsWorkItem(id: string | null): boolean {
+  const source = useDataSource();
+  const dateKey = source.todayKey();
+  const query = useQuery<TodayRecords, Error, boolean>({
+    queryKey: todayQueryKey(source.scenario.name, dateKey),
+    queryFn: () => source.server.readToday(dateKey),
+    select: (records) =>
+      id !== null && records.workItems.some((item) => item.id === id),
+    enabled: id !== null,
+    retry: false,
+  });
+  return query.data ?? false;
+}
+
+/**
+ * The sheet on a work item (USE-65): `deriveWorkSheet` over the date's
+ * records, the pool's slots (each session's place) and the item's issue. Its
+ * fields save as made; ···'s three writes resolve to their Undo. Start and
+ * Done are the work loop's (USE-59, USE-60), never this hook's.
+ */
+export function useWorkItemSheet(id: string | null) {
+  const source = useDataSource();
+  const queryClient = useQueryClient();
+  const dateKey = source.todayKey();
+  const scenario = source.scenario.name;
+  const { slots } = usePool();
+  const { issueFor } = useLinear();
+
+  const query = useQuery<TodayRecords, Error, Today>({
+    queryKey: todayQueryKey(scenario, dateKey),
+    queryFn: () => source.server.readToday(dateKey),
+    select: deriveToday,
+    enabled: id !== null,
+    retry: false,
+  });
+  const today = query.data;
+  const record = today?.records.workItems.find((item) => item.id === id);
+  const view: WorkSheetView | null =
+    id === null || today === undefined || record === undefined
+      ? null
+      : deriveWorkSheet({
+          today,
+          workItemId: id,
+          sessions: slots,
+          issue: issueFor(record),
+        });
+
+  const server: WorkSheetServer = source.server;
+  const viewRef = React.useRef(view);
+  viewRef.current = view;
+
+  function invalidate() {
+    for (const queryKey of [
+      todayQueryKey(scenario),
+      weekQueryKey(scenario),
+      poolQueryKey(scenario),
+      linearQueryKey(scenario),
+    ]) {
+      void queryClient.invalidateQueries({ queryKey });
+    }
+  }
+
+  function run(
+    write: (
+      s: WorkSheetServer,
+      v: WorkSheetView,
+    ) => Promise<WorkSheetWrite | null>,
+  ): Promise<{ write: WorkSheetWrite; view: WorkSheetView } | null> {
+    const at = viewRef.current;
+    if (at === null) return Promise.resolve(null);
+    return write(server, at)
+      .then((written) =>
+        written === null ? null : { write: written, view: at },
+      )
+      .finally(invalidate);
+  }
+
+  return {
+    view,
+    isPending: query.isPending,
+    /** A record row: is this id a work item on the date's records? */
+    isWork: record !== undefined,
+    /** Another work item's name, for the ask's words. */
+    titleOf: (workItemId: string) =>
+      today?.records.workItems.find((row) => row.id === workItemId)?.title ??
+      "",
+    setSize: (size: WorkSize) => run((s, v) => writeSize(s, v, size)),
+    setLength: (range: { min: number; max: number | null }) =>
+      run((s, v) => writeLength(s, v, range)),
+    setTier: (tier: WorkTier) => run((s, v) => writeTier(s, v, tier)),
+    setNotes: (notes: string) => run((s, v) => writeNotes(s, v, notes)),
+    markTaskDone: () => run(writeMarkTaskDone),
+    backToPool: () => run(writeBackToPool),
+    removeFromSynapse: () => run(writeRemoveFromSynapse),
+    /** A ··· write's Undo; the day, the week and the pool read again. */
+    undo: (done: { write: WorkSheetWrite; view: WorkSheetView }) =>
+      undoWorkSheetWrite(server, done.view, done.write).finally(invalidate),
   };
 }

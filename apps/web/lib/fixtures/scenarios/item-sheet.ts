@@ -4,12 +4,15 @@ import type { FixtureRecords } from "../records";
 import { BASE_DATE } from "./base-day";
 import type { Scenario } from "./index";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
+import { TODAY_DESK_NOW, todayWorkRecords } from "./today-desk";
+import { WEEK_IDS } from "./week";
 
 /**
  * The Item sheet's states (USE-64; day/item-sheet), over Taylor's Monday at
  * 6:58 before Wellness: Meditate in Wellness, and "Workout: gym" in Training
  * between the drives, with the other workouts on Tuesday to Thursday's
  * Training blocks as the library. `?sheet=item&id=<item>&state=item-<state>`.
+ * A work item's states (USE-65) are work's Today Monday instead.
  */
 
 const STAMP = "2026-10-01T12:00:00.000Z";
@@ -34,6 +37,15 @@ export const ITEM_SHEET_IDS = {
     meditateToday: fixtureId(2, 647),
   },
   slots: { meditateOff: fixtureId(3, 641) },
+  /**
+   * A work item's sheet (USE-65), on work's Today Monday at 10:20:
+   * [Portal sign-in] (KES-42, 3 Medium, Primary in Work 9:30 to 12:00) and
+   * [Desk Today layout] (SYN-212, session 1 of 3: Mon 12, Thu 15, Mon 19).
+   */
+  work: {
+    portal: WEEK_IDS.workItems.kes42,
+    desk: WEEK_IDS.workItems.syn212,
+  },
 } as const;
 
 const I = ITEM_SHEET_IDS.items;
@@ -185,4 +197,18 @@ export const ITEM_SHEET_SCENARIOS: Record<string, () => Scenario> = {
   "item-icon": scenario("item-icon", { view: { open: "item:icon" } }),
   "item-loading": scenario("item-loading"),
   "item-offline": scenario("item-offline", { offline: true }),
+  // USE-65: a work item's sheet, `&sheet=item&id=<ITEM_SHEET_IDS.work.*>`.
+  "item-size-and-length": () => ({
+    name: "item-size-and-length",
+    now: TODAY_DESK_NOW,
+    records: todayWorkRecords(),
+    mode: "ready",
+  }),
+  "item-work-more-open": () => ({
+    name: "item-work-more-open",
+    now: TODAY_DESK_NOW,
+    records: todayWorkRecords(),
+    mode: "ready",
+    view: { open: "item:more" },
+  }),
 };
