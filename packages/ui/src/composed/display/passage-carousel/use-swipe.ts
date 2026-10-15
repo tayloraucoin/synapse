@@ -20,13 +20,21 @@ export function useSwipe({
   onPrevious: () => void;
   reducedMotion: boolean;
 }) {
-  const pointer = React.useRef<{ id: number; startX: number; startY: number } | null>(null);
+  const pointer = React.useRef<{
+    id: number;
+    startX: number;
+    startY: number;
+  } | null>(null);
   const [dragX, setDragX] = React.useState(0);
 
   const handlers = {
     onPointerDown: (event: React.PointerEvent) => {
       if (event.pointerType === "mouse" && event.button !== 0) return;
-      pointer.current = { id: event.pointerId, startX: event.clientX, startY: event.clientY };
+      pointer.current = {
+        id: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+      };
     },
     onPointerMove: (event: React.PointerEvent) => {
       const start = pointer.current;

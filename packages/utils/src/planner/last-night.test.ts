@@ -69,7 +69,11 @@ describe("lastNightEntries (C-USE-orient-last-night-open-1, -4)", () => {
       DEFAULT_JOURNAL_PROMPTS,
     );
     expect(entries).toEqual([
-      { key: "looking_forward", caption: "Looking forward to", text: "Dinner." },
+      {
+        key: "looking_forward",
+        caption: "Looking forward to",
+        text: "Dinner.",
+      },
     ]);
   });
 

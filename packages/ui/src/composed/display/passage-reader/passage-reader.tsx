@@ -22,11 +22,14 @@
 
 import * as React from "react";
 import { XIcon } from "lucide-react";
-
-import { cn } from "../../../lib/cn";
 import { usePrefersReducedMotion } from "../../../hooks/use-prefers-reduced-motion";
+import { cn } from "../../../lib/cn";
 import { Button } from "../../../primitives/control/button";
-import { Dialog, DialogContent, DialogTitle } from "../../../primitives/feedback/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "../../../primitives/feedback/dialog";
 import { Text } from "../../../primitives/typography/text";
 import { RichTextEditor } from "../../control/rich-text-editor";
 import { PASSAGE_CAROUSEL_COPY, type PassageSlide } from "../passage-carousel";
@@ -63,7 +66,9 @@ export function PassageReader({
   // Unmounted rather than closed, so the dialog's own return never runs:
   // focus goes back here, to "Read all" or whatever opened the reader.
   const [opener] = React.useState(() =>
-    typeof document === "undefined" ? null : (document.activeElement as HTMLElement | null),
+    typeof document === "undefined"
+      ? null
+      : (document.activeElement as HTMLElement | null),
   );
   const returnRef = React.useRef(returnFocusRef);
   returnRef.current = returnFocusRef;
@@ -149,9 +154,12 @@ export function PassageReader({
             <div
               className={cn(
                 "flex h-full",
-                dragX === 0 && "transition-transform duration-200 ease-(--ease-settle)",
+                dragX === 0 &&
+                  "transition-transform duration-200 ease-(--ease-settle)",
               )}
-              style={{ transform: `translateX(calc(${-current * 100}% + ${dragX}px))` }}
+              style={{
+                transform: `translateX(calc(${-current * 100}% + ${dragX}px))`,
+              }}
             >
               {passages.map((slide, at) => (
                 <div
@@ -238,7 +246,12 @@ function ReaderSlide({
         ) : (
           <>
             {urls.map((url) => (
-              <img key={url} src={url} alt="" className="w-full rounded-(--radius) object-cover" />
+              <img
+                key={url}
+                src={url}
+                alt=""
+                className="w-full rounded-(--radius) object-cover"
+              />
             ))}
             {slide.title === "" ? null : (
               <Text as="h3" variant="review-headline" className="font-sans">
