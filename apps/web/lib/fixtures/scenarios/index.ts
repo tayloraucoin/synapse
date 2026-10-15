@@ -11,6 +11,7 @@ import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { NOW_END_SCENARIOS } from "./now-end";
 import { NOW_FORM_SCENARIOS } from "./now-forms";
+import { NOW_SYSTEM_SCENARIOS } from "./now-system";
 import { ORIENT_SCENARIOS } from "./orient-morning";
 import { POOL_SCENARIOS } from "./pool";
 import { REVIEW_SCENARIOS } from "./review-day";
@@ -186,6 +187,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   // ---- Now's other block forms (USE-17): ···, behind, a meal, before go, checklists ----
   ...NOW_FORM_SCENARIOS,
   // ---- Now at a block's end and the day's (USE-20): all done, ahead, empties ----
+  // ---- Now's To-dos block and system states (USE-21) ----
+  ...NOW_SYSTEM_SCENARIOS,
   ...NOW_END_SCENARIOS,
   ...ORIENT_SCENARIOS,
   // ---- The avatar menu and the Install sheet (USE-83) ----

@@ -3,6 +3,7 @@ import { useQueryState } from "nuqs";
 import { resolveDayKey } from "@syn/utils";
 import { resolveScenario, type Scenario } from "@/lib/fixtures/scenarios";
 import { createFixtureServer, type FixtureServer } from "@/lib/fixtures/server";
+import { useOnline } from "@/lib/hooks/use-online";
 
 /**
  * The one place a data hook gets its server (USE-7): the scenario `?state=`
@@ -55,4 +56,13 @@ export function useDataSource(): DataSource {
   const pinned = useContext(PinnedScenario);
   const [state] = useQueryState("state");
   return getDataSource(pinned ?? state);
+}
+
+/**
+ * No connection (USE-21): the scenario's `offline`, else the browser's own
+ * signal (`useOnline`). Offline is not an error: every check still works.
+ */
+export function useIsOffline(): boolean {
+  const online = useOnline();
+  return useDataSource().scenario.offline === true || !online;
 }

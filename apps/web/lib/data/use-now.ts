@@ -21,6 +21,7 @@ import { useDataSource } from "./source";
 import type { TodayRecords } from "./today-records";
 import { useBlockFocus } from "./use-block-focus";
 import { todayQueryKey } from "./use-today";
+import { todosQueryKey } from "./use-todos";
 
 /**
  * Now's data (USE-16): the active block, its items in order with their
@@ -38,6 +39,10 @@ export interface NowItemView {
   blockItemId: string | null;
   /** A to-do's id when the row is a to-do pulled into the block. */
   todoId: string | null;
+  /** Where the row came from: the block's set items, a to-do, a work item. */
+  source: "set" | "todo" | "work";
+  /** A to-do's: the day it was made, `YYYY-MM-DD` ("a to-do since Tue"). */
+  madeOn: string | null;
   title: string;
   icon: IconValue | null;
   /** The planned length: the slot's, else the set item's. */
@@ -123,6 +128,8 @@ function itemsOf(
           slotId: slot?.id ?? null,
           blockItemId: item.id,
           todoId: null,
+          source: "set",
+          madeOn: null,
           title: item.title,
           icon: item.icon,
           lengthMin: slot?.lengthMin ?? item.lengthMin,
@@ -137,9 +144,9 @@ function itemsOf(
   const pooled = slots
     .filter((slot) => slot.blockItemId === null && !slot.skipped)
     .flatMap((slot): NowItemView[] => {
+      const todo = records.todos.find((row) => row.id === slot.todoId);
       const source =
-        records.todos.find((todo) => todo.id === slot.todoId) ??
-        records.workItems.find((work) => work.id === slot.workItemId);
+        todo ?? records.workItems.find((work) => work.id === slot.workItemId);
       if (!source) return [];
       return [
         {
@@ -147,6 +154,8 @@ function itemsOf(
           slotId: slot.id,
           blockItemId: null,
           todoId: slot.todoId,
+          source: todo ? "todo" : "work",
+          madeOn: todo ? dayKeyIn(todo.createdAt, records.timeZone) : null,
           title: source.title,
           icon: source.icon,
           lengthMin:
@@ -180,6 +189,19 @@ function itemsOf(
     ...item,
     plannedAt: starts.get(item.id) ?? null,
   }));
+}
+
+/**
+ * The calendar day of an instant in the person's zone: when a to-do was made
+ * [ASSUMPTION: the wall-clock date, not the day close].
+ */
+function dayKeyIn(at: string | Date, timeZone: string): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(at));
 }
 
 /** A checklist with no span is the whole date (D-USE-28) [ASSUMPTION]. */
@@ -537,11 +559,18 @@ export function useSlotWrites(dateKey: string, blockId: string | null) {
     }
   >({
     mutationFn: async ({ item, change }) =>
-      source.server.writeSlots({ id: await slotFor(item), ...change }),
-    onSettled: () =>
-      queryClient.invalidateQueries({
+      writeRowChange(source.server, await slotFor(item), item, change),
+    onSettled: async (_, __, { item }) => {
+      await queryClient.invalidateQueries({
         queryKey: todayQueryKey(source.scenario.name),
-      }),
+      });
+      // A to-do checked in its block leaves the tray (USE-21).
+      if (item.todoId !== null) {
+        await queryClient.invalidateQueries({
+          queryKey: todosQueryKey(source.scenario.name),
+        });
+      }
+    },
   });
 
   return {

@@ -1,5 +1,6 @@
 "use client";
 
+import type * as React from "react";
 import { useWorkClock } from "@syn/hooks";
 import type { SlotClock } from "@syn/utils";
 import {
@@ -32,6 +33,7 @@ export function NowCurrentCard({
   running,
   onPlainDone,
   onTimedDone,
+  below = null,
 }: {
   item: NowItemView;
   block: NowBlockView;
@@ -39,6 +41,8 @@ export function NowCurrentCard({
   running: RunningView | null;
   onPlainDone: (item: NowItemView) => void;
   onTimedDone: (item: NowItemView) => void;
+  /** Under the card: a Done that did not save (USE-21) [ASSUMPTION]. */
+  below?: React.ReactNode;
 }) {
   const writes = useRunningWrites(dateKey, block.id);
   const hue = BLOCK_HUE[block.kind];
@@ -64,12 +68,20 @@ export function NowCurrentCard({
     );
   }
 
-  return (
+  // A to-do's meta ends with where it came from (D-USE-74).
+  const meta = [
+    COPY.meta(item.lengthMin, running?.liftedAt ?? item.plannedAt),
+    item.madeOn === null ? null : COPY.todoSince(item.madeOn, dateKey),
+  ]
+    .filter((part) => part !== null && part !== "")
+    .join(" · ");
+
+  const card = (
     <LiftedCard
       title={item.title}
       icon={item.icon}
       hue={meal ? "neutral" : hue}
-      meta={COPY.meta(item.lengthMin, running?.liftedAt ?? item.plannedAt)}
+      meta={meta}
       label={COPY.liftedName(item.title)}
       // An item with no length has nothing to count down from.
       start={
@@ -88,6 +100,13 @@ export function NowCurrentCard({
         onPress: () => onPlainDone(item),
       }}
     />
+  );
+  if (below === null) return card;
+  return (
+    <div className="flex flex-col gap-(--space-2)">
+      {card}
+      <div className="ps-(--space-4)">{below}</div>
+    </div>
   );
 }
 

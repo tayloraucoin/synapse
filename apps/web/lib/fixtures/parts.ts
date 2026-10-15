@@ -81,6 +81,12 @@ for (const state of [
   "before-ready-go", // USE-17
   "checklist-block", // USE-17
   "sunday-checklist", // USE-17
+  "todos-block", // USE-21
+  "offline", // USE-21
+  "error-on-check", // USE-21
+  "now-loading", // USE-21
+  "now-partial-todos", // USE-21
+  "now-partial-block", // USE-21
   "all-done-start-next", // USE-20
   "all-done-add-more", // USE-20
   "ahead", // USE-20

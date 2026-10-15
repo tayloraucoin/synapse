@@ -17,7 +17,7 @@ import {
 import type { SlotEventInput } from "@syn/validators";
 import type { Today } from "./derive-today";
 import { useDataSource } from "./source";
-import type { NowItemView, NowView } from "./use-now";
+import { writeRowChange, type NowItemView, type NowView } from "./use-now";
 import { todayQueryKey, useToday } from "./use-today";
 
 /**
@@ -264,10 +264,13 @@ export function useRunningWrites(dateKey: string, blockId: string | null) {
       const at = source.now();
       await source.server.writeSlotEvents([slotEventFor(slotId, kind, at)]);
       if (!done) return;
-      await source.server.writeSlots({
-        id: slotId,
-        ...timedDoneChange(done.slotClock, at, done.dayEnd),
-      });
+      // A to-do's Done checks the to-do too (USE-21).
+      await writeRowChange(
+        source.server,
+        slotId,
+        item,
+        timedDoneChange(done.slotClock, at, done.dayEnd),
+      );
     },
     onSettled: () =>
       queryClient.invalidateQueries({

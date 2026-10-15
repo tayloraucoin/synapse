@@ -8,7 +8,9 @@
  *   quietly, "From <weekday>" (N4); past a week, "From 3 Oct".
  * - A repeating to-do shows on the dates its rule hits.
  * - A checked to-do stays, checked, until the day ends (`dayStart`), then
- *   leaves. A to-do in a live slot is in its block, not the tray.
+ *   leaves. A to-do in a live slot is in its block, not the tray; one done
+ *   in its block's slot was the block's, so it leaves the tray at once
+ *   (USE-21).
  * - Rows with a reminder today come first by time, then the rest oldest
  *   first. Never a count: the caller gets rows, not a number to show.
  */
@@ -109,11 +111,18 @@ export function trayTodos<T extends TrayTodo>(input: {
       )
       .map((slot) => slot.todoId),
   );
+  // Checked in a To-dos block: the block shows it done, never the tray.
+  const doneInBlock = new Set(
+    slots
+      .filter((slot) => slot.todoId !== null && slot.doneAt !== null)
+      .map((slot) => slot.todoId),
+  );
 
   const rows: TrayRow<T>[] = [];
   for (const todo of todos) {
     if (todo.archivedAt !== null) continue;
     if (todo.doneAt !== null && !checkedToday(todo)) continue;
+    if (todo.doneAt !== null && doneInBlock.has(todo.id)) continue;
     if (todo.doneAt === null && live.has(todo.id)) continue;
 
     let carriedFrom: string | null = null;

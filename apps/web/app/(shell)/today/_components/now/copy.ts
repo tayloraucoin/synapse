@@ -1,4 +1,4 @@
-import { weekdayForDayKey } from "@syn/utils";
+import { daysBefore, weekdayForDayKey } from "@syn/utils";
 
 /**
  * Now's words (USE-16; day/now/words-and-access.md). No second person, no
@@ -25,6 +25,20 @@ export function dateTitle(dateKey: string): string {
     timeZone: "UTC",
   }).format(new Date(Date.UTC(2000, month - 1, 1, 12)));
   return `${weekdayForDayKey(dateKey)}, ${day} ${monthName}`;
+}
+
+const MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split(" ");
+
+/**
+ * "Tue" within the week, "3 Oct" past it, as the tray's "From <day>"
+ * [ASSUMPTION: the made day as the card draws it, "a to-do since Tue"].
+ */
+export function madeOnLabel(madeOn: string, dateKey: string): string {
+  if (daysBefore(madeOn, dateKey) < 7) {
+    return weekdayForDayKey(madeOn).slice(0, 3);
+  }
+  const [, month = 1, day = 1] = madeOn.split("-").map(Number);
+  return `${day} ${MONTHS[month - 1] ?? ""}`;
 }
 
 export const NOW_COPY = {
@@ -98,6 +112,20 @@ export const NOW_COPY = {
   change: "Change",
   announceDone: (title: string, next: string | null) =>
     next === null ? `${title} done.` : `${title} done. ${next} is next.`,
+  /** A To-dos block's header meta, the kind first (D-USE-74). */
+  todosSpan: (startsAt: string, endsAt: string) =>
+    `To-dos · ${clockLabel(startsAt)} to ${clockLabel(endsAt)}`,
+  /** Closes a to-do's card meta: where it came from (D-USE-74). */
+  todoSince: (madeOn: string, dateKey: string) =>
+    `a to-do since ${madeOnLabel(madeOn, dateKey)}`,
+  // ---- The system states (USE-21) ----
+  offline: "Offline. Checks are saved on this phone.",
+  notSaved: { notSaved: "Not saved.", tryAgain: "Try again" },
+  announceNotSaved: (title: string) => `${title} not saved.`,
+  loading: "Now, loading",
+  /** Phone Today's load error, carried to Now (D-USE-57, D-USE-74). */
+  blockFailed:
+    "Today didn't load. Timers that were running keep their time; nothing is lost.",
   sheet: {
     planned: (title: string, min: number | null) =>
       min === null ? title : `${title} · planned ${min} min`,

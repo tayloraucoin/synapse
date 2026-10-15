@@ -510,6 +510,14 @@ export function createFixtureServer(
             new SlotWriteRefusal("unknown", "No slot with that id."),
           );
         }
+        // `failWrites` names the slot, or the set item or to-do it holds, so
+        // a slot placed on first touch can fail too (USE-21). Offline, a slot
+        // write lands as online; the queue is wave 3's.
+        for (const key of [row.id, row.blockItemId, row.todoId]) {
+          if (key !== null && failNext.delete(key)) {
+            return Promise.reject(new FixtureWriteError());
+          }
+        }
         // Only the keys sent change; `null` clears (doneAt, tookMin).
         for (const [key, value] of Object.entries(change)) {
           if (value !== undefined) Object.assign(row, { [key]: value });

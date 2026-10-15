@@ -18,6 +18,13 @@ export type NowPartState =
   | "before-ready-go"
   | "checklist-block"
   | "sunday-checklist"
+  // USE-21: a To-dos block and the system states.
+  | "todos-block"
+  | "offline"
+  | "error-on-check"
+  | "now-loading"
+  | "now-partial-todos"
+  | "now-partial-block"
   // USE-20: a block's end and the day's.
   | "all-done-start-next"
   | "all-done-add-more"

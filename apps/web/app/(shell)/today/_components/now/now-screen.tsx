@@ -2,13 +2,22 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { BreakIcon, MealIcon, ReorderIcon, toastUndo } from "@syn/ui";
+import {
+  BreakIcon,
+  MealIcon,
+  RegionRetry,
+  ReorderIcon,
+  toastUndo,
+} from "@syn/ui";
 import { nextItem } from "@syn/utils";
 import {
   BlockDoneFooter,
   ChecklistRows,
   DayBlockHeader,
+  NotSavedLine,
   NowBlockMenu,
+  NowSkeleton,
+  OfflineLine,
   PlannerItemRow,
   RowMenu,
   RunningGroup,
@@ -16,7 +25,7 @@ import {
 } from "@/components/planner";
 import type { NowFooter } from "@/lib/data/now-end";
 import { isTimedDone, runningGroup, useRunningView } from "@/lib/data/running";
-import { useDataSource } from "@/lib/data/source";
+import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { useBlockFocus } from "@/lib/data/use-block-focus";
 import {
   moveIds,
@@ -61,6 +70,13 @@ function inOrder(items: NowItemView[], ids: readonly string[] | null) {
       (rank.get(a.id) ?? items.indexOf(a)) -
       (rank.get(b.id) ?? items.indexOf(b)),
   );
+}
+
+/** A to-do's emoji on its row (USE-21); a set item's icon is the card's only. */
+function rowEmoji(item: NowItemView): string | null {
+  return item.source === "todo" && item.icon?.kind === "emoji"
+    ? item.icon.value
+    : null;
 }
 
 /** `?state=reordering`: the dragged row held above the row it lands on. */
@@ -140,7 +156,14 @@ export function NowScreen({
     setLiftFocus(false);
   }, [liftFocus, chosenId]);
 
-  const { view: now } = useNow(dateKey, chosenId);
+  // USE-21: a check that did not save, online: the state it was asked for.
+  const [failed, setFailed] = React.useState<ReadonlyMap<string, boolean>>(
+    () => new Map(),
+  );
+  const offline = useIsOffline();
+
+  const nowQuery = useNow(dateKey, chosenId);
+  const { view: now } = nowQuery;
   const writes = useSlotWrites(dateKey, now?.block?.id ?? null);
   const running = useRunningView(dateKey, now);
   const add = useChecklistAdd(dateKey, now?.block?.id ?? null);
@@ -180,11 +203,32 @@ export function NowScreen({
     return () => clearTimeout(timer);
   }, [took, sheetId]);
 
-  // The tray is its own region: the day's loading never blanks it (USE-19).
+  // Offline is not an error (USE-21): one line above the tray, all else as online.
+  const top = (
+    <>
+      {offline ? <OfflineLine text={COPY.offline} /> : null}
+      <NowTodosTray open={trayOpen} onOpenChange={setTrayOpen} />
+    </>
+  );
+
+  // The tray is its own region: the day's loading or failure never blanks it
+  // (USE-19), and the block's failure is its own, in place (USE-21).
   if (!now)
     return (
       <div className="mx-auto flex w-full max-w-(--content-text) flex-col">
-        <NowTodosTray />
+        {top}
+        {nowQuery.isError ? (
+          <RegionRetry
+            label={COPY.blockFailed}
+            onRetry={() => {
+              source.server.recover();
+              void nowQuery.refetch();
+            }}
+            className="px-(--space-4)"
+          />
+        ) : (
+          <NowSkeleton label={COPY.loading} />
+        )}
       </div>
     );
   const { block, items, current, next } = now;
@@ -192,16 +236,47 @@ export function NowScreen({
   if (now.phase === "before-go") {
     return (
       <div className="mx-auto flex w-full max-w-(--content-text) flex-1 flex-col">
-        <NowTodosTray />
+        {top}
         <BeforeGoList blocks={now.dayBlocks} />
       </div>
     );
   }
 
+  /**
+   * A check's write (USE-21). Offline it lands as online (the queue is wave
+   * 3's); online and refused, the box reads as the day does (unchecked again)
+   * and the row says "Not saved. Try again." in ink.
+   */
+  function saveCheck(
+    item: NowItemView,
+    checked: boolean,
+    write: Promise<unknown>,
+  ) {
+    setFailed((map) => without(map, item.id));
+    write.catch(() => {
+      setFailed((map) => new Map(map).set(item.id, checked));
+      setTook((line) => (line?.id === item.id ? null : line));
+      setAnnouncement(COPY.announceNotSaved(item.title));
+    });
+  }
+
+  function retryCheck(item: NowItemView) {
+    const checked = failed.get(item.id);
+    if (checked === undefined) return;
+    if (checked) markDone(item);
+    else markUndone(item);
+  }
+
+  function notSavedUnder(item: NowItemView) {
+    return failed.has(item.id) ? (
+      <NotSavedLine words={COPY.notSaved} onRetry={() => retryCheck(item)} />
+    ) : null;
+  }
+
   function markDone(item: NowItemView) {
     // The next lift is only Done's on the current item; a row's box stays put.
     const lifts = item.id === current?.id ? next : current;
-    void writes.done(item);
+    saveCheck(item, true, writes.done(item));
     if (item.id === chosenId) setChosenId(null);
     setTook({ id: item.id, fades: true });
     setAnnouncement(
@@ -241,7 +316,7 @@ export function NowScreen({
   }
 
   function markUndone(item: NowItemView) {
-    void writes.undo(item);
+    saveCheck(item, false, writes.undo(item));
     if (took?.id === item.id) setTook(null);
   }
 
@@ -265,6 +340,7 @@ export function NowScreen({
         running={running}
         onPlainDone={markDone}
         onTimedDone={markTimedDone}
+        below={notSavedUnder(item)}
       />
     );
   }
@@ -318,11 +394,11 @@ export function NowScreen({
         item={{
           id: item.id,
           title: item.title,
-          emoji: null,
+          emoji: rowEmoji(item),
           checked: item.done,
           meta: timed ? null : COPY.length(item.lengthMin),
         }}
-        noEmoji
+        noEmoji={item.source !== "todo"}
         fadeChecked
         checkLabel={COPY.boxName(item.title, item.lengthMin)}
         openLabel={item.done ? undefined : COPY.rowName(item.title)}
@@ -346,7 +422,9 @@ export function NowScreen({
               changeRef={changeRef}
               onChange={() => setSheetId(item.id)}
             />
-          ) : null
+          ) : (
+            notSavedUnder(item)
+          )
         }
       />
     );
@@ -414,7 +492,7 @@ export function NowScreen({
 
   return (
     <div className="mx-auto flex w-full max-w-(--content-text) flex-1 flex-col">
-      <NowTodosTray open={trayOpen} onOpenChange={setTrayOpen} />
+      {top}
 
       {!block && now.empty ? <NowEmpty /> : null}
 
@@ -594,6 +672,16 @@ function detailOf(block: NowBlockView): string {
     case "all-day-checklist":
       return COPY.allDaySpan(block.next);
     default:
-      return COPY.span(block.startsAt, block.endsAt);
+      // A To-dos block names its kind first (D-USE-74).
+      return block.kind === "todos"
+        ? COPY.todosSpan(block.startsAt, block.endsAt)
+        : COPY.span(block.startsAt, block.endsAt);
   }
+}
+
+function without<V>(map: ReadonlyMap<string, V>, id: string) {
+  if (!map.has(id)) return map;
+  const next = new Map(map);
+  next.delete(id);
+  return next;
 }
