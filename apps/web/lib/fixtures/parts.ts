@@ -9,6 +9,7 @@ import {
   WorkRowForms,
 } from "./day-parts";
 import { DaysPart } from "./days-parts";
+import { FromLinearPart, type FromLinearPartState } from "./from-linear-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { ItemSheetPart } from "./item-sheet-parts";
 import { JournalPart, type JournalPartState } from "./journal-parts";
@@ -197,6 +198,17 @@ for (const state of [
 ] satisfies AddPartState[]) {
   registerPart(state, () => createElement(AddPart, { state })); // USE-51
 }
+// USE-52: From Linear on a Work tier's add row, by its scenario names.
+for (const state of [
+  "from-linear-by-size",
+  "from-linear",
+  "from-linear-size-filter",
+  "from-linear-no-match",
+  "from-linear-loading",
+  "from-linear-error",
+] satisfies FromLinearPartState[]) {
+  registerPart(state, () => createElement(FromLinearPart, { state })); // USE-52
+}
 // USE-31: Review the day's success frame and the tray open, `review-<state>`.
 // USE-37: the edits' frames, `review-first-mornings` and the rest.
 // USE-38: a late wake, `review-late` and `review-late-passed-open`.
@@ -278,10 +290,6 @@ for (const state of [
 ] satisfies SchedulePartState[]) {
   const name = state.startsWith("schedule-") ? state : `schedule-${state}`;
   registerPart(name, () => createElement(SchedulePart, { state }));
-}
-// USE-72: the Week, under the week scenarios' names.
-for (const state of Object.keys(WEEK_SCENARIOS)) {
-  registerPart(state, () => createElement(WeekPart));
 }
 // USE-62: a meeting inside the Work block, on the same frame.
 for (const state of Object.keys(TODAY_MEETING_SCENARIOS)) {

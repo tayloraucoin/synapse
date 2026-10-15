@@ -36,7 +36,7 @@ export type CreateTaskInput = z.input<typeof createTaskInput>;
 export const NO_WORK_BLOCK = "That day has no Work block.";
 export const ONE_SESSION_A_DAY = "Pick each day once.";
 
-function runsOn(block: BlockRecord, dateKey: string): boolean {
+export function runsOn(block: BlockRecord, dateKey: string): boolean {
   if (block.rrule === null) return block.onDate === dateKey;
   const parsed = parseRule(block.rrule);
   return parsed.ok && occursOn(parsed.rule, dateKey);

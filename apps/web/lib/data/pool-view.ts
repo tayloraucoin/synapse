@@ -218,7 +218,7 @@ function statusType(type: string): StatusShapeType {
   return type === "duplicate" ? "canceled" : (type as StatusShapeType);
 }
 
-function lineOf(
+export function lineOf(
   linear: LinearRecords | null,
   connectionId: string | null,
   issue: Pick<LinearIssue, "teamId" | "projectId"> | null,

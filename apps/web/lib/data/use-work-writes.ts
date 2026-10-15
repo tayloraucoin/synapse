@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlannerRefusal, type PlannerWrite } from "@/lib/fixtures/planner";
 import type { WorkServer } from "@/lib/fixtures/work";
 import { useDataSource } from "./source";
+import { linearQueryKey } from "./use-linear";
 import { usePlannerWrites } from "./use-planner-writes";
 import { poolQueryKey } from "./use-pool";
 import { todayQueryKey } from "./use-today";
@@ -35,6 +36,8 @@ export function useWorkWrites() {
       todayQueryKey(scenario),
       weekQueryKey(scenario),
       poolQueryKey(scenario),
+      // From Linear's placed rows fade, and the pool's notInPool shrinks.
+      linearQueryKey(scenario),
     ]) {
       void queryClient.invalidateQueries({ queryKey });
     }
@@ -66,6 +69,8 @@ export function useWorkWrites() {
     setClientOrder: write("setClientOrder"),
     /** New task: one work item, then a slot a picked day; no days is the pool. */
     createTask: write("createTask"),
+    /** From Linear: each ticked issue's work item and its slot in the tier. */
+    placeIssues: write("placeIssues"),
     /** A write's Undo, from its `PlannerWrite.undo`: USE-36's, then the pool reads again. */
     undo: (token: PlannerWrite["undo"]) =>
       planner.undo(token).finally(invalidate),

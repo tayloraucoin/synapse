@@ -26,6 +26,7 @@ import {
 import type { Journal, WriteLog } from "../planner/journal";
 import type { FixtureRecords } from "../records";
 import { writeTask, type CreateTaskInput } from "./create-task";
+import { writeIssues, type PlaceIssuesInput } from "./place-issues";
 import { readPool } from "./read-pool";
 
 /**
@@ -84,6 +85,11 @@ export interface WorkServer {
   removeFromSynapse(input: { workItemId: string }): Promise<PlannerWrite>;
   /** New task (USE-51): the item, then a slot a picked day; `id` is the item. */
   createTask(input: CreateTaskInput): Promise<PlannerWrite>;
+  /**
+   * From Linear (USE-52): a work item per ticked issue (or its linked one)
+   * and a slot each in the tier on the date; `id` is the first item.
+   */
+  placeIssues(input: PlaceIssuesInput): Promise<PlannerWrite>;
   /** D-USE-96: the one client order, top first. */
   setClientOrder(
     input: z.input<typeof clientOrderInput>,
@@ -358,6 +364,10 @@ export function createWorkServer({
 
     createTask(raw) {
       return write((journal) => writeTask(journal, records, raw, stamp()));
+    },
+
+    placeIssues(raw) {
+      return write((journal) => writeIssues(journal, records, raw, stamp()));
     },
 
     setClientOrder(raw) {

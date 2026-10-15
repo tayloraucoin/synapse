@@ -7,6 +7,7 @@ import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { BLOCK_VIEW_SCENARIOS } from "./block-view";
 import { CLOSE_THE_DAY_SCENARIOS } from "./close-the-day";
+import { FROM_LINEAR_SCENARIOS } from "./from-linear";
 import { INTEGRATION_SCENARIOS } from "./integrations";
 import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
 import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
@@ -250,6 +251,7 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...SETTINGS_SCENARIOS,
   // ---- + Add and New task (USE-51): Monday during Work, and the pool's New task ----
   ...ADD_SCENARIOS,
+  ...FROM_LINEAR_SCENARIOS,
   // ---- Review the day (USE-31): the Monday at 6:58, before Ready, go ----
   ...REVIEW_SCENARIOS,
   // ---- The Ready, go welcome (USE-43): plain, first go ever, late wake, checklist day, offline ----
