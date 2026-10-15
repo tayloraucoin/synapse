@@ -74,6 +74,12 @@ export interface MinutesStepperProps {
    * is in the accessible name (*Length, Breakfast*) and the row's meaning.
    */
   compact?: boolean;
+  /** How far − and + move the value; typed values are kept as typed. */
+  step?: number;
+  /** − and +'s names, when the screen has its own words (*Shorter*, *Longer*). */
+  stepLabels?: { decrease: string; increase: string };
+  /** The label on the left and the control on the right, on one row. */
+  inline?: boolean;
   disabled?: boolean;
   className?: string;
 }
@@ -91,6 +97,9 @@ export function MinutesStepper({
   error,
   boundedNote = true,
   compact = false,
+  step = 1,
+  stepLabels,
+  inline = false,
   disabled = false,
   className,
 }: MinutesStepperProps) {
@@ -130,12 +139,18 @@ export function MinutesStepper({
 
   const current = local ?? min;
   // An empty field steps to `min` first — the placeholder is not a value to step from.
-  const stepBy = (delta: -1 | 1) => commit(local === null ? min : local + delta);
+  const stepBy = (delta: -1 | 1) => commit(local === null ? min : local + delta * step);
   const invalid = error !== undefined && error !== null;
   const message = error ?? (snapped ? MINUTES_STEPPER_COPY.boundedNote : helperText);
 
   return (
-    <div className={cn("flex flex-col gap-(--space-2)", className)}>
+    <div
+      className={cn(
+        "flex flex-col gap-(--space-2)",
+        inline && "flex-row flex-wrap items-center justify-between gap-x-(--space-3)",
+        className,
+      )}
+    >
       <Text as="label" htmlFor={inputId} variant="secondary" weight={500}>
         {label}
       </Text>
@@ -146,7 +161,7 @@ export function MinutesStepper({
       >
         <InputGroupAddon align="inline-start" className="p-0">
           <InputGroupButton
-            aria-label="Fewer minutes"
+            aria-label={stepLabels?.decrease ?? "Fewer minutes"}
             disabled={disabled || current <= min}
             onClick={() => stepBy(-1)}
             className="size-(--target) rounded-none text-(length:--fs-body)"
@@ -199,7 +214,7 @@ export function MinutesStepper({
         <InputGroupAddon align="inline-end" className="gap-0 p-0">
           {compact ? null : <InputGroupText className="px-(--space-2)">min</InputGroupText>}
           <InputGroupButton
-            aria-label="More minutes"
+            aria-label={stepLabels?.increase ?? "More minutes"}
             disabled={disabled || current >= max}
             onClick={() => stepBy(1)}
             className="size-(--target) rounded-none text-(length:--fs-body)"
@@ -210,7 +225,7 @@ export function MinutesStepper({
       </InputGroup>
 
       {message === undefined ? null : (
-        <HelperText id={helperId} error={invalid}>
+        <HelperText id={helperId} error={invalid} className={inline ? "basis-full" : undefined}>
           {message}
         </HelperText>
       )}

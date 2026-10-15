@@ -82,6 +82,8 @@ export {
   UserIcon as ProfileIcon,
   XIcon as CloseIcon,
 } from "lucide-react";
+/** The Item sheet's ··· (USE-64): Move to…. */
+export { ArrowRightIcon as MoveToIcon } from "lucide-react";
 /** The Profile sheet's glyphs (USE-84): the crop step's back, the not-saved line. */
 export {
   ChevronLeftIcon as BackIcon,

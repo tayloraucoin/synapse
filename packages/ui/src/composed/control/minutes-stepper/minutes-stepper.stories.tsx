@@ -169,3 +169,26 @@ export const Optimistic: StoryObj<OptimisticArgs> = {
     );
   },
 };
+
+/**
+ * USE-64 (day/item-sheet): the Item sheet's Length row. The label on the left,
+ * the stepper on the right; − and + move five minutes and read *Shorter* and
+ * *Longer*.
+ */
+export const InlineByFive: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<number | null>(10);
+    return (
+      <MinutesStepper
+        label="Length"
+        value={value}
+        onChange={setValue}
+        min={1}
+        max={240}
+        step={5}
+        stepLabels={{ decrease: "Shorter", increase: "Longer" }}
+        inline
+      />
+    );
+  },
+};

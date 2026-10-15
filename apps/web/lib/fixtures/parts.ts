@@ -8,8 +8,10 @@ import {
   WorkRowForms,
 } from "./day-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
+import { ItemSheetPart } from "./item-sheet-parts";
 import { MealTopicPart, type MealTopicPartState } from "./meal-topic-parts";
 import { NowPart, type NowPartState } from "./now-parts";
+import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { OrientPart, type OrientPartState } from "./orient-parts";
 import { ReviewPart, type ReviewPartState } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
@@ -166,4 +168,8 @@ for (const state of [
   "meal-topics-sheet",
 ] satisfies MealTopicPartState[]) {
   registerPart(state, () => createElement(MealTopicPart, { state })); // USE-22
+}
+// USE-64: the Item sheet over Now, taken with `&sheet=item&id=`.
+for (const state of Object.keys(ITEM_SHEET_SCENARIOS)) {
+  registerPart(state, () => createElement(ItemSheetPart)); // USE-64
 }

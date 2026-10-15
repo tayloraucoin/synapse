@@ -4,6 +4,7 @@ import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
 import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
+import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
 import { INTEGRATION_SCENARIOS } from "./integrations";
 import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
@@ -199,6 +200,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...ADD_SCENARIOS,
   // ---- Review the day (USE-31): the Monday at 6:58, before Ready, go ----
   ...REVIEW_SCENARIOS,
+  // ---- The Item sheet (USE-64): a plain item, ···, at a set time, Swap ----
+  ...ITEM_SHEET_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {

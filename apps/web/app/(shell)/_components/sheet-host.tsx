@@ -18,6 +18,7 @@ import * as React from "react";
 import { useQueryState } from "nuqs";
 import { useIsSplit } from "@syn/ui";
 import { InstallSheet, ProfileSheet } from "@/components/account";
+import { ItemSheet } from "@/components/planner/item-sheet";
 import { MealTopicsSheet } from "@/components/planner/meal-topics-sheet";
 import { useDataSource } from "@/lib/data/source";
 import { isInstallOffered, useInstallState } from "@/lib/pwa/use-install-state";
@@ -103,6 +104,11 @@ export function SheetHost() {
       />
       <MealTopicsSheet
         open={sheet === "meal-topics"}
+        onOpenChange={close}
+        returnFocusRef={opener ?? undefined}
+      />
+      <ItemSheet
+        open={sheet === "item"}
         onOpenChange={close}
         returnFocusRef={opener ?? undefined}
       />

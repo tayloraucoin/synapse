@@ -1,0 +1,671 @@
+"use client";
+
+import * as React from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { IconValue, StoredBlockKind } from "@syn/types";
+import { clockFromMinutes, clockToMinutes, reflowItems } from "@syn/utils";
+import type { BlockItemRecord } from "@syn/validators";
+import type { FixtureServer } from "@/lib/fixtures/server";
+import { deriveToday, type Today } from "./derive-today";
+import { useDataSource } from "./source";
+import type { TodayRecords } from "./today-records";
+import { usePlannerWrites } from "./use-planner-writes";
+import { todayQueryKey } from "./use-today";
+
+/**
+ * The Item sheet's data (USE-64; day/item-sheet): one plain item on today's
+ * date, its block's span, the item before it, and the library of its kind
+ * for Swap, all derived from `useToday`'s records. Every change saves as
+ * made, for today only (D-USE-60); the usual week changes only through Make
+ * it Monday's usual.
+ *
+ * TODAY ONLY, ON THE SCHEMA AS IT STANDS. A slot carries the date's own
+ * length, so Length writes the slot (placed on first touch). A slot holds no
+ * time, icon or title, so At a set time, the icon and Swap leave the set
+ * item off the date (a skipped slot) and write the date's own copy of it
+ * (`onDate`, "This day only"); later edits change that copy. Notes have no
+ * column on an item: they are kept on this device for the date
+ * [ASSUMPTION: until the data seam names one, as the chosen item on Now].
+ */
+
+/** D-USE-81: an item with no length counts 5 minutes. */
+const DEFAULT_LENGTH_MIN = 5;
+
+export interface ItemSheetItem {
+  /** The block item's id: the set item, or the date's own copy. */
+  id: string;
+  /** Null until the item is first touched on the date. */
+  slotId: string | null;
+  /** The slot's own length for the date, when it has one. */
+  slotLengthMin: number | null;
+  title: string;
+  icon: IconValue | null;
+  /** The length the date plans with: the slot's, else the item's. */
+  lengthMin: number;
+  /** "HH:MM" when it stays at a set time. */
+  atTime: string | null;
+  /** "HH:MM", where the day places it. */
+  plannedAt: string | null;
+  /** Its place on the date: the slot's, else the item's. */
+  sortOrder: number;
+  /** The date's own copy (`onDate`), not the usual item. */
+  dated: boolean;
+  meal: boolean;
+}
+
+export interface ItemSheetBlock {
+  id: string;
+  kind: StoredBlockKind;
+  name: string;
+  /** "HH:MM" on the date. */
+  startsAt: string;
+  endsAt: string;
+}
+
+/** One row of Swap: a library item laid in the current one's place. */
+export interface SwapRow {
+  id: string;
+  title: string;
+  icon: IconValue | null;
+  lengthMin: number;
+  /** "HH:MM": where it would start, the current item's start. */
+  startsAt: string | null;
+  /** "HH:MM": where the block's items end with this pick. */
+  endsAt: string;
+  current: boolean;
+}
+
+export interface ItemSheetView {
+  date: string;
+  block: ItemSheetBlock;
+  item: ItemSheetItem;
+  /** The item before it in the block, for "Off: follows <item>". */
+  previous: { title: string } | null;
+  /** The current item first, then the library of its kind (D-USE-12). */
+  swap: SwapRow[];
+}
+
+interface Row {
+  id: string;
+  title: string;
+  lengthMin: number;
+  atTime: string | null;
+  sortOrder: number;
+}
+
+function lengthOf(lengthMin: number | null | undefined): number {
+  return lengthMin ?? DEFAULT_LENGTH_MIN;
+}
+
+/** The block's rows on the date in order: set items, dated items, pulled slots. */
+function rowsOf(
+  records: TodayRecords,
+  occurrence: Today["occurrences"]["blocks"][number],
+): Row[] {
+  const { block, slots } = occurrence;
+  const items = records.blockItems
+    .filter(
+      (item) =>
+        item.blockId === block.id &&
+        !item.isTransition &&
+        (item.onDate === null || item.onDate === records.date),
+    )
+    .flatMap((item): Row[] => {
+      const slot = slots.find((row) => row.blockItemId === item.id);
+      if (slot?.skipped) return [];
+      return [
+        {
+          id: item.id,
+          title: item.title,
+          lengthMin: lengthOf(slot?.lengthMin ?? item.lengthMin),
+          atTime: item.atTime,
+          sortOrder: slot?.sortOrder ?? item.sortOrder,
+        },
+      ];
+    });
+  const pulled = slots
+    .filter((slot) => slot.blockItemId === null && !slot.skipped)
+    .map((slot): Row => {
+      const source =
+        records.todos.find((todo) => todo.id === slot.todoId) ??
+        records.workItems.find((work) => work.id === slot.workItemId);
+      return {
+        id: slot.id,
+        title: source?.title ?? "",
+        lengthMin: lengthOf(
+          slot.lengthMin ??
+            (source && "lengthMin" in source ? source.lengthMin : null),
+        ),
+        atTime: null,
+        sortOrder: slot.sortOrder,
+      };
+    });
+  return [...items, ...pulled].sort((a, b) => a.sortOrder - b.sortOrder);
+}
+
+/** Where the rows start, and where the last one ends. */
+function layOut(block: ItemSheetBlock, rows: readonly Row[]) {
+  const { placed } = reflowItems({
+    startsAt: block.startsAt,
+    endsAt: block.endsAt,
+    items: rows,
+    bands: [],
+  });
+  const starts = new Map(placed.map((place) => [place.id, place.startsAt]));
+  const end = rows.reduce((last, row) => {
+    const start = starts.get(row.id);
+    return start === undefined
+      ? last
+      : Math.max(last, clockToMinutes(start) + row.lengthMin);
+  }, clockToMinutes(block.startsAt));
+  return { starts, endsAt: clockFromMinutes(end) };
+}
+
+/**
+ * The library of a kind (refinement 7): every item in a block of that kind,
+ * one per title, transitions left out [ASSUMPTION: the library has no table
+ * yet; where it lives once wired is the wiring's]. What else is in the
+ * current block on the date is not offered: it is already there.
+ */
+function libraryOf(
+  records: TodayRecords,
+  block: ItemSheetBlock,
+  rows: readonly Row[],
+): BlockItemRecord[] {
+  const kinds = new Set(
+    records.blocks.filter((b) => b.kind === block.kind).map((b) => b.id),
+  );
+  const here = new Set(rows.map((row) => row.title));
+  const seen = new Set<string>();
+  return records.blockItems.filter((item) => {
+    if (!kinds.has(item.blockId) || item.isTransition || item.meal) {
+      return false;
+    }
+    if (item.onDate !== null && item.onDate !== records.date) return false;
+    if (here.has(item.title) || seen.has(item.title)) return false;
+    seen.add(item.title);
+    return true;
+  });
+}
+
+/** The sheet on one item of the date: pure, so a test reads what the sheet reads. */
+export function deriveItemSheet(
+  today: Today,
+  id: string,
+): ItemSheetView | null {
+  const { records } = today;
+  const record = records.blockItems.find((item) => item.id === id);
+  if (!record) return null;
+  const occurrence = today.occurrences.blocks.find(
+    (entry) => entry.block.id === record.blockId,
+  );
+  if (!occurrence) return null;
+  const slot =
+    occurrence.slots.find((row) => row.blockItemId === record.id) ?? null;
+  const block: ItemSheetBlock = {
+    id: occurrence.block.id,
+    kind: occurrence.block.kind,
+    name: occurrence.block.name,
+    startsAt: occurrence.startsAt,
+    endsAt: occurrence.endsAt,
+  };
+  const rows = rowsOf(records, occurrence);
+  const { starts } = layOut(block, rows);
+  const index = rows.findIndex((row) => row.id === record.id);
+  const lengthMin = lengthOf(slot?.lengthMin ?? record.lengthMin);
+  const item: ItemSheetItem = {
+    id: record.id,
+    slotId: slot?.id ?? null,
+    slotLengthMin: slot?.lengthMin ?? null,
+    title: record.title,
+    icon: record.icon,
+    lengthMin,
+    atTime: record.atTime,
+    plannedAt: starts.get(record.id) ?? null,
+    sortOrder: slot?.sortOrder ?? record.sortOrder,
+    dated: record.onDate !== null,
+    meal: record.meal,
+  };
+
+  // Each pick laid in the current one's place: its start, and the block's end.
+  const withPick = (pick: { title: string; lengthMin: number }) =>
+    layOut(
+      block,
+      rows.map((row) => (row.id === record.id ? { ...row, ...pick } : row)),
+    ).endsAt;
+  const current: SwapRow = {
+    id: record.id,
+    title: record.title,
+    icon: record.icon,
+    lengthMin,
+    startsAt: item.plannedAt,
+    endsAt: withPick({ title: record.title, lengthMin }),
+    current: true,
+  };
+  const library = libraryOf(records, block, rows).map((entry): SwapRow => ({
+    id: entry.id,
+    title: entry.title,
+    icon: entry.icon,
+    lengthMin: lengthOf(entry.lengthMin),
+    startsAt: item.plannedAt,
+    endsAt: withPick({
+      title: entry.title,
+      lengthMin: lengthOf(entry.lengthMin),
+    }),
+    current: false,
+  }));
+
+  return {
+    date: records.date,
+    block,
+    item,
+    previous: index > 0 ? { title: rows[index - 1]!.title } : null,
+    swap: [current, ...library],
+  };
+}
+
+/* ------------------------------------------------------------- writes -- */
+
+/** The server calls the sheet's writes use, so a test drives the same code. */
+export type ItemSheetServer = Pick<
+  FixtureServer,
+  | "writeSlots"
+  | "removeSlot"
+  | "writeBlockItem"
+  | "editBlockItem"
+  | "removeBlockItem"
+  | "undo"
+>;
+
+/** One step of an Undo, run in reverse order of the writes. */
+export type ItemUndoStep =
+  /** A planner write's own Undo. */
+  | { kind: "token"; token: string }
+  /** A slot's fields put back as they were. */
+  | {
+      kind: "slot";
+      id: string;
+      change: { lengthMin?: number | null; skipped?: boolean };
+    }
+  /** A slot the write placed: it goes. */
+  | { kind: "remove-slot"; id: string };
+
+export interface ItemWrite {
+  /** The item after the write: a new copy's id when the set item was left off. */
+  id: string;
+  undo: ItemUndoStep[];
+}
+
+/** Length (C-USE-item-sheet-default-2): the slot's, for the date only. */
+export async function writeItemLength(
+  server: ItemSheetServer,
+  view: ItemSheetView,
+  lengthMin: number,
+): Promise<ItemWrite> {
+  const { item, block, date } = view;
+  if (item.slotId !== null) {
+    await server.writeSlots({ id: item.slotId, lengthMin });
+    return {
+      id: item.id,
+      undo: [
+        {
+          kind: "slot",
+          id: item.slotId,
+          change: { lengthMin: item.slotLengthMin },
+        },
+      ],
+    };
+  }
+  const placed = await server.writeSlots({
+    blockId: block.id,
+    onDate: date,
+    sortOrder: item.sortOrder,
+    blockItemId: item.id,
+    lengthMin,
+  });
+  return { id: item.id, undo: [{ kind: "remove-slot", id: placed.id }] };
+}
+
+type ItemChange = {
+  title?: string;
+  icon?: IconValue | null;
+  atTime?: string | null;
+  lengthMin?: number;
+};
+
+/**
+ * A change the slot cannot hold, for the date only: the date's own copy is
+ * edited; a set item is left off the date and its copy written in its place.
+ */
+async function writeTodayCopy(
+  server: ItemSheetServer,
+  view: ItemSheetView,
+  change: ItemChange,
+): Promise<ItemWrite> {
+  const { item, block, date } = view;
+  if (item.dated) {
+    const edited = await server.editBlockItem({ id: item.id, ...change });
+    return { id: item.id, undo: [{ kind: "token", token: edited.undo }] };
+  }
+  const off = await server.removeBlockItem({ id: item.id, date });
+  const copy = await server.writeBlockItem({
+    blockId: block.id,
+    title: item.title,
+    icon: item.icon,
+    isTransition: false,
+    atTime: item.atTime,
+    lengthMin: item.lengthMin,
+    meal: item.meal,
+    onDate: date,
+    sortOrder: item.sortOrder,
+    ...change,
+  });
+  if (copy.id === undefined) throw new Error("The copy has its id.");
+  return {
+    id: copy.id,
+    undo: [
+      { kind: "token", token: off.undo },
+      { kind: "token", token: copy.undo },
+    ],
+  };
+}
+
+/** At a set time (C-USE-item-sheet-at-a-set-time-2): on with its time, or off. */
+export function writeItemAtTime(
+  server: ItemSheetServer,
+  view: ItemSheetView,
+  atTime: string | null,
+): Promise<ItemWrite> {
+  return writeTodayCopy(server, view, { atTime });
+}
+
+/** The icon tile's pick, for today. */
+export function writeItemIcon(
+  server: ItemSheetServer,
+  view: ItemSheetView,
+  icon: IconValue,
+): Promise<ItemWrite> {
+  return writeTodayCopy(server, view, { icon });
+}
+
+/**
+ * Swap (D-USE-12, D-USE-60 (1)): the pick in the item's place for today, at
+ * the pick's length; its set time, if it had one, stays. The rest stay.
+ */
+export async function writeSwap(
+  server: ItemSheetServer,
+  view: ItemSheetView,
+  pick: SwapRow,
+): Promise<ItemWrite> {
+  const { item } = view;
+  const steps: ItemUndoStep[] = [];
+  // The date's own length was the old item's: the pick brings its own.
+  if (item.dated && item.slotId !== null && item.slotLengthMin !== null) {
+    await server.writeSlots({ id: item.slotId, lengthMin: null });
+    steps.push({
+      kind: "slot",
+      id: item.slotId,
+      change: { lengthMin: item.slotLengthMin },
+    });
+  }
+  const written = await writeTodayCopy(server, view, {
+    title: pick.title,
+    icon: pick.icon,
+    lengthMin: pick.lengthMin,
+  });
+  return { id: written.id, undo: [...steps, ...written.undo] };
+}
+
+/** Not today (D-USE-70): off today only; the usual day keeps it. */
+export async function writeItemNotToday(
+  server: ItemSheetServer,
+  view: ItemSheetView,
+): Promise<ItemWrite> {
+  const off = await server.removeBlockItem({
+    id: view.item.id,
+    date: view.date,
+  });
+  return { id: view.item.id, undo: [{ kind: "token", token: off.undo }] };
+}
+
+/**
+ * The set item a date's copy stands in for: the set item of the block left
+ * off the date at the copy's place [ASSUMPTION: no column links them; the
+ * copy is written at the set item's place].
+ */
+export function copyOrigin(
+  records: TodayRecords,
+  view: ItemSheetView,
+): { id: string; slotId: string } | null {
+  const { item, block, date } = view;
+  for (const candidate of records.blockItems) {
+    if (candidate.blockId !== block.id || candidate.onDate !== null) continue;
+    const slot = records.slots.find(
+      (row) =>
+        row.blockItemId === candidate.id &&
+        row.onDate === date &&
+        row.skipped &&
+        row.sortOrder === item.sortOrder,
+    );
+    if (slot) return { id: candidate.id, slotId: slot.id };
+  }
+  return null;
+}
+
+/**
+ * Make it Monday's usual (C-USE-item-sheet-more-open-2): today's version
+ * becomes the usual item, the way back from a today-only edit, and the date
+ * reads the usual again. One Undo takes it all back.
+ */
+export async function writeMakeUsual(
+  server: ItemSheetServer,
+  records: TodayRecords,
+  view: ItemSheetView,
+): Promise<ItemWrite> {
+  const { item } = view;
+  const steps: ItemUndoStep[] = [];
+  if (!item.dated) {
+    const edited = await server.editBlockItem({
+      id: item.id,
+      lengthMin: item.lengthMin,
+    });
+    steps.push({ kind: "token", token: edited.undo });
+    if (item.slotId !== null && item.slotLengthMin !== null) {
+      await server.writeSlots({ id: item.slotId, lengthMin: null });
+      steps.push({
+        kind: "slot",
+        id: item.slotId,
+        change: { lengthMin: item.slotLengthMin },
+      });
+    }
+    return { id: item.id, undo: steps };
+  }
+  const origin = copyOrigin(records, view);
+  if (origin === null) {
+    // A date's own item with no set item behind it joins the usual week.
+    const edited = await server.editBlockItem({ id: item.id, onDate: null });
+    return { id: item.id, undo: [{ kind: "token", token: edited.undo }] };
+  }
+  const edited = await server.editBlockItem({
+    id: origin.id,
+    title: item.title,
+    icon: item.icon,
+    atTime: item.atTime,
+    lengthMin: item.lengthMin,
+  });
+  steps.push({ kind: "token", token: edited.undo });
+  const gone = await server.removeBlockItem({ id: item.id });
+  steps.push({ kind: "token", token: gone.undo });
+  await server.writeSlots({ id: origin.slotId, skipped: false });
+  steps.push({ kind: "slot", id: origin.slotId, change: { skipped: true } });
+  return { id: origin.id, undo: steps };
+}
+
+/** A write's Undo: each step put back, last first. */
+export async function undoItemWrite(
+  server: ItemSheetServer,
+  undo: readonly ItemUndoStep[],
+): Promise<void> {
+  for (const step of [...undo].reverse()) {
+    if (step.kind === "token") await server.undo(step.token);
+    else if (step.kind === "slot") {
+      await server.writeSlots({ id: step.id, ...step.change });
+    } else await server.removeSlot({ id: step.id });
+  }
+}
+
+/* --------------------------------------------------------------- notes -- */
+
+/** Notes per date and item, on this device (see the file's note). */
+const notesStore = new Map<string, string>();
+const notesListeners = new Set<() => void>();
+
+function notesKey(scenario: string, date: string, id: string) {
+  return `${scenario}:${date}:${id}`;
+}
+
+function setStoredNotes(key: string, text: string) {
+  if (text === "") notesStore.delete(key);
+  else notesStore.set(key, text);
+  notesListeners.forEach((listener) => listener());
+}
+
+/* ---------------------------------------------------------------- hook -- */
+
+/**
+ * The sheet on `id`, on today's date. Writes run one at a time, each on the
+ * day as the last one left it, so a copy written by one is the item the next
+ * changes; `onMoved` hands the sheet a copy's id. The planner's writes go
+ * through its queue, so offline they wait on the device and land in order
+ * (D-USE-64).
+ */
+export function useItemSheet(
+  id: string | null,
+  onMoved: (id: string) => void = () => {},
+) {
+  const source = useDataSource();
+  const queryClient = useQueryClient();
+  const planner = usePlannerWrites();
+  const dateKey = source.todayKey();
+  const scenario = source.scenario.name;
+  const queryKey = todayQueryKey(scenario, dateKey);
+
+  const query = useQuery<TodayRecords, Error, ItemSheetView | null>({
+    queryKey,
+    queryFn: () => source.server.readToday(dateKey),
+    select: (records) =>
+      id === null ? null : deriveItemSheet(deriveToday(records), id),
+    enabled: id !== null,
+    retry: false,
+  });
+
+  const notesId = id ?? "";
+  const notes = React.useSyncExternalStore(
+    (listener) => {
+      notesListeners.add(listener);
+      return () => notesListeners.delete(listener);
+    },
+    () => notesStore.get(notesKey(scenario, dateKey, notesId)) ?? "",
+    () => "",
+  );
+
+  const server: ItemSheetServer = {
+    writeSlots: source.server.writeSlots,
+    removeSlot: source.server.removeSlot,
+    writeBlockItem: planner.writeBlockItem,
+    editBlockItem: planner.editBlockItem,
+    removeBlockItem: planner.removeBlockItem,
+    undo: planner.undo,
+  };
+  const serverRef = React.useRef(server);
+  serverRef.current = server;
+  const chain = React.useRef<Promise<unknown>>(Promise.resolve());
+  // An item a write left for its copy: later writes follow it there.
+  const moved = React.useRef(new Map<string, string>());
+  const follow = (start: string) => {
+    let at = start;
+    while (moved.current.has(at)) at = moved.current.get(at)!;
+    return at;
+  };
+
+  /** The day as it stands now, read again, on the item a write began on. */
+  async function readLatest(start: string): Promise<{
+    records: TodayRecords;
+    view: ItemSheetView;
+  } | null> {
+    await queryClient.invalidateQueries({ queryKey });
+    const records = await queryClient.fetchQuery({
+      queryKey,
+      queryFn: () => source.server.readToday(dateKey),
+    });
+    const view = deriveItemSheet(deriveToday(records), follow(start));
+    return view ? { records, view } : null;
+  }
+
+  /**
+   * One write after the last, on the latest day. The item is taken when the
+   * write is asked for, so a tap that also closes the sheet still lands.
+   */
+  function run(
+    write: (
+      server: ItemSheetServer,
+      view: ItemSheetView,
+      records: TodayRecords,
+    ) => Promise<ItemWrite>,
+  ): Promise<ItemWrite | null> {
+    const start = id;
+    if (start === null) return Promise.resolve(null);
+    const next = chain.current.then(async () => {
+      const latest = await readLatest(start);
+      if (latest === null) return null;
+      const written = await write(
+        serverRef.current,
+        latest.view,
+        latest.records,
+      );
+      if (written.id !== latest.view.item.id) {
+        // The notes follow the item to its copy.
+        const from = notesKey(scenario, dateKey, latest.view.item.id);
+        const kept = notesStore.get(from);
+        if (kept !== undefined) {
+          notesStore.delete(from);
+          setStoredNotes(notesKey(scenario, dateKey, written.id), kept);
+        }
+        moved.current.set(latest.view.item.id, written.id);
+        onMoved(written.id);
+      }
+      await queryClient.invalidateQueries({
+        queryKey: todayQueryKey(scenario),
+      });
+      return written;
+    });
+    chain.current = next.catch(() => {});
+    return next;
+  }
+
+  return {
+    ...query,
+    view: query.data ?? null,
+    notes,
+    setNotes: (text: string) =>
+      setStoredNotes(notesKey(scenario, dateKey, notesId), text),
+    setLength: (lengthMin: number) =>
+      run((s, view) => writeItemLength(s, view, lengthMin)),
+    setAtTime: (atTime: string | null) =>
+      run((s, view) => writeItemAtTime(s, view, atTime)),
+    setIcon: (icon: IconValue) =>
+      run((s, view) => writeItemIcon(s, view, icon)),
+    swap: (pick: SwapRow) => run((s, view) => writeSwap(s, view, pick)),
+    notToday: () => run((s, view) => writeItemNotToday(s, view)),
+    makeUsual: () =>
+      run((s, view, records) => writeMakeUsual(s, records, view)),
+    /** A write's Undo; the day is read again after. */
+    undo: async (write: ItemWrite) => {
+      await chain.current;
+      await undoItemWrite(serverRef.current, write.undo);
+      await queryClient.invalidateQueries({
+        queryKey: todayQueryKey(scenario),
+      });
+    },
+  };
+}
