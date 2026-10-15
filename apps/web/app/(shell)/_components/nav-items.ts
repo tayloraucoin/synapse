@@ -18,6 +18,7 @@ import {
 } from "@syn/ui";
 
 import {
+  isJournalPath,
   orientRoute,
   reviewRoute,
   todayReviewRoute,
@@ -83,7 +84,10 @@ const FOCUSED_ROUTES = [orientRoute(), todayReviewRoute()];
 
 /** A focused screen renders with no rail and no tabs. */
 export function isFocusedPath(pathname: string): boolean {
-  return FOCUSED_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  return (
+    isJournalPath(pathname) ||
+    FOCUSED_ROUTES.some(
+      (route) => pathname === route || pathname.startsWith(`${route}/`),
+    )
   );
 }

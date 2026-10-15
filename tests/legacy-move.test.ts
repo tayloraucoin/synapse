@@ -32,8 +32,9 @@ test("C1: the live route folders are the auth, api, legal and logout groups and 
   ]);
   // The shell holds Today and the routes USE redraws as it lands (USE-4: week
   // and review, new pages, not the old folders; USE-12: orient, reworked from
-  // the legacy frame); nothing else comes back.
-  const useRoutes = ["layout.tsx", "today", "week", "review", "orient"];
+  // the legacy frame; USE-44: day/[date]/journal, Close the day, by git mv);
+  // nothing else comes back.
+  const useRoutes = ["layout.tsx", "today", "week", "review", "orient", "day"];
   const shell = readdirSync(at("apps/web/app/(shell)")).filter(isRoute);
   assert.ok(shell.includes("today"));
   assert.deepEqual(

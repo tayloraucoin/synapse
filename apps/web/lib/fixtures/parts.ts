@@ -9,6 +9,7 @@ import {
 } from "./day-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { ItemSheetPart } from "./item-sheet-parts";
+import { JournalPart, type JournalPartState } from "./journal-parts";
 import { MealTopicPart, type MealTopicPartState } from "./meal-topic-parts";
 import { NowPart, type NowPartState } from "./now-parts";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
@@ -192,4 +193,14 @@ for (const state of [
 // USE-64: the Item sheet over Now, taken with `&sheet=item&id=`.
 for (const state of Object.keys(ITEM_SHEET_SCENARIOS)) {
   registerPart(state, () => createElement(ItemSheetPart)); // USE-64
+}
+// USE-44: Close the day's states, `close-<state>` (the /day/…/journal scenarios).
+for (const state of [
+  "journal",
+  "empty",
+  "offline",
+  "read-only",
+  "nothing-written",
+] satisfies JournalPartState[]) {
+  registerPart(`close-${state}`, () => createElement(JournalPart, { state })); // USE-44
 }

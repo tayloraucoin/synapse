@@ -129,6 +129,37 @@ export function todayReadyRoute(): string {
   return "/today/ready";
 }
 
+/* ---------------------------------------------------------------- a day -- */
+
+/**
+ * Close the day on a date (USE-44; `/day/{date}/journal`): the Wind-down
+ * block's Journal item opens it. `from: "review"` is a past day opened from
+ * Review, read only.
+ */
+export function journalRoute(
+  date: string,
+  params: { from?: "review" } = {},
+): string {
+  const path = `/day/${encodeURIComponent(date)}/journal`;
+  return params.from ? `${path}?from=${params.from}` : path;
+}
+
+/** Whether a path is Close the day's: a focused screen, no rail, no tabs. */
+export function isJournalPath(pathname: string): boolean {
+  return /^\/day\/\d{4}-\d{2}-\d{2}\/journal\/?$/.test(pathname);
+}
+
+/**
+ * A date as Schedule draws it (D-USE-74): the Tomorrow peek's See it.
+ * [ASSUMPTION: `?date=` on Schedule until its own ticket names the route.]
+ */
+export function scheduleDateRoute(date: string): string {
+  return `${todayScheduleRoute()}?${SCHEDULE_DATE_PARAM}=${encodeURIComponent(date)}`;
+}
+
+/** The query key `scheduleDateRoute` writes. */
+export const SCHEDULE_DATE_PARAM = "date";
+
 /* ----------------------------------------------------------------- week -- */
 
 /** The desk's Week (D-USE-93); below 1024 the phone reaches it through Set my days. */

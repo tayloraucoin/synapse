@@ -5,6 +5,7 @@ import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
 import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
+import { CLOSE_THE_DAY_SCENARIOS } from "./close-the-day";
 import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
 import { INTEGRATION_SCENARIOS } from "./integrations";
 import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
@@ -76,6 +77,11 @@ export interface Scenario {
   linearSends?: "fail";
   /** Linear issue ids the next sync finds closed (USE-56). */
   linearClosesOnSync?: string[];
+  /**
+   * Where the screen was opened from (USE-44): "review" stands for
+   * `?from=review`, so a past day's journal reads as Review opens it.
+   */
+  openedFrom?: "review";
 }
 
 export type { ProfileSheetStart };
@@ -209,6 +215,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...REVIEW_SCENARIOS,
   // ---- The Item sheet (USE-64): a plain item, ···, at a set time, Swap ----
   ...ITEM_SHEET_SCENARIOS,
+  // ---- Close the day (USE-44): writing, empty, offline, read only ----
+  ...CLOSE_THE_DAY_SCENARIOS,
   // ---- The To-do sheet (USE-28): its six drawn states, a failed change, offline ----
   ...TODO_SHEET_SCENARIOS,
 };

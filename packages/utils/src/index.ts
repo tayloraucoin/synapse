@@ -324,3 +324,10 @@ export {
 
 /* ---- Later from a closed block: where an item left goes (USE-25) ---- */
 export { laterTarget, type LaterBlock, type LaterTarget } from "./planner";
+
+/* ---- Close the day: the Tomorrow peek (USE-44) ---- */
+export {
+  tomorrowPeek,
+  type PeekOccurrence,
+  type TomorrowPeek,
+} from "./planner";

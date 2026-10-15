@@ -5,9 +5,12 @@ import {
   nextTodoDue,
   resolveDayKey,
 } from "@syn/utils";
+import { DEFAULT_JOURNAL_PROMPTS } from "@syn/constants";
 import {
   dayRecordRecord,
   displayNameSchema,
+  journalEntryRecord,
+  journalSaveInput,
   mealTopicInput,
   mealTopicRecord,
   morningLinesInput,
@@ -22,6 +25,8 @@ import {
   todoInput,
   todoRecord,
   type DayRecordRecord,
+  type JournalEntryRecord,
+  type JournalSaveInput,
   type MealTopicInput,
   type MealTopicRecord,
   type MorningLinesInput,
@@ -41,6 +46,7 @@ import type {
   MorningRecords,
   ReadingRecords,
 } from "@/lib/data/morning-records";
+import type { JournalRecords } from "@/lib/data/journal-records";
 import type { TodayRecords } from "@/lib/data/today-records";
 import type { AccountView } from "@/lib/data/use-account";
 import type { TodosRecords } from "@/lib/data/use-todos";
@@ -181,6 +187,14 @@ export class TodoWriteRefusal extends Error {
   }
 }
 
+/** A journal write the router would refuse (USE-44). */
+export class JournalWriteRefusal extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "JournalWriteRefusal";
+  }
+}
+
 /** A morning-lines write the router would refuse. */
 export class MorningLinesRefusal extends Error {
   constructor(message: string) {
@@ -237,6 +251,16 @@ export interface FixtureServer
    * same minute [ASSUMPTION: Review the day is only reached after Orient].
    */
   readyGo(dateKey: string, at: string): Promise<DayRecordRecord>;
+  /**
+   * Close the day (USE-44): the date's entry, the person's prompts (the
+   * defaults when none are set) and the quote on its day.
+   */
+  readJournal(dateKey: string): Promise<JournalRecords>;
+  /**
+   * One answer (`journalSaveInput`): only its key changes, merged into the
+   * date's entry as the router's jsonb merge does. Offline it waits.
+   */
+  writeJournalAnswer(input: JournalSaveInput): Promise<JournalEntryRecord>;
   /** Only the lines sent change. */
   writeMorningLines(patch: MorningLinesInput): Promise<MorningLinesRecord>;
   /**
@@ -735,6 +759,45 @@ export function createFixtureServer(
       });
       records.dayRecords.push(record);
       return Promise.resolve(structuredClone(record));
+    },
+
+    readJournal(dateKey) {
+      const prompts =
+        records.journalPrompts !== undefined &&
+        records.journalPrompts.length > 0
+          ? records.journalPrompts
+          : DEFAULT_JOURNAL_PROMPTS.map(({ key, label }) => ({ key, label }));
+      return Promise.resolve(
+        structuredClone({
+          entry:
+            records.journalEntries.find((entry) => entry.onDate === dateKey) ??
+            null,
+          prompts,
+          quote:
+            records.quotes.find((quote) => quote.onDate === dateKey) ?? null,
+        }),
+      );
+    },
+
+    writeJournalAnswer(raw) {
+      const parsed = journalSaveInput.safeParse(raw);
+      if (!parsed.success) {
+        return Promise.reject(
+          new JournalWriteRefusal(
+            parsed.error.issues[0]?.message ?? "Invalid answer.",
+          ),
+        );
+      }
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      const { date, key, value } = parsed.data;
+      let row = records.journalEntries.find((entry) => entry.onDate === date);
+      if (!row) {
+        row = journalEntryRecord.parse({ onDate: date, answers: {} });
+        records.journalEntries.push(row);
+      }
+      // One key per save: every other answer stays as it was.
+      row.answers[key] = value;
+      return Promise.resolve(structuredClone(row));
     },
 
     writeMorningLines(raw) {
