@@ -11,10 +11,11 @@ import {
   NowBlockMenu,
   PlannerItemRow,
   RowMenu,
+  RunningGroup,
   SortableItemRows,
 } from "@/components/planner";
 import type { NowFooter } from "@/lib/data/now-end";
-import { isTimedDone, useRunningView } from "@/lib/data/running";
+import { isTimedDone, runningGroup, useRunningView } from "@/lib/data/running";
 import { useDataSource } from "@/lib/data/source";
 import { useBlockFocus } from "@/lib/data/use-block-focus";
 import {
@@ -38,7 +39,9 @@ import { EndBreakFooter } from "./end-break-footer";
 import { NowCurrentCard } from "./now-current-card";
 import { NowEmpty } from "./now-empty";
 import { NowMealTopics } from "./now-meal-topics";
+import { NowRunningRows } from "./now-running-rows";
 import { NowTodosTray } from "./now-todos-tray";
+import { RUNNING_COPY } from "./running-copy";
 import { TimeTakenSheet } from "./time-taken-sheet";
 import { TimedTook } from "./timed-took";
 import { TookLine } from "./took-line";
@@ -115,6 +118,27 @@ export function NowScreen({
   );
   const [savingOrder, setSavingOrder] = React.useState<string[] | null>(null);
   const router = useRouter();
+  // USE-24: rows Done a moment ago, held settled under "Running"; a seeded
+  // one stays until the person acts, so a capture holds still.
+  const [settledIds, setSettledIds] = React.useState<ReadonlySet<string>>(
+    () => {
+      const id = seeded(view?.open, "settled");
+      return new Set(id === null ? [] : [id]);
+    },
+  );
+  const settleTimers = React.useRef(new Set<ReturnType<typeof setTimeout>>());
+  React.useEffect(() => {
+    const timers = settleTimers.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
+  // After a lift, focus moves to the card (USE-24 [PROPOSED]).
+  const cardRef = React.useRef<HTMLDivElement>(null);
+  const [liftFocus, setLiftFocus] = React.useState(false);
+  React.useEffect(() => {
+    if (!liftFocus) return;
+    cardRef.current?.focus();
+    setLiftFocus(false);
+  }, [liftFocus, chosenId]);
 
   const { view: now } = useNow(dateKey, chosenId);
   const writes = useSlotWrites(dateKey, now?.block?.id ?? null);
@@ -194,16 +218,56 @@ export function NowScreen({
     setAnnouncement(COPY.announceDone(item.title, next?.title ?? null));
   }
 
+  /** Lifting a Running row (D-USE-27): focus only; no event is written. */
+  function liftRow(item: NowItemView) {
+    setChosenId(item.id);
+    setLiftFocus(true);
+    setAnnouncement(RUNNING_COPY.inFocus(item.title));
+  }
+
+  /** Done on a Running row: settled a moment, then back in its place. */
+  function settleRow(item: NowItemView) {
+    setSettledIds((ids) => new Set(ids).add(item.id));
+    setAnnouncement(COPY.announceDone(item.title, null));
+    const timer = setTimeout(() => {
+      settleTimers.current.delete(timer);
+      setSettledIds((ids) => {
+        const rest = new Set(ids);
+        rest.delete(item.id);
+        return rest;
+      });
+    }, TOOK_LINE_MS);
+    settleTimers.current.add(timer);
+  }
+
   function markUndone(item: NowItemView) {
     void writes.undo(item);
     if (took?.id === item.id) setTook(null);
   }
 
   const sheetItem = items.find((item) => item.id === sheetId) ?? null;
+  // USE-24: several running in a non-work block gather under "Running".
+  const group = runningGroup(now, running, settledIds);
+  const grouped = new Set(
+    group ? [group.focusedId, ...group.rows.map((row) => row.item.id)] : [],
+  );
   const shown = inOrder(
     items,
     view?.drag ? heldOrder(items, view.drag) : savingOrder,
-  );
+  ).filter((item) => !grouped.has(item.id));
+
+  function currentCard(item: NowItemView, block: NowBlockView) {
+    return (
+      <NowCurrentCard
+        item={item}
+        block={block}
+        dateKey={dateKey}
+        running={running}
+        onPlainDone={markDone}
+        onTimedDone={markTimedDone}
+      />
+    );
+  }
 
   /**
    * A drop or a Move: today's order only. The current item is pinned, so a
@@ -416,59 +480,79 @@ export function NowScreen({
               }
             />
           ) : (
-            <SortableItemRows
-              items={shown}
-              label={COPY.listName(block.name)}
-              frozenId={view?.drag?.itemId ?? null}
-              hasGrip={(item) => !item.done && item.id !== current?.id}
-              // The list's own live region says where a dragged row went.
-              onReorder={(ids) => reorder(ids, null)}
-              renderRow={(item, { grip }) => {
-                if (item.id === current?.id) {
+            <>
+              {group && running ? (
+                <RunningGroup
+                  heading={RUNNING_COPY.group}
+                  card={
+                    group.focusedId !== null && current ? (
+                      <div
+                        ref={cardRef}
+                        tabIndex={-1}
+                        className="rounded-md outline-none"
+                      >
+                        {currentCard(current, block)}
+                      </div>
+                    ) : null
+                  }
+                >
+                  <NowRunningRows
+                    rows={group.rows}
+                    running={running}
+                    dateKey={dateKey}
+                    blockId={block.id}
+                    onLift={liftRow}
+                    onDone={settleRow}
+                  />
+                </RunningGroup>
+              ) : null}
+              <SortableItemRows
+                items={shown}
+                label={COPY.listName(block.name)}
+                frozenId={view?.drag?.itemId ?? null}
+                hasGrip={(item) => !item.done && item.id !== current?.id}
+                // The list's own live region says where a dragged row went.
+                onReorder={(ids) => reorder(ids, null)}
+                renderRow={(item, { grip }) => {
+                  if (item.id === current?.id) {
+                    return (
+                      <div className="py-(--space-2)">
+                        {currentCard(item, block)}
+                      </div>
+                    );
+                  }
+                  if (item.done) return itemRow(item, null);
+                  const up = moveIds(items, item.id, -1);
+                  const down = moveIds(items, item.id, 1);
                   return (
-                    <div className="py-(--space-2)">
-                      <NowCurrentCard
-                        item={item}
-                        block={block}
-                        dateKey={dateKey}
-                        running={running}
-                        onPlainDone={markDone}
-                        onTimedDone={markTimedDone}
-                      />
-                    </div>
+                    <RowMenu
+                      words={{
+                        ...COPY.rowMenu,
+                        more: COPY.rowMenu.more(item.title),
+                        menu: COPY.rowMenu.menu(item.title),
+                      }}
+                      open={menuId === item.id}
+                      onOpenChange={(open) => setMenuId(open ? item.id : null)}
+                      canMoveUp={up !== null}
+                      canMoveDown={down !== null}
+                      onSwap={() => openItemSheet(item, true)}
+                      onEdit={() => openItemSheet(item, false)}
+                      onMoveUp={() => up && reorder(up, item.id)}
+                      onMoveDown={() => down && reorder(down, item.id)}
+                      onNotToday={() => void notToday(item)}
+                      clone={itemRow(
+                        item,
+                        <span className="text-text-muted flex size-(--target) shrink-0 items-center justify-center">
+                          <ReorderIcon aria-hidden="true" className="size-4" />
+                        </span>,
+                      )}
+                    >
+                      {itemRow(item, grip)}
+                    </RowMenu>
                   );
-                }
-                if (item.done) return itemRow(item, null);
-                const up = moveIds(items, item.id, -1);
-                const down = moveIds(items, item.id, 1);
-                return (
-                  <RowMenu
-                    words={{
-                      ...COPY.rowMenu,
-                      more: COPY.rowMenu.more(item.title),
-                      menu: COPY.rowMenu.menu(item.title),
-                    }}
-                    open={menuId === item.id}
-                    onOpenChange={(open) => setMenuId(open ? item.id : null)}
-                    canMoveUp={up !== null}
-                    canMoveDown={down !== null}
-                    onSwap={() => openItemSheet(item, true)}
-                    onEdit={() => openItemSheet(item, false)}
-                    onMoveUp={() => up && reorder(up, item.id)}
-                    onMoveDown={() => down && reorder(down, item.id)}
-                    onNotToday={() => void notToday(item)}
-                    clone={itemRow(
-                      item,
-                      <span className="text-text-muted flex size-(--target) shrink-0 items-center justify-center">
-                        <ReorderIcon aria-hidden="true" className="size-4" />
-                      </span>,
-                    )}
-                  >
-                    {itemRow(item, grip)}
-                  </RowMenu>
-                );
-              }}
-            />
+                }}
+              />
+            </>
           )}
           {block.form === "meal" ? (
             <NowMealTopics

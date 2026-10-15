@@ -587,6 +587,10 @@
       "types": "./src/composed/display/timer-display/countdown-face.tsx",
       "default": "./src/composed/display/timer-display/countdown-face.tsx"
     },
+    "./progress-ring": {
+      "types": "./src/composed/display/progress-ring/index.ts",
+      "default": "./src/composed/display/progress-ring/index.ts"
+    },
     "./hue-square": {
       "types": "./src/composed/display/hue-square/index.ts",
       "default": "./src/composed/display/hue-square/index.ts"

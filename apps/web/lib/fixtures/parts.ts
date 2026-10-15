@@ -95,6 +95,10 @@ for (const state of [
   "paused",
   "timed-done",
   "timed-over-warning",
+  "several-running", // USE-24
+  "running-row-focused",
+  "done-on-a-running-row",
+  "done-well-over",
 ] satisfies RunningPartState[]) {
   registerPart(`running-${state}`, () => createElement(RunningPart, { state }));
 }

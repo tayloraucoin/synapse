@@ -45,6 +45,8 @@ export {
   EllipsisIcon as MoreIcon,
   PencilIcon as EditIcon,
 } from "lucide-react";
+/** A Running row's round Pause and Resume (USE-24). */
+export { PauseIcon as HoldIcon, PlayIcon as ResumeIcon } from "lucide-react";
 /** The To-dos tray's glyphs (USE-19): a reminder's bell, a failed list's info, the open chevron. */
 export {
   BellIcon as ReminderIcon,
@@ -541,6 +543,10 @@ export {
   type TimerDisplayProps,
 } from "./composed/display/timer-display";
 export {
+  ProgressRing,
+  type ProgressRingProps,
+} from "./composed/display/progress-ring";
+export {
   ARCHIVED_SECTION_COPY,
   ArchivedSection,
   type ArchivedSectionProps,
@@ -751,7 +757,10 @@ export {
   type AppHeaderClasses,
   type AppHeaderProps,
 } from "./composed/navigation/app-header";
-export { Breadcrumb, type BreadcrumbProps } from "./composed/navigation/breadcrumb";
+export {
+  Breadcrumb,
+  type BreadcrumbProps,
+} from "./composed/navigation/breadcrumb";
 /** Review the day (USE-31): Orient's locked line. */
 export { LockIcon as LockedIcon } from "lucide-react";
 

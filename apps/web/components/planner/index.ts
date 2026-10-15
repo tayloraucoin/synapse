@@ -20,6 +20,8 @@ export {
   RunningCard,
   type RunningCardProps,
 } from "./running-card";
+export { RunningGroup, type RunningGroupProps } from "./running-group";
+export { RunningRow, type RunningRowProps } from "./running-row";
 export { TodosTrayLine, type TodosTrayLineProps } from "./todos-tray-line";
 export {
   ChecklistRows,

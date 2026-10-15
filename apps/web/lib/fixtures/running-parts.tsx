@@ -10,7 +10,11 @@ export type RunningPartState =
   | "over-a-minute-or-more"
   | "paused"
   | "timed-done"
-  | "timed-over-warning";
+  | "timed-over-warning"
+  | "several-running" // USE-24
+  | "running-row-focused"
+  | "done-on-a-running-row"
+  | "done-well-over";
 
 export function RunningPart({ state }: { state: RunningPartState }) {
   return (
