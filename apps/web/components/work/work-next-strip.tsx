@@ -6,20 +6,19 @@ import { Button, cn, Kbd, Text } from "@syn/ui";
  * The desk's Next strip (USE-57; Today's index, layout 2): "NEXT", the
  * emoji, the title, the tier word and **Go ↵**, which goes to Next as Enter
  * does (D-USE-62). Desk-only: the phone never has it (D-USE-51). It repeats
- * `resolveWorkNext`'s answer and decides nothing. Props only.
+ * `resolveWorkNext`'s answer and decides nothing. When everything fires it is
+ * "Everything is firing." alone, with no tier and nothing to go to (USE-59,
+ * D-USE-43). Props only.
  */
 export interface WorkNextStripProps {
   /** "NEXT". */
   label: string;
   emoji: string | null;
   title: string;
-  /** "Primary". */
-  tierWord: string;
-  /** "Go". */
-  go: string;
-  /** "Go to Next, <title>". */
-  goName: string;
-  onGo?: () => void;
+  /** "Primary"; null when there is no Next. */
+  tierWord: string | null;
+  /** "Go" with its name ("Go to Next, <title>"); null: nothing to go to. */
+  go: { word: string; name: string; onGo?: () => void } | null;
   className?: string;
 }
 
@@ -29,8 +28,6 @@ export function WorkNextStrip({
   title,
   tierWord,
   go,
-  goName,
-  onGo,
   className,
 }: WorkNextStripProps) {
   return (
@@ -63,21 +60,25 @@ export function WorkNextStrip({
           {title}
         </Text>
       </span>
-      <Text as="span" variant="caption" tone="muted" className="shrink-0">
-        {tierWord}
-      </Text>
-      <Button
-        variant="ghost"
-        size="sm"
-        aria-label={goName}
-        onClick={onGo}
-        className="bg-fill-muted hover:bg-fill-muted h-8 gap-(--space-1) px-(--space-2)"
-      >
-        {go}
-        <Kbd aria-hidden="true" className="bg-transparent">
-          ↵
-        </Kbd>
-      </Button>
+      {tierWord ? (
+        <Text as="span" variant="caption" tone="muted" className="shrink-0">
+          {tierWord}
+        </Text>
+      ) : null}
+      {go ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          aria-label={go.name}
+          onClick={go.onGo}
+          className="bg-fill-muted hover:bg-fill-muted h-8 gap-(--space-1) px-(--space-2)"
+        >
+          {go.word}
+          <Kbd aria-hidden="true" className="bg-transparent">
+            ↵
+          </Kbd>
+        </Button>
+      ) : null}
     </div>
   );
 }

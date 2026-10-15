@@ -198,17 +198,32 @@ function work(
   name: string,
   options: Partial<Scenario> & {
     events?: ReturnType<typeof mondayEvent>[];
+    /** Slots done by then, as Done wrote them: the time and its minutes. */
+    done?: { slotId: string; at: string; tookMin: number }[];
   } = {},
 ): () => Scenario {
-  const { events, ...rest } = options;
-  return () => ({
-    name,
-    now: TODAY_DESK_NOW,
-    records: todayWorkRecords(events),
-    mode: "ready",
-    ...rest,
-  });
+  const { events, done = [], ...rest } = options;
+  return () => {
+    const records = todayWorkRecords(events);
+    for (const entry of done) {
+      const slot = records.slots.find((row) => row.id === entry.slotId);
+      if (slot) {
+        slot.doneAt = onMonday(entry.at);
+        slot.tookMin = entry.tookMin;
+      }
+    }
+    return {
+      name,
+      now: TODAY_DESK_NOW,
+      records,
+      mode: "ready",
+      ...rest,
+    };
+  };
 }
+
+/** "HH:MM" on the Monday as a scenario's fixed now. */
+const at = (clock: string) => `2026-10-12T${clock}:00-04:00`;
 
 const S = TODAY_WORK_IDS.slots;
 
@@ -231,6 +246,69 @@ export const TODAY_DESK_SCENARIOS: Record<string, () => Scenario> = {
   "today-error": work("today-error", {
     events: PORTAL_FIRING,
     regions: { week: "error" },
+  }),
+
+  // USE-59: the work loop. [Case studies] is the week's [Alder intro].
+  // Started at 9:45: at 10:20 "1:25:00 left of 2 h · worked 35 min since 9:45".
+  "today-running": work("today-running", {
+    events: [...PORTAL_FIRING, mondayEvent(2, S.alder, "started", "09:45")],
+  }),
+  // Prompt sent at 10:20: two fire, "worked 35 min" kept; the SMS copy lifts.
+  "today-prompt-sent": work("today-prompt-sent", {
+    now: at("10:21"),
+    events: [
+      ...PORTAL_FIRING,
+      mondayEvent(2, S.alder, "started", "09:45"),
+      mondayEvent(3, S.alder, "prompt_sent", "10:20"),
+    ],
+  }),
+  // 11:52: [Portal sign-in] back after 12 min, Next with Start; [Alder intro]
+  // firing 6 min with "worked 35 min"; the SMS copy done, "Took 1 h 10 ·
+  // fired 32 min".
+  "today-brought-back": work("today-brought-back", {
+    now: at("11:52"),
+    events: [
+      mondayEvent(2, S.sms, "started", "09:30"),
+      mondayEvent(3, S.sms, "prompt_sent", "10:10"),
+      mondayEvent(4, S.alder, "started", "10:10"),
+      ...PORTAL_FIRING,
+      mondayEvent(5, S.portal, "brought_back", "10:28"),
+      mondayEvent(6, S.sms, "brought_back", "10:42"),
+      mondayEvent(7, S.alder, "paused", "10:45"),
+      mondayEvent(8, S.sms, "resumed", "10:45"),
+      mondayEvent(9, S.sms, "done", "11:15"),
+      mondayEvent(10, S.alder, "prompt_sent", "11:46"),
+    ],
+    done: [{ slotId: S.sms, at: "11:15", tookMin: 70 }],
+  }),
+  // 10:42: Pause at 10:40 holds [Alder intro] alone after 57 min.
+  "today-paused": work("today-paused", {
+    now: at("10:42"),
+    events: [
+      mondayEvent(1, S.portal, "prompt_sent", "10:15"),
+      mondayEvent(2, S.alder, "started", "09:43"),
+      mondayEvent(3, S.alder, "paused", "10:40"),
+    ],
+  }),
+  // 11:36: past the top of 2 h, "13 min over" in warning by Done's percent
+  // bands (D-USE-72) [ASSUMPTION: the board's 12 is ink under them]; Portal
+  // firing "1 h 20".
+  "today-over": work("today-over", {
+    now: at("11:36"),
+    events: [...PORTAL_FIRING, mondayEvent(2, S.alder, "started", "09:23")],
+  }),
+  // 10:58: every work item fires; the to-dos lift into the card.
+  "today-everything-firing": work("today-everything-firing", {
+    now: at("10:58"),
+    events: [
+      mondayEvent(1, S.portal, "prompt_sent", "10:15"),
+      mondayEvent(2, S.alder, "started", "09:45"),
+      mondayEvent(3, S.alder, "prompt_sent", "10:42"),
+      mondayEvent(4, S.sms, "started", "10:44"),
+      mondayEvent(5, S.sms, "prompt_sent", "10:56"),
+      mondayEvent(6, S.desk, "prompt_sent", "10:50"),
+      mondayEvent(7, S.invoice, "prompt_sent", "10:55"),
+    ],
   }),
 };
 

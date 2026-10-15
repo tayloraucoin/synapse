@@ -276,6 +276,7 @@ export function WorkRowMeta({ row }: { row: WorkRowView }) {
           {row.noLinear ? <span>{row.noLinear}</span> : null}
           {row.session ? <span>{row.session}</span> : null}
           {row.worked ? <span>{row.worked}</span> : null}
+          {row.fired ? <span>{row.fired}</span> : null}
         </>
       )}
     </div>

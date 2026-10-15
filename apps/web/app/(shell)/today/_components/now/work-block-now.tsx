@@ -4,11 +4,11 @@ import type * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
 import { DayBlockHeader } from "@/components/planner";
-import { WorkRetry, WorkTiersSkeleton } from "@/components/work";
+import { AllFiringCard, WorkRetry, WorkTiersSkeleton } from "@/components/work";
 import { useDataSource } from "@/lib/data/source";
 import { TODAY_WORK_COPY } from "@/lib/data/today-work";
 import type { NowBlockView } from "@/lib/data/use-now";
-import { useTodayWork } from "@/lib/data/use-today-work";
+import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
 import { itemSheetRoute } from "@/lib/routes";
 import { WORK_COPY as COPY } from "../work/copy";
 import { WorkTiers } from "../work/work-tiers";
@@ -19,7 +19,8 @@ import { WorkTiers } from "../work/work-tiers";
  * 11:00", ···), then the same tiers as the desk, the rows trimmed (D-USE-51).
  * No Next strip: Next is the lifted card in its tier, or a shaded row
  * (D-USE-61). The header stands while the tiers load or fail; the tiers
- * alone wait or retry (loading.md, error.md).
+ * alone wait or retry (loading.md, error.md). With every item firing, the
+ * undone to-dos lift into a card under the header (USE-59, D-USE-53).
  */
 export function WorkBlockNow({
   block,
@@ -34,6 +35,7 @@ export function WorkBlockNow({
   const now = useWorkClock(source.now);
   const work = useTodayWork(dateKey, now);
   const { view } = work;
+  const loop = useWorkLoop(dateKey, view);
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams().toString();
@@ -69,16 +71,28 @@ export function WorkBlockNow({
       ) : view === null ? (
         <WorkTiersSkeleton label={COPY.loading} />
       ) : (
-        <WorkTiers
-          view={view}
-          headingAs="h3"
-          onOpen={(slotId) => {
-            const item = view.workItemIds.get(slotId);
-            if (item)
-              router.push(itemSheetRoute(here, item), { scroll: false });
-          }}
-          onCheckReminder={work.checkTodo}
-        />
+        <>
+          {view.allFiring ? (
+            <AllFiringCard
+              title={COPY.allFiring}
+              lead={COPY.allFiringLead}
+              todos={(work.todos ?? []).filter((todo) => !todo.checked)}
+              onCheckedChange={work.checkTodo}
+            />
+          ) : null}
+          <WorkTiers
+            view={view}
+            now={now}
+            loop={loop}
+            headingAs="h3"
+            onOpen={(slotId) => {
+              const item = view.workItemIds.get(slotId);
+              if (item)
+                router.push(itemSheetRoute(here, item), { scroll: false });
+            }}
+            onCheckReminder={work.checkTodo}
+          />
+        </>
       )}
     </section>
   );

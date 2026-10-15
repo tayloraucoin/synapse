@@ -1,7 +1,12 @@
+export { AllFiringCard, type AllFiringCardProps } from "./all-firing-card";
 export { ClientTile } from "./client-tile";
 export { DueBadge, type DueBadgeProps } from "./due-badge";
 export { PriorityChip, PriorityMarkGlyph } from "./priority-chip";
 export { NextCard, type NextCardProps } from "./next-card";
+export {
+  RunningWorkCard,
+  type RunningWorkCardProps,
+} from "./running-work-card";
 export { TierGroup, type TierGroupProps } from "./tier-group";
 export {
   DeskDayColumn,

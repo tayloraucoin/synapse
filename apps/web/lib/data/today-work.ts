@@ -5,11 +5,15 @@ import {
   clockFromMinutes,
   clockToMinutes,
   compareInTiers,
+  formatCountdown,
   instantToWallClockMinutes,
   parseRule,
   pickWhileItFires,
   resolveWorkNext,
+  runningBand,
   weekdayIndex,
+  type OverBand,
+  type SlotClock,
   type SlotClockState,
   type WorkNext,
 } from "@syn/utils";
@@ -20,6 +24,7 @@ import type {
   WorkItemRecord,
 } from "@syn/validators";
 import type { WorkRowView } from "@/components/work";
+import { SIZE_RANGE } from "@/components/work/add/new-task/form";
 import type { Today } from "./derive-today";
 import type { LinearIssueJoin } from "./integration-records";
 import type { TrayRowView } from "./use-todos";
@@ -40,6 +45,16 @@ import { workMinutes, workRowView } from "./work-row-view";
 export const TODAY_WORK_COPY = {
   firing: "firing",
   worked: (minutes: string) => `worked ${minutes}`,
+  fired: (minutes: string) => `fired ${minutes}`,
+  took: (minutes: string) => `Took ${minutes}`,
+  workTime: "WORK TIME",
+  workTimePaused: "WORK TIME · PAUSED",
+  workTimeOver: "WORK TIME · OVER",
+  over: "over",
+  leftOf: (top: string) => `left of ${top}`,
+  pastTop: (top: string) => `past the top of ${top}`,
+  since: (clock: string) => `since ${clock}`,
+  pausedAt: (clock: string) => `paused at ${clock}`,
   whileItFires: "While it fires:",
   daily: "daily",
   /** "9:30 to 12:00". */
@@ -125,8 +140,32 @@ export interface TodayWorkView {
   whileItFires: WhileItFiresView | null;
   /** Each row's slot clock state, by slot id: what USE-59's writes read. */
   states: ReadonlyMap<string, SlotClockState>;
+  /** Each row's derived clock, by slot id, once it has events. */
+  clocks: ReadonlyMap<string, SlotClock>;
   /** Each row's work item, by slot id: the Item sheet opens the item. */
   workItemIds: ReadonlyMap<string, string>;
+  /**
+   * The item in hand (USE-59): the running item, or the one its own Pause
+   * holds. It stands as the running card in its row's place; null with
+   * nothing in hand.
+   */
+  inHand: InHandView | null;
+  /** Next has worked today, so its card reads Resume (brought-back.md). */
+  nextResumes: boolean;
+  /** Every work item fires: "Everything is firing." (D-USE-43). */
+  allFiring: boolean;
+  /** A one-day item, by slot id: its Done is the task's (a session's is USE-60). */
+  oneDay: ReadonlyMap<string, boolean>;
+  /** The day's close: nothing counts past it (C11). */
+  dayEnd: Date;
+}
+
+export interface InHandView {
+  slotId: string;
+  row: WorkRowView;
+  clock: SlotClock;
+  /** The top of its range, minutes: WORK TIME counts down from it. */
+  topMin: number;
 }
 
 export interface TodayWorkInput {
@@ -262,6 +301,40 @@ function isDaily(todo: TodoRecord): boolean {
   return parsed.ok && parsed.rule.freq === "DAILY";
 }
 
+/** The last event written on each slot, by the clock's order. */
+function lastKinds(today: Today): Map<string, string> {
+  const last = new Map<
+    string,
+    { at: number; received: number; kind: string }
+  >();
+  for (const event of today.records.slotEvents) {
+    const at = Date.parse(event.at);
+    const received = Date.parse(event.receivedAt);
+    const kept = last.get(event.slotId);
+    if (
+      !kept ||
+      at > kept.at ||
+      (at === kept.at && received >= kept.received)
+    ) {
+      last.set(event.slotId, { at, received, kind: event.kind });
+    }
+  }
+  return new Map([...last].map(([id, entry]) => [id, entry.kind]));
+}
+
+/** The top of an item's range, in minutes: the clock counts down from it (D-USE-47). */
+export function topOfRange(item: WorkItemRecord, slot: SlotRecord): number {
+  const preset = item.size ? SIZE_RANGE[item.size] : null;
+  return (
+    item.lengthMaxMin ??
+    preset?.max ??
+    item.lengthMinMin ??
+    preset?.min ??
+    slot.lengthMin ??
+    60
+  );
+}
+
 export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
   const { today, day, now } = input;
   const { records } = today;
@@ -283,6 +356,22 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
       ),
     );
   const states = new Map(slots.map((slot) => [slot.id, stateOf(today, slot)]));
+
+  // One in hand inside a Work block (D-USE-43): the running item, else the
+  // one its own Pause holds. A slot resting after Bring back is not in hand,
+  // so it can be Next (D-USE-44).
+  const kinds = lastKinds(today);
+  const running = slots.find((slot) => states.get(slot.id) === "running");
+  const held = running
+    ? undefined
+    : slots.find(
+        (slot) =>
+          states.get(slot.id) === "paused" && kinds.get(slot.id) === "paused",
+      );
+  const inHand = running ?? held ?? null;
+  // The held card keeps the lift, so it is never Next (paused.md).
+  const nextStates = new Map(states);
+  if (inHand) nextStates.set(inHand.id, "running");
   // [ASSUMPTION] nothing is waiting until Linear's Waiting group (USE-63).
   const next = resolveWorkNext({
     slots: slots.map((slot) => ({
@@ -291,13 +380,10 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
       sortOrder: slot.sortOrder,
       waiting: false,
     })),
-    states,
+    states: nextStates,
   });
   const nextId = next.kind === "slot" ? next.slotId : null;
   const band = bandOf(today, now);
-  const inHand = [...states.values()].some(
-    (state) => state === "running" || state === "paused",
-  );
 
   const dayEnd = records.dayWindow.end;
   const rowOf = (slot: SlotRecord): WorkRowView => {
@@ -322,18 +408,45 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
       subIssues: input.subIssuesFor?.(item),
     });
     const clock = today.clock.slots.get(slot.id);
-    if (form !== "firing" || !clock) return row;
+    if (!clock) return row;
     const figures = clockAt(clock, now, dayEnd);
     const workedMin = Math.floor(figures.workMs / 60_000);
+    const firedMin = Math.floor(figures.firingMs / 60_000);
+    const worked =
+      workedMin >= 1 ? TODAY_WORK_COPY.worked(workMinutes(workedMin)) : null;
+    if (form === "done") {
+      // Took is work time only; "fired" is left off one that never fired (D-USE-48).
+      const tookMin = slot.tookMin ?? (workedMin >= 1 ? workedMin : null);
+      const parts = [
+        tookMin !== null ? TODAY_WORK_COPY.took(workMinutes(tookMin)) : null,
+        clock.firing.length > 0
+          ? TODAY_WORK_COPY.fired(workMinutes(Math.max(1, firedMin)))
+          : null,
+      ].filter((part): part is string => part !== null);
+      return {
+        ...row,
+        doneRecord: parts.length ? TODAY_WORK_COPY.joined(parts) : null,
+      };
+    }
+    if (form === "firing") {
+      return {
+        ...row,
+        // Firing reads from 1 min, in whole minutes (C-USE-firing-1, D-USE-29).
+        firing: {
+          word: TODAY_WORK_COPY.firing,
+          time: workMinutes(Math.max(1, figures.firingMs / 60_000)),
+        },
+        worked,
+      };
+    }
+    // Back in place: a length, never a caption (D-USE-44, D-USE-47).
     return {
       ...row,
-      // Firing reads from 1 min, in whole minutes (C-USE-firing-1, D-USE-29).
-      firing: {
-        word: TODAY_WORK_COPY.firing,
-        time: workMinutes(Math.max(1, figures.firingMs / 60_000)),
-      },
-      worked:
-        workedMin >= 1 ? TODAY_WORK_COPY.worked(workMinutes(workedMin)) : null,
+      worked,
+      fired:
+        clock.firing.length > 0
+          ? TODAY_WORK_COPY.fired(workMinutes(Math.max(1, firedMin)))
+          : null,
     };
   };
 
@@ -359,6 +472,11 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
   const reminder = records.todos.find((todo) => todo.id === reminderId);
   const firstFiring = flat.find(({ row }) => row.form === "firing");
 
+  const handClock = inHand ? today.clock.slots.get(inHand.id) : undefined;
+  const handRow = inHand
+    ? flat.find(({ row }) => row.id === inHand.id)?.row
+    : undefined;
+
   return {
     dateKey,
     timeZone: records.timeZone,
@@ -367,7 +485,20 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
     band,
     next,
     nextRow: nextEntry ? { ...nextEntry.row, tierWord: nextEntry.word } : null,
-    lift: band?.isWork === true && !inHand && nextEntry !== undefined,
+    lift: band?.isWork === true && inHand === null && nextEntry !== undefined,
+    nextResumes:
+      nextId !== null && (today.clock.slots.get(nextId)?.work.length ?? 0) > 0,
+    inHand:
+      inHand && handClock && handRow
+        ? {
+            slotId: inHand.id,
+            // The clock's line says what it worked; the meta does not repeat it.
+            row: { ...handRow, worked: null, fired: null },
+            clock: handClock,
+            topMin: topOfRange(items.get(inHand.workItemId!)!, inHand),
+          }
+        : null,
+    allFiring: next.kind === "all_firing",
     tiers,
     whileItFires:
       reminder && firstFiring
@@ -380,7 +511,83 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
           }
         : null,
     states,
+    clocks: new Map(
+      slots.flatMap((slot) => {
+        const clock = today.clock.slots.get(slot.id);
+        return clock ? [[slot.id, clock] as const] : [];
+      }),
+    ),
     workItemIds: new Map(slots.map((slot) => [slot.id, slot.workItemId!])),
+    oneDay: new Map(
+      slots.map((slot) => [slot.id, (sessions.get(slot.id) ?? null) === null]),
+    ),
+    dayEnd,
+  };
+}
+
+/** The running card's words at an instant (USE-59; running, paused, over). */
+export interface WorkCardFigures {
+  /** "WORK TIME", "WORK TIME · PAUSED", "WORK TIME · OVER". */
+  label: string;
+  /** "1:24:10"; past the top "12 min" with `over`. */
+  figure: string;
+  over: { word: string; level: OverBand } | null;
+  /** "left of 2 h · worked 35 min since 9:45". */
+  line: string;
+  /** Paused by its own Pause: the figure holds. */
+  held: boolean;
+}
+
+/**
+ * The card's figures: `clockAt` over the slot's derived clock at the tick,
+ * counting down from the top of the range; past it, "n min over" by Done's
+ * percent bands, as the running card on Now (D-USE-72). Nothing is stored.
+ */
+export function workCardFigures(
+  hand: InHandView,
+  now: Date,
+  dayEnd: Date,
+  timeZone: string,
+): WorkCardFigures {
+  const { workMs, running } = clockAt(hand.clock, now, dayEnd);
+  const countdown = formatCountdown(hand.topMin * 60_000, workMs);
+  const top = workMinutes(hand.topMin);
+  const worked = workMinutes(Math.floor(workMs / 60_000));
+  const since = hand.clock.work[0]?.start;
+  const sinceWords = since
+    ? ` ${TODAY_WORK_COPY.since(wallWords(since, timeZone))}`
+    : "";
+  const held = !running;
+  const lastEnd = hand.clock.work.at(-1)?.end ?? null;
+  const line = countdown.over
+    ? TODAY_WORK_COPY.joined([
+        TODAY_WORK_COPY.pastTop(top),
+        `${TODAY_WORK_COPY.worked(worked)}${sinceWords}`,
+      ])
+    : TODAY_WORK_COPY.joined([
+        TODAY_WORK_COPY.leftOf(top),
+        held
+          ? TODAY_WORK_COPY.worked(worked)
+          : `${TODAY_WORK_COPY.worked(worked)}${sinceWords}`,
+        ...(held && lastEnd
+          ? [TODAY_WORK_COPY.pausedAt(wallWords(lastEnd, timeZone))]
+          : []),
+      ]);
+  return {
+    label: held
+      ? TODAY_WORK_COPY.workTimePaused
+      : countdown.over
+        ? TODAY_WORK_COPY.workTimeOver
+        : TODAY_WORK_COPY.workTime,
+    figure: countdown.figure,
+    over: countdown.over
+      ? {
+          word: TODAY_WORK_COPY.over,
+          level: runningBand(hand.topMin, workMs),
+        }
+      : null,
+    line,
+    held,
   };
 }
 

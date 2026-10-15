@@ -1,14 +1,16 @@
 "use client";
 
-import type * as React from "react";
-import { cn } from "@syn/ui";
+import * as React from "react";
+import { cn, toastUndo } from "@syn/ui";
 import {
   NextCard,
+  RunningWorkCard,
   TierGroup,
   WhileItFiresLine,
   type WorkRowHandlers,
 } from "@/components/work";
-import type { TodayWorkView } from "@/lib/data/today-work";
+import { workCardFigures, type TodayWorkView } from "@/lib/data/today-work";
+import type { useWorkLoop } from "@/lib/data/use-today-work";
 import { WORK_COPY as COPY } from "./copy";
 
 /**
@@ -18,52 +20,110 @@ import { WORK_COPY as COPY } from "./copy";
  * firing item in its tier and place; the reminder line once under the first
  * firing row. The same tree at both widths: the rows trim at `split:`.
  *
- * `card` stands in Next's place when the screen has its own (USE-59's
- * running card); the rest of the slot's writes come through `handlers`.
+ * The work loop (USE-59): the item in hand is the running card in its row's
+ * place, its figures read at `now`, the page's one tick; Start, Pause,
+ * Resume, Prompt sent, the ring, the firing mark and Done are `loop`'s
+ * writes. "<title> firing", "<title> back" and "Next: <title>" are said
+ * politely; nothing sounds and no caption shows on a return (D-USE-62).
  */
-export interface WorkTiersProps extends WorkRowHandlers {
+export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
   view: TodayWorkView;
-  onStart?: (slotId: string) => void;
-  onDone?: (slotId: string) => void;
+  now: Date;
+  loop?: ReturnType<typeof useWorkLoop>;
   onCheckReminder?: (todoId: string, checked: boolean) => void;
-  card?: { rowId: string; content: React.ReactNode } | null;
   headingAs?: "h2" | "h3";
   className?: string;
 }
 
 export function WorkTiers({
   view,
-  onStart,
-  onDone,
+  now,
+  loop,
   onCheckReminder,
-  card = null,
   headingAs = "h2",
   className,
-  ...handlers
+  onOpen,
 }: WorkTiersProps) {
+  const [said, setSaid] = React.useState("");
+  const titleOf = (id: string) =>
+    view.tiers.flatMap((group) => group.rows).find((row) => row.id === id)
+      ?.title ?? "";
+
+  // "Next: <title>" when Next moves to another item, after the action's words.
+  const nextId = view.nextRow?.id ?? null;
+  const nextTitle = view.nextRow?.title ?? null;
+  const lastNext = React.useRef(nextId);
+  React.useEffect(() => {
+    if (lastNext.current === nextId) return;
+    lastNext.current = nextId;
+    if (nextTitle)
+      setSaid((words) => joinSaid(words, COPY.saidNext(nextTitle)));
+  }, [nextId, nextTitle]);
+
+  const toggleFiring = loop
+    ? (id: string, fire: boolean) => {
+        setSaid(
+          fire ? COPY.saidFiring(titleOf(id)) : COPY.saidBack(titleOf(id)),
+        );
+        void (fire ? loop.promptSent(id) : loop.bringBack(id));
+      }
+    : undefined;
+  const done = loop
+    ? async (id: string) => {
+        const title = titleOf(id);
+        const undo = await loop.done(id);
+        if (undo)
+          toastUndo({ text: COPY.doneToast(title), onUndo: () => void undo() });
+      }
+    : undefined;
+
+  const hand = view.inHand;
   const next = view.lift ? view.nextRow : null;
-  const lifted =
-    card ??
-    (next
+  const lifted = hand
+    ? {
+        rowId: hand.slotId,
+        content: (
+          <RunningWorkCard
+            row={hand.row}
+            figures={workCardFigures(hand, now, view.dayEnd, view.timeZone)}
+            words={{
+              pause: COPY.pause,
+              resume: COPY.resume,
+              promptSent: COPY.promptSent,
+              done: COPY.done,
+              doneName: COPY.doneName(hand.row.title),
+              label: COPY.inHand(hand.row.title),
+            }}
+            onPause={loop ? () => void loop.pause(hand.slotId) : undefined}
+            onResume={loop ? () => void loop.resume(hand.slotId) : undefined}
+            onPromptSent={
+              toggleFiring ? () => toggleFiring(hand.slotId, true) : undefined
+            }
+            onDone={done ? () => void done(hand.slotId) : undefined}
+            onOpen={onOpen}
+          />
+        ),
+      }
+    : next
       ? {
           rowId: next.id,
           content: (
             <NextCard
               row={next}
               words={{
-                start: COPY.start,
+                start: view.nextResumes ? COPY.resume : COPY.start,
                 done: COPY.done,
                 doneName: COPY.doneName(next.title),
                 next: COPY.next,
               }}
-              onStart={onStart ? () => onStart(next.id) : undefined}
-              onDone={onDone ? () => onDone(next.id) : undefined}
-              onToggleFiring={handlers.onToggleFiring}
-              onOpen={handlers.onOpen}
+              onStart={loop ? () => void loop.start(next.id) : undefined}
+              onDone={done ? () => void done(next.id) : undefined}
+              onToggleFiring={toggleFiring}
+              onOpen={onOpen}
             />
           ),
         }
-      : null);
+      : null;
   const reminder = view.whileItFires;
 
   return (
@@ -98,9 +158,17 @@ export function WorkTiers({
                 }
               : null
           }
-          {...handlers}
+          onOpen={onOpen}
+          onToggleFiring={toggleFiring}
         />
       ))}
+      <p aria-live="polite" className="sr-only">
+        {said}
+      </p>
     </div>
   );
+}
+
+function joinSaid(words: string, more: string): string {
+  return words ? `${words} ${more}` : more;
 }

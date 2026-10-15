@@ -37,6 +37,8 @@ export interface WorkRowView {
   session: string | null;
   /** "worked 40 min", kept while firing (D-USE-47). */
   worked: string | null;
+  /** "fired 12 min", once back (D-USE-47; USE-59). */
+  fired?: string | null;
   /** The right column at rest: "30 to 60 min". */
   length: string | null;
   /** The firing form's words: "firing" and "4 min" (D-USE-49). */

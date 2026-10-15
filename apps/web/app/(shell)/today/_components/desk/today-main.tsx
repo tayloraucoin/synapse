@@ -7,7 +7,7 @@ import { DayBlockBand, PlannerItemRow } from "@/components/planner";
 import { WorkNextStrip, WorkRetry, WorkTiersSkeleton } from "@/components/work";
 import { useDataSource } from "@/lib/data/source";
 import { dayTitle, wallWords } from "@/lib/data/today-work";
-import { useTodayWork } from "@/lib/data/use-today-work";
+import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
 import { itemSheetRoute, todoSheetRoute } from "@/lib/routes";
 import { PushCheck } from "../push-check";
 import { WORK_COPY as COPY } from "../work/copy";
@@ -31,6 +31,7 @@ export function TodayMain() {
   const now = useWorkClock(source.now);
   const work = useTodayWork(dateKey, now);
   const { view } = work;
+  const loop = useWorkLoop(dateKey, view);
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams().toString();
@@ -91,13 +92,25 @@ export function TodayMain() {
               emoji={view.nextRow.emoji}
               title={view.nextRow.title}
               tierWord={view.nextRow.tierWord}
-              go={COPY.go}
-              goName={COPY.goName(view.nextRow.title)}
-              onGo={goToNext}
+              go={{
+                word: COPY.go,
+                name: COPY.goName(view.nextRow.title),
+                onGo: goToNext,
+              }}
+            />
+          ) : view.allFiring ? (
+            <WorkNextStrip
+              label={COPY.nextLabel}
+              emoji={null}
+              title={COPY.allFiring}
+              tierWord={null}
+              go={null}
             />
           ) : null}
           <WorkTiers
             view={view}
+            now={now}
+            loop={loop}
             className="pt-(--space-2)"
             onOpen={openItem}
             onCheckReminder={work.checkTodo}
