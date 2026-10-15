@@ -3,12 +3,17 @@ import type { IconValue } from "@syn/types";
 import {
   clockFromMinutes,
   clockMinutes,
+  defaultRuleForm,
+  describeRule,
   eventLanding,
   overlaps,
+  parseRule,
   presetRule,
   reflowItems,
+  ruleForm,
   weekdayIndex,
   type RepeatPreset,
+  type RuleForm,
 } from "@syn/utils";
 import type { NewBlockInput, NewTransitionInput } from "@syn/validators";
 import { BLOCK_HUE } from "../block-hue";
@@ -86,7 +91,10 @@ export interface NewBlockForm {
   icon: IconValue | null;
   startsAt: string;
   endsAt: string;
-  repeat: RepeatPreset;
+  /** A preset, or "custom": `customRule` holds the rule Custom… made (USE-47). */
+  repeat: RepeatPreset | "custom";
+  /** The stored text Custom… made; null unless `repeat` is "custom". */
+  customRule: string | null;
   checklist: boolean;
   meal: boolean;
   fill: WorkFill;
@@ -148,6 +156,7 @@ export function openForm(
     startsAt: start.startsAt,
     endsAt: start.endsAt ?? plus(start.startsAt, length),
     repeat: scope.date === null ? "weekly" : "none",
+    customRule: null,
     checklist: false,
     meal: false,
     fill: "tasks_for_the_day",
@@ -164,6 +173,8 @@ export type NewBlockAction =
   | { type: "starts"; startsAt: string }
   | { type: "ends"; endsAt: string }
   | { type: "repeat"; repeat: RepeatPreset }
+  /** Custom…'s Done: the rule it made, anchored on the sheet's rule date. */
+  | { type: "custom"; rrule: string; ruleDate: string }
   | { type: "checklist"; on: boolean }
   | { type: "meal"; on: boolean }
   | { type: "fill"; fill: WorkFill }
@@ -214,7 +225,16 @@ export function reduceForm(
     case "ends":
       return action.endsAt === "" ? form : { ...form, endsAt: action.endsAt };
     case "repeat":
-      return { ...form, repeat: action.repeat };
+      return { ...form, repeat: action.repeat, customRule: null };
+    case "custom": {
+      // A custom rule that is a preset reads, and is picked, as that preset.
+      const preset = PRESETS.find(
+        (each) => presetRule(each, action.ruleDate) === action.rrule,
+      );
+      return preset === undefined
+        ? { ...form, repeat: "custom", customRule: action.rrule }
+        : { ...form, repeat: preset, customRule: null };
+    }
     case "checklist":
       return { ...form, checklist: action.on };
     case "meal":
@@ -312,7 +332,34 @@ export function repeatOptions(ruleDate: string): RepeatOption[] {
   ];
 }
 
+const PRESETS: RepeatPreset[] = [
+  "daily",
+  "weekly",
+  "monthly",
+  "annually",
+  "weekdays",
+];
+
+/** The rule in force: Custom…'s, or the preset's from the rule date; null for none. */
+export function formRule(form: NewBlockForm, ruleDate: string): string | null {
+  return form.repeat === "custom"
+    ? form.customRule
+    : presetRule(form.repeat, ruleDate);
+}
+
+/** What Custom… opens on: the rule in force, or every week on the start's day. */
+export function customForm(form: NewBlockForm, ruleDate: string): RuleForm {
+  const text = formRule(form, ruleDate);
+  const parsed = text === null ? null : parseRule(text);
+  return parsed?.ok ? ruleForm(parsed.rule) : defaultRuleForm(ruleDate);
+}
+
+/** The Repeats trigger's words: the preset's label, or Custom…'s rule read in words. */
 export function repeatLabel(form: NewBlockForm, ruleDate: string): string {
+  if (form.repeat === "custom" && form.customRule !== null) {
+    const parsed = parseRule(form.customRule);
+    if (parsed.ok) return describeRule(parsed.rule);
+  }
   return (
     repeatOptions(ruleDate).find((option) => option.preset === form.repeat)
       ?.label ?? COPY.repeats.none
@@ -496,11 +543,12 @@ export function consequenceLine(
     };
   }
 
-  const weekday = WEEKDAYS[weekdayIndex(day.scope.ruleDate)];
-  const weekly = form.repeat === "weekly";
+  const days = weeklyDays(form, day.scope.ruleDate);
+  const weekday = days ?? "";
+  const weekly = days !== null;
 
   if (form.checklist) {
-    const where = weekly ? `on ${weekday}s ` : "";
+    const where = weekly ? `on ${weekday} ` : "";
     return {
       kind: "goes",
       tone: "muted",
@@ -511,7 +559,7 @@ export function consequenceLine(
   const after = blockBefore(form.startsAt, day);
   if (form.kind === "todos") {
     const lead = weekly
-      ? `Goes in on ${weekday}s, ${start} to ${end}`
+      ? `Goes in on ${weekday}, ${start} to ${end}`
       : `Goes in ${start} to ${end}`;
     return {
       kind: "goes",
@@ -522,7 +570,7 @@ export function consequenceLine(
 
   const opens = opensWords(form);
   if (weekly) {
-    const lead = `Goes in on ${weekday}s, ${start} to ${end}${after === null ? "" : `, after ${after}`}.`;
+    const lead = `Goes in on ${weekday}, ${start} to ${end}${after === null ? "" : `, after ${after}`}.`;
     return {
       kind: "goes",
       tone: "muted",
@@ -538,6 +586,22 @@ export function consequenceLine(
     tone: "muted",
     text: opens === null ? `${lead}.` : `${lead}, and ${opens}`,
   };
+}
+
+/**
+ * "Sundays", "Wednesdays and Sundays": the days a weekly rule goes in on,
+ * every week; null for any other rule, whose line names no weekday.
+ */
+function weeklyDays(form: NewBlockForm, ruleDate: string): string | null {
+  const text = form.repeat === "weekdays" ? null : formRule(form, ruleDate);
+  const parsed = text === null ? null : parseRule(text);
+  if (!parsed?.ok) return null;
+  const { rule } = parsed;
+  if (rule.freq !== "WEEKLY" || rule.interval !== 1) return null;
+  const names = rule.weekdays.map((d) => `${WEEKDAYS[d]}s`);
+  return names.length === 1
+    ? names[0]!
+    : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
 }
 
 /* ---- The write ---- */
@@ -558,7 +622,7 @@ export type NewBlockWrite =
     };
 
 function repeatFields(form: NewBlockForm, scope: NewBlockScope) {
-  const rrule = presetRule(form.repeat, scope.ruleDate);
+  const rrule = formRule(form, scope.ruleDate);
   return rrule === null
     ? { rrule: null, onDate: scope.date ?? scope.ruleDate }
     : { rrule, onDate: null };

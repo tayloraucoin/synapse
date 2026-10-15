@@ -361,3 +361,24 @@ export {
   type WelcomeSegment,
   type WelcomeView,
 } from "./planner";
+
+/* ---- Repeats › Custom…: a rule built, worded and split (USE-47) ---- */
+export {
+  buildRule,
+  defaultRuleForm,
+  describeEnds,
+  describeRepeat,
+  describeRule,
+  formatRule,
+  longDate,
+  nthWeekdayOf,
+  nthWord,
+  ruleForm,
+  ruleFromForm,
+  splitRule,
+  weekdayList,
+  type RuleEnds,
+  type RuleForm,
+  type RuleUnit,
+  type SplitRule,
+} from "./planner";

@@ -137,6 +137,19 @@ export const NEW_BLOCK_SCENARIOS: Record<string, () => Scenario> =
       ...SUNDAY_RESET,
       preset: { ...SUNDAY_RESET.preset, open: "repeats" },
     }),
+    // USE-47: Custom… on Sunday reset, every week on Wednesday and Sunday.
+    scenario("new-block-custom-recurrence", sundayRecords, {
+      ...SUNDAY_RESET,
+      preset: {
+        fields: {
+          ...SUNDAY_RESET.preset?.fields,
+          repeat: "custom",
+          customRule:
+            "DTSTART;VALUE=DATE:20261018\nRRULE:FREQ=WEEKLY;BYDAY=WE,SU",
+        },
+        open: "custom",
+      },
+    }),
     scenario("new-block-checklist", setUpUsualRecords, {
       start: {
         week: "usual",

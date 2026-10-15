@@ -54,6 +54,10 @@ Repeats › Custom… (`repeats-menu.md`), a step inside the sheet for Sunday re
 
 Drawn at: 402. At 1024 and wider: the step inside the right panel at `--sheet-w` (D-USE-39, D-USE-83).
 
+## As built (USE-47)
+
+`?state=new-block-custom-recurrence&sheet=new-block` (the sheet's own prefix, as USE-46's states) and `/days?state=repeat-scope`. The step is `CustomRecurrenceStep` (`components/planner/custom-recurrence/`), so the To-do sheet's Repeats can mount it (USE-28). Done stores one rule through `buildRule`; a custom rule that equals a preset is stored and read as that preset. The trigger reads `describeRule` ("Weekly on Wednesday and Sunday", "Monthly on the third Sunday, 13 times"). With month the hint becomes two radio rows, "On day 18" and "On the third Sunday"; with day or year there is no Repeat on. The faded On field reads three months from the start, After reads 13 [ASSUMPTION]. A rule the usual week cannot hold (every N days or weeks, monthly, yearly) says "It shows in This week on its dates only." (or "on its weeks only") [ASSUMPTION: D-USE-87 read wider]. The scope question is `RepeatScope` (`components/planner/repeat-scope/`), an AlertDialog asked when a repeating block is dragged on a dated day: "Move Training to 8:30?", "Training repeats. Which dates take the change?", This one ("Thursday, 15 October only", first and focused), This and following, All, Cancel [ASSUMPTION: the words]. This one is the date's block change (times only until USE-88); This and following is the fixture write `splitBlock` (the old rule ends the day before, COUNT recounted; the date's own items, slots and changes move with it) with "Training changed from Thursday, 15 October on." and Undo; All is `editBlock`, "Training changed on every date." with Undo. A delete of a repeating block from a date is not asked yet: no delete reaches a dated day's column.
+
 ## Criteria
 
 | ID                                        | When                               | Then                                                                        | Evidence                             |

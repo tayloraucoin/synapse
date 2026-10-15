@@ -49,6 +49,7 @@ import {
   type DayChip,
 } from "./day-parts";
 import { DaysHeader } from "./days-header";
+import { useRepeatMove } from "./repeat-move";
 
 /**
  * A day (A; the-day.md, usual-saturday.md): "‹ Week" over its title, the
@@ -373,10 +374,23 @@ function SetDay({
     });
   };
 
+  const repeatMove = useRepeatMove({
+    place,
+    day,
+    writes,
+    ready,
+    staged:
+      start?.day === place.day && start.askScope !== undefined
+        ? start.askScope
+        : undefined,
+    onMoved: setMoved,
+  });
+
   /**
-   * One block to new times, nothing else moved (D-USE-33): in This week the
-   * date's change, never the usual block; in the usual week the block, with
-   * its reach named.
+   * One block to new times, nothing else moved (D-USE-33): in This week a
+   * repeating block asks This one, This and following, or All first
+   * (USE-47), and a one-date block takes its own times; in the usual week
+   * the block, with its reach named.
    */
   const moveTo = (blockId: string, startMin: number) => {
     const b = day.blocks.find((x) => x.block.id === blockId);
@@ -385,12 +399,12 @@ function SetDay({
     const from = Math.max(0, Math.min(24 * 60 - length, startMin));
     const startsAt = clockFromMinutes(from);
     const endsAt = clockFromMinutes(from + length);
-    setMoved(blockId);
     if (place.date !== null && b.block.rrule !== null) {
-      void writes
-        .writeBlockChange({ blockId, onDate: place.date, startsAt, endsAt })
-        .catch(() => {});
-    } else if (place.date !== null) {
+      repeatMove.ask(blockId, startsAt, endsAt);
+      return;
+    }
+    setMoved(blockId);
+    if (place.date !== null) {
       void writes.editBlock({ id: blockId, startsAt, endsAt }).catch(() => {});
     } else {
       void writes
@@ -607,6 +621,7 @@ function SetDay({
         <div className="pointer-events-auto">
           <AboveFooterToaster />
         </div>
+        {repeatMove.element}
         {offline ? (
           // D-USE-82: the + gives way to the line; a block still opens.
           <div className="pointer-events-auto -mx-(--space-4) -mb-(--space-4)">

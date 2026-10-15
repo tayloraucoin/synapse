@@ -20,6 +20,8 @@
  * The form's rules are `form.ts`; this file draws them and sends the add.
  * The icon tile opens USE-11's IconPickerStep as a step inside the sheet,
  * back on the left. Edit topics opens the Meal topics sheet over this one.
+ * Repeats › Custom… opens CustomRecurrenceStep the same way (USE-47): Done
+ * stores its one rule and the trigger reads it in words; back changes nothing.
  */
 import * as React from "react";
 import {
@@ -42,15 +44,20 @@ import {
   Text,
   TimeField,
 } from "@syn/ui";
-import type { RepeatPreset } from "@syn/utils";
+import { buildRule, type RepeatPreset } from "@syn/utils";
 import { useMealTopics } from "@/lib/data/use-meal-topics";
 import { HUE_DOT } from "../block-hue";
+import {
+  CUSTOM_RECURRENCE_COPY,
+  CustomRecurrenceStep,
+} from "../custom-recurrence";
 import { IconPickerStep } from "../icon-picker-step";
 import { MealTopicsSheet } from "../meal-topics-sheet";
 import { clock, NEW_BLOCK_COPY as COPY } from "./copy";
 import {
   colourLine,
   consequenceLine,
+  customForm,
   hasChecklist,
   hasName,
   lengthMin,
@@ -73,8 +80,8 @@ import {
 /** Where a capture starts the form (`?state=`), applied once on open. */
 export interface NewBlockPreset {
   fields?: Partial<NewBlockForm>;
-  /** The Repeats list open (repeats-menu.md). */
-  open?: "repeats";
+  /** The Repeats list open (repeats-menu.md), or Custom…'s step (custom-recurrence.md). */
+  open?: "repeats" | "custom";
   /** Sends the add once on open, so a failed add is reachable (error.md). */
   add?: boolean;
 }
@@ -89,7 +96,7 @@ export interface NewBlockSheetProps {
   returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
-type Step = "fields" | "icon";
+type Step = "fields" | "icon" | "custom";
 
 const ROW =
   "border-hairline flex min-h-(--row-min) items-center gap-(--space-3) border-t";
@@ -125,6 +132,7 @@ export function NewBlockSheet({
   const [topicsOpen, setTopicsOpen] = React.useState(false);
   const nameRef = React.useRef<HTMLInputElement>(null);
   const iconRef = React.useRef<HTMLButtonElement>(null);
+  const repeatsRef = React.useRef<HTMLButtonElement>(null);
   const editTopicsRef = React.useRef<HTMLButtonElement>(null);
   const ids = {
     name: React.useId(),
@@ -211,6 +219,7 @@ export function NewBlockSheet({
     staged.current = true;
     const timer = window.setTimeout(() => {
       if (preset.open === "repeats") setRepeatsOpen(true);
+      if (preset.open === "custom") setStep("custom");
       if (preset.add) sendNow.current();
     }, CAPTURE_SETTLE_MS);
     return () => window.clearTimeout(timer);
@@ -300,7 +309,31 @@ export function NewBlockSheet({
         footer: "border-t-0",
       }}
     >
-      {step === "icon" ? (
+      {step === "custom" ? (
+        <CustomRecurrenceStep
+          caption={CUSTOM_RECURRENCE_COPY.caption(form.name, title)}
+          backTo={form.name.trim() || title}
+          startKey={day.scope.ruleDate}
+          value={customForm(form, day.scope.ruleDate)}
+          {...(form.checklist
+            ? {}
+            : { times: { startsAt: form.startsAt, endsAt: form.endsAt } })}
+          usualWeek
+          onBack={() => {
+            setStep("fields");
+            requestAnimationFrame(() => repeatsRef.current?.focus());
+          }}
+          onDone={(rule) => {
+            set({
+              type: "custom",
+              rrule: buildRule(rule, day.scope.ruleDate),
+              ruleDate: day.scope.ruleDate,
+            });
+            setStep("fields");
+            requestAnimationFrame(() => repeatsRef.current?.focus());
+          }}
+        />
+      ) : step === "icon" ? (
         <IconPickerStep
           name={form.name}
           value={form.icon}
@@ -422,20 +455,24 @@ export function NewBlockSheet({
                 {COPY.repeats.label}
               </Text>
               <Select
-                value={form.repeat}
+                // A custom rule picks no row, so Custom… always fires again.
+                value={form.repeat === "custom" ? "" : form.repeat}
                 open={repeatsOpen}
                 onOpenChange={setRepeatsOpen}
                 onValueChange={(next) => {
-                  // Custom… is the Repeats ticket's step (USE-47).
-                  if (next === CUSTOM) return;
+                  if (next === CUSTOM) {
+                    setStep("custom");
+                    return;
+                  }
                   set({ type: "repeat", repeat: next as RepeatPreset });
                 }}
               >
                 <SelectTrigger
+                  ref={repeatsRef}
                   aria-label={COPY.repeats.name(repeats)}
                   className="min-h-(--target) w-fit"
                 >
-                  <SelectValue />
+                  <SelectValue>{repeats}</SelectValue>
                 </SelectTrigger>
                 <SelectContent
                   position="popper"

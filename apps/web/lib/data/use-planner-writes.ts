@@ -8,6 +8,7 @@ import {
   type PlannerServer,
   type PlannerWrite,
 } from "@/lib/fixtures/planner";
+import type { SplitPatch } from "@/lib/fixtures/planner/split-block";
 import { FixtureOfflineError } from "@/lib/fixtures/server";
 import { useDataSource, type DataSource } from "./source";
 import { useConnection } from "./use-connection";
@@ -173,6 +174,47 @@ function isRefusal(error: unknown): boolean {
   );
 }
 
+/**
+ * A change to a repeating block from a dated day (USE-47). A block change
+ * holds times or a skip, so This one takes the times
+ * [ASSUMPTION: a name or look for one date waits on USE-88's columns].
+ */
+export interface EditRepeating {
+  id: string;
+  date: string;
+  patch: { startsAt: string; endsAt: string } & Omit<
+    SplitPatch,
+    "startsAt" | "endsAt"
+  >;
+  scope: "this" | "following" | "all";
+}
+
+/** The one write a scope answer sends. */
+export function repeatingCall({
+  id,
+  date,
+  patch,
+  scope,
+}: EditRepeating): PlannerCall {
+  if (scope === "this") {
+    return {
+      method: "writeBlockChange",
+      args: [
+        {
+          blockId: id,
+          onDate: date,
+          startsAt: patch.startsAt,
+          endsAt: patch.endsAt,
+        },
+      ],
+    };
+  }
+  if (scope === "following") {
+    return { method: "splitBlock", args: [{ id, fromDate: date, patch }] };
+  }
+  return { method: "editBlock", args: [{ id, ...patch }] };
+}
+
 export function usePlannerWrites() {
   const source = useDataSource();
   const queryClient = useQueryClient();
@@ -234,6 +276,14 @@ export function usePlannerWrites() {
     createTransition: write("createTransition"),
     editBlock: write("editBlock"),
     writeBlockChange: write("writeBlockChange"),
+    splitBlock: write("splitBlock"),
+    /**
+     * A repeating block changed from a dated day, at the scope RepeatScope
+     * asked (USE-47): This one is the date's change, This and following
+     * splits the block, All edits it.
+     */
+    editRepeating: (edit: EditRepeating) =>
+      mutation.mutateAsync(repeatingCall(edit)) as Promise<PlannerWrite>,
     writeBlockItem: write("writeBlockItem"),
     editBlockItem: write("editBlockItem"),
     removeBlockItem: write("removeBlockItem"),

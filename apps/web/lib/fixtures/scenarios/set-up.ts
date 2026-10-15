@@ -558,6 +558,8 @@ export interface SetUpScenarioStart {
   reach?: string;
   /** The block just moved by a drag: its ink edge (overlap.md). */
   moved?: string;
+  /** A repeating block dragged to this start on a date: the scope question open (USE-47). */
+  askScope?: { block: string; startsAt: string };
   /** The day's Toaster stays, for its capture. */
   holdToast?: boolean;
   /** A tapped slot marked at this time, as the New block sheet opens there. */
@@ -860,6 +862,12 @@ export const DAYS_SCENARIOS: Record<string, () => Scenario> =
     // USE-42: This week, the menus, the reach, an own change, overlap, offline.
     days("the-week", setUpThisWeekRecords, { week: "this" }),
     days("the-day", setUpThisWeekRecords, { week: "this", day: 0 }),
+    // USE-47: Thursday 15's Training dragged to 8:30, which dates asked.
+    days("repeat-scope", setUpThisWeekRecords, {
+      week: "this",
+      day: 3,
+      askScope: { block: B.training, startsAt: "08:30" },
+    }),
     days("item-icons", () => withIcons(setUpThisWeekRecords()), {
       week: "this",
       day: 0,

@@ -32,6 +32,7 @@ import type { FixtureRecords } from "../records";
 import { createWriteLog, type Journal, type WriteLog } from "./journal";
 import { boundsFor, readSetUpDay, readWeek } from "./read-week";
 import { weeklyRule, withoutWeekday } from "./rules";
+import { splitInto, type SplitPatch } from "./split-block";
 
 /**
  * The planner's fixture server (USE-36): the set-up area's reads and writes,
@@ -96,6 +97,15 @@ export interface PlannerServer {
     input: z.input<typeof editBlockInput>,
     scope?: WriteScope,
   ): Promise<PlannerWrite>;
+  /**
+   * This and following (USE-47): the block's dates from `fromDate` on take
+   * the patch as a new block; the old one ends the day before.
+   */
+  splitBlock(input: {
+    id: string;
+    fromDate: string;
+    patch: SplitPatch;
+  }): Promise<PlannerWrite>;
   /** One date of a repeating block: moved or skipped (This week). */
   writeBlockChange(
     input: z.input<typeof blockChangeInput>,
@@ -501,6 +511,27 @@ export function createPlannerServer({
             changedOn: changedDates(id),
           },
         };
+      });
+    },
+
+    splitBlock({ id, fromDate, patch: change }) {
+      return write((journal) => {
+        const block = findBlock(id);
+        requireOn(block, fromDate);
+        const next = patch(block, change);
+        // The patch passes the block's checks, in their words.
+        parse(editBlockInput, {
+          id,
+          ...change,
+          startsAt: next.startsAt,
+          endsAt: next.endsAt,
+        });
+        const split = splitInto(journal, records, block, fromDate, change, {
+          stamp,
+          stamps,
+        });
+        if (!split.ok) throw new PlannerRefusal("invalid", split.reason);
+        return { id: split.id };
       });
     },
 
