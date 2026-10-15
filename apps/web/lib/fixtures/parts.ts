@@ -1,16 +1,16 @@
 import type * as React from "react";
 import { createElement } from "react";
+import { AccountPart } from "./account-parts";
+import { AddPart, type AddPartState } from "./add-parts";
 import {
   BlockBandAndHeaderForms,
   TierAndItemForms,
   WorkRowForms,
 } from "./day-parts";
-import { AccountPart } from "./account-parts";
-import { AddPart, type AddPartState } from "./add-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { NowPart, type NowPartState } from "./now-parts";
-import { RunningPart, type RunningPartState } from "./running-parts";
 import { OrientPart, type OrientPartState } from "./orient-parts";
+import { RunningPart, type RunningPartState } from "./running-parts";
 import {
   TodosNotificationPart,
   TodosTrayPart,
@@ -67,6 +67,8 @@ for (const state of [
   "row-tapped",
   "took-change",
   "time-taken-sheet",
+  "row-long-press", // USE-18
+  "reordering", // USE-18
   "header-menu", // USE-17
   "behind", // USE-17
   "transition", // USE-17
@@ -123,9 +125,7 @@ for (const state of [
   registerPart(`orient-${state}`, () => createElement(OrientPart, { state })); // USE-12
 }
 // USE-19: the to-do reminder on the lock screen (no app screen holds it).
-registerPart("todos-notification", () =>
-  createElement(TodosNotificationPart),
-); // USE-19
+registerPart("todos-notification", () => createElement(TodosNotificationPart)); // USE-19
 // USE-19: the tray's states on Now, by their /today scenario names.
 for (const state of [
   "todos-open",

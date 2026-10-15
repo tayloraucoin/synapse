@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { IconValue, StoredBlockKind } from "@syn/types";
 import {
@@ -11,6 +12,7 @@ import {
   reflowItems,
 } from "@syn/utils";
 import type { BlockRecord, DayRecordRecord, SlotRecord } from "@syn/validators";
+import type { FixtureServer } from "@/lib/fixtures/server";
 import { useNow as useMinute } from "@/lib/hooks/use-now";
 import { deriveToday, type Today } from "./derive-today";
 import { useDataSource } from "./source";
@@ -31,6 +33,8 @@ export interface NowItemView {
   /** Null until a set item is first touched (its slot is placed then). */
   slotId: string | null;
   blockItemId: string | null;
+  /** A to-do's id when the row is a to-do pulled into the block. */
+  todoId: string | null;
   title: string;
   icon: IconValue | null;
   /** The planned length: the slot's, else the set item's. */
@@ -105,24 +109,29 @@ function itemsOf(
         !item.isTransition &&
         (item.onDate === null || item.onDate === records.date),
     )
-    .map((item): NowItemView => {
+    .flatMap((item): NowItemView[] => {
       const slot = slots.find((row) => row.blockItemId === item.id) ?? null;
-      return {
-        id: item.id,
-        slotId: slot?.id ?? null,
-        blockItemId: item.id,
-        title: item.title,
-        icon: item.icon,
-        lengthMin: slot?.lengthMin ?? item.lengthMin,
-        plannedAt: null,
-        sortOrder: slot?.sortOrder ?? item.sortOrder,
-        done: slot?.doneAt != null,
-        doneAt: slot?.doneAt ?? null,
-        tookMin: slot?.tookMin ?? null,
-      };
+      // Not today (D-USE-70): the date's slot is skipped; the item stays usual.
+      if (slot?.skipped) return [];
+      return [
+        {
+          id: item.id,
+          slotId: slot?.id ?? null,
+          blockItemId: item.id,
+          todoId: null,
+          title: item.title,
+          icon: item.icon,
+          lengthMin: slot?.lengthMin ?? item.lengthMin,
+          plannedAt: null,
+          sortOrder: slot?.sortOrder ?? item.sortOrder,
+          done: slot?.doneAt != null,
+          doneAt: slot?.doneAt ?? null,
+          tookMin: slot?.tookMin ?? null,
+        },
+      ];
     });
   const pooled = slots
-    .filter((slot) => slot.blockItemId === null)
+    .filter((slot) => slot.blockItemId === null && !slot.skipped)
     .flatMap((slot): NowItemView[] => {
       const source =
         records.todos.find((todo) => todo.id === slot.todoId) ??
@@ -133,6 +142,7 @@ function itemsOf(
           id: slot.id,
           slotId: slot.id,
           blockItemId: null,
+          todoId: slot.todoId,
           title: source.title,
           icon: source.icon,
           lengthMin:
@@ -270,6 +280,41 @@ export function deriveNow(
 }
 
 /** Now for a date, with the item the person made current (or null). */
+/**
+ * The item the person made current on a date (a tapped row; the card a
+ * reorder keeps, D-USE-26). It outlives the screen, so a sheet opened over
+ * Now or a re-render never hands the card to a row dropped above it; it
+ * lives as long as the day's data source does. No column holds it
+ * [ASSUMPTION: per device, until the data seam names one].
+ */
+const chosenItems = new Map<string, string | null>();
+const chosenListeners = new Set<() => void>();
+
+export function useChosenItem(
+  dateKey: string,
+  seed: string | null = null,
+): [string | null, (id: string | null) => void] {
+  const source = useDataSource();
+  const key = `${source.scenario.name}:${dateKey}`;
+  if (!chosenItems.has(key) && seed !== null) chosenItems.set(key, seed);
+  const chosen = React.useSyncExternalStore(
+    (listener) => {
+      chosenListeners.add(listener);
+      return () => chosenListeners.delete(listener);
+    },
+    () => chosenItems.get(key) ?? null,
+    () => seed,
+  );
+  const setChosen = React.useCallback(
+    (id: string | null) => {
+      chosenItems.set(key, id);
+      chosenListeners.forEach((listener) => listener());
+    },
+    [key],
+  );
+  return [chosen, setChosen];
+}
+
 export function useNow(dateKey: string, chosenId: string | null = null) {
   const source = useDataSource();
   // A render each minute, so behind shows once the planned end passes.
@@ -304,6 +349,140 @@ export function doneChange(item: NowItemView, at: Date) {
   return { doneAt: at.toISOString(), tookMin: item.lengthMin };
 }
 
+/** Where Now's rows live: the active block on the date. */
+export interface NowPlace {
+  dateKey: string;
+  blockId: string;
+}
+
+/** The server calls Now's row writes use, so a test drives the same code. */
+export type NowRowServer = Pick<
+  FixtureServer,
+  "writeSlots" | "removeSlot" | "undo" | "writeTodoDone"
+>;
+
+/**
+ * A row's slot change (USE-21). A to-do's box is the to-do's own: its slot's
+ * `doneAt` and the to-do's are written together, so the tray, which reads the
+ * to-do, no longer shows it. Undone at the block's end, the slot reads as
+ * returned (USE-9's `isReturned`) and nothing more is written.
+ */
+export async function writeRowChange(
+  server: Pick<NowRowServer, "writeSlots" | "writeTodoDone">,
+  slotId: string,
+  item: Pick<NowItemView, "todoId">,
+  change: { doneAt?: string | null; tookMin?: number | null },
+): Promise<SlotRecord> {
+  const slot = await server.writeSlots({ id: slotId, ...change });
+  if (item.todoId !== null && change.doneAt !== undefined) {
+    await server.writeTodoDone({ id: item.todoId, doneAt: change.doneAt });
+  }
+  return slot;
+}
+
+/**
+ * The new order for every row: `ids` is the whole list after a drop or a
+ * Move. Today only (D-USE-26): each row whose place changed has its slot's
+ * `sortOrder` written, a set item's slot placed on first touch; the block's
+ * items and its rule are never written.
+ */
+export async function writeReorder(
+  server: NowRowServer,
+  place: NowPlace,
+  items: readonly NowItemView[],
+  ids: readonly string[],
+): Promise<void> {
+  const byId = new Map(items.map((item) => [item.id, item]));
+  for (const [index, id] of ids.entries()) {
+    const item = byId.get(id);
+    if (!item || item.sortOrder === index) continue;
+    if (item.slotId !== null) {
+      await server.writeSlots({ id: item.slotId, sortOrder: index });
+    } else if (item.blockItemId !== null) {
+      await server.writeSlots({
+        blockId: place.blockId,
+        onDate: place.dateKey,
+        sortOrder: index,
+        blockItemId: item.blockItemId,
+      });
+    }
+  }
+}
+
+/**
+ * Move up / Move down (D-USE-26), the grip's tap and keyboard fallback: the
+ * row trades places with the undone row beside it, done rows staying put.
+ * Null on the first undone row going up and the last going down (disabled).
+ */
+export function moveIds(
+  items: readonly NowItemView[],
+  id: string,
+  direction: -1 | 1,
+): string[] | null {
+  const undone = items.filter((item) => !item.done).map((item) => item.id);
+  const from = undone.indexOf(id);
+  const to = from + direction;
+  if (from === -1 || to < 0 || to >= undone.length) return null;
+  const swapped = [...undone];
+  [swapped[from], swapped[to]] = [swapped[to] as string, id];
+  let next = 0;
+  return items.map((item) =>
+    item.done ? item.id : (swapped[next++] as string),
+  );
+}
+
+/** How a Not today is undone: exactly what it wrote, put back. */
+export type NotTodayUndo =
+  /** The slot was there before: only `skipped` goes back to false. */
+  | { kind: "unskip"; slotId: string }
+  /** Not today placed the slot: it goes. */
+  | { kind: "remove"; slotId: string }
+  /** A to-do's slot was removed: the server puts the row back as it was. */
+  | { kind: "restore"; token: string };
+
+/**
+ * Not today (D-USE-70): off today only. A set item's slot for the date is
+ * written `skipped` (placed so on first touch); its usual day keeps it. A
+ * to-do's slot is removed, so it returns to the pool (USE-9's `todoPool`).
+ */
+export async function writeNotToday(
+  server: NowRowServer,
+  place: NowPlace,
+  item: NowItemView,
+): Promise<NotTodayUndo> {
+  if (item.blockItemId !== null) {
+    if (item.slotId !== null) {
+      await server.writeSlots({ id: item.slotId, skipped: true });
+      return { kind: "unskip", slotId: item.slotId };
+    }
+    const placed = await server.writeSlots({
+      blockId: place.blockId,
+      onDate: place.dateKey,
+      sortOrder: item.sortOrder,
+      blockItemId: item.blockItemId,
+      skipped: true,
+    });
+    return { kind: "remove", slotId: placed.id };
+  }
+  if (item.slotId === null) throw new Error("A pulled row has its slot.");
+  const removed = await server.removeSlot({ id: item.slotId });
+  return { kind: "restore", token: removed.undo };
+}
+
+/** Not today's Undo: the row is back where it was. */
+export async function undoNotToday(
+  server: NowRowServer,
+  undo: NotTodayUndo,
+): Promise<void> {
+  if (undo.kind === "unskip") {
+    await server.writeSlots({ id: undo.slotId, skipped: false });
+  } else if (undo.kind === "remove") {
+    await server.removeSlot({ id: undo.slotId });
+  } else {
+    await server.undo(undo.token);
+  }
+}
+
 /**
  * Now's writes (USE-16): Done, a row's box and its uncheck, and the time
  * taken. A set item's slot is placed on its first touch. The day is
@@ -325,6 +504,19 @@ export function useSlotWrites(dateKey: string, blockId: string | null) {
       blockItemId: item.blockItemId,
     });
     return placed.id;
+  }
+
+  const place = blockId === null ? null : { dateKey, blockId };
+
+  /** A row write, then the day read again; Now is never set by hand. */
+  async function settle<T>(write: Promise<T>): Promise<T> {
+    try {
+      return await write;
+    } finally {
+      await queryClient.invalidateQueries({
+        queryKey: todayQueryKey(source.scenario.name),
+      });
+    }
   }
 
   const mutation = useMutation<
@@ -354,6 +546,22 @@ export function useSlotWrites(dateKey: string, blockId: string | null) {
     /** The time-taken sheet's Save. */
     setTook: (item: NowItemView, min: number) =>
       mutation.mutateAsync({ item, change: { tookMin: min } }),
+    /** A drop or a Move (USE-18): the whole order, today only. */
+    reorder: (items: readonly NowItemView[], ids: readonly string[]) =>
+      settle(
+        place === null
+          ? Promise.resolve()
+          : writeReorder(source.server, place, items, ids),
+      ),
+    /** Not today (USE-18): resolves to what its Undo takes. */
+    notToday: (item: NowItemView) =>
+      settle(
+        place === null
+          ? Promise.reject(new Error("Not today needs its block."))
+          : writeNotToday(source.server, place, item),
+      ),
+    undoNotToday: (undo: NotTodayUndo) =>
+      settle(undoNotToday(source.server, undo)),
   };
 }
 

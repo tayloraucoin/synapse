@@ -38,3 +38,14 @@ export {
   type TodosTrayProps,
   type TodosTrayRowProps,
 } from "./todos-tray";
+export {
+  LONG_PRESS_MS,
+  RowMenu,
+  type RowMenuProps,
+  type RowMenuWords,
+} from "./row-menu";
+export {
+  SortableItemRows,
+  type SortableItemRow,
+  type SortableItemRowsProps,
+} from "./sortable-item-rows";

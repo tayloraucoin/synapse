@@ -74,6 +74,11 @@ export type { ProfileSheetStart };
 export interface ScenarioView {
   currentItemId?: string;
   open?: string;
+  /**
+   * A row held mid-drag, drawn above `beforeId` (USE-18's `reordering`
+   * capture only; never reachable outside `?state=`).
+   */
+  drag?: { itemId: string; beforeId: string };
 }
 
 export const DEFAULT_SCENARIO = "default";
@@ -140,6 +145,26 @@ const SCENARIOS: Record<string, () => Scenario> = {
     records: nowDayRecords(WELLNESS_DONE),
     mode: "ready",
     view: { open: `time-taken:${NOW_IDS.items.startColdBath}` },
+  }),
+  // ---- Now's rows (USE-18): the long-press menu and a drag held mid-air ----
+  "row-long-press": () => ({
+    name: "row-long-press",
+    now: onNowDay("07:14"),
+    records: nowDayRecords(WELLNESS_DONE),
+    mode: "ready",
+    view: { open: `menu:${NOW_IDS.items.coldBath}` },
+  }),
+  reordering: () => ({
+    name: "reordering",
+    now: onNowDay("07:14"),
+    records: nowDayRecords(WELLNESS_DONE),
+    mode: "ready",
+    view: {
+      drag: {
+        itemId: NOW_IDS.items.coldBath,
+        beforeId: NOW_IDS.items.meditate,
+      },
+    },
   }),
   // ---- Orient (USE-12): the Monday before it is opened ----
   // ---- Now's other block forms (USE-17): ···, behind, a meal, before go, checklists ----

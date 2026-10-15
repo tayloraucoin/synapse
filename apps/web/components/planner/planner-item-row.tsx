@@ -77,6 +77,7 @@ export function PlannerItemRow({
       </span>
       <button
         type="button"
+        data-row-open
         onClick={() => onOpen?.(item.id)}
         aria-label={openLabel}
         className="flex min-w-0 flex-1 cursor-pointer items-center gap-1.75 text-start"

@@ -149,7 +149,9 @@ export function reviewRoute(): string {
  * Set my days (USE-39 builds the page): the avatar menu's first row. The
  * params are USE-39's; the menu opens it on the week.
  */
-export function daysRoute(params: { week?: string; day?: string } = {}): string {
+export function daysRoute(
+  params: { week?: string; day?: string } = {},
+): string {
   const query = new URLSearchParams();
   if (params.week) query.set("week", params.week);
   if (params.day) query.set("day", params.day);
@@ -166,13 +168,31 @@ export function settingsRoute(): string {
  * The sheets a screen opens over itself by `?sheet=` (the shell's sheet host).
  * The value names the sheet; the path stays the screen beneath.
  */
-export type SheetName = "install" | "profile" | "meal-topics" | "todo";
+export type SheetName = "install" | "profile" | "meal-topics" | "todo" | "item";
 
 /** `path` with `?sheet=<name>` set, keeping its other query. */
 export function sheetRoute(path: string, sheet: SheetName): string {
   const [base = "", search = ""] = path.split("?");
   const query = new URLSearchParams(search);
   query.set("sheet", sheet);
+  return `${base}?${query.toString()}`;
+}
+
+/**
+ * The Item sheet on one item over `path` (`?sheet=item&id=`; day/item-sheet,
+ * its own ticket builds it). Swap opens it on its Swap view
+ * [ASSUMPTION: `&view=swap`].
+ */
+export function itemSheetRoute(
+  path: string,
+  id: string,
+  view?: "swap",
+): string {
+  const [base = "", search = ""] = sheetRoute(path, "item").split("?");
+  const query = new URLSearchParams(search);
+  query.set("id", id);
+  if (view) query.set("view", view);
+  else query.delete("view");
   return `${base}?${query.toString()}`;
 }
 

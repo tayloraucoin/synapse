@@ -1,22 +1,29 @@
 "use client";
 
 import * as React from "react";
-import { MealIcon, ReorderIcon } from "@syn/ui";
+import { useRouter } from "next/navigation";
+import { MealIcon, ReorderIcon, toastUndo } from "@syn/ui";
+import { nextItem } from "@syn/utils";
 import {
   ChecklistRows,
   DayBlockHeader,
   NowBlockMenu,
   PlannerItemRow,
+  RowMenu,
+  SortableItemRows,
 } from "@/components/planner";
 import { isTimedDone, useRunningView } from "@/lib/data/running";
 import { useDataSource } from "@/lib/data/source";
 import {
+  moveIds,
   useChecklistAdd,
+  useChosenItem,
   useNow,
   useSlotWrites,
   type NowBlockView,
   type NowItemView,
 } from "@/lib/data/use-now";
+import { itemSheetRoute } from "@/lib/routes";
 import { BeforeGoList } from "./before-go-list";
 import { nowBlockMenuRows } from "./block-menu";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
@@ -30,6 +37,27 @@ import { TookLine } from "./took-line";
 function seeded(open: string | undefined, what: string): string | null {
   const prefix = `${what}:`;
   return open?.startsWith(prefix) ? open.slice(prefix.length) : null;
+}
+
+/** The rows in `ids`' order; a row `ids` does not name keeps its place. */
+function inOrder(items: NowItemView[], ids: readonly string[] | null) {
+  if (ids === null) return items;
+  const rank = new Map(ids.map((id, index) => [id, index]));
+  return [...items].sort(
+    (a, b) =>
+      (rank.get(a.id) ?? items.indexOf(a)) -
+      (rank.get(b.id) ?? items.indexOf(b)),
+  );
+}
+
+/** `?state=reordering`: the dragged row held above the row it lands on. */
+function heldOrder(
+  items: NowItemView[],
+  drag: { itemId: string; beforeId: string },
+): string[] {
+  const ids = items.map((item) => item.id).filter((id) => id !== drag.itemId);
+  ids.splice(Math.max(ids.indexOf(drag.beforeId), 0), 0, drag.itemId);
+  return ids;
 }
 
 /**
@@ -56,7 +84,8 @@ export function NowScreen({
   const dateKey = source.todayKey();
   const view = source.scenario.view;
 
-  const [chosenId, setChosenId] = React.useState<string | null>(
+  const [chosenId, setChosenId] = useChosenItem(
+    dateKey,
     view?.currentItemId ?? null,
   );
   const sheetSeed = seeded(view?.open, "time-taken");
@@ -70,6 +99,12 @@ export function NowScreen({
   const [sheetId, setSheetId] = React.useState<string | null>(sheetSeed);
   const [announcement, setAnnouncement] = React.useState("");
   const changeRef = React.useRef<HTMLButtonElement>(null);
+  // USE-18: the row whose menu is open, and an order shown while it saves.
+  const [menuId, setMenuId] = React.useState<string | null>(
+    seeded(view?.open, "menu"),
+  );
+  const [savingOrder, setSavingOrder] = React.useState<string[] | null>(null);
+  const router = useRouter();
 
   const { view: now } = useNow(dateKey, chosenId);
   const writes = useSlotWrites(dateKey, now?.block?.id ?? null);
@@ -139,6 +174,93 @@ export function NowScreen({
   }
 
   const sheetItem = items.find((item) => item.id === sheetId) ?? null;
+  const shown = inOrder(
+    items,
+    view?.drag ? heldOrder(items, view.drag) : savingOrder,
+  );
+
+  /**
+   * A drop or a Move: today's order only. The current item is pinned, so a
+   * row dropped above the lifted card is next up and the card stays (D-USE-26).
+   */
+  function reorder(ids: string[], movedId: string | null) {
+    if (current) setChosenId(current.id);
+    setSavingOrder(ids);
+    void writes.reorder(items, ids).finally(() => setSavingOrder(null));
+    const moved = items.find((item) => item.id === movedId);
+    if (!moved) return;
+    const reordered = inOrder(items, ids);
+    setAnnouncement(
+      COPY.announceMoved(
+        moved.title,
+        nextItem(reordered, current)?.id === movedId,
+      ),
+    );
+  }
+
+  /** Not today (D-USE-70): off today only, with an Undo. */
+  async function notToday(item: NowItemView) {
+    const undo = await writes.notToday(item);
+    if (item.id === chosenId) setChosenId(null);
+    toastUndo({
+      text: COPY.offToday(item.title),
+      onUndo: () => void writes.undoNotToday(undo),
+    });
+  }
+
+  /** Swap and Edit open the Item sheet over Now (its own ticket builds it). */
+  function openItemSheet(item: NowItemView, swap: boolean) {
+    const here = `${window.location.pathname}${window.location.search}`;
+    router.push(
+      itemSheetRoute(
+        here,
+        item.blockItemId ?? item.id,
+        swap ? "swap" : undefined,
+      ),
+      { scroll: false },
+    );
+  }
+
+  function itemRow(item: NowItemView, trailing: React.ReactNode) {
+    const timed = isTimedDone(running, item);
+    return (
+      <PlannerItemRow
+        item={{
+          id: item.id,
+          title: item.title,
+          emoji: null,
+          checked: item.done,
+          meta: timed ? null : COPY.length(item.lengthMin),
+        }}
+        noEmoji
+        fadeChecked
+        checkLabel={COPY.boxName(item.title, item.lengthMin)}
+        openLabel={item.done ? undefined : COPY.rowName(item.title)}
+        onCheckedChange={(_, checked) =>
+          checked ? markDone(item) : markUndone(item)
+        }
+        onOpen={() => {
+          if (!item.done) setChosenId(item.id);
+        }}
+        trailing={
+          timed && item.tookMin !== null && item.lengthMin !== null ? (
+            <TimedTook tookMin={item.tookMin} planMin={item.lengthMin} />
+          ) : (
+            trailing
+          )
+        }
+        below={
+          took?.id === item.id && item.done && item.tookMin !== null ? (
+            <TookLine
+              min={item.tookMin}
+              changeRef={changeRef}
+              onChange={() => setSheetId(item.id)}
+            />
+          ) : null
+        }
+      />
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-(--content-text) flex-col">
@@ -201,81 +323,59 @@ export function NowScreen({
               }
             />
           ) : (
-            <ul className="flex flex-col gap-(--space-1)">
-              {items.map((item) =>
-                item.id === current?.id ? (
-                  <li key={item.id} className="py-(--space-2)">
-                    <NowCurrentCard
-                      item={item}
-                      block={block}
-                      dateKey={dateKey}
-                      running={running}
-                      onPlainDone={markDone}
-                      onTimedDone={markTimedDone}
-                    />
-                  </li>
-                ) : (
-                  <li key={item.id}>
-                    <PlannerItemRow
-                      item={{
-                        id: item.id,
-                        title: item.title,
-                        emoji: null,
-                        checked: item.done,
-                        meta: isTimedDone(running, item)
-                          ? null
-                          : COPY.length(item.lengthMin),
-                      }}
-                      noEmoji
-                      fadeChecked
-                      checkLabel={COPY.boxName(item.title, item.lengthMin)}
-                      openLabel={
-                        item.done ? undefined : COPY.rowName(item.title)
-                      }
-                      onCheckedChange={(_, checked) =>
-                        checked ? markDone(item) : markUndone(item)
-                      }
-                      onOpen={() => {
-                        if (!item.done) setChosenId(item.id);
-                      }}
-                      trailing={
-                        isTimedDone(running, item) &&
-                        item.tookMin !== null &&
-                        item.lengthMin !== null ? (
-                          <TimedTook
-                            tookMin={item.tookMin}
-                            planMin={item.lengthMin}
-                          />
-                        ) : item.done ? null : (
-                          // Dragging and Move up / Move down are USE-18's.
-                          <button
-                            type="button"
-                            aria-label={COPY.gripName(item.title)}
-                            className="text-text-muted flex size-(--target) shrink-0 cursor-grab items-center justify-center rounded-(--radius-control) focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                          >
-                            <ReorderIcon
-                              aria-hidden="true"
-                              className="size-4"
-                            />
-                          </button>
-                        )
-                      }
-                      below={
-                        took?.id === item.id &&
-                        item.done &&
-                        item.tookMin !== null ? (
-                          <TookLine
-                            min={item.tookMin}
-                            changeRef={changeRef}
-                            onChange={() => setSheetId(item.id)}
-                          />
-                        ) : null
-                      }
-                    />
-                  </li>
-                ),
-              )}
-            </ul>
+            <SortableItemRows
+              items={shown}
+              label={COPY.listName(block.name)}
+              frozenId={view?.drag?.itemId ?? null}
+              hasGrip={(item) => !item.done && item.id !== current?.id}
+              // The list's own live region says where a dragged row went.
+              onReorder={(ids) => reorder(ids, null)}
+              renderRow={(item, { grip }) => {
+                if (item.id === current?.id) {
+                  return (
+                    <div className="py-(--space-2)">
+                      <NowCurrentCard
+                        item={item}
+                        block={block}
+                        dateKey={dateKey}
+                        running={running}
+                        onPlainDone={markDone}
+                        onTimedDone={markTimedDone}
+                      />
+                    </div>
+                  );
+                }
+                if (item.done) return itemRow(item, null);
+                const up = moveIds(items, item.id, -1);
+                const down = moveIds(items, item.id, 1);
+                return (
+                  <RowMenu
+                    words={{
+                      ...COPY.rowMenu,
+                      more: COPY.rowMenu.more(item.title),
+                      menu: COPY.rowMenu.menu(item.title),
+                    }}
+                    open={menuId === item.id}
+                    onOpenChange={(open) => setMenuId(open ? item.id : null)}
+                    canMoveUp={up !== null}
+                    canMoveDown={down !== null}
+                    onSwap={() => openItemSheet(item, true)}
+                    onEdit={() => openItemSheet(item, false)}
+                    onMoveUp={() => up && reorder(up, item.id)}
+                    onMoveDown={() => down && reorder(down, item.id)}
+                    onNotToday={() => void notToday(item)}
+                    clone={itemRow(
+                      item,
+                      <span className="text-text-muted flex size-(--target) shrink-0 items-center justify-center">
+                        <ReorderIcon aria-hidden="true" className="size-4" />
+                      </span>,
+                    )}
+                  >
+                    {itemRow(item, grip)}
+                  </RowMenu>
+                );
+              }}
+            />
           )}
         </section>
       ) : null}

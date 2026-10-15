@@ -10,6 +10,8 @@ export type NowPartState =
   | "row-tapped"
   | "took-change"
   | "time-taken-sheet"
+  | "row-long-press"
+  | "reordering"
   | "header-menu"
   | "behind"
   | "transition"

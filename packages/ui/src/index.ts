@@ -36,6 +36,15 @@ export {
   ChevronDownIcon as ExpandIcon,
   GripVerticalIcon as ReorderIcon,
 } from "lucide-react";
+/** A Now row's menu (USE-18): Swap, Edit, Move up, Move down, Not today, More. */
+export {
+  ArrowDownIcon as MoveDownIcon,
+  ArrowRightLeftIcon as SwapIcon,
+  ArrowUpIcon as MoveUpIcon,
+  CalendarX2Icon as NotTodayIcon,
+  EllipsisIcon as MoreIcon,
+  PencilIcon as EditIcon,
+} from "lucide-react";
 /** The To-dos tray's glyphs (USE-19): a reminder's bell, a failed list's info, the open chevron. */
 export {
   BellIcon as ReminderIcon,
@@ -136,10 +145,7 @@ export {
   NativeSelectOptGroup,
   NativeSelectOption,
 } from "./primitives/control/native-select";
-export {
-  RadioGroup,
-  RadioGroupItem,
-} from "./primitives/control/radio-group";
+export { RadioGroup, RadioGroupItem } from "./primitives/control/radio-group";
 export {
   Select,
   SelectContent,
@@ -156,10 +162,7 @@ export {
   type SelectFieldProps,
   type SelectOption,
 } from "./primitives/control/select";
-export {
-  Switch,
-  type SwitchProps,
-} from "./primitives/control/switch";
+export { Switch, type SwitchProps } from "./primitives/control/switch";
 export {
   Tabs,
   TabsContent,
@@ -183,10 +186,7 @@ export {
   type AvatarProps,
   type AvatarSize,
 } from "./primitives/display/avatar";
-export {
-  Badge,
-  badgeVariants,
-} from "./primitives/display/badge";
+export { Badge, badgeVariants } from "./primitives/display/badge";
 export {
   Empty,
   EmptyContent,
@@ -201,16 +201,9 @@ export {
   type HelperTextClasses,
   type HelperTextProps,
 } from "./primitives/display/helper-text";
-export {
-  Kbd,
-  KbdGroup,
-} from "./primitives/display/kbd";
-export {
-  Label,
-} from "./primitives/display/label";
-export {
-  Skeleton,
-} from "./primitives/display/skeleton";
+export { Kbd, KbdGroup } from "./primitives/display/kbd";
+export { Label } from "./primitives/display/label";
+export { Skeleton } from "./primitives/display/skeleton";
 export {
   AlertDialog,
   AlertDialogAction,
@@ -269,9 +262,7 @@ export {
   PopoverTitle,
   PopoverTrigger,
 } from "./primitives/feedback/popover";
-export {
-  Spinner,
-} from "./primitives/feedback/spinner";
+export { Spinner } from "./primitives/feedback/spinner";
 export {
   Toaster,
   toast,
@@ -305,9 +296,7 @@ export {
   DrawerTitle,
   DrawerTrigger,
 } from "./primitives/layout/drawer";
-export {
-  Separator,
-} from "./primitives/layout/separator";
+export { Separator } from "./primitives/layout/separator";
 export {
   Card,
   CardAction,
@@ -643,15 +632,31 @@ export {
   TrustLine,
   type TrustLineProps,
 } from "./composed/display/trust-line";
-export { SynapseMark, type SynapseMarkProps } from "./composed/display/synapse-mark";
+export {
+  SynapseMark,
+  type SynapseMarkProps,
+} from "./composed/display/synapse-mark";
 
 /* ---- composed: Workflow's board (Workflow UX v0.1 §9, FLO-4) ---- */
-export { FiringMark, type FiringMarkProps } from "./composed/display/firing-mark";
-export { FiringToggle, type FiringToggleProps } from "./composed/control/firing-toggle";
+export {
+  FiringMark,
+  type FiringMarkProps,
+} from "./composed/display/firing-mark";
+export {
+  FiringToggle,
+  type FiringToggleProps,
+} from "./composed/control/firing-toggle";
 
 /* ---- composed: USE's shared day parts (USE-10) ---- */
-export { HueSquare, type HueSquareProps, type SquareHue } from "./composed/display/hue-square";
-export { LinearLine, type LinearLineProps } from "./composed/display/linear-line";
+export {
+  HueSquare,
+  type HueSquareProps,
+  type SquareHue,
+} from "./composed/display/hue-square";
+export {
+  LinearLine,
+  type LinearLineProps,
+} from "./composed/display/linear-line";
 export {
   LinearStatusGlyph,
   LinearStatusShape,
@@ -681,7 +686,10 @@ export {
   type NextStripProps,
   type NextStripValue,
 } from "./composed/display/next-strip";
-export { InlineAddRow, type InlineAddRowProps } from "./composed/control/inline-add-row";
+export {
+  InlineAddRow,
+  type InlineAddRowProps,
+} from "./composed/control/inline-add-row";
 export {
   BOARD_COPY,
   Board,

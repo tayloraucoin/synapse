@@ -45,6 +45,20 @@ export const NOW_COPY = {
     min === null ? title : `${title}, ${min} min`,
   rowName: (title: string) => `${title}, make current`,
   gripName: (title: string) => `Reorder ${title}`,
+  listName: (block: string) => `${block}, in order`,
+  rowMenu: {
+    swap: "Swap",
+    edit: "Edit",
+    moveUp: "Move up",
+    moveDown: "Move down",
+    notToday: "Not today",
+    more: (title: string) => `More for ${title}`,
+    menu: (title: string) => `${title} options`,
+  },
+  /** Not today's Toaster (D-USE-70, as Move to's): no judgement. */
+  offToday: (title: string) => `${title} is off today.`,
+  announceMoved: (title: string, next: boolean) =>
+    next ? `${title} is next.` : `${title} moved.`,
   blockMenu: (block: string) => `${block} options`,
   blockMenuTitle: (block: string) => `${block}, today`,
   completeBlock: (block: string) => `Complete ${block}`,
