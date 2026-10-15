@@ -1,4 +1,4 @@
-import { cn, MeetingIcon, GroupHeading, Text } from "@syn/ui";
+import { cn, GroupHeading, MeetingIcon, Text } from "@syn/ui";
 import { HUE_CHIP, HUE_DOT } from "@/components/planner/block-hue";
 import { MeetingTag } from "./meeting-band";
 
