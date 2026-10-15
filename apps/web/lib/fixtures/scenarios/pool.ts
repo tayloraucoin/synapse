@@ -1,5 +1,10 @@
 import { clientRecord, slotRecord, workItemRecord } from "@syn/validators";
 import { fixtureId } from "../ids";
+import {
+  integrationRecords,
+  PROJECTS,
+  withIntegrations,
+} from "../integrations/workspaces";
 import type { FixtureRecords } from "../records";
 import type { Scenario } from "./index";
 import { SET_UP_IDS, SET_UP_NOW, setUpThisWeekRecords } from "./set-up";
@@ -16,6 +21,9 @@ import { SET_UP_IDS, SET_UP_NOW, setUpThisWeekRecords } from "./set-up";
 
 const STAMP = "2026-10-01T12:00:00.000Z";
 const stamps = { createdAt: STAMP, updatedAt: STAMP };
+
+/** Eight minutes before SET_UP_NOW (Sun 11 Oct, 21:10 in Toronto). */
+export const POOL_LAST_SYNCED = "2026-10-12T01:02:00.000Z";
 
 /** Pool ids count from 301, clear of the set-up's. */
 const id = (table: number, n: number) => fixtureId(table, 300 + n);
@@ -193,13 +201,33 @@ export function poolRecords(): FixtureRecords {
     }),
   );
   // A copy, so no scenario shares rows with another.
-  return structuredClone({
-    ...week,
-    clients,
-    clientsEnabled: true,
-    workItems: [...week.workItems, ...workItems],
-    slots: [...week.slots, ...slots],
-  });
+  return withIntegrations(
+    structuredClone({
+      ...week,
+      clients,
+      clientsEnabled: true,
+      workItems: [...week.workItems, ...workItems],
+      slots: [...week.slots, ...slots],
+    }),
+    poolIntegrations(),
+  );
+}
+
+/**
+ * The pool's workspaces (USE-56): Kestrel's is Kestrel's; Lighthouse is set
+ * per project, Brand site Alder's and Synapse Personal.
+ */
+function poolIntegrations() {
+  const integrations = integrationRecords(POOL_LAST_SYNCED);
+  const [kestrel, lighthouse] = integrations.linear;
+  kestrel!.connection.clientId = C.kestrel;
+  lighthouse!.connection.perProject = true;
+  const connectionId = lighthouse!.connection.id;
+  integrations.projectClients = [
+    { connectionId, projectId: PROJECTS.brandSite, clientId: C.alder },
+    { connectionId, projectId: PROJECTS.synapse, clientId: C.personal },
+  ];
+  return integrations;
 }
 
 export const POOL_SCENARIOS: Record<string, () => Scenario> = {

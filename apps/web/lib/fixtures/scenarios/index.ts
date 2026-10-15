@@ -4,6 +4,7 @@ import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
 import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
+import { INTEGRATION_SCENARIOS } from "./integrations";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { NOW_FORM_SCENARIOS } from "./now-forms";
 import { ORIENT_SCENARIOS } from "./orient-morning";
@@ -62,6 +63,10 @@ export interface Scenario {
   profileWrites?: "fail" | "hang";
   /** Where the Profile sheet starts, so its states are reachable by `?state=`. */
   profileSheet?: ProfileSheetStart;
+  /** `fail`: each Linear write's first send fails, and Try again sends it (USE-56). */
+  linearSends?: "fail";
+  /** Linear issue ids the next sync finds closed (USE-56). */
+  linearClosesOnSync?: string[];
 }
 
 export type { ProfileSheetStart };
@@ -150,6 +155,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...TODOS_SCENARIOS,
   // ---- The pool and the work writes (USE-55): clients on, on this week ----
   ...POOL_SCENARIOS,
+  // ---- Linear, Google and clients (USE-56): off, a failed write, closed in Linear, clients ----
+  ...INTEGRATION_SCENARIOS,
   // ---- + Add and New task (USE-51): Monday during Work, and the pool's New task ----
   ...ADD_SCENARIOS,
 };

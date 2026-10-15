@@ -14,6 +14,10 @@ import {
   workItemRecord,
 } from "@syn/validators";
 import { fixtureId } from "../ids";
+import {
+  integrationRecords,
+  withIntegrations,
+} from "../integrations/workspaces";
 import type { FixtureRecords } from "../records";
 
 /**
@@ -453,8 +457,19 @@ export function morningRecords() {
   });
 }
 
-/** The base day's rows; a scenario copies them, never shares them. */
+/** Today's work linked to its issues (USE-56): Kestrel's workspace is Kestrel's; clients stay off. */
+function baseIntegrations() {
+  const integrations = integrationRecords("2026-10-12T14:10:00.000Z");
+  integrations.linear[0]!.connection.clientId = B.clients.kestrel;
+  return integrations;
+}
+
 export function baseRecords(): FixtureRecords {
+  return withIntegrations(baseDayRecords(), baseIntegrations());
+}
+
+/** The base day's rows; a scenario copies them, never shares them. */
+function baseDayRecords(): FixtureRecords {
   return structuredClone({
     timeZone: "America/Toronto",
     dayCloseTime: "03:00",

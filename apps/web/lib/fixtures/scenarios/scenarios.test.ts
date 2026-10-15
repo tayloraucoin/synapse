@@ -37,6 +37,8 @@ const SCHEMAS: {
       | "clientsEnabled"
       // USE-13: the account's evening prompts, a setting, not a table.
       | "journalPrompts"
+      // USE-56: Linear and Google, parsed by their views in integrations.test.ts.
+      | "integrations"
     >
   ]: z.ZodTypeAny;
 } = {

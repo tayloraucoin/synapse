@@ -42,6 +42,10 @@ import {
   type PlannerServer,
 } from "./planner";
 import { createWriteLog } from "./planner/journal";
+import {
+  createIntegrationServer,
+  type IntegrationServer,
+} from "./integrations";
 import type { FixtureRecords } from "./records";
 import type { Scenario } from "./scenarios";
 import { createWorkServer, type WorkServer } from "./work";
@@ -164,7 +168,10 @@ export class MorningLinesRefusal extends Error {
   }
 }
 
-export interface FixtureServer extends PlannerServer, WorkServer {
+export interface FixtureServer
+  extends PlannerServer,
+    WorkServer,
+    IntegrationServer {
   readToday(dateKey: string): Promise<TodayRecords>;
   writeSlotEvents(inputs: SlotEventInput[]): Promise<SlotEventRecord[]>;
   /**
@@ -339,12 +346,24 @@ export function createFixtureServer(
     log,
   });
   const work = createWorkServer({ records, now, log });
+  const integrations = createIntegrationServer({
+    records,
+    now,
+    isOffline,
+    offlineError,
+    options: {
+      linearSends: scenario.linearSends,
+      linearClosesOnSync: scenario.linearClosesOnSync,
+    },
+  });
 
   const server: FixtureServer = {
     // The set-up area's reads and writes (USE-36).
     ...planner,
     // The work side's reads and writes (USE-55).
     ...work,
+    // Linear, Google and the client mappings (USE-56).
+    ...integrations,
 
     readPool() {
       if (scenario.mode === "loading") return new Promise(() => {});

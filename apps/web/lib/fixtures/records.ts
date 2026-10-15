@@ -19,6 +19,7 @@ import type {
 } from "@syn/validators";
 import type { JournalPromptRecord } from "@/lib/data/morning-records";
 import type { AccountView } from "@/lib/data/use-account";
+import type { IntegrationRecords } from "./integrations/records";
 
 /**
  * What the fixture server holds (USE-7). Every list is a `@syn/validators`
@@ -63,4 +64,6 @@ export interface FixtureRecords {
   journalPrompts?: JournalPromptRecord[];
   /** The signed-in person behind the avatar (USE-83). */
   account: AccountView;
+  /** Linear and Google (USE-56); unset, nothing is connected. */
+  integrations?: IntegrationRecords;
 }
