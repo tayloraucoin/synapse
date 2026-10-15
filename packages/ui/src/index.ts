@@ -49,11 +49,6 @@ export {
   UserIcon as ProfileIcon,
   XIcon as CloseIcon,
 } from "lucide-react";
-/** The Profile sheet's glyphs (USE-84): the crop step's back, the not-saved line. */
-export {
-  ChevronLeftIcon as BackIcon,
-  CircleAlertIcon as NotSavedIcon,
-} from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
 export { ThemeProvider } from "./providers/theme-provider";
@@ -855,8 +850,6 @@ export {
 } from "./composed/control/ellipses-menu";
 export {
   ImageCropper,
-  type ImageCropperCopy,
-  type ImageCropperHandle,
   type ImageCropperProps,
 } from "./composed/control/image-cropper";
 export {

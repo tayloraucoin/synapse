@@ -17,6 +17,3 @@ export const Default: Story = {};
 
 /** ST-10 — the words say it; no spinner, no animated ellipsis. */
 export const Export: Story = { args: { label: "Preparing your export" } };
-
-/** The Profile sheet's upload (USE-84): the small spinner beside the words. */
-export const Uploading: Story = { args: { label: "Uploading", spinner: true } };

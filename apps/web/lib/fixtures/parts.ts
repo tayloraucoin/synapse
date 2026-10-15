@@ -8,6 +8,7 @@ import {
 import { AccountPart } from "./account-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { NowPart, type NowPartState } from "./now-parts";
+import { RunningPart, type RunningPartState } from "./running-parts";
 import { OrientPart, type OrientPartState } from "./orient-parts";
 
 /**
@@ -63,6 +64,17 @@ for (const state of [
 ] satisfies NowPartState[]) {
   registerPart(`now-${state}`, () => createElement(NowPart, { state })); // USE-16
 }
+// USE-23: the running card and a timed Done, `running-<state>` (the /today scenarios).
+for (const state of [
+  "counting-down",
+  "over-under-a-minute",
+  "over-a-minute-or-more",
+  "paused",
+  "timed-done",
+  "timed-over-warning",
+] satisfies RunningPartState[]) {
+  registerPart(`running-${state}`, () => createElement(RunningPart, { state }));
+}
 // USE-83: the avatar menu and the Install sheet, by their scenario names.
 for (const state of [
   "account-menu",
@@ -74,16 +86,6 @@ for (const state of [
   "install-other-browser",
 ]) {
   registerPart(state, () => createElement(AccountPart)); // USE-83
-}
-// USE-84: the Profile sheet's states, taken with `&sheet=profile`.
-for (const state of [
-  "profile",
-  "profile-no-photo",
-  "profile-crop",
-  "profile-uploading",
-  "profile-not-saved",
-]) {
-  registerPart(state, () => createElement(AccountPart)); // USE-84
 }
 // USE-12: Orient's states, `orient-<state>` (the /orient scenarios).
 for (const state of [

@@ -1,4 +1,3 @@
-import type { ProfileSheetStart } from "@/lib/data/use-profile";
 import type { InstallOverride } from "@/lib/pwa/use-install-state";
 import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
@@ -6,6 +5,7 @@ import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { ORIENT_SCENARIOS } from "./orient-morning";
 import { POOL_SCENARIOS } from "./pool";
+import { RUNNING_SCENARIOS } from "./running";
 import { SET_UP_SCENARIOS } from "./set-up";
 
 /**
@@ -42,16 +42,7 @@ export interface Scenario {
   install?: InstallOverride;
   /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */
   accountMenuOpen?: boolean;
-  /**
-   * The profile's writes (USE-84): `fail` refuses the name and the photo as a
-   * server error would; `hang` leaves an upload under way, for its capture.
-   */
-  profileWrites?: "fail" | "hang";
-  /** Where the Profile sheet starts, so its states are reachable by `?state=`. */
-  profileSheet?: ProfileSheetStart;
 }
-
-export type { ProfileSheetStart };
 
 export interface ScenarioView {
   currentItemId?: string;
@@ -129,6 +120,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...ACCOUNT_SCENARIOS,
   // ---- Setting up the days (USE-36): the usual week, this week, the first day ----
   ...SET_UP_SCENARIOS,
+  // ---- Running on Now (USE-23): Meditate's timer ----
+  ...RUNNING_SCENARIOS,
   // ---- The pool and the work writes (USE-55): clients on, on this week ----
   ...POOL_SCENARIOS,
 };

@@ -1,6 +1,1 @@
-export {
-  ImageCropper,
-  type ImageCropperCopy,
-  type ImageCropperHandle,
-  type ImageCropperProps,
-} from "./image-cropper";
+export { ImageCropper, type ImageCropperProps } from "./image-cropper";

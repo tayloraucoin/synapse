@@ -26,6 +26,45 @@ export interface LiftedCardProps {
   className?: string;
 }
 
+/**
+ * The card's head, shared with `RunningCard` (USE-23) so Start never moves
+ * the frame: the tile, the dot and the name, the meta line under them.
+ */
+export function LiftedCardHeader({
+  title,
+  icon,
+  hue,
+  meta,
+}: Pick<LiftedCardProps, "title" | "icon" | "hue" | "meta">) {
+  return (
+    <div className="flex items-center gap-(--space-3)">
+      <span
+        aria-hidden="true"
+        className={cn(
+          "flex size-10 shrink-0 items-center justify-center rounded-(--radius-control)",
+          HUE_CHIP[hue],
+        )}
+      >
+        <ItemIcon icon={icon} size={20} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-(--space-2)">
+          <span
+            aria-hidden="true"
+            className="bg-accent-mark size-2 shrink-0 rounded-full"
+          />
+          <Text as="p" variant="row-title" weight={600} truncate>
+            {title}
+          </Text>
+        </div>
+        <Text as="p" variant="caption" weight={500} className="tabular-nums">
+          {meta}
+        </Text>
+      </div>
+    </div>
+  );
+}
+
 export function LiftedCard({
   title,
   icon,
@@ -43,31 +82,7 @@ export function LiftedCard({
       data-lifted-card=""
       className={cn("shadow-none", className)}
     >
-      <div className="flex items-center gap-(--space-3)">
-        <span
-          aria-hidden="true"
-          className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-(--radius-control)",
-            HUE_CHIP[hue],
-          )}
-        >
-          <ItemIcon icon={icon} size={20} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-(--space-2)">
-            <span
-              aria-hidden="true"
-              className="bg-accent-mark size-2 shrink-0 rounded-full"
-            />
-            <Text as="p" variant="row-title" weight={600} truncate>
-              {title}
-            </Text>
-          </div>
-          <Text as="p" variant="caption" weight={500} className="tabular-nums">
-            {meta}
-          </Text>
-        </div>
-      </div>
+      <LiftedCardHeader title={title} icon={icon} hue={hue} meta={meta} />
       <div className="grid grid-cols-2 gap-(--space-2) wide:flex wide:justify-end">
         <Button
           variant="secondary"

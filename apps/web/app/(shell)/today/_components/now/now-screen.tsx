@@ -3,16 +3,17 @@
 import * as React from "react";
 import { ReorderIcon } from "@syn/ui";
 import {
-  BLOCK_HUE,
   DayBlockHeader,
-  LiftedCard,
   PlannerItemRow,
   TodosTrayLine,
 } from "@/components/planner";
+import { isTimedDone, useRunningView } from "@/lib/data/running";
 import { useDataSource } from "@/lib/data/source";
 import { useNow, useSlotWrites, type NowItemView } from "@/lib/data/use-now";
 import { todayScheduleRoute } from "@/lib/routes";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
+import { NowCurrentCard } from "./now-current-card";
+import { TimedTook } from "./timed-took";
 import { TimeTakenSheet } from "./time-taken-sheet";
 import { TookLine } from "./took-line";
 
@@ -52,6 +53,7 @@ export function NowScreen() {
 
   const { view: now } = useNow(dateKey, chosenId);
   const writes = useSlotWrites(dateKey, now?.block?.id ?? null);
+  const running = useRunningView(dateKey, now);
 
   // The line fades after a few seconds; the planned length stands.
   React.useEffect(() => {
@@ -75,6 +77,12 @@ export function NowScreen() {
         item.id === current?.id ? (lifts?.title ?? null) : null,
       ),
     );
+  }
+
+  /** Done on the running card (USE-23): the time worked, no Change. */
+  function markTimedDone(item: NowItemView) {
+    if (item.id === chosenId) setChosenId(null);
+    setAnnouncement(COPY.announceDone(item.title, next?.title ?? null));
   }
 
   function markUndone(item: NowItemView) {
@@ -113,19 +121,13 @@ export function NowScreen() {
             {items.map((item) =>
               item.id === current?.id ? (
                 <li key={item.id} className="py-(--space-2)">
-                  <LiftedCard
-                    title={item.title}
-                    icon={item.icon}
-                    hue={BLOCK_HUE[block.kind]}
-                    meta={COPY.meta(item.lengthMin, item.plannedAt)}
-                    label={COPY.liftedName(item.title)}
-                    // Start's running card is USE-23's; until then it is drawn and quiet.
-                    start={{ label: COPY.start, onPress: () => {} }}
-                    done={{
-                      label: COPY.done,
-                      name: COPY.doneName(item.title),
-                      onPress: () => markDone(item),
-                    }}
+                  <NowCurrentCard
+                    item={item}
+                    block={block}
+                    dateKey={dateKey}
+                    running={running}
+                    onPlainDone={markDone}
+                    onTimedDone={markTimedDone}
                   />
                 </li>
               ) : (
@@ -136,7 +138,9 @@ export function NowScreen() {
                       title: item.title,
                       emoji: null,
                       checked: item.done,
-                      meta: COPY.length(item.lengthMin),
+                      meta: isTimedDone(running, item)
+                        ? null
+                        : COPY.length(item.lengthMin),
                     }}
                     noEmoji
                     fadeChecked
@@ -149,7 +153,14 @@ export function NowScreen() {
                       if (!item.done) setChosenId(item.id);
                     }}
                     trailing={
-                      item.done ? null : (
+                      isTimedDone(running, item) &&
+                      item.tookMin !== null &&
+                      item.lengthMin !== null ? (
+                        <TimedTook
+                          tookMin={item.tookMin}
+                          planMin={item.lengthMin}
+                        />
+                      ) : item.done ? null : (
                         // Dragging and Move up / Move down are USE-18's.
                         <button
                           type="button"

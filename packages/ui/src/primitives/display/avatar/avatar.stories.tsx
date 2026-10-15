@@ -25,7 +25,6 @@ export const Overview: Story = {
       <Avatar name="Taylor Aucoin" size={40} />
       <Avatar name="Taylor Aucoin" size={64} />
       <Avatar name="Taylor" size={64} />
-      <Avatar name="Taylor Aucoin" size={96} />
       <Avatar
         name="Taylor Aucoin"
         size={64}
