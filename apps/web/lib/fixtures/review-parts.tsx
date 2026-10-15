@@ -21,3 +21,14 @@ export function ReviewPart({ state }: { state: ReviewPartState }) {
     </PinnedScenarioProvider>
   );
 }
+
+/** Finding minutes over Review the day (USE-41), `room-<state>`. */
+export type RoomPartState = "make-room" | "later-cut" | "later-slide";
+
+export function RoomPart({ state }: { state: RoomPartState }) {
+  return (
+    <PinnedScenarioProvider value={`room-${state}`}>
+      <ReviewDayFrame />
+    </PinnedScenarioProvider>
+  );
+}

@@ -17,6 +17,7 @@ import type { TodayRecords } from "./today-records";
 import {
   deriveItemSheet,
   undoItemWrite,
+  writeItemLength,
   writeSwap,
   type ItemSheetServer,
   type ItemUndoStep,
@@ -88,7 +89,10 @@ function occurrenceOf(records: TodayRecords, blockId: string) {
 }
 
 /** A bullet's id to its block item: a slot holding a set item names it. */
-function blockItemIdOf(records: TodayRecords, id: string): string | null {
+export function blockItemIdOf(
+  records: TodayRecords,
+  id: string,
+): string | null {
   if (records.blockItems.some((item) => item.id === id)) return id;
   return records.slots.find((slot) => slot.id === id)?.blockItemId ?? null;
 }
@@ -264,19 +268,54 @@ export async function writeDayReorder(
   return { undo: [{ kind: "token", token: moved.undo }] };
 }
 
-/** The engine's today-only block changes, written one by one, each undoable. */
-async function writeDayChanges(
+/**
+ * The engine's today-only changes, written one by one, each undoable. A
+ * block's are its date's `block_changes` row; a row's go the Item sheet's
+ * way (USE-41): off is Not today for a set item (a drive that goes with its
+ * workout too) and skipped for a pulled slot; a length is the slot's for
+ * the date.
+ */
+export async function writeDayChanges(
   server: DayEditsServer,
+  records: TodayRecords,
   changes: readonly DayChange[],
 ): Promise<ItemUndoStep[]> {
   const undo: ItemUndoStep[] = [];
+  const today = deriveToday(records);
   for (const change of changes) {
-    if (
-      change.kind !== "block_times" &&
-      change.kind !== "block_off" &&
-      change.kind !== "block_usual"
-    ) {
-      throw new Error(`A ${change.kind} change is not written here.`);
+    if (change.kind === "slot_on") {
+      throw new Error("A row comes back through its write's own Undo.");
+    }
+    if (change.kind === "slot_length" || change.kind === "slot_off") {
+      const itemId = blockItemIdOf(records, change.slotId);
+      if (itemId !== null && change.kind === "slot_off") {
+        const off = await server.removeBlockItem({
+          id: itemId,
+          date: records.date,
+        });
+        undo.push({ kind: "token", token: off.undo });
+        continue;
+      }
+      const view = itemId === null ? null : deriveItemSheet(today, itemId);
+      if (view !== null && change.kind === "slot_length") {
+        const written = await writeItemLength(server, view, change.lengthMin);
+        undo.push(...written.undo);
+        continue;
+      }
+      const slot = records.slots.find((row) => row.id === change.slotId);
+      if (!slot) throw new Error("Nothing to change there.");
+      if (change.kind === "slot_off") {
+        await server.writeSlots({ id: slot.id, skipped: true });
+        undo.push({ kind: "slot", id: slot.id, change: { skipped: false } });
+      } else {
+        await server.writeSlots({ id: slot.id, lengthMin: change.lengthMin });
+        undo.push({
+          kind: "slot",
+          id: slot.id,
+          change: { lengthMin: slot.lengthMin },
+        });
+      }
+      continue;
     }
     const written = await server.writeBlockChange({
       blockId: change.blockId,
@@ -314,7 +353,7 @@ export async function writeDayMoveLater(
     today.occurrences.blocks.find((entry) => entry.block.id === blockId)?.block
       .name ?? "";
   return {
-    undo: await writeDayChanges(server, result.plan.changes),
+    undo: await writeDayChanges(server, records, result.plan.changes),
     movedLater: { block: name, startsAt: result.plan.summary.startsAt },
   };
 }
@@ -364,9 +403,9 @@ export function useDayEdits(
     await queryClient.invalidateQueries({ queryKey: todayQueryKey(scenario) });
   }
 
-  function run(
-    write: (server: DayEditsServer, records: TodayRecords) => Promise<DayEdit>,
-  ): Promise<DayEditResult> {
+  function run<E extends DayEdit>(
+    write: (server: DayEditsServer, records: TodayRecords) => Promise<E>,
+  ): Promise<Omit<E, "undo"> & { token: string }> {
     const next = chain.current.then(async () => {
       const records = await source.server.readToday(dateKey);
       const { undo, ...rest } = await write(serverRef.current, records);
@@ -391,6 +430,10 @@ export function useDayEdits(
       run((s, records) => writeDayReorder(s, records, blockId, ids)),
     moveLater: (blockId: string) =>
       run((s, records) => writeDayMoveLater(s, records, blockId)),
+    /** Any edit built on the day as it reads then (USE-41's room plans). */
+    write: <E extends DayEdit>(
+      edit: (server: DayEditsServer, records: TodayRecords) => Promise<E>,
+    ) => run(edit),
     /** An edit's Undo: its steps back, after any write still out. Once only. */
     undo: async (token: string) => {
       const steps = edits.get(token);

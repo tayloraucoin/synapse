@@ -10,6 +10,8 @@ export const REVIEW_LATE_COPY = {
   passed: (wokeAt: string, names: readonly string[]) =>
     `Planned before ${clockLabel(wokeAt)} · ${names.join(", ")}`,
   moveLater: "Move later",
+  /** The way back into A later start (USE-41) [ASSUMPTION: not drawn]. */
+  laterStart: "Cut some, or slide the day back",
   leave: "Leave",
   /** The card's buttons by name, so two cards never read alike. */
   moveLaterLabel: (name: string) => `Move ${name} later`,

@@ -6,9 +6,11 @@ import { Breadcrumb, Button, Text } from "@syn/ui";
 import { weekKeyOf } from "@syn/utils";
 import { DayColumn, TodosTray } from "@/components/planner";
 import { DAY_COLUMN_PX_PER_HOUR } from "@/components/planner/day-column";
+import { LaterStartSheet, MakeRoomSheet } from "@/components/planner/room";
 import { useDataSource } from "@/lib/data/source";
 import { useTodayKey } from "@/lib/data/use-morning";
 import { useReadyGo, useReviewDay } from "@/lib/data/use-review-day";
+import { useRoom } from "@/lib/data/use-room";
 import { AboveFooterToaster } from "@/lib/hooks/use-undo-toast";
 import {
   addSheetRoute,
@@ -19,9 +21,9 @@ import {
   todayReadyRoute,
   withSearch,
 } from "@/lib/routes";
+import { fadeNavigate } from "../../_components/fade-navigate";
 import { dateTitle } from "../../_components/now/copy";
 import { useDayEntryGate } from "../../../_components/day-entry-gate";
-import { fadeNavigate } from "../../_components/fade-navigate";
 import { REVIEW_DAY_COPY as COPY } from "./copy";
 import { EmptyWork } from "./empty-work";
 import { FirstChangeLine } from "./first-change-line";
@@ -57,6 +59,11 @@ import { useReviewEdits } from "./use-review-edits";
  * A late wake (USE-38) lays the column out from the wake, and the blocks it
  * passed fold into one row under the tray that opens to Move later and
  * Leave; nothing reads late.
+ *
+ * Finding minutes (USE-41): Make room opens over the day when an addition
+ * finds no room the engine could guess; A later start opens by itself once
+ * a day from 15 minutes past Up at, and again from the passed row. Both
+ * apply the engine's plan for today, with Undo in the same Toaster.
  */
 export function ReviewDayFrame() {
   const router = useRouter();
@@ -65,6 +72,8 @@ export function ReviewDayFrame() {
   const { view } = useReviewDay(dateKey);
   const readyGo = useReadyGo();
   const edits = useReviewEdits(dateKey, view);
+  // USE-41: Make room when an addition finds no room; A later start once a day.
+  const room = useRoom(dateKey, { offerLaterStart: true });
   // A scenario's `view.open` seeds the tray open, for its capture.
   const seeded = useDataSource().scenario.view?.open;
   const headingRef = React.useRef<HTMLHeadingElement>(null);
@@ -126,6 +135,7 @@ export function ReviewDayFrame() {
             wokeAt={view.late.wokeAt}
             passed={view.late.passed}
             onMoveLater={(blockId) => void edits.moveLater(blockId)}
+            onLaterStart={room.openLaterStart}
             defaultOpen={seeded === "passed"}
           />
         ) : null}
@@ -219,6 +229,38 @@ export function ReviewDayFrame() {
           </Button>
         </footer>
       </div>
+
+      <MakeRoomSheet
+        view={room.makeRoom.view}
+        onSource={room.makeRoom.setSource}
+        onToggle={room.makeRoom.toggle}
+        onStep={room.makeRoom.step}
+        onApply={() => void room.apply()}
+        onClose={room.makeRoom.close}
+      />
+      <LaterStartSheet
+        open={room.laterStart.open}
+        ask={room.laterStart.ask}
+        tab={room.laterStart.tab}
+        onTab={room.laterStart.setTab}
+        cut={room.laterStart.cut}
+        slide={room.laterStart.slide}
+        onToggle={room.laterStart.toggle}
+        onToggleBlock={room.laterStart.toggleBlock}
+        onShowMore={room.laterStart.showMore}
+        canSwap={room.canSwap}
+        onSwap={(itemId) => {
+          room.laterStart.close();
+          router.push(
+            itemSheetRoute(
+              `${window.location.pathname}${window.location.search}`,
+              itemId,
+            ),
+          );
+        }}
+        onApply={() => void room.laterStart.apply()}
+        onClose={room.laterStart.close}
+      />
     </main>
   );
 }

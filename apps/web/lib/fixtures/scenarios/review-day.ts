@@ -1,12 +1,15 @@
 import {
   blockItemRecord,
   blockRecord,
+  dayEventRecord,
   dayRecordRecord,
   slotRecord,
   todoRecord,
   workItemRecord,
 } from "@syn/validators";
+import { LATER_START } from "@/lib/data/later-start-flag";
 import { FIRST_CHANGE, RAIL_HINT } from "@/lib/data/review-first-times";
+import type { RoomAddition } from "@/lib/data/room";
 import { fixtureId } from "../ids";
 import type { FixtureRecords } from "../records";
 import { BASE_DATE } from "./base-day";
@@ -47,6 +50,8 @@ export const REVIEW_IDS = {
   slots: { linked: id(3, 1), primary: id(3, 2), secondary: id(3, 3) },
   todos: { mechanic: id(6, 1), placeholder: id(6, 2) },
   dayRecord: id(0, 1),
+  /** USE-41's morning: the boards' Journal, Call with Sam and the evening. */
+  room: { journal: id(2, 6), evening: id(1, 4), callWithSam: id(8, 1) },
 } as const;
 
 const R = REVIEW_IDS;
@@ -271,14 +276,116 @@ const SEEN = [RAIL_HINT, FIRST_CHANGE];
 const SWAP_TO_YOGA = { id: R.items.workout, withId: R.items.yoga };
 
 /**
- * A late wake at 8:10, now 8:10. [ASSUMPTION] The later-start sheet's
- * once-a-day flag is pinned seen by its own ticket (USE-41), which does
- * not exist yet; these frames stay as drawn.
+ * A late wake at 8:10, now 8:10. The later-start sheet's day flag (USE-41)
+ * is pinned seen, so these frames stay as drawn.
  */
 const LATE = {
   now: onNowDay("08:10"),
   records: reviewDayRecords({ orientedAt: "08:10" }),
+  seen: [...SEEN, LATER_START],
 } satisfies Partial<Scenario>;
+
+/**
+ * Finding minutes (USE-41; make-room/, later-start/): the Monday as the
+ * three boards draw it. Training's drives are 11 minutes and the workout
+ * 35, so Training still ends 8:57 with 3 minutes before Breakfast; Wellness
+ * gains "Journal [placeholder]" (15 min); Work holds "Call with Sam
+ * [placeholder]" at 11:00 as a day event; an evening block ends at 22:30,
+ * so a 70-minute slide puts Lights out at 23:40.
+ */
+function roomRecords(orientedAt?: string): FixtureRecords {
+  const records = reviewDayRecords(orientedAt ? { orientedAt } : {});
+  const lengths: Record<string, number> = {
+    [R.items.driveThere]: 11,
+    [R.items.workout]: 35,
+    [R.items.driveHome]: 11,
+  };
+  return {
+    ...records,
+    blocks: [
+      ...records.blocks,
+      blockRecord.parse({
+        ...stamps,
+        id: R.room.evening,
+        kind: "wind_down",
+        name: "Evening",
+        startsAt: "21:30",
+        endsAt: "22:30",
+        rrule: DAILY,
+        fill: "set_items",
+        icon: null,
+        color: null,
+        onDate: null,
+        checklist: false,
+        meal: false,
+        notify: false,
+        archivedAt: null,
+      }),
+    ],
+    blockItems: [
+      ...records.blockItems.map((item) =>
+        item.id in lengths ? { ...item, lengthMin: lengths[item.id]! } : item,
+      ),
+      blockItemRecord.parse({
+        ...stamps,
+        id: R.room.journal,
+        blockId: NOW_IDS.blocks.wellness,
+        title: "Journal [placeholder]",
+        isTransition: false,
+        icon: null,
+        atTime: null,
+        lengthMin: 15,
+        meal: false,
+        onDate: null,
+        sortOrder: 9,
+      }),
+    ],
+    dayEvents: [
+      dayEventRecord.parse({
+        ...stamps,
+        id: R.room.callWithSam,
+        onDate: BASE_DATE,
+        rrule: null,
+        title: "Call with Sam [placeholder]",
+        icon: null,
+        startsAt: "11:00",
+        endsAt: "11:30",
+        tag: "work",
+        notes: null,
+        color: null,
+        clientId: null,
+      }),
+    ],
+  };
+}
+
+/** What a room scenario opens on, for its capture. */
+export interface RoomSeed {
+  /** Make room opens on load for this addition, as when the engine asks. */
+  makeRoom?: RoomAddition;
+  /** The later-start sheet's tab and ticks on open. */
+  later?: { tab: "cut" | "slide"; cuts?: string[] };
+}
+
+const ROOM_SEEDS: Record<string, RoomSeed> = {
+  // Kept as the board drew it (sheet.md): with these lengths the engine's
+  // default would take the minutes with no sheet, so the capture opens it.
+  "room-make-room": {
+    makeRoom: {
+      blockId: NOW_IDS.blocks.training,
+      title: "Foam roll [placeholder]",
+      lengthMin: 10,
+      at: "08:45",
+    },
+  },
+  "room-later-cut": {
+    later: { tab: "cut", cuts: [NOW_IDS.items.meditate, R.room.journal] },
+  },
+  "room-later-slide": { later: { tab: "slide" } },
+};
+
+export const roomSeedOf = (name: string): RoomSeed | undefined =>
+  ROOM_SEEDS[name];
 
 function review(name: string, extra: Partial<Scenario> = {}): () => Scenario {
   return () => ({
@@ -331,6 +438,18 @@ export const REVIEW_SCENARIOS: Record<string, () => Scenario> = {
   // USE-38: woke at 8:10 against Up at 7:00 (D-USE-8's morning). Wellness
   // folds into "Planned before 8:10"; Training runs 8:15 to 8:57.
   "review-late": review("review-late", LATE),
+  // USE-41: Make room for Foam roll at 8:45 in Training, at 6:58.
+  "room-make-room": review("room-make-room", { records: roomRecords() }),
+  // USE-41: woke at 8:10; A later start opens by itself (its flag unset),
+  // on Cut some with Meditate and Journal ticked, then on Slide.
+  "room-later-cut": review("room-later-cut", {
+    now: onNowDay("08:10"),
+    records: roomRecords("08:10"),
+  }),
+  "room-later-slide": review("room-later-slide", {
+    now: onNowDay("08:10"),
+    records: roomRecords("08:10"),
+  }),
   // USE-38: the passed row opened to Wellness's card.
   "review-late-passed-open": review("review-late-passed-open", {
     ...LATE,

@@ -36,6 +36,8 @@ export interface PassedRowProps {
   wokeAt: string;
   passed: readonly ReviewPassedBlock[];
   onMoveLater: (blockId: string) => void;
+  /** A later start again, past its once-a-day flag (USE-41). */
+  onLaterStart?: () => void;
   /** A scenario's capture opens it on load. */
   defaultOpen?: boolean;
 }
@@ -59,6 +61,7 @@ export function PassedRow({
   wokeAt,
   passed,
   onMoveLater,
+  onLaterStart,
   defaultOpen = false,
 }: PassedRowProps) {
   const [open, setOpen] = React.useState(defaultOpen);
@@ -147,6 +150,18 @@ export function PassedRow({
               </li>
             ))}
           </ul>
+          {onLaterStart ? (
+            <div style={indent}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-link -ms-(--space-3) mt-(--space-1)"
+                onClick={onLaterStart}
+              >
+                {COPY.laterStart} ›
+              </Button>
+            </div>
+          ) : null}
         </div>
       </CollapsibleContent>
     </Collapsible>
