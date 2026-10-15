@@ -24,11 +24,7 @@ function setup(name: string, at?: string) {
   const server = createFixtureServer(scenario, now);
   const dateKey = scenario.now.slice(0, 10);
   async function read() {
-    return deriveNow(
-      deriveToday(await server.readToday(dateKey)),
-      now(),
-      null,
-    );
+    return deriveNow(deriveToday(await server.readToday(dateKey)), now(), null);
   }
   async function check(blockId: string, item: NowItemView) {
     const slotId =
