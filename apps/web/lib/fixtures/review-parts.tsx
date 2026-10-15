@@ -32,3 +32,15 @@ export function RoomPart({ state }: { state: RoomPartState }) {
     </PinnedScenarioProvider>
   );
 }
+
+/** Add from the rail over Review the day (USE-54), `rail-<state>`. */
+export type RailAddPartState =
+  "drag" | "add-sheet" | "add-preset-tier" | "added-undo";
+
+export function RailAddPart({ state }: { state: RailAddPartState }) {
+  return (
+    <PinnedScenarioProvider value={`rail-${state}`}>
+      <ReviewDayFrame />
+    </PinnedScenarioProvider>
+  );
+}

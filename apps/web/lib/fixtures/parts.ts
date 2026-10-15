@@ -18,7 +18,12 @@ import { NewBlockSheetPart } from "./new-block-parts";
 import { NowPart, type NowPartState } from "./now-parts";
 import { OrientPart, type OrientPartState } from "./orient-parts";
 import { ReadyPart, type ReadyPartState } from "./ready-parts";
-import { ReviewPart, type ReviewPartState } from "./review-parts";
+import {
+  RailAddPart,
+  ReviewPart,
+  type RailAddPartState,
+  type ReviewPartState,
+} from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
 import { BLOCK_VIEW_SCENARIOS } from "./scenarios/block-view";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
@@ -259,6 +264,15 @@ for (const state of [
   "nothing-written",
 ] satisfies JournalPartState[]) {
   registerPart(`close-${state}`, () => createElement(JournalPart, { state })); // USE-44
+}
+// USE-54: add from the rail over Review the day, `rail-<state>`.
+for (const state of [
+  "drag",
+  "add-sheet",
+  "add-preset-tier",
+  "added-undo",
+] satisfies RailAddPartState[]) {
+  registerPart(`rail-${state}`, () => createElement(RailAddPart, { state }));
 }
 // USE-72: the Week, under the week scenarios' names.
 for (const state of Object.keys(WEEK_SCENARIOS)) {

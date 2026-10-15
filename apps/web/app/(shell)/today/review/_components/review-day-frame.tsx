@@ -3,12 +3,15 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb, Button, Text } from "@syn/ui";
-import { weekKeyOf } from "@syn/utils";
+import { clockFromMinutes, weekdayIndex, weekKeyOf } from "@syn/utils";
 import { DayColumn, TodosTray } from "@/components/planner";
+import { AddSheet } from "@/components/planner/add-sheet";
 import { DAY_COLUMN_PX_PER_HOUR } from "@/components/planner/day-column";
+import { snapToStep } from "@/components/planner/rail-add";
 import { LaterStartSheet, MakeRoomSheet } from "@/components/planner/room";
 import { useDataSource } from "@/lib/data/source";
 import { useTodayKey } from "@/lib/data/use-morning";
+import { useRailAdd } from "@/lib/data/use-rail-add";
 import { useReadyGo, useReviewDay } from "@/lib/data/use-review-day";
 import { useRoom } from "@/lib/data/use-room";
 import { AboveFooterToaster } from "@/lib/hooks/use-undo-toast";
@@ -16,6 +19,7 @@ import {
   addSheetRoute,
   daysRoute,
   itemSheetRoute,
+  newBlockSheetRoute,
   orientRoute,
   todayBlockRoute,
   todayReadyRoute,
@@ -64,6 +68,12 @@ import { useReviewEdits } from "./use-review-edits";
  * finds no room the engine could guess; A later start opens by itself once
  * a day from 15 minutes past Up at, and again from the passed row. Both
  * apply the engine's plan for today, with Undo in the same Toaster.
+ *
+ * Add from the rail (USE-54): the + tapped, dragged and released, empty
+ * time tapped (rounded to 15 minutes), or a Work block's Add row opens the
+ * add sheet (`?sheet=add`). With room the addition lands at once, today
+ * only, with Undo; with none it goes to Make room. Block hands the time to
+ * the New block sheet.
  */
 export function ReviewDayFrame() {
   const router = useRouter();
@@ -74,8 +84,10 @@ export function ReviewDayFrame() {
   const edits = useReviewEdits(dateKey, view);
   // USE-41: Make room when an addition finds no room; A later start once a day.
   const room = useRoom(dateKey, { offerLaterStart: true });
+  const source = useDataSource();
   // A scenario's `view.open` seeds the tray open, for its capture.
-  const seeded = useDataSource().scenario.view?.open;
+  const seeded = source.scenario.view?.open;
+  const rail = useRailAdd(dateKey, edits.edits, room.place);
   const headingRef = React.useRef<HTMLHeadingElement>(null);
   const sent = React.useRef(false);
 
@@ -88,6 +100,14 @@ export function ReviewDayFrame() {
 
   /** A path with this screen's query kept, so `?state=` travels. */
   const kept = (path: string) => `${path}${window.location.search}`;
+  /** The add sheet over this screen. */
+  const openAdd = (preset: Parameters<typeof addSheetRoute>[1]) =>
+    router.push(
+      addSheetRoute(
+        `${window.location.pathname}${window.location.search}`,
+        preset,
+      ),
+    );
 
   function onReadyGo(event: React.MouseEvent) {
     if (sent.current) return;
@@ -167,16 +187,20 @@ export function ReviewDayFrame() {
                 )
               }
               onSwipeAway={edits.swipeAway}
+              // Empty time: the add sheet there, on the 15-minute grid.
+              onRail={(atMin) =>
+                openAdd({
+                  at: clockFromMinutes(
+                    snapToStep(atMin, {
+                      startMin: view.startMin,
+                      endMin: view.endMin,
+                    }),
+                  ),
+                })
+              }
               emptyWork={(block) => (
                 <EmptyWork
-                  onAdd={(tier) =>
-                    router.push(
-                      addSheetRoute(
-                        `${window.location.pathname}${window.location.search}`,
-                        { tier, block: block.id },
-                      ),
-                    )
-                  }
+                  onAdd={(tier) => openAdd({ tier, block: block.id })}
                   weekHref={daysRoute({
                     week: weekKeyOf(dateKey),
                     day: dateKey,
@@ -189,20 +213,16 @@ export function ReviewDayFrame() {
                 <RailPlus
                   atMin={edits.plusAtMin}
                   startMin={view.startMin}
+                  endMin={view.endMin}
                   heightPx={
                     ((view.endMin - view.startMin) / 60) *
                     DAY_COLUMN_PX_PER_HOUR
                   }
                   showHint={edits.hint.show}
                   onHint={edits.hint.onHint}
-                  onTap={(at) =>
-                    router.push(
-                      addSheetRoute(
-                        `${window.location.pathname}${window.location.search}`,
-                        { at },
-                      ),
-                    )
-                  }
+                  onTap={(at) => openAdd({ at })}
+                  onRelease={(at) => openAdd({ at })}
+                  heldAtMin={rail.heldAtMin}
                 />
               ) : null}
             </DayColumn>
@@ -229,6 +249,31 @@ export function ReviewDayFrame() {
           </Button>
         </footer>
       </div>
+
+      {view !== undefined ? (
+        <AddSheet
+          open={rail.open}
+          onOpenChange={(open) => {
+            if (!open) rail.close();
+          }}
+          dateKey={dateKey}
+          start={rail.start}
+          day={rail.day}
+          hours={{ startMin: view.startMin, endMin: view.endMin }}
+          preset={rail.preset}
+          onAdd={rail.add}
+          // One URL change: the New block sheet takes the add sheet's place.
+          onBlock={(at) => {
+            router.push(
+              newBlockSheetRoute(rail.hereWithoutAdd(), {
+                week: weekKeyOf(dateKey),
+                day: weekdayIndex(dateKey),
+                at,
+              }),
+            );
+          }}
+        />
+      ) : null}
 
       <MakeRoomSheet
         view={room.makeRoom.view}

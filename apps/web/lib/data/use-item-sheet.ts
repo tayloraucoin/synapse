@@ -552,6 +552,16 @@ function setStoredNotes(key: string, text: string) {
   notesListeners.forEach((listener) => listener());
 }
 
+/** A new item's notes from the add sheet (USE-54), kept as the sheet's own. */
+export function writeItemNotes(
+  scenario: string,
+  date: string,
+  id: string,
+  text: string,
+) {
+  setStoredNotes(notesKey(scenario, date, id), text.trim());
+}
+
 /* ---------------------------------------------------------------- hook -- */
 
 /**

@@ -4,6 +4,7 @@ import type { InstallOverride } from "@/lib/pwa/use-install-state";
 import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
 import { ADD_SCENARIOS } from "./add";
+import { RAIL_ADD_SCENARIOS } from "./add-from-the-rail";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { BLOCK_VIEW_SCENARIOS } from "./block-view";
 import { CLOSE_THE_DAY_SCENARIOS } from "./close-the-day";
@@ -251,6 +252,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...SETTINGS_SCENARIOS,
   // ---- + Add and New task (USE-51): Monday during Work, and the pool's New task ----
   ...ADD_SCENARIOS,
+  // ---- Add from the rail (USE-54), over Review the day ----
+  ...RAIL_ADD_SCENARIOS,
   ...FROM_LINEAR_SCENARIOS,
   // ---- Review the day (USE-31): the Monday at 6:58, before Ready, go ----
   ...REVIEW_SCENARIOS,
