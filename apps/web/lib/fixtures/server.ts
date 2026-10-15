@@ -480,7 +480,9 @@ export function createFixtureServer(
     },
 
     readWeek(week) {
-      if (scenario.mode === "loading") return new Promise(() => {});
+      if (scenario.mode === "loading" || scenario.regions?.week === "loading") {
+        return new Promise(() => {});
+      }
       if (failing || weekFails) return Promise.reject(new FixtureReadError());
       return planner.readWeek(week);
     },

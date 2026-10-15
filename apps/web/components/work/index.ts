@@ -1,6 +1,7 @@
 export { ClientTile } from "./client-tile";
 export { DueBadge, type DueBadgeProps } from "./due-badge";
 export { PriorityChip, PriorityMarkGlyph } from "./priority-chip";
+export { NextCard, type NextCardProps } from "./next-card";
 export { TierGroup, type TierGroupProps } from "./tier-group";
 export {
   DeskDayColumn,
@@ -23,5 +24,8 @@ export {
   WhileItFiresLine,
   type WhileItFiresLineProps,
 } from "./while-it-fires-line";
-export { WorkRow, type WorkRowProps } from "./work-row";
+export { WorkNextStrip, type WorkNextStripProps } from "./work-next-strip";
+export { WorkRetry, type WorkRetryProps } from "./work-retry";
+export { WorkRow, WorkRowMeta, type WorkRowProps } from "./work-row";
+export { WorkTiersSkeleton } from "./work-tiers-skeleton";
 export { WeekStrip, type WeekStripProps } from "./week-strip";

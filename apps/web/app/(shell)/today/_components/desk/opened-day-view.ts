@@ -1,14 +1,9 @@
 import type { WorkTier } from "@syn/types";
 import type { ClientRecord, SlotRecord, WorkItemRecord } from "@syn/validators";
-import type { PriorityLevel, WorkRowView } from "@/components/work";
-import {
-  rangeWords,
-  SIZE_RANGE,
-  sizeWords,
-} from "@/components/work/add/new-task/form";
+import type { WorkRowView } from "@/components/work";
 import type { LinearIssueJoin } from "@/lib/data/integration-records";
 import { TIER_WORDS, type WeekDayView } from "@/lib/data/week-view";
-import { DESK_COPY as COPY } from "./copy";
+import { workRowView } from "@/lib/data/work-row-view";
 
 /**
  * The opened day's tiers (USE-58; opened-day.md): the date's work slots in
@@ -41,21 +36,6 @@ export interface OpenedDayInput {
   issueFor: (item: WorkItemRecord) => LinearIssueJoin | null;
 }
 
-/** Linear's 1 to 4 (0 is none). */
-const PRIORITY: Record<number, PriorityLevel> = {
-  1: "urgent",
-  2: "high",
-  3: "normal",
-  4: "low",
-};
-
-function lengthOf(item: WorkItemRecord): string | null {
-  const preset = item.size ? SIZE_RANGE[item.size] : null;
-  const min = item.lengthMinMin ?? preset?.min ?? null;
-  const max = item.lengthMaxMin ?? preset?.max ?? null;
-  return rangeWords(min, max) || null;
-}
-
 export function openedDayTiers(input: OpenedDayInput): OpenedTier[] {
   const items = new Map(input.workItems.map((item) => [item.id, item]));
   const slots = new Map(input.slots.map((slot) => [slot.id, slot]));
@@ -68,43 +48,16 @@ export function openedDayTiers(input: OpenedDayInput): OpenedTier[] {
       const done = slots.get(chip.id)?.doneAt != null;
       const isNext = !done && !nextTaken;
       if (isNext) nextTaken = true;
-      const client = input.clientFor(item);
-      const issue = input.issueFor(item);
-      const identifier = issue?.identifier ?? item.linearIdentifier;
-      const level = issue ? PRIORITY[issue.priority] : undefined;
       return [
-        {
+        workRowView({
           id: chip.id,
-          title: item.title,
+          item,
           emoji: chip.emoji,
           form: done ? "done" : isNext ? "next" : "idle",
-          client: client
-            ? {
-                letter: client.name.slice(0, 1).toUpperCase(),
-                name: client.name,
-                hue: client.colorKey,
-              }
-            : null,
-          project: issue?.project
-            ? { emoji: issue.project.icon ?? null, name: issue.project.name }
-            : null,
-          identifier,
-          noLinear: identifier === null ? COPY.noLinear : null,
-          priority: level ? { level, word: COPY.priority[level] } : null,
-          size: item.size ? sizeWords(item.size) : null,
-          labels: (issue?.labels ?? []).map((label) => ({
-            name: label.name,
-            color: label.color,
-          })),
-          session: chip.session
-            ? COPY.session(chip.session.n, chip.session.of)
-            : null,
-          worked: null,
-          length: lengthOf(item),
-          firing: null,
-          doneRecord: null,
-          subIssues: null,
-        },
+          session: chip.session,
+          client: input.clientFor(item),
+          issue: input.issueFor(item),
+        }),
       ];
     });
     if (tier === "urgent" && rows.length === 0) return [];

@@ -14,6 +14,8 @@ import { WorkRow } from "./work-row";
  *
  * `afterRow` is the group's one slot under a row: the reminder line under the
  * first firing row (D-USE-47; the pick is USE-8's, the screen passes it).
+ * `lifted` stands in a row's place: Next lifted as the card (USE-57), or the
+ * running card (USE-59), so the lift never moves an item out of its tier.
  */
 export interface TierGroupProps extends WorkRowHandlers {
   tier: WorkTier;
@@ -21,6 +23,7 @@ export interface TierGroupProps extends WorkRowHandlers {
   word: string;
   rows: WorkRowView[];
   afterRow?: { rowId: string; content: React.ReactNode } | null;
+  lifted?: { rowId: string; content: React.ReactNode } | null;
   /** The opened day's rows, with no lead slot (USE-58). */
   planning?: boolean;
   /** Drawn under the heading when the tier holds nothing: "+ Add to Stretch" (USE-58). */
@@ -34,6 +37,7 @@ export function TierGroup({
   word,
   rows,
   afterRow = null,
+  lifted = null,
   planning = false,
   empty = null,
   headingAs = "h3",
@@ -51,7 +55,11 @@ export function TierGroup({
       <ul className="flex flex-col">
         {rows.map((row) => (
           <li key={row.id}>
-            <WorkRow row={row} planning={planning} {...handlers} />
+            {lifted?.rowId === row.id ? (
+              lifted.content
+            ) : (
+              <WorkRow row={row} planning={planning} {...handlers} />
+            )}
             {afterRow?.rowId === row.id ? afterRow.content : null}
           </li>
         ))}

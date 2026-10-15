@@ -63,9 +63,10 @@ export interface Scenario {
   device?: Partial<ReminderDevice>;
   /**
    * A region's own read waits or fails while the rest reads (USE-19: the
-   * to-dos; USE-72: the Week, with the pool live).
+   * to-dos; USE-72: the Week, with the pool live; USE-57: Today's tiers wait
+   * on it).
    */
-  regions?: { todos?: "loading" | "error"; week?: "error" };
+  regions?: { todos?: "loading" | "error"; week?: "loading" | "error" };
   /** Record ids whose next write rejects once, then goes through (USE-19). */
   failWrites?: string[];
   /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */

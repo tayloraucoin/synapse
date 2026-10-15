@@ -6,6 +6,7 @@ import {
   joinIssue,
   lastSyncedOf,
   statesOfTeam,
+  subIssuesOf,
   type LinearRecords,
 } from "./integration-records";
 import { useDataSource } from "./source";
@@ -86,6 +87,8 @@ export function useLinear() {
     ...query,
     /** The issue behind a work item; null for a Synapse-only one. */
     issueFor: (item: Item) => (records ? joinIssue(records, item) : null),
+    /** Its sub-issues: checkboxes at the desk, folded on the phone (D-USE-51). */
+    subIssuesFor: (item: Item) => (records ? subIssuesOf(records, item) : []),
     /** A team's statuses for the status sheet, each with its fill and effect. */
     statesFor: (teamId: string) =>
       records ? statesOfTeam(records, teamId) : [],

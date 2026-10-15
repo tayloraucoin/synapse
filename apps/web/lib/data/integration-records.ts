@@ -136,6 +136,33 @@ export function joinIssue(
   };
 }
 
+/**
+ * A linked issue's sub-issues, in Linear's order (D-USE-51): each with its
+ * title and whether its state is completed. Empty for a Synapse-only item.
+ */
+export function subIssuesOf(
+  records: LinearRecords,
+  item: LinkedItem,
+): { id: string; title: string; done: boolean }[] {
+  if (item.linearConnectionId === null || item.linearIssueId === null) {
+    return [];
+  }
+  const workspace = records.workspaces.find(
+    (w) => w.connectionId === item.linearConnectionId,
+  );
+  if (!workspace) return [];
+  const { payload } = workspace;
+  return payload.subIssues
+    .filter((row) => row.parentId === item.linearIssueId)
+    .map((row) => ({
+      id: row.id,
+      title: row.title,
+      done:
+        payload.states.find((state) => state.id === row.stateId)?.type ===
+        "completed",
+    }));
+}
+
 const GROUP_ORDER = [
   "triage",
   "backlog",

@@ -56,6 +56,7 @@ import { RUNNING_COPY } from "./running-copy";
 import { TimeTakenSheet } from "./time-taken-sheet";
 import { TimedTook } from "./timed-took";
 import { TookLine } from "./took-line";
+import { WorkBlockNow } from "./work-block-now";
 
 /** `view.open` from a scenario: "<what>:<item id>". */
 function seeded(open: string | undefined, what: string): string | null {
@@ -535,6 +536,19 @@ export function NowScreen() {
             onAnnounce={setAnnouncement}
           />
         </section>
+      ) : block?.kind === "work" ? (
+        // USE-57: a Work block is Today's tiers, not a block's items.
+        <WorkBlockNow
+          block={block}
+          trailing={
+            <NowBlockMenu
+              label={COPY.blockMenu(block.name)}
+              title={COPY.blockMenuTitle(block.name)}
+              rows={nowBlockMenuRows(block, () => complete(block))}
+              defaultOpen={view?.open === "block-menu"}
+            />
+          }
+        />
       ) : block ? (
         <section
           aria-labelledby="now-block"

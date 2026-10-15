@@ -67,15 +67,7 @@ export const DESK_COPY = {
     `Planning ${WEEKDAY_LONG[weekdayIndex]}. Firing, Start and Done wait for the day itself.`,
   addTo: (tier: string) => `+ Add to ${tier}`,
   todos: "To-dos",
-  noLinear: "No Linear",
-  session: (n: number, of: number) => `session ${n} of ${of}`,
   /** The strip's "2/3". */
   place: (n: number, of: number) => `${n}/${of}`,
-  priority: {
-    urgent: "Urgent",
-    high: "High",
-    normal: "Normal",
-    low: "Low",
-  },
   dayError: "The day didn't load.",
 } as const;

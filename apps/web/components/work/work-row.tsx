@@ -108,6 +108,7 @@ export function WorkRow({
       <div className="min-w-0 flex-1 py-(--space-2)">
         <button
           type="button"
+          data-open
           onClick={() => onOpen?.(row.id)}
           className="flex w-full cursor-pointer items-start gap-1.75 text-start"
         >
@@ -198,7 +199,8 @@ function Separator({ deskOnly = false }: { deskOnly?: boolean }) {
   );
 }
 
-function WorkRowMeta({ row }: { row: WorkRowView }) {
+/** The row's meta line, shared with the lifted and running cards. */
+export function WorkRowMeta({ row }: { row: WorkRowView }) {
   const firing = row.form === "firing";
   const done = row.form === "done";
   const next = row.form === "next";
