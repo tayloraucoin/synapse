@@ -38,7 +38,7 @@ All Decided (D-USE-71), the flow's [PROPOSED] Rules taken as drawn:
 - Reduced motion: opacity only.
 - Words [placeholder] until Gloss. From round 1's words frame, kept for Gloss: the payoff is in the words and the type, never a score; never "late", never a count, never second person.
 - Focused at every width, no rail and no tabs (D-USE-39); the desk, and where Start lands there: [`states/welcome.md`](states/welcome.md) › Widths.
-- [ASSUMPTION] The welcome is a route of its own (the dev note's three routes); its path is unnamed.
+- The welcome is a route of its own (the dev note's three routes): `/today/ready` (USE-43), focused like Review the day. A reopen between Ready, go and Start lands there; "‹ Review the day" reached from it stays on Review the day.
 
 ## How it flows
 

@@ -115,7 +115,7 @@ function checklistRows(form: "reset" | "day", blockId: string) {
 }
 
 /** The Sunday, readied at 9:40, with the Monday's to-dos in the tray. */
-function sundayRecords(form: "reset" | "day"): FixtureRecords {
+export function sundayRecords(form: "reset" | "day"): FixtureRecords {
   const monday = nowDayRecords([]);
   const blocks =
     form === "reset"

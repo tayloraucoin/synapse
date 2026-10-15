@@ -13,6 +13,7 @@ import { JournalPart, type JournalPartState } from "./journal-parts";
 import { MealTopicPart, type MealTopicPartState } from "./meal-topic-parts";
 import { NowPart, type NowPartState } from "./now-parts";
 import { OrientPart, type OrientPartState } from "./orient-parts";
+import { ReadyPart, type ReadyPartState } from "./ready-parts";
 import { ReviewPart, type ReviewPartState } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
@@ -182,16 +183,18 @@ for (const state of [
   registerPart(state, () => createElement(AddPart, { state })); // USE-51
 }
 // USE-31: Review the day's success frame and the tray open, `review-<state>`.
-// USE-37: the edits' frames, `review-first-mornings` and the rest.
-for (const state of [
-  "success",
-  "tray-open",
-  "first-mornings",
-  "first-edit",
-  "after-swap-undo",
-  "no-work",
-] satisfies ReviewPartState[]) {
+for (const state of ["success", "tray-open"] satisfies ReviewPartState[]) {
   registerPart(`review-${state}`, () => createElement(ReviewPart, { state }));
+}
+// USE-43: the Ready, go welcome, `ready-<state>`.
+for (const state of [
+  "welcome",
+  "first-go-ever",
+  "late-wake",
+  "checklist-day",
+  "offline",
+] satisfies ReadyPartState[]) {
+  registerPart(`ready-${state}`, () => createElement(ReadyPart, { state }));
 }
 // USE-22: a meal's topics and the Meal topics sheet, by their scenario names.
 for (const state of [

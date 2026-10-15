@@ -112,9 +112,7 @@ export function welcomeView({
     nowMin < clockToMinutes(block.endsAt);
 
   const list = isChecklistDay ? blocks.find(isAllDayList) : undefined;
-  const ahead = blocks.filter(
-    (block) => !passed(block) && block !== list,
-  );
+  const ahead = blocks.filter((block) => !passed(block) && block !== list);
   const underWay =
     list === undefined
       ? (ahead.find((block) => block.id === layout?.underWay) ??
@@ -122,17 +120,15 @@ export function welcomeView({
       : undefined;
   const ordered = [...(list ? [list] : []), ...ahead];
   const limit = firstEver ? 2 : 3;
-  const rows = ordered.slice(0, limit).map(
-    (block, index): WelcomeRow => ({
-      blockId: block.id,
-      name: labelOf(block),
-      startsAt: block.startsAt,
-      endsAt: block.endsAt,
-      lead: index === 0,
-      underWay: block === underWay,
-      allDay: block === list,
-    }),
-  );
+  const rows = ordered.slice(0, limit).map((block, index): WelcomeRow => ({
+    blockId: block.id,
+    name: labelOf(block),
+    startsAt: block.startsAt,
+    endsAt: block.endsAt,
+    lead: index === 0,
+    underWay: block === underWay,
+    allDay: block === list,
+  }));
   const first = ordered[0];
 
   const starts = blocks
@@ -141,8 +137,7 @@ export function welcomeView({
   const ends = blocks
     .filter((block) => !isAllDayList(block))
     .map((block) => clockToMinutes(block.endsAt));
-  const from =
-    Math.floor(Math.min(nowMin, ...starts, 7 * 60) / 60) * 60;
+  const from = Math.floor(Math.min(nowMin, ...starts, 7 * 60) / 60) * 60;
   const to = Math.min(
     24 * 60,
     Math.max(WELCOME_BAR_END_MIN, Math.ceil(Math.max(from, ...ends) / 60) * 60),

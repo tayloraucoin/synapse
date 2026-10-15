@@ -263,6 +263,11 @@ export interface FixtureServer
    */
   readyGo(dateKey: string, at: string): Promise<DayRecordRecord>;
   /**
+   * Whether Ready, go was given on any date before this one (USE-43): the
+   * welcome's first go ever is derived from it; nothing is stored for it.
+   */
+  readReadiedBefore(dateKey: string): Promise<boolean>;
+  /**
    * Close the day (USE-44): the date's entry, the person's prompts (the
    * defaults when none are set) and the quote on its day.
    */
@@ -754,6 +759,14 @@ export function createFixtureServer(
       });
       records.dayRecords.push(record);
       return Promise.resolve(structuredClone(record));
+    },
+
+    readReadiedBefore(dateKey) {
+      return Promise.resolve(
+        records.dayRecords.some(
+          (row) => row.onDate < dateKey && row.readyAt !== null,
+        ),
+      );
     },
 
     readyGo(dateKey, at) {

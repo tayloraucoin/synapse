@@ -21,6 +21,7 @@ import {
   isJournalPath,
   orientRoute,
   reviewRoute,
+  todayReadyRoute,
   todayReviewRoute,
   todayRoute,
   todayScheduleRoute,
@@ -80,7 +81,8 @@ export function tabForPath(pathname: string): ShellTab | null {
   return null;
 }
 
-const FOCUSED_ROUTES = [orientRoute(), todayReviewRoute()];
+/** Orient, Review the day and the Ready, go welcome (USE-43; D-USE-39). */
+const FOCUSED_ROUTES = [orientRoute(), todayReviewRoute(), todayReadyRoute()];
 
 /** A focused screen renders with no rail and no tabs. */
 export function isFocusedPath(pathname: string): boolean {

@@ -15,6 +15,7 @@ import { NOW_FORM_SCENARIOS } from "./now-forms";
 import { NOW_SYSTEM_SCENARIOS } from "./now-system";
 import { ORIENT_SCENARIOS } from "./orient-morning";
 import { POOL_SCENARIOS } from "./pool";
+import { READY_SCENARIOS } from "./ready-welcome";
 import { REVIEW_SCENARIOS } from "./review-day";
 import { RUNNING_SCENARIOS } from "./running";
 import { SCHEDULE_SCENARIOS } from "./schedule";
@@ -87,12 +88,6 @@ export interface Scenario {
    * `?from=review`, so a past day's journal reads as Review opens it.
    */
   openedFrom?: "review";
-  /**
-   * One-time lines counted as already seen on this scenario (USE-37's rail
-   * hint and first-change line), so a capture of another state is not
-   * covered by them. Unset, a one-time line shows until its own dismissal.
-   */
-  seen?: string[];
 }
 
 export type { ProfileSheetStart };
@@ -111,12 +106,6 @@ export interface ScenarioView {
    * hides; unset shows as live.
    */
   ending?: { addRow?: false; ahead?: false };
-  /**
-   * An edit staged on load (USE-37): a swap that arrives from the Item sheet
-   * is run through `useDayEdits` when the frame opens, with its Toaster when
-   * `toast` (held until Undo, for the capture).
-   */
-  staged?: { swap: { id: string; withId: string }; toast: boolean };
 }
 
 export const DEFAULT_SCENARIO = "default";
@@ -230,6 +219,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...ADD_SCENARIOS,
   // ---- Review the day (USE-31): the Monday at 6:58, before Ready, go ----
   ...REVIEW_SCENARIOS,
+  // ---- The Ready, go welcome (USE-43): plain, first go ever, late wake, checklist day, offline ----
+  ...READY_SCENARIOS,
   // ---- The Item sheet (USE-64): a plain item, ···, at a set time, Swap ----
   ...ITEM_SHEET_SCENARIOS,
   // ---- Schedule (USE-27): during go, the marks, the checklist day, a meeting ----

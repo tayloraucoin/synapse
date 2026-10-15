@@ -30,6 +30,10 @@ import {
  * BACK TO ORIENT (USE-31; D-USE-10). Review the day's "‹ Orient" is a link
  * within the app: Orient reached so before Ready, go stays, so the morning
  * can be read again. Opened fresh, it still goes on to Review the day.
+ *
+ * BACK TO REVIEW THE DAY (USE-43; D-USE-71). The welcome's "‹ Review the
+ * day" goes back with nothing undone: Review the day reached so between
+ * Ready, go and Start stays. Opened fresh, it goes on to the welcome.
  */
 
 let shellPainted = false;
@@ -64,6 +68,7 @@ export function useDayEntryGate(here: DayEntry, dateKey: string) {
     if (failed) setDecided(here);
     else if (entry === "review" && here === "now" && byTab) setDecided(here);
     else if (entry === "review" && here === "orient" && byTab) setDecided(here);
+    else if (entry === "welcome" && here === "review" && byTab) setDecided(here);
     else if (entry !== null) setDecided(entry);
   }, [byTab, decided, entry, failed, here]);
 

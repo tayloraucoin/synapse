@@ -341,3 +341,14 @@ export {
   type UnderWay,
   type UnderWaySpan,
 } from "./planner";
+
+/* ---- Ready, go: the welcome before Start (USE-43) ---- */
+export {
+  WELCOME_BAR_END_MIN,
+  welcomeView,
+  type WelcomeBlock,
+  type WelcomeLayout,
+  type WelcomeRow,
+  type WelcomeSegment,
+  type WelcomeView,
+} from "./planner";

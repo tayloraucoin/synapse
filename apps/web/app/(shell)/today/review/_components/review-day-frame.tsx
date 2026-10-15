@@ -20,6 +20,7 @@ import {
 } from "@/lib/routes";
 import { dateTitle } from "../../_components/now/copy";
 import { useDayEntryGate } from "../../../_components/day-entry-gate";
+import { fadeNavigate } from "../../_components/fade-navigate";
 import { REVIEW_DAY_COPY as COPY } from "./copy";
 import { EmptyWork } from "./empty-work";
 import { FirstChangeLine } from "./first-change-line";
@@ -41,7 +42,8 @@ import { useReviewEdits } from "./use-review-edits";
  * at the top with nothing to scroll.
  *
  * READY, GO WRITES ONCE. The button is held while the write is out; the
- * server keeps the first `readyAt`, and the screen goes to the welcome.
+ * server keeps the first `readyAt`, and the screen cross-fades to the
+ * welcome (USE-43).
  * After that the entry tree sends this path on (D-USE-71).
  *
  * Loading, error and offline are the system-states ticket's. The edits
@@ -72,11 +74,15 @@ export function ReviewDayFrame() {
   /** A path with this screen's query kept, so `?state=` travels. */
   const kept = (path: string) => `${path}${window.location.search}`;
 
-  function onReadyGo() {
+  function onReadyGo(event: React.MouseEvent) {
     if (sent.current) return;
     sent.current = true;
+    // From the keyboard the welcome lands with no motion (C-P11).
+    const keyboard = event.detail === 0;
     readyGo.mutate(dateKey, {
-      onSuccess: () => router.push(kept(todayReadyRoute())),
+      // The welcome cross-fades in (USE-43; D-USE-71).
+      onSuccess: () =>
+        fadeNavigate(() => router.push(kept(todayReadyRoute())), { keyboard }),
       // Not written: the button comes back (offline is its own ticket).
       onError: () => {
         sent.current = false;
