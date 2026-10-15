@@ -42,6 +42,14 @@ export {
   ChevronUpIcon as CollapseIcon,
   InfoIcon as NoticeIcon,
 } from "lucide-react";
+/** + Add's glyphs (USE-51): the button and its four choices. */
+export {
+  CalendarIcon as AddEventIcon,
+  CaptionsIcon as TaskToTierIcon,
+  LayersIcon as FromPoolIcon,
+  PlusIcon as AddIcon,
+  SquareCheckIcon as AddTodoIcon,
+} from "lucide-react";
 /** The account's glyphs (USE-83): the avatar menu's rows and the install steps. */
 export {
   CalendarRangeIcon as SetMyDaysIcon,

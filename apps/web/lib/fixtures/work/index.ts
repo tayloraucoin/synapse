@@ -25,6 +25,7 @@ import {
 } from "../planner";
 import type { Journal, WriteLog } from "../planner/journal";
 import type { FixtureRecords } from "../records";
+import { writeTask, type CreateTaskInput } from "./create-task";
 import { readPool } from "./read-pool";
 
 /**
@@ -76,6 +77,8 @@ export interface WorkServer {
   backToPool(input: { workItemId: string }): Promise<PlannerWrite>;
   /** Archived here; the Linear issue stays as it is. */
   removeFromSynapse(input: { workItemId: string }): Promise<PlannerWrite>;
+  /** New task (USE-51): the item, then a slot a picked day; `id` is the item. */
+  createTask(input: CreateTaskInput): Promise<PlannerWrite>;
   /** D-USE-96: the one client order, top first. */
   setClientOrder(
     input: z.input<typeof clientOrderInput>,
@@ -317,6 +320,10 @@ export function createWorkServer({
         }
         return { id: workItemId };
       });
+    },
+
+    createTask(raw) {
+      return write((journal) => writeTask(journal, records, raw, stamp()));
     },
 
     setClientOrder(raw) {

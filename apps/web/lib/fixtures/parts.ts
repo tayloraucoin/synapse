@@ -6,6 +6,7 @@ import {
   WorkRowForms,
 } from "./day-parts";
 import { AccountPart } from "./account-parts";
+import { AddPart, type AddPartState } from "./add-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { NowPart, type NowPartState } from "./now-parts";
 import { OrientPart, type OrientPartState } from "./orient-parts";
@@ -119,4 +120,13 @@ for (const state of [
   "todos-offline",
 ] satisfies TodosTrayPartState[]) {
   registerPart(state, () => createElement(TodosTrayPart, { state })); // USE-19
+}
+// USE-51: + Add and New task, by their scenario names.
+for (const state of [
+  "add-sheet",
+  "add-menu",
+  "add-new-task",
+  "add-save-to-the-pool",
+] satisfies AddPartState[]) {
+  registerPart(state, () => createElement(AddPart, { state })); // USE-51
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { PlannerWrite } from "@/lib/fixtures/planner";
+import { PlannerRefusal, type PlannerWrite } from "@/lib/fixtures/planner";
 import type { WorkServer } from "@/lib/fixtures/work";
 import { useDataSource } from "./source";
 import { usePlannerWrites } from "./use-planner-writes";
@@ -10,8 +10,8 @@ import { todayQueryKey } from "./use-today";
 import { weekQueryKey } from "./use-week";
 
 /**
- * The work writes (USE-55; USE-51 and USE-52 add `createTask` and
- * `placeIssues` here): place, move and unplace a session, change a tier for
+ * The work writes (USE-55; USE-51 adds `createTask`, USE-52 `placeIssues`):
+ * New task, place, move and unplace a session, change a tier for
  * this session or all, edit the item, mark the task done, send it back to the
  * pool, remove it from Synapse and set client order. Each is a mutation that
  * invalidates the day, the week and the pool; its Undo is USE-36's `undo`.
@@ -63,10 +63,17 @@ export function useWorkWrites() {
     backToPool: write("backToPool"),
     removeFromSynapse: write("removeFromSynapse"),
     setClientOrder: write("setClientOrder"),
+    /** New task: one work item, then a slot a picked day; no days is the pool. */
+    createTask: write("createTask"),
     /** A write's Undo, from its `PlannerWrite.undo`: USE-36's, then the pool reads again. */
     undo: (token: PlannerWrite["undo"]) =>
       planner.undo(token).finally(invalidate),
     isPending: mutation.isPending,
     error: mutation.error,
   };
+}
+
+/** A refusal's words, for the form to show; null for any other failure. */
+export function refusalWords(error: unknown): string | null {
+  return error instanceof PlannerRefusal ? error.message : null;
 }

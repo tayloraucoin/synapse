@@ -2,6 +2,7 @@ import type { ProfileSheetStart } from "@/lib/data/use-profile";
 import type { InstallOverride } from "@/lib/pwa/use-install-state";
 import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
+import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { ORIENT_SCENARIOS } from "./orient-morning";
@@ -138,6 +139,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...TODOS_SCENARIOS,
   // ---- The pool and the work writes (USE-55): clients on, on this week ----
   ...POOL_SCENARIOS,
+  // ---- + Add and New task (USE-51): Monday during Work, and the pool's New task ----
+  ...ADD_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {
