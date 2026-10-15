@@ -1,4 +1,10 @@
-import { addDays, checkEventTime, dayWindow } from "@syn/utils";
+import {
+  addDays,
+  checkEventTime,
+  dayWindow,
+  nextTodoDue,
+  resolveDayKey,
+} from "@syn/utils";
 import {
   dayRecordRecord,
   displayNameSchema,
@@ -240,6 +246,14 @@ export interface FixtureServer
   readTodos(dateKey: string): Promise<TodosRecords>;
   /** A new to-do (`todoInput`). */
   writeTodo(input: TodoInput): Promise<TodoRecord>;
+  /**
+   * The To-do sheet's change (USE-28): only the keys sent change, checked
+   * against `todoInput` as the to-do will be after it.
+   */
+  updateTodo(input: {
+    id: string;
+    patch: Partial<TodoInput>;
+  }): Promise<TodoRecord>;
   /** A to-do's box: `doneAt` set, or cleared by uncheck. */
   writeTodoDone(input: {
     id: string;
@@ -800,7 +814,60 @@ export function createFixtureServer(
           new TodoWriteRefusal("unknown", "No to-do with that id."),
         );
       }
+      const wasDone = row.doneAt !== null;
       row.doneAt = doneAt;
+      row.updatedAt = now().toISOString();
+      // A repeating one checked comes back on its next due date as a new
+      // to-do; the done one stays done (repeats-open.md). The rule moves to
+      // the new one, so the series has one open to-do and one live rule.
+      if (doneAt !== null && !wasDone && row.rrule !== null) {
+        const due = nextTodoDue({
+          rrule: row.rrule,
+          onDate: row.onDate,
+          checkedOn: resolveDayKey(
+            new Date(doneAt),
+            records.timeZone,
+            records.dayCloseTime,
+          ),
+        });
+        if (due !== null) {
+          records.todos.push(
+            todoRecord.parse({
+              ...row,
+              id: crypto.randomUUID(),
+              createdAt: row.updatedAt,
+              onDate: due,
+              remindOn: row.remindAt === null ? null : due,
+              doneAt: null,
+            }),
+          );
+          row.rrule = null;
+        }
+      }
+      return Promise.resolve(structuredClone(todoRecord.parse(row)));
+    },
+
+    updateTodo({ id, patch }) {
+      // Offline, the to-dos write as online here; their persistence is wave 3's.
+      if (failNext.delete(id)) return Promise.reject(new FixtureWriteError());
+      const row = records.todos.find((todo) => todo.id === id);
+      if (!row) {
+        return Promise.reject(
+          new TodoWriteRefusal("unknown", "No to-do with that id."),
+        );
+      }
+      const parsed = todoInput.safeParse({ ...row, ...patch });
+      if (!parsed.success) {
+        return Promise.reject(
+          new TodoWriteRefusal(
+            "invalid",
+            parsed.error.issues[0]?.message ?? "Invalid to-do.",
+          ),
+        );
+      }
+      for (const key of Object.keys(patch) as (keyof TodoInput)[]) {
+        Object.assign(row, { [key]: parsed.data[key] ?? null });
+      }
       row.updatedAt = now().toISOString();
       return Promise.resolve(structuredClone(todoRecord.parse(row)));
     },

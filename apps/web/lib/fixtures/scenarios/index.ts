@@ -1,4 +1,5 @@
 import type { ProfileSheetStart } from "@/lib/data/use-profile";
+import type { ReminderDevice } from "@/lib/pwa/reminder-availability";
 import type { InstallOverride } from "@/lib/pwa/use-install-state";
 import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
@@ -15,6 +16,7 @@ import { POOL_SCENARIOS } from "./pool";
 import { REVIEW_SCENARIOS } from "./review-day";
 import { RUNNING_SCENARIOS } from "./running";
 import { SET_UP_SCENARIOS } from "./set-up";
+import { TODO_SHEET_SCENARIOS } from "./todo-sheet";
 import { TODOS_SCENARIOS } from "./todos-tray";
 
 /**
@@ -49,6 +51,8 @@ export interface Scenario {
   offline?: boolean;
   /** Stands the install check on a device for a capture (USE-83); unset, the device's own. */
   install?: InstallOverride;
+  /** Stands the reminder check on a device for a capture (USE-28); unset, the device's own. */
+  device?: Partial<ReminderDevice>;
   /** A region's own read waits or fails while the day reads (USE-19: the to-dos). */
   regions?: { todos?: "loading" | "error" };
   /** Record ids whose next write rejects once, then goes through (USE-19). */
@@ -202,6 +206,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...REVIEW_SCENARIOS,
   // ---- The Item sheet (USE-64): a plain item, ···, at a set time, Swap ----
   ...ITEM_SHEET_SCENARIOS,
+  // ---- The To-do sheet (USE-28): its six drawn states, a failed change, offline ----
+  ...TODO_SHEET_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {

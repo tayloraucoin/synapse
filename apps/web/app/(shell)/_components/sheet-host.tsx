@@ -15,14 +15,16 @@
  * beneath once the device has been read (install-sheet/states/installed.md).
  */
 import * as React from "react";
-import { useQueryState } from "nuqs";
+import { useRouter } from "next/navigation";
+import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 import { useIsSplit } from "@syn/ui";
 import { InstallSheet, ProfileSheet } from "@/components/account";
 import { ItemSheet } from "@/components/planner/item-sheet";
 import { MealTopicsSheet } from "@/components/planner/meal-topics-sheet";
+import { TodoSheet } from "@/components/planner/todo-sheet";
 import { useDataSource } from "@/lib/data/source";
 import { isInstallOffered, useInstallState } from "@/lib/pwa/use-install-state";
-import type { SheetName } from "@/lib/routes";
+import { settingsRoute, type SheetName } from "@/lib/routes";
 
 type OpenerRef = React.RefObject<HTMLElement | null>;
 
@@ -59,6 +61,11 @@ export function useOpenSheet(): (
 
 export function SheetHost() {
   const [sheet, setSheet] = useQueryState("sheet");
+  const [todo, setTodo] = useQueryStates({
+    id: parseAsString,
+    new: parseAsString,
+  });
+  const router = useRouter();
   const opener = React.useContext(SheetOpenerContext);
   const { scenario } = useDataSource();
   const install = useInstallState(scenario.install);
@@ -89,6 +96,16 @@ export function SheetHost() {
     [setSheet],
   );
 
+  // The To-do sheet's own params go with it.
+  const closeTodo = React.useCallback(
+    (open: boolean) => {
+      if (open) return;
+      void setSheet(null);
+      void setTodo({ id: null, new: null });
+    },
+    [setSheet, setTodo],
+  );
+
   return (
     <>
       <InstallSheet
@@ -110,6 +127,19 @@ export function SheetHost() {
       <ItemSheet
         open={sheet === "item"}
         onOpenChange={close}
+        returnFocusRef={opener ?? undefined}
+      />
+      <TodoSheet
+        open={sheet === "todo" && (todo.id !== null || todo.new === "1")}
+        onOpenChange={closeTodo}
+        todoId={todo.id}
+        onCreated={(id) => void setTodo({ id, new: null })}
+        onHow={(element) => {
+          if (opener !== null) opener.current = element;
+          void setTodo({ id: null, new: null });
+          void setSheet("install");
+        }}
+        onSettings={() => router.push(settingsRoute("notifications"))}
         returnFocusRef={opener ?? undefined}
       />
     </>

@@ -15,6 +15,8 @@ import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { OrientPart, type OrientPartState } from "./orient-parts";
 import { ReviewPart, type ReviewPartState } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
+import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
+import { TodoSheetPart } from "./todo-sheet-parts";
 import {
   TodosNotificationPart,
   TodosTrayPart,
@@ -123,6 +125,10 @@ for (const state of [
   "profile-not-saved",
 ]) {
   registerPart(state, () => createElement(AccountPart)); // USE-84
+}
+// USE-28: the To-do sheet over Now, taken with `&sheet=todo&id=`.
+for (const state of Object.keys(TODO_SHEET_SCENARIOS)) {
+  registerPart(state, () => createElement(TodoSheetPart)); // USE-28
 }
 // USE-12: Orient's states, `orient-<state>` (the /orient scenarios).
 for (const state of [

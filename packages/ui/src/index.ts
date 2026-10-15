@@ -91,6 +91,11 @@ export {
   ChevronLeftIcon as BackIcon,
   CircleAlertIcon as NotSavedIcon,
 } from "lucide-react";
+/** The To-do sheet's reminder lines (USE-28): not installed, notifications off. */
+export {
+  BellOffIcon as NotificationsOffIcon,
+  SmartphoneIcon as InstallNeededIcon,
+} from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
 export { ThemeProvider } from "./providers/theme-provider";

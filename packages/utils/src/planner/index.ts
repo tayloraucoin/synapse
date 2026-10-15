@@ -25,6 +25,15 @@ export {
   type RepeatRule,
 } from "./rrule";
 export {
+  nextDue,
+  nextTodoDue,
+  ordinal,
+  ruleBody,
+  ruleStart,
+  todoRepeatOptions,
+  type TodoRepeatOption,
+} from "./todo-repeat";
+export {
   readDay,
   type DayBlock,
   type DayBlockChange,

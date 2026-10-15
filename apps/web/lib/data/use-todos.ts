@@ -14,6 +14,7 @@ import {
   type BlockChangeRecord,
   type BlockRecord,
   type SlotRecord,
+  type TodoInput,
   type TodoRecord,
 } from "@syn/validators";
 import type { FixtureServer } from "@/lib/fixtures/server";
@@ -164,6 +165,21 @@ export function useTodos(dateKey: string) {
     add: (title: string) => addMutation.mutateAsync(title),
     check: (id: string) => box(id, true),
     uncheck: (id: string) => box(id, false),
+    /**
+     * The To-do sheet's change (USE-28): shown at once, written once; a
+     * failure puts the to-do back as it was. True when it saved.
+     */
+    update: async (id: string, patch: Partial<TodoInput>) => {
+      const saved = await writeTodoPatch({
+        queryClient,
+        server: source.server,
+        queryKey,
+        id,
+        patch,
+      });
+      if (saved) settle();
+      return saved;
+    },
     /** A failed box's Try again: the same write once more. */
     retryWrite: async (id: string) => {
       const checked = failed.get(id);
@@ -175,6 +191,65 @@ export function useTodos(dateKey: string) {
       return queryClient.refetchQueries({ queryKey });
     },
   };
+}
+
+/**
+ * One to-do as stored, for the To-do sheet (USE-28): the tray's own query
+ * read raw, so the sheet and the tray never disagree. Undefined until read;
+ * null when no to-do has that id.
+ */
+export function useTodoRecord(dateKey: string, id: string | null) {
+  const source = useDataSource();
+  return useQuery<TodosRecords, Error, TodoRecord | null>({
+    queryKey: todosQueryKey(source.scenario.name, dateKey),
+    queryFn: () => source.server.readTodos(dateKey),
+    select: (records) => records.todos.find((todo) => todo.id === id) ?? null,
+    enabled: id !== null,
+    retry: false,
+  });
+}
+
+/**
+ * A sheet field's write: the cache shows it at once, the write follows, and
+ * a failure puts the to-do back as it was. True when it saved.
+ */
+export async function writeTodoPatch(input: {
+  queryClient: QueryClient;
+  server: Pick<FixtureServer, "updateTodo">;
+  queryKey: readonly unknown[];
+  id: string;
+  patch: Partial<TodoInput>;
+}): Promise<boolean> {
+  const { queryClient, server, queryKey, id, patch } = input;
+  await queryClient.cancelQueries({ queryKey });
+  const before = queryClient.getQueryData<TodosRecords>(queryKey);
+  queryClient.setQueryData<TodosRecords>(queryKey, (records) =>
+    records
+      ? {
+          ...records,
+          todos: records.todos.map((todo) =>
+            todo.id === id
+              ? { ...todo, ...(patch as Partial<TodoRecord>) }
+              : todo,
+          ),
+        }
+      : records,
+  );
+  try {
+    const saved = await server.updateTodo({ id, patch });
+    queryClient.setQueryData<TodosRecords>(queryKey, (records) =>
+      records
+        ? {
+            ...records,
+            todos: records.todos.map((todo) => (todo.id === id ? saved : todo)),
+          }
+        : records,
+    );
+    return true;
+  } catch {
+    if (before) queryClient.setQueryData(queryKey, before);
+    return false;
+  }
 }
 
 /**

@@ -144,6 +144,16 @@ export {
   type RepeatRule,
 } from "./planner";
 
+/* ---- a to-do's Repeats and its next due date (USE-28) ---- */
+export {
+  nextDue,
+  nextTodoDue,
+  ruleBody,
+  ruleStart,
+  todoRepeatOptions,
+  type TodoRepeatOption,
+} from "./planner";
+
 /* ---- set-up arithmetic: new blocks, re-flow, the usual week (USE-33) ---- */
 export {
   boundsEdge,

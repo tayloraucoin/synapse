@@ -159,9 +159,12 @@ export function daysRoute(
   return search ? `/days?${search}` : "/days";
 }
 
-/** Settings (USE-85 builds it): the avatar menu's last row. */
-export function settingsRoute(): string {
-  return "/settings";
+/**
+ * Settings (USE-85 builds it): the avatar menu's last row. `section` opens
+ * it at one part, as the To-do sheet's Settings does at Notifications.
+ */
+export function settingsRoute(section?: "notifications"): string {
+  return section ? `/settings#${section}` : "/settings";
 }
 
 /**
@@ -193,6 +196,26 @@ export function itemSheetRoute(
   query.set("id", id);
   if (view) query.set("view", view);
   else query.delete("view");
+  return `${base}?${query.toString()}`;
+}
+
+/**
+ * The To-do sheet over `path` (USE-28): one to-do by `id`, or a new one
+ * (`&new=1`, "+ Add" › To-do) created once a title is typed.
+ */
+export function todoSheetRoute(
+  path: string,
+  target: { id: string } | { new: true },
+): string {
+  const [base = "", search = ""] = sheetRoute(path, "todo").split("?");
+  const query = new URLSearchParams(search);
+  if ("id" in target) {
+    query.set("id", target.id);
+    query.delete("new");
+  } else {
+    query.set("new", "1");
+    query.delete("id");
+  }
   return `${base}?${query.toString()}`;
 }
 
