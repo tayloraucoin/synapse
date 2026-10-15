@@ -172,6 +172,13 @@ export {
 } from "./welcome";
 export { laterTarget, type LaterBlock, type LaterTarget } from "./later";
 export {
+  doNowLines,
+  slideAfter,
+  type DoNowItem,
+  type DoNowLine,
+  type SlideChange,
+} from "./do-now";
+export {
   tomorrowPeek,
   type PeekOccurrence,
   type TomorrowPeek,

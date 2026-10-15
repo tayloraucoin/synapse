@@ -118,6 +118,19 @@ export const NOW_COPY = {
     movedTo: (block: string) => `Moved to the end of ${block}`,
     undo: "Undo",
     undoName: (item: string) => `Undo move of ${item}`,
+    /** Do now (USE-26): the length, and the consequence before the tap. */
+    withLength: (item: string, lengthMin: number | null) =>
+      lengthMin === null ? item : `${item} · ${lengthMin} min`,
+    fitsBy: (clock: string) => `Fits by ${clockLabel(clock)}`,
+    wouldStart: (block: string, clock: string) =>
+      `${block} would start ${clockLabel(clock)}`,
+    /** The day's last block, not drawn (D-USE-74) [ASSUMPTION]. */
+    wouldEnd: (block: string, clock: string) =>
+      `${block} would end ${clockLabel(clock)}`,
+    doNow: "Do now",
+    doNowName: (item: string, consequence: string) =>
+      `Do ${item} now, ${consequence}`,
+    announceDoNow: (item: string, block: string) => `${block}. ${item} is now.`,
     nothingAfter: "Nothing after this today.",
     announce: (
       block: string,

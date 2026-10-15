@@ -440,6 +440,7 @@ export function NowScreen() {
       items.map((item) => ({
         id: item.id,
         title: item.title,
+        lengthMin: item.lengthMin,
         done: item.done,
         row: {
           sortOrder: item.sortOrder,
@@ -528,6 +529,9 @@ export function NowScreen() {
           <NowCloseCard
             closing={now.closing}
             blockClose={blockClose}
+            now={source.now()}
+            onDoNow={setChosenId}
+            onLifted={() => setLiftFocus(true)}
             onAnnounce={setAnnouncement}
           />
         </section>

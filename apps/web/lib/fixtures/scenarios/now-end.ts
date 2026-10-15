@@ -243,6 +243,14 @@ export const NOW_END_SCENARIOS: Record<string, () => Scenario> = {
     mode: "ready",
     view: { open: `close-open:${NOW_IDS.blocks.wellness}` },
   }),
+  // USE-26: the open list with Do now, at 7:45 so Cold bath runs past 8:00.
+  "not-done-do-now": () => ({
+    name: "not-done-do-now",
+    now: onNowDay("07:45"),
+    records: notDoneRecords(false),
+    mode: "ready",
+    view: { open: `close-open:${NOW_IDS.blocks.wellness}` },
+  }),
   "last-block": () => ({
     name: "last-block",
     now: onNowDay("21:40"),

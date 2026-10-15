@@ -99,6 +99,7 @@ for (const state of [
   "empty-no-blocks", // USE-20
   "not-done-closed", // USE-25
   "not-done-open", // USE-25
+  "not-done-do-now", // USE-26
   "last-block", // USE-25
   "all-done", // USE-25
 ] satisfies NowPartState[]) {

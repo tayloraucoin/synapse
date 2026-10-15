@@ -1,4 +1,13 @@
-import { laterTarget, type LaterTarget } from "@syn/utils";
+import {
+  clockFromMinutes,
+  doNowLines,
+  instantToWallClockMinutes,
+  laterTarget,
+  slideAfter,
+  type DoNowLine,
+  type LaterTarget,
+  type SlideChange,
+} from "@syn/utils";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import type { Today } from "./derive-today";
 import type { NowNextBlock } from "./now-end";
@@ -17,6 +26,7 @@ export interface CloseSpan {
   items: readonly {
     id: string;
     title: string;
+    lengthMin: number | null;
     done: boolean;
     sortOrder: number;
     blockItemId: string | null;
@@ -32,6 +42,8 @@ export interface CloseItem {
   /** The row's id on Now: the set item's, or the slot's for a pulled row. */
   id: string;
   title: string;
+  /** The planned length: Do now's consequence counts it. */
+  lengthMin: number | null;
   /** Left as it was; moved by Later; or Leave tapped (the row goes). */
   state: "left" | "moved" | "leave";
   /** "Training": where Later put it, while it is moved. */
@@ -53,6 +65,17 @@ export interface NowClosing {
    * item Later moved out today. The card's own list once it is acted on.
    */
   left: CloseItem[];
+  /** What Do now's lines and slide are read from (USE-26). */
+  doNow: {
+    dateKey: string;
+    /** The closed block's end today. */
+    end: Date;
+    /** The first block of Next: the one "would start" names. */
+    next: { name: string; start: Date } | null;
+    /** The date's blocks as they run today, for the slide. */
+    blocks: readonly Occurrence[];
+    timeZone: string;
+  };
 }
 
 /** How Later is undone: exactly what it wrote, put back. */
@@ -92,18 +115,18 @@ export function deriveClosing(
   const closed = spans.find((span) => span.occurrence.block.id === blockId);
   if (!closed) return null;
   const after = Math.max(now.getTime(), closed.start.getTime());
-  const next = spans
+  const following = spans
     .filter(
       (span) => span !== closed && !span.allDay && span.start.getTime() > after,
     )
-    .slice(0, 2)
-    .map(({ occurrence }) => ({
-      id: occurrence.block.id,
-      name: occurrence.block.name,
-      kind: occurrence.block.kind,
-      startsAt: occurrence.startsAt,
-      endsAt: occurrence.endsAt,
-    }));
+    .slice(0, 2);
+  const next = following.map(({ occurrence }) => ({
+    id: occurrence.block.id,
+    name: occurrence.block.name,
+    kind: occurrence.block.kind,
+    startsAt: occurrence.startsAt,
+    endsAt: occurrence.endsAt,
+  }));
   const target = laterTarget({
     blocks: spans.map((span) => ({
       id: span.occurrence.block.id,
@@ -129,6 +152,7 @@ export function deriveClosing(
         {
           id: item.id,
           title: item.title,
+          lengthMin: item.lengthMin,
           state: "moved",
           movedTo: names.get(slot.blockId) ?? null,
           undo: { kind: "remove", slotId: slot.id },
@@ -156,6 +180,7 @@ export function deriveClosing(
         .map((item): CloseItem => ({
           id: item.id,
           title: item.title,
+          lengthMin: item.lengthMin,
           state: "left",
           movedTo: null,
           undo: null,
@@ -167,7 +192,84 @@ export function deriveClosing(
         })),
       ...moved,
     ],
+    doNow: {
+      dateKey: records.date,
+      end: closed.end,
+      next: following[0]
+        ? {
+            name: following[0].occurrence.block.name,
+            start: following[0].start,
+          }
+        : null,
+      blocks: today.occurrences.blocks,
+      timeZone: records.timeZone,
+    },
   };
+}
+
+/**
+ * Do now on one item left (USE-26; D-USE-72): its consequence and what the
+ * tap writes, from the same pure functions. Past the block's end the block
+ * extends and the day slides; fitting before it, nothing is written.
+ */
+export interface DoNowPlan {
+  line: DoNowLine;
+  /** "7:55" or "8:05": the line's time, in the day's zone. */
+  at: string;
+  changes: SlideChange[];
+}
+
+/**
+ * Each item still left on the card, in its order, counting the items above
+ * it as done now too; recomputed whenever the list changes. An item whose
+ * slide would push a block past 24:00 gets no plan, so no Do now
+ * [ASSUMPTION].
+ */
+export function doNowPlans(
+  closing: NowClosing,
+  items: readonly CloseItem[],
+  now: Date,
+): Map<string, DoNowPlan> {
+  const { doNow } = closing;
+  const left = items.filter((item) => item.state === "left");
+  const plans = new Map<string, DoNowPlan>();
+  for (const line of doNowLines({
+    block: { end: doNow.end },
+    left,
+    next: doNow.next,
+    now,
+  })) {
+    const time =
+      "fitsBy" in line
+        ? line.fitsBy
+        : "nextStartsAt" in line
+          ? line.nextStartsAt
+          : line.endsAt;
+    const changes =
+      "fitsBy" in line
+        ? []
+        : slideAfter({
+            blocks: doNow.blocks,
+            fromBlockId: closing.block.id,
+            overrunMin: line.overrunMin,
+            dateKey: doNow.dateKey,
+          });
+    if (changes === null) continue;
+    plans.set(line.id, {
+      line,
+      at: clockFromMinutes(instantToWallClockMinutes(time, doNow.timeZone)),
+      changes,
+    });
+  }
+  return plans;
+}
+
+/** Do now's write: the slide's dated block changes, or nothing at all. */
+export async function writeDoNow(
+  server: Pick<FixtureServer, "writeBlockChange">,
+  plan: DoNowPlan,
+): Promise<void> {
+  for (const change of plan.changes) await server.writeBlockChange(change);
 }
 
 /** The server calls Later uses, so a test drives the same code. */

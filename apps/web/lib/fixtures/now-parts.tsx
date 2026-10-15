@@ -34,6 +34,7 @@ export type NowPartState =
   // USE-25: Block complete with items left, the last block, all done.
   | "not-done-closed"
   | "not-done-open"
+  | "not-done-do-now"
   | "last-block"
   | "all-done";
 

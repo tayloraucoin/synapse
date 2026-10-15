@@ -5,8 +5,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   closesWithCard,
   undoLater as undoLaterWrite,
+  writeDoNow,
   writeLater,
   type CloseItem,
+  type DoNowPlan,
   type NowClosing,
 } from "./block-close";
 import { useDataSource } from "./source";
@@ -120,7 +122,7 @@ export function useBlockClose(
      */
     complete(
       blockId: string,
-      items: readonly (Pick<CloseItem, "id" | "title" | "row"> & {
+      items: readonly (Pick<CloseItem, "id" | "title" | "lengthMin" | "row"> & {
         done: boolean;
       })[],
     ): boolean {
@@ -130,6 +132,7 @@ export function useBlockClose(
         .map((item): CloseItem => ({
           id: item.id,
           title: item.title,
+          lengthMin: item.lengthMin,
           state: "left",
           movedTo: null,
           undo: null,
@@ -168,6 +171,22 @@ export function useBlockClose(
       if (item.undo === null) return;
       await undoLaterWrite(source.server, item.undo);
       setItem(closing, item.id, { state: "left", movedTo: null, undo: null });
+      await settle();
+    },
+    /**
+     * Do now (USE-26; D-USE-72): the slide the line named, when it said
+     * "would start", then the card goes and the block reopens in focus. The
+     * screen makes the item current before this, so it lifts as the card
+     * leaves.
+     */
+    async doNow(closing: NowClosing, plan: DoNowPlan) {
+      await writeDoNow(source.server, plan);
+      const blockId = closing.block.id;
+      put(key, {
+        closed: current().closed.filter((id) => id !== blockId),
+        card: null,
+      });
+      blockFocus.start(blockId);
       await settle();
     },
     /** Leave: nothing is written; the row leaves the list. */

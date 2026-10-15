@@ -49,6 +49,9 @@ Phone 402 × 874. As [`not-done-closed.md`](not-done-closed.md) down to Start (t
 - D-USE-70: Later puts the item at the end of the next block of the same kind today, else the end of the next block.
 - [ASSUMPTION] Each consequence counts the items above it as done now too: Meditate alone ends 7:55; Cold bath after it ends 8:05, so Training would start 8:05. Doing one item recomputes the others' lines.
 - [ASSUMPTION] "Later" is round 1's "Move to later", shortened to fit three buttons; the words wait for Gloss.
+- [ASSUMPTION] (USE-26) The lines count from the current minute, as Now's clock reads it, so seconds never tip a line; the overrun is whole minutes.
+- [ASSUMPTION] (USE-26) The day's last block, not drawn: past its end the line reads "<Block> would end <time>" and Do now extends it. An item whose slide would carry a block past 24:00 has no Do now.
+- [ASSUMPTION] (USE-26) After Do now, a polite "Wellness. Cold bath is now." and focus on the lifted card.
 
 ## Widths
 

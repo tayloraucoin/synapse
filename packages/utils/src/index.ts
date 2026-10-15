@@ -321,6 +321,15 @@ export {
 /* ---- Later from a closed block: where an item left goes (USE-25) ---- */
 export { laterTarget, type LaterBlock, type LaterTarget } from "./planner";
 
+/* ---- Do now from a closed block: its consequence and slide (USE-26) ---- */
+export {
+  doNowLines,
+  slideAfter,
+  type DoNowItem,
+  type DoNowLine,
+  type SlideChange,
+} from "./planner";
+
 /* ---- Close the day: the Tomorrow peek (USE-44) ---- */
 export {
   tomorrowPeek,

@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { BLOCK_HUE } from "@/components/planner/block-hue";
 import { CloseCard, NextRows } from "@/components/planner/close-card";
 import { NotDoneList } from "@/components/planner/not-done-list";
-import type { NowClosing } from "@/lib/data/block-close";
+import {
+  doNowPlans,
+  type DoNowPlan,
+  type NowClosing,
+} from "@/lib/data/block-close";
 import type { useBlockClose } from "@/lib/data/use-block-close";
 import { todayScheduleRoute } from "@/lib/routes";
 import { clockLabel, NOW_COPY } from "./copy";
@@ -24,15 +28,25 @@ export const LAST_BLOCK_PAUSE_MS = 4000;
  * Block complete with items left (USE-25): the close card in the block's
  * place on Now, its list the close's own. Start <next> and × both put the
  * next block in focus; after the last block, × or the pause leaves Now
- * empty. Undo stays on a moved row until the card closes.
+ * empty. Undo stays on a moved row until the card closes. Do now (USE-26)
+ * reopens the block with the item current, the line's slide written first.
  */
 export function NowCloseCard({
   closing,
   blockClose,
+  now,
+  onDoNow,
+  onLifted,
   onAnnounce,
 }: {
   closing: NowClosing;
   blockClose: ReturnType<typeof useBlockClose>;
+  /** The minute the lines are counted from. */
+  now: Date;
+  /** Makes the item current; the card then goes. */
+  onDoNow: (itemId: string) => void;
+  /** The block is back on Now with the item lifted: focus goes to it. */
+  onLifted: () => void;
   onAnnounce: (words: string) => void;
 }) {
   const router = useRouter();
@@ -62,6 +76,14 @@ export function NowCloseCard({
   const items = blockClose.itemsOf(closing);
   const shown = items.filter((item) => item.state !== "leave");
   const target = closing.later;
+  // Each line counts the items above it; the tap writes what it says.
+  const plans = doNowPlans(closing, items, now);
+  const consequence = (plan: DoNowPlan) =>
+    "fitsBy" in plan.line
+      ? COPY.fitsBy(plan.at)
+      : "nextStartsAt" in plan.line && closing.doNow.next
+        ? COPY.wouldStart(closing.doNow.next.name, plan.at)
+        : COPY.wouldEnd(closing.block.name, plan.at);
 
   return (
     <div
@@ -118,42 +140,72 @@ export function NowCloseCard({
                 onOpenChange: blockClose.toggle,
                 list: (
                   <NotDoneList
-                    rows={shown.map((item) => ({
-                      id: item.id,
-                      title: item.title,
-                      movedLine:
-                        item.state === "moved" && item.movedTo
-                          ? COPY.movedTo(item.movedTo)
-                          : null,
-                      later: target
-                        ? {
-                            label: COPY.later,
-                            name: COPY.laterName(item.title),
-                            onPress: () => {
-                              void blockClose
-                                .later(item, closing)
-                                .then(() =>
-                                  onAnnounce(
-                                    COPY.announceMoved(
-                                      item.title,
-                                      target.blockName,
+                    rows={shown.map((item) => {
+                      const plan = plans.get(item.id);
+                      const line = plan ? consequence(plan) : null;
+                      const moved = item.state === "moved";
+                      return {
+                        id: item.id,
+                        title: moved
+                          ? item.title
+                          : COPY.withLength(item.title, item.lengthMin),
+                        movedLine:
+                          moved && item.movedTo
+                            ? COPY.movedTo(item.movedTo)
+                            : null,
+                        consequence: moved ? null : line,
+                        doNow:
+                          plan && line
+                            ? {
+                                label: COPY.doNow,
+                                name: COPY.doNowName(item.title, line),
+                                onPress: () => {
+                                  onDoNow(item.id);
+                                  void blockClose
+                                    .doNow(closing, plan)
+                                    .then(() => {
+                                      onAnnounce(
+                                        COPY.announceDoNow(
+                                          item.title,
+                                          closing.block.name,
+                                        ),
+                                      );
+                                      onLifted();
+                                    });
+                                },
+                              }
+                            : null,
+                        later: target
+                          ? {
+                              label: COPY.later,
+                              name: COPY.laterName(item.title),
+                              onPress: () => {
+                                void blockClose
+                                  .later(item, closing)
+                                  .then(() =>
+                                    onAnnounce(
+                                      COPY.announceMoved(
+                                        item.title,
+                                        target.blockName,
+                                      ),
                                     ),
-                                  ),
-                                );
-                            },
-                          }
-                        : null,
-                      leave: {
-                        label: COPY.leave,
-                        name: COPY.leaveName(item.title),
-                        onPress: () => blockClose.leave(item, closing),
-                      },
-                      undo: {
-                        label: COPY.undo,
-                        name: COPY.undoName(item.title),
-                        onPress: () => void blockClose.undoLater(item, closing),
-                      },
-                    }))}
+                                  );
+                              },
+                            }
+                          : null,
+                        leave: {
+                          label: COPY.leave,
+                          name: COPY.leaveName(item.title),
+                          onPress: () => blockClose.leave(item, closing),
+                        },
+                        undo: {
+                          label: COPY.undo,
+                          name: COPY.undoName(item.title),
+                          onPress: () =>
+                            void blockClose.undoLater(item, closing),
+                        },
+                      };
+                    })}
                   />
                 ),
               }
