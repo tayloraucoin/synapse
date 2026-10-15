@@ -1,6 +1,6 @@
 /**
  * Avatar — the account mark: the header button (28px), the rail footer, the
- * avatar menu's Who (40px) and the profile (64px). Official spec §9.8; USE's
+ * avatar menu's Who (40px) and the Profile sheet (96px, USE-84). Official spec §9.8; USE's
  * account (D-USE-37, N2).
  *
  * There are no status dots, no presence, and no group — Synapse is a
@@ -27,13 +27,14 @@ import { Avatar as AvatarPrimitive } from "radix-ui";
 
 import { cn } from "../../../lib/cn";
 
-export type AvatarSize = 28 | 32 | 40 | 64;
+export type AvatarSize = 28 | 32 | 40 | 64 | 96;
 
 const SIZE_CLASS: Record<AvatarSize, string> = {
   28: "size-7 text-(length:--fs-caption)",
   32: "size-8 text-(length:--fs-caption)",
   40: "size-10 text-(length:--fs-body)",
   64: "size-16 text-(length:--fs-title)",
+  96: "size-24 text-(length:--fs-review-title)",
 };
 
 /** The name's first letter, upper case; nothing for an empty name. */

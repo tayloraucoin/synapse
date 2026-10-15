@@ -164,6 +164,11 @@ export function installSheetRoute(path: string): string {
   return sheetRoute(path, "install");
 }
 
+/** The Profile sheet over `path` (USE-84): the avatar menu's "Profile". */
+export function profileSheetRoute(path: string): string {
+  return sheetRoute(path, "profile");
+}
+
 /* ---------------------------------------------------------------- legal -- */
 
 /**

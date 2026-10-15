@@ -1,6 +1,7 @@
 import { addDays, checkEventTime, dayWindow } from "@syn/utils";
 import {
   dayRecordRecord,
+  displayNameSchema,
   morningLinesInput,
   morningLinesRecord,
   placeSlotInput,
@@ -107,6 +108,22 @@ export class FixtureOfflineError extends Error {
   }
 }
 
+/** A profile write that did not land (`profileWrites: "fail"`), as a server error. */
+export class FixtureProfileError extends Error {
+  constructor() {
+    super("The profile could not be saved.");
+    this.name = "FixtureProfileError";
+  }
+}
+
+/** A name the user router would refuse: empty, or past the cap. */
+export class AccountNameRefusal extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AccountNameRefusal";
+  }
+}
+
 /** A morning-lines write the router would refuse. */
 export class MorningLinesRefusal extends Error {
   constructor(message: string) {
@@ -132,6 +149,13 @@ export interface FixtureServer extends PlannerServer, WorkServer {
   removeSavedColour(id: string): Promise<void>;
   /** The account behind the avatar (USE-83); offline it is already on the device. */
   readAccount(): Promise<AccountView>;
+  /**
+   * The name, trimmed (USE-84). Not queued offline: the profile is not the
+   * day's, so with no connection it fails at once (profile-sheet not-saved).
+   */
+  writeAccountName(name: string): Promise<AccountView>;
+  /** The cropped photo, at once with no Save; the account as stored after. */
+  uploadAccountPhoto(photo: Blob): Promise<AccountView>;
   /** The reading alone (USE-12): it may wait or fail while the rest reads. */
   readReading(dateKey: string): Promise<ReadingRecords>;
   /** The date's lines and the evening before's journal. */
@@ -330,6 +354,35 @@ export function createFixtureServer(
     },
 
     readAccount() {
+      return Promise.resolve(structuredClone(records.account));
+    },
+
+    writeAccountName(raw) {
+      const parsed = displayNameSchema.safeParse(raw);
+      if (!parsed.success) {
+        return Promise.reject(
+          new AccountNameRefusal(
+            parsed.error.issues[0]?.message ?? "Invalid name.",
+          ),
+        );
+      }
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      if (scenario.profileWrites === "fail") {
+        return Promise.reject(new FixtureProfileError());
+      }
+      records.account.name = parsed.data;
+      return Promise.resolve(structuredClone(records.account));
+    },
+
+    uploadAccountPhoto(photo) {
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      if (scenario.profileWrites === "fail") {
+        return Promise.reject(new FixtureProfileError());
+      }
+      // The uploading capture: the upload is under way and stays so.
+      if (scenario.profileWrites === "hang") return new Promise(() => {});
+      // Stands for the asset router's URL; the page's life is the fixture's.
+      records.account.photoUrl = URL.createObjectURL(photo);
       return Promise.resolve(structuredClone(records.account));
     },
 

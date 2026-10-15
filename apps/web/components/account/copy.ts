@@ -26,3 +26,31 @@ export const INSTALL_COPY = {
   orFromMenu: "Or from Chrome’s menu",
   addWord: "Add",
 } as const;
+
+/**
+ * The Profile sheet's words (USE-84; profile-sheet/words-and-access.md), as
+ * drawn. No second person; no numbers.
+ */
+export const PROFILE_COPY = {
+  title: "Profile",
+  close: "Close",
+  photo: "Profile photo",
+  changePhoto: "Change photo",
+  addPhoto: "Add photo",
+  name: "Name",
+  email: "Email",
+  save: "Save",
+  nothingToSave: "Nothing to save yet",
+  uploading: "Uploading",
+  photoUpdated: "Photo updated",
+  notSaved: "Not saved. Try again.",
+  crop: {
+    back: "Profile",
+    backLabel: "Back to Profile",
+    heading: "Crop photo",
+    region: "Photo crop",
+    zoom: "Zoom",
+    hint: "Drag to move, pinch or slide to zoom.",
+    use: "Use photo",
+  },
+} as const;

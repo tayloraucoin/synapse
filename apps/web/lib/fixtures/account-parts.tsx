@@ -8,7 +8,8 @@ import { TabHeader } from "@/app/(shell)/_components/tab-header";
  * avatar menu, over a muted line, since the tabs' own screens are their
  * tickets'. The part names are the account scenarios' names, so the menu
  * reads the same `?state=`; `account-*` open the menu on load, and `install-*`
- * are taken with `&sheet=install`. At 1024 and up the rail footer's avatar
+ * are taken with `&sheet=install` and `profile-*` with `&sheet=profile`
+ * (USE-84). At 1024 and up the rail footer's avatar
  * is the trigger.
  */
 

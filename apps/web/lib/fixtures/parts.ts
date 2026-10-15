@@ -75,6 +75,16 @@ for (const state of [
 ]) {
   registerPart(state, () => createElement(AccountPart)); // USE-83
 }
+// USE-84: the Profile sheet's states, taken with `&sheet=profile`.
+for (const state of [
+  "profile",
+  "profile-no-photo",
+  "profile-crop",
+  "profile-uploading",
+  "profile-not-saved",
+]) {
+  registerPart(state, () => createElement(AccountPart)); // USE-84
+}
 // USE-12: Orient's states, `orient-<state>` (the /orient scenarios).
 for (const state of [
   "success",

@@ -3,7 +3,8 @@
 /**
  * SheetHost — the one place `?sheet=` is read and its sheet mounted, over
  * whatever screen is beneath (the account overview's routes; USE-83 makes it
- * with the `install` case, the other sheets join as their tickets land).
+ * with the `install` case and USE-84 adds `profile`; the other sheets join
+ * as their tickets land).
  *
  * THE OPENER. A sheet opened from a menu row loses its opener when the menu
  * closes, so the row records where focus goes back to (the avatar) through
@@ -16,7 +17,7 @@
 import * as React from "react";
 import { useQueryState } from "nuqs";
 import { useIsSplit } from "@syn/ui";
-import { InstallSheet } from "@/components/account";
+import { InstallSheet, ProfileSheet } from "@/components/account";
 import { useDataSource } from "@/lib/data/source";
 import { isInstallOffered, useInstallState } from "@/lib/pwa/use-install-state";
 import type { SheetName } from "@/lib/routes";
@@ -76,11 +77,18 @@ export function SheetHost() {
   );
 
   return (
-    <InstallSheet
-      open={sheet === "install" && installOffered}
-      onOpenChange={close}
-      install={install}
-      returnFocusRef={opener ?? undefined}
-    />
+    <>
+      <InstallSheet
+        open={sheet === "install" && installOffered}
+        onOpenChange={close}
+        install={install}
+        returnFocusRef={opener ?? undefined}
+      />
+      <ProfileSheet
+        open={sheet === "profile"}
+        onOpenChange={close}
+        returnFocusRef={opener ?? undefined}
+      />
+    </>
   );
 }

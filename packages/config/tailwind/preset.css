@@ -174,6 +174,8 @@
   --header-h: 56px; --tabbar-h: 56px; --rail-w: 220px; --sheet-w: 420px;
   /* The avatar menu's width (D-USE-28). */
   --menu-w: 264px;
+  /* The Profile sheet at 402, and its crop step (USE-84, D-USE-37). */
+  --profile-sheet-h: 544px; --profile-crop-h: 704px;
   /* Workflow's board tracks (Workflow UX v0.1 §3.1, FLO-4): the first column
      `minmax(--board-col-wide, 1.5fr)`, the rest `minmax(--board-col, 1fr)`. */
   --board-col-wide: 320px; --board-col: 240px;

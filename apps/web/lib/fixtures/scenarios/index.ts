@@ -1,3 +1,4 @@
+import type { ProfileSheetStart } from "@/lib/data/use-profile";
 import type { InstallOverride } from "@/lib/pwa/use-install-state";
 import type { FixtureRecords } from "../records";
 import { ACCOUNT_SCENARIOS } from "./account";
@@ -41,7 +42,16 @@ export interface Scenario {
   install?: InstallOverride;
   /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */
   accountMenuOpen?: boolean;
+  /**
+   * The profile's writes (USE-84): `fail` refuses the name and the photo as a
+   * server error would; `hang` leaves an upload under way, for its capture.
+   */
+  profileWrites?: "fail" | "hang";
+  /** Where the Profile sheet starts, so its states are reachable by `?state=`. */
+  profileSheet?: ProfileSheetStart;
 }
+
+export type { ProfileSheetStart };
 
 export interface ScenarioView {
   currentItemId?: string;
