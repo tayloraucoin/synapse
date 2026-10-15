@@ -30,7 +30,11 @@ const SCHEMAS: {
   [
     K in Exclude<
       keyof FixtureRecords,
-      "timeZone" | "dayCloseTime" | "account" | "usualWakeTime"
+      | "timeZone"
+      | "dayCloseTime"
+      | "account"
+      | "usualWakeTime"
+      | "clientsEnabled"
     >
   ]: z.ZodTypeAny;
 } = {

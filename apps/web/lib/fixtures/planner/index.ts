@@ -29,7 +29,7 @@ import {
   type WeekRef,
 } from "@/lib/data/week-records";
 import type { FixtureRecords } from "../records";
-import { Journal, restore, type JournalEntry } from "./journal";
+import { createWriteLog, type Journal, type WriteLog } from "./journal";
 import { boundsFor, readSetUpDay, readWeek } from "./read-week";
 import { weeklyRule, withoutWeekday } from "./rules";
 
@@ -133,7 +133,31 @@ export interface PlannerServer {
   undo(token: string): Promise<void>;
 }
 
-function parse<S extends z.ZodTypeAny>(schema: S, raw: unknown): z.output<S> {
+/** A slot place refused by `slots`' unique keys: one per item and per work item on a date. */
+export const ALREADY_PLACED = "That item is already placed.";
+
+export function slotClash(
+  slots: readonly SlotRecord[],
+  input: {
+    onDate: string;
+    blockItemId?: string | null;
+    workItemId?: string | null;
+  },
+  except?: string,
+): boolean {
+  return slots.some(
+    (s) =>
+      s.id !== except &&
+      s.onDate === input.onDate &&
+      ((input.blockItemId != null && s.blockItemId === input.blockItemId) ||
+        (input.workItemId != null && s.workItemId === input.workItemId)),
+  );
+}
+
+export function parse<S extends z.ZodTypeAny>(
+  schema: S,
+  raw: unknown,
+): z.output<S> {
   const parsed = schema.safeParse(raw);
   if (!parsed.success) {
     throw new PlannerRefusal(
@@ -145,7 +169,7 @@ function parse<S extends z.ZodTypeAny>(schema: S, raw: unknown): z.output<S> {
 }
 
 /** Only the keys sent change; `null` clears. */
-function patch<T extends object>(row: T, change: object): T {
+export function patch<T extends object>(row: T, change: object): T {
   const next = { ...row };
   for (const [key, value] of Object.entries(change)) {
     if (value !== undefined) Object.assign(next, { [key]: value });
@@ -172,13 +196,20 @@ export function createPlannerServer({
   now,
   isOffline,
   offlineError,
+  log = createWriteLog({
+    records,
+    isOffline,
+    offlineError,
+    unknownUndo: () => new PlannerRefusal("unknown", "Nothing to undo."),
+  }),
 }: {
   records: FixtureRecords;
   now: () => Date;
   isOffline: () => boolean;
   offlineError: () => Error;
+  /** Shared with the work writes (USE-55), so one `undo` serves both. */
+  log?: WriteLog;
 }): PlannerServer {
-  const undos = new Map<string, JournalEntry[]>();
   const stamp = () => now().toISOString();
   const stamps = () => {
     const at = stamp();
@@ -241,22 +272,14 @@ export function createPlannerServer({
       reach?: { weekday: number; changedOn?: ReadonlySet<string> };
     },
   ): Promise<PlannerWrite> {
-    if (isOffline()) return Promise.reject(offlineError());
-    const journal = new Journal(records);
-    try {
-      const out = fn(journal);
-      const token = crypto.randomUUID();
-      undos.set(token, journal.done());
-      const result: PlannerWrite = { undo: token };
+    return log.commit(fn).then(({ undo, out }) => {
+      const result: PlannerWrite = { undo };
       if (out.id !== undefined) result.id = out.id;
       if (out.reach) {
         result.reach = reachOf(out.reach.weekday, out.reach.changedOn);
       }
-      return Promise.resolve(result);
-    } catch (error) {
-      restore(records, journal.done());
-      return Promise.reject(error);
-    }
+      return result;
+    });
   }
 
   /** A set item's slot on a date, made if it has none. */
@@ -620,14 +643,8 @@ export function createPlannerServer({
       return write((journal) => {
         const input = parse(placeSlotInput, raw);
         findBlock(input.blockId);
-        const clash =
-          input.blockItemId != null &&
-          records.slots.some(
-            (s) =>
-              s.blockItemId === input.blockItemId && s.onDate === input.onDate,
-          );
-        if (clash) {
-          throw new PlannerRefusal("duplicate", "That item is already placed.");
+        if (slotClash(records.slots, input)) {
+          throw new PlannerRefusal("duplicate", ALREADY_PLACED);
         }
         const row = journal.put(
           "slots",
@@ -789,16 +806,7 @@ export function createPlannerServer({
     },
 
     undo(token) {
-      if (isOffline()) return Promise.reject(offlineError());
-      const entries = undos.get(token);
-      if (!entries) {
-        return Promise.reject(
-          new PlannerRefusal("unknown", "Nothing to undo."),
-        );
-      }
-      undos.delete(token);
-      restore(records, entries);
-      return Promise.resolve();
+      return log.undo(token);
     },
   };
   return server;

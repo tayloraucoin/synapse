@@ -1,7 +1,7 @@
 import type { FixtureRecords } from "../records";
 
 /**
- * Every planner write's Undo (USE-36): a write notes each row it touches as
+ * Every planner and work write's Undo (USE-36, USE-55): a write notes each row it touches as
  * it was before the first touch, and Undo puts exactly those rows back, no
  * more. A row the write made is removed again; a row it removed comes back.
  */
@@ -12,7 +12,9 @@ export type PlannerTable =
   | "blockItems"
   | "slots"
   | "dayEvents"
-  | "dayBounds";
+  | "dayBounds"
+  | "workItems"
+  | "clients";
 
 type Row = { id: string };
 
@@ -109,4 +111,57 @@ export function restore(records: FixtureRecords, entries: JournalEntry[]) {
       rows[index] = structuredClone(entry.before);
     }
   }
+}
+
+/** What a committed write hands back: its Undo token and what it returned. */
+export interface Committed<T> {
+  undo: string;
+  out: T;
+}
+
+/**
+ * The one Undo scheme for every fixture write (USE-36; work joins in
+ * USE-55): a write is all or nothing through a journal, and its token puts
+ * back exactly the rows it touched.
+ */
+export interface WriteLog {
+  commit<T>(fn: (journal: Journal) => T): Promise<Committed<T>>;
+  undo(token: string): Promise<void>;
+}
+
+export function createWriteLog({
+  records,
+  isOffline,
+  offlineError,
+  unknownUndo,
+}: {
+  records: FixtureRecords;
+  isOffline: () => boolean;
+  offlineError: () => Error;
+  unknownUndo: () => Error;
+}): WriteLog {
+  const undos = new Map<string, JournalEntry[]>();
+  return {
+    commit(fn) {
+      if (isOffline()) return Promise.reject(offlineError());
+      const journal = new Journal(records);
+      try {
+        const out = fn(journal);
+        const token = crypto.randomUUID();
+        undos.set(token, journal.done());
+        return Promise.resolve({ undo: token, out });
+      } catch (error) {
+        restore(records, journal.done());
+        return Promise.reject(error);
+      }
+    },
+    undo(token) {
+      if (isOffline()) return Promise.reject(offlineError());
+      const entries = undos.get(token);
+      if (!entries) return Promise.reject(unknownUndo());
+      undos.delete(token);
+      restore(records, entries);
+      return Promise.resolve();
+    },
+  };
 }

@@ -4,6 +4,7 @@ import { ACCOUNT_SCENARIOS } from "./account";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { ORIENT_SCENARIOS } from "./orient-morning";
+import { POOL_SCENARIOS } from "./pool";
 import { SET_UP_SCENARIOS } from "./set-up";
 
 /**
@@ -118,6 +119,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...ACCOUNT_SCENARIOS,
   // ---- Setting up the days (USE-36): the usual week, this week, the first day ----
   ...SET_UP_SCENARIOS,
+  // ---- The pool and the work writes (USE-55): clients on, on this week ----
+  ...POOL_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {

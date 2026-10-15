@@ -37,6 +37,8 @@ export interface FixtureRecords {
   slots: SlotRecord[];
   workItems: WorkItemRecord[];
   clients: ClientRecord[];
+  /** `users.clients_enabled`: Settings' Clients switch, off by default (D-USE-40). */
+  clientsEnabled: boolean;
   todos: TodoRecord[];
   dayEvents: DayEventRecord[];
   slotEvents: SlotEventRecord[];

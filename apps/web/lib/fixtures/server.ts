@@ -28,9 +28,17 @@ import type {
 } from "@/lib/data/morning-records";
 import type { TodayRecords } from "@/lib/data/today-records";
 import type { AccountView } from "@/lib/data/use-account";
-import { createPlannerServer, type PlannerServer } from "./planner";
+import {
+  ALREADY_PLACED,
+  createPlannerServer,
+  PlannerRefusal,
+  slotClash,
+  type PlannerServer,
+} from "./planner";
+import { createWriteLog } from "./planner/journal";
 import type { FixtureRecords } from "./records";
 import type { Scenario } from "./scenarios";
+import { createWorkServer, type WorkServer } from "./work";
 
 /**
  * The fixture server (USE-7): an in-memory fake of the routers, held per
@@ -107,7 +115,7 @@ export class MorningLinesRefusal extends Error {
   }
 }
 
-export interface FixtureServer extends PlannerServer {
+export interface FixtureServer extends PlannerServer, WorkServer {
   readToday(dateKey: string): Promise<TodayRecords>;
   writeSlotEvents(inputs: SlotEventInput[]): Promise<SlotEventRecord[]>;
   /**
@@ -240,16 +248,35 @@ export function createFixtureServer(
     return input;
   }
 
+  const isOffline = () => offline;
+  const offlineError = () => new FixtureOfflineError();
+  // One Undo for planner and work writes alike (USE-36, USE-55).
+  const log = createWriteLog({
+    records,
+    isOffline,
+    offlineError,
+    unknownUndo: () => new PlannerRefusal("unknown", "Nothing to undo."),
+  });
   const planner = createPlannerServer({
     records,
     now,
-    isOffline: () => offline,
-    offlineError: () => new FixtureOfflineError(),
+    isOffline,
+    offlineError,
+    log,
   });
+  const work = createWorkServer({ records, now, log });
 
   const server: FixtureServer = {
     // The set-up area's reads and writes (USE-36).
     ...planner,
+    // The work side's reads and writes (USE-55).
+    ...work,
+
+    readPool() {
+      if (scenario.mode === "loading") return new Promise(() => {});
+      if (failing) return Promise.reject(new FixtureReadError());
+      return work.readPool();
+    },
 
     readWeek(week) {
       if (scenario.mode === "loading") return new Promise(() => {});
@@ -329,17 +356,10 @@ export function createFixtureServer(
       const parsed = placeSlotInput.safeParse(raw);
       if (!parsed.success) return refuseSlot("invalid", parsed.error);
       const input = parsed.data;
-      // One slot per set item on a date: a second place is refused.
-      const clash =
-        input.blockItemId != null &&
-        records.slots.some(
-          (slot) =>
-            slot.blockItemId === input.blockItemId &&
-            slot.onDate === input.onDate,
-        );
-      if (clash) {
+      // One slot per set item and per work item on a date: a second place is refused.
+      if (slotClash(records.slots, input)) {
         return Promise.reject(
-          new SlotWriteRefusal("duplicate", "That item is already placed."),
+          new SlotWriteRefusal("duplicate", ALREADY_PLACED),
         );
       }
       const record = slotRecord.parse({
