@@ -13,8 +13,10 @@ import {
   RowMenu,
   SortableItemRows,
 } from "@/components/planner";
+import type { NowFooter } from "@/lib/data/now-end";
 import { isTimedDone, useRunningView } from "@/lib/data/running";
 import { useDataSource } from "@/lib/data/source";
+import { useBlockFocus } from "@/lib/data/use-block-focus";
 import {
   moveIds,
   useChecklistAdd,
@@ -24,19 +26,17 @@ import {
   type NowBlockView,
   type NowItemView,
 } from "@/lib/data/use-now";
-import { useBlockFocus } from "@/lib/data/use-block-focus";
-import type { NowFooter } from "@/lib/data/now-end";
 import {
   itemSheetRoute,
   todayBlockRoute,
   todayScheduleRoute,
 } from "@/lib/routes";
 import { BeforeGoList } from "./before-go-list";
-import { EndBreakFooter } from "./end-break-footer";
-import { NowEmpty } from "./now-empty";
 import { nowBlockMenuRows } from "./block-menu";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
+import { EndBreakFooter } from "./end-break-footer";
 import { NowCurrentCard } from "./now-current-card";
+import { NowEmpty } from "./now-empty";
 import { NowMealTopics } from "./now-meal-topics";
 import { NowTodosTray } from "./now-todos-tray";
 import { TimeTakenSheet } from "./time-taken-sheet";
