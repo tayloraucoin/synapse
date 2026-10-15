@@ -146,7 +146,7 @@ export const TIER_WORDS: Record<WorkTier, string> = {
   stretch: "Stretch",
 };
 
-const SIZE_WORDS: Record<WorkSize, string> = {
+export const SIZE_WORDS: Record<WorkSize, string> = {
   quick: "1 Quick",
   small: "2 Small",
   medium: "3 Medium",

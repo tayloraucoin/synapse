@@ -15,7 +15,6 @@ export const WEEK_COPY = {
   fits: "Fits",
   noWorkBlocks: "No work blocks",
   openDay: (weekday: string) => `Open ${weekday}`,
-  pool: "Pool",
   matrix: (range: string) => `Week of ${range}, by tier`,
   loading: "Loading the week",
   weekFailed: "The week didn't load. Nothing placed is lost.",

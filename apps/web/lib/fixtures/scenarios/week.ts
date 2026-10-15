@@ -10,6 +10,11 @@ import { fixtureId } from "../ids";
 import type { FixtureRecords } from "../records";
 import type { Scenario } from "./index";
 import { POOL_IDS, poolRecords } from "./pool";
+import {
+  emptyPoolRecords,
+  linearOffRecords,
+  poolPanelRecords,
+} from "./pool-panel";
 
 /**
  * The Week (USE-72): 12 to 18 Oct as the Priority lens board draws it, Monday
@@ -350,16 +355,23 @@ export function weekRecords({ placed = true } = {}): FixtureRecords {
 
 function week(
   name: string,
-  options: Partial<Scenario> & { placed?: boolean } = {},
+  options: Partial<Scenario> & {
+    placed?: boolean;
+    /** The pool panel's records (USE-74), over the Week's. */
+    pool?: (records: FixtureRecords) => FixtureRecords;
+  } = {},
 ): () => Scenario {
-  const { placed, ...rest } = options;
-  return () => ({
-    name,
-    now: WEEK_NOW,
-    records: weekRecords({ placed }),
-    mode: "ready",
-    ...rest,
-  });
+  const { placed, pool, ...rest } = options;
+  return () => {
+    const records = weekRecords({ placed });
+    return {
+      name,
+      now: WEEK_NOW,
+      records: pool ? pool(records) : records,
+      mode: "ready",
+      ...rest,
+    };
+  };
 }
 
 export const WEEK_SCENARIOS: Record<string, () => Scenario> = {
@@ -369,4 +381,12 @@ export const WEEK_SCENARIOS: Record<string, () => Scenario> = {
   "week-loading": week("week-loading", { mode: "loading" }),
   "week-error": week("week-error", { regions: { week: "error" } }),
   "week-offline": week("week-offline", { offline: true }),
+  // USE-74: the pool panel beside the Priority lens. `pool` is USE-55's records.
+  "pool-panel": week("pool-panel", { pool: poolPanelRecords }),
+  "pool-linear-tab": week("pool-linear-tab", {
+    pool: poolPanelRecords,
+    view: { open: "pool:linear" },
+  }),
+  "pool-empty": week("pool-empty", { pool: emptyPoolRecords }),
+  "pool-linear-off": week("pool-linear-off", { pool: linearOffRecords }),
 };

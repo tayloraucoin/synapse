@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { RegionRetry, Text } from "@syn/ui";
 import { OfflineLine } from "@/components/planner";
+import { PoolPanel } from "@/components/work/pool";
 import { useIsOffline } from "@/lib/data/source";
 import {
   useShownWeek,
@@ -18,8 +19,8 @@ import { PriorityLens } from "./priority-lens";
 import { WeekHeader } from "./week-header";
 
 /**
- * The Week (USE-72; ux/work/week/): from 1024 the pool panel's place at 360
- * (USE-74 fills it), then the header and the lens. Region by region: the week
+ * The Week (USE-72; ux/work/week/): from 1024 the pool panel at 360
+ * (USE-74), then the header and the lens. Region by region: the week
  * failing is a RegionRetry in the lens's place, the rest live; offline is one
  * StatusLine under the header and everything still works (D-USE-56). Below
  * 1024 there is no Week: one line to Set my days › This week (D-USE-55).
@@ -63,11 +64,7 @@ export function WeekScreen() {
       </div>
 
       <div className="hidden min-h-dvh flex-1 split:flex">
-        <aside
-          aria-label={COPY.pool}
-          data-pool-panel=""
-          className="sticky top-0 h-dvh w-(--pool-w) shrink-0 border-e border-hairline bg-surface"
-        />
+        <PoolPanel mode="week" />
         <div className="flex min-w-0 flex-1 flex-col gap-(--space-6) px-(--space-8) py-(--space-6)">
           <WeekHeader
             range={range}

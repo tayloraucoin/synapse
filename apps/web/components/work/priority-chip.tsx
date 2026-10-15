@@ -9,6 +9,26 @@ const TONE: Record<PriorityLevel, string> = {
   low: "text-category-slate-dot",
 };
 
+/** The glyph alone in its colour, named (D-USE-42): the pool's rows. */
+export function PriorityMarkGlyph({
+  level,
+  word,
+}: {
+  level: PriorityLevel;
+  word: string;
+}) {
+  return (
+    <span
+      role="img"
+      aria-label={`${word} priority`}
+      data-priority={level}
+      className={cn("inline-flex", TONE[level])}
+    >
+      <PriorityGlyph level={level} />
+    </span>
+  );
+}
+
 /** How many of the three bars are lit. */
 const BARS: Record<Exclude<PriorityLevel, "urgent">, number> = {
   high: 3,

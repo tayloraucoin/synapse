@@ -18,7 +18,7 @@ export function DueBadge({ word, tone, className }: DueBadgeProps) {
     <span
       className={cn(
         "inline-flex h-4.5 shrink-0 items-center rounded-(--radius-control) px-1.5",
-        "text-caption font-semibold whitespace-nowrap",
+        "text-(length:--fs-caption) leading-(--lh-caption) font-semibold whitespace-nowrap",
         tone === "warning"
           ? "bg-warning-fill text-warning-text"
           : "bg-destructive-fill text-destructive-text",
