@@ -29,3 +29,11 @@ export {
   type LinearStateLike,
   type StatusEffect,
 } from "./linear-status";
+export {
+  flowWorkBlock,
+  type FlowBand,
+  type FlowEvent,
+  type FlowRow,
+  type FlowedRow,
+  type WorkBlockFlow,
+} from "./flow";

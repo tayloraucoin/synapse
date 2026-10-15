@@ -1061,3 +1061,5 @@ export {
   type WeekdayChipsProps,
   type WeekdayIndexing,
 } from "./composed/control/weekday-chips";
+/** A meeting inside the Work block (USE-62): the band and the lifted meeting. */
+export { CalendarIcon as MeetingIcon } from "lucide-react";

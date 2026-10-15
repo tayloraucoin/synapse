@@ -5,12 +5,14 @@ import {
   clockFromMinutes,
   clockToMinutes,
   compareInTiers,
+  flowWorkBlock,
   formatCountdown,
   instantToWallClockMinutes,
   parseRule,
   pickWhileItFires,
   resolveWorkNext,
   runningBand,
+  topMinutes,
   weekdayIndex,
   type OverBand,
   type SlotClock,
@@ -19,6 +21,7 @@ import {
 } from "@syn/utils";
 import type {
   ClientRecord,
+  DayEventRecord,
   SlotRecord,
   TodoRecord,
   WorkItemRecord,
@@ -69,6 +72,26 @@ export const TODAY_WORK_COPY = {
   /** Outside Work: "Work starts at 9:30". */
   workStarts: (startsAt: string) => `Work starts at ${clockWords(startsAt)}`,
   joined: (parts: readonly string[]) => parts.join(" · "),
+  /** A meeting inside the Work block (USE-62; meeting-coming-up.md, meeting-lifted.md). */
+  tag: { work: "Work", personal: "Personal" },
+  /** "the work below waits until 11:00", after the band's span. */
+  waitsUntil: (endsAt: string) =>
+    `the work below waits until ${clockWords(endsAt)}`,
+  /** "in 10 min" on the band. */
+  inMin: (minutes: number) => `in ${workMinutes(minutes)}`,
+  /** The band's name: "[Design sync], 10:30 to 11:00, in 10 min". */
+  bandName: (title: string, span: string, lead: string) =>
+    `${title}, ${span}, ${lead}`,
+  /** "At 11:00", over the lifted meeting. */
+  atTime: (startsAt: string) => `At ${clockWords(startsAt)}`,
+  /** "Meeting · 11:00 to 11:15". */
+  meeting: "Meeting",
+  /** "At 11:00: [Standup]", said once, politely. */
+  saidAt: (startsAt: string, title: string) =>
+    `At ${clockWords(startsAt)}: ${title}`,
+  /** The card's consequence, in ink: "would end 10:50, past [Design sync]". */
+  wouldEnd: (clock: string, title: string) =>
+    `would end ${clock}, past ${title}`,
 } as const;
 
 const TIERS: readonly WorkTier[] = [
@@ -97,6 +120,39 @@ export interface TodayLaterBlock {
   line: string;
   /** Slots done before this block began: they stay in their own block. */
   doneBefore: ReadonlySet<string>;
+}
+
+/** A meeting inside the current Work block, as Now and Today draw it (USE-62). */
+export interface MeetingView {
+  id: string;
+  /** "[Design sync]". */
+  title: string;
+  /** "Work" or "Personal": the Tag, so colour is never alone. */
+  tag: string;
+  /** "10:30 to 11:00". */
+  span: string;
+}
+
+/** Before its time: a band in the phone's flow (meeting-coming-up.md). */
+export interface MeetingBandView extends MeetingView {
+  /** The row it follows in the tiers; null ahead of them. */
+  afterSlotId: string | null;
+  /** "10:30 to 11:00 · the work below waits until 11:00". */
+  line: string;
+  /** "in 10 min". */
+  lead: string;
+  /** "[Design sync], 10:30 to 11:00, in 10 min": the band is not a control. */
+  name: string;
+}
+
+/** At its time: lifted ahead of the tiers, or a row under the desk's band (meeting-lifted.md). */
+export interface LiftedMeetingView extends MeetingView {
+  /** "At 11:00". */
+  heading: string;
+  /** "Meeting · 11:00 to 11:15". */
+  meta: string;
+  /** "At 11:00: [Standup]". */
+  said: string;
 }
 
 /** The current block, as the desk's band and the phone's header name it. */
@@ -174,6 +230,11 @@ export interface TodayWorkView {
   oneDay: ReadonlyMap<string, boolean>;
   /** The day's close: nothing counts past it (C11). */
   dayEnd: Date;
+  /**
+   * The current Work block's meetings (USE-62): ahead, bands where the plan
+   * reaches them; under way, lifted. The block stays one block.
+   */
+  meetings: { bands: MeetingBandView[]; lifted: LiftedMeetingView[] };
 }
 
 export interface InHandView {
@@ -266,14 +327,15 @@ function bandOf(today: Today, now: Date): TodayWorkBand | null {
 
   if (block.kind === "work") {
     // The next event inside the block from now (a meeting, D-USE-41).
-    const event = records.dayEvents
+    const ahead = records.dayEvents
       .filter(
         (row) =>
           row.startsAt >= startsAt &&
           row.startsAt < endsAt &&
           clockToMinutes(row.startsAt) >= nowMin,
       )
-      .sort((a, b) => a.startsAt.localeCompare(b.startsAt))[0];
+      .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+    const event = ahead[0];
     const eventWords = event
       ? TODAY_WORK_COPY.eventAt(event.title, event.startsAt)
       : null;
@@ -289,9 +351,12 @@ function bandOf(today: Today, now: Date): TodayWorkBand | null {
         ? TODAY_WORK_COPY.joined([span, eventWords]) +
           (lead >= 1 ? TODAY_WORK_COPY.inMinutes(lead) : "")
         : span,
-      headerDetail: eventWords
-        ? TODAY_WORK_COPY.joined([span, eventWords])
-        : span,
+      // [ASSUMPTION] The phone header names every meeting ahead in the
+      // block; the band places each in the flow (meeting-coming-up.md).
+      headerDetail: TODAY_WORK_COPY.joined([
+        span,
+        ...ahead.map((row) => TODAY_WORK_COPY.eventAt(row.title, row.startsAt)),
+      ]),
     };
   }
 
@@ -406,6 +471,14 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
   const band = bandOf(today, now);
 
   const dayEnd = records.dayWindow.end;
+  const meetings = meetingsOf({
+    today,
+    now,
+    slots,
+    states,
+    items,
+    inHandId: inHand?.id ?? null,
+  });
   const rowOf = (slot: SlotRecord): WorkRowView => {
     const item = items.get(slot.workItemId!)!;
     const state = states.get(slot.id)!;
@@ -471,7 +544,15 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
   };
 
   const tiers = TIERS.flatMap((tier): TodayWorkTier[] => {
-    const rows = slots.filter((slot) => slot.tier === tier).map(rowOf);
+    const rows = slots
+      .filter((slot) => slot.tier === tier)
+      .map(rowOf)
+      .map((row) =>
+        // The card's consequence: Next's, or the item in hand's (D-USE-77).
+        row.id === nextId || row.id === inHand?.id
+          ? { ...row, consequence: meetings.consequences.get(row.id) ?? null }
+          : row,
+      );
     if (tier === "urgent" && rows.length === 0) return [];
     // The tier is the day's: the helper counts every row it holds today.
     return [
@@ -569,7 +650,141 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
       slots.map((slot) => [slot.id, (sessions.get(slot.id) ?? null) === null]),
     ),
     dayEnd,
+    meetings: { bands: meetings.bands, lifted: meetings.lifted },
   };
+}
+
+const MIN = 60_000;
+
+/**
+ * The current Work block's meetings (USE-62; the meeting-inside-a-work-block
+ * dev note): `flowWorkBlock` lays the block's own undone rows from now, the
+ * one in hand first, firing ones left out (an agent's time is not the
+ * plan's), each at `topMinutes`; a meeting ahead is a band where the plan
+ * reaches it, one under way is lifted. Nothing here writes: a lift never
+ * pauses, fires or brings back anything (C-USE-today-meeting-lifted-2).
+ */
+function meetingsOf(input: {
+  today: Today;
+  now: Date;
+  slots: readonly SlotRecord[];
+  states: ReadonlyMap<string, SlotClockState>;
+  items: ReadonlyMap<string, WorkItemRecord>;
+  inHandId: string | null;
+}): {
+  bands: MeetingBandView[];
+  lifted: LiftedMeetingView[];
+  consequences: Map<string, { length: string; words: string }>;
+} {
+  const { today, now, states, items } = input;
+  const { records } = today;
+  const none = { bands: [], lifted: [], consequences: new Map() };
+  const block = activeBlock(
+    today.occurrences.blocks.map((occurrence) => ({
+      id: occurrence.block.id,
+      start: occurrence.start,
+      end: occurrence.end,
+      occurrence,
+    })),
+    now,
+  )?.occurrence;
+  if (!block || block.block.kind !== "work") return none;
+
+  const blockStartMin = clockToMinutes(block.startsAt);
+  const atClock = (clock: string) =>
+    new Date(
+      block.start.getTime() + (clockToMinutes(clock) - blockStartMin) * MIN,
+    );
+  const events = records.dayEvents.filter(
+    (event) =>
+      event.startsAt >= block.startsAt && event.startsAt < block.endsAt,
+  );
+  if (events.length === 0) return none;
+  const byId = new Map<string, DayEventRecord>(
+    events.map((event) => [event.id, event]),
+  );
+
+  const own = new Set(block.slots.map((slot) => slot.id));
+  const topOf = new Map<string, number>();
+  const rows = input.slots
+    .filter((slot) => own.has(slot.id) && states.get(slot.id) !== "firing")
+    .map((slot) => {
+      const item = items.get(slot.workItemId!)!;
+      const topMin =
+        topMinutes({
+          lengthMin: slot.lengthMin,
+          lengthMaxMin: item.lengthMaxMin,
+          size: item.size,
+        }) ?? 0;
+      topOf.set(slot.id, topMin);
+      return {
+        slotId: slot.id,
+        tier: slot.tier!,
+        topMin,
+        doneAt: states.get(slot.id) === "done" ? now : null,
+        running: slot.id === input.inHandId,
+      };
+    });
+  const flow = flowWorkBlock({
+    block: { start: block.start, end: block.end },
+    rows,
+    events: events.map((event) => ({
+      id: event.id,
+      start: atClock(event.startsAt),
+      end: atClock(event.endsAt),
+      title: event.title,
+    })),
+    now,
+  });
+
+  const viewOf = (event: DayEventRecord): MeetingView => ({
+    id: event.id,
+    title: event.title,
+    tag: TODAY_WORK_COPY.tag[event.tag],
+    span: TODAY_WORK_COPY.span(event.startsAt, event.endsAt),
+  });
+  const bands: MeetingBandView[] = [];
+  const lifted: LiftedMeetingView[] = [];
+  for (const band of flow.bands) {
+    const event = byId.get(band.eventId)!;
+    const meeting = viewOf(event);
+    const start = atClock(event.startsAt);
+    if (start <= now) {
+      lifted.push({
+        ...meeting,
+        heading: TODAY_WORK_COPY.atTime(event.startsAt),
+        meta: TODAY_WORK_COPY.joined([TODAY_WORK_COPY.meeting, meeting.span]),
+        said: TODAY_WORK_COPY.saidAt(event.startsAt, event.title),
+      });
+      continue;
+    }
+    const lead = TODAY_WORK_COPY.inMin(
+      Math.max(1, Math.ceil((start.getTime() - now.getTime()) / MIN)),
+    );
+    bands.push({
+      ...meeting,
+      afterSlotId: band.afterSlotId,
+      line: TODAY_WORK_COPY.joined([
+        meeting.span,
+        TODAY_WORK_COPY.waitsUntil(event.endsAt),
+      ]),
+      lead,
+      name: TODAY_WORK_COPY.bandName(event.title, meeting.span, lead),
+    });
+  }
+
+  const consequences = new Map<string, { length: string; words: string }>();
+  for (const row of flow.rows) {
+    if (!row.pastEvent) continue;
+    consequences.set(row.slotId, {
+      length: workMinutes(topOf.get(row.slotId) ?? 0),
+      words: TODAY_WORK_COPY.wouldEnd(
+        wallWords(row.end, records.timeZone),
+        row.pastEvent.title,
+      ),
+    });
+  }
+  return { bands, lifted, consequences };
 }
 
 /** The running card's words at an instant (USE-59; running, paused, over). */

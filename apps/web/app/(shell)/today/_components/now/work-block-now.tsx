@@ -96,6 +96,7 @@ export function WorkBlockNow({
             now={now}
             loop={loop}
             headingAs="h3"
+            meetingsInFlow
             onOpen={(slotId) => {
               const item = view.workItemIds.get(slotId);
               if (item)

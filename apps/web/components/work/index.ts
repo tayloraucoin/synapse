@@ -38,3 +38,5 @@ export { WorkRetry, type WorkRetryProps } from "./work-retry";
 export { WorkRow, WorkRowMeta, type WorkRowProps } from "./work-row";
 export { WorkTiersSkeleton } from "./work-tiers-skeleton";
 export { WeekStrip, type WeekStripProps } from "./week-strip";
+export { LiftedMeeting, type LiftedMeetingProps } from "./lifted-meeting";
+export { MeetingBand, MeetingTag, type MeetingBandProps } from "./meeting-band";

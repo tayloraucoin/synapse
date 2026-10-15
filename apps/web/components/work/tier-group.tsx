@@ -40,6 +40,11 @@ export interface TierGroupProps extends WorkRowHandlers {
   rows: WorkRowView[];
   afterRow?: { rowId: string; content: React.ReactNode } | null;
   lifted?: { rowId: string; content: React.ReactNode } | null;
+  /**
+   * Meeting bands in the flow, each after the row the plan reaches it at
+   * (USE-62): between rows, never splitting one.
+   */
+  bands?: readonly { rowId: string; content: React.ReactNode }[];
   /** The opened day's rows, with no lead slot (USE-58). */
   planning?: boolean;
   /** Drawn under the heading when the tier holds nothing: "+ Add to Stretch" (USE-58). */
@@ -57,6 +62,7 @@ export function TierGroup({
   rows,
   afterRow = null,
   lifted = null,
+  bands = [],
   planning = false,
   empty = null,
   headingAs = "h3",
@@ -120,6 +126,9 @@ export function TierGroup({
               <WorkRow row={row} planning={planning} {...handlers} />
             )}
             {afterRow?.rowId === row.id ? afterRow.content : null}
+            {bands
+              .filter((band) => band.rowId === row.id)
+              .map((band) => band.content)}
           </li>
         ))}
       </ul>

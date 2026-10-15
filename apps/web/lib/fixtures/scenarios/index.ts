@@ -24,6 +24,7 @@ import { SCHEDULE_SCENARIOS } from "./schedule";
 import { SET_UP_SCENARIOS, type SetUpScenarioStart } from "./set-up";
 import { SETTINGS_SCENARIOS } from "./settings";
 import { TODAY_DESK_SCENARIOS } from "./today-desk";
+import { TODAY_MEETING_SCENARIOS } from "./today-meetings";
 import { TODO_SHEET_SCENARIOS } from "./todo-sheet";
 import { TODOS_SCENARIOS } from "./todos-tray";
 import { WEEK_SCENARIOS } from "./week";
@@ -265,6 +266,7 @@ const SCENARIOS: Record<string, () => Scenario> = {
   // ---- The Week (USE-72): the Priority lens, empty, a past day, loading, error, offline ----
   ...WEEK_SCENARIOS,
   ...TODAY_DESK_SCENARIOS,
+  ...TODAY_MEETING_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {

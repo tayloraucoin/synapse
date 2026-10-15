@@ -4,6 +4,8 @@ import * as React from "react";
 import type { WorkTier } from "@syn/types";
 import { cn, toastUndo, useIsSplit } from "@syn/ui";
 import {
+  LiftedMeeting,
+  MeetingBand,
   NextCard,
   RunningWorkCard,
   TierGroup,
@@ -40,6 +42,12 @@ export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
   loop?: ReturnType<typeof useWorkLoop>;
   onCheckReminder?: (todoId: string, checked: boolean) => void;
   headingAs?: "h2" | "h3";
+  /**
+   * The phone's meetings in the flow (USE-62): bands where the plan reaches
+   * them, and one under way lifted ahead of the tiers under "At <time>",
+   * Next back in its row. The desk names them on its band instead (D-USE-77).
+   */
+  meetingsInFlow?: boolean;
   className?: string;
 }
 
@@ -49,6 +57,7 @@ export function WorkTiers({
   loop,
   onCheckReminder,
   headingAs = "h2",
+  meetingsInFlow = false,
   className,
   onOpen,
 }: WorkTiersProps) {
@@ -83,6 +92,17 @@ export function WorkTiers({
   // "Next: <title>" when Next moves to another item, after the action's words.
   const nextId = view.nextRow?.id ?? null;
   const nextTitle = view.nextRow?.title ?? null;
+  // "At 11:00: <meeting>" once, when a meeting lifts on the phone (USE-62).
+  const liftedSaid = meetingsInFlow
+    ? view.meetings.lifted.map((meeting) => meeting.said).join(" ")
+    : "";
+  const lastLifted = React.useRef(liftedSaid);
+  React.useEffect(() => {
+    if (lastLifted.current === liftedSaid) return;
+    lastLifted.current = liftedSaid;
+    if (liftedSaid) setSaid(liftedSaid);
+  }, [liftedSaid]);
+
   const lastNext = React.useRef(nextId);
   React.useEffect(() => {
     if (lastNext.current === nextId) return;
@@ -109,7 +129,22 @@ export function WorkTiers({
     : undefined;
 
   const hand = view.inHand;
-  const next = view.lift ? view.nextRow : null;
+  // A meeting at its time holds the lift on the phone; Next goes back to its row.
+  const meetings = meetingsInFlow ? view.meetings : null;
+  const next = view.lift && !meetings?.lifted.length ? view.nextRow : null;
+  const bandFor = (band: (typeof view.meetings.bands)[number]) => ({
+    rowId: band.afterSlotId ?? "",
+    content: (
+      <MeetingBand
+        key={band.id}
+        title={band.title}
+        tag={band.tag}
+        line={band.line}
+        lead={band.lead}
+        name={band.name}
+      />
+    ),
+  });
   const lifted = hand
     ? {
         rowId: hand.slotId,
@@ -159,6 +194,20 @@ export function WorkTiers({
 
   return (
     <div className={cn("flex flex-col gap-(--space-6)", className)}>
+      {meetings?.lifted.map((meeting) => (
+        <LiftedMeeting
+          key={meeting.id}
+          variant="card"
+          heading={meeting.heading}
+          headingAs={headingAs}
+          title={meeting.title}
+          tag={meeting.tag}
+          meta={meeting.meta}
+        />
+      ))}
+      {meetings?.bands
+        .filter((band) => band.afterSlotId === null)
+        .map((band) => bandFor(band).content)}
       {view.tiers.map((group) => (
         <TierGroup
           key={group.tier}
@@ -191,6 +240,9 @@ export function WorkTiers({
                 }
               : null
           }
+          bands={meetings?.bands
+            .filter((band) => band.afterSlotId !== null)
+            .map(bandFor)}
           onOpen={onOpen}
           onToggleFiring={toggleFiring}
         />

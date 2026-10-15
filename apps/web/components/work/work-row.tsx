@@ -277,6 +277,13 @@ export function WorkRowMeta({ row }: { row: WorkRowView }) {
           {row.session ? <span>{row.session}</span> : null}
           {row.worked ? <span>{row.worked}</span> : null}
           {row.fired ? <span>{row.fired}</span> : null}
+          {row.consequence ? (
+            <span className="inline-flex items-center gap-(--space-2)">
+              <span>{row.consequence.length}</span>
+              <Separator />
+              <span className="text-foreground">{row.consequence.words}</span>
+            </span>
+          ) : null}
         </>
       )}
     </div>

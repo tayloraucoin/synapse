@@ -45,6 +45,12 @@ export interface WorkRowView {
   firing: { word: string; time: string } | null;
   /** The done form's record: "Took 1 h 10 · fired 32 min" (D-USE-48). */
   doneRecord: string | null;
+  /**
+   * The lifted card's consequence of a meeting ahead (USE-62; D-USE-77):
+   * its planned length and "would end 10:50, past [Design sync]", in ink,
+   * never a warning colour.
+   */
+  consequence?: { length: string; words: string } | null;
   /** Sub-issues: checkboxes at the desk, folded on the phone (D-USE-51). */
   subIssues: {
     summary: string;

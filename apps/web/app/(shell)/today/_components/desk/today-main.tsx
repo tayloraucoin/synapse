@@ -4,7 +4,12 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
 import { GroupHeading, Text } from "@syn/ui";
 import { DayBlockBand, PlannerItemRow } from "@/components/planner";
-import { WorkNextStrip, WorkRetry, WorkTiersSkeleton } from "@/components/work";
+import {
+  LiftedMeeting,
+  WorkNextStrip,
+  WorkRetry,
+  WorkTiersSkeleton,
+} from "@/components/work";
 import { AddEntry } from "@/components/work/add";
 import { useDataSource } from "@/lib/data/source";
 import { dayTitle, wallWords } from "@/lib/data/today-work";
@@ -114,6 +119,17 @@ export function TodayMain() {
               detail={view.band.detail}
             />
           ) : null}
+          {/* A meeting at its time: a row under the band; the tiers stay (D-USE-65). */}
+          {view.meetings.lifted.map((meeting) => (
+            <LiftedMeeting
+              key={meeting.id}
+              variant="row"
+              heading={meeting.heading}
+              title={meeting.title}
+              tag={meeting.tag}
+              meta={meeting.meta}
+            />
+          ))}
           {view.nextRow ? (
             <WorkNextStrip
               label={COPY.nextLabel}

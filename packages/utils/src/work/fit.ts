@@ -62,13 +62,13 @@ export type BlockFit =
   | { fits: false; runsTo: Date | null; overMin: number | null };
 
 /** Minutes from the block's start; NaN reads as 0. */
-function offsetMin(at: Date, start: number): number {
+export function offsetMin(at: Date, start: number): number {
   const ms = at.getTime() - start;
   return Number.isFinite(ms) ? ms / MIN : 0;
 }
 
 /** The meetings inside the block as merged whole-minute spans, ascending. */
-function busySpans(
+export function busySpans(
   busy: readonly BlockSpan[],
   start: number,
   lengthMin: number,
@@ -91,7 +91,10 @@ function busySpans(
 }
 
 /** Where `needMin` of free time runs out, walking around the meetings. */
-function endAfter(needMin: number, spans: readonly [number, number][]): number {
+export function endAfter(
+  needMin: number,
+  spans: readonly [number, number][],
+): number {
   let at = 0;
   let left = needMin;
   for (const [from, to] of spans) {
