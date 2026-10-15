@@ -12,7 +12,7 @@ import {
   type WeekDayView,
   type WeekView,
 } from "@/lib/data/week-view";
-import { itemSheetRoute, scheduleDateRoute } from "@/lib/routes";
+import { itemSheetRoute, todayRoute } from "@/lib/routes";
 import { WEEK_COPY as COPY } from "./copy";
 import { EventChip, WorkChip } from "./week-chip";
 
@@ -234,9 +234,11 @@ function DayHead({
   return (
     <span className="flex flex-col items-start">
       {hasWork && weekday ? (
-        // The opened day (USE-58) [ASSUMPTION: Schedule's dated view until it names its route].
+        // The opened day (USE-58): Today on that date, planning; today's is Today.
         <Link
-          href={scheduleDateRoute(head.dateKey)}
+          href={
+            head.isToday ? todayRoute() : todayRoute({ date: head.dateKey })
+          }
           aria-label={COPY.openDay(weekday)}
           className="rounded-(--radius-control) outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
         >

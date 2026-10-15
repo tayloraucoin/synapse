@@ -65,3 +65,31 @@ export const TIER_HUE: Record<WorkTier, SquareHue> = {
   secondary: "amber",
   stretch: "slate",
 };
+
+/** One line of a week-strip card: a work item or an event (USE-58). */
+export type StripLine =
+  | {
+      kind: "work";
+      id: string;
+      tier: WorkTier;
+      /** "[Case studies]". */
+      title: string;
+      /** "2/3": the session's place, never a count of the day (D-USE-47). */
+      session: string | null;
+    }
+  | { kind: "event"; id: string; time: string; title: string };
+
+/** A day card on the desk's week strip (USE-58; D-USE-55). */
+export interface StripDayView {
+  dateKey: string;
+  /** "Mon 12". */
+  head: string;
+  /** "Monday 12 October": the card's name with its lines. */
+  name: string;
+  isToday: boolean;
+  past: boolean;
+  /** Up to two. */
+  lines: StripLine[];
+  /** With no lines: "Nothing slotted yet", "No work", "Sunday reset". */
+  empty: string | null;
+}

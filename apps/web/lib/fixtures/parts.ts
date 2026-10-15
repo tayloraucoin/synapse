@@ -18,10 +18,12 @@ import { ReviewPart, type ReviewPartState } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
+import { TODAY_DESK_SCENARIOS } from "./scenarios/today-desk";
 import { WEEK_SCENARIOS } from "./scenarios/week";
 import { SchedulePart, type SchedulePartState } from "./schedule-parts";
 import { SETTINGS_SCENARIOS } from "./scenarios/settings";
 import { SettingsClientsPart } from "./settings-parts";
+import { TodayDeskPart } from "./today-desk-parts";
 import { TodoSheetPart } from "./todo-sheet-parts";
 import {
   TodosNotificationPart,
@@ -235,6 +237,10 @@ for (const state of [
 // USE-72: the Week, under the week scenarios' names.
 for (const state of Object.keys(WEEK_SCENARIOS)) {
   registerPart(state, () => createElement(WeekPart));
+}
+// USE-58: the desk's Today frame, under the today-desk scenarios' names.
+for (const state of Object.keys(TODAY_DESK_SCENARIOS)) {
+  registerPart(state, () => createElement(TodayDeskPart));
 }
 // USE-27: Schedule's states, `schedule-<state>` (the drawn four by their names).
 for (const state of [

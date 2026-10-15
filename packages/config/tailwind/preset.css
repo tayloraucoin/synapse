@@ -175,6 +175,8 @@
   --content-text: 720px; --content-canvas: 960px;
   --header-h: 56px; --tabbar-h: 56px; --rail-w: 220px; --sheet-w: 420px;
   --pool-w: 360px; --week-label-w: 84px; --week-col-min: 120px;   /* the Week at the desk (D-USE-41, D-USE-94) */
+  /* Today at the desk (USE-58): the content right of the rail, the day column, a strip card's floor. */
+  --desk-w: 1108px; --day-col-w: 340px; --strip-card-min: 144px;
   /* The avatar menu's width (D-USE-28). */
   --menu-w: 264px;
   /* The Profile sheet at 402, and its crop step (USE-84, D-USE-37). */

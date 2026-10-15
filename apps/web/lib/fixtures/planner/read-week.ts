@@ -34,7 +34,8 @@ export function boundsFor(
   return records.dayBounds.find((row) => row.weekday === weekday) ?? null;
 }
 
-function eventOn(event: DayEventRecord, dateKey: string): boolean {
+/** A one-off on its date, or a repeating event on a date its rule reaches. */
+export function eventOn(event: DayEventRecord, dateKey: string): boolean {
   if (event.rrule === null) return event.onDate === dateKey;
   const parsed = parseRule(event.rrule);
   return parsed.ok && occursOn(parsed.rule, dateKey);

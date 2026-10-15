@@ -39,6 +39,12 @@ import type { WorkRowHandlers, WorkRowView } from "./view";
  */
 export interface WorkRowProps extends WorkRowHandlers {
   row: WorkRowView;
+  /**
+   * Another date, planning (USE-58; opened-day.md): no lead slot, so no
+   * ring, firing mark or done mark; nothing fires on a day not today
+   * (C-USE-today-opened-day-2).
+   */
+  planning?: boolean;
   className?: string;
 }
 
@@ -50,6 +56,7 @@ export function WorkRow({
   onToggleFiring,
   onOpen,
   onToggleSubIssue,
+  planning = false,
   className,
 }: WorkRowProps) {
   const [subOpen, setSubOpen] = React.useState(false);
@@ -66,34 +73,37 @@ export function WorkRow({
         "group/row flex items-start rounded-(--radius-control) pe-(--space-2)",
         "transition-colors duration-(--dur-state) ease-(--ease-settle)",
         next ? "bg-surface py-(--space-3)" : "hover:bg-surface",
+        planning && "ps-(--space-3)",
         className,
       )}
     >
-      <div className="flex size-(--target) shrink-0 items-center justify-center">
-        {done ? (
-          <span
-            aria-hidden="true"
-            data-done-mark
-            className="bg-muted-foreground text-background inline-flex size-4 items-center justify-center rounded-full"
-          >
-            <DoneIcon className="size-3" strokeWidth={3} />
-          </span>
-        ) : (
-          <FiringToggle
-            pressed={firing}
-            onPressedChange={(nextPressed) =>
-              onToggleFiring?.(row.id, nextPressed)
-            }
-            label={
-              firing
-                ? WORK_PARTS_COPY.bringBack(row.title)
-                : WORK_PARTS_COPY.fire(row.title)
-            }
-            disabled={onToggleFiring === undefined}
-            className="disabled:cursor-default disabled:opacity-100"
-          />
-        )}
-      </div>
+      {planning ? null : (
+        <div className="flex size-(--target) shrink-0 items-center justify-center">
+          {done ? (
+            <span
+              aria-hidden="true"
+              data-done-mark
+              className="bg-muted-foreground text-background inline-flex size-4 items-center justify-center rounded-full"
+            >
+              <DoneIcon className="size-3" strokeWidth={3} />
+            </span>
+          ) : (
+            <FiringToggle
+              pressed={firing}
+              onPressedChange={(nextPressed) =>
+                onToggleFiring?.(row.id, nextPressed)
+              }
+              label={
+                firing
+                  ? WORK_PARTS_COPY.bringBack(row.title)
+                  : WORK_PARTS_COPY.fire(row.title)
+              }
+              disabled={onToggleFiring === undefined}
+              className="disabled:cursor-default disabled:opacity-100"
+            />
+          )}
+        </div>
+      )}
 
       <div className="min-w-0 flex-1 py-(--space-2)">
         <button

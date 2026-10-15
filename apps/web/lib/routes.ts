@@ -89,14 +89,26 @@ export function assetRoute(storedPath: string): string {
  * Today; on the phone, Now. `todo` opens the To-dos tray on that to-do
  * (`?todo=<id>`, read by `TODAY_TODO_PARAM`): a reminder's tap lands here (N4).
  */
-export function todayRoute(params: { todo?: string } = {}): string {
-  return params.todo
-    ? `/today?${TODAY_TODO_PARAM}=${encodeURIComponent(params.todo)}`
-    : "/today";
+export function todayRoute(
+  params: { todo?: string; date?: string } = {},
+): string {
+  const query = new URLSearchParams();
+  if (params.todo) query.set(TODAY_TODO_PARAM, params.todo);
+  // Another date, opened from the Week for planning (USE-58; D-USE-41).
+  if (params.date) query.set(TODAY_DATE_PARAM, params.date);
+  const search = query.toString();
+  return search ? `/today?${search}` : "/today";
 }
 
 /** The query key `todayRoute({ todo })` writes and Now reads (nuqs). */
 export const TODAY_TODO_PARAM = "todo";
+
+/**
+ * The query key `todayRoute({ date })` writes: the desk's Today on another
+ * date, planning (opened-day.md [ASSUMPTION: `/today?date=`, one route for
+ * doing and planning a day]). Today's own date is never written.
+ */
+export const TODAY_DATE_PARAM = "date";
 
 /** Today's timeline: the rail's Schedule and the phone's Schedule tab. */
 export function todayScheduleRoute(): string {

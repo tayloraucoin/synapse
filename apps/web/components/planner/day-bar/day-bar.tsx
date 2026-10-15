@@ -29,12 +29,17 @@ export interface DayBarSegment {
 
 export interface DayBarProps {
   segments: readonly DayBarSegment[];
-  /** The now-tick, minutes from midnight. */
-  nowAt: number;
+  /** The now-tick, minutes from midnight; null on a day that is not today (USE-58). */
+  nowAt: number | null;
   from: number;
   to: number;
   /** The bar's accessible name, read before its blocks ("The day"). */
   label: string;
+  /**
+   * The words under the bar (USE-58: "7:00", "Work ends 17:00", "Lights out
+   * 22:30"); unset, the start, middle and end clocks.
+   */
+  ticks?: { start: string; middle: string; end: string };
   className?: string;
 }
 
@@ -52,6 +57,7 @@ export function DayBar({
   from,
   to,
   label,
+  ticks,
   className,
 }: DayBarProps) {
   const span = Math.max(1, to - from);
@@ -92,8 +98,10 @@ export function DayBar({
       (segment) =>
         `${segment.label}, ${clock(segment.startMin)} to ${clock(segment.endMin)}`,
     ),
-    `now ${clock(nowAt)}`,
-  ].join("; ");
+    nowAt === null ? null : `now ${clock(nowAt)}`,
+  ]
+    .filter(Boolean)
+    .join("; ");
 
   return (
     <div className={cn("flex flex-col gap-(--space-1)", className)}>
@@ -140,16 +148,18 @@ export function DayBar({
             </div>
           );
         })}
-        <span
-          aria-hidden="true"
-          data-now-tick
-          style={{ left: at(nowAt) }}
-          className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-now"
-        />
+        {nowAt === null ? null : (
+          <span
+            aria-hidden="true"
+            data-now-tick
+            style={{ left: at(nowAt) }}
+            className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-now"
+          />
+        )}
       </div>
       <div aria-hidden="true" className="relative flex justify-between">
         <Text as="span" variant="caption" tone="muted" tabular>
-          {clock(from)}
+          {ticks?.start ?? clock(from)}
         </Text>
         <Text
           as="span"
@@ -158,10 +168,10 @@ export function DayBar({
           tabular
           className="absolute left-1/2 -translate-x-1/2"
         >
-          {clock(from + Math.round(span / 2))}
+          {ticks?.middle ?? clock(from + Math.round(span / 2))}
         </Text>
         <Text as="span" variant="caption" tone="muted" tabular>
-          {clock(to)}
+          {ticks?.end ?? clock(to)}
         </Text>
       </div>
     </div>

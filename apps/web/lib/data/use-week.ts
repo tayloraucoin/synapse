@@ -46,7 +46,7 @@ export interface SetUpWeek {
   days: SetUpDay[];
 }
 
-function deriveWeek(records: WeekRecords): SetUpWeek {
+export function deriveWeek(records: WeekRecords): SetUpWeek {
   return {
     week: records.week,
     days: records.days.map((day) => deriveSetUpDay(day, records.timeZone)),

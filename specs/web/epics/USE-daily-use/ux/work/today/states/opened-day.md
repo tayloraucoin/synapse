@@ -27,7 +27,7 @@ rulings:
 
 Tuesday 13 opened from the Week on Monday 12: Today's layout for that date in a planning state. Drawn in round 2 (D-USE-41), before the row and lift rounds (D-USE-42 to D-USE-49); where they differ, the later lines win, as Rulings say. `?state=opened-day`.
 
-**Entry:** a day head's › on the Week ("Tue 13 ›"; Sat and Sun heads carry none as drawn on the Week); **Open day** in the Block panel ([`../../block-panel/index.md`](../../block-panel/index.md)). **Route** [ASSUMPTION: `/today?date=2026-10-13`, one route for doing and planning a day, as the note's "One layout"; not ruled].
+**Entry:** a day head's › on the Week ("Tue 13 ›"; Sat and Sun heads carry none as drawn on the Week); **Open day** in the Block panel ([`../../block-panel/index.md`](../../block-panel/index.md)). **Route:** `/today?date=2026-10-13` (built USE-58, the ledger's `?date=` first): one route for doing and planning a day, as the note's "One layout"; today's own date is never written, so its strip card and day head go to `/today`. Captures: `/dev/parts?state=today-opened-day&date=2026-10-13`.
 
 ## What shows, top to bottom
 
@@ -77,6 +77,8 @@ A day opened from the week (a day head's ›, or Open day in the Block panel) is
 - A past date opened [ASSUMPTION: not drawn; the same layout with what was done shown done and the rest still editable, nothing marked missed, as N6's Week "a past day"].
 
 ## Widths
+
+**As built (USE-58) [ASSUMPTION]:** the strip's cards come from the date's own records: the first work item and the first event, else the first two of one kind; with no line, "Nothing slotted yet" for a Work block holding nothing, the date's all-day list by name ("Sunday reset"), else "No work" (Saturday's Errands block reads "No work", as drawn). A work line names its title before any colon. The header's "Work ends" is the Week's Fits line for the date. The day column's hours sit at 64 px an hour, the axis's nearest scale to the drawn 56; the day bar's middle word is the same Fits line. A block in the day column is words until the Block panel (USE-76).
 
 Drawn at 1728. 1024 to 1727: as Today (D-USE-65, D-USE-93): the day column keeps 340 px, the main column shrinks, then the strip scrolls sideways. Below 1024: Set my days' day (D-USE-55).
 

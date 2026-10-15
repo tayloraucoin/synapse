@@ -16,11 +16,11 @@ import {
   WeekIcon,
   type LucideIcon,
 } from "@syn/ui";
-
 import {
   isJournalPath,
   orientRoute,
   reviewRoute,
+  TODAY_DATE_PARAM,
   todayReadyRoute,
   todayReviewRoute,
   todayRoute,
@@ -70,13 +70,19 @@ export const TAB_ITEMS: readonly NavItem[] = tabItems();
 /**
  * Which item owns a path, or null when none does (nothing is shaded rather
  * than the wrong thing). A prefix rule: a page under `/week` is the Week's.
+ * Today on another date (`?date=`, USE-58) belongs to the Week: the opened
+ * day is planning (opened-day.md).
  */
-export function tabForPath(pathname: string): ShellTab | null {
+export function tabForPath(
+  pathname: string,
+  search: URLSearchParams | null = null,
+): ShellTab | null {
   const is = (route: string) =>
     pathname === route || pathname.startsWith(`${route}/`);
   if (is(todayScheduleRoute())) return "schedule";
   if (is(weekRoute())) return "week";
   if (is(reviewRoute())) return "review";
+  if (pathname === todayRoute() && search?.has(TODAY_DATE_PARAM)) return "week";
   if (is(todayRoute())) return "today";
   return null;
 }

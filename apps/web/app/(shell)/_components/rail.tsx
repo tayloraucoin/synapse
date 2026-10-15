@@ -13,7 +13,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -30,7 +30,7 @@ import { SHELL_COPY as COPY } from "./copy";
 import { RAIL_ITEMS, tabForPath } from "./nav-items";
 
 export function Rail() {
-  const active = tabForPath(usePathname());
+  const active = tabForPath(usePathname(), useSearchParams());
 
   return (
     <SidebarProvider className="min-h-0">

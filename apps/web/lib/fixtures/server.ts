@@ -58,6 +58,7 @@ import {
   type PlannerServer,
 } from "./planner";
 import { createWriteLog } from "./planner/journal";
+import { eventOn } from "./planner/read-week";
 import {
   createIntegrationServer,
   type IntegrationServer,
@@ -337,7 +338,8 @@ function readRecords(records: FixtureRecords, dateKey: string): TodayRecords {
     workItems: records.workItems,
     clients: records.clients,
     todos: records.todos,
-    dayEvents: records.dayEvents.filter((event) => event.onDate === dateKey),
+    // Repeating events too, as the week reads them (USE-58).
+    dayEvents: records.dayEvents.filter((event) => eventOn(event, dateKey)),
     slotEvents: records.slotEvents.filter((event) => slotIds.has(event.slotId)),
     dayRecord:
       records.dayRecords.find((record) => record.onDate === dateKey) ?? null,

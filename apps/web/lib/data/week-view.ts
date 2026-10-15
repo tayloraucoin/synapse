@@ -166,6 +166,8 @@ export interface ChipView {
   /** "KES-42 · 3 Medium", "ALD-17 · session 2 of 3", "1 Quick"; null with nothing to say. */
   meta: string | null;
   due: DueBadge | null;
+  /** The session's place, "2/3" on the desk's strip (D-USE-47); null for one session. */
+  session: { n: number; of: number } | null;
   /** "<title>, <tier>, <day>, session n of N, due <day>". */
   label: string;
 }
@@ -188,6 +190,8 @@ export interface WeekDayView {
   past: boolean;
   /** Holds a Work block: its head carries › and its tiers show. */
   hasWork: boolean;
+  /** The date's all-day checklist's name, the strip's "Sunday reset" (USE-58); else null. */
+  checklistName: string | null;
   events: EventChipView[];
   cells: Record<WorkTier, ChipView[]>;
   /** "Work ends 16:20", "Nothing slotted yet", "No work blocks". */
@@ -289,10 +293,11 @@ export function deriveWeekView(input: WeekViewInput): WeekView {
         const dates = [
           ...(sessionDates.get(item.id) ?? weekDatesOf.get(item.id) ?? []),
         ].sort();
-        const session =
+        const place =
           dates.length > 1
-            ? `session ${dates.indexOf(dateKey) + 1} of ${dates.length}`
+            ? { n: dates.indexOf(dateKey) + 1, of: dates.length }
             : null;
+        const session = place ? `session ${place.n} of ${place.of}` : null;
         const size = item.size ? SIZE_WORDS[item.size] : null;
         const meta =
           [item.linearIdentifier, session ?? size]
@@ -309,6 +314,7 @@ export function deriveWeekView(input: WeekViewInput): WeekView {
           emoji: item.icon?.kind === "emoji" ? item.icon.value : null,
           meta,
           due,
+          session: place,
           label: [
             item.title,
             TIER_WORDS[tier],
@@ -334,6 +340,8 @@ export function deriveWeekView(input: WeekViewInput): WeekView {
       isToday: dateKey === todayKey,
       past,
       hasWork: workBlocks.length > 0,
+      checklistName:
+        day.blocks.find((b) => b.block.checklist)?.block.name ?? null,
       events: [...day.events]
         .sort((a, b) => a.startsAt.localeCompare(b.startsAt))
         .map((event) => ({

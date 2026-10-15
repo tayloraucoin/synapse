@@ -20,7 +20,7 @@ Mid-morning, two or three AI threads out for two or three clients; the one quest
 | `?sheet=item&id=` | `../day/item-sheet/` | both | A row (click, tap) | Closes to Today |
 | `/week` [ASSUMPTION] | [`week/`](week/index.md) | desk only, from 1024 (D-USE-93); below it Set my days › This week (D-USE-55) | Rail "Week"; Plan the week on Today | Today; the opened day; the Block panel; the Item sheet |
 | `?panel=block&id=&date=` [ASSUMPTION] | [`block-panel/`](block-panel/index.md) | desk only, from 1024 (D-USE-93); below it Block view (D-USE-55) | A block in the Time lens, Today's day column, or Schedule (D-USE-77) | ×, Esc, Open day |
-| `/today?date=` [ASSUMPTION] | [`today/states/opened-day.md`](today/states/opened-day.md) | desk only; below it a day chip in Set my days (D-USE-55) | A day head's › on the Week; Open day in the Block panel | ‹ Week |
+| `/today?date=` (USE-58) | [`today/states/opened-day.md`](today/states/opened-day.md) | desk only; below it a day chip in Set my days (D-USE-55) | A day head's › on the Week; Open day in the Block panel | ‹ Week |
 | `/days?week=this&day=` [PROPOSED, the Set my days route] | [`this-week/`](this-week/index.md) | phone, below 1024; at the desk the Week (D-USE-55) | Set my days › This week, then a day; Plan the week on Today's no-work-slotted; Open This week on Review the day | ‹ Week; the Item sheet; the Block view; Pool (the pool sheet, [`place-from-the-pool/`](../interactions/place-from-the-pool/index.md)) |
 
 `/today` is one route at both widths: at and above the split the desk layout renders, below it the phone's Now (D-USE-39, D-USE-50).

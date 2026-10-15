@@ -21,6 +21,10 @@ export interface TierGroupProps extends WorkRowHandlers {
   word: string;
   rows: WorkRowView[];
   afterRow?: { rowId: string; content: React.ReactNode } | null;
+  /** The opened day's rows, with no lead slot (USE-58). */
+  planning?: boolean;
+  /** Drawn under the heading when the tier holds nothing: "+ Add to Stretch" (USE-58). */
+  empty?: React.ReactNode;
   headingAs?: "h2" | "h3";
   className?: string;
 }
@@ -30,6 +34,8 @@ export function TierGroup({
   word,
   rows,
   afterRow = null,
+  planning = false,
+  empty = null,
   headingAs = "h3",
   className,
   ...handlers
@@ -41,10 +47,11 @@ export function TierGroup({
       <GroupHeading as={headingAs} leading={<HueSquare hue={TIER_HUE[tier]} />}>
         {word}
       </GroupHeading>
+      {rows.length === 0 ? empty : null}
       <ul className="flex flex-col">
         {rows.map((row) => (
           <li key={row.id}>
-            <WorkRow row={row} {...handlers} />
+            <WorkRow row={row} planning={planning} {...handlers} />
             {afterRow?.rowId === row.id ? afterRow.content : null}
           </li>
         ))}
