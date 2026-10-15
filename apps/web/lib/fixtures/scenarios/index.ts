@@ -8,6 +8,7 @@ import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { NOW_FORM_SCENARIOS } from "./now-forms";
 import { ORIENT_SCENARIOS } from "./orient-morning";
 import { POOL_SCENARIOS } from "./pool";
+import { RUNNING_SCENARIOS } from "./running";
 import { SET_UP_SCENARIOS } from "./set-up";
 import { TODOS_SCENARIOS } from "./todos-tray";
 
@@ -143,6 +144,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...ACCOUNT_SCENARIOS,
   // ---- Setting up the days (USE-36): the usual week, this week, the first day ----
   ...SET_UP_SCENARIOS,
+  // ---- Running on Now (USE-23): Meditate's timer ----
+  ...RUNNING_SCENARIOS,
   // ---- The To-dos tray (USE-19): open, carried, empty, from a reminder, its failures ----
   ...TODOS_SCENARIOS,
   // ---- The pool and the work writes (USE-55): clients on, on this week ----

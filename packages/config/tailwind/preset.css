@@ -194,6 +194,9 @@
      form. It does NOT collapse under reduced motion like the two above: the
      animation is never attached there (`motion-safe:` only). */
   --dur-breathe: 2400ms;
+  /* The paused running figure's pulse (USE-23; D-USE-29): 100% to 40% and
+     back over 2 s, `motion-safe:` only; reduced motion holds it at 60%. */
+  --dur-pulse: 2000ms;
 
   /* ---- 3. shadcn bridge — every name points at a role ---- */
   --card: var(--background);

@@ -30,3 +30,9 @@ export {
   type UseOptimisticValueOptions,
   type UseOptimisticValueResult,
 } from "./use-optimistic-value";
+
+export {
+  WORK_CLOCK_TICK_MS,
+  useWorkClock,
+  type Visibility,
+} from "./use-work-clock";

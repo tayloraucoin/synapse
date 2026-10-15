@@ -5,8 +5,9 @@
  * It counts down from the top of the range; the caller passes the figure
  * already formatted ("1:24:10") and owns the tick, so this is a pure render.
  * Past the range the caller passes `over`: the figure ("0:42", "12 min") and
- * the word ("over") sit side by side in `warning-text` under a minute over,
- * in `destructive-text` from a minute on. The word is always there, so the
+ * the word ("over") sit side by side, in the band the caller gives (USE-23,
+ * D-USE-72: Done's percent bands): ink a little over, `warning-text`, then
+ * `destructive-text`. The word is always there, so the
  * colour never carries the state alone (P-A03); both colours are named bends
  * of "nothing red on the tabs" (D-USE-29).
  *
@@ -16,7 +17,7 @@
 import * as React from "react";
 import { cn } from "../../../lib/cn";
 
-export type CountdownOverLevel = "warning" | "danger";
+export type CountdownOverLevel = "ink" | "warning" | "danger";
 
 export interface CountdownFaceProps {
   /** The time left, or past the range the time over. */
@@ -27,6 +28,7 @@ export interface CountdownFaceProps {
 }
 
 const OVER_TONE: Record<CountdownOverLevel, string> = {
+  ink: "text-foreground",
   warning: "text-warning-text",
   danger: "text-destructive-text",
 };

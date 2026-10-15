@@ -3,13 +3,12 @@
 import * as React from "react";
 import { MealIcon, ReorderIcon } from "@syn/ui";
 import {
-  BLOCK_HUE,
   ChecklistRows,
   DayBlockHeader,
-  LiftedCard,
   NowBlockMenu,
   PlannerItemRow,
 } from "@/components/planner";
+import { isTimedDone, useRunningView } from "@/lib/data/running";
 import { useDataSource } from "@/lib/data/source";
 import {
   useChecklistAdd,
@@ -21,8 +20,10 @@ import {
 import { BeforeGoList } from "./before-go-list";
 import { nowBlockMenuRows } from "./block-menu";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
+import { NowCurrentCard } from "./now-current-card";
 import { NowTodosTray } from "./now-todos-tray";
 import { TimeTakenSheet } from "./time-taken-sheet";
+import { TimedTook } from "./timed-took";
 import { TookLine } from "./took-line";
 
 /** `view.open` from a scenario: "<what>:<item id>". */
@@ -72,6 +73,7 @@ export function NowScreen({
 
   const { view: now } = useNow(dateKey, chosenId);
   const writes = useSlotWrites(dateKey, now?.block?.id ?? null);
+  const running = useRunningView(dateKey, now);
   const add = useChecklistAdd(dateKey, now?.block?.id ?? null);
 
   // USE-17: behind is announced once per block, politely; the line stays.
@@ -123,6 +125,12 @@ export function NowScreen({
         item.id === current?.id ? (lifts?.title ?? null) : null,
       ),
     );
+  }
+
+  /** Done on the running card (USE-23): the time worked, no Change. */
+  function markTimedDone(item: NowItemView) {
+    if (item.id === chosenId) setChosenId(null);
+    setAnnouncement(COPY.announceDone(item.title, next?.title ?? null));
   }
 
   function markUndone(item: NowItemView) {
@@ -197,28 +205,13 @@ export function NowScreen({
               {items.map((item) =>
                 item.id === current?.id ? (
                   <li key={item.id} className="py-(--space-2)">
-                    <LiftedCard
-                      title={item.title}
-                      icon={item.icon}
-                      hue={
-                        block.form === "meal"
-                          ? "neutral"
-                          : BLOCK_HUE[block.kind]
-                      }
-                      meta={COPY.meta(item.lengthMin, item.plannedAt)}
-                      label={COPY.liftedName(item.title)}
-                      // A meal has no Start. Start's running card is USE-23's;
-                      // until then it is drawn and quiet.
-                      start={
-                        block.form === "meal"
-                          ? null
-                          : { label: COPY.start, onPress: () => {} }
-                      }
-                      done={{
-                        label: COPY.done,
-                        name: COPY.doneName(item.title),
-                        onPress: () => markDone(item),
-                      }}
+                    <NowCurrentCard
+                      item={item}
+                      block={block}
+                      dateKey={dateKey}
+                      running={running}
+                      onPlainDone={markDone}
+                      onTimedDone={markTimedDone}
                     />
                   </li>
                 ) : (
@@ -229,7 +222,9 @@ export function NowScreen({
                         title: item.title,
                         emoji: null,
                         checked: item.done,
-                        meta: COPY.length(item.lengthMin),
+                        meta: isTimedDone(running, item)
+                          ? null
+                          : COPY.length(item.lengthMin),
                       }}
                       noEmoji
                       fadeChecked
@@ -244,7 +239,14 @@ export function NowScreen({
                         if (!item.done) setChosenId(item.id);
                       }}
                       trailing={
-                        item.done ? null : (
+                        isTimedDone(running, item) &&
+                        item.tookMin !== null &&
+                        item.lengthMin !== null ? (
+                          <TimedTook
+                            tookMin={item.tookMin}
+                            planMin={item.lengthMin}
+                          />
+                        ) : item.done ? null : (
                           // Dragging and Move up / Move down are USE-18's.
                           <button
                             type="button"
