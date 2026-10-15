@@ -20,6 +20,7 @@ import { REVIEW_SCENARIOS } from "./review-day";
 import { RUNNING_SCENARIOS } from "./running";
 import { SCHEDULE_SCENARIOS } from "./schedule";
 import { SET_UP_SCENARIOS } from "./set-up";
+import { SETTINGS_SCENARIOS } from "./settings";
 import { TODO_SHEET_SCENARIOS } from "./todo-sheet";
 import { TODOS_SCENARIOS } from "./todos-tray";
 import { WEEK_SCENARIOS } from "./week";
@@ -227,6 +228,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...POOL_SCENARIOS,
   // ---- Linear, Google and clients (USE-56): off, a failed write, closed in Linear, clients ----
   ...INTEGRATION_SCENARIOS,
+  // ---- Settings › Connections, clients on, and its two sheets (USE-86) ----
+  ...SETTINGS_SCENARIOS,
   // ---- + Add and New task (USE-51): Monday during Work, and the pool's New task ----
   ...ADD_SCENARIOS,
   // ---- Review the day (USE-31): the Monday at 6:58, before Ready, go ----

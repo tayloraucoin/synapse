@@ -11,6 +11,13 @@ const TILE: Record<ClientHue, string> = {
   ink: "bg-foreground",
 };
 
+/** 16 on a work row; 20 in Settings' client list; 48 on the client sheet (USE-86). */
+const SIZE = {
+  sm: "size-4 rounded-(--radius-control) text-(length:--fs-caption)",
+  md: "size-5 rounded-(--radius-control) text-(length:--fs-caption)",
+  lg: "size-12 rounded-(--radius-md) text-(length:--fs-title)",
+} as const;
+
 /**
  * The client's letter tile (D-USE-42, D-USE-51): the letter keeps the colour
  * from standing alone. Its name, where shown, is read; the tile is hidden.
@@ -18,17 +25,23 @@ const TILE: Record<ClientHue, string> = {
 export function ClientTile({
   letter,
   hue,
+  size = "sm",
+  className,
 }: {
   letter: string;
   hue: ClientHue;
+  size?: keyof typeof SIZE;
+  className?: string;
 }) {
   return (
     <span
       aria-hidden="true"
       data-client-tile={hue}
       className={cn(
-        "text-background inline-flex size-4 shrink-0 items-center justify-center rounded-(--radius-control) text-(length:--fs-caption) leading-none font-semibold",
+        "text-background inline-flex shrink-0 items-center justify-center leading-none font-semibold",
+        SIZE[size],
         TILE[hue],
+        className,
       )}
     >
       {letter}

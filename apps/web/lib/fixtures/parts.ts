@@ -20,6 +20,8 @@ import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
 import { WEEK_SCENARIOS } from "./scenarios/week";
 import { SchedulePart, type SchedulePartState } from "./schedule-parts";
+import { SETTINGS_SCENARIOS } from "./scenarios/settings";
+import { SettingsClientsPart } from "./settings-parts";
 import { TodoSheetPart } from "./todo-sheet-parts";
 import {
   TodosNotificationPart,
@@ -252,4 +254,8 @@ for (const state of [
 // USE-72: the Week, under the week scenarios' names.
 for (const state of Object.keys(WEEK_SCENARIOS)) {
   registerPart(state, () => createElement(WeekPart));
+}
+// USE-86: Connections with clients on and its two sheets, by their scenario names.
+for (const state of Object.keys(SETTINGS_SCENARIOS)) {
+  registerPart(state, () => createElement(SettingsClientsPart)); // USE-86
 }

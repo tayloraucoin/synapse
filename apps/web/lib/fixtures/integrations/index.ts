@@ -60,6 +60,14 @@ export const workspaceClientInput = z.object({
 
 export type WorkspaceClientInput = z.infer<typeof workspaceClientInput>;
 
+/** Remove client, or its Undo (USE-86). */
+export const clientArchivedInput = z.object({
+  id: z.string().uuid(),
+  archived: z.boolean(),
+});
+
+export type ClientArchivedInput = z.infer<typeof clientArchivedInput>;
+
 export interface IntegrationOptions {
   /** `fail`: each outbox row's first send fails; Try again sends it. */
   linearSends?: "fail";
@@ -92,6 +100,12 @@ export interface IntegrationServer {
   writeClientsEnabled(raw: ClientsEnabledInput): Promise<void>;
   /** A new client, or with `id` a change to one. */
   writeClient(raw: ClientInput & { id?: string }): Promise<ClientRecord>;
+  /**
+   * Remove client, or its Undo (USE-86): the row is archived, never deleted,
+   * so its work resolves to no client (Personal) and Undo brings it back
+   * with every mapping and its place in the order. Nothing reaches Linear.
+   */
+  writeClientArchived(raw: ClientArchivedInput): Promise<void>;
   disconnect(connectionId: string): Promise<void>;
 }
 
@@ -492,6 +506,25 @@ export function createIntegrationServer({
         });
         records.clients.push(record);
         return structuredClone(record);
+      });
+    },
+
+    writeClientArchived(raw) {
+      return run(() => {
+        const input = parse(clientArchivedInput, raw);
+        const row = records.clients.find((c) => c.id === input.id);
+        if (!row) {
+          throw new PlannerRefusal("unknown", "No client with that id.");
+        }
+        const at = stamp();
+        Object.assign(
+          row,
+          clientRecord.parse({
+            ...row,
+            archivedAt: input.archived ? at : null,
+            updatedAt: at,
+          }),
+        );
       });
     },
 

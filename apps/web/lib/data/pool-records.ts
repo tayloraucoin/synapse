@@ -38,12 +38,23 @@ export interface Pool {
   groups: PoolGroup[];
 }
 
-export function groupPool(records: PoolRecords): Pool {
+/**
+ * Whose work an item is. Unset, the item's own client; `usePool` passes
+ * USE-9's `resolveClient` through Connections' mappings (USE-86), so a
+ * project mapped in Settings regroups its work at once.
+ */
+export type PoolClientOf = (item: WorkItemRecord) => ClientRecord | null;
+
+export function groupPool(records: PoolRecords, clientOf?: PoolClientOf): Pool {
   const clients = new Map(records.clients.map((c) => [c.id, c]));
+  const ownClient = (item: WorkItemRecord) =>
+    item.clientId === null ? null : (clients.get(item.clientId) ?? null);
   const items = records.workItems.map((item) => ({
     item,
-    client:
-      item.clientId === null ? null : (clients.get(item.clientId) ?? null),
+    // Only a client the pool holds: one in the order, not archived.
+    client: clientOf
+      ? (clients.get(clientOf(item)?.id ?? "") ?? null)
+      : ownClient(item),
     sessionDates: records.slots
       .filter((slot) => slot.workItemId === item.id)
       .map((slot) => slot.onDate)

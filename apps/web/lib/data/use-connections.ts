@@ -24,6 +24,7 @@ type ConnectionsMethod =
   | "writeWorkspaceClient"
   | "writeClientsEnabled"
   | "writeClient"
+  | "writeClientArchived"
   | "disconnect";
 
 type ConnectionsCall = {
@@ -77,6 +78,40 @@ export function useConnections() {
     setWorkspaceClient: write("writeWorkspaceClient"),
     setClientsEnabled: write("writeClientsEnabled"),
     saveClient: write("writeClient"),
+    archiveClient: write("writeClientArchived"),
+    /**
+     * A project's client in a per-project workspace, or with no `projectId`
+     * the workspace's one client (USE-86). Saves as made; never to Linear.
+     */
+    setMapping: ({
+      connectionId,
+      projectId,
+      clientId,
+    }: {
+      connectionId: string;
+      projectId?: string;
+      clientId: string | null;
+    }) =>
+      projectId === undefined
+        ? write("writeWorkspaceClient")({
+            connectionId,
+            clientId,
+            perProject: false,
+          })
+        : write("writeProjectClient")({ connectionId, projectId, clientId }),
+    /**
+     * One client or Set per project (USE-86). The projects' rows are kept
+     * either way, so a switch back to per project finds them as they were.
+     */
+    setPerProject: (connectionId: string, perProject: boolean) =>
+      write("writeWorkspaceClient")({
+        connectionId,
+        perProject,
+        clientId: perProject
+          ? null
+          : (query.data?.linear.find((c) => c.id === connectionId)?.clientId ??
+            null),
+      }),
     disconnect: write("disconnect"),
     isPending: mutation.isPending,
     error: mutation.error,

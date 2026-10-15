@@ -54,3 +54,60 @@ export const PROFILE_COPY = {
     use: "Use photo",
   },
 } as const;
+
+/**
+ * Settings › Connections with clients on, the client sheet and the
+ * workspace sheet (USE-86; account/settings/words-and-access.md), as drawn.
+ * No second person; the counts are of projects, never of the day.
+ */
+export const CLIENTS_COPY = {
+  linear: "Linear",
+  addWorkspace: "Add a workspace",
+  connected: "Connected",
+  title: "Clients",
+  explainer: "Group work by who it's for. Off by default.",
+  orderLine: "In this order in the pool. Hold the grip to reorder.",
+  listLabel: "Clients, in pool order",
+  addClient: "Add a client",
+  personalLine: "Work with no client shows under Personal.",
+  clientRow: (name: string, covers: string) => `${name}, ${covers}`,
+  workspaceRow: (name: string, line: string) => `${name}, ${line}`,
+  close: "Close",
+  removed: (name: string) => `${name} removed. Its work is under Personal.`,
+  client: {
+    title: "Client",
+    upload: "Upload a logo",
+    uploadLine: "Or the letter and colour, as here",
+    name: "Name",
+    colour: "Colour",
+    colourLine: "Sky, plum and clay stay with Work, events and firing.",
+    linear: "Linear",
+    save: "Save",
+    nothingToSave: "Nothing to save yet",
+    notSaved: "Not saved. Try again.",
+    remove: "Remove client · its work moves to Personal",
+    removeLabel: (name: string) => `Remove client ${name}`,
+    colours: {
+      rose: "Rose",
+      leaf: "Leaf",
+      amber: "Amber",
+      moss: "Moss",
+      slate: "Slate",
+      ink: "Ink",
+    },
+  },
+  workspace: {
+    line: (synced: string) => `Linear workspace · connected · ${synced}`,
+    whose: "Whose work is it",
+    oneClient: "One client",
+    perProject: "Set per project",
+    workspaceClient: "Client",
+    projects: "Projects",
+    noClient: "No client",
+    projectClient: (project: string, value: string) =>
+      `${project} client, ${value}`,
+    footnote:
+      "The project emoji comes from Linear, or set one here. A project's client never writes to Linear.",
+    disconnect: (name: string) => `Disconnect ${name}`,
+  },
+} as const;
