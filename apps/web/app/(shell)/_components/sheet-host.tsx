@@ -18,6 +18,7 @@ import * as React from "react";
 import { useQueryState } from "nuqs";
 import { useIsSplit } from "@syn/ui";
 import { InstallSheet, ProfileSheet } from "@/components/account";
+import { MealTopicsSheet } from "@/components/planner/meal-topics-sheet";
 import { useDataSource } from "@/lib/data/source";
 import { isInstallOffered, useInstallState } from "@/lib/pwa/use-install-state";
 import type { SheetName } from "@/lib/routes";
@@ -63,6 +64,17 @@ export function SheetHost() {
   const atDesk = useIsSplit();
   const installOffered = isInstallOffered(install, atDesk);
 
+  // A scenario that opens on a sheet (`view.open: "sheet:<name>"`), once.
+  const seeded = React.useRef(false);
+  const seedSheet = scenario.view?.open?.startsWith("sheet:")
+    ? scenario.view.open.slice("sheet:".length)
+    : null;
+  React.useEffect(() => {
+    if (seeded.current || seedSheet === null) return;
+    seeded.current = true;
+    void setSheet(seedSheet);
+  }, [seedSheet, setSheet]);
+
   React.useEffect(() => {
     if (sheet === "install" && install.known && !installOffered) {
       void setSheet(null);
@@ -86,6 +98,11 @@ export function SheetHost() {
       />
       <ProfileSheet
         open={sheet === "profile"}
+        onOpenChange={close}
+        returnFocusRef={opener ?? undefined}
+      />
+      <MealTopicsSheet
+        open={sheet === "meal-topics"}
         onOpenChange={close}
         returnFocusRef={opener ?? undefined}
       />

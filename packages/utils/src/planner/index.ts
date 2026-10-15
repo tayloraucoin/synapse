@@ -147,3 +147,8 @@ export {
   type BulletGrid,
   type BulletGridOptions,
 } from "./bullet-grid";
+export {
+  mealTopicUrl,
+  type MealTopicLink,
+  type MealTopicLinkKind,
+} from "./meal-topic";

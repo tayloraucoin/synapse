@@ -8,6 +8,7 @@ import {
   WorkRowForms,
 } from "./day-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
+import { MealTopicPart, type MealTopicPartState } from "./meal-topic-parts";
 import { NowPart, type NowPartState } from "./now-parts";
 import { OrientPart, type OrientPartState } from "./orient-parts";
 import { ReviewPart, type ReviewPartState } from "./review-parts";
@@ -157,4 +158,12 @@ for (const state of [
 // USE-31: Review the day's success frame and the tray open, `review-<state>`.
 for (const state of ["success", "tray-open"] satisfies ReviewPartState[]) {
   registerPart(`review-${state}`, () => createElement(ReviewPart, { state }));
+}
+// USE-22: a meal's topics and the Meal topics sheet, by their scenario names.
+for (const state of [
+  "meal-pick-topic",
+  "meal-topic-picked",
+  "meal-topics-sheet",
+] satisfies MealTopicPartState[]) {
+  registerPart(state, () => createElement(MealTopicPart, { state })); // USE-22
 }

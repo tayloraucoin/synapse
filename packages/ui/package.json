@@ -279,6 +279,10 @@
       "types": "./src/composed/display/group-heading/index.ts",
       "default": "./src/composed/display/group-heading/index.ts"
     },
+    "./icon-tile": {
+      "types": "./src/composed/display/icon-tile/index.ts",
+      "default": "./src/composed/display/icon-tile/index.ts"
+    },
     "./item-icon": {
       "types": "./src/composed/display/item-icon/index.ts",
       "default": "./src/composed/display/item-icon/index.ts"

@@ -10,6 +10,7 @@ import {
   dayRecordRecord,
   journalEntryRecord,
   linkRecord,
+  mealTopicRecord,
   morningLinesRecord,
   passageRecord,
   quoteRecord,
@@ -61,13 +62,15 @@ const SCHEMAS: {
   quotes: quoteRecord,
   morningLines: morningLinesRecord,
   journalEntries: journalEntryRecord,
+  // USE-22: the meal topics, where a scenario has them.
+  mealTopics: mealTopicRecord,
 };
 
 describe("C1: every scenario record parses with its @syn/validators schema", () => {
   it.each(scenarioNames())("%s", (name) => {
     const { records } = resolveScenario(name);
     for (const [table, schema] of Object.entries(SCHEMAS)) {
-      for (const record of records[table as keyof typeof SCHEMAS]) {
+      for (const record of records[table as keyof typeof SCHEMAS] ?? []) {
         // Unchanged by a parse: no key dropped, none coerced.
         expect(schema.parse(record)).toEqual(record);
       }

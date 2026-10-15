@@ -5,6 +5,7 @@ import {
   dayRecordRecord,
   journalEntryRecord,
   linkRecord,
+  mealTopicRecord,
   passageRecord,
   quoteRecord,
   savedColourRecord,
@@ -353,6 +354,58 @@ const savedColours = ["#3d5a80", "#d4893a", "#6a4c93", "#2f6f62"].map(
 );
 
 /**
+ * Meal topics (USE-22; the sheet's frame "with icons"): an icon on its kind
+ * colour, a name and one link, in the chips' order. Every link is a
+ * [placeholder].
+ */
+const mealTopics = [
+  {
+    name: "Agent workflows",
+    icon: { kind: "lucide", value: "bot", color: "sky" },
+    linkKind: "playlist",
+    linkValue: "https://www.youtube.com/playlist?list=PLplaceholder0agents",
+  },
+  {
+    name: "Strength training",
+    icon: { kind: "lucide", value: "dumbbell", color: "rose" },
+    linkKind: "channel",
+    linkValue: "@placeholder",
+  },
+  {
+    name: "Roman history",
+    icon: { kind: "lucide", value: "landmark", color: "amber" },
+    linkKind: "search",
+    linkValue: "roman history documentary",
+  },
+  {
+    name: "Cooking basics",
+    icon: { kind: "lucide", value: "cooking-pot", color: "leaf" },
+    linkKind: "search",
+    linkValue: "simple weeknight cooking",
+  },
+].map((topic, n) =>
+  mealTopicRecord.parse({
+    id: fixtureId(0, 41 + n),
+    ...stamps,
+    ...topic,
+    sortOrder: n,
+  }),
+);
+
+/** The topics' ids, in order. */
+export const MEAL_TOPIC_IDS = {
+  agentWorkflows: fixtureId(0, 41),
+  strengthTraining: fixtureId(0, 42),
+  romanHistory: fixtureId(0, 43),
+  cookingBasics: fixtureId(0, 44),
+} as const;
+
+/** The four topics, a fresh copy each call. */
+export function baseMealTopics() {
+  return structuredClone(mealTopics);
+}
+
+/**
  * The account on the boards (USE-83): "Taylor Aucoin", with a photo. The
  * photo is a drawn [placeholder] in warm tones, inline so a capture needs no
  * network; the no-photo scenario clears it.
@@ -487,6 +540,7 @@ function baseDayRecords(): FixtureRecords {
     savedColours,
     ...morningRecords(),
     account: baseAccount,
+    mealTopics,
   });
 }
 

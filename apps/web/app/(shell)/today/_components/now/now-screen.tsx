@@ -37,6 +37,7 @@ import { NowEmpty } from "./now-empty";
 import { nowBlockMenuRows } from "./block-menu";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
 import { NowCurrentCard } from "./now-current-card";
+import { NowMealTopics } from "./now-meal-topics";
 import { NowTodosTray } from "./now-todos-tray";
 import { TimeTakenSheet } from "./time-taken-sheet";
 import { TimedTook } from "./timed-took";
@@ -469,6 +470,13 @@ export function NowScreen({
               }}
             />
           )}
+          {block.form === "meal" ? (
+            <NowMealTopics
+              dateKey={dateKey}
+              blockId={block.id}
+              seed={seeded(view?.open, "topic")}
+            />
+          ) : null}
           {now.footer ? blockEnd(now.footer, block) : null}
         </section>
       ) : null}

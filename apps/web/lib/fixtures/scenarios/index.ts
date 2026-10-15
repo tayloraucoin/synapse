@@ -5,6 +5,7 @@ import { ACCOUNT_SCENARIOS } from "./account";
 import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { INTEGRATION_SCENARIOS } from "./integrations";
+import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { NOW_END_SCENARIOS } from "./now-end";
 import { NOW_FORM_SCENARIOS } from "./now-forms";
@@ -154,6 +155,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
     mode: "ready",
     view: { open: `time-taken:${NOW_IDS.items.startColdBath}` },
   }),
+  // ---- A meal's topics and the Meal topics sheet (USE-22) ----
+  ...MEAL_TOPIC_SCENARIOS,
   // ---- Now's rows (USE-18): the long-press menu and a drag held mid-air ----
   "row-long-press": () => ({
     name: "row-long-press",

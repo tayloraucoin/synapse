@@ -8,6 +8,7 @@ import type {
   DayRecordRecord,
   JournalEntryRecord,
   LinkRecord,
+  MealTopicRecord,
   MorningLinesRecord,
   PassageRecord,
   QuoteRecord,
@@ -64,6 +65,8 @@ export interface FixtureRecords {
   journalPrompts?: JournalPromptRecord[];
   /** The signed-in person behind the avatar (USE-83). */
   account: AccountView;
+  /** Meal topics (USE-22), any order; reads sort by `sortOrder`. Unset, none saved. */
+  mealTopics?: MealTopicRecord[];
   /** Linear and Google (USE-56); unset, nothing is connected. */
   integrations?: IntegrationRecords;
 }

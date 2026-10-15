@@ -6,7 +6,7 @@ import {
 } from "@syn/validators";
 import { fixtureId } from "../ids";
 import type { FixtureRecords } from "../records";
-import { BASE_DATE, emptyRecords } from "./base-day";
+import { BASE_DATE, baseMealTopics, emptyRecords } from "./base-day";
 
 /**
  * Taylor's Monday (USE-16; D-USE-8), the day Now's captures are drawn on:
@@ -249,5 +249,7 @@ export function nowDayRecords(done: readonly NowItemName[]): FixtureRecords {
     blockItems,
     todos,
     slots,
+    // Breakfast offers the default's topics (USE-22).
+    mealTopics: baseMealTopics(),
   });
 }

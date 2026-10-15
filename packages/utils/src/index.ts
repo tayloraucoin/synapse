@@ -304,3 +304,10 @@ export {
   type BulletGrid,
   type BulletGridOptions,
 } from "./planner";
+
+/* ---- Meal topics: where a topic opens on YouTube (USE-22) ---- */
+export {
+  mealTopicUrl,
+  type MealTopicLink,
+  type MealTopicLinkKind,
+} from "./planner";

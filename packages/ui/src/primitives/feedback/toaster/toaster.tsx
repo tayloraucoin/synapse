@@ -22,9 +22,7 @@
 "use client";
 
 import { Toaster as Sonner, toast } from "sonner";
-
 import { UNDO_SHORT_MS } from "@syn/constants";
-
 import { cn } from "../../../lib/cn";
 
 export type ToasterProps = React.ComponentProps<typeof Sonner>;
@@ -52,7 +50,10 @@ function Toaster({ className, toastOptions, ...props }: ToasterProps) {
             "rounded-(--radius)!",
             "border-0!",
             "bg-primary! text-primary-foreground!",
-                                  ),
+            // A modal sheet sets `pointer-events: none` on the body; Undo over
+            // a sheet must still be tappable (USE-22).
+            "pointer-events-auto!",
+          ),
           title: cn(
             "group-[.toast]:font-sans",
             "group-[.toast]:text-(length:--fs-secondary)",

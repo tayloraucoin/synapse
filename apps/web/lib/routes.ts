@@ -201,6 +201,11 @@ export function installSheetRoute(path: string): string {
   return sheetRoute(path, "install");
 }
 
+/** The Meal topics sheet over `path` (USE-22): Edit topics on a meal, the avatar menu's row. */
+export function mealTopicsSheetRoute(path: string): string {
+  return sheetRoute(path, "meal-topics");
+}
+
 /** The Profile sheet over `path` (USE-84): the avatar menu's "Profile". */
 export function profileSheetRoute(path: string): string {
   return sheetRoute(path, "profile");

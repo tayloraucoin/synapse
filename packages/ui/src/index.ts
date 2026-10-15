@@ -551,6 +551,7 @@ export {
   GroupHeading,
   type GroupHeadingProps,
 } from "./composed/display/group-heading";
+export { IconTile, type IconTileProps } from "./composed/display/icon-tile";
 export {
   CURATED_GLYPHS,
   ItemIcon,

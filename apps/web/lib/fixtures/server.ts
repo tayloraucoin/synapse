@@ -2,6 +2,8 @@ import { addDays, checkEventTime, dayWindow } from "@syn/utils";
 import {
   dayRecordRecord,
   displayNameSchema,
+  mealTopicInput,
+  mealTopicRecord,
   morningLinesInput,
   morningLinesRecord,
   placeSlotInput,
@@ -14,6 +16,8 @@ import {
   todoInput,
   todoRecord,
   type DayRecordRecord,
+  type MealTopicInput,
+  type MealTopicRecord,
   type MorningLinesInput,
   type MorningLinesRecord,
   type PlaceSlotInput,
@@ -78,6 +82,17 @@ export class SavedColourRefusal extends Error {
   constructor(reason: SavedColourRefusal["reason"], message: string) {
     super(message);
     this.name = "SavedColourRefusal";
+    this.reason = reason;
+  }
+}
+
+/** A meal topic write the router would refuse (USE-22). */
+export class MealTopicRefusal extends Error {
+  readonly reason: "invalid" | "unknown";
+
+  constructor(reason: MealTopicRefusal["reason"], message: string) {
+    super(message);
+    this.name = "MealTopicRefusal";
     this.reason = reason;
   }
 }
@@ -186,6 +201,13 @@ export interface FixtureServer
     input: SavedColourInput & { id?: string },
   ): Promise<SavedColourRecord>;
   removeSavedColour(id: string): Promise<void>;
+  /** Meal topics in their order (lowest `sortOrder` first): the chips' order. */
+  listMealTopics(): Promise<MealTopicRecord[]>;
+  /** Adds a topic (`mealTopicInput`), or with `id` changes one. */
+  writeMealTopic(
+    input: MealTopicInput & { id?: string },
+  ): Promise<MealTopicRecord>;
+  removeMealTopic(id: string): Promise<void>;
   /** The account behind the avatar (USE-83); offline it is already on the device. */
   readAccount(): Promise<AccountView>;
   /**
@@ -567,6 +589,61 @@ export function createFixtureServer(
         );
       }
       records.savedColours.splice(index, 1);
+      return Promise.resolve();
+    },
+
+    listMealTopics() {
+      return Promise.resolve(
+        structuredClone(
+          [...(records.mealTopics ?? [])].sort(
+            (a, b) => a.sortOrder - b.sortOrder,
+          ),
+        ),
+      );
+    },
+
+    writeMealTopic(raw) {
+      const parsed = mealTopicInput.safeParse(raw);
+      if (!parsed.success) {
+        return Promise.reject(
+          new MealTopicRefusal(
+            "invalid",
+            parsed.error.issues[0]?.message ?? "Invalid meal topic.",
+          ),
+        );
+      }
+      const input = { ...parsed.data, icon: parsed.data.icon ?? null };
+      const topics = (records.mealTopics ??= []);
+      const stamp = now().toISOString();
+      if (raw.id !== undefined) {
+        const row = topics.find((r) => r.id === raw.id);
+        if (!row) {
+          return Promise.reject(
+            new MealTopicRefusal("unknown", "No meal topic with that id."),
+          );
+        }
+        Object.assign(row, input, { updatedAt: stamp });
+        return Promise.resolve(structuredClone(row));
+      }
+      const record = mealTopicRecord.parse({
+        id: crypto.randomUUID(),
+        createdAt: stamp,
+        updatedAt: stamp,
+        ...input,
+      });
+      topics.push(record);
+      return Promise.resolve(structuredClone(record));
+    },
+
+    removeMealTopic(id) {
+      const topics = records.mealTopics ?? [];
+      const index = topics.findIndex((row) => row.id === id);
+      if (index === -1) {
+        return Promise.reject(
+          new MealTopicRefusal("unknown", "No meal topic with that id."),
+        );
+      }
+      topics.splice(index, 1);
       return Promise.resolve();
     },
 

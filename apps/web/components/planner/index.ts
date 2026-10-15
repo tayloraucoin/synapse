@@ -59,3 +59,16 @@ export {
   type DayColumnItem,
   type DayColumnProps,
 } from "./day-column";
+export {
+  MealTopicChips,
+  type MealTopicChipsProps,
+} from "./meal-topic-chips";
+export {
+  MealTopicsSheet,
+  type MealTopicsSheetProps,
+} from "./meal-topics-sheet";
+export {
+  MealTopicEditStep,
+  type MealTopicDraft,
+  type MealTopicEditStepProps,
+} from "./meal-topic-edit-step";
