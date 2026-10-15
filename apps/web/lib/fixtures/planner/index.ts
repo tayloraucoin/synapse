@@ -1,5 +1,12 @@
 import type { z } from "zod";
-import { addDays, occursOn, parseRule, usualChangeReach } from "@syn/utils";
+import {
+  addDays,
+  clockFromMinutes,
+  clockMinutes,
+  occursOn,
+  parseRule,
+  usualChangeReach,
+} from "@syn/utils";
 import {
   blockChangeInput,
   blockChangeRecord,
@@ -137,6 +144,16 @@ export interface PlannerServer {
   ): Promise<PlannerWrite>;
   /** D-USE-32 and D-USE-87: blocks, times, kinds and items; Work as time only. */
   copyDay(input: { from: DayRef; to: DayRef }): Promise<PlannerWrite>;
+  /**
+   * D-USE-87's From a saved block: one block of another day, with its items
+   * (Work as time only), onto the day at `startsAt`, keeping its length.
+   */
+  copyBlock(input: {
+    blockId: string;
+    from: DayRef;
+    to: DayRef;
+    startsAt: string;
+  }): Promise<PlannerWrite>;
   clearDay(ref: DayRef): Promise<PlannerWrite>;
   /** D-USE-33: the date's own changes go; the usual day shows again. */
   resetDay(ref: { date: string }): Promise<PlannerWrite>;
@@ -276,6 +293,56 @@ export function createPlannerServer({
    * One write: all or nothing. `fn` changes the records through the journal;
    * a refusal part way puts back what it had done.
    */
+  /**
+   * One block of `source` onto `to` at `times`, with its items (D-USE-32,
+   * D-USE-87: a Work block as time only). A usual weekday's copy starts this
+   * week if that date has not begun.
+   */
+  function putCopy(
+    journal: Journal,
+    {
+      block,
+      source,
+      to,
+      times,
+    }: {
+      block: BlockRecord;
+      source: ReturnType<typeof readSetUpDay>;
+      to: DayRef;
+      times: { startsAt: string; endsAt: string };
+    },
+  ): BlockRecord {
+    const start =
+      "date" in to
+        ? null
+        : (reachOf(to.weekday).follows ??
+          addDays(thisWeekDates(now(), records.timeZone)[to.weekday]!, 7));
+    const row = journal.put(
+      "blocks",
+      blockRecord.parse({
+        ...block,
+        ...stamps(),
+        ...times,
+        rrule: "date" in to ? null : weeklyRule(start as string, to.weekday),
+        onDate: "date" in to ? to.date : null,
+        archivedAt: null,
+      }),
+    );
+    if (block.kind === "work") return row;
+    for (const item of source.items.filter((i) => i.blockId === block.id)) {
+      journal.put(
+        "blockItems",
+        blockItemRecord.parse({
+          ...item,
+          ...stamps(),
+          blockId: row.id,
+          onDate: null,
+        }),
+      );
+    }
+    return row;
+  }
+
   function write(
     fn: (journal: Journal) => {
       id?: string;
@@ -752,43 +819,42 @@ export function createPlannerServer({
           throw new PlannerRefusal("invalid", "That day has nothing to copy.");
         }
         clearInto(journal, to);
-
-        // A usual weekday's copy starts this week if that date has not begun.
-        const start =
-          "date" in to
-            ? null
-            : (reachOf(to.weekday).follows ??
-              addDays(thisWeekDates(now(), records.timeZone)[to.weekday]!, 7));
         for (const block of source.blocks) {
-          const row = journal.put(
-            "blocks",
-            blockRecord.parse({
-              ...block,
-              ...stamps(),
-              ...timesOf(block, source.changes),
-              rrule:
-                "date" in to ? null : weeklyRule(start as string, to.weekday),
-              onDate: "date" in to ? to.date : null,
-              archivedAt: null,
-            }),
-          );
-          // D-USE-87: a Work block copies as time only.
-          if (block.kind === "work") continue;
-          for (const item of source.items.filter(
-            (i) => i.blockId === block.id,
-          )) {
-            journal.put(
-              "blockItems",
-              blockItemRecord.parse({
-                ...item,
-                ...stamps(),
-                blockId: row.id,
-                onDate: null,
-              }),
-            );
-          }
+          putCopy(journal, {
+            block,
+            source,
+            to,
+            times: timesOf(block, source.changes),
+          });
         }
         return { reach: "date" in to ? undefined : { weekday: to.weekday } };
+      });
+    },
+
+    copyBlock({ blockId, from, to, startsAt }) {
+      return write((journal) => {
+        const source = readSetUpDay(records, from);
+        const block = source.blocks.find((b) => b.id === blockId);
+        if (!block) {
+          throw new PlannerRefusal("unknown", "That block is not on that day.");
+        }
+        const times = timesOf(block, source.changes);
+        const length =
+          clockMinutes(times.endsAt) - clockMinutes(times.startsAt);
+        const start = clockMinutes(startsAt);
+        const row = putCopy(journal, {
+          block,
+          source,
+          to,
+          times: {
+            startsAt,
+            endsAt: clockFromMinutes(Math.min(24 * 60, start + length)),
+          },
+        });
+        return {
+          id: row.id,
+          reach: "date" in to ? undefined : { weekday: to.weekday },
+        };
       });
     },
 

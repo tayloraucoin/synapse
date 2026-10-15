@@ -1,5 +1,11 @@
 export { BLOCK_HUE, type BlockHue } from "./block-hue";
 export {
+  CopyPicker,
+  type CopyPickerProps,
+  type CopyPickerRow,
+} from "./copy-picker";
+export { DayStrip, type DayStripProps } from "./day-strip";
+export {
   BlockDoneFooter,
   type BlockDoneFooterProps,
 } from "./block-done-footer";

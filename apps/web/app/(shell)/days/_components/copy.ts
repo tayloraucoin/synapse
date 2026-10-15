@@ -53,6 +53,20 @@ export const DAYS_COPY = {
   cancel: "Cancel",
   clear: "Clear",
   undo: "Undo",
+  /** Copy from (USE-45; interactions/copy-from, copy-offer.md, empty-day.md). */
+  copyFromDay: (day: string) => `Copy from ${day}`,
+  orTapATime: "or tap a time to add a block",
+  emptyHeading: (day: string) => `Nothing on ${day} yet.`,
+  emptyBody: "Start from a day that's built, or add the first block.",
+  otherDay: "Other day…",
+  orTapOrPlus: "or tap a time, or +, to add a block",
+  copyTitle: "Copy from",
+  replace: "Replace",
+  /** Undo's name in the copied toast (copied-undo.md) [PROPOSED]. */
+  undoCopy: "copy",
+  /** From a saved block's picker (D-USE-87) [PROPOSED helper]. */
+  savedHelper: (day: string) =>
+    `One block from another day, with its items, at the first free time on ${day}.`,
   /** A usual change names its reach (usual-change-reaches.md). */
   seeIt: "See it",
   /** Offline (offline.md, D-USE-82). */

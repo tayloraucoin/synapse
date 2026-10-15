@@ -241,17 +241,20 @@ export function BoundsField({
  * Monday"): Copy from…, Reset to usual <weekday> (This week only, once the
  * day differs from its usual), a separator, then Clear this day in ink,
  * never red, disabled with no blocks. Event is the +'s. The button takes an
- * ink ring while open. Copy from's picker is its own ticket's; until then
- * the row shows and takes no tap [ASSUMPTION]. Offline the button is faded
- * and inert (D-USE-82).
+ * ink ring while open. Copy from… opens USE-45's picker; with no other
+ * day built it does not show [ASSUMPTION]. Offline the button is faded and
+ * inert (D-USE-82).
  */
 export function DayMenu({
   title,
   day,
   resetTo,
   canClear,
+  canCopy,
   disabled,
   defaultOpen = false,
+  triggerRef,
+  onCopyFrom,
   onReset,
   onClear,
 }: {
@@ -261,8 +264,13 @@ export function DayMenu({
   /** "Monday" when Reset to usual shows; null hides it. */
   resetTo: string | null;
   canClear: boolean;
+  /** Another day is built: Copy from… shows. */
+  canCopy: boolean;
   disabled: boolean;
   defaultOpen?: boolean;
+  /** Where focus returns when the picker or the ask closes. */
+  triggerRef?: React.Ref<HTMLButtonElement>;
+  onCopyFrom: () => void;
   onReset: () => void;
   onClear: () => void;
 }) {
@@ -278,6 +286,7 @@ export function DayMenu({
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger
+        ref={triggerRef}
         aria-label={COPY.dayMenu(day)}
         disabled={disabled}
         className="group inline-flex size-(--target) shrink-0 items-center justify-center rounded-full focus-visible:outline-none disabled:cursor-default"
@@ -302,12 +311,14 @@ export function DayMenu({
         <DropdownMenuLabel className="px-(--space-4) pt-(--space-2) pb-(--space-1) text-(length:--fs-caption) font-medium text-muted-foreground">
           {title}
         </DropdownMenuLabel>
-        <DropdownMenuItem disabled className={row}>
-          <CopyFromIcon aria-hidden="true" className={icon} />
-          <Text as="span" variant="body" weight={500}>
-            {COPY.copyFrom}
-          </Text>
-        </DropdownMenuItem>
+        {canCopy ? (
+          <DropdownMenuItem onSelect={onCopyFrom} className={row}>
+            <CopyFromIcon aria-hidden="true" className={icon} />
+            <Text as="span" variant="body" weight={500}>
+              {COPY.copyFrom}
+            </Text>
+          </DropdownMenuItem>
+        ) : null}
         {resetTo !== null ? (
           <DropdownMenuItem onSelect={onReset} className={row}>
             <ResetToUsualIcon aria-hidden="true" className={icon} />
@@ -336,20 +347,24 @@ export function DayMenu({
 }
 
 /**
- * Clear's one ask (day-menu.md, D-USE-87): Replace's form (D-USE-32), an
- * AlertDialog "Clear Monday, 12 October?" naming what goes, Clear in ink
- * and Cancel. A Toaster with Undo follows.
+ * The day's one ask (D-USE-32): Replace's (replace-confirm.md, USE-45) and
+ * Clear's in its form (day-menu.md, D-USE-87). An AlertDialog naming what
+ * goes, the action in ink, never red, and Cancel, where focus starts; Esc
+ * cancels. A Toaster with Undo follows.
  */
-export function ClearDialog({
+export function DayAsk({
   open,
   words,
+  action,
   onOpenChange,
-  onClear,
+  onConfirm,
 }: {
   open: boolean;
   words: { title: string; body: string };
+  /** "Clear" or "Replace". */
+  action: string;
   onOpenChange: (open: boolean) => void;
-  onClear: () => void;
+  onConfirm: () => void;
 }) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -360,7 +375,7 @@ export function ClearDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{COPY.cancel}</AlertDialogCancel>
-          <AlertDialogAction onClick={onClear}>{COPY.clear}</AlertDialogAction>
+          <AlertDialogAction onClick={onConfirm}>{action}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -382,25 +397,32 @@ interface PlusRow {
  * The + (plus-menu.md): a round 56 px ink button that turns to × while its
  * menu is open, a dropdown above it (D-USE-28) titled "Add to <weekday>":
  * Block, Transition, in This week Event (USE-42), a separator, From a
- * saved block. Event's sheet is the Add event ticket's and From a saved
- * block's picker the Copy from ticket's; until then each row shows and
- * takes no tap [ASSUMPTION].
+ * saved block, which opens USE-45's picker of other days' blocks
+ * (D-USE-87), and takes no tap when none is there. Event's sheet is the
+ * Add event ticket's; until then it shows and takes no tap [ASSUMPTION].
  */
 export function PlusMenu({
   day,
   disabled,
   defaultOpen = false,
   event = false,
+  savedDisabled = false,
+  triggerRef,
   onBlock,
   onTransition,
+  onSaved,
 }: {
   day: string;
   disabled: boolean;
   defaultOpen?: boolean;
   /** This week: Event, at a set time on this date only. */
   event?: boolean;
+  /** No other day's block to take. */
+  savedDisabled?: boolean;
+  triggerRef?: React.Ref<HTMLButtonElement>;
   onBlock: () => void;
   onTransition: () => void;
+  onSaved: () => void;
 }) {
   const [open, setOpen] = React.useState(false);
   // Seeded after mount, so the server and the first paint agree.
@@ -436,13 +458,15 @@ export function PlusMenu({
       line: COPY.fromSavedLine,
       icon: SavedBlockIcon,
       separated: true,
-      disabled: true,
+      onSelect: onSaved,
+      disabled: savedDisabled,
     },
   ];
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger
+        ref={triggerRef}
         disabled={disabled}
         aria-label={open ? COPY.closeAdd : COPY.addTo(day)}
         className={cn(

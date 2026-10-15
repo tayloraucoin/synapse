@@ -40,9 +40,10 @@ import {
 } from "@/lib/hooks/use-undo-toast";
 import { daysRoute, newBlockSheetRoute } from "@/lib/routes";
 import { DAYS_COPY as COPY } from "./copy";
+import { EmptyDayOffer, useCopyFrom } from "./copy-from";
 import {
   BoundsField,
-  ClearDialog,
+  DayAsk,
   DayChips,
   DayMenu,
   PlusMenu,
@@ -66,6 +67,10 @@ import { useRepeatMove } from "./repeat-move";
  * Toaster; offline the day's own controls are faded and inert and the +
  * gives way to the StatusLine (D-USE-82). Reach, overlaps and own changes
  * come from the set-up hooks.
+ *
+ * USE-45: an empty day offers Copy from under Orient (the offer alone just
+ * after its bounds are set, else the dashed card), and the ··· and the +
+ * open Copy from's pickers.
  */
 export interface DayViewProps {
   place: DaysPlace & { day: number };
@@ -99,6 +104,12 @@ export function DayView({
   const day = week?.days[place.day];
   const titleDay = { weekday: place.day, date: place.date };
   const column = useSetUpColumnRead(place.week, place.day);
+  // The bounds just set on this day, here: the copy offer, not the card.
+  const { scenario } = useDataSource();
+  const here = `${place.week}:${place.day}`;
+  const [justSet, setJustSet] = React.useState<string | null>(
+    scenario.setUp?.justSet && scenario.setUp.day === place.day ? here : null,
+  );
 
   const chips: DayChip[] = Array.from({ length: 7 }, (_, weekday) => {
     const date = place.dates[weekday] ?? null;
@@ -153,6 +164,7 @@ export function DayView({
           place={place}
           writes={writes}
           key={`${place.week}:${place.day}`}
+          onSet={() => setJustSet(here)}
         />
       ) : (
         <SetDay
@@ -162,6 +174,7 @@ export function DayView({
           writes={writes}
           column={column}
           offer={offer}
+          justSet={justSet === here}
         />
       )}
     </div>
@@ -187,6 +200,7 @@ function useBoundsDraft(
   place: DaysPlace & { day: number },
   saved: Bounds | null,
   writes: DayViewProps["writes"],
+  onSaved?: () => void,
 ) {
   const [draft, setDraft] = React.useState<Partial<Bounds>>({});
   const latest = React.useRef(draft);
@@ -205,12 +219,13 @@ function useBoundsDraft(
         .then(() => {
           latest.current = {};
           setDraft({});
+          onSaved?.();
         })
         .catch(() => {
           // Kept on screen; SaveStatus offers Try again.
         });
     },
-    [place, saved, writes],
+    [place, saved, writes, onSaved],
   );
 
   // A frame's edit made on load (`?state=`), once: Saving, Saved, Not saved.
@@ -231,11 +246,14 @@ function useBoundsDraft(
 function FirstDay({
   place,
   writes,
+  onSet,
 }: {
   place: DaysPlace & { day: number };
   writes: DayViewProps["writes"];
+  /** Both bounds landed: the day opens on the copy offer (copy-offer.md). */
+  onSet: () => void;
 }) {
-  const bounds = useBoundsDraft(place, null, writes);
+  const bounds = useBoundsDraft(place, null, writes, onSet);
   return (
     <div className="flex flex-col gap-(--space-6) border-t border-border px-(--space-4) pt-(--space-8) mt-(--space-3)">
       <div className="flex flex-col gap-(--space-1)">
@@ -272,12 +290,14 @@ function SetDay({
   writes,
   column,
   offer,
+  justSet,
 }: {
   place: DaysPlace & { day: number };
   day: SetUpDay;
   writes: DayViewProps["writes"];
   column: ReturnType<typeof useSetUpColumnRead>;
   offer: React.ReactNode;
+  justSet: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -347,6 +367,18 @@ function SetDay({
 
   const ready = !column.isLoading && !column.isError;
   const dayName = weekdayName(place.day);
+  const copyFrom = useCopyFrom({
+    place,
+    day,
+    writes,
+    start: start?.day === place.day ? start : undefined,
+    ready,
+  });
+  const orientTop =
+    view.orient === null
+      ? 0
+      : ((view.orient.atMin - view.hours.startMin) / 60) *
+        DAY_COLUMN_PX_PER_HOUR;
   const ref =
     place.date === null ? { weekday: place.day } : { date: place.date };
 
@@ -490,18 +522,23 @@ function SetDay({
           // [ASSUMPTION] Shown in This week only, once the day differs from its usual.
           resetTo={place.date !== null && day.ownChange ? dayName : null}
           canClear={day.blocks.length > 0}
+          canCopy={copyFrom.canCopy}
           disabled={offline || !ready}
           defaultOpen={start?.day === place.day && start.menu === "day"}
+          triggerRef={copyFrom.menuRef}
+          onCopyFrom={copyFrom.openPicker}
           onReset={reset}
           onClear={() => setClearing(true)}
         />
       </div>
-      <ClearDialog
+      <DayAsk
         open={clearing}
         words={clearWordsNow}
+        action={COPY.clear}
         onOpenChange={setClearing}
-        onClear={clear}
+        onConfirm={clear}
       />
+      {copyFrom.element}
 
       {view.allDay.map((b) => (
         <Text
@@ -599,11 +636,27 @@ function SetDay({
                 />
               ))
             : null}
+          {ready &&
+          day.blocks.length === 0 &&
+          view.orient !== null &&
+          copyFrom.offered !== null ? (
+            <div
+              style={{ top: `${orientTop + 20}px` }}
+              className="absolute start-10 end-0"
+            >
+              <EmptyDayOffer
+                dayName={dayName}
+                offered={weekdayName(copyFrom.offered.weekday)}
+                justSet={justSet}
+                disabled={offline}
+                onCopy={copyFrom.copyOffered}
+                onOther={copyFrom.openPicker}
+              />
+            </div>
+          ) : null}
           {column.isError && view.orient !== null ? (
             <div
-              style={{
-                top: `${((view.orient.atMin - view.hours.startMin) / 60) * DAY_COLUMN_PX_PER_HOUR + 16}px`,
-              }}
+              style={{ top: `${orientTop + 16}px` }}
               className="absolute start-10 end-0"
             >
               <RegionRetry
@@ -636,8 +689,11 @@ function SetDay({
                 disabled={!ready}
                 event={place.date !== null}
                 defaultOpen={start?.menu === "plus"}
+                savedDisabled={!copyFrom.hasSaved}
+                triggerRef={copyFrom.plusRef}
                 onBlock={() => sheetAt()}
                 onTransition={() => sheetAt(undefined, "transition")}
+                onSaved={copyFrom.openSaved}
               />
             </div>
           </div>

@@ -1,6 +1,11 @@
 "use client";
 
-import { createElement, useCallback, type CSSProperties } from "react";
+import {
+  createElement,
+  Fragment,
+  useCallback,
+  type CSSProperties,
+} from "react";
 import { UNDO_SHORT_MS } from "@syn/constants";
 import { toast, Toaster } from "@syn/ui";
 
@@ -44,15 +49,28 @@ export interface UndoToast {
   onUndo: () => void;
   /** The house short window by default; `Infinity` holds it (a staged capture). */
   durationMs?: number;
+  /** Words after "Undo" for assistive tech only: "Undo copy" (USE-45). */
+  undoOf?: string;
 }
 
 export function useUndoToast() {
   return useCallback(
-    ({ text, onUndo, durationMs = UNDO_SHORT_MS }: UndoToast) =>
+    ({ text, onUndo, durationMs = UNDO_SHORT_MS, undoOf }: UndoToast) =>
       toast(text, {
         toasterId: ABOVE_FOOTER_TOASTER,
         duration: durationMs,
-        action: { label: "Undo", onClick: onUndo },
+        action: {
+          label:
+            undoOf === undefined
+              ? "Undo"
+              : createElement(
+                  Fragment,
+                  null,
+                  "Undo",
+                  createElement("span", { className: "sr-only" }, ` ${undoOf}`),
+                ),
+          onClick: onUndo,
+        },
       }),
     [],
   );

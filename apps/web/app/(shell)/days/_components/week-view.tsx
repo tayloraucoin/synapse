@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import type { StoredBlockKind } from "@syn/types";
 import {
   cn,
   DisclosureIcon,
@@ -10,9 +9,8 @@ import {
   Skeleton,
   Text,
 } from "@syn/ui";
-import { addDays, weekKeyOf, type StripPart } from "@syn/utils";
-import { BLOCK_HUE } from "@/components/planner";
-import { HUE_DOT } from "@/components/planner/block-hue";
+import { addDays, weekKeyOf } from "@syn/utils";
+import { DayStrip } from "@/components/planner";
 import {
   rowBounds,
   rowDayLabel,
@@ -268,38 +266,5 @@ function WeekRow({
         </Text>
       ) : null}
     </div>
-  );
-}
-
-/** A part's fill: Orient ink, open time nothing, Break the muted fill, else the kind's dot. */
-function partClass(part: string): string | null {
-  if (part === "orient") return "bg-foreground";
-  if (part === "open") return null;
-  if (part === "break") return "bg-fill-muted";
-  const hue = BLOCK_HUE[part as StoredBlockKind];
-  return hue ? HUE_DOT[hue] : "bg-fill-muted";
-}
-
-/**
- * The day's strip: 8 px, segments in kind colours with 2 px gaps, each its
- * share of the day between its bounds. Decoration: the line says it in words.
- */
-export function DayStrip({ parts }: { parts: readonly StripPart[] }) {
-  return (
-    <span aria-hidden="true" className="flex h-2 w-full gap-0.5">
-      {parts.map((part, index) => (
-        <span
-          key={index}
-          data-strip-part={part.part}
-          style={{ flexGrow: part.share, flexBasis: 0 }}
-          className={cn(
-            "min-w-0.5",
-            partClass(part.part),
-            // Orient's sliver keeps its width at any scale.
-            part.part === "orient" && "max-w-1.5 min-w-1.5",
-          )}
-        />
-      ))}
-    </span>
   );
 }

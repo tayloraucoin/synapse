@@ -572,6 +572,15 @@ export interface SetUpScenarioStart {
   save?: "hang";
   /** Saved stays, for its capture, instead of going after 2 s. */
   holdSaved?: boolean;
+  /** The bounds were just set here: the copy offer, not the card (USE-45). */
+  justSet?: boolean;
+  /**
+   * Copy from's step on load (USE-45): the picker, Replace's ask or the
+   * copy made (from `copyFrom`, Monday 0 by default), or From a saved
+   * block's picker.
+   */
+  copy?: "picker" | "replace" | "copied" | "saved";
+  copyFrom?: number;
 }
 
 const BYDAY = /BYDAY=([A-Z,]+)/;
@@ -610,6 +619,37 @@ function usualEmptyThursdayRecords(): FixtureRecords {
   const usual = setUpUsualRecords();
   const others = keepWeekdays(usual, [0, 1, 2, 4, 5, 6]);
   return { ...others, dayBounds: usual.dayBounds };
+}
+
+/**
+ * Copy from's week (USE-45; empty-day.md, copy-picker.md): Monday to
+ * Wednesday and Sunday built, Sunday one checklist with no times; Thursday
+ * with its bounds and no blocks; Friday and Saturday not set.
+ */
+function copyFromRecords(): FixtureRecords {
+  const usual = setUpUsualRecords();
+  const kept = keepWeekdays(usual, [0, 1, 2, 6]);
+  return {
+    ...kept,
+    blocks: kept.blocks.filter((row) => row.id !== B.sundayReset),
+    dayBounds: usual.dayBounds.filter(
+      (row) => row.weekday !== null && row.weekday <= 3,
+    ),
+  };
+}
+
+/** copy-picker.md, replace-confirm.md: the same week, Thursday part built with Wellness and Work. */
+function thursdayPartBuiltRecords(): FixtureRecords {
+  const records = copyFromRecords();
+  const onThursday = new Set<string>([B.wellness, B.work]);
+  return {
+    ...records,
+    blocks: records.blocks.map((row) =>
+      onThursday.has(row.id) && row.rrule !== null
+        ? { ...row, rrule: row.rrule.replace(BYDAY, "BYDAY=$1,TH") }
+        : row,
+    ),
+  };
 }
 
 /** install-offer.md: Monday the only day set, just saved. */
@@ -898,6 +938,39 @@ export const DAYS_SCENARIOS: Record<string, () => Scenario> =
       week: "this",
       day: 0,
       moved: B.breakfast,
+    }),
+    // USE-45: Copy from on the usual Thursday.
+    days("copy-offer", copyFromRecords, {
+      week: "usual",
+      day: 3,
+      justSet: true,
+      // Thursday's bounds just written, Saved held.
+      staged: { upAt: "07:00", lightsOut: "22:30" },
+      holdSaved: true,
+    }),
+    days("empty-day", copyFromRecords, { week: "usual", day: 3 }),
+    days("copy-picker", thursdayPartBuiltRecords, {
+      week: "usual",
+      day: 3,
+      copy: "picker",
+    }),
+    days("replace-confirm", thursdayPartBuiltRecords, {
+      week: "usual",
+      day: 3,
+      copy: "replace",
+      copyFrom: 0,
+    }),
+    days("copied-undo", thursdayPartBuiltRecords, {
+      week: "usual",
+      day: 3,
+      copy: "copied",
+      copyFrom: 0,
+      holdToast: true,
+    }),
+    days("saved-block-picker", thursdayPartBuiltRecords, {
+      week: "usual",
+      day: 3,
+      copy: "saved",
     }),
     // [ASSUMPTION] `offline` is Now's; this frame takes the `days-` prefix.
     days(

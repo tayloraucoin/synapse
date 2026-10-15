@@ -461,3 +461,88 @@ export function clearWords(day: SetUpDay): {
 export function resetWords(day: Pick<SetUpDay, "weekday" | "date">): string {
   return `${dayTitle(day)} is the usual ${weekdayName(day.weekday)} again.`;
 }
+
+/* ------------------------------------------------- Copy from (USE-45) -- */
+
+/** A day another can take: it has blocks (copy-from/index.md, "Only built days"). */
+export function isBuilt(day: Pick<SetUpDay, "blocks">): boolean {
+  return day.blocks.length > 0;
+}
+
+/**
+ * The day "Copy from <day>" names (D-USE-85): the last built weekday before
+ * the one open, counting back round the week; null when none is built.
+ */
+export function lastBuiltBefore(
+  days: readonly Pick<SetUpDay, "weekday" | "blocks">[],
+  weekday: number,
+): number | null {
+  for (let back = 1; back < 7; back += 1) {
+    const day = days[(weekday - back + 7) % 7];
+    if (day && isBuilt(day)) return day.weekday;
+  }
+  return null;
+}
+
+/** The days the picker lists: built, the day being set left out (C-USE-copy-from-4). */
+export function copySources<T extends Pick<SetUpDay, "weekday" | "blocks">>(
+  days: readonly T[],
+  weekday: number,
+): T[] {
+  return days.filter((day) => day.weekday !== weekday && isBuilt(day));
+}
+
+/** A picker row's line: the blocks named, never counted (copy-picker.md). */
+export function pickerLine(day: SetUpDay): string {
+  const timed = day.blocks.filter((b) => !isAllDay(b));
+  const names = timed.map((b) => b.block.name).join(", ");
+  const checklist = day.blocks.some(isAllDay) ? "One checklist, no times" : "";
+  return [checklist, names].filter((part) => part !== "").join(". ");
+}
+
+/** "Every Thursday takes the blocks of the day picked. Built days only." */
+export function copyHelper(day: Pick<SetUpDay, "weekday" | "date">): string {
+  return `${dayTitle(day)} takes the blocks of the day picked. Built days only.`;
+}
+
+/**
+ * Replace's ask and the copied toast (replace-confirm.md, copied-undo.md;
+ * D-USE-33). The day being set reads "Thursday" in the usual week and
+ * "Thursday, 15 October" in This week [ASSUMPTION]; the day copied is
+ * named by its weekday.
+ */
+export function copyWords({
+  to,
+  from,
+}: {
+  to: SetUpDay;
+  from: Pick<SetUpDay, "weekday">;
+}): { title: string; body: string; done: string } {
+  const toName = to.date === null ? weekdayName(to.weekday) : dayTitle(to);
+  const fromName = weekdayName(from.weekday);
+  const goes = `${weekdayName(to.weekday)}'s ${namesOnce(to.blocks.map((b) => b.block.name))} go, and ${fromName}'s blocks take their place.`;
+  return {
+    title: `Replace ${toName} with ${fromName}?`,
+    body:
+      to.date === null
+        ? `${goes} This week's ${weekdayName(to.weekday)} follows.`
+        : goes,
+    done: `${toName} copied from ${fromName}`,
+  };
+}
+
+/** A saved block's line: its day and span, then its items (D-USE-87) [PROPOSED]. */
+export function savedBlockLine(
+  b: Pick<SetUpBlock, "startsAt" | "endsAt" | "items" | "block">,
+  weekday: number,
+): string {
+  const when = `${weekdayName(weekday)}, ${spanWords(b.startsAt, b.endsAt)}`;
+  if (b.block.kind === "work") return `${when}. Time only`;
+  const items = b.items.map((item) => item.title).join(", ");
+  return items === "" ? when : `${when}. ${items}`;
+}
+
+/** From a saved block's toast [PROPOSED]: "Wellness added at 15:00." */
+export function savedBlockDone(name: string, startsAt: string): string {
+  return `${name} added at ${clockWords(startsAt)}.`;
+}

@@ -35,6 +35,7 @@ const DAY_WRITES = new Set<PlannerMethod>([
   "createBlock",
   "writeDayEvent",
   "copyDay",
+  "copyBlock",
   "clearDay",
   "resetDay",
 ]);
@@ -292,6 +293,7 @@ export function usePlannerWrites() {
     removeSlot: write("removeSlot"),
     writeDayEvent: write("writeDayEvent"),
     copyDay: write("copyDay"),
+    copyBlock: write("copyBlock"),
     clearDay: write("clearDay"),
     resetDay: write("resetDay"),
     /** A write's Undo, from its `PlannerWrite.undo`. */
