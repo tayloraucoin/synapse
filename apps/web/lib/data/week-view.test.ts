@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { dueBadge, fitsLine, type FitsDay } from "./week-view";
+import {
+  dueBadge,
+  fitsLine,
+  timeLensDay,
+  type ChipView,
+  type FitsDay,
+} from "./week-view";
 
 /** C1 (USE-72): due badges per column; Fits as a time, never a count. */
 
@@ -70,5 +76,98 @@ describe("fitsLine", () => {
 
   it("names a day with no Work blocks", () => {
     expect(fitsLine({ workBlocks: [], events: [] })).toBe("No work blocks");
+  });
+});
+
+/* ---- USE-73: the Time lens's day ---- */
+
+type LensInput = Parameters<typeof timeLensDay>[0];
+
+const blockOf = (
+  id: string,
+  kind: string,
+  startsAt: string,
+  endsAt: string,
+  checklist = false,
+) =>
+  ({
+    block: { id, kind, name: kind === "work" ? "Work" : id, checklist },
+    startsAt,
+    endsAt,
+  }) as unknown as LensInput["blocks"][number];
+
+const eventOf = (id: string, startsAt: string, endsAt: string) =>
+  ({ id, title: `[${id}]`, startsAt, endsAt }) as LensInput["events"][number];
+
+const chip = (id: string, tier: ChipView["tier"]) => ({ id, tier }) as ChipView;
+
+describe("timeLensDay", () => {
+  // Given out of order on purpose: the lens places by time, never by index.
+  const blocks = [
+    blockOf("late", "work", "15:10", "17:00"),
+    blockOf("training", "training", "08:00", "08:57"),
+    blockOf("reset", "wellness", "00:00", "24:00", true),
+    blockOf("morning", "work", "09:30", "12:00"),
+    blockOf("lunch", "break", "12:00", "13:00"),
+  ];
+
+  it("places each block at its own minutes from 8:00, all-day checklists left out", () => {
+    const { timeBlocks } = timeLensDay({
+      blocks,
+      events: [],
+      chipsOf: new Map(),
+      fits: "Work ends 16:20",
+    });
+    expect(timeBlocks.map((b) => [b.id, b.topMin, b.lengthMin])).toEqual([
+      ["training", 0, 57],
+      ["morning", 90, 150],
+      ["lunch", 240, 60],
+      ["late", 430, 110],
+    ]);
+    expect(timeBlocks.find((b) => b.id === "morning")?.label).toBe(
+      "Work, 9:30 to 12:00",
+    );
+  });
+
+  it("puts an event inside the block its start falls in, never splitting it", () => {
+    const { timeBlocks, looseEvents } = timeLensDay({
+      blocks,
+      events: [
+        eventOf("Kestrel", "11:00", "11:30"),
+        eventOf("Late", "17:30", "17:45"),
+      ],
+      chipsOf: new Map(),
+      fits: "",
+    });
+    const morning = timeBlocks.find((b) => b.id === "morning")!;
+    expect(morning.lengthMin).toBe(150);
+    expect(morning.events).toEqual([
+      { id: "Kestrel", label: "11:00 [Kestrel]", offsetMin: 90, lengthMin: 30 },
+    ]);
+    expect(timeBlocks.filter((b) => b.id === "morning")).toHaveLength(1);
+    expect(looseEvents.map((e) => [e.id, e.topMin])).toEqual([["Late", 570]]);
+  });
+
+  it("orders chips tier by tier and sets the Fits line in the last Work block only", () => {
+    const { timeBlocks } = timeLensDay({
+      blocks,
+      events: [],
+      chipsOf: new Map([
+        [
+          "morning",
+          [chip("s", "stretch"), chip("p", "primary"), chip("a", "secondary")],
+        ],
+      ]),
+      fits: "Work ends 16:20",
+    });
+    expect(
+      timeBlocks.find((b) => b.id === "morning")?.chips.map((c) => c.id),
+    ).toEqual(["p", "a", "s"]);
+    expect(timeBlocks.map((b) => b.fits)).toEqual([
+      null,
+      null,
+      null,
+      "Work ends 16:20",
+    ]);
   });
 });

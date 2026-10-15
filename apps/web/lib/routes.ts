@@ -290,6 +290,24 @@ export function itemSheetRoute(
 }
 
 /**
+ * The Block panel on one block's date over `path` (`?panel=block&id=&date=`;
+ * D-USE-41, D-USE-77): the Week's Time lens sets it (USE-73), USE-76 draws
+ * the panel. The path's own query is kept, so `?state=` travels.
+ */
+export function blockPanelRoute(
+  path: string,
+  id: string,
+  date: string,
+): string {
+  const [base = "", search = ""] = path.split("?");
+  const query = new URLSearchParams(search);
+  query.set("panel", "block");
+  query.set("id", id);
+  query.set("date", date);
+  return `${base}?${query.toString()}`;
+}
+
+/**
  * The To-do sheet over `path` (USE-28): one to-do by `id`, or a new one
  * (`&new=1`, "+ Add" › To-do) created once a title is typed.
  */

@@ -52,9 +52,10 @@ export interface ScheduleAxisProps {
    * 64, or 96 at ≥150% text. 28 is the COMPACT scale (UX v1.3 §4.2; DAY-7):
    * the primer's 24-hour example day on one phone screen — every third hour
    * labelled, half-hour lines hidden, every band's label inside it. Nothing
-   * on `/today` or the Schedule passes 28.
+   * on `/today` or the Schedule passes 28. 80 is the Week's Time lens
+   * (USE-73; D-USE-41).
    */
-  pxPerHour?: 28 | 64 | 96;
+  pxPerHour?: 28 | 64 | 80 | 96;
   timeZone: string;
   locale?: string;
   onExtend?: (direction: "earlier" | "later") => void;

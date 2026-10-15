@@ -210,14 +210,18 @@ function RowLabel({ row }: { row: "events" | WorkTier }) {
   );
 }
 
-function DayHead({
+/** A day's head, both lenses': "Mon 12 ›" to the opened day, "today" on today. */
+export function DayHead({
   head,
   weekday,
   hasWork,
+  inline = false,
 }: {
   head: WeekHead;
   weekday: string | undefined;
   hasWork: boolean;
+  /** "today" beside the date (Time) rather than under it (Priority). */
+  inline?: boolean;
 }) {
   const word = (
     <span
@@ -232,7 +236,12 @@ function DayHead({
     </span>
   );
   return (
-    <span className="flex flex-col items-start">
+    <span
+      className={cn(
+        "flex items-start",
+        inline ? "flex-row items-baseline gap-(--space-2)" : "flex-col",
+      )}
+    >
       {hasWork && weekday ? (
         // The opened day (USE-58): Today on that date, planning; today's is Today.
         <Link

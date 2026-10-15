@@ -2,7 +2,12 @@
 
 import * as React from "react";
 import { useQueryState } from "nuqs";
-import { addDays, weekDates, weekKeyOf } from "@syn/utils";
+import {
+  addDays,
+  instantToWallClockMinutes,
+  weekDates,
+  weekKeyOf,
+} from "@syn/utils";
 import { weekKeySchema } from "@syn/validators";
 import { useRememberedToggle } from "@/lib/hooks/use-remembered-toggle";
 import { useDataSource } from "./source";
@@ -54,10 +59,17 @@ export function useWeekView(weekKey: string) {
         : null,
     [week.week, pool.pool, weekKey, todayKey],
   );
+  const dates = weekDates(weekKey);
+  // The Time lens's now line (USE-73): today's minute, in this week only.
+  const nowMin = dates.includes(todayKey)
+    ? instantToWallClockMinutes(source.now(), source.scenario.records.timeZone)
+    : null;
   return {
     view,
+    nowMin,
+    timeZone: source.scenario.records.timeZone,
     heads: weekHeads(weekKey, todayKey),
-    range: weekRange(weekDates(weekKey)),
+    range: weekRange(dates),
     isError: week.isError,
     retry: week.retry,
   };
@@ -89,23 +101,30 @@ export function useShownWeek() {
 export type WeekLens = "priority" | "time";
 
 /**
- * The lens, remembered per person (C-USE-week-2; Synapse is single-player,
- * so the device's store is the person's). `?lens=` overrides it for a capture.
+ * The lens, remembered per person (C-USE-week-2, C-USE-week-time-lens-4;
+ * Synapse is single-player, so the device's store is the person's). `?lens=`
+ * overrides it for a capture, as does a scenario's `week:time` (USE-73's
+ * `week-time` states), until a lens is chosen.
  */
 export function useWeekLens(): [WeekLens, (lens: WeekLens) => void] {
+  const source = useDataSource();
   const [timeChosen, setTimeChosen] = useRememberedToggle(
     "synapse.week.lens-time",
     false,
   );
   const [param, setParam] = useQueryState("lens");
+  const [seeded, setSeeded] = React.useState(
+    () => source.scenario.view?.open?.startsWith("week:time") ?? false,
+  );
   const lens: WeekLens =
     param === "time" || param === "priority"
       ? param
-      : timeChosen
+      : seeded || timeChosen
         ? "time"
         : "priority";
   const choose = (next: WeekLens) => {
     setTimeChosen(next === "time");
+    setSeeded(false);
     if (param !== null) void setParam(null);
   };
   return [lens, choose];

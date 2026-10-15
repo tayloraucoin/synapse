@@ -1,4 +1,5 @@
 import {
+  clockMinutes,
   fitInBlock,
   topMinutes,
   weekdayIndex,
@@ -179,6 +180,41 @@ export interface EventChipView {
   title: string;
 }
 
+/* ---- The week as the Time lens reads it (USE-73) ---- */
+
+/** The Time lens's hours, minutes from midnight: 8:00 to 18:00 (D-USE-41). */
+export const TIME_HOURS = { startMin: 8 * 60, endMin: 18 * 60 };
+
+export interface TimeEventView {
+  id: string;
+  /** "11:00 [Kestrel weekly]". */
+  label: string;
+  /** Minutes after its block's start; its length in minutes. */
+  offsetMin: number;
+  lengthMin: number;
+}
+
+export interface TimeBlockView {
+  /** The block's id: one block per day, so the column's key. */
+  id: string;
+  kind: BlockKindOf;
+  /** "Work", "Lunch", "Training · gym" as named. */
+  name: string;
+  /** "Work, 9:30 to 12:00": the Block panel's opener names the block and its times. */
+  label: string;
+  /** Minutes from the axis's start, and its length; laid out by time, never by order. */
+  topMin: number;
+  lengthMin: number;
+  /** A Work block's work, tier by tier, the date's order within each. */
+  chips: ChipView[];
+  /** The day's events whose start falls inside it; they never split it. */
+  events: TimeEventView[];
+  /** The Fits line, in the day's last Work block only. */
+  fits: string | null;
+}
+
+type BlockKindOf = SetUpWeek["days"][number]["blocks"][number]["block"]["kind"];
+
 export interface WeekDayView {
   dateKey: string;
   /** "Mon 12". */
@@ -196,6 +232,10 @@ export interface WeekDayView {
   cells: Record<WorkTier, ChipView[]>;
   /** "Work ends 16:20", "Nothing slotted yet", "No work blocks". */
   fits: string;
+  /** The Time lens: the day's timed blocks inside 8:00 to 18:00, by start. */
+  timeBlocks: TimeBlockView[];
+  /** Events inside no block, on their own in the column. */
+  looseEvents: (TimeEventView & { topMin: number })[];
 }
 
 export interface WeekView {
@@ -272,8 +312,11 @@ export function deriveWeekView(input: WeekViewInput): WeekView {
       stretch: [],
     };
     const fitsBlocks: FitsBlock[] = [];
+    const chipsOf = new Map<string, ChipView[]>();
 
     for (const block of workBlocks) {
+      const blockChips: ChipView[] = [];
+      chipsOf.set(block.block.id, blockChips);
       const fitSlots: BlockFitSlot[] = [];
       const slots = [...block.slots]
         .filter((slot) => slot.workItemId !== null)
@@ -306,7 +349,7 @@ export function deriveWeekView(input: WeekViewInput): WeekView {
         let due = dueBadge(item.dueOn, dateKey);
         // A past column badges only a date that is that day or later.
         if (past && item.dueOn !== null && item.dueOn < dateKey) due = null;
-        cells[tier].push({
+        const chip: ChipView = {
           id: slot.id,
           workItemId: item.id,
           tier,
@@ -324,7 +367,9 @@ export function deriveWeekView(input: WeekViewInput): WeekView {
           ]
             .filter(Boolean)
             .join(", "),
-        });
+        };
+        cells[tier].push(chip);
+        blockChips.push(chip);
       }
       fitsBlocks.push({
         startsAt: block.startsAt,
@@ -332,6 +377,16 @@ export function deriveWeekView(input: WeekViewInput): WeekView {
         slots: fitSlots,
       });
     }
+
+    const fits = fitsLine({ workBlocks: fitsBlocks, events: day.events });
+    // A day with no Work block is its line alone, as the strip's card
+    // (USE-58): its events at their times, no blocks [ASSUMPTION: as drawn].
+    const { timeBlocks, looseEvents } = timeLensDay({
+      blocks: workBlocks.length > 0 ? day.blocks : [],
+      events: day.events,
+      chipsOf,
+      fits,
+    });
 
     return {
       dateKey,
@@ -350,7 +405,9 @@ export function deriveWeekView(input: WeekViewInput): WeekView {
           title: event.title,
         })),
       cells,
-      fits: fitsLine({ workBlocks: fitsBlocks, events: day.events }),
+      fits,
+      timeBlocks,
+      looseEvents,
     };
   });
 
@@ -359,5 +416,101 @@ export function deriveWeekView(input: WeekViewInput): WeekView {
     range: weekRange(days.map((day) => day.dateKey)),
     hasUrgent: days.some((day) => day.cells.urgent.length > 0),
     days,
+  };
+}
+
+const TIER_ORDER: readonly WorkTier[] = [
+  "urgent",
+  "primary",
+  "secondary",
+  "stretch",
+];
+
+interface TimeLensDayInput {
+  blocks: SetUpWeek["days"][number]["blocks"];
+  events: SetUpWeek["days"][number]["events"];
+  /** Each Work block's chips, by block id, in the date's order. */
+  chipsOf: ReadonlyMap<string, ChipView[]>;
+  fits: string;
+}
+
+/**
+ * One day on the Time lens (USE-73, D-USE-41): every timed block at its own
+ * minutes from `readDay`'s occurrences (an all-day checklist is the day's
+ * line, never a block), clipped to 8:00 to 18:00; a Work block's chips tier
+ * by tier; each event inside the block its start falls in, never splitting
+ * it, or on its own; the Fits line in the day's last Work block.
+ */
+export function timeLensDay(input: TimeLensDayInput): {
+  timeBlocks: TimeBlockView[];
+  looseEvents: (TimeEventView & { topMin: number })[];
+} {
+  const { startMin, endMin } = TIME_HOURS;
+  const clip = (minutes: number) =>
+    Math.min(endMin, Math.max(startMin, minutes));
+  const timed = input.blocks
+    .filter((b) => !b.block.checklist)
+    .map((b) => ({
+      b,
+      from: clockMinutes(b.startsAt),
+      to: clockMinutes(b.endsAt),
+    }))
+    .filter(({ from, to }) => clip(to) > clip(from))
+    .sort((x, y) => x.from - y.from || x.to - y.to);
+  const lastWork = timed.filter(({ b }) => b.block.kind === "work").at(-1);
+
+  const placed = new Set<string>();
+  const timeBlocks = timed.map(({ b, from, to }): TimeBlockView => {
+    const events = input.events
+      .filter((event) => {
+        const at = clockMinutes(event.startsAt);
+        return !placed.has(event.id) && at >= from && at < to;
+      })
+      .sort((x, y) => x.startsAt.localeCompare(y.startsAt))
+      .map((event) => {
+        placed.add(event.id);
+        return eventView(event, from);
+      });
+    const chips = [...(input.chipsOf.get(b.block.id) ?? [])].sort(
+      (x, y) => TIER_ORDER.indexOf(x.tier) - TIER_ORDER.indexOf(y.tier),
+    );
+    return {
+      id: b.block.id,
+      kind: b.block.kind,
+      name: b.block.name,
+      label: `${b.block.name}, ${clock(b.startsAt)} to ${clock(b.endsAt)}`,
+      topMin: clip(from) - startMin,
+      lengthMin: clip(to) - clip(from),
+      chips,
+      events,
+      fits: lastWork?.b === b ? input.fits : null,
+    };
+  });
+
+  const looseEvents = input.events
+    .filter((event) => !placed.has(event.id))
+    .filter((event) => {
+      const at = clockMinutes(event.startsAt);
+      return at >= startMin && at < endMin;
+    })
+    .sort((x, y) => x.startsAt.localeCompare(y.startsAt))
+    .map((event) => ({
+      ...eventView(event, clockMinutes(event.startsAt)),
+      topMin: clockMinutes(event.startsAt) - startMin,
+    }));
+
+  return { timeBlocks, looseEvents };
+}
+
+function eventView(
+  event: SetUpWeek["days"][number]["events"][number],
+  fromMin: number,
+): TimeEventView {
+  const at = clockMinutes(event.startsAt);
+  return {
+    id: event.id,
+    label: `${clock(event.startsAt)} ${event.title}`,
+    offsetMin: at - fromMin,
+    lengthMin: Math.max(0, clockMinutes(event.endsAt) - at),
   };
 }

@@ -16,6 +16,7 @@ import {
 import { daysRoute } from "@/lib/routes";
 import { WEEK_COPY as COPY } from "./copy";
 import { PriorityLens } from "./priority-lens";
+import { TimeLens } from "./time-lens";
 import { WeekHeader } from "./week-header";
 
 /**
@@ -28,7 +29,9 @@ import { WeekHeader } from "./week-header";
 export function WeekScreen() {
   const shown = useShownWeek();
   const [lens, setLens] = useWeekLens();
-  const { view, heads, range, isError, retry } = useWeekView(shown.weekKey);
+  const { view, heads, range, isError, retry, nowMin, timeZone } = useWeekView(
+    shown.weekKey,
+  );
   const offline = useIsOffline();
   const pathname = usePathname();
   const search = useSearchParams().toString();
@@ -82,14 +85,19 @@ export function WeekScreen() {
                 onRetry={() => void retry()}
               />
             ) : lens === "time" ? (
-              <Text
-                as="p"
-                variant="body"
-                tone="muted"
-                className="py-(--space-6)"
+              <div
+                aria-busy={view === null}
+                aria-label={view === null ? COPY.loading : undefined}
               >
-                {COPY.timeLensLater}
-              </Text>
+                <TimeLens
+                  heads={heads}
+                  range={range}
+                  view={view}
+                  here={here}
+                  nowMin={nowMin}
+                  timeZone={timeZone}
+                />
+              </div>
             ) : (
               <div
                 aria-busy={view === null}

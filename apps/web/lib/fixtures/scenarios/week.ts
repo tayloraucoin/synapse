@@ -29,6 +29,8 @@ import {
 
 /** Monday 12 October, 9:10 in Toronto: the board's today. */
 export const WEEK_NOW = "2026-10-12T09:10:00-04:00";
+/** Monday 12 October, 10:20: the Time lens board's now (USE-73). */
+export const WEEK_TIME_NOW = "2026-10-12T10:20:00-04:00";
 /** Wednesday 14 October, 10:00: Monday and Tuesday have gone. */
 export const WEEK_PAST_NOW = "2026-10-14T10:00:00-04:00";
 
@@ -389,4 +391,10 @@ export const WEEK_SCENARIOS: Record<string, () => Scenario> = {
   }),
   "pool-empty": week("pool-empty", { pool: emptyPoolRecords }),
   "pool-linear-off": week("pool-linear-off", { pool: linearOffRecords }),
+  // USE-73: the Time lens on the same week at 10:20, the pool panel beside it.
+  "week-time": week("week-time", {
+    now: WEEK_TIME_NOW,
+    pool: poolPanelRecords,
+    view: { open: "week:time" },
+  }),
 };

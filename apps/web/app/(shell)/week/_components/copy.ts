@@ -22,8 +22,11 @@ export const WEEK_COPY = {
     "Offline. Everything works here; Linear catches up when back online.",
   announceWeek: (range: string) => `Week of ${range}`,
   announceLens: (lens: string) => `Lens: ${lens}`,
-  // [ASSUMPTION] The Time lens is USE-73's; until then its place says so.
-  timeLensLater: "The Time lens comes with its own build.",
+  // The Time lens (USE-73; states/time-lens.md).
+  timeGrid: (range: string) => `Week of ${range}, by time`,
+  hour: (minutes: number) => `${Math.floor(minutes / 60)}:00`,
+  /** A chip's hover title: the tier word with the colour (D-USE-101). */
+  chipTitle: (title: string, tier: string) => `${title} · ${tier}`,
   phoneLine: "The Week is at the desk. On the phone the week is planned in",
   phoneLink: "Set my days › This week",
 } as const;
