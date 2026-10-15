@@ -92,6 +92,10 @@ for (const state of [
   "ahead", // USE-20
   "empty-break", // USE-20
   "empty-no-blocks", // USE-20
+  "not-done-closed", // USE-25
+  "not-done-open", // USE-25
+  "last-block", // USE-25
+  "all-done", // USE-25
 ] satisfies NowPartState[]) {
   registerPart(`now-${state}`, () => createElement(NowPart, { state })); // USE-16
 }

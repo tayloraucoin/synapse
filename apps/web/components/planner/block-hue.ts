@@ -57,3 +57,16 @@ export const HUE_DOT: Record<BlockHue, string> = {
   moss: "bg-category-moss-dot",
   yellow: "bg-category-yellow-dot",
 };
+
+/** The dot's colour as a glyph's: the close card's check (USE-25). */
+export const HUE_TEXT: Record<BlockHue, string> = {
+  leaf: "text-category-leaf-dot",
+  sky: "text-category-sky-dot",
+  clay: "text-category-clay-dot",
+  rose: "text-category-rose-dot",
+  amber: "text-category-amber-dot",
+  slate: "text-category-slate-dot",
+  plum: "text-category-plum-dot",
+  moss: "text-category-moss-dot",
+  yellow: "text-category-yellow-dot",
+};

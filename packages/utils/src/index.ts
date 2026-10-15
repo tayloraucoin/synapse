@@ -321,3 +321,6 @@ export {
   type MealTopicLink,
   type MealTopicLinkKind,
 } from "./planner";
+
+/* ---- Later from a closed block: where an item left goes (USE-25) ---- */
+export { laterTarget, type LaterBlock, type LaterTarget } from "./planner";

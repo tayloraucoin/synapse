@@ -15,10 +15,12 @@ import {
 import type { BlockRecord, DayRecordRecord, SlotRecord } from "@syn/validators";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import { useNow as useMinute } from "@/lib/hooks/use-now";
+import { deriveClosing, movedOut, type NowClosing } from "./block-close";
 import { deriveToday, type Today } from "./derive-today";
 import { deriveNowEnd, type NowEnd } from "./now-end";
 import { useDataSource } from "./source";
 import type { TodayRecords } from "./today-records";
+import { useBlockClose, type BlockCloseState } from "./use-block-close";
 import { useBlockFocus } from "./use-block-focus";
 import { todayQueryKey } from "./use-today";
 import { todosQueryKey } from "./use-todos";
@@ -103,6 +105,8 @@ export interface NowView extends NowEnd {
   next: NowItemView | null;
   /** The closed tray's first to-do; null when there is none. */
   trayFirst: string | null;
+  /** The close card's facts while one is up (USE-25); else null. */
+  closing: NowClosing | null;
 }
 
 function itemsOf(
@@ -116,7 +120,9 @@ function itemsOf(
       (item) =>
         item.blockId === block.id &&
         !item.isTransition &&
-        (item.onDate === null || item.onDate === records.date),
+        (item.onDate === null || item.onDate === records.date) &&
+        // Later (USE-25) put its date's slot in another block: that block's row.
+        movedOut(records, block.id, item.id) === null,
     )
     .flatMap((item): NowItemView[] => {
       const slot = slots.find((row) => row.blockItemId === item.id) ?? null;
@@ -138,6 +144,33 @@ function itemsOf(
           done: slot?.doneAt != null,
           doneAt: slot?.doneAt ?? null,
           tookMin: slot?.tookMin ?? null,
+        },
+      ];
+    });
+  // A set item Later moved here from another block, for this date (USE-25).
+  const movedIn = slots
+    .filter((slot) => slot.blockItemId !== null && !slot.skipped)
+    .flatMap((slot): NowItemView[] => {
+      const item = records.blockItems.find(
+        (row) => row.id === slot.blockItemId && row.blockId !== block.id,
+      );
+      if (!item) return [];
+      return [
+        {
+          id: item.id,
+          slotId: slot.id,
+          blockItemId: item.id,
+          todoId: null,
+          source: "set",
+          madeOn: null,
+          title: item.title,
+          icon: item.icon,
+          lengthMin: slot.lengthMin ?? item.lengthMin,
+          plannedAt: null,
+          sortOrder: slot.sortOrder,
+          done: slot.doneAt !== null,
+          doneAt: slot.doneAt,
+          tookMin: slot.tookMin,
         },
       ];
     });
@@ -168,7 +201,7 @@ function itemsOf(
         },
       ];
     });
-  const items = [...setItems, ...pooled].sort(
+  const items = [...setItems, ...movedIn, ...pooled].sort(
     (a, b) => a.sortOrder - b.sortOrder,
   );
   const atTimes = new Map(
@@ -238,8 +271,11 @@ export function deriveNow(
   chosenId: string | null,
   /** A block put in focus early (USE-20): Start <Block> or End break. */
   focus: NowFocus | null = null,
+  /** Blocks closed with items left, and the card up (USE-25). */
+  close: BlockCloseState | null = null,
 ): NowView {
   const { records } = today;
+  const closed = new Set(close?.closed ?? []);
   const spans = today.occurrences.blocks.map((occurrence) => {
     const items = itemsOf(occurrence, records);
     return {
@@ -249,7 +285,9 @@ export function deriveNow(
       start: occurrence.start,
       end: occurrence.end,
       allDay: formOf(occurrence) === "all-day-checklist",
-      open: items.some((item) => !item.done),
+      // Closed with items left, it holds the screen no longer (USE-25).
+      open:
+        !closed.has(occurrence.block.id) && items.some((item) => !item.done),
     };
   });
   const active = activeBlock(spans, now, focus);
@@ -305,6 +343,10 @@ export function deriveNow(
     current,
     next: nextItem(items, current),
     trayFirst: tray?.title ?? null,
+    closing:
+      close?.card == null
+        ? null
+        : deriveClosing(today, spans, close.card.blockId, now),
     ...deriveNowEnd(spans, active, form === "items" || form === "meal", now),
   };
 }
@@ -350,11 +392,12 @@ export function useNow(dateKey: string, chosenId: string | null = null) {
   // A render each minute, so behind shows once the planned end passes.
   useMinute();
   const { focus } = useBlockFocus(dateKey);
+  const { state: close } = useBlockClose(dateKey);
   const query = useQuery<TodayRecords, Error, NowView>({
     queryKey: todayQueryKey(source.scenario.name, dateKey),
     queryFn: () => source.server.readToday(dateKey),
     select: (records) =>
-      deriveNow(deriveToday(records), source.now(), chosenId, focus),
+      deriveNow(deriveToday(records), source.now(), chosenId, focus, close),
     retry: false,
   });
   return { ...query, view: query.data };

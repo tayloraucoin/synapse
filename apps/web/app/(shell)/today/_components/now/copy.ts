@@ -105,6 +105,30 @@ export const NOW_COPY = {
     `Done before ${clockLabel(endsAt)}. Starting early is fine: ${next} keeps its end, ${clockLabel(nextEndsAt)}.`,
   todoUntil: (endsAt: string) => `Or a to-do until ${clockLabel(endsAt)}`,
   announceComplete: (block: string) => `${block} complete.`,
+  /** The close card (USE-25): names and times, never a count or "missed". */
+  close: {
+    closeName: (block: string) => `Close, stay on ${block}`,
+    next: "Next",
+    then: (block: string) => `then ${block}`,
+    notDone: (titles: readonly string[]) => `Not done: ${titles.join(", ")}`,
+    later: "Later",
+    laterName: (item: string) => `Move ${item} to later`,
+    leave: "Leave",
+    leaveName: (item: string) => `Leave ${item} not done`,
+    movedTo: (block: string) => `Moved to the end of ${block}`,
+    undo: "Undo",
+    undoName: (item: string) => `Undo move of ${item}`,
+    nothingAfter: "Nothing after this today.",
+    announce: (
+      block: string,
+      next: { name: string; startsAt: string } | null,
+    ) =>
+      next === null
+        ? `${block} complete.`
+        : `${block} complete. Next: ${next.name}, ${clockLabel(next.startsAt)}.`,
+    announceMoved: (item: string, block: string) =>
+      `${item} moved to the end of ${block}.`,
+  },
   breakTitle: "Break",
   endBreak: "End break",
   blocksDone: "The day's blocks are done.",

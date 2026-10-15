@@ -26,6 +26,7 @@ import {
 import type { NowFooter } from "@/lib/data/now-end";
 import { isTimedDone, runningGroup, useRunningView } from "@/lib/data/running";
 import { useDataSource, useIsOffline } from "@/lib/data/source";
+import { closeSeed, useBlockClose } from "@/lib/data/use-block-close";
 import { useBlockFocus } from "@/lib/data/use-block-focus";
 import {
   moveIds,
@@ -45,6 +46,7 @@ import { BeforeGoList } from "./before-go-list";
 import { nowBlockMenuRows } from "./block-menu";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
 import { EndBreakFooter } from "./end-break-footer";
+import { NowCloseCard } from "./now-close-card";
 import { NowCurrentCard } from "./now-current-card";
 import { NowEmpty } from "./now-empty";
 import { NowMealTopics } from "./now-meal-topics";
@@ -103,15 +105,13 @@ function heldOrder(
  *
  * Below 1024 only; the desk's /today is its own ticket's.
  */
-export function NowScreen({
-  onComplete = () => {},
-}: {
-  /** Complete <Block>: the close card is USE-25's, which supplies this. */
-  onComplete?: (blockId: string) => void;
-} = {}) {
+export function NowScreen() {
   const source = useDataSource();
   const dateKey = source.todayKey();
   const view = source.scenario.view;
+  // USE-25: a block closed with items left, and its card (seeded first, so
+  // the day is read with it).
+  const blockClose = useBlockClose(dateKey, closeSeed(view?.open));
 
   const [chosenId, setChosenId] = useChosenItem(
     dateKey,
@@ -430,6 +430,30 @@ export function NowScreen({
     );
   }
 
+  /**
+   * Complete <Block> (USE-25): with items left, or none, the close card; all
+   * done, USE-20's footer already stands and nothing more happens.
+   */
+  function complete(here: NowBlockView) {
+    const shows = blockClose.complete(
+      here.id,
+      items.map((item) => ({
+        id: item.id,
+        title: item.title,
+        done: item.done,
+        row: {
+          sortOrder: item.sortOrder,
+          blockItemId: item.blockItemId,
+          slotId: item.slotId,
+        },
+      })),
+    );
+    if (shows) {
+      setChosenId(null);
+      setAnnouncement(COPY.close.announce(here.name, here.next));
+    }
+  }
+
   /** Start <Block> or End break (USE-20): that block now; its span stays. */
   function focusBlock(blockId: string | null, endBreak: boolean) {
     if (endBreak) blockFocus.endBreak(blockId);
@@ -494,9 +518,20 @@ export function NowScreen({
     <div className="mx-auto flex w-full max-w-(--content-text) flex-1 flex-col">
       {top}
 
-      {!block && now.empty ? <NowEmpty /> : null}
+      {!block && now.empty && !now.closing ? <NowEmpty /> : null}
 
-      {block ? (
+      {now.closing && blockClose.state.card ? (
+        <section
+          aria-label={COPY.blockComplete(now.closing.block.name)}
+          className="flex flex-1 flex-col px-(--space-4)"
+        >
+          <NowCloseCard
+            closing={now.closing}
+            blockClose={blockClose}
+            onAnnounce={setAnnouncement}
+          />
+        </section>
+      ) : block ? (
         <section
           aria-labelledby="now-block"
           className="flex flex-1 flex-col px-(--space-4)"
@@ -525,7 +560,7 @@ export function NowScreen({
                 <NowBlockMenu
                   label={COPY.blockMenu(block.name)}
                   title={COPY.blockMenuTitle(block.name)}
-                  rows={nowBlockMenuRows(block, () => onComplete(block.id))}
+                  rows={nowBlockMenuRows(block, () => complete(block))}
                   defaultOpen={view?.open === "block-menu"}
                 />
               }

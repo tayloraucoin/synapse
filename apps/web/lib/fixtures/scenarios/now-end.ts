@@ -22,7 +22,8 @@ const stamps = { createdAt: STAMP, updatedAt: STAMP };
 export const NOW_END_IDS = {
   blocks: { break: fixtureId(1, 701), windDown: fixtureId(1, 702) },
   items: { warmUp: fixtureId(2, 701), strength: fixtureId(2, 702) },
-  slots: { breakfast: fixtureId(3, 701) },
+  /** USE-25: Meditate's slot once Later put it at the end of Training. */
+  slots: { breakfast: fixtureId(3, 701), meditateLater: fixtureId(3, 703) },
 } as const;
 
 const ALL_WELLNESS = [
@@ -38,12 +39,17 @@ const ALL_WELLNESS = [
  * given two items [placeholder] so Start Training has one to lift.
  */
 export function allDoneRecords(coldBathMin: number): FixtureRecords {
-  const records = nowDayRecords(ALL_WELLNESS);
+  const records = withTraining(nowDayRecords(ALL_WELLNESS));
   records.slots = records.slots.map((slot) =>
     slot.blockItemId === NOW_IDS.items.coldBath
       ? { ...slot, tookMin: coldBathMin, doneAt: onNowDay("07:34") }
       : slot,
   );
+  return records;
+}
+
+/** Training given two items [placeholder], so a move lands after them. */
+function withTraining(records: FixtureRecords): FixtureRecords {
   const training = [
     { id: NOW_END_IDS.items.warmUp, title: "Warm-up [placeholder]", min: 10 },
     {
@@ -139,7 +145,60 @@ export function afternoonRecords(): FixtureRecords {
   };
 }
 
+/**
+ * Block complete with items left (USE-25; day/block-complete): Wellness at
+ * 7:40 with Meditate and Cold bath unchecked. `moved` is Later already
+ * tapped on Meditate: one slot at the end of Training (after its two items).
+ */
+export function notDoneRecords(moved: boolean): FixtureRecords {
+  const records = withTraining(
+    nowDayRecords(["peeAndWeigh", "water", "startColdBath"]),
+  );
+  if (moved) {
+    records.slots = [
+      ...records.slots,
+      slotRecord.parse({
+        ...stamps,
+        id: NOW_END_IDS.slots.meditateLater,
+        blockId: NOW_IDS.blocks.training,
+        onDate: BASE_DATE,
+        skipped: false,
+        sortOrder: 2,
+        blockItemId: NOW_IDS.items.meditate,
+        todoId: null,
+        workItemId: null,
+        tier: null,
+        lengthMin: null,
+        tookMin: null,
+        doneAt: null,
+      }),
+    ];
+  }
+  return records;
+}
+
+/**
+ * The day's last block (block-complete last-block): Wind-down [placeholder]
+ * moved to 21:00 to 22:00 as a wind-down kind (its rose chip), nothing in
+ * it, closed at 21:40.
+ */
+export function lastBlockRecords(): FixtureRecords {
+  const records = afternoonRecords();
+  records.blocks = records.blocks.map((block) =>
+    block.id === NOW_END_IDS.blocks.windDown
+      ? {
+          ...block,
+          kind: "wind_down" as const,
+          startsAt: "21:00",
+          endsAt: "22:00",
+        }
+      : block,
+  );
+  return records;
+}
+
 const tookColdBath = `took:${NOW_IDS.items.coldBath}`;
+const closeWellness = `close:${NOW_IDS.blocks.wellness}`;
 
 export const NOW_END_SCENARIOS: Record<string, () => Scenario> = {
   "all-done-start-next": () => ({
@@ -168,6 +227,36 @@ export const NOW_END_SCENARIOS: Record<string, () => Scenario> = {
     now: onNowDay("15:02"),
     records: afternoonRecords(),
     mode: "ready",
+  }),
+  // USE-25: Block complete with items left, and the day's last block.
+  "not-done-closed": () => ({
+    name: "not-done-closed",
+    now: onNowDay("07:40"),
+    records: notDoneRecords(false),
+    mode: "ready",
+    view: { open: closeWellness },
+  }),
+  "not-done-open": () => ({
+    name: "not-done-open",
+    now: onNowDay("07:40"),
+    records: notDoneRecords(true),
+    mode: "ready",
+    view: { open: `close-open:${NOW_IDS.blocks.wellness}` },
+  }),
+  "last-block": () => ({
+    name: "last-block",
+    now: onNowDay("21:40"),
+    records: lastBlockRecords(),
+    mode: "ready",
+    view: { open: `close:${NOW_END_IDS.blocks.windDown}` },
+  }),
+  // All done keeps USE-20's footer (D-USE-28): Took 10 min, no card.
+  "all-done": () => ({
+    name: "all-done",
+    now: onNowDay("07:34"),
+    records: allDoneRecords(10),
+    mode: "ready",
+    view: { open: tookColdBath, ending: { addRow: false, ahead: false } },
   }),
   "empty-no-blocks": () => ({
     name: "empty-no-blocks",

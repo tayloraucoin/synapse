@@ -30,7 +30,12 @@ export type NowPartState =
   | "all-done-add-more"
   | "ahead"
   | "empty-break"
-  | "empty-no-blocks";
+  | "empty-no-blocks"
+  // USE-25: Block complete with items left, the last block, all done.
+  | "not-done-closed"
+  | "not-done-open"
+  | "last-block"
+  | "all-done";
 
 export function NowPart({ state }: { state: NowPartState }) {
   return (
