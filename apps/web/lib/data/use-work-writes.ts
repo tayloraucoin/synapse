@@ -60,6 +60,7 @@ export function useWorkWrites() {
     setWorkTier: write("setWorkTier"),
     editWorkItem: write("editWorkItem"),
     markTaskDone: write("markTaskDone"),
+    reopenTask: write("reopenTask"),
     backToPool: write("backToPool"),
     removeFromSynapse: write("removeFromSynapse"),
     setClientOrder: write("setClientOrder"),

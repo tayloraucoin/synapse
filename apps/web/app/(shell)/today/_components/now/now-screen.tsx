@@ -204,10 +204,13 @@ export function NowScreen() {
     return () => clearTimeout(timer);
   }, [took, sheetId]);
 
-  // Offline is not an error (USE-21): one line above the tray, all else as online.
+  // Offline is not an error (USE-21): one line above the tray, all else as
+  // online. Inside a Work block the line is Work's, under its header (USE-63).
   const top = (
     <>
-      {offline ? <OfflineLine text={COPY.offline} /> : null}
+      {offline && now?.block?.kind !== "work" ? (
+        <OfflineLine text={COPY.offline} />
+      ) : null}
       <NowTodosTray open={trayOpen} onOpenChange={setTrayOpen} />
     </>
   );

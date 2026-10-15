@@ -32,5 +32,8 @@ export const WORK_COPY = {
   error: "Today didn't load.",
   errorDetail: "Timers that were running keep their time; nothing is lost.",
   tryAgain: "Try again",
+  /** offline.md (USE-63, D-USE-56). */
+  offline:
+    "Offline. Everything works here; Linear catches up when back online.",
   workName: "Work",
 } as const;

@@ -72,6 +72,8 @@ export interface WorkRowInput {
   client: ClientRecord | null;
   issue: LinearIssueJoin | null;
   subIssues?: { id: string; title: string; done: boolean }[];
+  /** Linear's line under the meta (USE-63). */
+  linear?: WorkRowView["linear"];
 }
 
 export function workRowView(input: WorkRowInput): WorkRowView {
@@ -109,6 +111,7 @@ export function workRowView(input: WorkRowInput): WorkRowView {
     length: lengthOf(item),
     firing: null,
     doneRecord: null,
+    ...(input.linear ? { linear: input.linear } : {}),
     subIssues:
       subs.length === 0
         ? null

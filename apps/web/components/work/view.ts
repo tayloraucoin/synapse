@@ -1,5 +1,5 @@
 import type { WorkTier } from "@syn/types";
-import type { SquareHue } from "@syn/ui";
+import type { LinearStatusType, SquareHue } from "@syn/ui";
 
 /**
  * The work parts' view models (USE-10): plain fields, every word already
@@ -13,6 +13,34 @@ export type PriorityLevel = "urgent" | "high" | "normal" | "low";
 
 /** Client.color_key (D-USE-95). */
 export type ClientHue = "rose" | "leaf" | "amber" | "moss" | "slate" | "ink";
+
+/**
+ * Linear's side of a row (USE-63), one line under its meta: a write in flight
+ * ("Moving to In progress in Linear…" with the spinner), a failed one ("Not
+ * updated in Linear." with Try again, in ink), or the issue closed in Linear
+ * (the done row's "Done in Linear at 10:12 · all its sessions close" with
+ * Reopen). Synapse's state stands under every one.
+ */
+export type LinearRowLineView =
+  | { kind: "updating"; text: string }
+  | { kind: "failed"; text: string; retry: string; writeId: string }
+  | { kind: "closed"; text: string; reopen: string; reopenName: string };
+
+/** A Linear status as `LinearStatusShape` draws it, the word always beside it. */
+export interface WorkStatusView {
+  type: LinearStatusType;
+  label: string;
+  progress: number;
+  color: string | null;
+}
+
+/** A row in Waiting (D-USE-78): no ring, the title muted, its status on the right. */
+export interface WaitingRowView {
+  id: string;
+  title: string;
+  emoji: string | null;
+  status: WorkStatusView;
+}
 
 export interface WorkRowView {
   id: string;
@@ -51,6 +79,8 @@ export interface WorkRowView {
    * never a warning colour.
    */
   consequence?: { length: string; words: string } | null;
+  /** Linear's line under the meta (USE-63); none with nothing to say. */
+  linear?: LinearRowLineView | null;
   /** Sub-issues: checkboxes at the desk, folded on the phone (D-USE-51). */
   subIssues: {
     summary: string;
@@ -64,6 +94,10 @@ export interface WorkRowHandlers {
   /** Opens the Item sheet. */
   onOpen?: (id: string) => void;
   onToggleSubIssue?: (rowId: string, subIssueId: string, done: boolean) => void;
+  /** "Not updated in Linear.": sends the same write again (USE-63). */
+  onRetryLinear?: (rowId: string) => void;
+  /** Closed in Linear: reopens it there and every session here (D-USE-97). */
+  onReopen?: (rowId: string) => void;
 }
 
 /** The tiers' squares step red, leaf, amber, slate (D-USE-38). */

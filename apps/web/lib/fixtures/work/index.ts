@@ -73,6 +73,11 @@ export interface WorkServer {
   editWorkItem(input: z.input<typeof editWorkItemInput>): Promise<PlannerWrite>;
   /** The task, not a session: it and every open session close. */
   markTaskDone(input: { workItemId: string }): Promise<PlannerWrite>;
+  /**
+   * Reopen (USE-63, D-USE-97): the task open again, and every session that
+   * closed with it; a session done on its own day before stays done.
+   */
+  reopenTask(input: { workItemId: string }): Promise<PlannerWrite>;
   /** Off every day until it's slotted again: its open sessions go. */
   backToPool(input: { workItemId: string }): Promise<PlannerWrite>;
   /** Archived here; the Linear issue stays as it is. */
@@ -289,6 +294,35 @@ export function createWorkServer({
           journal.put(
             "slots",
             slotRecord.parse({ ...session, doneAt: at, updatedAt: at }),
+          );
+        }
+        return { id: workItemId };
+      });
+    },
+
+    reopenTask({ workItemId }) {
+      return write((journal) => {
+        const item = findWorkItem(workItemId);
+        if (item.doneAt === null) {
+          throw new PlannerRefusal("invalid", "That task is open.");
+        }
+        const closedAt = item.doneAt;
+        const at = stamp();
+        journal.put(
+          "workItems",
+          workItemRecord.parse({
+            ...item,
+            doneAt: null,
+            doneSource: null,
+            updatedAt: at,
+          }),
+        );
+        for (const session of records.slots) {
+          if (session.workItemId !== workItemId) continue;
+          if (session.doneAt !== closedAt) continue;
+          journal.put(
+            "slots",
+            slotRecord.parse({ ...session, doneAt: null, updatedAt: at }),
           );
         }
         return { id: workItemId };

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {
+  Button,
   Checkbox,
   cn,
   DisclosureIcon,
@@ -11,6 +12,7 @@ import {
 } from "@syn/ui";
 import { ClientTile } from "./client-tile";
 import { WORK_PARTS_COPY } from "./copy";
+import { LinearRowLine } from "./linear-row-line";
 import { PriorityChip } from "./priority-chip";
 import type { WorkRowHandlers, WorkRowView } from "./view";
 
@@ -32,6 +34,11 @@ import type { WorkRowHandlers, WorkRowView } from "./view";
  * - done: the done mark, the title receded, the meta trimmed to client,
  *   project and ID, "Took … · fired …" right at the desk and under the title
  *   on the phone (D-USE-48, D-USE-51). Faded, never disabled (P-A07).
+ *
+ * Linear's line (USE-63) sits under the meta: a write in flight or a failed
+ * one with Try again; an issue closed in Linear is the done form with its
+ * time in the meta and Reopen on the right. Synapse's state never changes
+ * for a failed write.
  *
  * The phone trims the meta to the tile, project emoji, ID, priority and size
  * (D-USE-51); the desk adds the names, labels and session. One tree, switched
@@ -56,6 +63,8 @@ export function WorkRow({
   onToggleFiring,
   onOpen,
   onToggleSubIssue,
+  onRetryLinear,
+  onReopen,
   planning = false,
   className,
 }: WorkRowProps) {
@@ -181,9 +190,19 @@ export function WorkRow({
             </ul>
           </div>
         ) : null}
+
+        {row.linear && row.linear.kind !== "closed" ? (
+          <LinearRowLine
+            line={row.linear}
+            onRetry={onRetryLinear ? () => onRetryLinear(row.id) : undefined}
+          />
+        ) : null}
       </div>
 
-      <WorkRowRight row={row} />
+      <WorkRowRight
+        row={row}
+        onReopen={onReopen ? () => onReopen(row.id) : undefined}
+      />
     </div>
   );
 }
@@ -241,7 +260,12 @@ export function WorkRowMeta({ row }: { row: WorkRowView }) {
         <span className="tabular-nums">{row.identifier}</span>
       ) : null}
       {done ? (
-        row.doneRecord ? (
+        row.linear?.kind === "closed" ? (
+          <span className="inline-flex items-center gap-(--space-2)">
+            <Separator />
+            <span>{row.linear.text}</span>
+          </span>
+        ) : row.doneRecord ? (
           <span className="split:hidden inline-flex items-center gap-(--space-2)">
             <Separator />
             <span className="text-foreground">{row.doneRecord}</span>
@@ -290,7 +314,27 @@ export function WorkRowMeta({ row }: { row: WorkRowView }) {
   );
 }
 
-function WorkRowRight({ row }: { row: WorkRowView }) {
+function WorkRowRight({
+  row,
+  onReopen,
+}: {
+  row: WorkRowView;
+  onReopen?: () => void;
+}) {
+  if (row.form === "done" && row.linear?.kind === "closed")
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        aria-label={row.linear.reopenName}
+        onClick={onReopen}
+        disabled={onReopen === undefined}
+        className="shrink-0"
+      >
+        {row.linear.reopen}
+      </Button>
+    );
   if (row.form === "firing" && row.firing)
     return (
       <p

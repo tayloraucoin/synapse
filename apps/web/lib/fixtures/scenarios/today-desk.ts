@@ -167,6 +167,8 @@ export function todayWorkRecords(
     (row) => row.identifier === "SYN-212",
   );
   if (lighthouse && parent) {
+    // Today draws it at work, in Secondary: In review would be Waiting (USE-63).
+    parent.stateId = stateId("SYN", "In progress");
     lighthouse.snapshot.subIssues.push(
       {
         ...parent,

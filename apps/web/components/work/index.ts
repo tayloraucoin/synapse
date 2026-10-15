@@ -1,5 +1,6 @@
 export { AllFiringCard, type AllFiringCardProps } from "./all-firing-card";
 export { ClientTile } from "./client-tile";
+export { LinearRowLine, type LinearRowLineProps } from "./linear-row-line";
 export { DueBadge, type DueBadgeProps } from "./due-badge";
 export { PriorityChip, PriorityMarkGlyph } from "./priority-chip";
 export { NextCard, type NextCardProps } from "./next-card";
@@ -24,6 +25,9 @@ export {
   type StripDayView,
   type StripLine,
   type ClientHue,
+  type LinearRowLineView,
+  type WaitingRowView,
+  type WorkStatusView,
   type PriorityLevel,
   type WorkRowForm,
   type WorkRowHandlers,
@@ -33,6 +37,7 @@ export {
   WhileItFiresLine,
   type WhileItFiresLineProps,
 } from "./while-it-fires-line";
+export { WaitingGroup, type WaitingGroupProps } from "./waiting-group";
 export { WorkNextStrip, type WorkNextStripProps } from "./work-next-strip";
 export { WorkRetry, type WorkRetryProps } from "./work-retry";
 export { WorkRow, WorkRowMeta, type WorkRowProps } from "./work-row";

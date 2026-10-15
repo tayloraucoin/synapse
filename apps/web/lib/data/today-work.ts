@@ -26,10 +26,15 @@ import type {
   TodoRecord,
   WorkItemRecord,
 } from "@syn/validators";
-import type { WorkRowView } from "@/components/work";
+import type {
+  LinearRowLineView,
+  WaitingRowView,
+  WorkRowView,
+  WorkStatusView,
+} from "@/components/work";
 import { SIZE_RANGE } from "@/components/work/add/new-task/form";
 import type { Today } from "./derive-today";
-import type { LinearIssueJoin } from "./integration-records";
+import type { LinearIssueJoin, LinearStatus } from "./integration-records";
 import { capHelper, laterWorkBlockOf, TIER_EDGE_COPY } from "./tier-edges";
 import type { TrayRowView } from "./use-todos";
 import { TIER_WORDS, type WeekDayView } from "./week-view";
@@ -44,6 +49,13 @@ import { workMinutes, workRowView } from "./work-row-view";
  *
  * A firing item stays in its tier and place, its form `firing` with "firing"
  * and whole minutes from the derived clock (C-USE-today-working-1, D-USE-29).
+ *
+ * Linear's side (USE-63): an item whose status `statusEffect` reads as
+ * "waiting" (In review, Blocked, Paused) leaves its tier for Waiting and is
+ * never Next (D-USE-78); when its status moves on it is back in its tier and
+ * place, since the place is the slot's own. Each row carries Linear's line
+ * from its latest outbox row (in flight, failed) or the item closed in Linear
+ * (D-USE-97). A failed write never changes the row's Synapse state.
  */
 
 export const TODAY_WORK_COPY = {
@@ -72,6 +84,16 @@ export const TODAY_WORK_COPY = {
   /** Outside Work: "Work starts at 9:30". */
   workStarts: (startsAt: string) => `Work starts at ${clockWords(startsAt)}`,
   joined: (parts: readonly string[]) => parts.join(" · "),
+  /** USE-63: Linear's side of the rows. */
+  waiting: "Waiting · nothing to do until it moves",
+  updating: (status: string) => `Moving to ${status} in Linear…`,
+  notUpdated: "Not updated in Linear.",
+  tryAgain: "Try again",
+  /** "Done in Linear at 10:12 · all its sessions close". */
+  closedInLinear: (clock: string) =>
+    `Done in Linear at ${clock} · all its sessions close`,
+  reopen: "Reopen",
+  reopenName: (title: string) => `Reopen ${title}`,
   /** A meeting inside the Work block (USE-62; meeting-coming-up.md, meeting-lifted.md). */
   tag: { work: "Work", personal: "Personal" },
   /** "the work below waits until 11:00", after the band's span. */
@@ -207,6 +229,8 @@ export interface TodayWorkView {
    */
   lift: boolean;
   tiers: TodayWorkTier[];
+  /** Waiting at the block's foot, under Stretch (D-USE-78); empty when none waits. */
+  waiting: WaitingRowView[];
   /** The current block is the day's later Work block; null otherwise. */
   later: TodayLaterBlock | null;
   whileItFires: WhileItFiresView | null;
@@ -420,6 +444,62 @@ export function topOfRange(item: WorkItemRecord, slot: SlotRecord): number {
   );
 }
 
+/** A status as `LinearStatusShape` draws it: duplicate as canceled, triage as unstarted. */
+export function statusShapeOf(status: LinearStatus): WorkStatusView {
+  const { type } = status.state;
+  return {
+    type:
+      type === "duplicate"
+        ? "canceled"
+        : type === "triage"
+          ? "unstarted"
+          : (type as WorkStatusView["type"]),
+    label: status.state.name,
+    progress: status.fill,
+    color: status.state.color,
+  };
+}
+
+/**
+ * Linear's line for a row (USE-63): closed in Linear on a done row; else the
+ * latest write in flight, named by the status Synapse already shows (its
+ * value is written first), or failed with Try again. A sent write says nothing.
+ */
+export function linearLineOf(
+  item: WorkItemRecord,
+  issue: LinearIssueJoin | null,
+  done: boolean,
+  timeZone: string,
+): LinearRowLineView | null {
+  if (done && item.doneSource === "linear" && item.doneAt !== null) {
+    return {
+      kind: "closed",
+      text: TODAY_WORK_COPY.closedInLinear(
+        wallWords(new Date(item.doneAt), timeZone),
+      ),
+      reopen: TODAY_WORK_COPY.reopen,
+      reopenName: TODAY_WORK_COPY.reopenName(item.title),
+    };
+  }
+  const write = issue?.write ?? null;
+  if (!issue || !write) return null;
+  if (write.state === "pending") {
+    return {
+      kind: "updating",
+      text: TODAY_WORK_COPY.updating(issue.status.state.name),
+    };
+  }
+  if (write.state === "failed") {
+    return {
+      kind: "failed",
+      text: TODAY_WORK_COPY.notUpdated,
+      retry: TODAY_WORK_COPY.tryAgain,
+      writeId: write.id,
+    };
+  }
+  return null;
+}
+
 export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
   const { today, day, now } = input;
   const { records } = today;
@@ -454,16 +534,40 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
           states.get(slot.id) === "paused" && kinds.get(slot.id) === "paused",
       );
   const inHand = running ?? held ?? null;
+
+  // Waiting is statusEffect's alone, never a colour or a status type
+  // (D-USE-78). [ASSUMPTION] an item running, firing, held or done stays in
+  // its tier: Waiting takes one at rest.
+  const issues = new Map(
+    slots.map((slot) => [
+      slot.id,
+      input.issueFor(items.get(slot.workItemId!)!),
+    ]),
+  );
+  const waitingIds = new Set(
+    slots
+      .filter((slot) => {
+        const state = states.get(slot.id);
+        return (
+          issues.get(slot.id)?.status.effect === "waiting" &&
+          slot.id !== inHand?.id &&
+          state !== "running" &&
+          state !== "firing" &&
+          state !== "done"
+        );
+      })
+      .map((slot) => slot.id),
+  );
   // The held card keeps the lift, so it is never Next (paused.md).
   const nextStates = new Map(states);
   if (inHand) nextStates.set(inHand.id, "running");
-  // [ASSUMPTION] nothing is waiting until Linear's Waiting group (USE-63).
   const next = resolveWorkNext({
     slots: slots.map((slot) => ({
       id: slot.id,
       tier: slot.tier!,
       sortOrder: slot.sortOrder,
-      waiting: false,
+      // A waiting item is never Next (D-USE-78).
+      waiting: waitingIds.has(slot.id),
     })),
     states: nextStates,
   });
@@ -497,8 +601,14 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
       form,
       session: sessions.get(slot.id) ?? null,
       client: input.clientFor(item),
-      issue: input.issueFor(item),
+      issue: issues.get(slot.id) ?? null,
       subIssues: input.subIssuesFor?.(item),
+      linear: linearLineOf(
+        item,
+        issues.get(slot.id) ?? null,
+        form === "done",
+        records.timeZone,
+      ),
     });
     const clock = today.clock.slots.get(slot.id);
     if (!clock) return row;
@@ -545,7 +655,7 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
 
   const tiers = TIERS.flatMap((tier): TodayWorkTier[] => {
     const rows = slots
-      .filter((slot) => slot.tier === tier)
+      .filter((slot) => slot.tier === tier && !waitingIds.has(slot.id))
       .map(rowOf)
       .map((row) =>
         // The card's consequence: Next's, or the item in hand's (D-USE-77).
@@ -627,6 +737,19 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
         : null,
     allFiring: next.kind === "all_firing",
     tiers,
+    waiting: slots.flatMap((slot): WaitingRowView[] => {
+      const issue = issues.get(slot.id);
+      if (!waitingIds.has(slot.id) || !issue) return [];
+      const item = items.get(slot.workItemId!)!;
+      return [
+        {
+          id: slot.id,
+          title: item.title,
+          emoji: emojiOf(item),
+          status: statusShapeOf(issue.status),
+        },
+      ];
+    }),
     later,
     whileItFires:
       reminder && firstFiring

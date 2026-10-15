@@ -4,12 +4,13 @@ import type * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
 import { Text } from "@syn/ui";
-import { DayBlockHeader } from "@/components/planner";
+import { DayBlockHeader, OfflineLine } from "@/components/planner";
 import { AllFiringCard, WorkRetry, WorkTiersSkeleton } from "@/components/work";
-import { useDataSource } from "@/lib/data/source";
+import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { stillOpenView } from "@/lib/data/tier-edges";
 import { TODAY_WORK_COPY } from "@/lib/data/today-work";
 import type { NowBlockView } from "@/lib/data/use-now";
+import { useTodayLinear } from "@/lib/data/use-today-linear";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
 import { itemSheetRoute } from "@/lib/routes";
 import { WORK_COPY as COPY } from "../work/copy";
@@ -42,6 +43,9 @@ export function WorkBlockNow({
   const work = useTodayWork(dateKey, now);
   const view = work.view ? stillOpenView(work.view) : null;
   const loop = useWorkLoop(dateKey, view);
+  const linear = useTodayLinear(dateKey, view);
+  // Offline is not an error (USE-63, D-USE-56): one line, every control live.
+  const offline = useIsOffline();
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams().toString();
@@ -67,6 +71,7 @@ export function WorkBlockNow({
           trailing={trailing}
         />
       </div>
+      {offline ? <OfflineLine text={COPY.offline} /> : null}
       {work.isError ? (
         <WorkRetry
           label={COPY.error}
@@ -95,6 +100,7 @@ export function WorkBlockNow({
             view={view}
             now={now}
             loop={loop}
+            linear={linear}
             headingAs="h3"
             meetingsInFlow
             onOpen={(slotId) => {

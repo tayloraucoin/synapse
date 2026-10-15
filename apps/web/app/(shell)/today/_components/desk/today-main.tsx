@@ -3,7 +3,11 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
 import { GroupHeading, Text } from "@syn/ui";
-import { DayBlockBand, PlannerItemRow } from "@/components/planner";
+import {
+  DayBlockBand,
+  OfflineLine,
+  PlannerItemRow,
+} from "@/components/planner";
 import {
   LiftedMeeting,
   WorkNextStrip,
@@ -11,8 +15,9 @@ import {
   WorkTiersSkeleton,
 } from "@/components/work";
 import { AddEntry } from "@/components/work/add";
-import { useDataSource } from "@/lib/data/source";
+import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { dayTitle, wallWords } from "@/lib/data/today-work";
+import { useTodayLinear } from "@/lib/data/use-today-linear";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
 import { itemSheetRoute, todoSheetRoute } from "@/lib/routes";
 import { PushCheck } from "../push-check";
@@ -42,6 +47,9 @@ export function TodayMain() {
   const work = useTodayWork(dateKey, now);
   const { view } = work;
   const loop = useWorkLoop(dateKey, view);
+  const linear = useTodayLinear(dateKey, view);
+  // Offline is not an error (USE-63, D-USE-56): one line, every control live.
+  const offline = useIsOffline();
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams().toString();
@@ -119,6 +127,8 @@ export function TodayMain() {
               detail={view.band.detail}
             />
           ) : null}
+          {/* Offline under the band, above the Next strip (D-USE-65). */}
+          {offline ? <OfflineLine text={COPY.offline} /> : null}
           {/* A meeting at its time: a row under the band; the tiers stay (D-USE-65). */}
           {view.meetings.lifted.map((meeting) => (
             <LiftedMeeting
@@ -155,6 +165,7 @@ export function TodayMain() {
             view={view}
             now={now}
             loop={loop}
+            linear={linear}
             className="pt-(--space-2)"
             onOpen={openItem}
             onCheckReminder={work.checkTodo}

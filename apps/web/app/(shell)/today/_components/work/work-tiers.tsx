@@ -9,12 +9,18 @@ import {
   NextCard,
   RunningWorkCard,
   TierGroup,
+  WaitingGroup,
   WhileItFiresLine,
   type WorkRowHandlers,
 } from "@/components/work";
 import { NewTaskSheet } from "@/components/work/add";
 import { TIER_EDGE_COPY } from "@/lib/data/tier-edges";
-import { workCardFigures, type TodayWorkView } from "@/lib/data/today-work";
+import {
+  TODAY_WORK_COPY,
+  workCardFigures,
+  type TodayWorkView,
+} from "@/lib/data/today-work";
+import type { useTodayLinear } from "@/lib/data/use-today-linear";
 import type { useWorkLoop } from "@/lib/data/use-today-work";
 import { WORK_COPY as COPY } from "./copy";
 
@@ -35,11 +41,16 @@ import { WORK_COPY as COPY } from "./copy";
  * the phone an empty tier folds to its heading with "+ Add", at the desk
  * every tier offers "+ Add to <tier>" on hover or focus; either opens New
  * task with that tier set, in the block under way when it is Work.
+ *
+ * Linear's side (USE-63): Waiting under Stretch, its rows never Next; each
+ * row's Linear line with Try again or Reopen through `linear`. A write that
+ * fails says "Not updated in Linear." politely, once.
  */
 export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
   view: TodayWorkView;
   now: Date;
   loop?: ReturnType<typeof useWorkLoop>;
+  linear?: ReturnType<typeof useTodayLinear>;
   onCheckReminder?: (todoId: string, checked: boolean) => void;
   headingAs?: "h2" | "h3";
   /**
@@ -55,6 +66,7 @@ export function WorkTiers({
   view,
   now,
   loop,
+  linear,
   onCheckReminder,
   headingAs = "h2",
   meetingsInFlow = false,
@@ -192,6 +204,27 @@ export function WorkTiers({
       : null;
   const reminder = view.whileItFires;
 
+  // "Not updated in Linear." once per failed write, politely.
+  const failedKey = view.tiers
+    .flatMap((group) => group.rows)
+    .flatMap((row) =>
+      row.linear?.kind === "failed" ? [row.linear.writeId] : [],
+    )
+    .join(" ");
+  const saidFailed = React.useRef(new Set<string>());
+  React.useEffect(() => {
+    const fresh = failedKey
+      .split(" ")
+      .filter((id) => id && !saidFailed.current.has(id));
+    if (fresh.length === 0) return;
+    for (const id of fresh) saidFailed.current.add(id);
+    setSaid(TODAY_WORK_COPY.notUpdated);
+  }, [failedKey]);
+  const onRetryLinear = linear
+    ? (id: string) => void linear.retry(id)
+    : undefined;
+  const onReopen = linear ? (id: string) => void linear.reopen(id) : undefined;
+
   return (
     <div className={cn("flex flex-col gap-(--space-6)", className)}>
       {meetings?.lifted.map((meeting) => (
@@ -245,8 +278,16 @@ export function WorkTiers({
             .map(bandFor)}
           onOpen={onOpen}
           onToggleFiring={toggleFiring}
+          onRetryLinear={onRetryLinear}
+          onReopen={onReopen}
         />
       ))}
+      <WaitingGroup
+        heading={TODAY_WORK_COPY.waiting}
+        rows={view.waiting}
+        headingAs={headingAs}
+        onOpen={onOpen}
+      />
       <p aria-live="polite" className="sr-only">
         {said}
       </p>
