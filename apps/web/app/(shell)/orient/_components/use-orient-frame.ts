@@ -142,6 +142,7 @@ export function useOrientFrame(dateKey: string, entered: boolean) {
     reading: morning.reading,
     retryReading: morning.retryReading,
     lastNight: morning.day.data?.lastNight ?? null,
+    prompts: morning.day.data?.prompts ?? [],
     lines,
     status,
     retrySave: () => flush(latest.current),

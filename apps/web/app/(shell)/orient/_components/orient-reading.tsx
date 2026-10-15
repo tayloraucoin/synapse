@@ -5,6 +5,7 @@ import {
   Button,
   LinkCallout,
   PassageCarousel,
+  PassageReader,
   RegionRetry,
   Skeleton,
   Text,
@@ -22,6 +23,11 @@ import { ORIENT_COPY as COPY } from "./copy";
  * jumps; a failure is one muted row with Try again, never red and never the
  * page. With no passages, one quiet line sits in its place; links are their
  * own setting and stay.
+ *
+ * READ ALL (USE-13; D-USE-9) opens the full-screen reader on the passage the
+ * carousel shows; both read one index, so × comes back to the passage it was
+ * left on, with focus on "Read all". In-page, no history entry
+ * [ASSUMPTION: the contract's default].
  */
 
 type ReadingState =
@@ -123,12 +129,15 @@ function ReadingSkeleton() {
 
 export function OrientReading({
   state,
-  onReadAll,
+  readerOpenAtStart = false,
 }: {
   state: ReadingState;
-  onReadAll?: (slideId: string) => void;
+  /** A scenario's `view.open: "passage"`: the reader is open on load. */
+  readerOpenAtStart?: boolean;
 }) {
   const [slide, setSlide] = React.useState(0);
+  const [readerOpen, setReaderOpen] = React.useState(readerOpenAtStart);
+  const readAllRef = React.useRef<HTMLButtonElement>(null);
 
   if (state.status === "pending") return <ReadingSkeleton />;
 
@@ -170,9 +179,11 @@ export function OrientReading({
           clamp
           trailing={
             <Button
+              ref={readAllRef}
               variant="ghost"
+              aria-haspopup="dialog"
               aria-label={COPY.readAllNamed(currentTitle)}
-              onClick={() => current && onReadAll?.(current.id)}
+              onClick={() => setReaderOpen(true)}
               className="-me-(--space-4) text-link"
             >
               {COPY.readAll}
@@ -181,6 +192,17 @@ export function OrientReading({
         />
       )}
       <Links links={state.data.links} />
+      {readerOpen && slides.length > 0 ? (
+        <PassageReader
+          passages={slides}
+          index={Math.min(slide, slides.length - 1)}
+          onIndexChange={setSlide}
+          onClose={() => setReaderOpen(false)}
+          caption={COPY.reading}
+          resolveImageUrl={(key) => assetRoute(key)}
+          returnFocusRef={readAllRef}
+        />
+      ) : null}
     </div>
   );
 }

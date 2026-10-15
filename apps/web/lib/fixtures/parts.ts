@@ -83,6 +83,8 @@ for (const state of [
   "loading",
   "error",
   "offline",
+  "passage-open", // USE-13
+  "last-night-open", // USE-13
 ] satisfies OrientPartState[]) {
   registerPart(`orient-${state}`, () => createElement(OrientPart, { state })); // USE-12
 }

@@ -34,6 +34,7 @@ import { usePrefersReducedMotion } from "../../../hooks/use-prefers-reduced-moti
 import { Text } from "../../../primitives/typography/text";
 import { RichTextEditor } from "../../control/rich-text-editor";
 import { PASSAGE_CAROUSEL_COPY } from "./copy";
+import { useSwipe } from "./use-swipe";
 
 export type PassageSlide =
   | {
@@ -66,8 +67,6 @@ export interface PassageCarouselProps {
   className?: string;
 }
 
-const SWIPE_PX = 40;
-
 export function PassageCarousel({
   slides,
   index,
@@ -83,8 +82,6 @@ export function PassageCarousel({
   const regionId = React.useId();
   const count = slides.length;
   const current = Math.min(Math.max(0, index), Math.max(0, count - 1));
-  const pointer = React.useRef<{ id: number; startX: number; startY: number } | null>(null);
-  const [dragX, setDragX] = React.useState(0);
 
   const go = React.useCallback(
     (next: number) => {
@@ -111,32 +108,11 @@ export function PassageCarousel({
     }
   };
 
-  const onPointerDown = (event: React.PointerEvent) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    pointer.current = { id: event.pointerId, startX: event.clientX, startY: event.clientY };
-  };
-  const onPointerMove = (event: React.PointerEvent) => {
-    const start = pointer.current;
-    if (!start || start.id !== event.pointerId) return;
-    const dx = event.clientX - start.startX;
-    const dy = event.clientY - start.startY;
-    // A vertical gesture is the page's scroll, not ours.
-    if (Math.abs(dy) > Math.abs(dx)) return;
-    setDragX(reducedMotion ? 0 : dx);
-  };
-  const onPointerUp = (event: React.PointerEvent) => {
-    const start = pointer.current;
-    if (!start || start.id !== event.pointerId) return;
-    pointer.current = null;
-    const dx = event.clientX - start.startX;
-    setDragX(0);
-    if (dx <= -SWIPE_PX) go(current + 1);
-    else if (dx >= SWIPE_PX) go(current - 1);
-  };
-  const onPointerCancel = () => {
-    pointer.current = null;
-    setDragX(0);
-  };
+  const { dragX, handlers } = useSwipe({
+    onNext: () => go(current + 1),
+    onPrevious: () => go(current - 1),
+    reducedMotion,
+  });
 
   if (count === 0) {
     return (
@@ -161,10 +137,7 @@ export function PassageCarousel({
     >
       <div
         className="touch-pan-y overflow-hidden"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
+        {...handlers}
       >
         {reducedMotion ? (
           // Crossfade: only the current slide is in the flow; it fades in.

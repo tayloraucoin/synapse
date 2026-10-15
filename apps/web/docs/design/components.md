@@ -11,6 +11,7 @@ Inventory: `packages/ui/src/`, stories beside.
 | Empty, loading | `EmptyState` one sentence; `SkeletonRow`                      |
 | Failure        | `RegionRetry` per region; `ErrorPage` per route               |
 | Sheet          | `ResponsiveSheet`                                             |
+| Reading        | `PassageCarousel` clamped; `PassageReader` full screen        |
 | Review numbers | `BigNumber` with `FormulaSentence`                            |
 | Category       | `CategoryChip`                                                |
 | Firing         | `FiringMark` `halo`: clay dot, grey halo, beside its words    |

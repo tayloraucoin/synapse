@@ -132,6 +132,8 @@ describe("the reading alone waits or fails", () => {
       "lines",
       "links",
       "passages",
+      // USE-13: the evening's prompts, for Last night's captions.
+      "prompts",
       "quote",
     ]);
     expect(morning.quote?.onDate).toBe(BASE_DATE);

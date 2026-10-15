@@ -257,6 +257,13 @@ export {
   type DayEntryRecord,
 } from "./planner";
 
+/* ---- Orient: last night read back (USE-13) ---- */
+export {
+  lastNightEntries,
+  type LastNightEntry,
+  type LastNightPrompt,
+} from "./planner";
+
 /* ---- Now: the active block and the current item (USE-16) ---- */
 export {
   activeBlock,

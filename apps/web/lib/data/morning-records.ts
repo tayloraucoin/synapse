@@ -20,11 +20,22 @@ export interface ReadingRecords {
   links: LinkRecord[];
 }
 
-/** The date's three lines (none written yet is null) and yesterday's evening. */
+/** A journal prompt as the person named it: `answers` is keyed by `key`. */
+export interface JournalPromptRecord {
+  key: string;
+  label: string;
+}
+
+/**
+ * The date's three lines (none written yet is null), yesterday's evening and
+ * the prompts it was written under (empty: the defaults), so "Last night"
+ * reads back under the person's own captions (USE-13).
+ */
 export interface MorningDayRecords {
   lines: MorningLinesRecord | null;
   lastNight: JournalEntryRecord | null;
+  prompts: JournalPromptRecord[];
 }
 
-/** `readMorning`'s whole answer: `{ passages, quote, links, lines, lastNight }`. */
+/** `readMorning`'s whole answer: `{ passages, quote, links, lines, lastNight, prompts }`. */
 export type MorningRecords = ReadingRecords & MorningDayRecords;

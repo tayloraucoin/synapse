@@ -8,6 +8,8 @@ import type { Scenario } from "./index";
  * day has no record yet and the first open lands on Orient. Up at is 7:00;
  * the late open is 8:10. The reading's own `loading` and `error` hold only
  * the reading; the lines, last night and Review the day still work.
+ * `view.open` opens the reader ("passage") or the Last night sheet
+ * ("last-night") on load (USE-13).
  */
 
 function atOrient(time: string): string {
@@ -62,5 +64,14 @@ export const ORIENT_SCENARIOS: Record<string, () => Scenario> = {
   "orient-offline": () =>
     orient("orient-offline", "06:58", unopened(baseRecords()), {
       offline: true,
+    }),
+  // USE-13: Orient's two overlays, each open on load.
+  "orient-passage-open": () =>
+    orient("orient-passage-open", "06:58", unopened(baseRecords()), {
+      view: { open: "passage" },
+    }),
+  "orient-last-night-open": () =>
+    orient("orient-last-night-open", "06:58", unopened(baseRecords()), {
+      view: { open: "last-night" },
     }),
 };

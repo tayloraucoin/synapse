@@ -17,6 +17,7 @@ import type {
   TodoRecord,
   WorkItemRecord,
 } from "@syn/validators";
+import type { JournalPromptRecord } from "@/lib/data/morning-records";
 import type { AccountView } from "@/lib/data/use-account";
 
 /**
@@ -58,6 +59,8 @@ export interface FixtureRecords {
   morningLines: MorningLinesRecord[];
   /** Evenings written; "Last night" reads the day before's. */
   journalEntries: JournalEntryRecord[];
+  /** The person's evening prompts, read back as captions (USE-13); unset, the defaults. */
+  journalPrompts?: JournalPromptRecord[];
   /** The signed-in person behind the avatar (USE-83). */
   account: AccountView;
 }

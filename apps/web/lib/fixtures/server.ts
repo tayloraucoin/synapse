@@ -136,7 +136,7 @@ export interface FixtureServer extends PlannerServer, WorkServer {
   readReading(dateKey: string): Promise<ReadingRecords>;
   /** The date's lines and the evening before's journal. */
   readMorningDay(dateKey: string): Promise<MorningDayRecords>;
-  /** Both together: `{ passages, quote, links, lines, lastNight }`. */
+  /** Both together: `{ passages, quote, links, lines, lastNight, prompts }`. */
   readMorning(dateKey: string): Promise<MorningRecords>;
   /** The open is the wake: `orientedAt` is written once, never moved. */
   stampOrient(dateKey: string, at: string): Promise<DayRecordRecord>;
@@ -200,6 +200,7 @@ function readMorningDayRecords(
     lastNight:
       records.journalEntries.find((entry) => entry.onDate === yesterday) ??
       null,
+    prompts: records.journalPrompts ?? [],
   });
 }
 

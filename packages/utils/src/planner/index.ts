@@ -116,3 +116,8 @@ export {
   type DayEntry,
   type DayEntryRecord,
 } from "./day-entry";
+export {
+  lastNightEntries,
+  type LastNightEntry,
+  type LastNightPrompt,
+} from "./last-night";

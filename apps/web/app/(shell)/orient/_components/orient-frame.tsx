@@ -15,11 +15,13 @@ import {
   Textarea,
   TextDisclosureButton,
 } from "@syn/ui";
-import { weekdayForDayKey } from "@syn/utils";
-import type { JournalEntryRecord } from "@syn/validators";
+import { lastNightEntries } from "@syn/utils";
+import { useDataSource } from "@/lib/data/source";
 import { useTodayKey } from "@/lib/data/use-morning";
 import { useDayEntryGate } from "../../_components/day-entry-gate";
 import { ORIENT_COPY as COPY } from "./copy";
+import { dateLabelOf } from "./date-label";
+import { LastNightSheet } from "./last-night-sheet";
 import { OrientReading } from "./orient-reading";
 import { useOrientFrame, type LineKey } from "./use-orient-frame";
 
@@ -48,33 +50,24 @@ const FIELDS: ReadonlyArray<{ key: LineKey; label: string; max: number }> = [
   { key: "todayAsISeeIt", label: COPY.todayAsISeeIt, max: VISUALISATION_MAX },
 ];
 
-/** "Monday, 12 October": weekday, day, month; no year. */
-function dateLabelOf(dateKey: string): string {
-  const [, month = 1, day = 1] = dateKey.split("-").map(Number);
-  const monthName = new Intl.DateTimeFormat("en-GB", {
-    month: "long",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(2000, month - 1, 1, 12)));
-  return `${weekdayForDayKey(dateKey)}, ${day} ${monthName}`;
-}
-
-/** An evening counts as written when any answer has words. */
-function wroteLastNight(entry: JournalEntryRecord | null): boolean {
-  return (
-    entry !== null &&
-    Object.values(entry.answers).some((answer) => answer.trim() !== "")
-  );
-}
-
 export function OrientFrame() {
   const dateKey = useTodayKey();
   const { decided, entered } = useDayEntryGate("orient", dateKey);
   const frame = useOrientFrame(dateKey, entered);
   const headingRef = React.useRef<HTMLHeadingElement>(null);
+  // A scenario's `view.open` seeds an overlay once, for a capture.
+  const seeded = useDataSource().scenario.view?.open;
+  const [lastNightOpen, setLastNightOpen] = React.useState(
+    seeded === "last-night",
+  );
+  const lastNightRef = React.useRef<HTMLButtonElement>(null);
 
   React.useEffect(() => {
     if (entered) headingRef.current?.focus();
   }, [entered]);
+
+  // The three lines the sheet reads back; none written, no link to it.
+  const lastNight = lastNightEntries(frame.lastNight, frame.prompts);
 
   // Not shown until the day's answer is Orient: a second open goes straight on.
   if (decided === null || !entered) return null;
@@ -101,7 +94,10 @@ export function OrientFrame() {
           </Text>
         </header>
 
-        <OrientReading state={readingState} />
+        <OrientReading
+          state={readingState}
+          readerOpenAtStart={seeded === "passage"}
+        />
 
         <section
           aria-labelledby="before-the-day"
@@ -133,11 +129,12 @@ export function OrientFrame() {
           ))}
         </section>
 
-        {wroteLastNight(frame.lastNight) ? (
-          // The "Last night" sheet is USE-13's; this is its trigger.
+        {frame.lastNight !== null && lastNight.length > 0 ? (
           <TextDisclosureButton
-            expanded={false}
+            ref={lastNightRef}
+            expanded={lastNightOpen}
             aria-haspopup="dialog"
+            onClick={() => setLastNightOpen(true)}
             collapsedLabel={
               <span className="inline-flex items-center gap-(--space-1)">
                 {COPY.lastNight}
@@ -146,6 +143,15 @@ export function OrientFrame() {
             }
             expandedLabel={COPY.lastNight}
             classes={{ root: "self-start text-muted-foreground" }}
+          />
+        ) : null}
+        {frame.lastNight !== null ? (
+          <LastNightSheet
+            open={lastNightOpen && lastNight.length > 0}
+            onOpenChange={setLastNightOpen}
+            onDate={frame.lastNight.onDate}
+            entries={lastNight}
+            returnFocusRef={lastNightRef}
           />
         ) : null}
 

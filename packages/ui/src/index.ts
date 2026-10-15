@@ -562,6 +562,11 @@ export {
   type PassageSlide,
 } from "./composed/display/passage-carousel";
 export {
+  PASSAGE_READER_COPY,
+  PassageReader,
+  type PassageReaderProps,
+} from "./composed/display/passage-reader";
+export {
   SelectRow,
   SelectRowList,
   type SelectRowListProps,

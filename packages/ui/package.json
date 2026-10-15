@@ -535,6 +535,10 @@
       "types": "./src/composed/display/passage-carousel/index.ts",
       "default": "./src/composed/display/passage-carousel/index.ts"
     },
+    "./passage-reader": {
+      "types": "./src/composed/display/passage-reader/index.ts",
+      "default": "./src/composed/display/passage-reader/index.ts"
+    },
     "./select-row": {
       "types": "./src/composed/control/select-row/index.ts",
       "default": "./src/composed/control/select-row/index.ts"

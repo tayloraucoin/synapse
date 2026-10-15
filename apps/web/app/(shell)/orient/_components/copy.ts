@@ -18,6 +18,9 @@ export const ORIENT_COPY = {
   intention: "Intention",
   todayAsISeeIt: "Today, as I see it",
   lastNight: "Read last night's reflections",
+  /** The sheet's title (D-USE-14). */
+  lastNightTitle: "Last night",
+  close: "Close",
   review: "Review the day",
   nothingYet: "Nothing to read yet. A passage shows up here once one is added.",
   readingFailed: "This morning's reading didn't load.",

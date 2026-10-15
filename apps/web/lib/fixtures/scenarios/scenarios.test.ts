@@ -35,6 +35,8 @@ const SCHEMAS: {
       | "account"
       | "usualWakeTime"
       | "clientsEnabled"
+      // USE-13: the account's evening prompts, a setting, not a table.
+      | "journalPrompts"
     >
   ]: z.ZodTypeAny;
 } = {
