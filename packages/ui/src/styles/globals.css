@@ -35,21 +35,6 @@
       opacity: 0.35;
     }
   }
-
-  /* The paused running figure (USE-23; D-USE-29, D-USE-72): 1 → 0.4 → 1 over
-     `--dur-pulse`, the only motion on Now. `RunningCard` attaches it under
-     `motion-safe:` only; under reduced motion the figure holds at 60%. */
-  --animate-held: syn-held var(--dur-pulse) ease-in-out infinite;
-
-  @keyframes syn-held {
-    0%,
-    100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.4;
-    }
-  }
 }
 
 @layer base {

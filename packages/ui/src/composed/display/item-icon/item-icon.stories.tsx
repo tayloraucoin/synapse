@@ -36,6 +36,15 @@ export const UnknownGlyph: Story = {
   args: { icon: { kind: "curated", value: "retired-glyph", colorKey: null } },
 };
 
+/** The To-dos tray's line icon: muted, the category tint set aside (USE-19). */
+export const Muted: Story = {
+  args: {
+    icon: { kind: "curated", value: "phone", colorKey: "sky" },
+    size: 20,
+    muted: true,
+  },
+};
+
 export const Sizes: StoryObj = {
   render: () => (
     <div className="flex items-end gap-(--space-4) p-(--space-8)">

@@ -85,9 +85,18 @@ export function assetRoute(storedPath: string): string {
 
 /* ---------------------------------------------------------------- today -- */
 
-export function todayRoute(): string {
-  return "/today";
+/**
+ * Today; on the phone, Now. `todo` opens the To-dos tray on that to-do
+ * (`?todo=<id>`, read by `TODAY_TODO_PARAM`): a reminder's tap lands here (N4).
+ */
+export function todayRoute(params: { todo?: string } = {}): string {
+  return params.todo
+    ? `/today?${TODAY_TODO_PARAM}=${encodeURIComponent(params.todo)}`
+    : "/today";
 }
+
+/** The query key `todayRoute({ todo })` writes and Now reads (nuqs). */
+export const TODAY_TODO_PARAM = "todo";
 
 /** Today's timeline: the rail's Schedule and the phone's Schedule tab. */
 export function todayScheduleRoute(): string {
@@ -149,7 +158,7 @@ export function settingsRoute(): string {
  * The sheets a screen opens over itself by `?sheet=` (the shell's sheet host).
  * The value names the sheet; the path stays the screen beneath.
  */
-export type SheetName = "install" | "profile" | "meal-topics";
+export type SheetName = "install" | "profile" | "meal-topics" | "todo";
 
 /** `path` with `?sheet=<name>` set, keeping its other query. */
 export function sheetRoute(path: string, sheet: SheetName): string {
@@ -162,6 +171,11 @@ export function sheetRoute(path: string, sheet: SheetName): string {
 /** The Install sheet over `path` (USE-83): the menu's row and the offer's How. */
 export function installSheetRoute(path: string): string {
   return sheetRoute(path, "install");
+}
+
+/** The Profile sheet over `path` (USE-84): the avatar menu's "Profile". */
+export function profileSheetRoute(path: string): string {
+  return sheetRoute(path, "profile");
 }
 
 /* ---------------------------------------------------------------- legal -- */

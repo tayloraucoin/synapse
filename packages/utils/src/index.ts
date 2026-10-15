@@ -273,12 +273,11 @@ export {
   type NowItem,
 } from "./planner";
 
-/* ---- Running: the countdown and the over bands (USE-23) ---- */
+/* ---- the To-dos tray: its rows and a reminder's words (USE-19) ---- */
 export {
-  formatCountdown,
-  overBand,
-  runningBand,
-  tookMinutes,
-  type CountdownText,
-  type OverBand,
+  carriedLabel,
+  reminderBody,
+  trayTodos,
+  type TrayRow,
+  type TrayTodo,
 } from "./planner";

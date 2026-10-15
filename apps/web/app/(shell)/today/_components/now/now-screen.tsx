@@ -3,17 +3,16 @@
 import * as React from "react";
 import { ReorderIcon } from "@syn/ui";
 import {
+  BLOCK_HUE,
   DayBlockHeader,
+  LiftedCard,
   PlannerItemRow,
-  TodosTrayLine,
 } from "@/components/planner";
-import { isTimedDone, useRunningView } from "@/lib/data/running";
 import { useDataSource } from "@/lib/data/source";
 import { useNow, useSlotWrites, type NowItemView } from "@/lib/data/use-now";
 import { todayScheduleRoute } from "@/lib/routes";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
-import { NowCurrentCard } from "./now-current-card";
-import { TimedTook } from "./timed-took";
+import { NowTodosTray } from "./now-todos-tray";
 import { TimeTakenSheet } from "./time-taken-sheet";
 import { TookLine } from "./took-line";
 
@@ -53,7 +52,6 @@ export function NowScreen() {
 
   const { view: now } = useNow(dateKey, chosenId);
   const writes = useSlotWrites(dateKey, now?.block?.id ?? null);
-  const running = useRunningView(dateKey, now);
 
   // The line fades after a few seconds; the planned length stands.
   React.useEffect(() => {
@@ -62,7 +60,13 @@ export function NowScreen() {
     return () => clearTimeout(timer);
   }, [took, sheetId]);
 
-  if (!now) return null;
+  // The tray is its own region: the day's loading never blanks it (USE-19).
+  if (!now)
+    return (
+      <div className="mx-auto flex w-full max-w-(--content-text) flex-col">
+        <NowTodosTray />
+      </div>
+    );
   const { block, items, current, next } = now;
 
   function markDone(item: NowItemView) {
@@ -79,12 +83,6 @@ export function NowScreen() {
     );
   }
 
-  /** Done on the running card (USE-23): the time worked, no Change. */
-  function markTimedDone(item: NowItemView) {
-    if (item.id === chosenId) setChosenId(null);
-    setAnnouncement(COPY.announceDone(item.title, next?.title ?? null));
-  }
-
   function markUndone(item: NowItemView) {
     void writes.undo(item);
     if (took?.id === item.id) setTook(null);
@@ -94,7 +92,7 @@ export function NowScreen() {
 
   return (
     <div className="mx-auto flex w-full max-w-(--content-text) flex-col">
-      <TodosTrayLine label={COPY.todos} first={now.trayFirst} />
+      <NowTodosTray />
 
       {block ? (
         <section
@@ -121,13 +119,19 @@ export function NowScreen() {
             {items.map((item) =>
               item.id === current?.id ? (
                 <li key={item.id} className="py-(--space-2)">
-                  <NowCurrentCard
-                    item={item}
-                    block={block}
-                    dateKey={dateKey}
-                    running={running}
-                    onPlainDone={markDone}
-                    onTimedDone={markTimedDone}
+                  <LiftedCard
+                    title={item.title}
+                    icon={item.icon}
+                    hue={BLOCK_HUE[block.kind]}
+                    meta={COPY.meta(item.lengthMin, item.plannedAt)}
+                    label={COPY.liftedName(item.title)}
+                    // Start's running card is USE-23's; until then it is drawn and quiet.
+                    start={{ label: COPY.start, onPress: () => {} }}
+                    done={{
+                      label: COPY.done,
+                      name: COPY.doneName(item.title),
+                      onPress: () => markDone(item),
+                    }}
                   />
                 </li>
               ) : (
@@ -138,9 +142,7 @@ export function NowScreen() {
                       title: item.title,
                       emoji: null,
                       checked: item.done,
-                      meta: isTimedDone(running, item)
-                        ? null
-                        : COPY.length(item.lengthMin),
+                      meta: COPY.length(item.lengthMin),
                     }}
                     noEmoji
                     fadeChecked
@@ -153,14 +155,7 @@ export function NowScreen() {
                       if (!item.done) setChosenId(item.id);
                     }}
                     trailing={
-                      isTimedDone(running, item) &&
-                      item.tookMin !== null &&
-                      item.lengthMin !== null ? (
-                        <TimedTook
-                          tookMin={item.tookMin}
-                          planMin={item.lengthMin}
-                        />
-                      ) : item.done ? null : (
+                      item.done ? null : (
                         // Dragging and Move up / Move down are USE-18's.
                         <button
                           type="button"

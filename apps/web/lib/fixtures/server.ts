@@ -1,6 +1,7 @@
 import { addDays, checkEventTime, dayWindow } from "@syn/utils";
 import {
   dayRecordRecord,
+  displayNameSchema,
   morningLinesInput,
   morningLinesRecord,
   placeSlotInput,
@@ -10,6 +11,8 @@ import {
   slotEventRecord,
   slotRecord,
   slotUpdateInput,
+  todoInput,
+  todoRecord,
   type DayRecordRecord,
   type MorningLinesInput,
   type MorningLinesRecord,
@@ -20,6 +23,8 @@ import {
   type SlotEventRecord,
   type SlotRecord,
   type SlotUpdateInput,
+  type TodoInput,
+  type TodoRecord,
 } from "@syn/validators";
 import type {
   MorningDayRecords,
@@ -28,6 +33,7 @@ import type {
 } from "@/lib/data/morning-records";
 import type { TodayRecords } from "@/lib/data/today-records";
 import type { AccountView } from "@/lib/data/use-account";
+import type { TodosRecords } from "@/lib/data/use-todos";
 import {
   ALREADY_PLACED,
   createPlannerServer,
@@ -107,6 +113,49 @@ export class FixtureOfflineError extends Error {
   }
 }
 
+/** A profile write that did not land (`profileWrites: "fail"`), as a server error. */
+export class FixtureProfileError extends Error {
+  constructor() {
+    super("The profile could not be saved.");
+    this.name = "FixtureProfileError";
+  }
+}
+
+/** A name the user router would refuse: empty, or past the cap. */
+export class AccountNameRefusal extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AccountNameRefusal";
+  }
+}
+
+/** The to-dos' own read, failing on its own (`regions.todos`) until retried. */
+export class FixtureTodosReadError extends Error {
+  constructor() {
+    super("The to-dos could not be read.");
+    this.name = "FixtureTodosReadError";
+  }
+}
+
+/** A write named in `failWrites`: it rejects once, then goes through. */
+export class FixtureWriteError extends Error {
+  constructor() {
+    super("The write did not save.");
+    this.name = "FixtureWriteError";
+  }
+}
+
+/** A to-do write the router would refuse (USE-19). */
+export class TodoWriteRefusal extends Error {
+  readonly reason: "invalid" | "unknown";
+
+  constructor(reason: TodoWriteRefusal["reason"], message: string) {
+    super(message);
+    this.name = "TodoWriteRefusal";
+    this.reason = reason;
+  }
+}
+
 /** A morning-lines write the router would refuse. */
 export class MorningLinesRefusal extends Error {
   constructor(message: string) {
@@ -132,6 +181,13 @@ export interface FixtureServer extends PlannerServer, WorkServer {
   removeSavedColour(id: string): Promise<void>;
   /** The account behind the avatar (USE-83); offline it is already on the device. */
   readAccount(): Promise<AccountView>;
+  /**
+   * The name, trimmed (USE-84). Not queued offline: the profile is not the
+   * day's, so with no connection it fails at once (profile-sheet not-saved).
+   */
+  writeAccountName(name: string): Promise<AccountView>;
+  /** The cropped photo, at once with no Save; the account as stored after. */
+  uploadAccountPhoto(photo: Blob): Promise<AccountView>;
   /** The reading alone (USE-12): it may wait or fail while the rest reads. */
   readReading(dateKey: string): Promise<ReadingRecords>;
   /** The date's lines and the evening before's journal. */
@@ -142,6 +198,20 @@ export interface FixtureServer extends PlannerServer, WorkServer {
   stampOrient(dateKey: string, at: string): Promise<DayRecordRecord>;
   /** Only the lines sent change. */
   writeMorningLines(patch: MorningLinesInput): Promise<MorningLinesRecord>;
+  /**
+   * The to-dos alone (USE-19): every to-do, the to-do slots on any date and
+   * the blocks they sit in, so a slot's end is read as the day reads it.
+   */
+  readTodos(dateKey: string): Promise<TodosRecords>;
+  /** A new to-do (`todoInput`). */
+  writeTodo(input: TodoInput): Promise<TodoRecord>;
+  /** A to-do's box: `doneAt` set, or cleared by uncheck. */
+  writeTodoDone(input: {
+    id: string;
+    doneAt: string | null;
+  }): Promise<TodoRecord>;
+  /** The to-dos' own retry (`regions.todos: "error"`). */
+  recoverTodos(): void;
   /** The `error` scenario's retry: reads succeed from here on. */
   recover(): void;
   /** The reading's own retry (`reading: "error"`). */
@@ -221,6 +291,9 @@ export function createFixtureServer(
   let failing = scenario.mode === "error";
   let readingFails = scenario.reading === "error";
   let offline = scenario.offline === true;
+  let todosFail = scenario.regions?.todos === "error";
+  // Each id rejects its next write once (`failWrites`).
+  const failNext = new Set(scenario.failWrites ?? []);
 
   function checkOne(raw: SlotEventInput): SlotEventInput {
     const parsed = slotEventInput.safeParse(raw);
@@ -330,6 +403,35 @@ export function createFixtureServer(
     },
 
     readAccount() {
+      return Promise.resolve(structuredClone(records.account));
+    },
+
+    writeAccountName(raw) {
+      const parsed = displayNameSchema.safeParse(raw);
+      if (!parsed.success) {
+        return Promise.reject(
+          new AccountNameRefusal(
+            parsed.error.issues[0]?.message ?? "Invalid name.",
+          ),
+        );
+      }
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      if (scenario.profileWrites === "fail") {
+        return Promise.reject(new FixtureProfileError());
+      }
+      records.account.name = parsed.data;
+      return Promise.resolve(structuredClone(records.account));
+    },
+
+    uploadAccountPhoto(photo) {
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      if (scenario.profileWrites === "fail") {
+        return Promise.reject(new FixtureProfileError());
+      }
+      // The uploading capture: the upload is under way and stays so.
+      if (scenario.profileWrites === "hang") return new Promise(() => {});
+      // Stands for the asset router's URL; the page's life is the fixture's.
+      records.account.photoUrl = URL.createObjectURL(photo);
       return Promise.resolve(structuredClone(records.account));
     },
 
@@ -512,6 +614,72 @@ export function createFixtureServer(
         if (value !== undefined) Object.assign(row, { [key]: value });
       }
       return Promise.resolve(structuredClone(row));
+    },
+
+    readTodos(dateKey) {
+      if (scenario.regions?.todos === "loading") return new Promise(() => {});
+      if (todosFail) return Promise.reject(new FixtureTodosReadError());
+      return Promise.resolve(
+        structuredClone({
+          date: dateKey,
+          timeZone: records.timeZone,
+          dayWindow: windowFor(records, dateKey),
+          todos: records.todos,
+          slots: records.slots.filter((slot) => slot.todoId !== null),
+          blocks: records.blocks,
+          blockChanges: records.blockChanges,
+        }),
+      );
+    },
+
+    writeTodo(raw) {
+      const parsed = todoInput.safeParse(raw);
+      if (!parsed.success) {
+        return Promise.reject(
+          new TodoWriteRefusal(
+            "invalid",
+            parsed.error.issues[0]?.message ?? "Invalid to-do.",
+          ),
+        );
+      }
+      const input = parsed.data;
+      const stamp = now().toISOString();
+      const record = todoRecord.parse({
+        id: crypto.randomUUID(),
+        createdAt: stamp,
+        updatedAt: stamp,
+        title: input.title,
+        type: input.type,
+        icon: input.icon ?? null,
+        lengthMin: input.lengthMin ?? null,
+        notes: input.notes ?? null,
+        onDate: input.onDate ?? null,
+        rrule: input.rrule ?? null,
+        remindAt: input.remindAt ?? null,
+        remindOn: input.remindOn ?? null,
+        doneAt: null,
+        archivedAt: null,
+      });
+      records.todos.push(record);
+      return Promise.resolve(structuredClone(record));
+    },
+
+    writeTodoDone({ id, doneAt }) {
+      // Offline, the to-dos write as online here; their persistence is wave 3's.
+      if (failNext.delete(id)) return Promise.reject(new FixtureWriteError());
+      const row = records.todos.find((todo) => todo.id === id);
+      if (!row) {
+        return Promise.reject(
+          new TodoWriteRefusal("unknown", "No to-do with that id."),
+        );
+      }
+      row.doneAt = doneAt;
+      row.updatedAt = now().toISOString();
+      return Promise.resolve(structuredClone(todoRecord.parse(row)));
+    },
+
+    recoverTodos() {
+      todosFail = false;
     },
 
     recover() {

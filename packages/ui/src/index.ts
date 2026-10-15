@@ -36,6 +36,12 @@ export {
   ChevronDownIcon as ExpandIcon,
   GripVerticalIcon as ReorderIcon,
 } from "lucide-react";
+/** The To-dos tray's glyphs (USE-19): a reminder's bell, a failed list's info, the open chevron. */
+export {
+  BellIcon as ReminderIcon,
+  ChevronUpIcon as CollapseIcon,
+  InfoIcon as NoticeIcon,
+} from "lucide-react";
 /** The account's glyphs (USE-83): the avatar menu's rows and the install steps. */
 export {
   CalendarRangeIcon as SetMyDaysIcon,
@@ -48,6 +54,11 @@ export {
   TvMinimalPlayIcon as MealTopicsIcon,
   UserIcon as ProfileIcon,
   XIcon as CloseIcon,
+} from "lucide-react";
+/** The Profile sheet's glyphs (USE-84): the crop step's back, the not-saved line. */
+export {
+  ChevronLeftIcon as BackIcon,
+  CircleAlertIcon as NotSavedIcon,
 } from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
@@ -850,6 +861,8 @@ export {
 } from "./composed/control/ellipses-menu";
 export {
   ImageCropper,
+  type ImageCropperCopy,
+  type ImageCropperHandle,
   type ImageCropperProps,
 } from "./composed/control/image-cropper";
 export {

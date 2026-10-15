@@ -1,15 +1,19 @@
 "use client";
 
-import { cn, ExpandIcon, Text } from "@syn/ui";
+import { cn, CollapseIcon, ExpandIcon, Text } from "@syn/ui";
 
 /**
- * TodosTrayLine — the To-dos tray, closed (USE-16; D-USE-26): "To-dos" and
- * the first title, ellipsised, and a chevron, between hairlines. "To-dos"
- * alone when there is none. A toggle; USE-19 opens it. Props only.
+ * TodosTrayLine — the To-dos tray's trigger row (USE-16, USE-19; D-USE-26).
+ * Closed: "To-dos", the first title ellipsised, a chevron down; "To-dos"
+ * alone when there is none or the list has not arrived. Open: "To-dos" alone
+ * and a chevron up. Never a count. Props only; `TodosTray` holds it.
  */
 export interface TodosTrayLineProps {
   label: string;
   first: string | null;
+  open?: boolean;
+  /** The id of what it opens. */
+  controls?: string;
   onToggle?: () => void;
   className?: string;
 }
@@ -17,16 +21,20 @@ export interface TodosTrayLineProps {
 export function TodosTrayLine({
   label,
   first,
+  open = false,
+  controls,
   onToggle,
   className,
 }: TodosTrayLineProps) {
+  const Chevron = open ? CollapseIcon : ExpandIcon;
   return (
     <button
       type="button"
-      aria-expanded={false}
+      aria-expanded={open}
+      aria-controls={controls}
       onClick={onToggle}
       className={cn(
-        "border-hairline flex min-h-(--target) w-full cursor-pointer items-center gap-(--space-2) border-y px-(--space-4) text-start",
+        "flex min-h-(--target) w-full cursor-pointer items-center gap-(--space-2) px-(--space-4) text-start",
         "hover:bg-surface transition-colors duration-(--dur-state) ease-(--ease-settle)",
         className,
       )}
@@ -41,12 +49,9 @@ export function TodosTrayLine({
         truncate
         className="min-w-0 flex-1"
       >
-        {first}
+        {open ? null : first}
       </Text>
-      <ExpandIcon
-        aria-hidden="true"
-        className="text-text-muted size-4 shrink-0"
-      />
+      <Chevron aria-hidden="true" className="text-text-muted size-4 shrink-0" />
     </button>
   );
 }
