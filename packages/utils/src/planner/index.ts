@@ -140,3 +140,10 @@ export {
   type CountdownText,
   type OverBand,
 } from "./over-band";
+export {
+  bulletCellsPerLine,
+  bulletGrid,
+  bulletLines,
+  type BulletGrid,
+  type BulletGridOptions,
+} from "./bullet-grid";

@@ -26,20 +26,25 @@
  *  - `ghostOutline` is the *not confirmed* face (§10.1: "Ghost outline").
  *  - `lifted` is the layer's ghost: 0.9 opacity, 1.5px `border-accent-mark`.
  *
+ * BULLETS (USE-31; D-USE-23): a full block may carry its items as
+ * `ScheduleBullets` under its head, with `moreCount` for what did not fit.
+ * Inside the block's own button they are text, never buttons of their own;
+ * a screen that wants each bullet tappable composes `ScheduleBullets` itself.
+ *
  * The accessible label carries what the visual cannot at small sizes:
  * "{title}, {start}–{end}, {state}". A hairline block is still a complete
  * sentence to a screen reader.
  */
 "use client";
 
+import * as React from "react";
 import type { DayItemView } from "@syn/types";
 import { formatClock } from "@syn/utils";
-import * as React from "react";
-
 import { cn } from "../../../lib/cn";
 import { Text } from "../../../primitives/typography/text";
 import { PinGlyph } from "../item-icon";
 import { scheduleBlockVariants } from "./schedule-block.variants";
+import { ScheduleBullets, type ScheduleBullet } from "./schedule-bullets";
 
 const MULTITASK_GUTTER_PX = 4;
 
@@ -71,6 +76,14 @@ export interface ScheduleBlockProps {
   lifted?: boolean;
   /** A container's nested blocks, positioned relative to it. */
   children?: React.ReactNode;
+
+  /* ---- USE-31 (D-USE-23) ---- */
+  /** The items under the head, already laid by `bulletGrid`; drawn as text. */
+  bullets?: readonly Omit<ScheduleBullet, "onOpen">[];
+  /** What did not fit: "+n more" in the next cell. */
+  moreCount?: number;
+  /** The bullets' dot fill. */
+  bulletDotClassName?: string;
   className?: string;
 }
 
@@ -115,11 +128,18 @@ export function ScheduleBlock({
   ghostOutline = false,
   lifted = false,
   children,
+  bullets,
+  moreCount = 0,
+  bulletDotClassName,
   className,
 }: ScheduleBlockProps) {
   const resolved = size ?? sizeFor(heightPx);
   const isPinned = pinned ?? item.pinned;
-  const tone = container ? "container" : ghostOutline ? "ghost" : toneFor(item.state);
+  const tone = container
+    ? "container"
+    : ghostOutline
+      ? "ghost"
+      : toneFor(item.state);
 
   const startLabel =
     item.scheduledStart === null
@@ -139,14 +159,17 @@ export function ScheduleBlock({
       ? "0px"
       : `calc(${multitask.index} * ((100% - ${(multitask.count - 1) * MULTITASK_GUTTER_PX}px) / ${multitask.count} + ${MULTITASK_GUTTER_PX}px))`;
 
-  const stateLabel = item.state === "not-confirmed" ? "not confirmed" : item.state;
+  const stateLabel =
+    item.state === "not-confirmed" ? "not confirmed" : item.state;
   const label = `${item.title}, ${startLabel}–${endLabel}, ${stateLabel}${isPinned ? ", pinned" : ""}${container ? ", block" : ""}`;
 
   const face =
     resolved === "hairline" ? (
       <span className="flex items-center gap-(--space-1)">
         <span aria-hidden="true" className="bg-ink h-0.5 w-4 shrink-0" />
-        {isPinned ? <PinGlyph size={10} className="text-text-secondary" /> : null}
+        {isPinned ? (
+          <PinGlyph size={10} className="text-text-secondary" />
+        ) : null}
         <Text as="span" variant="caption" tone="secondary" truncate>
           {item.title}
         </Text>
@@ -155,7 +178,9 @@ export function ScheduleBlock({
       <span
         className={cn(
           "flex flex-col overflow-hidden",
-          container ? "h-auto justify-start" : "h-full justify-center",
+          container || bullets !== undefined
+            ? "h-auto justify-start"
+            : "h-full justify-center",
         )}
       >
         <span className="flex items-center gap-(--space-1)">
@@ -184,6 +209,18 @@ export function ScheduleBlock({
             {tone === "moved" ? "moved" : `${startLabel}–${endLabel}`}
           </Text>
         ) : null}
+        {resolved === "full" && bullets !== undefined ? (
+          <ScheduleBullets
+            bullets={bullets.map(({ id, label, tone: mark }) => ({
+              id,
+              label,
+              tone: mark,
+            }))}
+            moreCount={moreCount}
+            dotClassName={bulletDotClassName}
+            className="mt-(--space-1)"
+          />
+        ) : null}
       </span>
     );
 
@@ -199,8 +236,16 @@ export function ScheduleBlock({
         data-schedule-block
         data-item-id={item.id}
         data-container
-        style={{ top: `${topPx}px`, height: `${heightPx}px`, width, insetInlineStart: offset }}
-        className={cn(scheduleBlockVariants({ tone, size: resolved, lifted }), className)}
+        style={{
+          top: `${topPx}px`,
+          height: `${heightPx}px`,
+          width,
+          insetInlineStart: offset,
+        }}
+        className={cn(
+          scheduleBlockVariants({ tone, size: resolved, lifted }),
+          className,
+        )}
       >
         <button
           type="button"
@@ -241,7 +286,8 @@ export function ScheduleBlock({
       className={cn(
         scheduleBlockVariants({ tone, size: resolved, lifted }),
         draggable && !isPinned && "touch-none",
-        lifted && "motion-safe:scale-[1.02] motion-safe:transition-transform motion-safe:duration-(--dur-state)",
+        lifted &&
+          "motion-safe:scale-[1.02] motion-safe:transition-transform motion-safe:duration-(--dur-state)",
         className,
       )}
     >

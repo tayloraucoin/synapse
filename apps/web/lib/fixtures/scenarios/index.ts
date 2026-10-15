@@ -10,6 +10,7 @@ import { NOW_END_SCENARIOS } from "./now-end";
 import { NOW_FORM_SCENARIOS } from "./now-forms";
 import { ORIENT_SCENARIOS } from "./orient-morning";
 import { POOL_SCENARIOS } from "./pool";
+import { REVIEW_SCENARIOS } from "./review-day";
 import { RUNNING_SCENARIOS } from "./running";
 import { SET_UP_SCENARIOS } from "./set-up";
 import { TODOS_SCENARIOS } from "./todos-tray";
@@ -193,6 +194,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...INTEGRATION_SCENARIOS,
   // ---- + Add and New task (USE-51): Monday during Work, and the pool's New task ----
   ...ADD_SCENARIOS,
+  // ---- Review the day (USE-31): the Monday at 6:58, before Ready, go ----
+  ...REVIEW_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {

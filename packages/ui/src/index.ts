@@ -495,8 +495,15 @@ export {
   type ScheduleAxisProps,
 } from "./composed/display/schedule-axis";
 export {
+  BULLET_CELL_PX,
+  BULLET_GAP_X_PX,
+  BULLET_GAP_Y_PX,
+  BULLET_LINE_PX,
   ScheduleBlock,
+  ScheduleBullets,
   scheduleBlockVariants,
+  type ScheduleBullet,
+  type ScheduleBulletsProps,
   type ScheduleBlockProps,
   type ScheduleBlockSize,
   type ScheduleBlockVariants,
@@ -741,6 +748,9 @@ export {
   type AppHeaderClasses,
   type AppHeaderProps,
 } from "./composed/navigation/app-header";
+export { Breadcrumb, type BreadcrumbProps } from "./composed/navigation/breadcrumb";
+/** Review the day (USE-31): Orient's locked line. */
+export { LockIcon as LockedIcon } from "lucide-react";
 
 /* ---- composed: feedback ---- */
 export {

@@ -1,7 +1,10 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
-
-import { BLOCK_WORK, STORY_TIME_ZONE, itemInState } from "../../__fixtures__/view-models";
+import type { Meta, StoryObj } from "@storybook/react";
+import {
+  BLOCK_WORK,
+  itemInState,
+  STORY_TIME_ZONE,
+} from "../../__fixtures__/view-models";
 import { ScheduleBlock } from "./schedule-block";
 
 /**
@@ -87,7 +90,11 @@ export const Multitask: StoryObj = {
 /** A pin: the anchor glyph, and `data-pinned` so the layer never lifts it (§6.5). */
 export const Pinned: Story = {
   args: {
-    item: itemInState("upcoming", { title: "Stand-up", pinned: true, scheduling: "hard" }),
+    item: itemInState("upcoming", {
+      title: "Stand-up",
+      pinned: true,
+      scheduling: "hard",
+    }),
     topPx: 0,
     heightPx: 32,
     pinned: true,
@@ -96,12 +103,24 @@ export const Pinned: Story = {
 
 /** The bottom-edge handle for today's length (§6.5). */
 export const Resizable: Story = {
-  args: { item: itemInState("upcoming"), topPx: 0, heightPx: 64, draggable: true, resizable: true },
+  args: {
+    item: itemInState("upcoming"),
+    topPx: 0,
+    heightPx: 64,
+    draggable: true,
+    resizable: true,
+  },
 };
 
 /** The layer's ghost: 0.9 opacity, 1.5px accent border, scaled 1.02 (§6.5, §10.1). */
 export const Lifted: Story = {
-  args: { item: itemInState("upcoming"), topPx: 0, heightPx: 64, draggable: true, lifted: true },
+  args: {
+    item: itemInState("upcoming"),
+    topPx: 0,
+    heightPx: 64,
+    draggable: true,
+    lifted: true,
+  },
 };
 
 /** The work container with two fixtures pinned inside it (§6.1, §6.5). */
@@ -136,10 +155,33 @@ export const Container: StoryObj = {
 
 /** *Not confirmed* on the Schedule: a ghost outline, no fill (§10.1). */
 export const GhostOutline: Story = {
-  args: { item: itemInState("not-confirmed", { title: "Stretch" }), topPx: 0, heightPx: 40 },
+  args: {
+    item: itemInState("not-confirmed", { title: "Stretch" }),
+    topPx: 0,
+    heightPx: 40,
+  },
 };
 
 /** After devices-off: the block at default; the sheet opens read-only (§10.1). */
 export const ConfirmLater: Story = {
-  args: { item: itemInState("confirm-later", { title: "Read" }), topPx: 0, heightPx: 40 },
+  args: {
+    item: itemInState("confirm-later", { title: "Read" }),
+    topPx: 0,
+    heightPx: 40,
+  },
+};
+
+/** USE-31: the items under the head as fixed cells, with what did not fit counted. */
+export const WithBullets: Story = {
+  args: {
+    item: itemInState("upcoming", { title: "Wellness" }),
+    topPx: 0,
+    heightPx: 88,
+    bullets: [
+      { id: "1", label: "Pee and weigh", tone: "dot" },
+      { id: "2", label: "Water", tone: "dot" },
+      { id: "3", label: "Start the cold bath", tone: "dot" },
+    ],
+    moreCount: 2,
+  },
 };

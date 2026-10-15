@@ -10,6 +10,7 @@ import {
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { NowPart, type NowPartState } from "./now-parts";
 import { OrientPart, type OrientPartState } from "./orient-parts";
+import { ReviewPart, type ReviewPartState } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
 import {
   TodosNotificationPart,
@@ -152,4 +153,8 @@ for (const state of [
   "add-save-to-the-pool",
 ] satisfies AddPartState[]) {
   registerPart(state, () => createElement(AddPart, { state })); // USE-51
+}
+// USE-31: Review the day's success frame and the tray open, `review-<state>`.
+for (const state of ["success", "tray-open"] satisfies ReviewPartState[]) {
+  registerPart(`review-${state}`, () => createElement(ReviewPart, { state }));
 }

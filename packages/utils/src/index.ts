@@ -295,3 +295,12 @@ export {
   type CountdownText,
   type OverBand,
 } from "./planner";
+
+/* ---- Review the day: the bullet grid's cells and "+n more" (USE-31) ---- */
+export {
+  bulletCellsPerLine,
+  bulletGrid,
+  bulletLines,
+  type BulletGrid,
+  type BulletGridOptions,
+} from "./planner";

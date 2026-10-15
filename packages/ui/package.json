@@ -359,6 +359,10 @@
       "types": "./src/composed/navigation/app-header/index.ts",
       "default": "./src/composed/navigation/app-header/index.ts"
     },
+    "./breadcrumb": {
+      "types": "./src/composed/navigation/breadcrumb/index.ts",
+      "default": "./src/composed/navigation/breadcrumb/index.ts"
+    },
     "./day-complete-action": {
       "types": "./src/composed/control/day-complete-action/index.ts",
       "default": "./src/composed/control/day-complete-action/index.ts"

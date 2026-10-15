@@ -53,3 +53,9 @@ export {
   type SortableItemRow,
   type SortableItemRowsProps,
 } from "./sortable-item-rows";
+export {
+  DayColumn,
+  type DayColumnBlock,
+  type DayColumnItem,
+  type DayColumnProps,
+} from "./day-column";

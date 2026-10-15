@@ -3,8 +3,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { DayEntry } from "@syn/utils";
-import { useDayEntry } from "@/lib/data/use-day-entry";
 import { useDataSource } from "@/lib/data/source";
+import { useDayEntry } from "@/lib/data/use-day-entry";
 import { useTodayKey } from "@/lib/data/use-morning";
 import {
   orientRoute,
@@ -26,6 +26,10 @@ import {
  * Ready, go, Now reached by its tab once the shell has painted (or a
  * scenario standing for that) stays, and shows the day's List: the tree's
  * "review" is for the first screen, not for a tab tapped later.
+ *
+ * BACK TO ORIENT (USE-31; D-USE-10). Review the day's "‹ Orient" is a link
+ * within the app: Orient reached so before Ready, go stays, so the morning
+ * can be read again. Opened fresh, it still goes on to Review the day.
  */
 
 let shellPainted = false;
@@ -59,6 +63,7 @@ export function useDayEntryGate(here: DayEntry, dateKey: string) {
     if (decided !== null) return;
     if (failed) setDecided(here);
     else if (entry === "review" && here === "now" && byTab) setDecided(here);
+    else if (entry === "review" && here === "orient" && byTab) setDecided(here);
     else if (entry !== null) setDecided(entry);
   }, [byTab, decided, entry, failed, here]);
 

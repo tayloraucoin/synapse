@@ -203,6 +203,12 @@ export interface FixtureServer
   readMorning(dateKey: string): Promise<MorningRecords>;
   /** The open is the wake: `orientedAt` is written once, never moved. */
   stampOrient(dateKey: string, at: string): Promise<DayRecordRecord>;
+  /**
+   * Ready, go (USE-31; D-USE-71): `readyAt` is written once and a second
+   * press keeps the first. A day with no record yet is oriented at the
+   * same minute [ASSUMPTION: Review the day is only reached after Orient].
+   */
+  readyGo(dateKey: string, at: string): Promise<DayRecordRecord>;
   /** Only the lines sent change. */
   writeMorningLines(patch: MorningLinesInput): Promise<MorningLinesRecord>;
   /**
@@ -601,6 +607,31 @@ export function createFixtureServer(
         onDate: dateKey,
         orientedAt: at,
         readyAt: null,
+        closedAt: null,
+      });
+      records.dayRecords.push(record);
+      return Promise.resolve(structuredClone(record));
+    },
+
+    readyGo(dateKey, at) {
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      const stamp = now().toISOString();
+      const row = records.dayRecords.find((r) => r.onDate === dateKey);
+      if (row) {
+        // A second press keeps the first.
+        if (row.readyAt === null) {
+          row.readyAt = at;
+          row.updatedAt = stamp;
+        }
+        return Promise.resolve(structuredClone(dayRecordRecord.parse(row)));
+      }
+      const record = dayRecordRecord.parse({
+        id: crypto.randomUUID(),
+        createdAt: stamp,
+        updatedAt: stamp,
+        onDate: dateKey,
+        orientedAt: at,
+        readyAt: at,
         closedAt: null,
       });
       records.dayRecords.push(record);
