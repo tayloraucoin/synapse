@@ -13,10 +13,19 @@
  * so no kind or hue is known here. A bullet with `onOpen` is a button (a
  * shortcut; the block's own button carries the tap, since 20 px is under
  * the target), one without is plain text.
+ *
+ * SCHEDULE'S MARKS (USE-27): a bullet's `mark` is what its item says now,
+ * never colour alone. `check`, a 10 px check in the block's colour
+ * (`checkClassName`) with the words muted; `running`, a now dot in a ring
+ * that pulses (100 % to 40 %, 2 s; still under reduced motion) with
+ * "· running" after the words; `firing`, a clay dot in a muted halo, the
+ * words receded, never the now colour (D-USE-49). `markLabel` is read, not
+ * seen ("done"); `suffix` is seen.
  */
 "use client";
 
 import * as React from "react";
+import { CheckIcon } from "lucide-react";
 import { cn } from "../../../lib/cn";
 
 /** The grid's fixed geometry, shared with the maths that lays it. */
@@ -34,6 +43,12 @@ export interface ScheduleBullet {
   onOpen?: () => void;
   /** "<item>, in <block>". */
   ariaLabel?: string;
+  /** What the item says now (Schedule); unset, the tone's dot or dash. */
+  mark?: "dot" | "check" | "running" | "firing";
+  /** Seen after the words: "· running". */
+  suffix?: string;
+  /** Read after the words, not seen: "done". */
+  markLabel?: string;
 }
 
 export interface ScheduleBulletsProps {
@@ -42,6 +57,8 @@ export interface ScheduleBulletsProps {
   moreCount?: number;
   /** The dot's fill, e.g. a category's dot colour. */
   dotClassName?: string;
+  /** The check's colour, the block's own (a text colour class). */
+  checkClassName?: string;
   /**
    * `cells`, the fixed 145 px grid; `lines`, one item a line across the
    * width (Work's tiers, where a title and its Linear id run long).
@@ -55,31 +72,74 @@ const CELL =
 
 function Mark({
   tone,
+  mark,
   dotClassName,
+  checkClassName,
 }: {
   tone: ScheduleBullet["tone"];
+  mark: ScheduleBullet["mark"];
   dotClassName?: string;
+  checkClassName?: string;
 }) {
-  return tone === "dot" ? (
-    <span
-      aria-hidden="true"
-      className={cn(
-        "size-1.5 shrink-0 rounded-full bg-muted-foreground",
-        dotClassName,
-      )}
-    />
-  ) : (
-    <span
-      aria-hidden="true"
-      className="h-0.5 w-1.5 shrink-0 bg-muted-foreground"
-    />
-  );
+  if (tone === "transition") {
+    return (
+      <span
+        aria-hidden="true"
+        className="h-0.5 w-1.5 shrink-0 bg-muted-foreground"
+      />
+    );
+  }
+  switch (mark) {
+    case "check":
+      return (
+        <CheckIcon
+          aria-hidden="true"
+          strokeWidth={2.5}
+          className={cn(
+            "size-2.5 shrink-0 text-muted-foreground",
+            checkClassName,
+          )}
+        />
+      );
+    case "running":
+      return (
+        <span
+          aria-hidden="true"
+          data-mark="running"
+          className="relative flex size-3 shrink-0 items-center justify-center"
+        >
+          <span className="absolute inset-0 rounded-full border border-now/45 motion-safe:animate-held" />
+          <span className="size-1.5 rounded-full bg-now" />
+        </span>
+      );
+    case "firing":
+      return (
+        <span
+          aria-hidden="true"
+          data-mark="firing"
+          className="flex size-3 shrink-0 items-center justify-center rounded-full bg-fill-muted"
+        >
+          <span className="size-1.5 rounded-full bg-category-clay-dot" />
+        </span>
+      );
+    default:
+      return (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "size-1.5 shrink-0 rounded-full bg-muted-foreground",
+            dotClassName,
+          )}
+        />
+      );
+  }
 }
 
 export function ScheduleBullets({
   bullets,
   moreCount = 0,
   dotClassName,
+  checkClassName,
   layout = "cells",
   className,
 }: ScheduleBulletsProps) {
@@ -98,18 +158,30 @@ export function ScheduleBullets({
       className={cn("grid", className)}
     >
       {bullets.map((bullet) => {
+        const receded = bullet.mark === "check" || bullet.mark === "firing";
         const face = (
           <>
-            <Mark tone={bullet.tone} dotClassName={dotClassName} />
+            <Mark
+              tone={bullet.tone}
+              mark={bullet.mark}
+              dotClassName={dotClassName}
+              checkClassName={checkClassName}
+            />
             <span
               className={cn(
                 "truncate",
                 bullet.tone === "transition"
                   ? "text-muted-foreground italic"
-                  : "text-foreground",
+                  : receded
+                    ? "text-muted-foreground"
+                    : "text-foreground",
               )}
             >
               {bullet.label}
+              {bullet.suffix ? ` ${bullet.suffix}` : null}
+              {bullet.markLabel ? (
+                <span className="sr-only">, {bullet.markLabel}</span>
+              ) : null}
             </span>
           </>
         );

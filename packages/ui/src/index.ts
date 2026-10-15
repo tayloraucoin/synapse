@@ -775,6 +775,11 @@ export {
 } from "./composed/navigation/breadcrumb";
 /** Review the day (USE-31): Orient's locked line. */
 export { LockIcon as LockedIcon } from "lucide-react";
+/* Schedule's empty day (USE-27; D-USE-68): a checklist, or blocks. */
+export {
+  ListChecksIcon as ChecklistIcon,
+  LayoutPanelTopIcon as PlanBlocksIcon,
+} from "lucide-react";
 
 /* ---- composed: feedback ---- */
 export {

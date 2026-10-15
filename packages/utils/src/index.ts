@@ -261,11 +261,7 @@ export { resolveClient, type ClientConnection, type ClientItem } from "./work";
 export { suggestIcons, type IconSuggestEntry } from "./planner";
 
 /* ---- where the day's first screen goes (USE-12) ---- */
-export {
-  resolveDayEntry,
-  type DayEntry,
-  type DayEntryRecord,
-} from "./planner";
+export { resolveDayEntry, type DayEntry, type DayEntryRecord } from "./planner";
 
 /* ---- Orient: last night read back (USE-13) ---- */
 export {
@@ -330,4 +326,18 @@ export {
   tomorrowPeek,
   type PeekOccurrence,
   type TomorrowPeek,
+} from "./planner";
+
+/* ---- Schedule: each bullet's mark, the one edge, meetings as bands (USE-27) ---- */
+export {
+  placeEvents,
+  scheduleMark,
+  underWay,
+  type BlockBands,
+  type PlacedEvents,
+  type PlaceEventsBlock,
+  type PlaceEventsEvent,
+  type ScheduleMark,
+  type UnderWay,
+  type UnderWaySpan,
 } from "./planner";

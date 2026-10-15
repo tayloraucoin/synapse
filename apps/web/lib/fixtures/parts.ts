@@ -12,19 +12,20 @@ import { ItemSheetPart } from "./item-sheet-parts";
 import { JournalPart, type JournalPartState } from "./journal-parts";
 import { MealTopicPart, type MealTopicPartState } from "./meal-topic-parts";
 import { NowPart, type NowPartState } from "./now-parts";
-import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { OrientPart, type OrientPartState } from "./orient-parts";
 import { ReviewPart, type ReviewPartState } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
+import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
 import { WEEK_SCENARIOS } from "./scenarios/week";
+import { SchedulePart, type SchedulePartState } from "./schedule-parts";
 import { TodoSheetPart } from "./todo-sheet-parts";
-import { WeekPart } from "./week-parts";
 import {
   TodosNotificationPart,
   TodosTrayPart,
   type TodosTrayPartState,
 } from "./todos-parts";
+import { WeekPart } from "./week-parts";
 
 /**
  * The parts registry (USE-7): the capture host `/dev/parts` renders a part
@@ -205,6 +206,25 @@ for (const state of [
   "nothing-written",
 ] satisfies JournalPartState[]) {
   registerPart(`close-${state}`, () => createElement(JournalPart, { state })); // USE-44
+}
+// USE-72: the Week, under the week scenarios' names.
+for (const state of Object.keys(WEEK_SCENARIOS)) {
+  registerPart(state, () => createElement(WeekPart));
+}
+// USE-27: Schedule's states, `schedule-<state>` (the drawn four by their names).
+for (const state of [
+  "during-go",
+  "checks-and-running",
+  "checklist-day",
+  "meeting-inside-a-block",
+  "schedule-empty",
+  "schedule-loading",
+  "schedule-error",
+  "schedule-partial",
+  "schedule-offline",
+] satisfies SchedulePartState[]) {
+  const name = state.startsWith("schedule-") ? state : `schedule-${state}`;
+  registerPart(name, () => createElement(SchedulePart, { state }));
 }
 // USE-72: the Week, under the week scenarios' names.
 for (const state of Object.keys(WEEK_SCENARIOS)) {

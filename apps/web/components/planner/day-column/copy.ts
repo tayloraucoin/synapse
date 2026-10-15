@@ -26,9 +26,31 @@ export const DAY_COLUMN_COPY = {
   /** "Orient · 5 min" */
   orient: (lengthMin: number) => `Orient · ${lengthMin} min`,
   axis: "The day",
-  /** A block's button: "Wellness, 7:05 to 8:00". */
-  block: (name: string, startsAt: string, endsAt: string) =>
-    `${name}, ${spanLabel(startsAt, endsAt)}`,
+  /**
+   * A block's button: "Wellness, 7:05 to 8:00"; on Schedule its state after
+   * (USE-27 [PROPOSED]): "Work, 9:30 to 12:00, now", "Wellness, …, done".
+   */
+  block: (
+    name: string,
+    startsAt: string,
+    endsAt: string,
+    state: "done" | "now" | null = null,
+  ) =>
+    `${name}, ${spanLabel(startsAt, endsAt)}${state === null ? "" : `, ${state}`}`,
+  /** Schedule's marks in words (never colour alone). */
+  mark: { done: "done", running: "· running", firing: "· firing" },
+  /** An event inside a block: "10:30 to 11:00 · Meeting". */
+  meeting: (startsAt: string, endsAt: string) =>
+    `${spanLabel(startsAt, endsAt)} · Meeting`,
+  /** An event on its own: "13:00 to 14:30 · Personal". */
+  eventMeta: (startsAt: string, endsAt: string, tag: "work" | "personal") =>
+    `${spanLabel(startsAt, endsAt)} · ${tag === "work" ? "Work" : "Personal"}`,
+  /** The All day strip (D-USE-28). */
+  allDay: "All day",
+  checklist: "Checklist",
+  /** The strip's button: "Sunday, all day, now". */
+  strip: (name: string, underWay: boolean) =>
+    `${name}, all day${underWay ? ", now" : ""}`,
   /** A bullet's button: "Water, in Wellness". */
   bullet: (item: string, block: string) => `${item}, in ${block}`,
   tier: {

@@ -92,3 +92,86 @@ export const Lines: Story = {
     ],
   },
 };
+
+/**
+ * Schedule's marks (USE-27): checked items a check in the block's colour,
+ * the words muted; planned a dot. Never colour alone.
+ */
+export const Checked: Story = {
+  args: {
+    checkClassName: "text-category-leaf-dot",
+    bullets: [
+      {
+        id: "1",
+        label: "Pee and weigh",
+        tone: "dot",
+        mark: "check",
+        markLabel: "done",
+      },
+      {
+        id: "2",
+        label: "Water",
+        tone: "dot",
+        mark: "check",
+        markLabel: "done",
+      },
+      {
+        id: "3",
+        label: "Start the cold bath",
+        tone: "dot",
+        mark: "check",
+        markLabel: "done",
+      },
+    ],
+    moreCount: 2,
+  },
+};
+
+/**
+ * Work's lines: done, running (a now dot in a ring that pulses, held still
+ * under reduced motion, "· running"), firing (a clay dot in a muted halo,
+ * the words receded, never the now colour) and planned.
+ */
+export const RunningAndFiring: Story = {
+  decorators: [
+    (Story) => (
+      <div className="w-80 rounded-(--radius-control) bg-category-sky-chip p-(--space-2)">
+        <Story />
+      </div>
+    ),
+  ],
+  args: {
+    layout: "lines",
+    dotClassName: "bg-category-sky-dot",
+    checkClassName: "text-category-sky-dot",
+    bullets: [
+      {
+        id: "1",
+        label: "[Write the sync spec] · ENG-123",
+        tone: "dot",
+        mark: "check",
+        markLabel: "done",
+      },
+      {
+        id: "2",
+        label: "[Review the Paper handoff]",
+        tone: "dot",
+        mark: "running",
+        suffix: "· running",
+      },
+      {
+        id: "3",
+        label: "[Draft the release notes]",
+        tone: "dot",
+        mark: "firing",
+        suffix: "· firing",
+      },
+      {
+        id: "4",
+        label: "[Answer the review comments]",
+        tone: "dot",
+        mark: "dot",
+      },
+    ],
+  },
+};

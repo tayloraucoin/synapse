@@ -176,3 +176,15 @@ export {
   type PeekOccurrence,
   type TomorrowPeek,
 } from "./tomorrow-peek";
+export {
+  placeEvents,
+  scheduleMark,
+  underWay,
+  type BlockBands,
+  type PlacedEvents,
+  type PlaceEventsBlock,
+  type PlaceEventsEvent,
+  type ScheduleMark,
+  type UnderWay,
+  type UnderWaySpan,
+} from "./schedule-marks";

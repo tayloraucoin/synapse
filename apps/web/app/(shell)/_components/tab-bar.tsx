@@ -4,13 +4,16 @@
  * Links with `aria-current`, not a `tablist`: these are routes, and a tablist
  * would promise arrow-key switching. The current tab is ink, its icon drawn
  * heavier and its word in semibold, so it reads without colour.
+ *
+ * Re-tapping the active tab navigates nowhere; the screen scrolls to now
+ * (USE-27; `_global/navigation.md`).
  */
 "use client";
 
-import { BottomNav, BottomNavItem, BottomNavList } from "@syn/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
+import { BottomNav, BottomNavItem, BottomNavList } from "@syn/ui";
+import { requestScrollToNow } from "@/lib/hooks/use-scroll-to-now";
 import { SHELL_COPY as COPY } from "./copy";
 import { tabForPath, tabItems } from "./nav-items";
 
@@ -30,7 +33,14 @@ export function TabBar({ firstTab = "Now" }: { firstTab?: "Now" | "List" }) {
               active={current}
               className={current ? "font-semibold" : undefined}
             >
-              <Link href={item.href}>
+              <Link
+                href={item.href}
+                onClick={(event) => {
+                  if (!current) return;
+                  event.preventDefault();
+                  requestScrollToNow();
+                }}
+              >
                 <span className="flex flex-col items-center gap-(--space-1)">
                   <Icon
                     aria-hidden="true"

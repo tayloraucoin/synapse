@@ -6,8 +6,8 @@ import { ACCOUNT_SCENARIOS } from "./account";
 import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { CLOSE_THE_DAY_SCENARIOS } from "./close-the-day";
-import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
 import { INTEGRATION_SCENARIOS } from "./integrations";
+import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
 import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { NOW_END_SCENARIOS } from "./now-end";
@@ -17,6 +17,7 @@ import { ORIENT_SCENARIOS } from "./orient-morning";
 import { POOL_SCENARIOS } from "./pool";
 import { REVIEW_SCENARIOS } from "./review-day";
 import { RUNNING_SCENARIOS } from "./running";
+import { SCHEDULE_SCENARIOS } from "./schedule";
 import { SET_UP_SCENARIOS } from "./set-up";
 import { TODO_SHEET_SCENARIOS } from "./todo-sheet";
 import { TODOS_SCENARIOS } from "./todos-tray";
@@ -219,6 +220,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...REVIEW_SCENARIOS,
   // ---- The Item sheet (USE-64): a plain item, ···, at a set time, Swap ----
   ...ITEM_SHEET_SCENARIOS,
+  // ---- Schedule (USE-27): during go, the marks, the checklist day, a meeting ----
+  ...SCHEDULE_SCENARIOS,
   // ---- Close the day (USE-44): writing, empty, offline, read only ----
   ...CLOSE_THE_DAY_SCENARIOS,
   // ---- The To-do sheet (USE-28): its six drawn states, a failed change, offline ----

@@ -56,15 +56,20 @@ export {
   type SortableItemRowsProps,
 } from "./sortable-item-rows";
 export {
+  AllDayStrip,
+  DAY_COLUMN_PX_PER_HOUR,
   DayColumn,
+  DayColumnSkeleton,
+  MeetingBand,
+  type AllDayStripRow,
   type DayColumnBlock,
+  type DayColumnEvent,
   type DayColumnItem,
   type DayColumnProps,
+  type DayColumnSegment,
+  type DayColumnTier,
 } from "./day-column";
-export {
-  MealTopicChips,
-  type MealTopicChipsProps,
-} from "./meal-topic-chips";
+export { MealTopicChips, type MealTopicChipsProps } from "./meal-topic-chips";
 export {
   MealTopicsSheet,
   type MealTopicsSheetProps,
