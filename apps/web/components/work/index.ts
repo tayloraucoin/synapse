@@ -7,7 +7,11 @@ export {
   RunningWorkCard,
   type RunningWorkCardProps,
 } from "./running-work-card";
-export { TierGroup, type TierGroupProps } from "./tier-group";
+export {
+  TierGroup,
+  type TierGroupAdd,
+  type TierGroupProps,
+} from "./tier-group";
 export {
   DeskDayColumn,
   type DeskColumnBlock,

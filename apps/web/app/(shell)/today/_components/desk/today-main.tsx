@@ -5,6 +5,7 @@ import { useWorkClock } from "@syn/hooks";
 import { GroupHeading, Text } from "@syn/ui";
 import { DayBlockBand, PlannerItemRow } from "@/components/planner";
 import { WorkNextStrip, WorkRetry, WorkTiersSkeleton } from "@/components/work";
+import { AddEntry } from "@/components/work/add";
 import { useDataSource } from "@/lib/data/source";
 import { dayTitle, wallWords } from "@/lib/data/today-work";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
@@ -24,6 +25,10 @@ import { WorkTiers } from "../work/work-tiers";
  * Next a shaded row with no Start (not-a-work-block.md, D-USE-65). Loading
  * keeps the header real over still skeleton rows; a failed read is the
  * column's own retry, the day column and strip untouched.
+ *
+ * The header's + Add ⌄ (USE-61) is USE-51's menu: Task to a tier opens New
+ * task in the block under way; To-do opens a new to-do; From the pool and
+ * Event wait on their tickets.
  */
 export function TodayMain() {
   const source = useDataSource();
@@ -57,15 +62,38 @@ export function TodayMain() {
         <h1 className="font-serif text-review-title text-ink">
           {view?.title ?? dayTitle(dateKey)}
         </h1>
-        <Text
-          as="span"
-          variant="secondary"
-          tone="muted"
-          weight={400}
-          className="tabular-nums"
-        >
-          {view?.time ?? wallWords(now, source.scenario.records.timeZone)}
-        </Text>
+        <div className="flex items-center gap-(--space-4)">
+          <Text
+            as="span"
+            variant="secondary"
+            tone="muted"
+            weight={400}
+            className="tabular-nums"
+          >
+            {view?.time ?? wallWords(now, source.scenario.records.timeZone)}
+          </Text>
+          <AddEntry
+            dateKey={dateKey}
+            block={
+              view?.band?.isWork
+                ? {
+                    id: view.band.id,
+                    name: view.band.name,
+                    startsAt: view.band.startsAt,
+                    endsAt: view.band.endsAt,
+                  }
+                : null
+            }
+            onTodo={() =>
+              router.push(todoSheetRoute(here, { new: true }), {
+                scroll: false,
+              })
+            }
+            openOnLoad={
+              source.scenario.view?.open === "add" ? "add" : undefined
+            }
+          />
+        </div>
       </header>
 
       {work.isError ? (

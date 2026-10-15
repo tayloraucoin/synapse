@@ -11,6 +11,9 @@
  *
  * `leading` (USE-10) is a slot before the words, for a `HueSquare`: the tier
  * headings carry their colour square there, always beside the word.
+ *
+ * `aria-describedby` (USE-61) ties a helper line under the heading to it, as
+ * a tier's soft cap is tied: plain text, never an alert.
  */
 import * as React from "react";
 import { cn } from "../../../lib/cn";
@@ -22,6 +25,7 @@ export interface GroupHeadingProps {
   /** Drawn before the words, e.g. a `HueSquare`. */
   leading?: React.ReactNode;
   as?: "h2" | "h3";
+  "aria-describedby"?: string;
   className?: string;
 }
 
@@ -30,6 +34,7 @@ export function GroupHeading({
   count,
   leading,
   as = "h2",
+  "aria-describedby": describedBy,
   className,
 }: GroupHeadingProps) {
   return (
@@ -38,6 +43,7 @@ export function GroupHeading({
       variant="secondary"
       tone="secondary"
       weight={500}
+      aria-describedby={describedBy}
       className={cn(
         "pt-(--space-6) pb-(--space-2)",
         leading !== undefined && "flex items-center gap-(--space-2)",

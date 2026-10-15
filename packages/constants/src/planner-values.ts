@@ -33,6 +33,13 @@ export const WORK_TIERS = [
   "stretch",
 ] as const;
 
+/**
+ * Each tier's usual number on a day (D-USE-65, N4): soft, never a block. Past
+ * it the tier carries a helper line and the add still goes through. Urgent
+ * and Stretch have none (D-USE-79).
+ */
+export const TIER_USUAL = { primary: 2, secondary: 4 } as const;
+
 /** WorkItem.size, smallest first. */
 export const WORK_SIZES = [
   "quick",

@@ -3,9 +3,11 @@
 import type * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
+import { Text } from "@syn/ui";
 import { DayBlockHeader } from "@/components/planner";
 import { AllFiringCard, WorkRetry, WorkTiersSkeleton } from "@/components/work";
 import { useDataSource } from "@/lib/data/source";
+import { stillOpenView } from "@/lib/data/tier-edges";
 import { TODAY_WORK_COPY } from "@/lib/data/today-work";
 import type { NowBlockView } from "@/lib/data/use-now";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
@@ -21,6 +23,10 @@ import { WorkTiers } from "../work/work-tiers";
  * (D-USE-61). The header stands while the tiers load or fail; the tiers
  * alone wait or retry (loading.md, error.md). With every item firing, the
  * undone to-dos lift into a card under the header (USE-59, D-USE-53).
+ *
+ * The day's later Work block (USE-61, later-work-block.md) shows only what is
+ * still open, under a quiet line naming where the done work stays; a firing
+ * item stays in its tier, firing. The desk keeps the day's tiers whole.
  */
 export function WorkBlockNow({
   block,
@@ -34,7 +40,7 @@ export function WorkBlockNow({
   const dateKey = source.todayKey();
   const now = useWorkClock(source.now);
   const work = useTodayWork(dateKey, now);
-  const { view } = work;
+  const view = work.view ? stillOpenView(work.view) : null;
   const loop = useWorkLoop(dateKey, view);
   const router = useRouter();
   const pathname = usePathname();
@@ -72,6 +78,11 @@ export function WorkBlockNow({
         <WorkTiersSkeleton label={COPY.loading} />
       ) : (
         <>
+          {view.later ? (
+            <Text as="p" variant="secondary" tone="muted" weight={400}>
+              {view.later.line}
+            </Text>
+          ) : null}
           {view.allFiring ? (
             <AllFiringCard
               title={COPY.allFiring}

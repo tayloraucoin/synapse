@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { cn, toastUndo } from "@syn/ui";
+import type { WorkTier } from "@syn/types";
+import { cn, toastUndo, useIsSplit } from "@syn/ui";
 import {
   NextCard,
   RunningWorkCard,
@@ -9,6 +10,8 @@ import {
   WhileItFiresLine,
   type WorkRowHandlers,
 } from "@/components/work";
+import { NewTaskSheet } from "@/components/work/add";
+import { TIER_EDGE_COPY } from "@/lib/data/tier-edges";
 import { workCardFigures, type TodayWorkView } from "@/lib/data/today-work";
 import type { useWorkLoop } from "@/lib/data/use-today-work";
 import { WORK_COPY as COPY } from "./copy";
@@ -25,6 +28,11 @@ import { WORK_COPY as COPY } from "./copy";
  * Resume, Prompt sent, the ring, the firing mark and Done are `loop`'s
  * writes. "<title> firing", "<title> back" and "Next: <title>" are said
  * politely; nothing sounds and no caption shows on a return (D-USE-62).
+ *
+ * The edges (USE-61): a tier past its usual number carries its helper; on
+ * the phone an empty tier folds to its heading with "+ Add", at the desk
+ * every tier offers "+ Add to <tier>" on hover or focus; either opens New
+ * task with that tier set, in the block under way when it is Work.
  */
 export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
   view: TodayWorkView;
@@ -45,6 +53,29 @@ export function WorkTiers({
   onOpen,
 }: WorkTiersProps) {
   const [said, setSaid] = React.useState("");
+  const atDesk = useIsSplit();
+  // The tier stays set while the sheet closes, so its form does not jump.
+  const [adding, setAdding] = React.useState<{
+    tier: WorkTier | null;
+    open: boolean;
+  }>({ tier: null, open: false });
+  const setAddTier = (tier: WorkTier) => setAdding({ tier, open: true });
+  const addFor = (tier: WorkTier, word: string, folded: boolean) =>
+    atDesk
+      ? {
+          label: TIER_EDGE_COPY.addTo(word),
+          name: TIER_EDGE_COPY.addToName(word),
+          reveal: "hover" as const,
+          onAdd: () => setAddTier(tier),
+        }
+      : folded
+        ? {
+            label: TIER_EDGE_COPY.add,
+            name: TIER_EDGE_COPY.addToName(word),
+            reveal: "always" as const,
+            onAdd: () => setAddTier(tier),
+          }
+        : null;
   const titleOf = (id: string) =>
     view.tiers.flatMap((group) => group.rows).find((row) => row.id === id)
       ?.title ?? "";
@@ -135,6 +166,8 @@ export function WorkTiers({
           word={group.word}
           rows={group.rows}
           headingAs={headingAs}
+          helper={group.helper}
+          add={addFor(group.tier, group.word, group.rows.length === 0)}
           lifted={
             lifted && group.rows.some((row) => row.id === lifted.rowId)
               ? lifted
@@ -165,6 +198,14 @@ export function WorkTiers({
       <p aria-live="polite" className="sr-only">
         {said}
       </p>
+      <NewTaskSheet
+        open={adding.open}
+        onOpenChange={(open) => setAdding((was) => ({ ...was, open }))}
+        dateKey={view.dateKey}
+        blockId={view.band?.isWork ? view.band.id : undefined}
+        tier={adding.tier ?? undefined}
+        from="add"
+      />
     </div>
   );
 }

@@ -1,5 +1,11 @@
 import type { SlotEventKind } from "@syn/types";
-import { dayRecordRecord, slotEventRecord, todoRecord } from "@syn/validators";
+import {
+  dayRecordRecord,
+  slotEventRecord,
+  slotRecord,
+  todoRecord,
+  workItemRecord,
+} from "@syn/validators";
 import { fixtureId } from "../ids";
 import { issueId, stateId, withIntegrations } from "../integrations/workspaces";
 import type { FixtureRecords } from "../records";
@@ -200,11 +206,14 @@ function work(
     events?: ReturnType<typeof mondayEvent>[];
     /** Slots done by then, as Done wrote them: the time and its minutes. */
     done?: { slotId: string; at: string; tookMin: number }[];
+    /** The Monday's slots and items changed for a state (USE-61). */
+    edit?: (records: FixtureRecords) => void;
   } = {},
 ): () => Scenario {
-  const { events, done = [], ...rest } = options;
+  const { events, done = [], edit, ...rest } = options;
   return () => {
     const records = todayWorkRecords(events);
+    edit?.(records);
     for (const entry of done) {
       const slot = records.slots.find((row) => row.id === entry.slotId);
       if (slot) {
@@ -229,6 +238,46 @@ const S = TODAY_WORK_IDS.slots;
 
 /** [Portal sign-in] fired from its ring at 10:16: "firing · 4 min" at 10:20. */
 const PORTAL_FIRING = [mondayEvent(1, S.portal, "prompt_sent", "10:16")];
+
+/** USE-61's added work: ids from 611, clear of the week's and the loop's. */
+const EDGE_IDS = {
+  syncErrors: { item: fixtureId(4, 611), slot: fixtureId(3, 611) },
+  redirect: { item: fixtureId(4, 612), slot: fixtureId(3, 612) },
+} as const;
+
+/** A new one-day item on the Monday, in `tier` of the morning's Work. */
+function addWork(
+  records: FixtureRecords,
+  ids: { item: string; slot: string },
+  item: { title: string; emoji: string; size: "quick" | "small" },
+  tier: "urgent" | "primary",
+  sortOrder: number,
+) {
+  const base = records.workItems.find(
+    (row) => row.id === WEEK_IDS.workItems.invoice,
+  )!;
+  records.workItems.push(
+    workItemRecord.parse({
+      ...base,
+      id: ids.item,
+      title: item.title,
+      icon: { kind: "emoji", value: item.emoji },
+      size: item.size,
+    }),
+  );
+  const slot = records.slots.find((row) => row.id === S.portal)!;
+  records.slots.push(
+    slotRecord.parse({
+      ...slot,
+      id: ids.slot,
+      workItemId: ids.item,
+      blockId: WEEK_IDS.blocks.workMorning,
+      tier,
+      lengthMin: null,
+      sortOrder,
+    }),
+  );
+}
 
 export const TODAY_DESK_SCENARIOS: Record<string, () => Scenario> = {
   "today-desk": desk("today-desk"),
@@ -310,6 +359,126 @@ export const TODAY_DESK_SCENARIOS: Record<string, () => Scenario> = {
       mondayEvent(7, S.invoice, "prompt_sent", "10:55"),
     ],
   }),
+
+  // USE-61: the tiers' edges. 9:40, only Primary holds work: Secondary and
+  // Stretch fold to their headings with "+ Add"; no Urgent heading.
+  "today-primary-only": work("today-primary-only", {
+    now: at("09:40"),
+    events: [],
+    edit: (records) => {
+      const gone = new Set<string>([S.sms, S.desk, S.invoice]);
+      records.slots = records.slots.filter((row) => !gone.has(row.id));
+    },
+  }),
+  // 9:55: [Sync errors in production] added to Urgent at 9:52 with nothing
+  // in hand: Urgent above Primary, its item lifted; [Portal sign-in] a row.
+  "today-urgent": work("today-urgent", {
+    now: at("09:55"),
+    events: [],
+    edit: (records) =>
+      addWork(
+        records,
+        EDGE_IDS.syncErrors,
+        { title: "[Sync errors in production]", emoji: "🚨", size: "small" },
+        "urgent",
+        0,
+      ),
+  }),
+  // 9:44: a third Primary, [Fix the sign-in redirect], went in; the helper
+  // "Two is the usual for Primary." sits under the heading.
+  "today-past-cap": work("today-past-cap", {
+    now: at("09:44"),
+    events: [],
+    edit: (records) =>
+      addWork(
+        records,
+        EDGE_IDS.redirect,
+        { title: "[Fix the sign-in redirect]", emoji: "🔁", size: "quick" },
+        "primary",
+        50,
+      ),
+  }),
+  // 13:05, the afternoon's Work: [Portal sign-in] and the SMS copy were done
+  // in the morning and stay in the 9:30 block; [Desk Today layout] fired at
+  // 11:50 and still fires in Secondary; [Alder intro] lifts as Next.
+  "today-later-block": work("today-later-block", {
+    now: at("13:05"),
+    events: [
+      mondayEvent(1, S.portal, "started", "09:30"),
+      mondayEvent(2, S.portal, "done", "10:40"),
+      mondayEvent(3, S.sms, "started", "10:40"),
+      mondayEvent(4, S.sms, "done", "11:30"),
+      mondayEvent(5, S.desk, "started", "11:30"),
+      mondayEvent(6, S.desk, "prompt_sent", "11:50"),
+    ],
+    done: [
+      { slotId: S.portal, at: "10:40", tookMin: 70 },
+      { slotId: S.sms, at: "11:30", tookMin: 50 },
+    ],
+  }),
+  // The desk header's + Add ⌄ open on load, Today at 10:20 (C6).
+  "today-add-menu": work("today-add-menu", {
+    events: PORTAL_FIRING,
+    view: { open: "add" },
+  }),
+};
+
+/** USE-60's Step away id: the 10:42 hold. */
+export const STEP_AWAY_ID = fixtureId(8, 601);
+
+/** A pause Step away wrote: the event under its hold. */
+function steppedAway(n: number, slotId: string, clock: string) {
+  return {
+    ...mondayEvent(n, slotId, "paused", clock),
+    stepAwayId: STEP_AWAY_ID,
+  };
+}
+
+/**
+ * USE-60: Step away, the ask and a session's Done on the Monday.
+ * `today-stepped-away` (10:51): Step away at 10:42 held [Alder intro] after
+ * 57 min; [Portal sign-in] fires on, "firing · 35 min". `today-ask` (10:42):
+ * [Alder intro] running, the ask open for the SMS copy. `today-done-for-today`
+ * (11:15): [Desk Today layout]'s session done at 11:15 after 2 h 05, its
+ * Thursday session moved to Wed 14 as the board draws it [ASSUMPTION], the
+ * toast held.
+ */
+export const STEP_AWAY_SCENARIOS: Record<string, () => Scenario> = {
+  "today-stepped-away": work("today-stepped-away", {
+    now: at("10:51"),
+    events: [
+      ...PORTAL_FIRING,
+      mondayEvent(2, S.alder, "started", "09:45"),
+      steppedAway(3, S.alder, "10:42"),
+    ],
+  }),
+  "today-ask": work("today-ask", {
+    now: at("10:42"),
+    events: [
+      mondayEvent(1, S.portal, "prompt_sent", "10:15"),
+      mondayEvent(2, S.alder, "started", "09:45"),
+    ],
+    view: { open: "start-ask" },
+  }),
+  "today-done-for-today": () => {
+    const scenario = work("today-done-for-today", {
+      now: at("11:15"),
+      events: [
+        mondayEvent(1, S.desk, "started", "09:10"),
+        mondayEvent(2, S.desk, "done", "11:15"),
+        mondayEvent(3, S.portal, "prompt_sent", "11:10"),
+      ],
+      done: [{ slotId: S.desk, at: "11:15", tookMin: 125 }],
+      view: { open: "done-for-today" },
+    })();
+    const thursday = scenario.records.slots.find(
+      (row) =>
+        row.workItemId === WEEK_IDS.workItems.syn212 &&
+        row.onDate === "2026-10-15",
+    );
+    if (thursday) thursday.onDate = "2026-10-14";
+    return scenario;
+  },
 };
 
 /** The Monday's Work blocks, for the tests. */

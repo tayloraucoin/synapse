@@ -27,6 +27,7 @@ import type { WorkRowView } from "@/components/work";
 import { SIZE_RANGE } from "@/components/work/add/new-task/form";
 import type { Today } from "./derive-today";
 import type { LinearIssueJoin } from "./integration-records";
+import { capHelper, laterWorkBlockOf, TIER_EDGE_COPY } from "./tier-edges";
 import type { TrayRowView } from "./use-todos";
 import { TIER_WORDS, type WeekDayView } from "./week-view";
 import { workMinutes, workRowView } from "./work-row-view";
@@ -86,6 +87,16 @@ export interface TodayWorkTier {
   tier: WorkTier;
   word: string;
   rows: WorkRowView[];
+  /** "Two is the usual for Primary." past the tier's usual number (USE-61). */
+  helper: string | null;
+}
+
+/** The day's later Work block, on the phone (USE-61, later-work-block.md). */
+export interface TodayLaterBlock {
+  /** "What's still open from the morning's Work. What was done stays in the 9:30 block." */
+  line: string;
+  /** Slots done before this block began: they stay in their own block. */
+  doneBefore: ReadonlySet<string>;
 }
 
 /** The current block, as the desk's band and the phone's header name it. */
@@ -94,6 +105,9 @@ export interface TodayWorkBand {
   kind: StoredBlockKind;
   name: string;
   isWork: boolean;
+  /** "09:30", "12:00": New task's day and block line read them. */
+  startsAt: string;
+  endsAt: string;
   /** The desk band: "9:30 to 12:00 · Kestrel weekly at 11:00, in 40 min". */
   detail: string;
   /** The phone header: "9:30 to 12:00 · Kestrel weekly at 11:00". */
@@ -137,6 +151,8 @@ export interface TodayWorkView {
    */
   lift: boolean;
   tiers: TodayWorkTier[];
+  /** The current block is the day's later Work block; null otherwise. */
+  later: TodayLaterBlock | null;
   whileItFires: WhileItFiresView | null;
   /** Each row's slot clock state, by slot id: what USE-59's writes read. */
   states: ReadonlyMap<string, SlotClockState>;
@@ -267,6 +283,8 @@ function bandOf(today: Today, now: Date): TodayWorkBand | null {
       kind: block.kind,
       name: block.name,
       isWork: true,
+      startsAt,
+      endsAt,
       detail: eventWords
         ? TODAY_WORK_COPY.joined([span, eventWords]) +
           (lead >= 1 ? TODAY_WORK_COPY.inMinutes(lead) : "")
@@ -290,6 +308,8 @@ function bandOf(today: Today, now: Date): TodayWorkBand | null {
     kind: block.kind,
     name: block.name,
     isWork: false,
+    startsAt,
+    endsAt,
     detail,
     headerDetail: detail,
   };
@@ -453,8 +473,34 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
   const tiers = TIERS.flatMap((tier): TodayWorkTier[] => {
     const rows = slots.filter((slot) => slot.tier === tier).map(rowOf);
     if (tier === "urgent" && rows.length === 0) return [];
-    return [{ tier, word: TIER_WORDS[tier], rows }];
+    // The tier is the day's: the helper counts every row it holds today.
+    return [
+      {
+        tier,
+        word: TIER_WORDS[tier],
+        rows,
+        helper: capHelper(tier, rows.length),
+      },
+    ];
   });
+  const laterBlock = laterWorkBlockOf(today, now);
+  const later: TodayLaterBlock | null = laterBlock
+    ? {
+        line: TIER_EDGE_COPY.stillOpen(laterBlock.earlierStartsAt),
+        doneBefore: new Set(
+          slots
+            .filter((slot) => {
+              if (states.get(slot.id) !== "done") return false;
+              const doneAt = slot.doneAt
+                ? new Date(slot.doneAt)
+                : today.clock.slots.get(slot.id)?.doneAt;
+              // [ASSUMPTION] a done slot with no time is the earlier block's.
+              return !doneAt || doneAt < laterBlock.start;
+            })
+            .map((slot) => slot.id),
+        ),
+      }
+    : null;
   const flat = tiers.flatMap((group) =>
     group.rows.map((row) => ({ row, word: group.word })),
   );
@@ -500,6 +546,7 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
         : null,
     allFiring: next.kind === "all_firing",
     tiers,
+    later,
     whileItFires:
       reminder && firstFiring
         ? {
