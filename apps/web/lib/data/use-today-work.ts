@@ -9,6 +9,7 @@ import { useDataSource } from "./source";
 import { deriveTodayWork, todayTodos, type TodayWorkView } from "./today-work";
 import { useClients } from "./use-clients";
 import { useLinear } from "./use-linear";
+import { usePool } from "./use-pool";
 import { useSlotEvents } from "./use-slot-events";
 import { todayQueryKey, useToday } from "./use-today";
 import { useTodos } from "./use-todos";
@@ -32,6 +33,7 @@ export function useTodayWork(dateKey: string, now: Date) {
   const { clientFor } = useClients();
   const { issueFor, subIssuesFor } = useLinear();
   const todos = useTodos(dateKey);
+  const pool = usePool();
 
   // Firing reads whole minutes: the view is derived again on the minute.
   const minute = Math.floor(now.getTime() / 60_000);
@@ -47,6 +49,11 @@ export function useTodayWork(dateKey: string, now: Date) {
           clientFor,
           issueFor,
           subIssuesFor,
+          sessionSlots: pool.slots?.flatMap((slot) =>
+            slot.workItemId === null
+              ? []
+              : [{ ...slot, workItemId: slot.workItemId }],
+          ),
         })
       : null;
   const todoRows = React.useMemo(
@@ -70,8 +77,11 @@ export function useTodayWork(dateKey: string, now: Date) {
   };
 }
 
-/** Start meets a running item: nothing is written; the ask is USE-60's. */
+/** Start meets a running item: nothing is written; the ask opens (USE-60). */
 export type StartResult = "written" | "asks";
+
+/** Where the running item goes when another starts (D-USE-43): Firing by default. */
+export type MoveTo = "firing" | "paused";
 
 /** The loop's actions that are one slot event each. */
 export type LoopAction = "start" | "pause" | "promptSent" | "bringBack";
@@ -107,6 +117,27 @@ export function loopEvent(
   }
 }
 
+/**
+ * The ask's Start (USE-60; start-while-one-runs.md): every other running
+ * item fires (`prompt_sent`) or holds (`paused`, no Step away id), then the
+ * new one starts, or resumes when it has worked today; one instant for all.
+ * Cancel writes nothing, so it has no events here (C-USE-start-while-one-runs-2).
+ */
+export function startEvents(
+  view: TodayWorkView,
+  slotId: string,
+  moveTo: MoveTo,
+): { slotId: string; kind: SlotEventKind }[] {
+  const moving = [...view.states]
+    .filter(([id, state]) => id !== slotId && state === "running")
+    .map(([id]) => ({
+      slotId: id,
+      kind: (moveTo === "firing" ? "prompt_sent" : "paused") as SlotEventKind,
+    }));
+  const worked = (view.clocks.get(slotId)?.work.length ?? 0) > 0;
+  return [...moving, { slotId, kind: worked ? "resumed" : "started" }];
+}
+
 /** Done's slot change: done at `at`, work time only, none when it never ran (D-USE-48). */
 export function doneChange(view: TodayWorkView, slotId: string, at: Date) {
   const clock = view.clocks.get(slotId);
@@ -128,7 +159,13 @@ export function doneChange(view: TodayWorkView, slotId: string, at: Date) {
  *
  * Done writes `done`, then the slot's `doneAt` and `tookMin` (work time
  * only), and on a one-day item the task's Done (USE-55's `markTaskDone`);
- * its Undo puts back each step, last first. A session's Done is USE-60's.
+ * its Undo puts back each step, last first. A session's Done (USE-60) is
+ * the same slot writes and never the task's: `oneDay` is false, so the task
+ * and Linear are untouched (C-USE-sessions-1, D-USE-65).
+ *
+ * Step away (USE-60, D-USE-46) pauses every running timer under one id;
+ * Resume all resumes exactly the slots that id still holds. Firing is not
+ * running, so it counts on. The ask's Start is `startMoving`.
  */
 export function useWorkLoop(dateKey: string, view: TodayWorkView | null) {
   const source = useDataSource();
@@ -163,13 +200,24 @@ export function useWorkLoop(dateKey: string, view: TodayWorkView | null) {
     });
     return async () => {
       if (task) await work.undo(task.undo);
-      await source.server.writeSlots({
-        id: slotId,
-        doneAt: null,
-        tookMin: null,
-      });
-      await write(slotId, "undone");
+      await reopen(slotId);
     };
+  }
+
+  /** Done's Undo on the slot: its stamp cleared, then `undone`. */
+  async function reopen(slotId: string) {
+    await source.server.writeSlots({ id: slotId, doneAt: null, tookMin: null });
+    await write(slotId, "undone");
+  }
+
+  async function startMoving(slotId: string, moveTo: MoveTo) {
+    if (!view) return;
+    const at = source.now();
+    await events.mutateAsync(
+      startEvents(view, slotId, moveTo).map((entry) =>
+        slotEventFor(entry.slotId, entry.kind, at),
+      ),
+    );
   }
 
   return {
@@ -182,5 +230,13 @@ export function useWorkLoop(dateKey: string, view: TodayWorkView | null) {
     bringBack: (slotId: string) => act("bringBack", slotId),
     /** Done; resolves to its Undo. */
     done,
+    /** A done slot open again, as Undo leaves it (a staged toast's Undo). */
+    reopen,
+    /** The ask's Start: the running one fires or holds, then this starts. */
+    startMoving,
+    /** Pause every running timer under one id; null when none ran. */
+    stepAway: () => events.stepAway(),
+    /** Resume exactly what that Step away still holds. */
+    resumeAll: (stepAwayId: string) => events.resumeAll(stepAwayId),
   };
 }

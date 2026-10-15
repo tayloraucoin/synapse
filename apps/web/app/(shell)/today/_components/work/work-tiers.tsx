@@ -8,12 +8,16 @@ import {
   MeetingBand,
   NextCard,
   RunningWorkCard,
+  StartWhileOneRuns,
   TierGroup,
   WaitingGroup,
   WhileItFiresLine,
+  type StartMoveTo,
   type WorkRowHandlers,
 } from "@/components/work";
 import { NewTaskSheet } from "@/components/work/add";
+import { shortDate } from "@/components/work/add/new-task/form";
+import { useDataSource } from "@/lib/data/source";
 import { TIER_EDGE_COPY } from "@/lib/data/tier-edges";
 import {
   TODAY_WORK_COPY,
@@ -45,6 +49,12 @@ import { WORK_COPY as COPY } from "./copy";
  * Linear's side (USE-63): Waiting under Stretch, its rows never Next; each
  * row's Linear line with Try again or Reopen through `linear`. A write that
  * fails says "Not updated in Linear." politely, once.
+ *
+ * USE-60: Start that meets an item running opens the ask (Firing or Paused;
+ * Cancel writes nothing). A session's Done closes today's share and its
+ * toast names the next session; the task and Linear are untouched. The
+ * scenarios `today-ask` and `today-done-for-today` stage the ask and the
+ * toast on load (held until Undo) for their captures.
  */
 export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
   view: TodayWorkView;
@@ -131,14 +141,53 @@ export function WorkTiers({
         void (fire ? loop.promptSent(id) : loop.bringBack(id));
       }
     : undefined;
+  // A session's Done names the next one; a one-day item's names itself.
+  const doneText = (id: string) => {
+    if (!view.sessionNext.has(id)) return COPY.doneToast(titleOf(id));
+    const next = view.sessionNext.get(id);
+    return COPY.doneForTodayToast(
+      next ? { n: next.n, day: shortDate(next.dateKey) } : null,
+    );
+  };
   const done = loop
     ? async (id: string) => {
-        const title = titleOf(id);
+        const text = doneText(id);
         const undo = await loop.done(id);
-        if (undo)
-          toastUndo({ text: COPY.doneToast(title), onUndo: () => void undo() });
+        if (undo) toastUndo({ text, onUndo: () => void undo() });
       }
     : undefined;
+
+  // The ask (USE-60): Start meeting an item running asks where it goes.
+  const source = useDataSource();
+  const staged = source.scenario.view?.open;
+  const [asking, setAsking] = React.useState<string | null>(() =>
+    staged === "start-ask" ? (view.nextRow?.id ?? null) : null,
+  );
+  const start = loop
+    ? async (id: string) => {
+        if ((await loop.start(id)) === "asks") setAsking(id);
+      }
+    : undefined;
+  const running = [...view.states].find(
+    ([id, state]) => id !== asking && state === "running",
+  );
+  const runningTitle = running ? titleOf(running[0]) : "";
+
+  // A session's Done toast staged on load, held for its capture.
+  const stagedDone = React.useRef(false);
+  React.useEffect(() => {
+    if (staged !== "done-for-today" || stagedDone.current || !loop) return;
+    const id = [...view.sessionNext.keys()].find(
+      (slotId) => view.states.get(slotId) === "done",
+    );
+    if (!id) return;
+    stagedDone.current = true;
+    toastUndo({
+      text: doneText(id),
+      durationMs: Infinity,
+      onUndo: () => void loop.reopen(id),
+    });
+  });
 
   const hand = view.inHand;
   // A meeting at its time holds the lift on the phone; Next goes back to its row.
@@ -173,7 +222,7 @@ export function WorkTiers({
               label: COPY.inHand(hand.row.title),
             }}
             onPause={loop ? () => void loop.pause(hand.slotId) : undefined}
-            onResume={loop ? () => void loop.resume(hand.slotId) : undefined}
+            onResume={start ? () => void start(hand.slotId) : undefined}
             onPromptSent={
               toggleFiring ? () => toggleFiring(hand.slotId, true) : undefined
             }
@@ -194,7 +243,7 @@ export function WorkTiers({
                 doneName: COPY.doneName(next.title),
                 next: COPY.next,
               }}
-              onStart={loop ? () => void loop.start(next.id) : undefined}
+              onStart={start ? () => void start(next.id) : undefined}
               onDone={done ? () => void done(next.id) : undefined}
               onToggleFiring={toggleFiring}
               onOpen={onOpen}
@@ -287,6 +336,24 @@ export function WorkTiers({
         rows={view.waiting}
         headingAs={headingAs}
         onOpen={onOpen}
+      />
+      <StartWhileOneRuns
+        open={asking !== null && running !== undefined}
+        title={COPY.askTitle(asking ? titleOf(asking) : "")}
+        lead={COPY.askLead(runningTitle)}
+        groupName={COPY.askGroup(runningTitle)}
+        options={{
+          firing: { word: COPY.askFiring, line: COPY.askFiringLine },
+          paused: { word: COPY.askPaused, line: COPY.askPausedLine },
+        }}
+        cancel={COPY.cancel}
+        start={COPY.start}
+        onCancel={() => setAsking(null)}
+        onStart={(moveTo: StartMoveTo) => {
+          const id = asking;
+          setAsking(null);
+          if (id && loop) void loop.startMoving(id, moveTo);
+        }}
       />
       <p aria-live="polite" className="sr-only">
         {said}

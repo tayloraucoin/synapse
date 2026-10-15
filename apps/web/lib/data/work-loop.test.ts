@@ -206,7 +206,11 @@ describe("the card and Done's record", () => {
 
   it("Done reads Took and fired, and leaves fired off one that never fired", async () => {
     const back = await (await open("today-brought-back")).read();
-    expect(rowOf(back, S.sms).doneRecord).toBe("Took 1 h 10 · fired 32 min");
+    // The SMS copy is a session (Mon 12 and Tue 13): its Done is today's
+    // share (USE-60); with no pool read here, no next session is named.
+    expect(rowOf(back, S.sms).doneRecord).toBe(
+      "Done for today · took 1 h 10 · fired 32 min",
+    );
 
     const loop = await open("today-running");
     loop.at("10:40");
@@ -221,7 +225,10 @@ describe("the card and Done's record", () => {
       slotEventFor(S.alder, "done", new Date(change.doneAt)),
     ]);
     await loop.server.writeSlots({ id: S.alder, ...change });
-    expect(rowOf(await loop.read(), S.alder).doneRecord).toBe("Took 55 min");
+    // [Alder intro] is session 1 of 3: "took", no next named without the pool.
+    expect(rowOf(await loop.read(), S.alder).doneRecord).toBe(
+      "Done for today · took 55 min",
+    );
   });
 
   it("everything firing has no Next and no reminder line", async () => {

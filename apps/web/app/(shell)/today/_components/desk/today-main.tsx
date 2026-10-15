@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
-import { GroupHeading, Text } from "@syn/ui";
+import { Button, GroupHeading, StepAwayIcon, Text } from "@syn/ui";
 import {
   DayBlockBand,
   OfflineLine,
@@ -22,6 +22,7 @@ import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
 import { itemSheetRoute, todoSheetRoute } from "@/lib/routes";
 import { PushCheck } from "../push-check";
 import { WORK_COPY as COPY } from "../work/copy";
+import { useStepAway } from "../work/use-step-away";
 import { WorkTiers } from "../work/work-tiers";
 
 /**
@@ -39,6 +40,9 @@ import { WorkTiers } from "../work/work-tiers";
  * The header's + Add ⌄ (USE-61) is USE-51's menu: Task to a tier opens New
  * task in the block under way; To-do opens a new to-do; From the pool and
  * Event wait on their tickets.
+ *
+ * Step away (USE-60, D-USE-46) sits left of + Add while a work timer runs;
+ * while it holds, its bar sits under the title, above the band.
  */
 export function TodayMain() {
   const source = useDataSource();
@@ -50,6 +54,7 @@ export function TodayMain() {
   const linear = useTodayLinear(dateKey, view);
   // Offline is not an error (USE-63, D-USE-56): one line, every control live.
   const offline = useIsOffline();
+  const away = useStepAway(view, loop);
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams().toString();
@@ -85,6 +90,18 @@ export function TodayMain() {
           >
             {view?.time ?? wallWords(now, source.scenario.records.timeZone)}
           </Text>
+          {away.stepAway ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              aria-label={away.stepAway.name}
+              data-step-away-button
+              onClick={away.stepAway.onPress}
+            >
+              <StepAwayIcon aria-hidden="true" className="size-4" />
+              {away.stepAway.label}
+            </Button>
+          ) : null}
           <AddEntry
             dateKey={dateKey}
             block={
@@ -108,6 +125,8 @@ export function TodayMain() {
           />
         </div>
       </header>
+      {view ? away.bar : null}
+      {away.live}
 
       {work.isError ? (
         <WorkRetry

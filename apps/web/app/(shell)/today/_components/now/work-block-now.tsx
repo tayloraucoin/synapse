@@ -14,6 +14,7 @@ import { useTodayLinear } from "@/lib/data/use-today-linear";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
 import { itemSheetRoute } from "@/lib/routes";
 import { WORK_COPY as COPY } from "../work/copy";
+import { useStepAway } from "../work/use-step-away";
 import { WorkTiers } from "../work/work-tiers";
 
 /**
@@ -21,7 +22,8 @@ import { WorkTiers } from "../work/work-tiers";
  * layout, D-USE-50): the block's header ("9:30 to 12:00 · Kestrel weekly at
  * 11:00", ···), then the same tiers as the desk, the rows trimmed (D-USE-51).
  * No Next strip: Next is the lifted card in its tier, or a shaded row
- * (D-USE-61). The header stands while the tiers load or fail; the tiers
+ * (D-USE-61). Step away is the pill beside ··· while a work timer runs, and
+ * its bar sits under the header while it holds (USE-60, D-USE-52). The header stands while the tiers load or fail; the tiers
  * alone wait or retry (loading.md, error.md). With every item firing, the
  * undone to-dos lift into a card under the header (USE-59, D-USE-53).
  *
@@ -46,6 +48,7 @@ export function WorkBlockNow({
   const linear = useTodayLinear(dateKey, view);
   // Offline is not an error (USE-63, D-USE-56): one line, every control live.
   const offline = useIsOffline();
+  const away = useStepAway(view, loop);
   const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams().toString();
@@ -69,9 +72,12 @@ export function WorkBlockNow({
           name={block.name}
           detail={detail}
           trailing={trailing}
+          stepAway={away.stepAway}
         />
       </div>
       {offline ? <OfflineLine text={COPY.offline} /> : null}
+      {away.bar}
+      {away.live}
       {work.isError ? (
         <WorkRetry
           label={COPY.error}

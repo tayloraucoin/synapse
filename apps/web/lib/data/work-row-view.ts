@@ -51,7 +51,10 @@ export function workMinutes(minutes: number): string {
   const hours = Math.floor(total / 60);
   const rest = total % 60;
   if (hours === 0) return `${rest} min`;
-  return rest === 0 ? `${hours} h` : `${hours} h ${rest}`;
+  // "2 h 05", as the boards print a time taken (done-for-today.md).
+  return rest === 0
+    ? `${hours} h`
+    : `${hours} h ${String(rest).padStart(2, "0")}`;
 }
 
 /** "30 to 60 min" from the item's own range, else its size's. */

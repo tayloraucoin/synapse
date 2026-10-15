@@ -19,6 +19,27 @@ export const WORK_COPY = {
   promptSent: "Prompt sent",
   inHand: (title: string) => `${title}, in hand`,
   doneToast: (title: string) => `${title} done.`,
+  /** A session's Done (USE-60; done-for-today.md, D-USE-57). */
+  doneForTodayToast: (next: { n: number; day: string } | null) =>
+    next
+      ? `Done for today. Session ${next.n} is ${next.day}.`
+      : "Done for today.",
+  /** Step away (USE-60; step-away.md, stepped-away.md). */
+  stepAway: "Step away",
+  stepAwayName: "Step away, pause work time",
+  heldLine: "Work time held · firing keeps counting",
+  resumeAll: "Resume all",
+  saidResumed: "Work time resumed.",
+  /** The ask (USE-60; start-while-one-runs.md, D-USE-43). */
+  askTitle: (title: string) => `Start ${title}`,
+  askLead: (running: string) =>
+    `One item is in hand at a time. ${running} is running; it moves to:`,
+  askGroup: (running: string) => `Where ${running} goes`,
+  askFiring: "Firing",
+  askFiringLine: "Its prompt is out; firing time starts now",
+  askPaused: "Paused",
+  askPausedLine: "Work time held; Resume from its row",
+  cancel: "Cancel",
   /** Said politely (words-and-access.md). */
   saidFiring: (title: string) => `${title} firing.`,
   saidBack: (title: string) => `${title} back.`,

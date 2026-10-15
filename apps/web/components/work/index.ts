@@ -9,6 +9,12 @@ export {
   type RunningWorkCardProps,
 } from "./running-work-card";
 export {
+  StartWhileOneRuns,
+  type StartMoveTo,
+  type StartWhileOneRunsProps,
+} from "./start-while-one-runs";
+export { StepAwayBar, type StepAwayBarProps } from "./step-away-bar";
+export {
   TierGroup,
   type TierGroupAdd,
   type TierGroupProps,

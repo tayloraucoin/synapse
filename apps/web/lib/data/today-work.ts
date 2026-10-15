@@ -5,9 +5,11 @@ import {
   clockFromMinutes,
   clockToMinutes,
   compareInTiers,
+  countSessions,
   flowWorkBlock,
   formatCountdown,
   instantToWallClockMinutes,
+  nextSession,
   parseRule,
   pickWhileItFires,
   resolveWorkNext,
@@ -15,6 +17,7 @@ import {
   topMinutes,
   weekdayIndex,
   type OverBand,
+  type SessionSlot,
   type SlotClock,
   type SlotClockState,
   type WorkNext,
@@ -32,7 +35,7 @@ import type {
   WorkRowView,
   WorkStatusView,
 } from "@/components/work";
-import { SIZE_RANGE } from "@/components/work/add/new-task/form";
+import { shortDate, SIZE_RANGE } from "@/components/work/add/new-task/form";
 import type { Today } from "./derive-today";
 import type { LinearIssueJoin, LinearStatus } from "./integration-records";
 import { capHelper, laterWorkBlockOf, TIER_EDGE_COPY } from "./tier-edges";
@@ -63,6 +66,12 @@ export const TODAY_WORK_COPY = {
   worked: (minutes: string) => `worked ${minutes}`,
   fired: (minutes: string) => `fired ${minutes}`,
   took: (minutes: string) => `Took ${minutes}`,
+  /** A session's Done (USE-60; done-for-today.md, D-USE-57). */
+  doneForToday: "Done for today",
+  tookToday: (minutes: string) => `took ${minutes}`,
+  nextSession: (day: string) => `next session ${day}`,
+  /** The stepped-away bar (USE-60; stepped-away.md). */
+  steppedAwayAt: (clock: string) => `Stepped away at ${clock}`,
   workTime: "WORK TIME",
   workTimePaused: "WORK TIME · PAUSED",
   workTimeOver: "WORK TIME · OVER",
@@ -250,8 +259,20 @@ export interface TodayWorkView {
   nextResumes: boolean;
   /** Every work item fires: "Everything is firing." (D-USE-43). */
   allFiring: boolean;
-  /** A one-day item, by slot id: its Done is the task's (a session's is USE-60). */
+  /** A one-day item, by slot id: its Done is the task's; a session's is the day's. */
   oneDay: ReadonlyMap<string, boolean>;
+  /**
+   * A session's next one, by slot id (USE-60; C-USE-sessions-1): its date
+   * and place, by `nextSession`; null past the last or before the pool reads.
+   */
+  sessionNext: ReadonlyMap<string, { dateKey: string; n: number } | null>;
+  /** A work timer runs: Step away shows (C-USE-today-running-2). */
+  workRunning: boolean;
+  /**
+   * The Step away holding work time (D-USE-46): its id for Resume all and
+   * the paused events' shared time, "Stepped away at 10:42"; null when none.
+   */
+  steppedAway: { id: string; words: string } | null;
   /** The day's close: nothing counts past it (C11). */
   dayEnd: Date;
   /**
@@ -279,6 +300,8 @@ export interface TodayWorkInput {
   subIssuesFor?: (
     item: WorkItemRecord,
   ) => { id: string; title: string; done: boolean }[];
+  /** Every open item's sessions (the pool's slots): a session's Done names the next. */
+  sessionSlots?: readonly SessionSlot[];
 }
 
 const WEEKDAY_LONG = [
@@ -500,6 +523,15 @@ export function linearLineOf(
   return null;
 }
 
+/** A slot with no events yet: done by a check, never timed. */
+const IDLE_CLOCK: SlotClock = {
+  state: "idle",
+  work: [],
+  firing: [],
+  doneAt: null,
+  heldBy: null,
+};
+
 export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
   const { today, day, now } = input;
   const { records } = today;
@@ -521,6 +553,24 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
       ),
     );
   const states = new Map(slots.map((slot) => [slot.id, stateOf(today, slot)]));
+
+  // A session's next one, numbered by date (USE-8): "Session 2 is Wed 14".
+  const pooled = input.sessionSlots ?? [];
+  const places = countSessions(pooled);
+  const sessionNext = new Map(
+    slots
+      .filter((slot) => (sessions.get(slot.id) ?? null) !== null)
+      .map((slot) => {
+        const nextId = nextSession(pooled, slot.workItemId!, dateKey);
+        const next = pooled.find((entry) => entry.id === nextId);
+        return [
+          slot.id,
+          next?.onDate
+            ? { dateKey: next.onDate, n: places.get(next.id)?.n ?? 0 }
+            : null,
+        ] as const;
+      }),
+  );
 
   // One in hand inside a Work block (D-USE-43): the running item, else the
   // one its own Pause holds. A slot resting after Bring back is not in hand,
@@ -610,8 +660,8 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
         records.timeZone,
       ),
     });
-    const clock = today.clock.slots.get(slot.id);
-    if (!clock) return row;
+    const clock = today.clock.slots.get(slot.id) ?? IDLE_CLOCK;
+    if (clock === IDLE_CLOCK && form !== "done") return row;
     const figures = clockAt(clock, now, dayEnd);
     const workedMin = Math.floor(figures.workMs / 60_000);
     const firedMin = Math.floor(figures.firingMs / 60_000);
@@ -620,6 +670,26 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
     if (form === "done") {
       // Took is work time only; "fired" is left off one that never fired (D-USE-48).
       const tookMin = slot.tookMin ?? (workedMin >= 1 ? workedMin : null);
+      if (sessionNext.has(slot.id)) {
+        // A session's Done closes today's share only (D-USE-57, D-USE-65).
+        const next = sessionNext.get(slot.id);
+        return {
+          ...row,
+          doneRecord: TODAY_WORK_COPY.joined([
+            TODAY_WORK_COPY.doneForToday,
+            ...(tookMin !== null
+              ? [TODAY_WORK_COPY.tookToday(workMinutes(tookMin))]
+              : []),
+            ...(clock.firing.length > 0
+              ? [TODAY_WORK_COPY.fired(workMinutes(Math.max(1, firedMin)))]
+              : []),
+            ...(next
+              ? [TODAY_WORK_COPY.nextSession(shortDate(next.dateKey))]
+              : []),
+          ]),
+        };
+      }
+      if (clock === IDLE_CLOCK) return row;
       const parts = [
         tookMin !== null ? TODAY_WORK_COPY.took(workMinutes(tookMin)) : null,
         clock.firing.length > 0
@@ -710,6 +780,17 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
   const firstFiring = flat.find(({ row }) => row.form === "firing");
 
   const handClock = inHand ? today.clock.slots.get(inHand.id) : undefined;
+  const workSlotIds = new Set(slots.map((slot) => slot.id));
+  const hold = today.clock.stepAway;
+  const steppedAway =
+    hold && hold.slotIds.some((id) => workSlotIds.has(id))
+      ? {
+          id: hold.id,
+          words: TODAY_WORK_COPY.steppedAwayAt(
+            wallWords(hold.at, records.timeZone),
+          ),
+        }
+      : null;
   const handRow = inHand
     ? flat.find(({ row }) => row.id === inHand.id)?.row
     : undefined;
@@ -772,6 +853,9 @@ export function deriveTodayWork(input: TodayWorkInput): TodayWorkView {
     oneDay: new Map(
       slots.map((slot) => [slot.id, (sessions.get(slot.id) ?? null) === null]),
     ),
+    sessionNext,
+    workRunning: [...states.values()].some((state) => state === "running"),
+    steppedAway,
     dayEnd,
     meetings: { bands: meetings.bands, lifted: meetings.lifted },
   };
@@ -954,7 +1038,8 @@ export function workCardFigures(
         held
           ? TODAY_WORK_COPY.worked(worked)
           : `${TODAY_WORK_COPY.worked(worked)}${sinceWords}`,
-        ...(held && lastEnd
+        // Held by Step away, the bar says when (stepped-away.md).
+        ...(held && lastEnd && !hand.clock.heldBy
           ? [TODAY_WORK_COPY.pausedAt(wallWords(lastEnd, timeZone))]
           : []),
       ]);

@@ -48,5 +48,6 @@ export function usePool() {
     source.server.recover();
     return queryClient.refetchQueries({ queryKey });
   }
-  return { ...query, data: pool, pool, retry };
+  // The open items' sessions as read: a session's Done names the next (USE-60).
+  return { ...query, data: pool, pool, slots: records?.slots, retry };
 }

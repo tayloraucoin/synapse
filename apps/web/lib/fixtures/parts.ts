@@ -24,7 +24,10 @@ import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { NEW_BLOCK_SCENARIOS } from "./scenarios/new-block";
 import { DAYS_SCENARIOS } from "./scenarios/set-up";
 import { SETTINGS_SCENARIOS } from "./scenarios/settings";
-import { TODAY_DESK_SCENARIOS } from "./scenarios/today-desk";
+import {
+  STEP_AWAY_SCENARIOS,
+  TODAY_DESK_SCENARIOS,
+} from "./scenarios/today-desk";
 import { TODAY_MEETING_SCENARIOS } from "./scenarios/today-meetings";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
 import { WEEK_SCENARIOS } from "./scenarios/week";
@@ -255,6 +258,10 @@ for (const state of Object.keys(DAYS_SCENARIOS)) {
 }
 // USE-58: the desk's Today frame, under the today-desk scenarios' names.
 for (const state of Object.keys(TODAY_DESK_SCENARIOS)) {
+  registerPart(state, () => createElement(TodayDeskPart));
+}
+// USE-60: Step away, the ask and a session's Done, on the same frame.
+for (const state of Object.keys(STEP_AWAY_SCENARIOS)) {
   registerPart(state, () => createElement(TodayDeskPart));
 }
 // USE-27: Schedule's states, `schedule-<state>` (the drawn four by their names).

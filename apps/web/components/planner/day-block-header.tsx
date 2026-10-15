@@ -39,7 +39,7 @@ export interface DayBlockHeaderProps {
   /** In place of `menu`: Now's ··· pull-down (USE-17). */
   trailing?: React.ReactNode;
   /** "Step away", shown only while a work timer runs (D-USE-52). */
-  stepAway?: { label: string; onPress: () => void } | null;
+  stepAway?: { label: string; name?: string; onPress: () => void } | null;
   as?: "h2" | "h3";
   className?: string;
 }
@@ -92,7 +92,14 @@ export function DayBlockHeader({
         ) : null}
       </div>
       {stepAway ? (
-        <Button variant="secondary" size="sm" onClick={stepAway.onPress}>
+        <Button
+          variant="secondary"
+          size="sm"
+          aria-label={stepAway.name}
+          data-step-away-button
+          onClick={stepAway.onPress}
+          className="rounded-full"
+        >
           <StepAwayIcon aria-hidden="true" className="size-4" />
           {stepAway.label}
         </Button>
