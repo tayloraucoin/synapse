@@ -98,6 +98,11 @@ export {
   BellOffIcon as NotificationsOffIcon,
   SmartphoneIcon as InstallNeededIcon,
 } from "lucide-react";
+/** The To-do sheet's ··· (USE-29): Give it a day…, Delete to-do. */
+export {
+  CalendarIcon as GiveADayIcon,
+  Trash2Icon as DeleteIcon,
+} from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
 export { ThemeProvider } from "./providers/theme-provider";
@@ -905,6 +910,11 @@ export {
   type CuratedIconGridProps,
 } from "./composed/control/curated-icon-grid";
 export { DateField, type DateFieldProps } from "./composed/control/date-field";
+export {
+  MONTH_GRID_WORDS,
+  MonthGrid,
+  type MonthGridProps,
+} from "./composed/control/month-grid";
 export {
   EmojiPicker,
   type EmojiPickerProps,

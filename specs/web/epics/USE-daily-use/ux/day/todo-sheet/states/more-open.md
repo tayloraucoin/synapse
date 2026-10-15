@@ -31,6 +31,8 @@ The default sheet with ··· pressed. `?state=more-open`.
 
 "<Title>" as the heading; "Give it a day…"; "Mark done"; "Delete to-do"; "Gone from the tray and any block. Undo in the toast."
 
+As built (USE-29), the developer's calls: the month step is titled "Give it a day" from ···, and "Remind on" from the At row's "Pick a day…", with "‹ <Title>" as its back link; the toasts read "<Title> is done." and "<Title> is deleted.", each with Undo. The month is `MonthGrid`: arrow keys move by day and week, Home and End to the week's ends, Page Up and Page Down by month; a past day takes focus but cannot be picked. A Mark done or Delete that does not save leaves the sheet open with "Not saved. Try again." under the scope line, in ink.
+
 ## The notes on the boards
 
 **todo-sheet / ··· open, Delete / 402 / light** (Frame @ x 2892, y 9750):

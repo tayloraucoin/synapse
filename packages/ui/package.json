@@ -183,6 +183,10 @@
       "types": "./src/composed/control/date-field/index.ts",
       "default": "./src/composed/control/date-field/index.ts"
     },
+    "./month-grid": {
+      "types": "./src/composed/control/month-grid/index.ts",
+      "default": "./src/composed/control/month-grid/index.ts"
+    },
     "./ellipses-menu": {
       "types": "./src/composed/control/ellipses-menu/index.ts",
       "default": "./src/composed/control/ellipses-menu/index.ts"

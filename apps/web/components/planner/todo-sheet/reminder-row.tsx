@@ -30,8 +30,9 @@ import { TODO_SHEET_COPY as COPY } from "./copy";
  * notifications-off.md].
  *
  * The day is `remindOn` and the time `remindAt`, wall-clock, never an
- * instant. The day select reads Today and Tomorrow; Pick a day… is USE-29's,
- * so a reminder on another date shows that date as its own option.
+ * instant. The day select reads Today, Tomorrow, then Pick a day… (D-USE-69),
+ * which opens the month as a step (USE-29); a reminder on another date shows
+ * that date as its own option above it.
  */
 export interface ReminderRowProps {
   availability: ReminderAvailability;
@@ -42,12 +43,17 @@ export interface ReminderRowProps {
   todayKey: string;
   onToggle: (on: boolean) => void;
   onDay: (dateKey: string) => void;
+  /** Pick a day…: the month step, for the reminder's day. */
+  onPickDay: () => void;
   onTime: (time: string) => void;
   onHow: (opener: HTMLElement) => void;
   onSettings: () => void;
   /** "Not saved. Try again." under the row, when its last change failed. */
   failedLine?: React.ReactNode;
 }
+
+/** The select's value for Pick a day…, never a day key. */
+const PICK_A_DAY = "pick-a-day";
 
 const ROW = "flex min-h-(--row-min) items-center gap-(--space-3)";
 
@@ -59,6 +65,7 @@ export function ReminderRow({
   todayKey,
   onToggle,
   onDay,
+  onPickDay,
   onTime,
   onHow,
   onSettings,
@@ -138,7 +145,12 @@ export function ReminderRow({
           <Text as="span" variant="body" tone="ink" className="flex-1">
             {COPY.at}
           </Text>
-          <Select value={day} onValueChange={onDay}>
+          <Select
+            value={day}
+            onValueChange={(next) =>
+              next === PICK_A_DAY ? onPickDay() : onDay(next)
+            }
+          >
             <SelectTrigger
               aria-label={COPY.reminderDay(dayLabel)}
               className="min-h-(--target) w-fit"
@@ -151,6 +163,7 @@ export function ReminderRow({
               {day !== todayKey && day !== tomorrowKey ? (
                 <SelectItem value={day}>{dayLabel}</SelectItem>
               ) : null}
+              <SelectItem value={PICK_A_DAY}>{COPY.pickADay}</SelectItem>
             </SelectContent>
           </Select>
           <div className="w-32 shrink-0">

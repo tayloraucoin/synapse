@@ -56,6 +56,8 @@ export const TODO_SHEET_COPY = {
   today: "Today",
   tomorrow: "Tomorrow",
   dayName,
+  /** The At row's third option, opening the month (D-USE-69). */
+  pickADay: "Pick a day…",
   reminderDay: (day: string) => `Reminder day, ${day}`,
   reminderTime: "Reminder time",
   notes: "Notes",
@@ -68,6 +70,24 @@ export const TODO_SHEET_COPY = {
     notInstalled: `${SAVES} Everything else here works in the browser.`,
     notificationsOff: `${SAVES} The reminder switch comes back once notifications are on.`,
   },
+  /** ··· (USE-29; more-open.md), all in ink. */
+  menu: {
+    giveADay: "Give it a day…",
+    markDone: "Mark done",
+    delete: "Delete to-do",
+    deleteDetail: "Gone from the tray and any block. Undo in the toast.",
+  },
+  /** The month step's title, per way in. */
+  step: {
+    giveADay: "Give it a day",
+    remindOn: "Remind on",
+  },
+  toast: {
+    done: (title: string) => `${title} is done.`,
+    deleted: (title: string) => `${title} is deleted.`,
+  },
+  /** A ··· action that did not save: the sheet stays, the line says so. */
+  notSavedAction: "Not saved. Try again.",
   /** The longest title `plannerNameSchema` takes. */
   titleMax: 120,
 } as const;

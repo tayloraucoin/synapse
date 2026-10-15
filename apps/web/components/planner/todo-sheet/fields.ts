@@ -61,3 +61,29 @@ export function reminderTimeWrite(
   if (remindAt === saved.remindAt) return null;
   return { remindAt, remindOn: saved.remindOn ?? todayKey };
 }
+
+/**
+ * Give it a day… (USE-29): the to-do's day only, never the reminder's. Null
+ * for a day before today, or the day it already has.
+ */
+export function giveADayWrite(
+  dateKey: string,
+  saved: Pick<TodoRecord, "onDate">,
+  todayKey: string,
+): Pick<TodoInput, "onDate"> | null {
+  if (dateKey < todayKey || dateKey === saved.onDate) return null;
+  return { onDate: dateKey };
+}
+
+/**
+ * The At row's Pick a day… (USE-29): the reminder's day only, never the
+ * to-do's. Null for a day before today, or the day it already has.
+ */
+export function remindOnWrite(
+  dateKey: string,
+  saved: Pick<TodoRecord, "remindOn">,
+  todayKey: string,
+): Pick<TodoInput, "remindOn"> | null {
+  if (dateKey < todayKey || dateKey === saved.remindOn) return null;
+  return { remindOn: dateKey };
+}

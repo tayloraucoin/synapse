@@ -178,7 +178,7 @@ export class FixtureWriteError extends Error {
 
 /** A to-do write the router would refuse (USE-19). */
 export class TodoWriteRefusal extends Error {
-  readonly reason: "invalid" | "unknown";
+  readonly reason: "invalid" | "unknown" | "past-day";
 
   constructor(reason: TodoWriteRefusal["reason"], message: string) {
     super(message);
@@ -193,6 +193,17 @@ export class JournalWriteRefusal extends Error {
     super(message);
     this.name = "JournalWriteRefusal";
   }
+}
+
+/**
+ * A deleted to-do with everything that went with it (USE-29): the slots that
+ * took it and their events, as `slots.todo_id`'s cascade takes them. Undo
+ * puts back exactly this.
+ */
+export interface RemovedTodo {
+  todo: TodoRecord;
+  slots: SlotRecord[];
+  slotEvents: SlotEventRecord[];
 }
 
 /** A morning-lines write the router would refuse. */
@@ -283,6 +294,13 @@ export interface FixtureServer
     id: string;
     doneAt: string | null;
   }): Promise<TodoRecord>;
+  /**
+   * Delete to-do (USE-29): the to-do, the slots that took it on any date and
+   * their events, all at once. Returns what went, for Undo.
+   */
+  removeTodo(id: string): Promise<RemovedTodo>;
+  /** Undo of a delete: the to-do and its slots back as they were. */
+  restoreTodo(removed: RemovedTodo): Promise<TodoRecord>;
   /** The to-dos' own retry (`regions.todos: "error"`). */
   recoverTodos(): void;
   /** The `error` scenario's retry: reads succeed from here on. */
@@ -936,11 +954,62 @@ export function createFixtureServer(
           ),
         );
       }
+      // A day given, or a reminder's day moved, is never before today
+      // (USE-29); a day already stored and sent again is left alone.
+      const todayKey = resolveDayKey(
+        now(),
+        records.timeZone,
+        records.dayCloseTime,
+      );
+      for (const key of ["onDate", "remindOn"] as const) {
+        const day = patch[key];
+        if (typeof day === "string" && day !== row[key] && day < todayKey) {
+          return Promise.reject(
+            new TodoWriteRefusal("past-day", "A day before today."),
+          );
+        }
+      }
       for (const key of Object.keys(patch) as (keyof TodoInput)[]) {
         Object.assign(row, { [key]: parsed.data[key] ?? null });
       }
       row.updatedAt = now().toISOString();
       return Promise.resolve(structuredClone(todoRecord.parse(row)));
+    },
+
+    removeTodo(id) {
+      if (failNext.delete(id)) return Promise.reject(new FixtureWriteError());
+      const todo = records.todos.find((row) => row.id === id);
+      if (!todo) {
+        return Promise.reject(
+          new TodoWriteRefusal("unknown", "No to-do with that id."),
+        );
+      }
+      const slots = records.slots.filter((slot) => slot.todoId === id);
+      const slotIds = new Set(slots.map((slot) => slot.id));
+      const slotEvents = records.slotEvents.filter((event) =>
+        slotIds.has(event.slotId),
+      );
+      records.todos = records.todos.filter((row) => row.id !== id);
+      records.slots = records.slots.filter((slot) => !slotIds.has(slot.id));
+      records.slotEvents = records.slotEvents.filter(
+        (event) => !slotIds.has(event.slotId),
+      );
+      return Promise.resolve(structuredClone({ todo, slots, slotEvents }));
+    },
+
+    restoreTodo(removed) {
+      const { todo, slots, slotEvents } = structuredClone(removed);
+      // Undo twice puts it back once.
+      if (!records.todos.some((row) => row.id === todo.id)) {
+        records.todos.push(todo);
+      }
+      const slotIds = new Set(records.slots.map((slot) => slot.id));
+      records.slots.push(...slots.filter((slot) => !slotIds.has(slot.id)));
+      const eventIds = new Set(records.slotEvents.map((event) => event.id));
+      records.slotEvents.push(
+        ...slotEvents.filter((event) => !eventIds.has(event.id)),
+      );
+      return Promise.resolve(structuredClone(todo));
     },
 
     recoverTodos() {

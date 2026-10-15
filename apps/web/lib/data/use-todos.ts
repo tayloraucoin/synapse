@@ -17,7 +17,7 @@ import {
   type TodoInput,
   type TodoRecord,
 } from "@syn/validators";
-import type { FixtureServer } from "@/lib/fixtures/server";
+import type { FixtureServer, RemovedTodo } from "@/lib/fixtures/server";
 import { useDataSource } from "./source";
 import { todayQueryKey } from "./use-today";
 
@@ -180,6 +180,41 @@ export function useTodos(dateKey: string) {
       if (saved) settle();
       return saved;
     },
+    /**
+     * ··· › Mark done (USE-29): the box's own write, so a repeating one comes
+     * back when due as the tray's does. True when it saved; Undo is `uncheck`.
+     */
+    markDone: async (id: string) => {
+      const saved = await writeBox({
+        queryClient,
+        server: source.server,
+        queryKey,
+        id,
+        checked: true,
+        at: source.now(),
+      });
+      if (saved) settle();
+      return saved;
+    },
+    /**
+     * ··· › Delete to-do (USE-29): at once, no confirm; the tray and any block
+     * that took it lose it. What went, for Undo; null when it did not save.
+     */
+    remove: async (id: string) => {
+      const removed = await writeRemove({
+        queryClient,
+        server: source.server,
+        queryKey,
+        id,
+      });
+      settle();
+      return removed;
+    },
+    /** Undo of a delete: the to-do and its slots back as they were. */
+    restore: async (removed: RemovedTodo) => {
+      await source.server.restoreTodo(removed);
+      settle();
+    },
     /** A failed box's Try again: the same write once more. */
     retryWrite: async (id: string) => {
       const checked = failed.get(id);
@@ -249,6 +284,36 @@ export async function writeTodoPatch(input: {
   } catch {
     if (before) queryClient.setQueryData(queryKey, before);
     return false;
+  }
+}
+
+/**
+ * A delete: the tray drops the to-do and its slots at once, the write
+ * follows, and a failure puts them back. What went, or null.
+ */
+export async function writeRemove(input: {
+  queryClient: QueryClient;
+  server: Pick<FixtureServer, "removeTodo">;
+  queryKey: readonly unknown[];
+  id: string;
+}): Promise<RemovedTodo | null> {
+  const { queryClient, server, queryKey, id } = input;
+  await queryClient.cancelQueries({ queryKey });
+  const before = queryClient.getQueryData<TodosRecords>(queryKey);
+  queryClient.setQueryData<TodosRecords>(queryKey, (records) =>
+    records
+      ? {
+          ...records,
+          todos: records.todos.filter((todo) => todo.id !== id),
+          slots: records.slots.filter((slot) => slot.todoId !== id),
+        }
+      : records,
+  );
+  try {
+    return await server.removeTodo(id);
+  } catch {
+    if (before) queryClient.setQueryData(queryKey, before);
+    return null;
   }
 }
 

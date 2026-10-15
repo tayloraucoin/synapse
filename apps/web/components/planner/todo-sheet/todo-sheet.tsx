@@ -17,7 +17,14 @@
  *
  * THE ICON TILE opens USE-11's IconPickerStep inside the sheet, back on the
  * left; `EmojiSlotButton`'s own popover would be a second picker, so the tile
- * is a plain button around `EmojiSlot`. ··· is USE-29's: drawn, inert here.
+ * is a plain button around `EmojiSlot`.
+ *
+ * ··· (USE-29) is `TodoMoreMenu`: Give it a day… opens `PickADayStep` in the
+ * sheet and sets the to-do's day, the scope line then reading it; Mark done
+ * checks it as its tray box does and closes, Undo in the toast; Delete to-do
+ * deletes at once with no confirm, the to-do and the slots that took it, and
+ * closes, Undo putting both back. The At row's Pick a day… opens the same
+ * step for the reminder's day alone. Past days are closed in both.
  */
 import * as React from "react";
 import type { IconValue } from "@syn/types";
@@ -37,6 +44,7 @@ import {
   SelectValue,
   Text,
   Textarea,
+  toastUndo,
 } from "@syn/ui";
 import {
   addDays,
@@ -52,12 +60,16 @@ import { useReminderAvailability } from "@/lib/pwa/reminder-availability";
 import { IconPickerStep } from "../icon-picker-step";
 import { TODO_SHEET_COPY as COPY } from "./copy";
 import {
+  giveADayWrite,
   notesWrite,
   reminderSwitchWrite,
   reminderTimeWrite,
+  remindOnWrite,
   titleWrite,
 } from "./fields";
+import { PickADayStep } from "./pick-a-day-step";
 import { ReminderRow } from "./reminder-row";
+import { TodoMoreMenu } from "./todo-more-menu";
 import { TODO_TYPE_OPTIONS, type TodoType } from "./types";
 
 export interface TodoSheetProps {
@@ -74,7 +86,11 @@ export interface TodoSheetProps {
   returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
-type Field = "title" | "icon" | "type" | "repeats" | "reminder" | "notes";
+type Field =
+  "title" | "icon" | "day" | "type" | "repeats" | "reminder" | "notes";
+
+/** The fields, or a step in the sheet's place. */
+type Step = "fields" | "icon" | "give-a-day" | "remind-on";
 
 const ROW =
   "border-hairline flex min-h-(--row-min) items-center gap-(--space-3) border-b";
@@ -107,7 +123,11 @@ export function TodoSheet({
   const isNew = todoId === null;
   const reminder = useReminderAvailability(source.scenario.device);
 
-  const [step, setStep] = React.useState<"fields" | "icon">("fields");
+  const [step, setStep] = React.useState<Step>("fields");
+  // ··· › Mark done or Delete that did not save: its Try again.
+  const [actionFailed, setActionFailed] = React.useState<(() => void) | null>(
+    null,
+  );
   const [failed, setFailed] = React.useState<
     Partial<Record<Field, Partial<TodoInput>>>
   >({});
@@ -128,6 +148,7 @@ export function TodoSheet({
     const timer = window.setTimeout(() => {
       if (startOpen === "todo-type") setTypeOpen(true);
       if (startOpen === "todo-repeats") setRepeatsOpen(true);
+      if (startOpen === "todo-give-a-day") setStep("give-a-day");
     }, CAPTURE_SETTLE_MS);
     return () => window.clearTimeout(timer);
   }, [open, hasTodo, startOpen]);
@@ -137,6 +158,7 @@ export function TodoSheet({
     if (open) return;
     setStep("fields");
     setFailed({});
+    setActionFailed(null);
     setTitleDraft(null);
     setNotesDraft(null);
   }, [open]);
@@ -187,6 +209,55 @@ export function TodoSheet({
     // An emptied title goes back to the one saved.
     setTitleDraft(null);
     if (write.kind === "update") await save("title", write.patch);
+  }
+
+  function notSaved(retry: () => void) {
+    setActionFailed(() => retry);
+    setAnnounce(COPY.notSavedAction);
+  }
+
+  async function markDone() {
+    if (todo === null) return;
+    const { id, title: name } = todo;
+    setActionFailed(null);
+    if (!(await todos.markDone(id))) {
+      notSaved(() => void markDone());
+      return;
+    }
+    onOpenChange(false);
+    toastUndo({
+      text: COPY.toast.done(name),
+      onUndo: () => void todos.uncheck(id),
+    });
+  }
+
+  async function remove() {
+    if (todo === null) return;
+    const name = todo.title;
+    setActionFailed(null);
+    const removed = await todos.remove(todo.id);
+    if (removed === null) {
+      notSaved(() => void remove());
+      return;
+    }
+    onOpenChange(false);
+    toastUndo({
+      text: COPY.toast.deleted(name),
+      onUndo: () => void todos.restore(removed),
+    });
+  }
+
+  function pickDay(dateKey: string) {
+    const target = step;
+    setStep("fields");
+    if (todo === null) return;
+    if (target === "give-a-day") {
+      const patch = giveADayWrite(dateKey, todo, todayKey);
+      if (patch) void save("day", patch);
+    } else {
+      const patch = remindOnWrite(dateKey, todo, todayKey);
+      if (patch) void save("reminder", patch);
+    }
   }
 
   function commitNotes() {
@@ -266,7 +337,7 @@ export function TodoSheet({
   const inert = todo === null;
 
   const header =
-    step === "icon" ? (
+    step !== "fields" ? (
       <span className="sr-only">{COPY.title}</span>
     ) : (
       <div className="flex min-w-0 flex-1 items-center justify-between">
@@ -279,17 +350,27 @@ export function TodoSheet({
         >
           <CloseIcon aria-hidden="true" />
         </Button>
-        {/* ··· and its menu are USE-29's. */}
-        <button
-          type="button"
-          aria-label={COPY.more(title || COPY.newTitle)}
-          aria-disabled="true"
-          className="inline-flex size-(--target) items-center justify-center rounded-full"
-        >
-          <span className="bg-surface text-foreground flex size-8 items-center justify-center rounded-full">
-            <MoreIcon aria-hidden="true" className="size-4" />
-          </span>
-        </button>
+        {todo === null ? (
+          // A new to-do has nothing to give a day, finish or delete yet.
+          <button
+            type="button"
+            aria-label={COPY.more(title || COPY.newTitle)}
+            aria-disabled="true"
+            className="inline-flex size-(--target) items-center justify-center rounded-full"
+          >
+            <span className="bg-surface text-foreground flex size-8 items-center justify-center rounded-full">
+              <MoreIcon aria-hidden="true" className="size-4" />
+            </span>
+          </button>
+        ) : (
+          <TodoMoreMenu
+            title={todo.title}
+            defaultOpen={startOpen === "todo-more"}
+            onGiveADay={() => setStep("give-a-day")}
+            onMarkDone={() => void markDone()}
+            onDelete={() => void remove()}
+          />
+        )}
       </div>
     );
 
@@ -301,7 +382,7 @@ export function TodoSheet({
       header={header}
       headerAction={null}
       footer={
-        step === "icon" ? undefined : (
+        step !== "fields" ? undefined : (
           <Text as="p" variant="secondary" tone="muted">
             {footer}
           </Text>
@@ -312,7 +393,11 @@ export function TodoSheet({
       // Up to 90dvh: the At row makes it taller rather than scrolling.
       size="tall"
       classes={{
-        header: "items-center pt-(--space-2)",
+        // A step brings its own back link: no × row above it.
+        header:
+          step === "give-a-day" || step === "remind-on"
+            ? "hidden"
+            : "items-center pt-(--space-2)",
         body: "pt-0",
         footer: "border-t-0",
       }}
@@ -321,7 +406,22 @@ export function TodoSheet({
         {announce}
       </span>
 
-      {step === "icon" ? (
+      {step === "give-a-day" || step === "remind-on" ? (
+        <PickADayStep
+          title={
+            step === "give-a-day" ? COPY.step.giveADay : COPY.step.remindOn
+          }
+          backLabel={title || COPY.title}
+          value={
+            step === "give-a-day"
+              ? (todo?.onDate ?? null)
+              : (todo?.remindOn ?? null)
+          }
+          todayKey={todayKey}
+          onPick={pickDay}
+          onBack={() => setStep("fields")}
+        />
+      ) : step === "icon" ? (
         <IconPickerStep
           name={title}
           value={todo?.icon ?? null}
@@ -338,6 +438,22 @@ export function TodoSheet({
           <Text as="p" variant="secondary" tone="muted">
             {COPY.scope(todo?.onDate ?? null)}
           </Text>
+          {failedLine("day")}
+          {actionFailed === null ? null : (
+            <p className="text-ink flex items-center gap-(--space-2) pb-(--space-2)">
+              <NotSavedIcon aria-hidden="true" className="size-4 shrink-0" />
+              <Text as="span" variant="secondary" tone="ink">
+                {COPY.notSaved}{" "}
+                <button
+                  type="button"
+                  onClick={actionFailed}
+                  className="min-h-(--target) underline underline-offset-4"
+                >
+                  {COPY.tryAgain}
+                </button>
+              </Text>
+            </p>
+          )}
 
           <div className="flex items-center gap-(--space-3) py-(--space-3)">
             <button
@@ -484,6 +600,7 @@ export function TodoSheet({
               );
             }}
             onDay={(remindOn) => void save("reminder", { remindOn })}
+            onPickDay={() => setStep("remind-on")}
             onTime={(remindAt) => {
               const patch = todo && reminderTimeWrite(remindAt, todo, todayKey);
               if (patch) void save("reminder", patch);

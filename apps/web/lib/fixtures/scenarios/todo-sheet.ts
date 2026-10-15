@@ -91,4 +91,13 @@ export const TODO_SHEET_SCENARIOS: Record<string, () => Scenario> = {
     sheet("todo-sheet-error", { failWrites: [TODO_SHEET_IDS.mechanic] }),
   // Offline the sheet works as online (D-USE-56, D-USE-64).
   "todo-sheet-offline": () => sheet("todo-sheet-offline", { offline: true }),
+  // ---- ··· (USE-29): the menu open, and Give it a day…'s month ----
+  "more-open": () => sheet("more-open", { view: { open: "todo-more" } }),
+  // Monday the 12th, the to-do given Thursday the 15th: 1 to 11 faded.
+  "give-it-a-day": () =>
+    sheet(
+      "give-it-a-day",
+      { view: { open: "todo-give-a-day" } },
+      mechanicTodo({ onDate: "2026-10-15" }),
+    ),
 };

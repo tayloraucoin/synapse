@@ -32,6 +32,8 @@ export interface NowBlockMenuRow {
   onSelect?: () => void;
   /** A hairline before this row. */
   separated?: boolean;
+  /** Its consequence, muted and small under the label (USE-29's Delete to-do). */
+  detail?: string;
 }
 
 export interface NowBlockMenuProps {
@@ -96,11 +98,26 @@ export function NowBlockMenu({
         </DropdownMenuLabel>
         {rows.map((row) => {
           const Icon = row.icon;
-          const content = (
-            <>
-              <Icon aria-hidden="true" className={GLYPH} />
-              {row.label}
-            </>
+          const content =
+            row.detail === undefined ? (
+              <>
+                <Icon aria-hidden="true" className={GLYPH} />
+                {row.label}
+              </>
+            ) : (
+              <>
+                <Icon aria-hidden="true" className={cn(GLYPH, "mt-0.5")} />
+                <span className="flex flex-col gap-(--space-1)">
+                  {row.label}
+                  <span className="text-(length:--fs-caption) leading-(--lh-caption) text-muted-foreground">
+                    {row.detail}
+                  </span>
+                </span>
+              </>
+            );
+          const rowClass = cn(
+            ROW,
+            row.detail !== undefined && "items-start py-(--space-2)",
           );
           return (
             <React.Fragment key={row.label}>
@@ -108,11 +125,11 @@ export function NowBlockMenu({
                 <DropdownMenuSeparator className="mx-(--space-4) my-(--space-1)" />
               ) : null}
               {row.href !== undefined ? (
-                <DropdownMenuItem asChild className={ROW}>
+                <DropdownMenuItem asChild className={rowClass}>
                   <Link href={row.href}>{content}</Link>
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem className={ROW} onSelect={row.onSelect}>
+                <DropdownMenuItem className={rowClass} onSelect={row.onSelect}>
                   {content}
                 </DropdownMenuItem>
               )}
