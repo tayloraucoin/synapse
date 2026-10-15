@@ -6,6 +6,7 @@ import {
   todoRecord,
   workItemRecord,
 } from "@syn/validators";
+import { FIRST_CHANGE, RAIL_HINT } from "@/lib/data/review-first-times";
 import { fixtureId } from "../ids";
 import type { FixtureRecords } from "../records";
 import { BASE_DATE } from "./base-day";
@@ -31,9 +32,17 @@ const DAILY = "DTSTART;VALUE=DATE:20261001\nRRULE:FREQ=DAILY";
 const WEEKDAYS =
   "DTSTART;VALUE=DATE:20261001\nRRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR";
 
+const SATURDAYS = "DTSTART;VALUE=DATE:20261001\nRRULE:FREQ=WEEKLY;BYDAY=SA";
+
 export const REVIEW_IDS = {
-  blocks: { lunch: id(1, 1), afternoonWork: id(1, 2) },
-  items: { driveThere: id(2, 1), workout: id(2, 2), driveHome: id(2, 3) },
+  blocks: { lunch: id(1, 1), afternoonWork: id(1, 2), saturday: id(1, 3) },
+  items: {
+    driveThere: id(2, 1),
+    workout: id(2, 2),
+    driveHome: id(2, 3),
+    yoga: id(2, 4),
+    homeWorkout: id(2, 5),
+  },
   workItems: { linked: id(4, 1), primary: id(4, 2), secondary: id(4, 3) },
   slots: { linked: id(3, 1), primary: id(3, 2), secondary: id(3, 3) },
   todos: { mechanic: id(6, 1), placeholder: id(6, 2) },
@@ -61,6 +70,16 @@ const extraBlocks = [
     endsAt: "15:00",
     rrule: WEEKDAYS,
     fill: "tasks_for_the_day",
+  },
+  // Saturday's Training holds the workouts Swap offers on a weekday (USE-37).
+  {
+    id: R.blocks.saturday,
+    kind: "training",
+    name: "Training",
+    startsAt: "09:00",
+    endsAt: "09:30",
+    rrule: SATURDAYS,
+    fill: "set_items",
   },
 ].map((block) =>
   blockRecord.parse({
@@ -100,6 +119,24 @@ const trainingItems = [
   blockItemRecord.parse({
     ...stamps,
     blockId: NOW_IDS.blocks.training,
+    icon: null,
+    atTime: null,
+    meal: false,
+    onDate: null,
+    sortOrder,
+    ...item,
+  }),
+);
+
+/** Swap's library from Saturday: Yoga at 23 min ends Training at 8:50. */
+const saturdayItems = [
+  { id: R.items.yoga, title: "Yoga", lengthMin: 23 },
+  { id: R.items.homeWorkout, title: "Home workout", lengthMin: 25 },
+].map((item, sortOrder) =>
+  blockItemRecord.parse({
+    ...stamps,
+    blockId: R.blocks.saturday,
+    isTransition: false,
     icon: null,
     atTime: null,
     meal: false,
@@ -197,15 +234,17 @@ const todos = [
 );
 
 /** The Monday as Review the day draws it: oriented at 6:55, not readied. */
-export function reviewDayRecords(): FixtureRecords {
+export function reviewDayRecords({
+  work = true,
+}: { work?: boolean } = {}): FixtureRecords {
   const monday = nowDayRecords([]);
   return structuredClone({
     ...monday,
     usualWakeTime: "07:00",
     blocks: [...monday.blocks, ...extraBlocks],
-    blockItems: [...monday.blockItems, ...trainingItems],
+    blockItems: [...monday.blockItems, ...trainingItems, ...saturdayItems],
     workItems,
-    slots: [...monday.slots, ...workSlots],
+    slots: [...monday.slots, ...(work ? workSlots : [])],
     todos,
     dayRecords: [
       dayRecordRecord.parse({
@@ -220,6 +259,12 @@ export function reviewDayRecords(): FixtureRecords {
   });
 }
 
+/** Both one-time lines already seen (USE-37): a usual morning, not the first. */
+const SEEN = [RAIL_HINT, FIRST_CHANGE];
+
+/** The swap from the Item sheet, staged on load (after-swap-undo.md). */
+const SWAP_TO_YOGA = { id: R.items.workout, withId: R.items.yoga };
+
 function review(name: string, extra: Partial<Scenario> = {}): () => Scenario {
   return () => ({
     name,
@@ -227,6 +272,7 @@ function review(name: string, extra: Partial<Scenario> = {}): () => Scenario {
     records: reviewDayRecords(),
     mode: "ready",
     startedOnDevice: false,
+    seen: SEEN,
     ...extra,
   });
 }
@@ -235,4 +281,36 @@ export const REVIEW_SCENARIOS: Record<string, () => Scenario> = {
   "review-success": review("review-success"),
   // The tray opened in place (board 2a); it pushes the column down.
   "review-tray-open": review("review-tray-open", { view: { open: "todos" } }),
+  // USE-37: the + hint, until Got it or a first drag.
+  "review-first-mornings": review("review-first-mornings", {
+    seen: [FIRST_CHANGE],
+  }),
+  // USE-37: the first change ever, a swap: the line under the header.
+  "review-first-edit": review("review-first-edit", {
+    seen: [RAIL_HINT],
+    view: { staged: { swap: SWAP_TO_YOGA, toast: false } },
+  }),
+  // USE-37: the swap's landing, with its Toaster and Undo.
+  "review-after-swap-undo": review("review-after-swap-undo", {
+    view: { staged: { swap: SWAP_TO_YOGA, toast: true } },
+  }),
+  // USE-37: the Work block with nothing slotted for today.
+  "review-no-work": review("review-no-work", {
+    records: reviewDayRecords({ work: false }),
+  }),
+  // USE-34's system states: the day and the to-dos read apart (D-USE-69).
+  "review-loading": review("review-loading", {
+    mode: "loading",
+    regions: { todos: "loading" },
+  }),
+  // Both fail: the drawn error frame, no tray; one Try again reads both.
+  "review-error": review("review-error", {
+    mode: "error",
+    regions: { todos: "error" },
+  }),
+  "review-partial-todos": review("review-partial-todos", {
+    regions: { todos: "error" },
+  }),
+  "review-partial-day": review("review-partial-day", { mode: "error" }),
+  "review-offline": review("review-offline", { offline: true }),
 };

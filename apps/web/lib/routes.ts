@@ -184,11 +184,13 @@ export function reviewRoute(): string {
  * params are USE-39's; the menu opens it on the week.
  */
 export function daysRoute(
-  params: { week?: string; day?: string } = {},
+  params: { week?: string; day?: string; block?: string } = {},
 ): string {
   const query = new URLSearchParams();
   if (params.week) query.set("week", params.week);
   if (params.day) query.set("day", params.day);
+  // Open This week scrolls to a block (USE-37) [ASSUMPTION: `&block=`].
+  if (params.block) query.set("block", params.block);
   const search = query.toString();
   return search ? `/days?${search}` : "/days";
 }
@@ -205,7 +207,8 @@ export function settingsRoute(section?: "notifications"): string {
  * The sheets a screen opens over itself by `?sheet=` (the shell's sheet host).
  * The value names the sheet; the path stays the screen beneath.
  */
-export type SheetName = "install" | "profile" | "meal-topics" | "todo" | "item";
+export type SheetName =
+  "install" | "profile" | "meal-topics" | "item" | "todo" | "add";
 
 /** `path` with `?sheet=<name>` set, keeping its other query. */
 export function sheetRoute(path: string, sheet: SheetName): string {
@@ -249,6 +252,25 @@ export function todoSheetRoute(
   } else {
     query.set("new", "1");
     query.delete("id");
+  }
+  return `${base}?${query.toString()}`;
+}
+
+/**
+ * The add sheet over `path` (`?sheet=add`; add-from-the-rail, USE-54 builds
+ * it): from the rail + at a time (`&at=HH:MM`), or from an empty Work
+ * block's "Add to Primary" preset to its tier (`&tier=&block=`; USE-37).
+ */
+export function addSheetRoute(
+  path: string,
+  preset: { at?: string; tier?: "primary" | "secondary"; block?: string },
+): string {
+  const [base = "", search = ""] = sheetRoute(path, "add").split("?");
+  const query = new URLSearchParams(search);
+  for (const key of ["at", "tier", "block"] as const) {
+    const value = preset[key];
+    if (value) query.set(key, value);
+    else query.delete(key);
   }
   return `${base}?${query.toString()}`;
 }

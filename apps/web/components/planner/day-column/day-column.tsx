@@ -27,6 +27,7 @@ import { DAY_COLUMN_COPY as COPY, hourLabel, spanLabel } from "./copy";
 import { HUE_CHECK } from "./mark-hue";
 import { MeetingBand } from "./meeting-band";
 import { useContentWidth } from "./use-content-width";
+import { useSwipeAway } from "./use-swipe-away";
 
 /**
  * DayColumn — the day drawn in time (USE-31; D-USE-7, D-USE-23): the axis
@@ -125,6 +126,10 @@ export interface DayColumnProps {
   /** Laid over the axis (the rail + lands here with its ticket). */
   children?: React.ReactNode;
   className?: string;
+  /** A block or meal swiped sideways takes it off the date (USE-37). */
+  onSwipeAway?: (blockId: string) => Promise<unknown> | void;
+  /** A Work block with nothing slotted draws this in place of its tiers (USE-37). */
+  emptyWork?: (block: DayColumnBlock) => React.ReactNode;
 }
 
 /* ---- the column's geometry (success.md) ---- */
@@ -196,12 +201,19 @@ export function DayColumn({
   timeZone,
   children,
   className,
+  onSwipeAway,
+  emptyWork,
 }: DayColumnProps) {
   const [ref, width] = useContentWidth<HTMLDivElement>();
   const cellsPerLine = cellsPerLineFor(width);
+  const { className: swipeClassName, ...swipe } = useSwipeAway(onSwipeAway);
 
   return (
-    <div ref={ref} className={cn("px-(--space-4)", className)}>
+    <div
+      ref={ref}
+      className={cn("px-(--space-4)", swipeClassName, className)}
+      {...swipe}
+    >
       <ScheduleAxis
         startMin={hours.startMin}
         endMin={hours.endMin}
@@ -243,6 +255,11 @@ export function DayColumn({
               onOpen={() => onBlock(block.id)}
               onBullet={
                 onBullet ? (itemId) => onBullet(block.id, itemId) : undefined
+              }
+              empty={
+                block.form === "work" && block.tiers.length === 0
+                  ? emptyWork?.(block)
+                  : undefined
               }
             />
           );
@@ -406,9 +423,12 @@ function BlockCard({
   cellsPerLine,
   onOpen,
   onBullet,
+  empty,
 }: PlacedProps & {
   cellsPerLine: number;
   onBullet: ((itemId: string) => void) | undefined;
+  /** Drawn under the head in place of the items (an empty Work block). */
+  empty?: React.ReactNode;
 }) {
   const hue = BLOCK_HUE[block.kind];
   const listId = React.useId();
@@ -476,7 +496,7 @@ function BlockCard({
       />
       <div className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-(--space-1) pt-(--space-2) ps-(--space-3) pe-(--space-2) pb-(--space-1) [&_button]:pointer-events-auto">
         <BlockHead block={block} />
-        <div id={`${listId}-0`}>{items(places[0]!)}</div>
+        <div id={`${listId}-0`}>{empty ?? items(places[0]!)}</div>
       </div>
       {(block.bands ?? []).map((band) => (
         <MeetingBand

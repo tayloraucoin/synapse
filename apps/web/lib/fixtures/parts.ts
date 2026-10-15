@@ -182,7 +182,15 @@ for (const state of [
   registerPart(state, () => createElement(AddPart, { state })); // USE-51
 }
 // USE-31: Review the day's success frame and the tray open, `review-<state>`.
-for (const state of ["success", "tray-open"] satisfies ReviewPartState[]) {
+// USE-37: the edits' frames, `review-first-mornings` and the rest.
+for (const state of [
+  "success",
+  "tray-open",
+  "first-mornings",
+  "first-edit",
+  "after-swap-undo",
+  "no-work",
+] satisfies ReviewPartState[]) {
   registerPart(`review-${state}`, () => createElement(ReviewPart, { state }));
 }
 // USE-22: a meal's topics and the Meal topics sheet, by their scenario names.

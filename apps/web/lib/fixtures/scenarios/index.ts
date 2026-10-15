@@ -87,6 +87,12 @@ export interface Scenario {
    * `?from=review`, so a past day's journal reads as Review opens it.
    */
   openedFrom?: "review";
+  /**
+   * One-time lines counted as already seen on this scenario (USE-37's rail
+   * hint and first-change line), so a capture of another state is not
+   * covered by them. Unset, a one-time line shows until its own dismissal.
+   */
+  seen?: string[];
 }
 
 export type { ProfileSheetStart };
@@ -105,6 +111,12 @@ export interface ScenarioView {
    * hides; unset shows as live.
    */
   ending?: { addRow?: false; ahead?: false };
+  /**
+   * An edit staged on load (USE-37): a swap that arrives from the Item sheet
+   * is run through `useDayEdits` when the frame opens, with its Toaster when
+   * `toast` (held until Undo, for the capture).
+   */
+  staged?: { swap: { id: string; withId: string }; toast: boolean };
 }
 
 export const DEFAULT_SCENARIO = "default";

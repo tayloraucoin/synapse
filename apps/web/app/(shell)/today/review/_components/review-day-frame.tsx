@@ -3,11 +3,16 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb, Button, Text } from "@syn/ui";
+import { weekKeyOf } from "@syn/utils";
 import { DayColumn, TodosTray } from "@/components/planner";
+import { DAY_COLUMN_PX_PER_HOUR } from "@/components/planner/day-column";
 import { useDataSource } from "@/lib/data/source";
 import { useTodayKey } from "@/lib/data/use-morning";
 import { useReadyGo, useReviewDay } from "@/lib/data/use-review-day";
+import { AboveFooterToaster } from "@/lib/hooks/use-undo-toast";
 import {
+  addSheetRoute,
+  daysRoute,
   itemSheetRoute,
   orientRoute,
   todayBlockRoute,
@@ -16,6 +21,10 @@ import {
 import { dateTitle } from "../../_components/now/copy";
 import { useDayEntryGate } from "../../../_components/day-entry-gate";
 import { REVIEW_DAY_COPY as COPY } from "./copy";
+import { EmptyWork } from "./empty-work";
+import { FirstChangeLine } from "./first-change-line";
+import { RailPlus } from "./rail-plus";
+import { useReviewEdits } from "./use-review-edits";
 
 /**
  * Review the day (USE-31; day/review-the-day/), the success frame and the
@@ -35,9 +44,11 @@ import { REVIEW_DAY_COPY as COPY } from "./copy";
  * server keeps the first `readyAt`, and the screen goes to the welcome.
  * After that the entry tree sends this path on (D-USE-71).
  *
- * Loading, error and offline are the system-states ticket's; the rail +,
- * the first-change line and swap's Toaster are the edits ticket's, which
- * fills the slot laid out above Ready, go.
+ * Loading, error and offline are the system-states ticket's. The edits
+ * (USE-37) change today only, each with Undo in the Toaster above Ready, go:
+ * a band swiped away, an empty Work block's Add rows, the rail + at the next
+ * free time with its first-mornings hint, and the first-change line under
+ * the header on the first change ever.
  */
 export function ReviewDayFrame() {
   const router = useRouter();
@@ -45,6 +56,7 @@ export function ReviewDayFrame() {
   const { entered } = useDayEntryGate("review", dateKey);
   const { view } = useReviewDay(dateKey);
   const readyGo = useReadyGo();
+  const edits = useReviewEdits(dateKey, view);
   // A scenario's `view.open` seeds the tray open, for its capture.
   const seeded = useDataSource().scenario.view?.open;
   const headingRef = React.useRef<HTMLHeadingElement>(null);
@@ -92,9 +104,14 @@ export function ReviewDayFrame() {
           </Text>
         </header>
 
+        {edits.firstChangeLine ? <FirstChangeLine dateKey={dateKey} /> : null}
+
         <TodosTray defaultOpen={seeded === "todos"} />
 
-        <div className="min-h-0 flex-1 overflow-y-auto pt-(--space-3) pb-(--space-8)">
+        <div
+          data-day-scroller
+          className="min-h-0 flex-1 overflow-y-auto pt-(--space-3) pb-(--space-8)"
+        >
           {view !== undefined ? (
             <DayColumn
               hours={{ startMin: view.startMin, endMin: view.endMin }}
@@ -110,7 +127,46 @@ export function ReviewDayFrame() {
                   ),
                 )
               }
-            />
+              onSwipeAway={edits.swipeAway}
+              emptyWork={(block) => (
+                <EmptyWork
+                  onAdd={(tier) =>
+                    router.push(
+                      addSheetRoute(
+                        `${window.location.pathname}${window.location.search}`,
+                        { tier, block: block.id },
+                      ),
+                    )
+                  }
+                  weekHref={daysRoute({
+                    week: weekKeyOf(dateKey),
+                    day: dateKey,
+                    block: block.id,
+                  })}
+                />
+              )}
+            >
+              {edits.plusAtMin !== null ? (
+                <RailPlus
+                  atMin={edits.plusAtMin}
+                  startMin={view.startMin}
+                  heightPx={
+                    ((view.endMin - view.startMin) / 60) *
+                    DAY_COLUMN_PX_PER_HOUR
+                  }
+                  showHint={edits.hint.show}
+                  onHint={edits.hint.onHint}
+                  onTap={(at) =>
+                    router.push(
+                      addSheetRoute(
+                        `${window.location.pathname}${window.location.search}`,
+                        { at },
+                      ),
+                    )
+                  }
+                />
+              ) : null}
+            </DayColumn>
           ) : null}
         </div>
 
@@ -120,8 +176,10 @@ export function ReviewDayFrame() {
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 bottom-full h-(--space-8) bg-linear-to-b from-transparent to-background split:hidden"
           />
-          {/* The edits ticket's Toaster sits here, above the button. */}
-          <div data-toaster-slot className="split:self-stretch" />
+          {/* Undo's Toaster, above the button (D-USE-25). */}
+          <div className="split:self-stretch">
+            <AboveFooterToaster />
+          </div>
           <Button
             size="lg"
             className="w-full font-semibold split:w-60"
