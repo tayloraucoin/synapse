@@ -19,20 +19,26 @@
 import type * as React from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@syn/ui";
+import { useTodayKey } from "@/lib/data/use-morning";
+import { useDayPhase } from "@/lib/data/use-now";
 import { SHELL_COPY as COPY } from "./copy";
 import { isFocusedPath } from "./nav-items";
 import { Rail } from "./rail";
+import { useMarkShellPainted } from "./day-entry-gate";
 import { SheetHost, SheetOpenerProvider } from "./sheet-host";
 import { TabBar } from "./tab-bar";
 
 export interface AppShellProps {
-  /** The phone's first tab word: "List" before Ready, go (day/overview.md). */
-  firstTab?: "Now" | "List";
   children: React.ReactNode;
 }
 
-export function AppShell({ firstTab = "Now", children }: AppShellProps) {
+export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  // The phone's first tab reads "List" before Ready, go, from the day record
+  // (D-USE-5, USE-17); "Now" while it is read.
+  const phase = useDayPhase(useTodayKey());
+  const firstTab = phase === "before-go" ? "List" : "Now";
+  useMarkShellPainted();
 
   if (isFocusedPath(pathname)) {
     return (

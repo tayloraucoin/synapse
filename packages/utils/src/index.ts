@@ -267,6 +267,8 @@ export {
 /* ---- Now: the active block and the current item (USE-16) ---- */
 export {
   activeBlock,
+  behindSince,
+  nextBlock,
   currentItem,
   nextItem,
   type NowBlockSpan,

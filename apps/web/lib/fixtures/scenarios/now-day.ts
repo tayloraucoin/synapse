@@ -42,6 +42,7 @@ export const NOW_IDS = {
     startColdBath: fixtureId(2, 103),
     meditate: fixtureId(2, 104),
     coldBath: fixtureId(2, 105),
+    breakfast: fixtureId(2, 106),
   },
   slots: {
     peeAndWeigh: fixtureId(3, 101),
@@ -49,6 +50,7 @@ export const NOW_IDS = {
     startColdBath: fixtureId(3, 103),
     meditate: fixtureId(3, 104),
     coldBath: fixtureId(3, 105),
+    breakfast: fixtureId(3, 106),
   },
   todos: { mechanic: fixtureId(6, 101), pharmacy: fixtureId(6, 102) },
 } as const;
@@ -155,7 +157,7 @@ const WELLNESS: {
   },
 ];
 
-const blockItems = WELLNESS.map((item, sortOrder) =>
+const wellnessItems = WELLNESS.map((item, sortOrder) =>
   blockItemRecord.parse({
     ...stamps,
     id: NOW_IDS.items[item.name],
@@ -170,6 +172,26 @@ const blockItems = WELLNESS.map((item, sortOrder) =>
     sortOrder,
   }),
 );
+
+/**
+ * Breakfast's one item, the meal itself (USE-17): a meal with no topics is
+ * one card with Done and no Start. Its glyph is untinted, on a neutral tile.
+ */
+const breakfastItem = blockItemRecord.parse({
+  ...stamps,
+  id: NOW_IDS.items.breakfast,
+  blockId: B.breakfast,
+  title: "Breakfast",
+  icon: { kind: "curated", value: "utensils", colorKey: null },
+  isTransition: false,
+  atTime: null,
+  lengthMin: 30,
+  meal: true,
+  onDate: null,
+  sortOrder: 0,
+});
+
+const blockItems = [...wellnessItems, breakfastItem];
 
 const todos = [
   {

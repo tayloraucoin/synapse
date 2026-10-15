@@ -11,16 +11,21 @@ import { HUE_CHIP, type BlockHue } from "./block-hue";
  * the mark of "this moment"; the dot never stands alone. Props only.
  *
  * From 768 the buttons keep a fixed 160 and sit right-aligned (D-USE-39).
+ *
+ * A meal (USE-17; now/states/transition.md) passes `hue="neutral"` for the
+ * `--color-fill-muted` tile and no `start`: Done alone, full width.
  */
 export interface LiftedCardProps {
   title: string;
   icon: IconValue | null;
-  hue: BlockHue;
+  /** "neutral": a meal's tile, no kind colour. */
+  hue: BlockHue | "neutral";
   /** "10 min · 7:10". */
   meta: string;
   /** The group's name: "Meditate, now". */
   label: string;
-  start: { label: string; onPress: () => void };
+  /** Null: no Start (a meal), and Done takes the full width. */
+  start: { label: string; onPress: () => void } | null;
   /** Done's visible word and its name ("Done, Meditate"). */
   done: { label: string; name: string; onPress: () => void };
   className?: string;
@@ -48,7 +53,7 @@ export function LiftedCard({
           aria-hidden="true"
           className={cn(
             "flex size-10 shrink-0 items-center justify-center rounded-(--radius-control)",
-            HUE_CHIP[hue],
+            hue === "neutral" ? "bg-fill-muted" : HUE_CHIP[hue],
           )}
         >
           <ItemIcon icon={icon} size={20} />
@@ -68,20 +73,27 @@ export function LiftedCard({
           </Text>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-(--space-2) wide:flex wide:justify-end">
-        <Button
-          variant="secondary"
-          size="lg"
-          onClick={start.onPress}
-          className="wide:w-40"
-        >
-          {start.label}
-        </Button>
+      <div
+        className={cn(
+          "grid gap-(--space-2)",
+          start ? "grid-cols-2 wide:flex wide:justify-end" : "grid-cols-1",
+        )}
+      >
+        {start ? (
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={start.onPress}
+            className="wide:w-40"
+          >
+            {start.label}
+          </Button>
+        ) : null}
         <Button
           size="lg"
           aria-label={done.name}
           onClick={done.onPress}
-          className="wide:w-40"
+          className={start ? "wide:w-40" : undefined}
         >
           {done.label}
         </Button>

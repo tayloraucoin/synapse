@@ -66,6 +66,12 @@ for (const state of [
   "row-tapped",
   "took-change",
   "time-taken-sheet",
+  "header-menu", // USE-17
+  "behind", // USE-17
+  "transition", // USE-17
+  "before-ready-go", // USE-17
+  "checklist-block", // USE-17
+  "sunday-checklist", // USE-17
 ] satisfies NowPartState[]) {
   registerPart(`now-${state}`, () => createElement(NowPart, { state })); // USE-16
 }

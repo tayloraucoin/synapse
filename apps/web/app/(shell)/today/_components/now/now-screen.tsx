@@ -1,16 +1,25 @@
 "use client";
 
 import * as React from "react";
-import { ReorderIcon } from "@syn/ui";
+import { MealIcon, ReorderIcon } from "@syn/ui";
 import {
   BLOCK_HUE,
+  ChecklistRows,
   DayBlockHeader,
   LiftedCard,
+  NowBlockMenu,
   PlannerItemRow,
 } from "@/components/planner";
 import { useDataSource } from "@/lib/data/source";
-import { useNow, useSlotWrites, type NowItemView } from "@/lib/data/use-now";
-import { todayScheduleRoute } from "@/lib/routes";
+import {
+  useChecklistAdd,
+  useNow,
+  useSlotWrites,
+  type NowBlockView,
+  type NowItemView,
+} from "@/lib/data/use-now";
+import { BeforeGoList } from "./before-go-list";
+import { nowBlockMenuRows } from "./block-menu";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
 import { NowTodosTray } from "./now-todos-tray";
 import { TimeTakenSheet } from "./time-taken-sheet";
@@ -28,9 +37,20 @@ function seeded(open: string | undefined, what: string): string | null {
  * person did here: the row made current, the "Took · Change" line, the
  * sheet. A scenario's `view` seeds those once, for a capture.
  *
+ * The block's form is `useNow`'s (USE-17): a block's items with one lifted;
+ * a meal, one card with Done and no Start; a Checklist block, rows only and
+ * nothing lifted; the all-day checklist, the same with its add row. Behind
+ * is one muted line under the span, announced once per block, politely.
+ * Before Ready, go the screen is the day's List.
+ *
  * Below 1024 only; the desk's /today is its own ticket's.
  */
-export function NowScreen() {
+export function NowScreen({
+  onComplete = () => {},
+}: {
+  /** Complete <Block>: the close card is USE-25's, which supplies this. */
+  onComplete?: (blockId: string) => void;
+} = {}) {
   const source = useDataSource();
   const dateKey = source.todayKey();
   const view = source.scenario.view;
@@ -52,6 +72,19 @@ export function NowScreen() {
 
   const { view: now } = useNow(dateKey, chosenId);
   const writes = useSlotWrites(dateKey, now?.block?.id ?? null);
+  const add = useChecklistAdd(dateKey, now?.block?.id ?? null);
+
+  // USE-17: behind is announced once per block, politely; the line stays.
+  const behindAnnounced = React.useRef(new Set<string>());
+  const behind = now?.block?.behindSince ?? null;
+  const behindBlock = now?.block?.id ?? null;
+  const behindName = now?.block?.name ?? "";
+  React.useEffect(() => {
+    if (behind === null || behindBlock === null) return;
+    if (behindAnnounced.current.has(behindBlock)) return;
+    behindAnnounced.current.add(behindBlock);
+    setAnnouncement(COPY.announceBehind(behindName, behind));
+  }, [behind, behindBlock, behindName]);
 
   // The line fades after a few seconds; the planned length stands.
   React.useEffect(() => {
@@ -68,6 +101,15 @@ export function NowScreen() {
       </div>
     );
   const { block, items, current, next } = now;
+
+  if (now.phase === "before-go") {
+    return (
+      <div className="mx-auto flex w-full max-w-(--content-text) flex-1 flex-col">
+        <NowTodosTray />
+        <BeforeGoList blocks={now.dayBlocks} />
+      </div>
+    );
+  }
 
   function markDone(item: NowItemView) {
     // The next lift is only Done's on the current item; a row's box stays put.
@@ -105,83 +147,134 @@ export function NowScreen() {
               as="h2"
               kind={block.kind}
               name={block.name}
-              detail={COPY.span(block.startsAt, block.endsAt)}
-              menu={{
-                label: COPY.blockMenu(block.name),
-                items: [
-                  { label: COPY.seeTheWholeDay, href: todayScheduleRoute() },
-                ],
-              }}
+              detail={detailOf(block)}
+              glyph={
+                block.form === "meal" ? <MealIcon className="size-4" /> : null
+              }
+              note={
+                block.behindSince === null
+                  ? null
+                  : COPY.plannedToEnd(block.behindSince)
+              }
+              trailing={
+                <NowBlockMenu
+                  label={COPY.blockMenu(block.name)}
+                  title={COPY.blockMenuTitle(block.name)}
+                  rows={nowBlockMenuRows(block, () => onComplete(block.id))}
+                  defaultOpen={view?.open === "block-menu"}
+                />
+              }
             />
           </div>
 
-          <ul className="flex flex-col gap-(--space-1)">
-            {items.map((item) =>
-              item.id === current?.id ? (
-                <li key={item.id} className="py-(--space-2)">
-                  <LiftedCard
-                    title={item.title}
-                    icon={item.icon}
-                    hue={BLOCK_HUE[block.kind]}
-                    meta={COPY.meta(item.lengthMin, item.plannedAt)}
-                    label={COPY.liftedName(item.title)}
-                    // Start's running card is USE-23's; until then it is drawn and quiet.
-                    start={{ label: COPY.start, onPress: () => {} }}
-                    done={{
-                      label: COPY.done,
-                      name: COPY.doneName(item.title),
-                      onPress: () => markDone(item),
-                    }}
-                  />
-                </li>
-              ) : (
-                <li key={item.id}>
-                  <PlannerItemRow
-                    item={{
-                      id: item.id,
-                      title: item.title,
-                      emoji: null,
-                      checked: item.done,
-                      meta: COPY.length(item.lengthMin),
-                    }}
-                    noEmoji
-                    fadeChecked
-                    checkLabel={COPY.boxName(item.title, item.lengthMin)}
-                    openLabel={item.done ? undefined : COPY.rowName(item.title)}
-                    onCheckedChange={(_, checked) =>
-                      checked ? markDone(item) : markUndone(item)
+          {block.form === "checklist" || block.form === "all-day-checklist" ? (
+            <ChecklistRows
+              rows={items.map((item) => ({
+                id: item.id,
+                title: item.title,
+                checked: item.done,
+              }))}
+              gripLabel={COPY.gripName}
+              onCheckedChange={(id, checked) => {
+                const item = items.find((row) => row.id === id);
+                if (!item) return;
+                if (checked) markDone(item);
+                else markUndone(item);
+              }}
+              add={
+                block.form === "all-day-checklist"
+                  ? {
+                      label: COPY.addToChecklist,
+                      placeholder: COPY.addPlaceholder,
+                      maxLength: 120,
+                      onAdd: (title) => add.mutate({ title, items }),
                     }
-                    onOpen={() => {
-                      if (!item.done) setChosenId(item.id);
-                    }}
-                    trailing={
-                      item.done ? null : (
-                        // Dragging and Move up / Move down are USE-18's.
-                        <button
-                          type="button"
-                          aria-label={COPY.gripName(item.title)}
-                          className="text-text-muted flex size-(--target) shrink-0 cursor-grab items-center justify-center rounded-(--radius-control) focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                        >
-                          <ReorderIcon aria-hidden="true" className="size-4" />
-                        </button>
-                      )
-                    }
-                    below={
-                      took?.id === item.id &&
-                      item.done &&
-                      item.tookMin !== null ? (
-                        <TookLine
-                          min={item.tookMin}
-                          changeRef={changeRef}
-                          onChange={() => setSheetId(item.id)}
-                        />
-                      ) : null
-                    }
-                  />
-                </li>
-              ),
-            )}
-          </ul>
+                  : null
+              }
+            />
+          ) : (
+            <ul className="flex flex-col gap-(--space-1)">
+              {items.map((item) =>
+                item.id === current?.id ? (
+                  <li key={item.id} className="py-(--space-2)">
+                    <LiftedCard
+                      title={item.title}
+                      icon={item.icon}
+                      hue={
+                        block.form === "meal"
+                          ? "neutral"
+                          : BLOCK_HUE[block.kind]
+                      }
+                      meta={COPY.meta(item.lengthMin, item.plannedAt)}
+                      label={COPY.liftedName(item.title)}
+                      // A meal has no Start. Start's running card is USE-23's;
+                      // until then it is drawn and quiet.
+                      start={
+                        block.form === "meal"
+                          ? null
+                          : { label: COPY.start, onPress: () => {} }
+                      }
+                      done={{
+                        label: COPY.done,
+                        name: COPY.doneName(item.title),
+                        onPress: () => markDone(item),
+                      }}
+                    />
+                  </li>
+                ) : (
+                  <li key={item.id}>
+                    <PlannerItemRow
+                      item={{
+                        id: item.id,
+                        title: item.title,
+                        emoji: null,
+                        checked: item.done,
+                        meta: COPY.length(item.lengthMin),
+                      }}
+                      noEmoji
+                      fadeChecked
+                      checkLabel={COPY.boxName(item.title, item.lengthMin)}
+                      openLabel={
+                        item.done ? undefined : COPY.rowName(item.title)
+                      }
+                      onCheckedChange={(_, checked) =>
+                        checked ? markDone(item) : markUndone(item)
+                      }
+                      onOpen={() => {
+                        if (!item.done) setChosenId(item.id);
+                      }}
+                      trailing={
+                        item.done ? null : (
+                          // Dragging and Move up / Move down are USE-18's.
+                          <button
+                            type="button"
+                            aria-label={COPY.gripName(item.title)}
+                            className="text-text-muted flex size-(--target) shrink-0 cursor-grab items-center justify-center rounded-(--radius-control) focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                          >
+                            <ReorderIcon
+                              aria-hidden="true"
+                              className="size-4"
+                            />
+                          </button>
+                        )
+                      }
+                      below={
+                        took?.id === item.id &&
+                        item.done &&
+                        item.tookMin !== null ? (
+                          <TookLine
+                            min={item.tookMin}
+                            changeRef={changeRef}
+                            onChange={() => setSheetId(item.id)}
+                          />
+                        ) : null
+                      }
+                    />
+                  </li>
+                ),
+              )}
+            </ul>
+          )}
         </section>
       ) : null}
 
@@ -204,4 +297,16 @@ export function NowScreen() {
       />
     </div>
   );
+}
+
+/** The header's second line, by form: the span, or the checklist's words. */
+function detailOf(block: NowBlockView): string {
+  switch (block.form) {
+    case "checklist":
+      return COPY.checklistSpan(block.startsAt, block.endsAt);
+    case "all-day-checklist":
+      return COPY.allDaySpan(block.next);
+    default:
+      return COPY.span(block.startsAt, block.endsAt);
+  }
 }

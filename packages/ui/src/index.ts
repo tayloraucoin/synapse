@@ -50,6 +50,14 @@ export {
   PlusIcon as AddIcon,
   SquareCheckIcon as AddTodoIcon,
 } from "lucide-react";
+/** Now's block forms (USE-17): the ··· menu's rows, its trigger, a meal, the add row. */
+export {
+  CalendarIcon as WholeDayIcon,
+  CircleCheckIcon as CompleteBlockIcon,
+  EllipsisIcon as BlockMenuIcon,
+  PencilIcon as EditBlockIcon,
+  UtensilsIcon as MealIcon,
+} from "lucide-react";
 /** The account's glyphs (USE-83): the avatar menu's rows and the install steps. */
 export {
   CalendarRangeIcon as SetMyDaysIcon,

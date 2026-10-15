@@ -5,6 +5,7 @@ import { ACCOUNT_SCENARIOS } from "./account";
 import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
+import { NOW_FORM_SCENARIOS } from "./now-forms";
 import { ORIENT_SCENARIOS } from "./orient-morning";
 import { POOL_SCENARIOS } from "./pool";
 import { SET_UP_SCENARIOS } from "./set-up";
@@ -48,6 +49,11 @@ export interface Scenario {
   failWrites?: string[];
   /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */
   accountMenuOpen?: boolean;
+  /**
+   * The screen was reached by its tab, not opened (USE-17; D-USE-5): the
+   * entry tree does not send it on, so the List before Ready, go shows.
+   */
+  reachedByTab?: boolean;
   /**
    * The profile's writes (USE-84): `fail` refuses the name and the photo as a
    * server error would; `hang` leaves an upload under way, for its capture.
@@ -130,6 +136,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
     view: { open: `time-taken:${NOW_IDS.items.startColdBath}` },
   }),
   // ---- Orient (USE-12): the Monday before it is opened ----
+  // ---- Now's other block forms (USE-17): ···, behind, a meal, before go, checklists ----
+  ...NOW_FORM_SCENARIOS,
   ...ORIENT_SCENARIOS,
   // ---- The avatar menu and the Install sheet (USE-83) ----
   ...ACCOUNT_SCENARIOS,

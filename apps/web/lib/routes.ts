@@ -104,6 +104,14 @@ export function todayScheduleRoute(): string {
 }
 
 /**
+ * A block on today's date: the Block view, from Now's Edit block, Review the
+ * day and Schedule (block-view/index.md, `/today/block/{id}` [PROPOSED]).
+ */
+export function todayBlockRoute(blockId: string): string {
+  return `/today/block/${encodeURIComponent(blockId)}`;
+}
+
+/**
  * The two focused screens the shell already knows (USE-4): no rail, no tabs.
  * Their pages land with their own tickets; each new focused path joins
  * `isFocusedPath` in the shell's `nav-items.ts`.

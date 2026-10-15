@@ -1,5 +1,6 @@
 "use client";
 
+import type * as React from "react";
 import type { StoredBlockKind } from "@syn/types";
 import {
   Button,
@@ -18,6 +19,11 @@ import { BLOCK_HUE, HUE_DOT } from "./block-hue";
  * menu. While a work timer runs the screen passes `stepAway`, and its quiet
  * button sits beside ··· (D-USE-52).
  *
+ * Now's forms (USE-17): a meal shows its glyph, muted, in the bar's place;
+ * `note` is behind's one quiet line under the span ("Planned to end at
+ * 8:00"), muted, never a colour; `trailing` takes Now's own ··· pull-down in
+ * place of the row menu.
+ *
  * Named apart from `@syn/ui`'s legacy `BlockHeader`.
  */
 export interface DayBlockHeaderProps {
@@ -26,6 +32,12 @@ export interface DayBlockHeaderProps {
   detail: string;
   /** The ··· menu: its items and the trigger's name ("Work block, more"). */
   menu?: { label: string; items: readonly EllipsesMenuItem[] } | null;
+  /** In the colour bar's place: a meal's glyph (USE-17). */
+  glyph?: React.ReactNode;
+  /** One muted line under the span: behind's "Planned to end at 8:00". */
+  note?: string | null;
+  /** In place of `menu`: Now's ··· pull-down (USE-17). */
+  trailing?: React.ReactNode;
   /** "Step away", shown only while a work timer runs (D-USE-52). */
   stepAway?: { label: string; onPress: () => void } | null;
   as?: "h2" | "h3";
@@ -37,6 +49,9 @@ export function DayBlockHeader({
   name,
   detail,
   menu = null,
+  glyph = null,
+  note = null,
+  trailing = null,
   stepAway = null,
   as = "h2",
   className,
@@ -50,10 +65,19 @@ export function DayBlockHeader({
         className,
       )}
     >
-      <span
-        aria-hidden="true"
-        className={cn("mt-1 h-7 w-1 shrink-0", HUE_DOT[hue])}
-      />
+      {glyph ? (
+        <span
+          aria-hidden="true"
+          className="text-text-muted mt-1.5 flex w-4 shrink-0 justify-center"
+        >
+          {glyph}
+        </span>
+      ) : (
+        <span
+          aria-hidden="true"
+          className={cn("mt-1 h-7 w-1 shrink-0", HUE_DOT[hue])}
+        />
+      )}
       <div className="min-w-0 flex-1">
         <Text as={as} variant="heading">
           {name}
@@ -61,6 +85,11 @@ export function DayBlockHeader({
         <Text as="p" variant="secondary" tone="muted" className="tabular-nums">
           {detail}
         </Text>
+        {note ? (
+          <Text as="p" variant="caption" tone="muted" className="tabular-nums">
+            {note}
+          </Text>
+        ) : null}
       </div>
       {stepAway ? (
         <Button variant="secondary" size="sm" onClick={stepAway.onPress}>
@@ -68,7 +97,8 @@ export function DayBlockHeader({
           {stepAway.label}
         </Button>
       ) : null}
-      {menu ? <EllipsesMenu label={menu.label} items={menu.items} /> : null}
+      {trailing ??
+        (menu ? <EllipsesMenu label={menu.label} items={menu.items} /> : null)}
     </div>
   );
 }

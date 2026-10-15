@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { activeBlock, currentItem, nextItem } from "./now-block";
+import {
+  activeBlock,
+  behindSince,
+  currentItem,
+  nextBlock,
+  nextItem,
+} from "./now-block";
 
 const at = (clock: string) => new Date(`2026-10-12T${clock}:00Z`);
 
@@ -86,5 +92,73 @@ describe("nextItem", () => {
       nextItem([{ id: "a", done: false }], { id: "a", done: false }),
     ).toBeNull();
     expect(nextItem(items, null)).toBeNull();
+  });
+});
+
+describe("C7: activeBlock past a block's end (USE-17)", () => {
+  const wellnessOpen = [
+    { ...block("wellness", "07:05", "08:00"), open: true },
+    block("training", "08:00", "08:57"),
+  ];
+
+  it("keeps an open block active past its end: the next does not slide", () => {
+    expect(activeBlock(wellnessOpen, at("08:04"))?.id).toBe("wellness");
+  });
+
+  it("hands over at the end once nothing in it is open", () => {
+    const closed = [
+      { ...block("wellness", "07:05", "08:00"), open: false },
+      block("training", "08:00", "08:57"),
+    ];
+    expect(activeBlock(closed, at("08:04"))?.id).toBe("training");
+  });
+});
+
+describe("C7: activeBlock on a checklist day (D-USE-72)", () => {
+  const sunday = [
+    { ...block("checklist", "00:00", "23:59"), allDay: true, open: true },
+    block("lunch", "13:00", "14:30"),
+  ];
+
+  it("is the checklist before a set-time block", () => {
+    expect(activeBlock(sunday, at("11:20"))?.id).toBe("checklist");
+  });
+
+  it("is the set-time block from 13:00 to 14:30", () => {
+    expect(activeBlock(sunday, at("13:00"))?.id).toBe("lunch");
+    expect(activeBlock(sunday, at("14:29"))?.id).toBe("lunch");
+  });
+
+  it("is the checklist again once it ends", () => {
+    expect(activeBlock(sunday, at("14:30"))?.id).toBe("checklist");
+    expect(activeBlock(sunday, at("18:00"))?.id).toBe("checklist");
+  });
+
+  it("is never held by an open all-day checklist", () => {
+    expect(activeBlock(sunday, at("13:10"))?.id).toBe("lunch");
+  });
+
+  it("names the set-time block as next, never the checklist", () => {
+    expect(nextBlock(sunday, at("11:20"))?.id).toBe("lunch");
+    expect(nextBlock(sunday, at("13:10"))).toBeNull();
+  });
+});
+
+describe("C7: behindSince", () => {
+  const wellness = block("wellness", "07:05", "08:00");
+
+  it("is null before the end and at it", () => {
+    expect(behindSince(wellness, at("07:14"))).toBeNull();
+    expect(behindSince(wellness, at("08:00"))).toBeNull();
+  });
+
+  it("is the block's end once now passes it", () => {
+    expect(behindSince(wellness, at("08:04"))).toEqual(at("08:00"));
+  });
+
+  it("is never set on an all-day checklist", () => {
+    expect(
+      behindSince({ ...wellness, allDay: true }, at("23:00")),
+    ).toBeNull();
   });
 });

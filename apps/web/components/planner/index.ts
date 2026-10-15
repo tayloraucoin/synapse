@@ -9,6 +9,16 @@ export {
 export { LiftedCard, type LiftedCardProps } from "./lifted-card";
 export { TodosTrayLine, type TodosTrayLineProps } from "./todos-tray-line";
 export {
+  ChecklistRows,
+  type ChecklistRowsProps,
+  type ChecklistRowView,
+} from "./checklist-rows";
+export {
+  NowBlockMenu,
+  type NowBlockMenuProps,
+  type NowBlockMenuRow,
+} from "./now-block-menu";
+export {
   REMINDED_TINT_MS,
   ReminderPreview,
   TodosTray,

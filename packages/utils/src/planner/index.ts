@@ -72,7 +72,9 @@ export {
 export { suggestIcons, type IconSuggestEntry } from "./icon-suggest";
 export {
   activeBlock,
+  behindSince,
   currentItem,
+  nextBlock,
   nextItem,
   type NowBlockSpan,
   type NowItem,

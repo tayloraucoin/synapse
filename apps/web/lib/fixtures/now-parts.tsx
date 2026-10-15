@@ -9,7 +9,13 @@ export type NowPartState =
   | "done-next-lifts"
   | "row-tapped"
   | "took-change"
-  | "time-taken-sheet";
+  | "time-taken-sheet"
+  | "header-menu"
+  | "behind"
+  | "transition"
+  | "before-ready-go"
+  | "checklist-block"
+  | "sunday-checklist";
 
 export function NowPart({ state }: { state: NowPartState }) {
   return (

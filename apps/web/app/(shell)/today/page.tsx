@@ -4,12 +4,14 @@ import { DayEntryGate } from "../_components/day-entry-gate";
 import { TabHeader } from "../_components/tab-header";
 import { TODAY_COPY as COPY } from "./_components/copy";
 import { NowScreen } from "./_components/now/now-screen";
+import { NowTitle } from "./_components/now/now-title";
 import { PushCheck } from "./_components/push-check";
 
 export const metadata: Metadata = { title: COPY.title };
 
 /**
- * Today. Below 1024 it is Now (USE-16), on fixtures through `useNow`; the
+ * Today. Below 1024 it is Now (USE-16, USE-17), on fixtures through
+ * `useNow`, or the day's List before Ready, go; the
  * desk's /today is work Today's ticket, so from 1024 it is still the muted
  * placeholder and the push check (USE-1): notifications have nowhere else
  * to be turned on while Settings is legacy.
@@ -22,7 +24,7 @@ export default function TodayPage() {
   return (
     <DayEntryGate here="now">
       <main id="main" className="flex flex-1 flex-col">
-        <TabHeader title={<TodayTitle />} />
+        <TabHeader title={<NowTitle />} />
         <div className="split:hidden">
           <NowScreen />
         </div>
@@ -34,15 +36,5 @@ export default function TodayPage() {
         </ScreenFrame>
       </main>
     </DayEntryGate>
-  );
-}
-
-/** "Now" on the phone's tab, "Today" at the desk (nav-items.ts): CSS picks, never a width read. */
-function TodayTitle() {
-  return (
-    <>
-      <span className="split:hidden">{COPY.phoneTitle}</span>
-      <span className="hidden split:inline">{COPY.title}</span>
-    </>
   );
 }
