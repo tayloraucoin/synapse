@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { QueryClient } from "@tanstack/react-query";
+import { describe, expect, it } from "vitest";
 import { resolveScenario } from "@/lib/fixtures/scenarios";
 import {
   createFixtureServer,
@@ -15,10 +15,7 @@ import { profileActions, profileDraftKey } from "./use-profile";
  */
 async function setup(name: string, options: { offline?: boolean } = {}) {
   const scenario = { ...resolveScenario(name), ...options };
-  const server = createFixtureServer(
-    scenario,
-    () => new Date(scenario.now),
-  );
+  const server = createFixtureServer(scenario, () => new Date(scenario.now));
   const queryClient = new QueryClient();
   // The account as the menu has already read it.
   queryClient.setQueryData(

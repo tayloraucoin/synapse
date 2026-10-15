@@ -25,7 +25,6 @@
 import * as React from "react";
 import { ZoomInIcon, ZoomOutIcon } from "lucide-react";
 import { Slider as SliderPrimitive } from "radix-ui";
-
 import { cn } from "../../../lib/cn";
 import { Text } from "../../../primitives/typography/text";
 
@@ -262,12 +261,12 @@ export function ImageCropper({
   );
 
   const size = drawnSize(zoom);
-  const percent = Math.round(
-    ((zoom - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM)) * 100,
-  );
+  const percent = Math.round(((zoom - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM)) * 100);
 
   return (
-    <div className={cn("flex flex-col items-center gap-(--space-4)", className)}>
+    <div
+      className={cn("flex flex-col items-center gap-(--space-4)", className)}
+    >
       <div
         role="group"
         tabIndex={0}
