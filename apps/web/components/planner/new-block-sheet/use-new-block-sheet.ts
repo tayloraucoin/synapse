@@ -1,6 +1,10 @@
 "use client";
 
 import { firstFreeTime, weekDates } from "@syn/utils";
+import { useDataSource } from "@/lib/data/source";
+import { usePlannerWrites } from "@/lib/data/use-planner-writes";
+import { useSetUpDay, type SetUpDay } from "@/lib/data/use-set-up-day";
+import { thisWeekDates, type WeekRef } from "@/lib/data/week-records";
 import {
   newBlockWrite,
   type DayBlock,
@@ -9,10 +13,6 @@ import {
   type NewBlockKind,
   type NewBlockMode,
 } from "./form";
-import { useDataSource } from "@/lib/data/source";
-import { useSetUpDay, type SetUpDay } from "@/lib/data/use-set-up-day";
-import { usePlannerWrites } from "@/lib/data/use-planner-writes";
-import { thisWeekDates, type WeekRef } from "@/lib/data/week-records";
 
 /**
  * The New block sheet's data (USE-46): the day it opens on, read through
@@ -41,29 +41,24 @@ export interface NewBlockSheetStart {
 /** [ASSUMPTION] A day with no Up at reads 7:00 for the +'s first free time. */
 const NO_UP_AT = "07:00";
 
-export function toNewBlockDay(
-  day: SetUpDay,
-  ruleDate: string,
-): NewBlockDay {
+export function toNewBlockDay(day: SetUpDay, ruleDate: string): NewBlockDay {
   return {
     scope: { weekday: day.weekday, date: day.date, ruleDate },
     upAt: day.bounds?.upAt ?? null,
-    blocks: day.blocks.map(
-      (b): DayBlock => ({
-        id: b.block.id,
-        name: b.block.name,
-        kind: b.block.kind,
-        startsAt: b.startsAt,
-        endsAt: b.endsAt,
-        checklist: b.block.checklist,
-        items: b.items.map((item) => ({
-          id: item.id,
-          title: item.title,
-          atTime: item.atTime,
-          lengthMin: item.lengthMin,
-        })),
-      }),
-    ),
+    blocks: day.blocks.map((b): DayBlock => ({
+      id: b.block.id,
+      name: b.block.name,
+      kind: b.block.kind,
+      startsAt: b.startsAt,
+      endsAt: b.endsAt,
+      checklist: b.block.checklist,
+      items: b.items.map((item) => ({
+        id: item.id,
+        title: item.title,
+        atTime: item.atTime,
+        lengthMin: item.lengthMin,
+      })),
+    })),
   };
 }
 

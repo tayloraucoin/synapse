@@ -42,7 +42,11 @@ export const NEW_BLOCK_COPY = {
   months: MONTHS,
   /** "Mon 12", from `2026-10-12`. */
   shortDate: (dateKey: string) => {
-    const [y, m, d] = dateKey.split("-").map(Number) as [number, number, number];
+    const [y, m, d] = dateKey.split("-").map(Number) as [
+      number,
+      number,
+      number,
+    ];
     const weekday = (new Date(Date.UTC(y, m - 1, d)).getUTCDay() + 6) % 7;
     return `${WEEKDAYS[weekday]!.slice(0, 3)} ${d}`;
   },
@@ -99,7 +103,8 @@ export const NEW_BLOCK_COPY = {
     blockOn: "On: a fork in the column, and something to watch while eating.",
     blockOff: "Off: a break, empty if left so.",
     transitionOff: "Off: a slim band between things, in italic.",
-    transitionOn: "On: a fork in the band, and something to watch while eating.",
+    transitionOn:
+      "On: a fork in the band, and something to watch while eating.",
     watching: "Watching while eating",
     editTopics: "Edit topics",
     offered: (name: string, on: boolean) =>

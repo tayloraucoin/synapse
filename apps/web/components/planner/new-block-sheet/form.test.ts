@@ -21,7 +21,8 @@ import {
  * and Work again; Monday's rule date is 12 October, Sunday's 18 October.
  */
 
-const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+const id = (n: number) =>
+  `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 
 function block(
   n: number,
@@ -180,9 +181,7 @@ describe("C12: a transition's time inside a block places it in_block", () => {
     expect(scopeLine(transition, MONDAY)).toBe(
       "Usual Monday · inside Training",
     );
-    expect(colourLine(transition, MONDAY).text).toBe(
-      "Takes Training's colour",
-    );
+    expect(colourLine(transition, MONDAY).text).toBe("Takes Training's colour");
     expect(consequenceLine(transition, MONDAY, false).text).toBe(
       "8:00 falls in Training, so it goes inside Training. Workout: gym moves to 8:15.",
     );

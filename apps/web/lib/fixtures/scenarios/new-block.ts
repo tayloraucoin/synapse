@@ -184,7 +184,10 @@ export const NEW_BLOCK_SCENARIOS: Record<string, () => Scenario> =
             nameTyped: true,
             icon: { kind: "emoji", value: "🍳" },
             meal: true,
-            topics: [MEAL_TOPIC_IDS.agentWorkflows, MEAL_TOPIC_IDS.strengthTraining],
+            topics: [
+              MEAL_TOPIC_IDS.agentWorkflows,
+              MEAL_TOPIC_IDS.strengthTraining,
+            ],
           },
         },
       },

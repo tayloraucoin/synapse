@@ -12,7 +12,7 @@ import {
 } from "@syn/utils";
 import type { NewBlockInput, NewTransitionInput } from "@syn/validators";
 import { BLOCK_HUE } from "../block-hue";
-import { NEW_BLOCK_COPY as COPY, clock } from "./copy";
+import { clock, NEW_BLOCK_COPY as COPY } from "./copy";
 
 /**
  * The New block sheet's form (USE-46; set-my-days/new-block-sheet/), pure:
@@ -132,7 +132,10 @@ function plus(start: string, minutes: number): string {
  * [ASSUMPTION] With no kind given, Wellness is picked, as the empty day's
  * frame opens, so the sheet never opens nameless.
  */
-export function openForm(start: NewBlockStart, scope: NewBlockScope): NewBlockForm {
+export function openForm(
+  start: NewBlockStart,
+  scope: NewBlockScope,
+): NewBlockForm {
   const kind = start.kind ?? "wellness";
   const length = start.mode === "transition" ? TRANSITION_MIN : BLOCK_MIN;
   return {
@@ -177,7 +180,11 @@ export function reduceForm(
         ...form,
         kind: action.kind,
         ...(fills
-          ? { name: KIND_WORDS[action.kind], nameTyped: false, nameCleared: false }
+          ? {
+              name: KIND_WORDS[action.kind],
+              nameTyped: false,
+              nameCleared: false,
+            }
           : {}),
         // Meal belongs to Break; Checklist to the kinds that show it.
         meal: action.kind === "break" ? form.meal : false,
@@ -237,7 +244,9 @@ export function hasChecklist(kind: NewBlockKind): boolean {
 }
 
 /** Minutes from Starts to Ends; 0 or less when Ends is not after Starts. */
-export function lengthMin(form: Pick<NewBlockForm, "startsAt" | "endsAt">): number {
+export function lengthMin(
+  form: Pick<NewBlockForm, "startsAt" | "endsAt">,
+): number {
   return clockMinutes(form.endsAt) - clockMinutes(form.startsAt);
 }
 
@@ -326,7 +335,10 @@ export function scopeLine(form: NewBlockForm, day: NewBlockDay): string {
 }
 
 /** "Clay, Training's colour", or a transition's "Takes Training's colour". */
-export function colourLine(form: NewBlockForm, day: NewBlockDay): {
+export function colourLine(
+  form: NewBlockForm,
+  day: NewBlockDay,
+): {
   hue: (typeof BLOCK_HUE)[keyof typeof BLOCK_HUE];
   text: string;
 } {
@@ -351,10 +363,7 @@ function possessive(name: string): string {
 }
 
 /** The block a new one goes after: the latest to end by its start, else Orient. */
-export function blockBefore(
-  startsAt: string,
-  day: NewBlockDay,
-): string | null {
+export function blockBefore(startsAt: string, day: NewBlockDay): string | null {
   const start = clockMinutes(startsAt);
   let best: DayBlock | null = null;
   for (const block of day.blocks) {
@@ -560,7 +569,10 @@ function repeatFields(form: NewBlockForm, scope: NewBlockScope) {
  * `newTransitionInput`; the server parses it again. Does not repeat from
  * the usual week [ASSUMPTION] lands on this week's date of the weekday.
  */
-export function newBlockWrite(form: NewBlockForm, day: NewBlockDay): NewBlockWrite {
+export function newBlockWrite(
+  form: NewBlockForm,
+  day: NewBlockDay,
+): NewBlockWrite {
   const name = form.name.trim();
   const { scope } = day;
 
@@ -600,7 +612,10 @@ export function newBlockWrite(form: NewBlockForm, day: NewBlockDay): NewBlockWri
         color: null,
         startsAt: form.startsAt,
         endsAt: form.endsAt,
-        ...repeatFields({ ...form, repeat: scope.date === null ? "weekly" : "none" }, scope),
+        ...repeatFields(
+          { ...form, repeat: scope.date === null ? "weekly" : "none" },
+          scope,
+        ),
         checklist: false,
         meal: form.meal,
         notify: false,

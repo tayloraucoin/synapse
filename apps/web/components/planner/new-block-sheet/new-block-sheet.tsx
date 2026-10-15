@@ -47,7 +47,7 @@ import { useMealTopics } from "@/lib/data/use-meal-topics";
 import { HUE_DOT } from "../block-hue";
 import { IconPickerStep } from "../icon-picker-step";
 import { MealTopicsSheet } from "../meal-topics-sheet";
-import { NEW_BLOCK_COPY as COPY, clock } from "./copy";
+import { clock, NEW_BLOCK_COPY as COPY } from "./copy";
 import {
   colourLine,
   consequenceLine,
@@ -476,7 +476,12 @@ export function NewBlockSheet({
                   HUE_DOT[colour.hue],
                 )}
               />
-              <Text as="span" variant="secondary" tone="secondary" aria-hidden="true">
+              <Text
+                as="span"
+                variant="secondary"
+                tone="secondary"
+                aria-hidden="true"
+              >
                 {colour.text}
               </Text>
             </span>
@@ -624,7 +629,9 @@ export function NewBlockSheet({
             aria-live="polite"
             className={cn(
               "flex items-center gap-(--space-2) pt-(--space-3)",
-              (kindRow || mealRow) && !form.meal ? "" : "border-hairline border-t",
+              (kindRow || mealRow) && !form.meal
+                ? ""
+                : "border-hairline border-t",
             )}
           >
             {line.kind === "error" ? (
