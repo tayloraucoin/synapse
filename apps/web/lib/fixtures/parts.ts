@@ -7,6 +7,7 @@ import {
   TierAndItemForms,
   WorkRowForms,
 } from "./day-parts";
+import { DaysPart } from "./days-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { ItemSheetPart } from "./item-sheet-parts";
 import { NewBlockSheetPart } from "./new-block-parts";
@@ -23,6 +24,7 @@ import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
 import { TODAY_DESK_SCENARIOS } from "./scenarios/today-desk";
 import { WEEK_SCENARIOS } from "./scenarios/week";
 import { SchedulePart, type SchedulePartState } from "./schedule-parts";
+import { DAYS_SCENARIOS } from "./scenarios/set-up";
 import { SETTINGS_SCENARIOS } from "./scenarios/settings";
 import { SettingsClientsPart } from "./settings-parts";
 import { TodayDeskPart } from "./today-desk-parts";
@@ -243,6 +245,10 @@ for (const state of [
 // USE-72: the Week, under the week scenarios' names.
 for (const state of Object.keys(WEEK_SCENARIOS)) {
   registerPart(state, () => createElement(WeekPart));
+}
+// USE-39: Set my days, under its scenarios' names.
+for (const state of Object.keys(DAYS_SCENARIOS)) {
+  registerPart(state, () => createElement(DaysPart));
 }
 // USE-58: the desk's Today frame, under the today-desk scenarios' names.
 for (const state of Object.keys(TODAY_DESK_SCENARIOS)) {

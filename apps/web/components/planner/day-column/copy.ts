@@ -51,6 +51,8 @@ export const DAY_COLUMN_COPY = {
   /** The strip's button: "Sunday, all day, now". */
   strip: (name: string, underWay: boolean) =>
     `${name}, all day${underWay ? ", now" : ""}`,
+  /** The tapped slot's mark (USE-39; tap-a-time.md). */
+  newBlock: "+ New block",
   /** A bullet's button: "Water, in Wellness". */
   bullet: (item: string, block: string) => `${item}, in ${block}`,
   tier: {

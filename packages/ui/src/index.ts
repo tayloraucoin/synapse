@@ -88,6 +88,13 @@ export {
 } from "lucide-react";
 /** The Item sheet's ··· (USE-64): Move to…. */
 export { ArrowRightIcon as MoveToIcon } from "lucide-react";
+/** Set my days' + menu (USE-39): Block, Transition, From a saved block; the install offer's phone. */
+export {
+  ListIcon as SavedBlockIcon,
+  MinusIcon as NewTransitionIcon,
+  SmartphoneIcon as HomeScreenOfferIcon,
+  SquareIcon as NewBlockIcon,
+} from "lucide-react";
 /** Now's system states (USE-21): the offline line's cloud. */
 export { CloudOffIcon as OfflineIcon } from "lucide-react";
 /** The Profile sheet's glyphs (USE-84): the crop step's back, the not-saved line. */

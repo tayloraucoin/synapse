@@ -22,8 +22,19 @@ import {
   clockMinutes,
   type ScheduleMark,
 } from "@syn/utils";
-import { BLOCK_HUE, HUE_CHIP, HUE_DOT, type BlockHue } from "../block-hue";
-import { DAY_COLUMN_COPY as COPY, hourLabel, spanLabel } from "./copy";
+import {
+  BLOCK_HUE,
+  HUE_BORDER,
+  HUE_CHIP,
+  HUE_DOT,
+  type BlockHue,
+} from "../block-hue";
+import {
+  clockLabel,
+  DAY_COLUMN_COPY as COPY,
+  hourLabel,
+  spanLabel,
+} from "./copy";
 import { HUE_CHECK } from "./mark-hue";
 import { MeetingBand } from "./meeting-band";
 import { useContentWidth } from "./use-content-width";
@@ -108,12 +119,23 @@ export interface DayColumnBlock {
   bands?: readonly DayColumnEvent[];
   /** With `bands`: the items before, between and after them. */
   segments?: readonly DayColumnSegment[];
+  /**
+   * Muted lines in place of the items (Set my days, USE-39): a usual Work
+   * block's "The time is kept every week.", a To-dos block's rule.
+   */
+  lines?: readonly string[];
+  /**
+   * Outside the day's bounds (D-USE-32): kept in place with a dashed edge in
+   * its kind's colour and no fill, its line and "Change its time".
+   */
+  edge?: { line: string; actionLabel: string; onAction: () => void };
 }
 
 export interface DayColumnProps {
   /** Minutes from midnight, on whole hours. */
   hours: { startMin: number; endMin: number };
-  orient: { atMin: number; lengthMin: number } | null;
+  /** `label` names a moved Up at: "Orient · 7:45" (out-of-bounds.md). */
+  orient: { atMin: number; lengthMin: number; label?: string } | null;
   blocks: readonly DayColumnBlock[];
   /** Events inside no block, on their own at their times (Schedule). */
   events?: readonly DayColumnEvent[];
@@ -130,6 +152,15 @@ export interface DayColumnProps {
   onSwipeAway?: (blockId: string) => Promise<unknown> | void;
   /** A Work block with nothing slotted draws this in place of its tiers (USE-37). */
   emptyWork?: (block: DayColumnBlock) => React.ReactNode;
+  /** Muted lines on the open rail at their minute: "Free until 19:00." (USE-39). */
+  openLines?: readonly { atMin: number; text: string }[];
+  /**
+   * A tap on empty rail (USE-39; tap-a-time.md): the minute tapped. Pointer
+   * only; the + is the keyboard's way to add.
+   */
+  onRail?: (atMin: number) => void;
+  /** The slot a tap marked: a dashed ink outline, its time tag on the rail. */
+  tapped?: { startsAt: string; endsAt: string } | null;
 }
 
 /* ---- the column's geometry (success.md) ---- */
@@ -203,6 +234,9 @@ export function DayColumn({
   className,
   onSwipeAway,
   emptyWork,
+  openLines = [],
+  onRail,
+  tapped = null,
 }: DayColumnProps) {
   const [ref, width] = useContentWidth<HTMLDivElement>();
   const cellsPerLine = cellsPerLineFor(width);
@@ -226,10 +260,28 @@ export function DayColumn({
         hourLabelAlign="start"
         className="overflow-visible pt-(--space-2)"
       >
+        {onRail ? <RailTarget hours={hours} onRail={onRail} /> : null}
+        {openLines.map((line) => (
+          <Text
+            key={line.atMin}
+            as="p"
+            variant="secondary"
+            tone="muted"
+            data-open-line
+            style={{
+              top: `${pxOf(line.atMin - hours.startMin) + PAD_TOP_PX}px`,
+              insetInlineStart: `${GUTTER_PX + PAD_START_PX}px`,
+            }}
+            className="pointer-events-none absolute end-0"
+          >
+            {line.text}
+          </Text>
+        ))}
         {orient !== null ? (
           <OrientLine
             topPx={pxOf(orient.atMin - hours.startMin)}
             lengthMin={orient.lengthMin}
+            label={orient.label}
           />
         ) : null}
         {blocks.map((block) => {
@@ -274,6 +326,15 @@ export function DayColumn({
             )}
           />
         ))}
+        {tapped !== null ? (
+          <TappedSlot
+            slot={tapped}
+            topPx={pxOf(clockMinutes(tapped.startsAt) - hours.startMin)}
+            heightPx={pxOf(
+              clockMinutes(tapped.endsAt) - clockMinutes(tapped.startsAt),
+            )}
+          />
+        ) : null}
         {children}
         {now !== null ? (
           <NowLine
@@ -289,13 +350,84 @@ export function DayColumn({
   );
 }
 
+/**
+ * Empty rail under the blocks (USE-39): a pointer tap names its minute. The
+ * blocks sit above it, so a tap inside one opens that block instead.
+ */
+function RailTarget({
+  hours,
+  onRail,
+}: {
+  hours: DayColumnProps["hours"];
+  onRail: (atMin: number) => void;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      data-rail-target
+      onPointerUp={(event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        const box = event.currentTarget.getBoundingClientRect();
+        const minutes =
+          hours.startMin +
+          ((event.clientY - box.top) / DAY_COLUMN_PX_PER_HOUR) * 60;
+        onRail(Math.floor(minutes));
+      }}
+      style={{ insetInlineStart: `${GUTTER_PX}px` }}
+      className="absolute inset-y-0 end-0 cursor-cell"
+    />
+  );
+}
+
+/** The marked slot: a dashed ink outline, "+ New block" over its span, the tag on the rail. */
+function TappedSlot({
+  slot,
+  topPx,
+  heightPx,
+}: {
+  slot: { startsAt: string; endsAt: string };
+  topPx: number;
+  heightPx: number;
+}) {
+  return (
+    <>
+      <span
+        data-tapped-tag
+        style={{ top: `${topPx}px` }}
+        className="absolute start-0 -translate-y-1/2 rounded-(--radius-control) bg-foreground px-(--space-1) text-(length:--fs-caption) leading-(--lh-caption) font-medium text-background tabular-nums"
+      >
+        {clockLabel(slot.startsAt)}
+      </span>
+      <div
+        data-tapped-slot
+        style={placed(topPx, heightPx)}
+        className="pointer-events-none absolute flex flex-col justify-center gap-0.5 rounded-(--radius-control) border border-dashed border-foreground ps-(--space-3)"
+      >
+        <Text as="span" variant="body" weight={600}>
+          {COPY.newBlock}
+        </Text>
+        <Text
+          as="span"
+          variant="secondary"
+          tone="muted"
+          className="tabular-nums"
+        >
+          {spanLabel(slot.startsAt, slot.endsAt)}
+        </Text>
+      </div>
+    </>
+  );
+}
+
 /** Orient's locked line: a 2 px ink bar, the lock, "Orient · 5 min". */
 function OrientLine({
   topPx,
   lengthMin,
+  label,
 }: {
   topPx: number;
   lengthMin: number;
+  label?: string;
 }) {
   return (
     <div
@@ -307,7 +439,7 @@ function OrientLine({
       <span className="flex items-center gap-(--space-1) text-muted-foreground">
         <LockedIcon aria-hidden="true" className="size-2.5" />
         <Text as="span" variant="caption" tone="muted">
-          {COPY.orient(lengthMin)}
+          {label ?? COPY.orient(lengthMin)}
         </Text>
       </span>
     </div>
@@ -473,10 +605,14 @@ function BlockCard({
       data-day-block={block.kind}
       data-block-id={block.id}
       data-state={block.state ?? undefined}
+      data-edge={block.edge ? "dashed" : undefined}
       style={placed(topPx, heightPx)}
       className={cn(
         "absolute flex overflow-hidden rounded-(--radius-control)",
-        HUE_CHIP[hue],
+        // Kept, not run: a dashed edge in its kind's colour, no fill (D-USE-32).
+        block.edge
+          ? cn("border border-dashed", HUE_BORDER[hue])
+          : HUE_CHIP[hue],
         stateClass(block.state),
       )}
     >
@@ -490,13 +626,23 @@ function BlockCard({
         describedBy={describedBy}
         onOpen={onOpen}
       />
-      <span
-        aria-hidden="true"
-        className={cn("w-0.75 shrink-0", HUE_DOT[hue])}
-      />
+      {block.edge ? null : (
+        <span
+          aria-hidden="true"
+          className={cn("w-0.75 shrink-0", HUE_DOT[hue])}
+        />
+      )}
       <div className="pointer-events-none relative flex min-w-0 flex-1 flex-col gap-(--space-1) pt-(--space-2) ps-(--space-3) pe-(--space-2) pb-(--space-1) [&_button]:pointer-events-auto">
         <BlockHead block={block} />
-        <div id={`${listId}-0`}>{empty ?? items(places[0]!)}</div>
+        <div id={`${listId}-0`}>
+          {block.edge ? (
+            <EdgeLine edge={block.edge} />
+          ) : block.lines ? (
+            <BlockLines lines={block.lines} />
+          ) : (
+            (empty ?? items(places[0]!))
+          )}
+        </div>
       </div>
       {(block.bands ?? []).map((band) => (
         <MeetingBand
@@ -522,6 +668,37 @@ function BlockCard({
           {items(place)}
         </div>
       ))}
+    </div>
+  );
+}
+
+/** A usual Work or To-dos block's rule: muted lines, in place of items. */
+function BlockLines({ lines }: { lines: readonly string[] }) {
+  return (
+    <div className="flex flex-col">
+      {lines.map((line) => (
+        <Text key={line} as="p" variant="secondary" tone="muted">
+          {line}
+        </Text>
+      ))}
+    </div>
+  );
+}
+
+/** "Before Up at. Kept, not run." with Change its time at the trailing edge. */
+function EdgeLine({ edge }: { edge: NonNullable<DayColumnBlock["edge"]> }) {
+  return (
+    <div className="flex items-baseline justify-between gap-(--space-2)">
+      <Text as="p" variant="secondary" tone="muted">
+        {edge.line}
+      </Text>
+      <button
+        type="button"
+        onClick={edge.onAction}
+        className="relative shrink-0 cursor-pointer rounded-(--radius-control) text-(length:--fs-secondary) font-semibold text-foreground underline underline-offset-2 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      >
+        {edge.actionLabel}
+      </button>
     </div>
   );
 }

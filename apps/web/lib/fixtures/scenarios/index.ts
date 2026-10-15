@@ -20,7 +20,7 @@ import { READY_SCENARIOS } from "./ready-welcome";
 import { REVIEW_SCENARIOS } from "./review-day";
 import { RUNNING_SCENARIOS } from "./running";
 import { SCHEDULE_SCENARIOS } from "./schedule";
-import { SET_UP_SCENARIOS } from "./set-up";
+import { SET_UP_SCENARIOS, type SetUpScenarioStart } from "./set-up";
 import { SETTINGS_SCENARIOS } from "./settings";
 import { TODAY_DESK_SCENARIOS } from "./today-desk";
 import { TODO_SHEET_SCENARIOS } from "./todo-sheet";
@@ -66,7 +66,12 @@ export interface Scenario {
    * to-dos; USE-72: the Week, with the pool live; USE-57: Today's tiers wait
    * on it).
    */
-  regions?: { todos?: "loading" | "error"; week?: "loading" | "error" };
+  regions?: {
+    todos?: "loading" | "error";
+    week?: "loading" | "error";
+    /** Set my days' column alone (USE-39): the header, chips and bounds paint. */
+    setUpColumn?: "loading" | "error";
+  };
   /** Record ids whose next write rejects once, then goes through (USE-19). */
   failWrites?: string[];
   /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */
@@ -100,6 +105,8 @@ export interface Scenario {
   seen?: string[];
   /** Where the New block sheet opens, and what its frame shows typed (USE-46). */
   newBlock?: NewBlockScenarioStart;
+  /** Where Set my days opens and what its frame holds (USE-39). */
+  setUp?: SetUpScenarioStart;
 }
 
 export type { ProfileSheetStart };

@@ -10,7 +10,8 @@
  * renders. Below 1024 the column is padded by the tab bar's height (and the
  * safe area the bar pads itself by), so the bar never covers content.
  *
- * A focused path (`isFocusedPath`) renders with no rail and no tabs.
+ * A focused path (`isFocusedPath`) renders with no rail and no tabs; a
+ * pushed one (`isPushedPath`, Set my days) keeps the rail and drops the tabs.
  *
  * `?sheet=` is read once, here, by `SheetHost` (USE-83), over any screen.
  */
@@ -22,7 +23,7 @@ import { cn } from "@syn/ui";
 import { useTodayKey } from "@/lib/data/use-morning";
 import { useDayPhase } from "@/lib/data/use-now";
 import { SHELL_COPY as COPY } from "./copy";
-import { isFocusedPath } from "./nav-items";
+import { isFocusedPath, isPushedPath } from "./nav-items";
 import { Rail } from "./rail";
 import { useMarkShellPainted } from "./day-entry-gate";
 import { SheetHost, SheetOpenerProvider } from "./sheet-host";
@@ -39,6 +40,7 @@ export function AppShell({ children }: AppShellProps) {
   const phase = useDayPhase(useTodayKey());
   const firstTab = phase === "before-go" ? "List" : "Now";
   useMarkShellPainted();
+  const pushed = isPushedPath(pathname);
 
   if (isFocusedPath(pathname)) {
     return (
@@ -68,13 +70,22 @@ export function AppShell({ children }: AppShellProps) {
           <Rail />
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom))] split:pb-0">
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 flex-col split:pb-0",
+            pushed
+              ? "pb-[env(safe-area-inset-bottom)]"
+              : "pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom))]",
+          )}
+        >
           {children}
         </div>
 
-        <div className="split:hidden">
-          <TabBar firstTab={firstTab} />
-        </div>
+        {pushed ? null : (
+          <div className="split:hidden">
+            <TabBar firstTab={firstTab} />
+          </div>
+        )}
       </div>
       <SheetHost />
     </SheetOpenerProvider>

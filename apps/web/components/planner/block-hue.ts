@@ -70,3 +70,16 @@ export const HUE_TEXT: Record<BlockHue, string> = {
   moss: "text-category-moss-dot",
   yellow: "text-category-yellow-dot",
 };
+
+/** A dashed edge in the kind's colour: a block outside the bounds (USE-39). */
+export const HUE_BORDER: Record<BlockHue, string> = {
+  leaf: "border-category-leaf-dot",
+  sky: "border-category-sky-dot",
+  clay: "border-category-clay-dot",
+  rose: "border-category-rose-dot",
+  amber: "border-category-amber-dot",
+  slate: "border-category-slate-dot",
+  plum: "border-category-plum-dot",
+  moss: "border-category-moss-dot",
+  yellow: "border-category-yellow-dot",
+};

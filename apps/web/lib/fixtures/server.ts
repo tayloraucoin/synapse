@@ -309,6 +309,11 @@ export interface FixtureServer
   restoreTodo(removed: RemovedTodo): Promise<TodoRecord>;
   /** The to-dos' own retry (`regions.todos: "error"`). */
   recoverTodos(): void;
+  /**
+   * A Set my days day's column, its own read (USE-39): it waits or fails
+   * alone (`regions.setUpColumn`) while the header, chips and bounds paint.
+   */
+  readSetUpColumn(): Promise<void>;
   /** The `error` scenario's retry: reads succeed from here on. */
   recover(): void;
   /** The reading's own retry (`reading: "error"`). */
@@ -392,6 +397,8 @@ export function createFixtureServer(
   let todosFail = scenario.regions?.todos === "error";
   // The Week's own read, failing alone while the pool reads (USE-72).
   let weekFails = scenario.regions?.week === "error";
+  // Set my days' column, failing alone while the day's own controls read (USE-39).
+  let columnFails = scenario.regions?.setUpColumn === "error";
   // Each id rejects its next write once (`failWrites`).
   const failNext = new Set(scenario.failWrites ?? []);
 
@@ -457,6 +464,25 @@ export function createFixtureServer(
     ...work,
     // Linear, Google and the client mappings (USE-56).
     ...integrations,
+
+    // Set my days' bounds (USE-39): `failWrites: ["bounds"]` fails the next
+    // once; `setUp.save: "hang"` leaves it sending, for Saving's capture.
+    writeBounds(input) {
+      if (scenario.setUp?.save === "hang") return new Promise(() => {});
+      if (failNext.delete("bounds")) {
+        return Promise.reject(new FixtureWriteError());
+      }
+      return planner.writeBounds(input);
+    },
+
+    readSetUpColumn() {
+      if (scenario.mode === "loading") return new Promise(() => {});
+      if (scenario.regions?.setUpColumn === "loading") {
+        return new Promise(() => {});
+      }
+      if (failing || columnFails) return Promise.reject(new FixtureReadError());
+      return Promise.resolve();
+    },
 
     // The New block sheet's add (USE-46): `failWrites: ["new-block"]` fails it once.
     createBlock(input, scope) {
@@ -1053,6 +1079,7 @@ export function createFixtureServer(
     recover() {
       failing = false;
       weekFails = false;
+      columnFails = false;
     },
 
     recoverReading() {

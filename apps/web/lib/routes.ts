@@ -192,15 +192,19 @@ export function reviewRoute(): string {
 /* -------------------------------------------------------------- account -- */
 
 /**
- * Set my days (USE-39 builds the page): the avatar menu's first row. The
- * params are USE-39's; the menu opens it on the week.
+ * Set my days (USE-39): the avatar menu's first row opens it on the week.
+ * `week` is "usual", "this" or an ISO week key; `day` opens one day, as its
+ * weekday (Monday 0, the New block sheet's own param) or a date key, which
+ * names its week too.
  */
 export function daysRoute(
-  params: { week?: string; day?: string; block?: string } = {},
+  params: { week?: string; day?: string | number; block?: string } = {},
 ): string {
   const query = new URLSearchParams();
   if (params.week) query.set("week", params.week);
-  if (params.day) query.set("day", params.day);
+  if (params.day !== undefined && params.day !== "") {
+    query.set("day", String(params.day));
+  }
   // Open This week scrolls to a block (USE-37) [ASSUMPTION: `&block=`].
   if (params.block) query.set("block", params.block);
   const search = query.toString();

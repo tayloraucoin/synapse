@@ -23,6 +23,7 @@ import {
   TODAY_DATE_PARAM,
   todayReadyRoute,
   todayReviewRoute,
+  daysRoute,
   todayRoute,
   todayScheduleRoute,
   weekRoute,
@@ -89,6 +90,15 @@ export function tabForPath(
 
 /** Orient, Review the day and the Ready, go welcome (USE-43; D-USE-39). */
 const FOCUSED_ROUTES = [orientRoute(), todayReviewRoute(), todayReadyRoute()];
+
+/**
+ * A pushed screen (USE-39; D-USE-49): no tab bar below 1024, the rail from
+ * 1024 with nothing current. Set my days, opened from the avatar menu.
+ */
+export function isPushedPath(pathname: string): boolean {
+  const days = daysRoute();
+  return pathname === days || pathname.startsWith(`${days}/`);
+}
 
 /** A focused screen renders with no rail and no tabs. */
 export function isFocusedPath(pathname: string): boolean {

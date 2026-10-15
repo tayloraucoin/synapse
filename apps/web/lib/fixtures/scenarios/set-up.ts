@@ -545,6 +545,172 @@ function setUp(
   });
 }
 
+/** Where Set my days opens and what its frame holds (USE-39). */
+export interface SetUpScenarioStart {
+  /** The week it opens on when the URL names none. */
+  week?: "usual" | "this";
+  /** A day open, Monday 0; unset, the week. */
+  day?: number;
+  /** The + menu open on load. */
+  menu?: "plus";
+  /** A tapped slot marked at this time, as the New block sheet opens there. */
+  tapAt?: string;
+  /** The column scrolled so this time is at its top. */
+  scrollTo?: string;
+  /** A bounds edit made on load, so Saving, Saved and Not saved are caught. */
+  staged?: { upAt: string; lightsOut: string };
+  /** `hang`: the bounds write stays sending (Saving's capture). */
+  save?: "hang";
+  /** Saved stays, for its capture, instead of going after 2 s. */
+  holdSaved?: boolean;
+}
+
+const BYDAY = /BYDAY=([A-Z,]+)/;
+
+/**
+ * The usual week kept to some weekdays: every rule loses the others, a block
+ * left with none goes, and so do the other days' bounds.
+ */
+function keepWeekdays(
+  records: FixtureRecords,
+  weekdays: readonly number[],
+): FixtureRecords {
+  const codes = new Set(weekdays.map((day) => DAY_CODES[day]));
+  const blocks = records.blocks.flatMap((row) => {
+    const match = BYDAY.exec(row.rrule ?? "");
+    if (!match) return [row];
+    const kept = match[1]!.split(",").filter((code) => codes.has(code));
+    if (kept.length === 0) return [];
+    return [
+      { ...row, rrule: row.rrule!.replace(BYDAY, `BYDAY=${kept.join(",")}`) },
+    ];
+  });
+  const ids = new Set(blocks.map((row) => row.id));
+  return {
+    ...records,
+    blocks,
+    blockItems: records.blockItems.filter((row) => ids.has(row.blockId)),
+    dayBounds: records.dayBounds.filter(
+      (row) => row.weekday === null || weekdays.includes(row.weekday),
+    ),
+  };
+}
+
+/** The usual week with Thursday's blocks gone and its bounds kept (empty-day.md). */
+function usualEmptyThursdayRecords(): FixtureRecords {
+  const usual = setUpUsualRecords();
+  const others = keepWeekdays(usual, [0, 1, 2, 4, 5, 6]);
+  return { ...others, dayBounds: usual.dayBounds };
+}
+
+/** install-offer.md: Monday the only day set, just saved. */
+function mondayOnlyRecords(): FixtureRecords {
+  return keepWeekdays(setUpUsualRecords(), [0]);
+}
+
+/**
+ * Set my days' frames (USE-39), each by `?state=`. The install offer is a
+ * one-time line, so every frame but its own counts it seen. [ASSUMPTION]
+ * The contract's saving, saved, not-saved, loading and error take a `days-`
+ * prefix: loading and error are the app's own and not-saved the account's.
+ */
+function days(
+  name: string,
+  records: () => FixtureRecords,
+  setUp: SetUpScenarioStart,
+  options: Partial<Scenario> = {},
+): [string, () => Scenario] {
+  return [
+    name,
+    () => ({
+      name,
+      now: SET_UP_NOW,
+      records: records(),
+      mode: "ready",
+      seen: ["install-offer"],
+      setUp,
+      ...options,
+    }),
+  ];
+}
+
+/** Up at moved from 7:00 to 6:45: the edit Saving, Saved and Not saved catch. */
+const STAGED_MONDAY = { upAt: "06:45", lightsOut: "22:30" };
+
+export const DAYS_SCENARIOS: Record<string, () => Scenario> =
+  Object.fromEntries([
+    days("usual-week", setUpUsualRecords, { week: "usual" }),
+    days("empty-first-day", emptyRecords, { week: "usual", day: 0 }),
+    days("usual-saturday", setUpUsualRecords, { week: "usual", day: 5 }),
+    days("usual-thursday-evening", setUpUsualRecords, {
+      week: "usual",
+      day: 3,
+      scrollTo: "17:00",
+    }),
+    days("plus-menu-empty-day", usualEmptyThursdayRecords, {
+      week: "usual",
+      day: 3,
+      menu: "plus",
+    }),
+    days("tap-a-time", setUpThisWeekRecords, {
+      week: "this",
+      day: 0,
+      tapAt: "17:00",
+      scrollTo: "12:00",
+    }),
+    days("out-of-bounds", setUpUsualRecords, {
+      week: "usual",
+      day: 3,
+      staged: { upAt: "07:45", lightsOut: "22:30" },
+      holdSaved: true,
+    }),
+    days("days-saving", setUpUsualRecords, {
+      week: "usual",
+      day: 0,
+      staged: STAGED_MONDAY,
+      save: "hang",
+    }),
+    days("days-saved", setUpUsualRecords, {
+      week: "usual",
+      day: 0,
+      staged: STAGED_MONDAY,
+      holdSaved: true,
+    }),
+    days(
+      "days-not-saved",
+      setUpUsualRecords,
+      { week: "usual", day: 0, staged: STAGED_MONDAY },
+      { failWrites: ["bounds"] },
+    ),
+    days(
+      "days-loading",
+      setUpUsualRecords,
+      { week: "usual", day: 3 },
+      { regions: { setUpColumn: "loading" } },
+    ),
+    days(
+      "days-error",
+      setUpUsualRecords,
+      { week: "usual", day: 3 },
+      { regions: { setUpColumn: "error" } },
+    ),
+    days(
+      "install-offer",
+      mondayOnlyRecords,
+      // Monday just saved: its bounds written again, Saved held.
+      {
+        week: "usual",
+        day: 0,
+        staged: { upAt: "07:00", lightsOut: "22:30" },
+        holdSaved: true,
+      },
+      {
+        seen: [],
+        install: { phone: true, standalone: false, platform: "iphone" },
+      },
+    ),
+  ]);
+
 export const SET_UP_SCENARIOS: Record<string, () => Scenario> = {
   "set-up-usual": setUp("set-up-usual", setUpUsualRecords),
   "set-up-this-week": setUp("set-up-this-week", setUpThisWeekRecords),
@@ -553,4 +719,5 @@ export const SET_UP_SCENARIOS: Record<string, () => Scenario> = {
   "set-up-offline": setUp("set-up-offline", setUpThisWeekRecords, {
     offline: true,
   }),
+  ...DAYS_SCENARIOS,
 };
