@@ -3,11 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { notFound, useSearchParams } from "next/navigation";
-
-import { Breadcrumb, Card, SaveStatusText, Text, Textarea } from "@syn/ui";
 import { JOURNAL_ANSWER_MAX } from "@syn/constants";
+import { Breadcrumb, Card, SaveStatusText, Text, Textarea } from "@syn/ui";
 import { addDays, tomorrowPeek, type TomorrowPeek } from "@syn/utils";
-
 import { OfflineLine } from "@/components/planner/offline-line";
 import type { JournalRecords } from "@/lib/data/journal-records";
 import { useDataSource } from "@/lib/data/source";
@@ -16,7 +14,6 @@ import { useJournal } from "@/lib/data/use-journal";
 import { useTodayKey } from "@/lib/data/use-morning";
 import { useToday } from "@/lib/data/use-today";
 import { reviewRoute, scheduleDateRoute, todayRoute } from "@/lib/routes";
-
 import { JOURNAL_COPY as COPY } from "./copy";
 import { useJournalFields } from "./use-journal-fields";
 
@@ -172,9 +169,7 @@ function JournalFields({
   const { prompts, quote } = records;
   const allAnswered =
     prompts.length > 0 &&
-    prompts.every(
-      (prompt) => (fields.answers[prompt.key] ?? "").trim() !== "",
-    );
+    prompts.every((prompt) => (fields.answers[prompt.key] ?? "").trim() !== "");
   const focusRef = React.useRef<HTMLTextAreaElement>(null);
   React.useEffect(() => {
     focusRef.current?.focus();

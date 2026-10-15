@@ -1,6 +1,6 @@
+import { describe, expect, it } from "vitest";
 import { DEFAULT_JOURNAL_PROMPTS } from "@syn/constants";
 import { lastNightEntries } from "@syn/utils";
-import { describe, expect, it } from "vitest";
 import { resolveScenario } from "./scenarios";
 import { BASE_DATE } from "./scenarios/base-day";
 import { createFixtureServer, FixtureOfflineError } from "./server";

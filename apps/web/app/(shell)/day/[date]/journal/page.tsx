@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-
 import { dateKeySchema } from "@syn/validators";
-
 import { JOURNAL_COPY, JournalScreen } from "@/components/journal";
 
 export const metadata: Metadata = { title: JOURNAL_COPY.title };

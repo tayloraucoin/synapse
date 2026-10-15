@@ -1,9 +1,7 @@
 "use client";
 
 import * as React from "react";
-
 import type { SaveStatus } from "@syn/types";
-
 import { isWaitingToSave } from "@/lib/data/use-morning";
 
 /**
