@@ -20,6 +20,7 @@ import { RUNNING_SCENARIOS } from "./running";
 import { SET_UP_SCENARIOS } from "./set-up";
 import { TODO_SHEET_SCENARIOS } from "./todo-sheet";
 import { TODOS_SCENARIOS } from "./todos-tray";
+import { WEEK_SCENARIOS } from "./week";
 
 /**
  * Scenarios: one named set of records per `?state=` (canon C-P08). This file
@@ -55,8 +56,11 @@ export interface Scenario {
   install?: InstallOverride;
   /** Stands the reminder check on a device for a capture (USE-28); unset, the device's own. */
   device?: Partial<ReminderDevice>;
-  /** A region's own read waits or fails while the day reads (USE-19: the to-dos). */
-  regions?: { todos?: "loading" | "error" };
+  /**
+   * A region's own read waits or fails while the rest reads (USE-19: the
+   * to-dos; USE-72: the Week, with the pool live).
+   */
+  regions?: { todos?: "loading" | "error"; week?: "error" };
   /** Record ids whose next write rejects once, then goes through (USE-19). */
   failWrites?: string[];
   /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */
@@ -219,6 +223,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...CLOSE_THE_DAY_SCENARIOS,
   // ---- The To-do sheet (USE-28): its six drawn states, a failed change, offline ----
   ...TODO_SHEET_SCENARIOS,
+  // ---- The Week (USE-72): the Priority lens, empty, a past day, loading, error, offline ----
+  ...WEEK_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {

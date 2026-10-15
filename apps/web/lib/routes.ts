@@ -162,9 +162,12 @@ export const SCHEDULE_DATE_PARAM = "date";
 
 /* ----------------------------------------------------------------- week -- */
 
-/** The desk's Week (D-USE-93); below 1024 the phone reaches it through Set my days. */
-export function weekRoute(): string {
-  return "/week";
+/**
+ * The desk's Week (D-USE-93); below 1024 the phone reaches it through Set my
+ * days. `week` is an ISO week key (`2026-W43`); absent is this week (USE-72).
+ */
+export function weekRoute(params: { week?: string } = {}): string {
+  return params.week ? `/week?week=${params.week}` : "/week";
 }
 
 /* --------------------------------------------------------------- review -- */

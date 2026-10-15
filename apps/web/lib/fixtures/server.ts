@@ -383,6 +383,8 @@ export function createFixtureServer(
   let readingFails = scenario.reading === "error";
   let offline = scenario.offline === true;
   let todosFail = scenario.regions?.todos === "error";
+  // The Week's own read, failing alone while the pool reads (USE-72).
+  let weekFails = scenario.regions?.week === "error";
   // Each id rejects its next write once (`failWrites`).
   const failNext = new Set(scenario.failWrites ?? []);
 
@@ -457,7 +459,7 @@ export function createFixtureServer(
 
     readWeek(week) {
       if (scenario.mode === "loading") return new Promise(() => {});
-      if (failing) return Promise.reject(new FixtureReadError());
+      if (failing || weekFails) return Promise.reject(new FixtureReadError());
       return planner.readWeek(week);
     },
 
@@ -1018,6 +1020,7 @@ export function createFixtureServer(
 
     recover() {
       failing = false;
+      weekFails = false;
     },
 
     recoverReading() {

@@ -1,22 +1,20 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import { ScreenFrame, Text } from "@syn/ui";
-import { TabHeader } from "../_components/tab-header";
 import { SHELL_COPY } from "../_components/copy";
+import { WeekScreen } from "./_components/week-screen";
 
-const COPY = SHELL_COPY.week;
+export const metadata: Metadata = { title: SHELL_COPY.week.title };
 
-export const metadata: Metadata = { title: COPY.title };
-
-/** The Week, a placeholder until its surface ticket (USE-4): one muted line. */
+/**
+ * The Week (USE-72): the desk's planning view, on fixtures through
+ * `useWeekView`. Below 1024 it is one line to Set my days › This week.
+ */
 export default function WeekPage() {
   return (
     <main id="main" className="flex flex-1 flex-col">
-      <TabHeader title={COPY.title} />
-      <ScreenFrame>
-        <Text as="p" variant="body" tone="muted">
-          {COPY.placeholder}
-        </Text>
-      </ScreenFrame>
+      <Suspense>
+        <WeekScreen />
+      </Suspense>
     </main>
   );
 }

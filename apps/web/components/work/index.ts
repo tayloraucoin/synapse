@@ -1,4 +1,5 @@
 export { ClientTile } from "./client-tile";
+export { DueBadge, type DueBadgeProps } from "./due-badge";
 export { PriorityChip } from "./priority-chip";
 export { TierGroup, type TierGroupProps } from "./tier-group";
 export {

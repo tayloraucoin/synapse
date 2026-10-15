@@ -96,6 +96,8 @@
   --alert: var(--syn-red-500);                  /* "needs you now": the Urgent square and chip, Blocked, Paused */
   --firing-text: var(--syn-red-700);            /* "firing · n min": dark rust, never an alarm */
   --warning-text: #845A0F;                      /* a timer under a minute over; a due badge two days out */
+  --warning-fill: var(--category-yellow-chip);  /* a due badge's ground two days out (D-USE-98) */
+  --destructive-fill: var(--syn-red-50);        /* "Due today"'s ground, on its column and after (D-USE-98) */
 
   /* Categories: a chip fill (text on it is foreground) and a dot (also a
      Schedule block's leading edge). Always printed beside the name. The kit
@@ -172,6 +174,7 @@
   --row-min: 56px; --target: 44px;
   --content-text: 720px; --content-canvas: 960px;
   --header-h: 56px; --tabbar-h: 56px; --rail-w: 220px; --sheet-w: 420px;
+  --pool-w: 360px; --week-label-w: 84px; --week-col-min: 120px;   /* the Week at the desk (D-USE-41, D-USE-94) */
   /* The avatar menu's width (D-USE-28). */
   --menu-w: 264px;
   /* The Profile sheet at 402, and its crop step (USE-84, D-USE-37). */
@@ -262,6 +265,8 @@
   --alert: var(--syn-red-400);
   --firing-text: var(--syn-red-300);
   --warning-text: #E3B667;
+  --warning-fill: var(--category-yellow-chip);
+  --destructive-fill: var(--syn-red-900);
   --logo-disc: var(--syn-neutral-50);
   --logo-rule: var(--syn-brand-400);
 
@@ -300,6 +305,8 @@
   --color-alert: var(--alert);
   --color-firing-text: var(--firing-text);
   --color-warning-text: var(--warning-text);
+  --color-warning-fill: var(--warning-fill);
+  --color-destructive-fill: var(--destructive-fill);
   --color-category-leaf-chip: var(--category-leaf-chip);   --color-category-leaf-dot: var(--category-leaf-dot);
   --color-category-sky-chip: var(--category-sky-chip);     --color-category-sky-dot: var(--category-sky-dot);
   --color-category-clay-chip: var(--category-clay-chip);   --color-category-clay-dot: var(--category-clay-dot);

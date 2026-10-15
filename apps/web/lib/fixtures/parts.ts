@@ -17,7 +17,9 @@ import { OrientPart, type OrientPartState } from "./orient-parts";
 import { ReviewPart, type ReviewPartState } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
+import { WEEK_SCENARIOS } from "./scenarios/week";
 import { TodoSheetPart } from "./todo-sheet-parts";
+import { WeekPart } from "./week-parts";
 import {
   TodosNotificationPart,
   TodosTrayPart,
@@ -203,4 +205,8 @@ for (const state of [
   "nothing-written",
 ] satisfies JournalPartState[]) {
   registerPart(`close-${state}`, () => createElement(JournalPart, { state })); // USE-44
+}
+// USE-72: the Week, under the week scenarios' names.
+for (const state of Object.keys(WEEK_SCENARIOS)) {
+  registerPart(state, () => createElement(WeekPart));
 }
