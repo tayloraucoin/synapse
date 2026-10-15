@@ -458,6 +458,21 @@ export function createFixtureServer(
     // Linear, Google and the client mappings (USE-56).
     ...integrations,
 
+    // The New block sheet's add (USE-46): `failWrites: ["new-block"]` fails it once.
+    createBlock(input, scope) {
+      if (failNext.delete("new-block")) {
+        return Promise.reject(new FixtureWriteError());
+      }
+      return planner.createBlock(input, scope);
+    },
+
+    createTransition(input, scope) {
+      if (failNext.delete("new-block")) {
+        return Promise.reject(new FixtureWriteError());
+      }
+      return planner.createTransition(input, scope);
+    },
+
     readPool() {
       if (scenario.mode === "loading") return new Promise(() => {});
       if (failing) return Promise.reject(new FixtureReadError());

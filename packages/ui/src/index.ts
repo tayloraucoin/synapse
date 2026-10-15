@@ -71,6 +71,8 @@ export {
 } from "lucide-react";
 /** Now at a block's end (USE-20): an empty Break's cup. */
 export { CoffeeIcon as BreakIcon } from "lucide-react";
+// USE-46: the New block sheet's icon tile with no icon set.
+export { SmileIcon as NoIconIcon } from "lucide-react";
 /** The account's glyphs (USE-83): the avatar menu's rows and the install steps. */
 export {
   CalendarRangeIcon as SetMyDaysIcon,

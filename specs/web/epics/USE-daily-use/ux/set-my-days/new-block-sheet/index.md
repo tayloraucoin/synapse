@@ -59,6 +59,8 @@ A `ResponsiveSheet` on the dimmed day; rows holding a control are `--spacing-row
 
 Empty, loading and partial do not apply: a new form with nothing to load.
 
+As built (USE-46): each state is `?state=new-block-<state>&sheet=new-block` (the state files' `state=<state>` collides with other surfaces' names), on `/dev/parts` until Set my days (USE-39) hosts it. The sheet opens on `?sheet=new-block&week=&day=` with `&at=HH:MM` for a tapped time and `&mode=transition` for the + menu's Transition (`newBlockSheetRoute`). Until Block view lands (USE-48), Add closes to the column. Custom… is listed and waits for USE-47. Meal's topic chips are kept for the open sheet only: no column holds which topics a meal offers.
+
 ## Platforms
 
 Phone 402 for every state. Wider, the sheet scales up as `ResponsiveSheet`'s right panel at `--sheet-w` (D-USE-39), beside Set my days' list-detail from 1024 (D-USE-83); no wide frame of its own.

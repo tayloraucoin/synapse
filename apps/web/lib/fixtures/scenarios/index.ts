@@ -9,6 +9,7 @@ import { CLOSE_THE_DAY_SCENARIOS } from "./close-the-day";
 import { INTEGRATION_SCENARIOS } from "./integrations";
 import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
 import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
+import { NEW_BLOCK_SCENARIOS, type NewBlockScenarioStart } from "./new-block";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { NOW_END_SCENARIOS } from "./now-end";
 import { NOW_FORM_SCENARIOS } from "./now-forms";
@@ -96,6 +97,8 @@ export interface Scenario {
    * covered by them. Unset, a one-time line shows until its own dismissal.
    */
   seen?: string[];
+  /** Where the New block sheet opens, and what its frame shows typed (USE-46). */
+  newBlock?: NewBlockScenarioStart;
 }
 
 export type { ProfileSheetStart };
@@ -221,6 +224,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...ACCOUNT_SCENARIOS,
   // ---- Setting up the days (USE-36): the usual week, this week, the first day ----
   ...SET_UP_SCENARIOS,
+  // ---- The New block sheet (USE-46) ----
+  ...NEW_BLOCK_SCENARIOS,
   // ---- Running on Now (USE-23): Meditate's timer ----
   ...RUNNING_SCENARIOS,
   // ---- The To-dos tray (USE-19): open, carried, empty, from a reminder, its failures ----

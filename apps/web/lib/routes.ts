@@ -220,7 +220,13 @@ export function settingsRoute(section?: "notifications"): string {
  * The value names the sheet; the path stays the screen beneath.
  */
 export type SheetName =
-  "install" | "profile" | "meal-topics" | "item" | "todo" | "add";
+  | "install"
+  | "profile"
+  | "meal-topics"
+  | "item"
+  | "todo"
+  | "add"
+  | "new-block";
 
 /** `path` with `?sheet=<name>` set, keeping its other query. */
 export function sheetRoute(path: string, sheet: SheetName): string {
@@ -281,6 +287,31 @@ export function addSheetRoute(
   const query = new URLSearchParams(search);
   for (const key of ["at", "tier", "block"] as const) {
     const value = preset[key];
+    if (value) query.set(key, value);
+    else query.delete(key);
+  }
+  return `${base}?${query.toString()}`;
+}
+
+/**
+ * The New block sheet over `path` (USE-46; `?sheet=new-block`): on Set my
+ * days' open day (`week`, `day`, the same params `daysRoute` takes), at a
+ * tapped time (`&at=HH:MM`) or the first free one, as a block or, from the
+ * + menu's Transition, a transition (`&mode=transition`).
+ */
+export function newBlockSheetRoute(
+  path: string,
+  start: { week?: string; day?: number; at?: string; mode?: "transition" },
+): string {
+  const [base = "", search = ""] = sheetRoute(path, "new-block").split("?");
+  const query = new URLSearchParams(search);
+  const values = {
+    week: start.week,
+    day: start.day === undefined ? undefined : String(start.day),
+    at: start.at,
+    mode: start.mode,
+  };
+  for (const [key, value] of Object.entries(values)) {
     if (value) query.set(key, value);
     else query.delete(key);
   }

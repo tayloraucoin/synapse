@@ -16,10 +16,19 @@
  */
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { parseAsString, useQueryState, useQueryStates } from "nuqs";
+import {
+  parseAsInteger,
+  parseAsString,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
 import { useIsSplit } from "@syn/ui";
 import { InstallSheet, ProfileSheet } from "@/components/account";
 import { ItemSheet } from "@/components/planner/item-sheet";
+import {
+  NewBlockSheet,
+  type NewBlockSheetStart,
+} from "@/components/planner/new-block-sheet";
 import { MealTopicsSheet } from "@/components/planner/meal-topics-sheet";
 import { TodoSheet } from "@/components/planner/todo-sheet";
 import { useDataSource } from "@/lib/data/source";
@@ -65,6 +74,13 @@ export function SheetHost() {
     id: parseAsString,
     new: parseAsString,
   });
+  // The New block sheet's start (USE-46): Set my days' day, the time, the mode.
+  const [newBlock, setNewBlock] = useQueryStates({
+    week: parseAsString,
+    day: parseAsInteger,
+    at: parseAsString,
+    mode: parseAsString,
+  });
   const router = useRouter();
   const opener = React.useContext(SheetOpenerContext);
   const { scenario } = useDataSource();
@@ -106,6 +122,24 @@ export function SheetHost() {
     [setSheet, setTodo],
   );
 
+  // A scenario's start stands for the opener's (`?state=`).
+  const newBlockStart: NewBlockSheetStart = scenario.newBlock?.start ?? {
+    week: newBlock.week ?? "usual",
+    day: newBlock.day ?? 0,
+    mode: newBlock.mode === "transition" ? "transition" : "block",
+    ...(newBlock.at ? { at: newBlock.at } : {}),
+  };
+
+  // Its time and mode go with it; the day is the screen's own.
+  const closeNewBlock = React.useCallback(
+    (open: boolean) => {
+      if (open) return;
+      void setSheet(null);
+      void setNewBlock({ at: null, mode: null });
+    },
+    [setSheet, setNewBlock],
+  );
+
   return (
     <>
       <InstallSheet
@@ -127,6 +161,16 @@ export function SheetHost() {
       <ItemSheet
         open={sheet === "item"}
         onOpenChange={close}
+        returnFocusRef={opener ?? undefined}
+      />
+      <NewBlockSheet
+        open={sheet === "new-block"}
+        onOpenChange={closeNewBlock}
+        start={newBlockStart}
+        preset={scenario.newBlock?.preset}
+        // [ASSUMPTION] The added block's Block view lands with USE-48; until
+        // then Add closes to the column, the block in place.
+        onAdded={() => closeNewBlock(false)}
         returnFocusRef={opener ?? undefined}
       />
       <TodoSheet

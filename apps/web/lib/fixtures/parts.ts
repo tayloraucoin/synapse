@@ -9,6 +9,7 @@ import {
 } from "./day-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { ItemSheetPart } from "./item-sheet-parts";
+import { NewBlockSheetPart } from "./new-block-parts";
 import { JournalPart, type JournalPartState } from "./journal-parts";
 import { MealTopicPart, type MealTopicPartState } from "./meal-topic-parts";
 import { NowPart, type NowPartState } from "./now-parts";
@@ -17,6 +18,7 @@ import { ReadyPart, type ReadyPartState } from "./ready-parts";
 import { ReviewPart, type ReviewPartState } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
+import { NEW_BLOCK_SCENARIOS } from "./scenarios/new-block";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
 import { TODAY_DESK_SCENARIOS } from "./scenarios/today-desk";
 import { WEEK_SCENARIOS } from "./scenarios/week";
@@ -223,6 +225,10 @@ for (const state of [
 // USE-64: the Item sheet over Now, taken with `&sheet=item&id=`.
 for (const state of Object.keys(ITEM_SHEET_SCENARIOS)) {
   registerPart(state, () => createElement(ItemSheetPart)); // USE-64
+}
+// USE-46: the New block sheet, opened on load by each scenario.
+for (const state of Object.keys(NEW_BLOCK_SCENARIOS)) {
+  registerPart(state, () => createElement(NewBlockSheetPart)); // USE-46
 }
 // USE-44: Close the day's states, `close-<state>` (the /day/…/journal scenarios).
 for (const state of [
