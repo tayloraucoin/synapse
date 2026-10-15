@@ -1,4 +1,8 @@
 export { BLOCK_HUE, type BlockHue } from "./block-hue";
+export {
+  BlockDoneFooter,
+  type BlockDoneFooterProps,
+} from "./block-done-footer";
 export { DayBlockBand, type DayBlockBandProps } from "./day-block-band";
 export { DayBlockHeader, type DayBlockHeaderProps } from "./day-block-header";
 export {

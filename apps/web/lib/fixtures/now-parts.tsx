@@ -17,7 +17,13 @@ export type NowPartState =
   | "transition"
   | "before-ready-go"
   | "checklist-block"
-  | "sunday-checklist";
+  | "sunday-checklist"
+  // USE-20: a block's end and the day's.
+  | "all-done-start-next"
+  | "all-done-add-more"
+  | "ahead"
+  | "empty-break"
+  | "empty-no-blocks";
 
 export function NowPart({ state }: { state: NowPartState }) {
   return (

@@ -36,6 +36,12 @@ export interface TodosTrayProps {
   defaultOpen?: boolean;
   /** The tint stays until a tap rather than fading, so a capture holds still. */
   holdTint?: boolean;
+  /**
+   * Held open by the screen (USE-20): Now's "Or a to-do until 8:00" and its
+   * empty state open it. Unset, the tray keeps its own.
+   */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   className?: string;
 }
 
@@ -46,11 +52,24 @@ export function TodosTray({
   focusTodoId = null,
   defaultOpen = false,
   holdTint = false,
+  open: heldOpen,
+  onOpenChange,
   className,
 }: TodosTrayProps) {
   const source = useDataSource();
   const todos = useTodos(source.todayKey());
-  const [open, setOpen] = React.useState(defaultOpen || focusTodoId !== null);
+  const [ownOpen, setOwnOpen] = React.useState(
+    defaultOpen || focusTodoId !== null,
+  );
+  const open = heldOpen ?? ownOpen;
+  const onOpenChangeRef = React.useRef(onOpenChange);
+  React.useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  });
+  const setOpen = React.useCallback((value: boolean) => {
+    setOwnOpen(value);
+    onOpenChangeRef.current?.(value);
+  }, []);
   const [, setSheet] = useQueryStates({
     sheet: parseAsString,
     id: parseAsString,
@@ -60,7 +79,7 @@ export function TodosTray({
   // A reminder opens the tray on its to-do, also once the screen is up.
   React.useEffect(() => {
     if (focusTodoId !== null) setOpen(true);
-  }, [focusTodoId]);
+  }, [focusTodoId, setOpen]);
 
   const tinted = useReminderTint(focusTodoId, holdTint);
   const focusRef = React.useRef<HTMLDivElement>(null);
@@ -84,7 +103,7 @@ export function TodosTray({
         first={first}
         open={open}
         controls={contentId}
-        onToggle={() => setOpen((was) => !was)}
+        onToggle={() => setOpen(!open)}
       />
       <CollapsibleContent
         id={contentId}

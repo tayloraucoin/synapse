@@ -73,10 +73,12 @@ export { suggestIcons, type IconSuggestEntry } from "./icon-suggest";
 export {
   activeBlock,
   behindSince,
+  blockEnding,
   currentItem,
   nextBlock,
   nextItem,
   type NowBlockSpan,
+  type NowFocus,
   type NowItem,
 } from "./now-block";
 export {

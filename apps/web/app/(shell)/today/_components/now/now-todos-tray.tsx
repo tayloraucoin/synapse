@@ -11,7 +11,14 @@ import { TODAY_TODO_PARAM } from "@/lib/routes";
  * `view.open` seeds it for a capture: "todos" open, "todos:<id>" as from a
  * reminder, its tint held still.
  */
-export function NowTodosTray() {
+export function NowTodosTray({
+  open: heldOpen,
+  onOpenChange,
+}: {
+  /** Held by Now (USE-20): "Or a to-do until …" and the empty state open it. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+} = {}) {
   const { scenario } = useDataSource();
   const [todo] = useQueryState(TODAY_TODO_PARAM);
   const open = scenario.view?.open;
@@ -23,6 +30,8 @@ export function NowTodosTray() {
       focusTodoId={todo ?? seeded}
       defaultOpen={open === "todos"}
       holdTint={seeded !== null && todo === null}
+      open={heldOpen}
+      onOpenChange={onOpenChange}
     />
   );
 }

@@ -67,6 +67,8 @@ export {
   PencilIcon as EditBlockIcon,
   UtensilsIcon as MealIcon,
 } from "lucide-react";
+/** Now at a block's end (USE-20): an empty Break's cup. */
+export { CoffeeIcon as BreakIcon } from "lucide-react";
 /** The account's glyphs (USE-83): the avatar menu's rows and the install steps. */
 export {
   CalendarRangeIcon as SetMyDaysIcon,

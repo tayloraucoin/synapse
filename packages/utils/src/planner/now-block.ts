@@ -7,6 +7,8 @@
 
 /** A block on the date, at its instants for that date. */
 export interface NowBlockSpan {
+  /** Matched against a block put in focus (USE-20). */
+  id?: string;
   start: Date;
   end: Date;
   /**
@@ -29,6 +31,16 @@ export interface NowItem {
 }
 
 /**
+ * A block put in focus early (USE-20): Start <next> on the all-done footer,
+ * or End break. `blockId` null is End break with nothing after it: the
+ * Break yields to no block.
+ */
+export interface NowFocus {
+  blockId: string | null;
+  at: Date;
+}
+
+/**
  * The active block at `now` (USE-16, USE-17). In order:
  *
  * 1. a set-time block whose end has passed while it is still open (behind);
@@ -39,8 +51,38 @@ export interface NowItem {
  *
  * Blocks come in start order (`readDay`'s); of two that qualify the earlier
  * wins.
+ *
+ * A `focus` (USE-20) wins from its instant until its block's own end, over
+ * a planned block that is all done, closed or the all-day checklist; a
+ * set-time block with an undone item keeps the screen.
  */
 export function activeBlock<B extends NowBlockSpan>(
+  blocks: readonly B[],
+  now: Date,
+  focus: NowFocus | null = null,
+): B | null {
+  const planned = plannedBlock(blocks, now);
+  if (focus === null || now.getTime() < focus.at.getTime()) return planned;
+  // A set-time block still holding an undone item keeps the screen: an
+  // unchecked row takes the block back (USE-20). All done, closed or the
+  // all-day checklist, it yields to the focus.
+  const holds =
+    planned !== null &&
+    planned.open === true &&
+    planned.allDay !== true &&
+    planned.id !== focus.blockId;
+  if (holds) return planned;
+  if (focus.blockId === null) {
+    return planned?.allDay === true && planned.open === true ? planned : null;
+  }
+  const focused = blocks.find((block) => block.id === focus.blockId);
+  // From the tap until its own end; its span does not move (D-USE-72).
+  if (!focused || now.getTime() >= focused.end.getTime()) return planned;
+  return focused;
+}
+
+/** The active block by the plan alone: `activeBlock`'s order, no focus. */
+function plannedBlock<B extends NowBlockSpan>(
   blocks: readonly B[],
   now: Date,
 ): B | null {
@@ -88,6 +130,26 @@ export function nextBlock<B extends NowBlockSpan>(
 export function behindSince(block: NowBlockSpan, now: Date): Date | null {
   if (block.allDay === true) return null;
   return now.getTime() > block.end.getTime() ? block.end : null;
+}
+
+/**
+ * How a block stands at its end (USE-20): every item done (a block with
+ * none is never done; an empty Break is End break's), whether that came
+ * before its planned end, and the end while it is still ahead ("Free until
+ * 8:00", the add row's). No counts: names and times only.
+ */
+export function blockEnding(
+  block: NowBlockSpan,
+  items: readonly NowItem[],
+  now: Date,
+): { allDone: boolean; ahead: boolean; freeUntil: Date | null } {
+  const allDone = items.length > 0 && items.every((item) => item.done);
+  const before = block.allDay !== true && now.getTime() < block.end.getTime();
+  return {
+    allDone,
+    ahead: allDone && before,
+    freeUntil: before ? block.end : null,
+  };
 }
 
 /**

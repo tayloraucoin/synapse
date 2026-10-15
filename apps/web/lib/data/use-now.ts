@@ -10,13 +10,16 @@ import {
   nextBlock,
   nextItem,
   reflowItems,
+  type NowFocus,
 } from "@syn/utils";
 import type { BlockRecord, DayRecordRecord, SlotRecord } from "@syn/validators";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import { useNow as useMinute } from "@/lib/hooks/use-now";
 import { deriveToday, type Today } from "./derive-today";
+import { deriveNowEnd, type NowEnd } from "./now-end";
 import { useDataSource } from "./source";
 import type { TodayRecords } from "./today-records";
+import { useBlockFocus } from "./use-block-focus";
 import { todayQueryKey } from "./use-today";
 
 /**
@@ -82,7 +85,8 @@ export interface NowDayBlockView {
   meal: boolean;
 }
 
-export interface NowView {
+/** With USE-20's footer, add row and empty state (`now-end.ts`). */
+export interface NowView extends NowEnd {
   dateKey: string;
   phase: NowPhase;
   /** The date's blocks in start order: the List before Ready, go. */
@@ -210,11 +214,14 @@ export function deriveNow(
   today: Today,
   now: Date,
   chosenId: string | null,
+  /** A block put in focus early (USE-20): Start <Block> or End break. */
+  focus: NowFocus | null = null,
 ): NowView {
   const { records } = today;
   const spans = today.occurrences.blocks.map((occurrence) => {
     const items = itemsOf(occurrence, records);
     return {
+      id: occurrence.block.id,
       occurrence,
       items,
       start: occurrence.start,
@@ -223,7 +230,7 @@ export function deriveNow(
       open: items.some((item) => !item.done),
     };
   });
-  const active = activeBlock(spans, now);
+  const active = activeBlock(spans, now, focus);
   const occurrence = active?.occurrence ?? null;
   const form = occurrence ? formOf(occurrence) : null;
   const items = active?.items ?? [];
@@ -276,6 +283,7 @@ export function deriveNow(
     current,
     next: nextItem(items, current),
     trayFirst: tray?.title ?? null,
+    ...deriveNowEnd(spans, active, form === "items" || form === "meal", now),
   };
 }
 
@@ -319,11 +327,12 @@ export function useNow(dateKey: string, chosenId: string | null = null) {
   const source = useDataSource();
   // A render each minute, so behind shows once the planned end passes.
   useMinute();
+  const { focus } = useBlockFocus(dateKey);
   const query = useQuery<TodayRecords, Error, NowView>({
     queryKey: todayQueryKey(source.scenario.name, dateKey),
     queryFn: () => source.server.readToday(dateKey),
     select: (records) =>
-      deriveNow(deriveToday(records), source.now(), chosenId),
+      deriveNow(deriveToday(records), source.now(), chosenId, focus),
     retry: false,
   });
   return { ...query, view: query.data };

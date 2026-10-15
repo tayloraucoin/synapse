@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { MealIcon, ReorderIcon, toastUndo } from "@syn/ui";
+import { BreakIcon, MealIcon, ReorderIcon, toastUndo } from "@syn/ui";
 import { nextItem } from "@syn/utils";
 import {
+  BlockDoneFooter,
   ChecklistRows,
   DayBlockHeader,
   NowBlockMenu,
@@ -23,8 +24,16 @@ import {
   type NowBlockView,
   type NowItemView,
 } from "@/lib/data/use-now";
-import { itemSheetRoute } from "@/lib/routes";
+import { useBlockFocus } from "@/lib/data/use-block-focus";
+import type { NowFooter } from "@/lib/data/now-end";
+import {
+  itemSheetRoute,
+  todayBlockRoute,
+  todayScheduleRoute,
+} from "@/lib/routes";
 import { BeforeGoList } from "./before-go-list";
+import { EndBreakFooter } from "./end-break-footer";
+import { NowEmpty } from "./now-empty";
 import { nowBlockMenuRows } from "./block-menu";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
 import { NowCurrentCard } from "./now-current-card";
@@ -110,6 +119,22 @@ export function NowScreen({
   const writes = useSlotWrites(dateKey, now?.block?.id ?? null);
   const running = useRunningView(dateKey, now);
   const add = useChecklistAdd(dateKey, now?.block?.id ?? null);
+  // USE-20: Start <Block> and End break put a block in focus; the tray is
+  // held here so "Or a to-do until …" and the empty state can open it.
+  const blockFocus = useBlockFocus(dateKey);
+  const [trayOpen, setTrayOpen] = React.useState(view?.open === "todos");
+  const empty = now?.empty ?? false;
+  React.useEffect(() => {
+    // After the last block the day holds nothing else: the tray opens (D-USE-26).
+    if (empty) setTrayOpen(true);
+  }, [empty]);
+  // The footer's arrival is said once, politely: "Wellness complete."
+  const completeName =
+    now?.footer?.kind === "done" ? now.footer.blockName : null;
+  React.useEffect(() => {
+    if (completeName !== null)
+      setAnnouncement(COPY.announceComplete(completeName));
+  }, [completeName]);
 
   // USE-17: behind is announced once per block, politely; the line stays.
   const behindAnnounced = React.useRef(new Set<string>());
@@ -262,14 +287,76 @@ export function NowScreen({
     );
   }
 
+  /** Start <Block> or End break (USE-20): that block now; its span stays. */
+  function focusBlock(blockId: string | null, endBreak: boolean) {
+    if (endBreak) blockFocus.endBreak(blockId);
+    else if (blockId !== null) blockFocus.start(blockId);
+    setChosenId(null);
+  }
+
+  function blockEnd(footer: NowFooter, here: NowBlockView) {
+    if (footer.kind === "end-break") {
+      return (
+        <EndBreakFooter
+          onEnd={() => focusBlock(footer.next?.id ?? null, true)}
+        />
+      );
+    }
+    const { next: following, doneBefore } = footer;
+    return (
+      <BlockDoneFooter
+        title={COPY.blockComplete(footer.blockName)}
+        nextLabel={
+          following ? COPY.nextBlock(following.name, following.startsAt) : null
+        }
+        aheadLine={
+          doneBefore !== null && following && view?.ending?.ahead !== false
+            ? COPY.doneBefore(doneBefore, following.name, following.endsAt)
+            : null
+        }
+        action={
+          following
+            ? {
+                label: COPY.startBlock(following.name),
+                onPress: () => focusBlock(following.id, false),
+              }
+            : {
+                label: COPY.seeTheWholeDay,
+                onPress: () => router.push(todayScheduleRoute()),
+              }
+        }
+        todoLink={
+          doneBefore !== null && view?.ending?.ahead !== false
+            ? {
+                label: COPY.todoUntil(doneBefore),
+                onPress: () => setTrayOpen(true),
+              }
+            : null
+        }
+        addRow={
+          now?.addRow && view?.ending?.addRow !== false
+            ? {
+                label: COPY.addToBlock(now.addRow.blockName),
+                freeUntil: COPY.freeUntil(now.addRow.freeUntil),
+                // The add sheet is add-from-the-rail's; until then the Block view.
+                onPress: () => router.push(todayBlockRoute(here.id)),
+              }
+            : null
+        }
+      />
+    );
+  }
+
   return (
-    <div className="mx-auto flex w-full max-w-(--content-text) flex-col">
-      <NowTodosTray />
+    <div className="mx-auto flex w-full max-w-(--content-text) flex-1 flex-col">
+      <NowTodosTray open={trayOpen} onOpenChange={setTrayOpen} />
+
+      {!block && now.empty ? <NowEmpty /> : null}
 
       {block ? (
         <section
           aria-labelledby="now-block"
-          className="flex flex-col px-(--space-4)"
+          className="flex flex-1 flex-col px-(--space-4)"
         >
           <div id="now-block">
             <DayBlockHeader
@@ -279,7 +366,12 @@ export function NowScreen({
               name={block.name}
               detail={detailOf(block)}
               glyph={
-                block.form === "meal" ? <MealIcon className="size-4" /> : null
+                block.form === "meal" ? (
+                  <MealIcon className="size-4" />
+                ) : block.kind === "break" ? (
+                  // A true break: the cup in the bar's place (USE-20).
+                  <BreakIcon className="size-4" />
+                ) : null
               }
               note={
                 block.behindSince === null
@@ -377,6 +469,7 @@ export function NowScreen({
               }}
             />
           )}
+          {now.footer ? blockEnd(now.footer, block) : null}
         </section>
       ) : null}
 

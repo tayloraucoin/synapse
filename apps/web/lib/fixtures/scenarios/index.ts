@@ -6,6 +6,7 @@ import { ADD_SCENARIOS } from "./add";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { INTEGRATION_SCENARIOS } from "./integrations";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
+import { NOW_END_SCENARIOS } from "./now-end";
 import { NOW_FORM_SCENARIOS } from "./now-forms";
 import { ORIENT_SCENARIOS } from "./orient-morning";
 import { POOL_SCENARIOS } from "./pool";
@@ -79,6 +80,12 @@ export interface ScenarioView {
    * capture only; never reachable outside `?state=`).
    */
   drag?: { itemId: string; beforeId: string };
+  /**
+   * The all-done parts a frame does not draw (USE-20): the three 7:34
+   * frames are one moment, so each capture holds back the rest. `false`
+   * hides; unset shows as live.
+   */
+  ending?: { addRow?: false; ahead?: false };
 }
 
 export const DEFAULT_SCENARIO = "default";
@@ -169,6 +176,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   // ---- Orient (USE-12): the Monday before it is opened ----
   // ---- Now's other block forms (USE-17): ···, behind, a meal, before go, checklists ----
   ...NOW_FORM_SCENARIOS,
+  // ---- Now at a block's end and the day's (USE-20): all done, ahead, empties ----
+  ...NOW_END_SCENARIOS,
   ...ORIENT_SCENARIOS,
   // ---- The avatar menu and the Install sheet (USE-83) ----
   ...ACCOUNT_SCENARIOS,

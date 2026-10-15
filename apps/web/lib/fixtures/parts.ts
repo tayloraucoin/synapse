@@ -75,6 +75,11 @@ for (const state of [
   "before-ready-go", // USE-17
   "checklist-block", // USE-17
   "sunday-checklist", // USE-17
+  "all-done-start-next", // USE-20
+  "all-done-add-more", // USE-20
+  "ahead", // USE-20
+  "empty-break", // USE-20
+  "empty-no-blocks", // USE-20
 ] satisfies NowPartState[]) {
   registerPart(`now-${state}`, () => createElement(NowPart, { state })); // USE-16
 }

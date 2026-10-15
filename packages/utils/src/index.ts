@@ -268,10 +268,12 @@ export {
 export {
   activeBlock,
   behindSince,
+  blockEnding,
   nextBlock,
   currentItem,
   nextItem,
   type NowBlockSpan,
+  type NowFocus,
   type NowItem,
 } from "./planner";
 

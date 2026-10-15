@@ -80,6 +80,20 @@ export const NOW_COPY = {
   addPlaceholder: "Item",
   reviewTheDay: "Review the day",
   dayListName: "The day",
+  /** A block's end and the day's (USE-20): names and times, never counts. */
+  blockComplete: (block: string) => `${block} complete`,
+  nextBlock: (block: string, startsAt: string) =>
+    `Next: ${block}, ${clockLabel(startsAt)}`,
+  startBlock: (block: string) => `Start ${block}`,
+  addToBlock: (block: string) => `Add to ${block}`,
+  freeUntil: (endsAt: string) => `Free until ${clockLabel(endsAt)}`,
+  doneBefore: (endsAt: string, next: string, nextEndsAt: string) =>
+    `Done before ${clockLabel(endsAt)}. Starting early is fine: ${next} keeps its end, ${clockLabel(nextEndsAt)}.`,
+  todoUntil: (endsAt: string) => `Or a to-do until ${clockLabel(endsAt)}`,
+  announceComplete: (block: string) => `${block} complete.`,
+  breakTitle: "Break",
+  endBreak: "End break",
+  blocksDone: "The day's blocks are done.",
   took: (min: number) => `Took ${min} min ·`,
   change: "Change",
   announceDone: (title: string, next: string | null) =>
