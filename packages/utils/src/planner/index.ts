@@ -161,3 +161,12 @@ export {
   type MealTopicLink,
   type MealTopicLinkKind,
 } from "./meal-topic";
+export {
+  WELCOME_BAR_END_MIN,
+  welcomeView,
+  type WelcomeBlock,
+  type WelcomeLayout,
+  type WelcomeRow,
+  type WelcomeSegment,
+  type WelcomeView,
+} from "./welcome";
