@@ -9,6 +9,7 @@ import {
   NextCard,
   RunningWorkCard,
   StartWhileOneRuns,
+  TierAddRow,
   TierGroup,
   WaitingGroup,
   WhileItFiresLine,
@@ -17,6 +18,7 @@ import {
 } from "@/components/work";
 import { NewTaskSheet } from "@/components/work/add";
 import { shortDate } from "@/components/work/add/new-task/form";
+import { PLACE_IDS } from "@/lib/data/place";
 import { useDataSource } from "@/lib/data/source";
 import { TIER_EDGE_COPY } from "@/lib/data/tier-edges";
 import {
@@ -27,6 +29,7 @@ import {
 import type { useTodayLinear } from "@/lib/data/use-today-linear";
 import type { useWorkLoop } from "@/lib/data/use-today-work";
 import { WORK_COPY as COPY } from "./copy";
+import { EMPTY_COPY } from "./empty-copy";
 
 /**
  * Today's tiers, at the desk and inside Now's Work block alike (USE-57): each
@@ -55,6 +58,11 @@ import { WORK_COPY as COPY } from "./copy";
  * toast names the next session; the task and Linear are untouched. The
  * scenarios `today-ask` and `today-done-for-today` stage the ask and the
  * toast on load (held until Undo) for their captures.
+ *
+ * Nothing slotted (USE-82): `unplanned` draws each empty tier's add row
+ * under its heading, always shown; at the desk with nothing planned the
+ * tiers take pool rows dropped on them, Primary as the dashed zone "Drop
+ * here, or + Add to Primary" (D-USE-42). Each opens New task with the tier.
  */
 export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
   view: TodayWorkView;
@@ -69,6 +77,8 @@ export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
    * Next back in its row. The desk names them on its band instead (D-USE-77).
    */
   meetingsInFlow?: boolean;
+  /** Nothing slotted today (USE-82); `dropZones` while the pool is docked beside. */
+  unplanned?: { dropZones: boolean } | null;
   className?: string;
 }
 
@@ -80,6 +90,7 @@ export function WorkTiers({
   onCheckReminder,
   headingAs = "h2",
   meetingsInFlow = false,
+  unplanned = null,
   className,
   onOpen,
 }: WorkTiersProps) {
@@ -107,6 +118,25 @@ export function WorkTiers({
             onAdd: () => setAddTier(tier),
           }
         : null;
+  const emptyRow = (tier: WorkTier, word: string) =>
+    unplanned ? (
+      <TierAddRow
+        variant={atDesk ? "desk" : "phone"}
+        label={atDesk ? EMPTY_COPY.plusAddTo(word) : EMPTY_COPY.addTo(word)}
+        name={TIER_EDGE_COPY.addToName(word)}
+        dropLead={
+          atDesk && unplanned.dropZones && tier === "primary"
+            ? EMPTY_COPY.dropHere
+            : undefined
+        }
+        dropId={
+          atDesk && unplanned.dropZones
+            ? PLACE_IDS.cell(view.dateKey, tier)
+            : undefined
+        }
+        onAdd={() => setAddTier(tier)}
+      />
+    ) : null;
   const titleOf = (id: string) =>
     view.tiers.flatMap((group) => group.rows).find((row) => row.id === id)
       ?.title ?? "";
@@ -298,7 +328,12 @@ export function WorkTiers({
           rows={group.rows}
           headingAs={headingAs}
           helper={group.helper}
-          add={addFor(group.tier, group.word, group.rows.length === 0)}
+          add={
+            unplanned
+              ? null
+              : addFor(group.tier, group.word, group.rows.length === 0)
+          }
+          empty={emptyRow(group.tier, group.word)}
           lifted={
             lifted && group.rows.some((row) => row.id === lifted.rowId)
               ? lifted

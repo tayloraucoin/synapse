@@ -3,16 +3,28 @@
 import * as React from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { SlotEventKind } from "@syn/types";
-import { clockAt, tookMinutes, weekKeyOf } from "@syn/utils";
+import {
+  addDays,
+  clockAt,
+  clockMinutes,
+  instantToWallClockMinutes,
+  tookMinutes,
+  weekKeyOf,
+  type WorkTier,
+} from "@syn/utils";
+import { todayEmpty, type LeftOpen } from "./left-open";
+import { nextSortOrder, workBlocksOf, type PlaceSource } from "./place";
 import { slotEventFor } from "./running";
 import { useDataSource } from "./source";
 import { deriveTodayWork, todayTodos, type TodayWorkView } from "./today-work";
 import { useClients } from "./use-clients";
 import { useLinear } from "./use-linear";
+import { usePlace } from "./use-place";
 import { usePool } from "./use-pool";
 import { useSlotEvents } from "./use-slot-events";
 import { todayQueryKey, useToday } from "./use-today";
 import { useTodos } from "./use-todos";
+import { useWeek } from "./use-week";
 import { useWeekView } from "./use-week-view";
 import { useWorkWrites } from "./use-work-writes";
 
@@ -26,6 +38,9 @@ import { useWorkWrites } from "./use-work-writes";
  * The tiers wait for the day and the Week's read alike [ASSUMPTION: a
  * session's "1 of 3" is the Week's, counted over the pool]; either failing is
  * Today's tiers failing, and `retry` reads both again.
+ *
+ * Nothing slotted (USE-82): `empty`, `bringIn` and `placeAt` are
+ * `useTodayPlacing`'s.
  */
 export function useTodayWork(dateKey: string, now: Date) {
   const today = useToday(dateKey);
@@ -34,6 +49,7 @@ export function useTodayWork(dateKey: string, now: Date) {
   const { issueFor, subIssuesFor } = useLinear();
   const todos = useTodos(dateKey);
   const pool = usePool();
+  const placing = useTodayPlacing(dateKey);
 
   // Firing reads whole minutes: the view is derived again on the minute.
   const minute = Math.floor(now.getTime() / 60_000);
@@ -66,14 +82,104 @@ export function useTodayWork(dateKey: string, now: Date) {
 
   return {
     view,
+    empty: placing.empty,
+    bringIn: placing.bringIn,
+    placeAt: placing.placeAt,
+    /** The last placing's words, for a polite live region. */
+    placed: placing.announcement,
     todos: todoRows,
-    isError: today.isError || week.isError,
+    isError: today.isError || week.isError || placing.isError,
     retry: () => {
       void today.retry();
       void week.retry();
+      placing.retry();
     },
     checkTodo: (id: string, checked: boolean) =>
       void (checked ? todos.check(id) : todos.uncheck(id)),
+  };
+}
+
+/**
+ * Today with nothing slotted (USE-82): `empty` is nothing planned, with what
+ * the last workday left open, or no work slotted; undefined until this week
+ * and the one before have read, null on a day with work. Placing goes
+ * through USE-75's `usePlace`: `placeAt` one item at a tier, `bringIn` the
+ * checked ones at their old tiers, the rest left in the pool. Both land in
+ * the Work block under way, else the day's next, else its first, after the
+ * block's own slots [ASSUMPTION].
+ */
+export function useTodayPlacing(dateKey: string) {
+  const source = useDataSource();
+  const week = useWeek(weekKeyOf(dateKey));
+  const before = useWeek(weekKeyOf(addDays(dateKey, -7)));
+  const placer = usePlace();
+  const days = React.useMemo(
+    () =>
+      week.week && before.week
+        ? [...before.week.days, ...week.week.days]
+        : null,
+    [week.week, before.week],
+  );
+  const empty = React.useMemo(
+    () => (days ? todayEmpty(dateKey, days) : undefined),
+    [days, dateKey],
+  );
+  const todayDay = days?.find((entry) => entry.date === dateKey) ?? null;
+
+  const landing = () => {
+    if (!todayDay) return null;
+    const work = workBlocksOf(todayDay);
+    const minute = instantToWallClockMinutes(
+      source.now(),
+      source.scenario.records.timeZone,
+    );
+    const block =
+      work.find((entry) => clockMinutes(entry.endsAt) > minute) ??
+      work[0] ??
+      null;
+    if (!block) return null;
+    return {
+      blockId: block.block.id,
+      sortOrder: nextSortOrder(
+        todayDay.blocks.flatMap((entry) => entry.slots),
+        block.block.id,
+        dateKey,
+      ),
+    };
+  };
+
+  const placeAt = async (
+    from: PlaceSource & { title?: string },
+    tier: WorkTier,
+  ) => {
+    const at = landing();
+    if (at) await placer.place(from, { dateKey, tier, ...at });
+  };
+
+  const bringIn = async (open: LeftOpen, slotIds: ReadonlySet<string>) => {
+    const at = landing();
+    if (!at) return;
+    const chosen = open.items.filter((item) => slotIds.has(item.slotId));
+    for (const [index, item] of chosen.entries()) {
+      await placer.place(
+        { workItemId: item.workItemId, title: item.title },
+        {
+          dateKey,
+          tier: item.tier,
+          blockId: at.blockId,
+          sortOrder: at.sortOrder + index,
+        },
+      );
+    }
+  };
+
+  return {
+    empty,
+    placeAt,
+    bringIn,
+    announcement: placer.announcement,
+    isError: before.isError,
+    retry: () => void before.retry(),
   };
 }
 

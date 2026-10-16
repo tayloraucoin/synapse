@@ -39,6 +39,7 @@ import {
   STEP_AWAY_SCENARIOS,
   TODAY_DESK_SCENARIOS,
 } from "./scenarios/today-desk";
+import { TODAY_EMPTY_SCENARIOS } from "./scenarios/today-empty";
 import { TODAY_MEETING_SCENARIOS } from "./scenarios/today-meetings";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
 import { WEEK_SCENARIOS } from "./scenarios/week";
@@ -293,6 +294,10 @@ for (const state of Object.keys(TODAY_DESK_SCENARIOS)) {
 }
 // USE-60: Step away, the ask and a session's Done, on the same frame.
 for (const state of Object.keys(STEP_AWAY_SCENARIOS)) {
+  registerPart(state, () => createElement(TodayDeskPart));
+}
+// USE-82: nothing planned and no work slotted, on the same frame.
+for (const state of Object.keys(TODAY_EMPTY_SCENARIOS)) {
   registerPart(state, () => createElement(TodayDeskPart));
 }
 // USE-27: Schedule's states, `schedule-<state>` (the drawn four by their names).

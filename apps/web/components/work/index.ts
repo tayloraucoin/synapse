@@ -15,6 +15,12 @@ export {
 } from "./start-while-one-runs";
 export { StepAwayBar, type StepAwayBarProps } from "./step-away-bar";
 export {
+  StartCard,
+  type StartCardItem,
+  type StartCardProps,
+} from "./start-card";
+export { TierAddRow, type TierAddRowProps } from "./tier-add-row";
+export {
   TierGroup,
   type TierGroupAdd,
   type TierGroupProps,

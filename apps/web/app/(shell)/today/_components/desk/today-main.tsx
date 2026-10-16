@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
 import { Button, GroupHeading, StepAwayIcon, Text } from "@syn/ui";
@@ -10,6 +11,7 @@ import {
 } from "@/components/planner";
 import {
   LiftedMeeting,
+  StartCard,
   WorkNextStrip,
   WorkRetry,
   WorkTiersSkeleton,
@@ -19,9 +21,10 @@ import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { dayTitle, wallWords } from "@/lib/data/today-work";
 import { useTodayLinear } from "@/lib/data/use-today-linear";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
-import { itemSheetRoute, todoSheetRoute } from "@/lib/routes";
+import { itemSheetRoute, todoSheetRoute, weekRoute } from "@/lib/routes";
 import { PushCheck } from "../push-check";
 import { WORK_COPY as COPY } from "../work/copy";
+import { EMPTY_COPY } from "../work/empty-copy";
 import { useStepAway } from "../work/use-step-away";
 import { WorkTiers } from "../work/work-tiers";
 
@@ -43,6 +46,12 @@ import { WorkTiers } from "../work/work-tiers";
  *
  * Step away (USE-60, D-USE-46) sits left of + Add while a work timer runs;
  * while it holds, its bar sits under the title, above the band.
+ *
+ * Nothing slotted (USE-82): with work left open on the last workday, the
+ * start card under the band offers each item at its old tier, Add both as
+ * they were and Plan the week (D-USE-42), the pool docked beside by the
+ * frame; with nothing left open, one line to the Week (D-USE-65). The tiers
+ * show their add rows either way.
  */
 export function TodayMain() {
   const source = useDataSource();
@@ -180,11 +189,53 @@ export function TodayMain() {
               go={null}
             />
           ) : null}
+          {work.empty?.kind === "nothing-planned" ? (
+            <StartCard
+              variant="desk"
+              title={EMPTY_COPY.deskTitle}
+              lead={EMPTY_COPY.deskLead}
+              heading={EMPTY_COPY.leftOpenOn(work.empty.leftOpen.weekday)}
+              items={work.empty.leftOpen.items}
+              words={{
+                was: EMPTY_COPY.was,
+                addTo: EMPTY_COPY.addTo,
+                addName: EMPTY_COPY.addName,
+                addAll: EMPTY_COPY.addAll(work.empty.leftOpen.items.length),
+                planTheWeek: EMPTY_COPY.planTheWeek,
+              }}
+              onAdd={(slotId) => {
+                if (work.empty?.kind !== "nothing-planned") return;
+                const open = work.empty.leftOpen;
+                void work.bringIn(open, new Set([slotId]));
+              }}
+              onAddAll={() => {
+                if (work.empty?.kind !== "nothing-planned") return;
+                const open = work.empty.leftOpen;
+                void work.bringIn(
+                  open,
+                  new Set(open.items.map((item) => item.slotId)),
+                );
+              }}
+              onPlanTheWeek={() => router.push(weekRoute())}
+            />
+          ) : work.empty?.kind === "no-work-slotted" ? (
+            <Text as="p" variant="secondary" tone="muted" weight={400}>
+              {EMPTY_COPY.deskNone}{" "}
+              <Link href={weekRoute()} className="text-ink underline">
+                {EMPTY_COPY.planTheWeek}
+              </Link>
+            </Text>
+          ) : null}
           <WorkTiers
             view={view}
             now={now}
             loop={loop}
             linear={linear}
+            unplanned={
+              work.empty
+                ? { dropZones: work.empty.kind === "nothing-planned" }
+                : null
+            }
             className="pt-(--space-2)"
             onOpen={openItem}
             onCheckReminder={work.checkTodo}
@@ -222,6 +273,9 @@ export function TodayMain() {
         </section>
       ) : null}
 
+      <p aria-live="polite" className="sr-only">
+        {work.placed}
+      </p>
       <PushCheck />
     </div>
   );

@@ -1,19 +1,26 @@
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
-import { Text } from "@syn/ui";
+import { SettingsRow, Text } from "@syn/ui";
 import { DayBlockHeader, OfflineLine } from "@/components/planner";
-import { AllFiringCard, WorkRetry, WorkTiersSkeleton } from "@/components/work";
+import {
+  AllFiringCard,
+  StartCard,
+  WorkRetry,
+  WorkTiersSkeleton,
+} from "@/components/work";
+import { PoolSheet, type PoolPlaceRef } from "@/components/work/pool-sheet";
 import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { stillOpenView } from "@/lib/data/tier-edges";
 import { TODAY_WORK_COPY } from "@/lib/data/today-work";
 import type { NowBlockView } from "@/lib/data/use-now";
 import { useTodayLinear } from "@/lib/data/use-today-linear";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
-import { itemSheetRoute } from "@/lib/routes";
+import { daysRoute, itemSheetRoute } from "@/lib/routes";
 import { WORK_COPY as COPY } from "../work/copy";
+import { EMPTY_COPY } from "../work/empty-copy";
 import { useStepAway } from "../work/use-step-away";
 import { WorkTiers } from "../work/work-tiers";
 
@@ -30,6 +37,13 @@ import { WorkTiers } from "../work/work-tiers";
  * The day's later Work block (USE-61, later-work-block.md) shows only what is
  * still open, under a quiet line naming where the done work stays; a firing
  * item stays in its tier, firing. The desk keeps the day's tiers whole.
+ *
+ * Nothing slotted (USE-82, D-USE-56): with work left open on the last
+ * workday, the start card stands in the tiers' place, each item checked at
+ * its old tier, Bring these in placing the checked ones and Open the pool
+ * opening the pool sheet over Now, set to today [ASSUMPTION]; under it,
+ * nothing is marked missed. With nothing left open, the line, each tier's
+ * add row and the Plan the week row to Set my days › This week.
  */
 export function WorkBlockNow({
   block,
@@ -53,6 +67,23 @@ export function WorkBlockNow({
   const pathname = usePathname();
   const search = useSearchParams().toString();
   const here = search ? `${pathname}?${search}` : pathname;
+  const [poolOpen, setPoolOpen] = React.useState(false);
+  const empty = work.empty;
+  // [ASSUMPTION] A pick from the pool lands at its old tier when it was left open, else Primary.
+  const placeFromPool = (ref: PoolPlaceRef) => {
+    const left =
+      empty?.kind === "nothing-planned" && ref.kind === "item"
+        ? empty.leftOpen.items.find(
+            (item) => item.workItemId === ref.workItemId,
+          )
+        : undefined;
+    void work.placeAt(
+      ref.kind === "item"
+        ? { workItemId: ref.workItemId, title: ref.title }
+        : { issueId: ref.issueId, title: ref.title },
+      left?.tier ?? "primary",
+    );
+  };
 
   const detail =
     view?.band?.id === block.id
@@ -102,22 +133,69 @@ export function WorkBlockNow({
               onCheckedChange={work.checkTodo}
             />
           ) : null}
-          <WorkTiers
-            view={view}
-            now={now}
-            loop={loop}
-            linear={linear}
-            headingAs="h3"
-            meetingsInFlow
-            onOpen={(slotId) => {
-              const item = view.workItemIds.get(slotId);
-              if (item)
-                router.push(itemSheetRoute(here, item), { scroll: false });
-            }}
-            onCheckReminder={work.checkTodo}
-          />
+          {empty?.kind === "nothing-planned" ? (
+            <div className="flex flex-col gap-(--space-3)">
+              <StartCard
+                variant="phone"
+                title={EMPTY_COPY.phoneTitle}
+                lead={EMPTY_COPY.phoneLead(empty.leftOpen.weekday)}
+                items={empty.leftOpen.items}
+                words={{
+                  openThePool: EMPTY_COPY.openThePool,
+                  bringIn: EMPTY_COPY.bringIn,
+                }}
+                onOpenPool={() => setPoolOpen(true)}
+                onBringIn={(slotIds) =>
+                  void work.bringIn(empty.leftOpen, slotIds)
+                }
+              />
+              <Text as="p" variant="secondary" tone="muted" weight={400}>
+                {EMPTY_COPY.notBrought}
+              </Text>
+            </div>
+          ) : null}
+          {empty?.kind === "no-work-slotted" ? (
+            <Text as="p" variant="secondary" tone="muted" weight={400}>
+              {EMPTY_COPY.phoneNone}
+            </Text>
+          ) : null}
+          {empty?.kind === "nothing-planned" ? null : (
+            <WorkTiers
+              view={view}
+              now={now}
+              loop={loop}
+              linear={linear}
+              unplanned={empty ? { dropZones: false } : null}
+              headingAs="h3"
+              meetingsInFlow
+              onOpen={(slotId) => {
+                const item = view.workItemIds.get(slotId);
+                if (item)
+                  router.push(itemSheetRoute(here, item), { scroll: false });
+              }}
+              onCheckReminder={work.checkTodo}
+            />
+          )}
+          {empty?.kind === "no-work-slotted" ? (
+            <ul className="rounded-(--radius-sheet) border border-hairline">
+              <SettingsRow
+                title={EMPTY_COPY.planTheWeek}
+                description={EMPTY_COPY.planTheWeekLine}
+                href={daysRoute({ week: "this" })}
+              />
+            </ul>
+          ) : null}
         </>
       )}
+      <PoolSheet
+        open={poolOpen}
+        onOpenChange={setPoolOpen}
+        dateKey={dateKey}
+        onPlace={placeFromPool}
+      />
+      <p aria-live="polite" className="sr-only">
+        {work.placed}
+      </p>
     </section>
   );
 }
