@@ -17,6 +17,7 @@ import { MealTopicPart, type MealTopicPartState } from "./meal-topic-parts";
 import { NewBlockSheetPart } from "./new-block-parts";
 import { NowPart, type NowPartState } from "./now-parts";
 import { OrientPart, type OrientPartState } from "./orient-parts";
+import { PlaceSheetPart } from "./place-sheet-parts";
 import { PoolSheetPart } from "./pool-sheet-parts";
 import { ReadyPart, type ReadyPartState } from "./ready-parts";
 import {
@@ -30,19 +31,20 @@ import { BLOCK_VIEW_SCENARIOS } from "./scenarios/block-view";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { NEW_BLOCK_SCENARIOS } from "./scenarios/new-block";
 import {
+  PLACE_SHEET_SCENARIOS,
+  type PlaceSheetScenarioName,
+} from "./scenarios/place-sheet";
+import {
   POOL_SHEET_SCENARIOS,
   type PoolSheetScenarioName,
 } from "./scenarios/pool-sheet";
 import { DAYS_SCENARIOS } from "./scenarios/set-up";
 import { SETTINGS_SCENARIOS } from "./scenarios/settings";
 import {
-  PLACE_SHEET_SCENARIOS,
-  type PlaceSheetScenarioName,
-} from "./scenarios/place-sheet";
-import {
   SPREAD_PHONE_SCENARIOS,
   type SpreadPhoneScenarioName,
 } from "./scenarios/spread";
+import { THIS_WEEK_DAY_SCENARIOS } from "./scenarios/this-week-day";
 import {
   GESTURE_SCENARIOS,
   STEP_AWAY_SCENARIOS,
@@ -55,7 +57,6 @@ import { WEEK_SCENARIOS } from "./scenarios/week";
 import { SchedulePart, type SchedulePartState } from "./schedule-parts";
 import { SettingsClientsPart } from "./settings-parts";
 import { SpreadPhonePart } from "./spread-parts";
-import { PlaceSheetPart } from "./place-sheet-parts";
 import { TodayDeskPart } from "./today-desk-parts";
 import { TodoSheetPart } from "./todo-sheet-parts";
 import {
@@ -361,4 +362,8 @@ for (const state of Object.keys(PLACE_SHEET_SCENARIOS)) {
   registerPart(state, () =>
     createElement(PlaceSheetPart, { state: state as PlaceSheetScenarioName }),
   );
+}
+// USE-81: This week's day with its work parts, on Set my days.
+for (const state of Object.keys(THIS_WEEK_DAY_SCENARIOS)) {
+  registerPart(state, () => createElement(DaysPart));
 }

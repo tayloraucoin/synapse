@@ -72,6 +72,8 @@ import { useSwipeAway } from "./use-swipe-away";
  * and `now` (the rail tag and its faint line). With no `onBullet` the
  * bullets are words the block's button describes, not controls.
  *
+ * THIS WEEK (USE-81) may draw a Work block's parts itself (`workParts`).
+ *
  * SET MY DAYS (USE-42) adds, each optional: an item's `icon` in place of
  * its dot, a tier's coloured square (`tierHue`), a block's `marker` ("This
  * day only" with a pencil), `ringed` (just changed) and `moved` (the ink
@@ -187,6 +189,12 @@ export interface DayColumnProps {
   onSwipeAway?: (blockId: string) => Promise<unknown> | void;
   /** A Work block with nothing slotted draws this in place of its tiers (USE-37). */
   emptyWork?: (block: DayColumnBlock) => React.ReactNode;
+  /**
+   * A Work block's own parts in place of its tiers' lines (USE-81: This
+   * week's tiers in place, session marks, due words and the fit line);
+   * undefined keeps the lines. Its muted `lines` still come first.
+   */
+  workParts?: (block: DayColumnBlock) => React.ReactNode | undefined;
   /** Muted lines on the open rail at their minute: "Free until 19:00." (USE-39). */
   openLines?: readonly { atMin: number; text: string }[];
   /**
@@ -275,6 +283,7 @@ export function DayColumn({
   className,
   onSwipeAway,
   emptyWork,
+  workParts,
   openLines = [],
   onRail,
   tapped = null,
@@ -369,9 +378,10 @@ export function DayColumn({
                 onBullet ? (itemId) => onBullet(block.id, itemId) : undefined
               }
               empty={
-                block.form === "work" && block.tiers.length === 0
-                  ? emptyWork?.(block)
-                  : undefined
+                block.form !== "work"
+                  ? undefined
+                  : (workParts?.(block) ??
+                    (block.tiers.length === 0 ? emptyWork?.(block) : undefined))
               }
             />
           );

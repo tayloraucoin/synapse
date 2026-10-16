@@ -377,7 +377,9 @@ export function usePlaceSheet(
         : { issueId: source.issueId };
 
   /** Place on the picked days; `only` places on that one day instead (Use Thu). */
-  async function place(only?: string): Promise<string[] | null> {
+  async function place(
+    only?: string,
+  ): Promise<{ dates: string[]; workItemId: string } | null> {
     const from = placeSource();
     if (!view || !week || !item || !from) return null;
     const targets = only
@@ -397,7 +399,9 @@ export function usePlaceSheet(
       : { targets: view.targets, toast: view.toast };
     if (targets.targets.length === 0) return null;
     const landed = await placing.placeAll(from, targets.targets, targets.toast);
-    return landed === null ? null : targets.targets.map((t) => t.dateKey);
+    return landed === null
+      ? null
+      : { dates: targets.targets.map((t) => t.dateKey), workItemId: landed };
   }
 
   return {

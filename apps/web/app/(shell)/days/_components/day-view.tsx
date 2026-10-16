@@ -17,7 +17,13 @@ import {
   DayColumn,
   OfflineLine,
 } from "@/components/planner";
+import { DAY_COLUMN_COPY } from "@/components/planner/day-column/copy";
 import { TIER_HUE } from "@/components/work";
+import {
+  PoolButton,
+  ThisWeekPool,
+  WorkTiersInPlace,
+} from "@/components/work/this-week";
 import {
   clearWords,
   dayTitle,
@@ -29,16 +35,18 @@ import {
   weekdayName,
 } from "@/lib/data/set-up-view";
 import { useDataSource } from "@/lib/data/source";
+import { workPartsOf } from "@/lib/data/this-week-day";
 import { useSetUpColumnRead, type DaysPlace } from "@/lib/data/use-days";
 import type { usePlannerWrites } from "@/lib/data/use-planner-writes";
+import { usePool } from "@/lib/data/use-pool";
 import type { SetUpDay } from "@/lib/data/use-set-up-day";
-import { useWeek } from "@/lib/data/use-week";
+import { useOpeningWeek, useWeek } from "@/lib/data/use-week";
 import {
   ABOVE_FOOTER_TOASTER,
   AboveFooterToaster,
   useUndoToast,
 } from "@/lib/hooks/use-undo-toast";
-import { daysRoute, newBlockSheetRoute } from "@/lib/routes";
+import { daysRoute, itemSheetRoute, newBlockSheetRoute } from "@/lib/routes";
 import { DAYS_COPY as COPY } from "./copy";
 import { EmptyDayOffer, useCopyFrom } from "./copy-from";
 import {
@@ -68,6 +76,14 @@ import { useRepeatMove } from "./repeat-move";
  * gives way to the StatusLine (D-USE-82). Reach, overlaps and own changes
  * come from the set-up hooks.
  *
+ * USE-81: a day of this week gains its work parts on the phone and in the
+ * pane (D-USE-107): each Work block open to its tiers in place
+ * (WorkTiersInPlace: squares and words, session marks, the day's due
+ * words, "+ Add to <tier>", the fit line in ink), the day's own events on
+ * their own at their times, and Pool beside the + (PoolButton, the pool and
+ * place sheets over the day). Offline the StatusLine sits above the foot,
+ * Pool stays live and the + is read-only (D-USE-82 with D-USE-56).
+ *
  * USE-45: an empty day offers Copy from under Orient (the offer alone just
  * after its bounds are set, else the dashed card), and the ··· and the +
  * open Copy from's pickers.
@@ -86,9 +102,7 @@ export interface DayViewProps {
 
 type Bounds = { upAt: string; lightsOut: string };
 /** What a planner write hands back: its Undo, and a usual change's reach. */
-type PlannerWrite = Awaited<
-  ReturnType<DayViewProps["writes"]["editBlock"]>
->;
+type PlannerWrite = Awaited<ReturnType<DayViewProps["writes"]["editBlock"]>>;
 
 const CHIP_LETTERS = ["M", "T", "W", "T", "F", "S", "S"] as const;
 
@@ -314,6 +328,30 @@ function SetDay({
     start?.day === place.day ? (start.moved ?? null) : null,
   );
   const [clearing, setClearing] = React.useState(false);
+
+  // This week's work parts (USE-81).
+  const { thisWeek: thisWeekKey } = useOpeningWeek();
+  const source = useDataSource();
+  const todayKey = source.todayKey();
+  const thisWeek = place.date !== null && place.week === thisWeekKey;
+  const pool = usePool();
+  const parts = React.useMemo(
+    () =>
+      thisWeek
+        ? workPartsOf({ day, slots: pool.slots ?? [], todayKey })
+        : new Map(),
+    [thisWeek, day, pool.slots, todayKey],
+  );
+  const past = place.date !== null && place.date < todayKey;
+  const [poolOpen, setPoolOpen] = React.useState(false);
+  const poolRef = React.useRef<HTMLButtonElement>(null);
+  const [marked, setMarked] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    if (marked === null) return;
+    // [ASSUMPTION] The mark fades as the desk drop's ink edge does.
+    const timer = window.setTimeout(() => setMarked(null), UNDO_SHORT_MS);
+    return () => window.clearTimeout(timer);
+  }, [marked]);
 
   // The column reads the bounds as typed, so Orient moves with Up at at once.
   const upAt = bounds.value("upAt");
@@ -584,6 +622,34 @@ function SetDay({
           }
           openLines={ready ? view.openLines : []}
           tierHue={TIER_HUE}
+          workParts={
+            thisWeek && ready
+              ? (block) => {
+                  const own = parts.get(block.id);
+                  if (!own) return undefined;
+                  return (
+                    <WorkTiersInPlace
+                      parts={own}
+                      past={past}
+                      marked={marked}
+                      onRow={(workItemId) =>
+                        router.push(itemSheetRoute(here(), workItemId))
+                      }
+                      onAdd={() =>
+                        router.push(
+                          daysRoute({
+                            week: place.week,
+                            day: place.day,
+                            block: block.id,
+                          }),
+                        )
+                      }
+                    />
+                  );
+                }
+              : undefined
+          }
+          events={thisWeek && ready ? ownEvents(day) : []}
           overlaps={
             ready
               ? view.overlaps.map((pair) => ({
@@ -675,30 +741,87 @@ function SetDay({
           <AboveFooterToaster />
         </div>
         {repeatMove.element}
-        {offline ? (
+        {offline && !thisWeek ? (
           // D-USE-82: the + gives way to the line; a block still opens.
           <div className="pointer-events-auto -mx-(--space-4) -mb-(--space-4)">
             <OfflineLine text={COPY.offline} />
           </div>
         ) : (
-          <div className="flex items-end gap-(--space-3)">
-            <div className="pointer-events-auto min-w-0 flex-1">{offer}</div>
-            <div className="pointer-events-auto shrink-0">
-              <PlusMenu
-                day={dayName}
-                disabled={!ready}
-                event={place.date !== null}
-                defaultOpen={start?.menu === "plus"}
-                savedDisabled={!copyFrom.hasSaved}
-                triggerRef={copyFrom.plusRef}
-                onBlock={() => sheetAt()}
-                onTransition={() => sheetAt(undefined, "transition")}
-                onSaved={copyFrom.openSaved}
-              />
+          <div className="flex flex-col gap-(--space-3)">
+            {offline ? (
+              // This week (USE-81): the line above the foot, Pool live, the + read-only.
+              <div className="pointer-events-auto -mx-(--space-4)">
+                <OfflineLine text={COPY.offline} />
+              </div>
+            ) : null}
+            <div className="flex items-end gap-(--space-3)">
+              {thisWeek ? (
+                <div className="pointer-events-auto shrink-0">
+                  <PoolButton
+                    ref={poolRef}
+                    disabled={!ready}
+                    onOpen={() => setPoolOpen(true)}
+                  />
+                </div>
+              ) : null}
+              <div className="pointer-events-auto min-w-0 flex-1">
+                {offline ? null : offer}
+              </div>
+              <div className="pointer-events-auto shrink-0">
+                <PlusMenu
+                  day={dayName}
+                  disabled={!ready || offline}
+                  event={place.date !== null}
+                  defaultOpen={start?.menu === "plus"}
+                  savedDisabled={!copyFrom.hasSaved}
+                  triggerRef={copyFrom.plusRef}
+                  onBlock={() => sheetAt()}
+                  onTransition={() => sheetAt(undefined, "transition")}
+                  onSaved={copyFrom.openSaved}
+                />
+              </div>
             </div>
           </div>
         )}
       </div>
+      {thisWeek && place.date !== null ? (
+        <ThisWeekPool
+          open={poolOpen}
+          onOpenChange={setPoolOpen}
+          dateKey={place.date}
+          returnFocusRef={poolRef}
+          onPlaced={(workItemId, dates) => {
+            if (place.date !== null && dates.includes(place.date)) {
+              setMarked(workItemId);
+            }
+          }}
+        />
+      ) : null}
     </div>
   );
+}
+
+/**
+ * The day's events outside every block, on their own at their times (USE-81:
+ * "15:30 [Dentist]", a plum band). One inside a block is that block's.
+ */
+function ownEvents(day: SetUpDay) {
+  const minutes = (time: string) => clockMinutes(time);
+  return day.events
+    .filter(
+      (event) =>
+        !day.blocks.some(
+          (b) =>
+            minutes(event.startsAt) < minutes(b.endsAt) &&
+            minutes(event.endsAt) > minutes(b.startsAt),
+        ),
+    )
+    .map((event) => ({
+      id: event.id,
+      title: event.title,
+      startsAt: event.startsAt,
+      endsAt: event.endsAt,
+      hue: "plum" as const,
+      meta: DAY_COLUMN_COPY.eventMeta(event.startsAt, event.endsAt, event.tag),
+    }));
 }

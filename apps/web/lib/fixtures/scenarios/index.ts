@@ -18,6 +18,7 @@ import { NOW_END_SCENARIOS } from "./now-end";
 import { NOW_FORM_SCENARIOS } from "./now-forms";
 import { NOW_SYSTEM_SCENARIOS } from "./now-system";
 import { ORIENT_SCENARIOS } from "./orient-morning";
+import { PLACE_SHEET_SCENARIOS } from "./place-sheet";
 import { POOL_SCENARIOS } from "./pool";
 import { POOL_SHEET_SCENARIOS } from "./pool-sheet";
 import { READY_SCENARIOS } from "./ready-welcome";
@@ -27,7 +28,7 @@ import { SCHEDULE_SCENARIOS } from "./schedule";
 import { SET_UP_SCENARIOS, type SetUpScenarioStart } from "./set-up";
 import { SETTINGS_SCENARIOS } from "./settings";
 import { SPREAD_PHONE_SCENARIOS } from "./spread";
-import { PLACE_SHEET_SCENARIOS } from "./place-sheet";
+import { THIS_WEEK_DAY_SCENARIOS } from "./this-week-day";
 import {
   GESTURE_SCENARIOS,
   STEP_AWAY_SCENARIOS,
@@ -260,6 +261,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...SPREAD_PHONE_SCENARIOS,
   // ---- Place on the phone (USE-80): the place sheet, placed with Undo, doesn't fit ----
   ...PLACE_SHEET_SCENARIOS,
+  // ---- This week's day on the phone (USE-81): work tiers, Pool, the edges ----
+  ...THIS_WEEK_DAY_SCENARIOS,
   // ---- Linear, Google and clients (USE-56): off, a failed write, closed in Linear, clients ----
   ...INTEGRATION_SCENARIOS,
   // ---- Settings › Connections, clients on, and its two sheets (USE-86) ----

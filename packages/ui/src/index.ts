@@ -1072,6 +1072,9 @@ export { ExternalLinkIcon as OpenInLinearIcon } from "lucide-react";
 /** A linked item's ··· › Unlink from Linear (USE-66). */
 export { Link2OffIcon as UnlinkIcon } from "lucide-react";
 
+/** A session of a spread task, beside its "2 of 3" (USE-81, D-USE-102). */
+export { LinkIcon as SessionIcon } from "lucide-react";
+
 /* ---- composed: carry a pool row onto a day (USE-75) ---- */
 export {
   DragToPlace,

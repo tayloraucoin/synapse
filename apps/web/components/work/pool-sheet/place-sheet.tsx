@@ -52,8 +52,8 @@ export interface PlaceSheetProps {
   /** The day it opens over: picked first, and due words count from it. */
   dateKey: string;
   onClose: () => void;
-  /** Placed: the days it landed on. */
-  onPlaced?: (dateKeys: string[]) => void;
+  /** Placed: the days it landed on, and the item (an issue's new one). */
+  onPlaced?: (dateKeys: string[], workItemId: string) => void;
   returnFocusRef?: React.RefObject<HTMLElement | null>;
   /** A capture's start: its picks and tier, or placed at once. */
   initial?: { picked?: string[]; tier?: WorkTier; place?: boolean };
@@ -91,9 +91,9 @@ export function PlaceSheet({
   }, [open]);
 
   async function place(only?: string) {
-    const days = await sheet.place(only);
-    if (!days) return;
-    onPlaced?.(days);
+    const placed = await sheet.place(only);
+    if (!placed) return;
+    onPlaced?.(placed.dates, placed.workItemId);
     onClose();
   }
 
@@ -180,11 +180,7 @@ export function PlaceSheet({
       >
         {view ? (
           <div className="flex flex-col">
-            <DayChips
-              view={view}
-              compact={folded}
-              onToggle={sheet.toggleDay}
-            />
+            <DayChips view={view} compact={folded} onToggle={sheet.toggleDay} />
             {folded && !tierOpen ? (
               <button
                 type="button"
