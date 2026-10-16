@@ -21,11 +21,14 @@ import {
   passageRecord,
   quoteRecord,
 } from "@syn/validators";
-import type { MorningDayRecords, ReadingRecords } from "@/lib/data/morning-records";
 import type { JournalRecords } from "@/lib/data/journal-records";
-import type { TrpcClient } from "@/lib/trpc/client";
-import { JournalWriteRefusal, MorningLinesRefusal } from "@/lib/data/refusals";
 import { orientDomain } from "@/lib/data/live/orient";
+import type {
+  MorningDayRecords,
+  ReadingRecords,
+} from "@/lib/data/morning-records";
+import { JournalWriteRefusal, MorningLinesRefusal } from "@/lib/data/refusals";
+import type { TrpcClient } from "@/lib/trpc/client";
 
 /**
  * USE-96's C1 to C4: the day's stamps, the readied-before read, the
@@ -82,10 +85,11 @@ function memoryOldTables(
     lines?: Record<string, Lines>;
     optIn?: boolean;
   } = {},
-): MorningStore & JournalStore & {
-  answers: Record<string, Record<string, string>>;
-  lines: Record<string, Lines>;
-} {
+): MorningStore &
+  JournalStore & {
+    answers: Record<string, Record<string, string>>;
+    lines: Record<string, Lines>;
+  } {
   const answers = structuredClone(seed.answers ?? {});
   const lines = structuredClone(seed.lines ?? {});
   const stamps = (n: number) => ({

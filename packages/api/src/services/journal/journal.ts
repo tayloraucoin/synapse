@@ -1,9 +1,11 @@
 import { and, eq, sql } from "drizzle-orm";
-
 import { DEFAULT_JOURNAL_PROMPTS } from "@syn/constants";
 import { days, journalEntries, users, type RlsClient } from "@syn/db";
-import type { JournalEntryRecord, JournalSaveInput, QuoteRecord } from "@syn/validators";
-
+import type {
+  JournalEntryRecord,
+  JournalSaveInput,
+  QuoteRecord,
+} from "@syn/validators";
 import { ensureOldDayRow } from "../day/old-day-row";
 import { pickQuote, quoteSource, type QuoteSource } from "../morning/quote";
 
@@ -83,7 +85,10 @@ export function journalReads(tx: Tx, userId: string): JournalReads {
         .from(users)
         .where(eq(users.id, userId))
         .limit(1);
-      return (row?.journalPrompts ?? []).map(({ key, label }) => ({ key, label }));
+      return (row?.journalPrompts ?? []).map(({ key, label }) => ({
+        key,
+        label,
+      }));
     },
     async readAnswers(onDate) {
       const [row] = await tx

@@ -1,5 +1,4 @@
 import { journalGetInput, journalSaveInput } from "@syn/validators";
-
 import {
   journalStore,
   readJournal,

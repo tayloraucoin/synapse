@@ -1,5 +1,4 @@
 import { and, eq, isNotNull, isNull, lt } from "drizzle-orm";
-
 import { dayRecords, type RlsClient } from "@syn/db";
 import type { DayRecordRecord, DayStampInput } from "@syn/validators";
 

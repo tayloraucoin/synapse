@@ -1,5 +1,4 @@
 import { and, eq } from "drizzle-orm";
-
 import { days, users, type RlsClient } from "@syn/db";
 
 type Tx = Parameters<Parameters<RlsClient["execute"]>[0]>[0];
@@ -46,7 +45,11 @@ export async function ensureOldDayRow(
     })
     .onConflictDoNothing({ target: [days.userId, days.date] });
 
-  const [row] = await tx.select({ id: days.id }).from(days).where(ofDate).limit(1);
+  const [row] = await tx
+    .select({ id: days.id })
+    .from(days)
+    .where(ofDate)
+    .limit(1);
   if (!row) throw new Error("days insert read back no row");
   return row.id;
 }

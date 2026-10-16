@@ -1,9 +1,8 @@
 import { asc, eq, isNotNull } from "drizzle-orm";
-
 import { CYCLE_EPOCH } from "@syn/constants";
 import { quotes, users, type RlsClient } from "@syn/db";
-import type { QuoteRecord } from "@syn/validators";
 import { cycleIndex } from "@syn/utils";
+import type { QuoteRecord } from "@syn/validators";
 
 type Tx = Parameters<Parameters<RlsClient["execute"]>[0]>[0];
 

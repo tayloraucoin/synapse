@@ -1,6 +1,6 @@
 import { and, asc, eq, isNull } from "drizzle-orm";
-
 import { days, links, passages, type RlsClient } from "@syn/db";
+import { addDays } from "@syn/utils";
 import type {
   JournalEntryRecord,
   LinkRecord,
@@ -9,8 +9,6 @@ import type {
   PassageRecord,
   QuoteRecord,
 } from "@syn/validators";
-import { addDays } from "@syn/utils";
-
 import { ensureOldDayRow } from "../day/old-day-row";
 import {
   journalReads,
@@ -170,7 +168,11 @@ export function morningStore(tx: Tx, userId: string): MorningStore {
         })
         .from(passages)
         .where(and(eq(passages.userId, userId), isNull(passages.archivedAt)))
-        .orderBy(asc(passages.sortOrder), asc(passages.createdAt), asc(passages.id));
+        .orderBy(
+          asc(passages.sortOrder),
+          asc(passages.createdAt),
+          asc(passages.id),
+        );
     },
     activeLinks() {
       return tx

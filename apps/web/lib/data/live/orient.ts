@@ -35,8 +35,7 @@ export const orientDomain: LiveDomain = {
 
     readyGo: (dateKey, at) => client.day.readyGo.mutate({ dateKey, at }),
 
-    readReadiedBefore: (dateKey) =>
-      client.day.readiedBefore.query({ dateKey }),
+    readReadiedBefore: (dateKey) => client.day.readiedBefore.query({ dateKey }),
 
     readJournal: (dateKey) => client.journal.read.query({ date: dateKey }),
 
