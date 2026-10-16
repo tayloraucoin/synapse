@@ -1,6 +1,7 @@
 import { assetRouter } from "./routers/asset";
 import { feedbackRouter } from "./routers/feedback";
 import { notificationRouter } from "./routers/notification";
+import { plannerRouter } from "./routers/planner";
 import { userRouter } from "./routers/user";
 import { createCallerFactory, router } from "./trpc";
 
@@ -17,6 +18,7 @@ export const appRouter = router({
   asset: assetRouter,
   feedback: feedbackRouter,
   notification: notificationRouter,
+  planner: plannerRouter,
   user: userRouter,
 });
 

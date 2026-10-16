@@ -18,6 +18,20 @@ export {
   updatePreferences,
   type UserPreferencesRow,
 } from "./services/user/preferences";
+/* USE-97: the rules over a store, so the web app's tests prove them in memory. */
+export {
+  listSavedColours,
+  removeSavedColour,
+  writeSavedColour,
+  type SavedColourStore,
+} from "./services/planner/saved-colours";
+export {
+  listMealTopics,
+  removeMealTopic,
+  writeMealTopic,
+  type MealTopicStore,
+  type MealTopicValues,
+} from "./services/planner/meal-topics";
 export {
   isVapidConfigured,
   sendWebPush,

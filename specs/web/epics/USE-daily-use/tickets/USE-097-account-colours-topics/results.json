@@ -1,0 +1,27 @@
+{
+  "id": "USE-97",
+  "criteria_sha256": "11ff57b9a2b1644a0965b4255001e1204f49dfd4844f17676a3a237ddf5e261a",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    }
+  },
+  "updated_at": "2026-10-16T21:59:02Z"
+}

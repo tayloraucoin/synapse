@@ -724,3 +724,22 @@ export const savedColourInput = z.object({
 });
 
 export type SavedColourInput = z.infer<typeof savedColourInput>;
+
+/** One row by id: a remove, or a read of one (USE-97). */
+export const idInput = z.object({ id: z.string().uuid() });
+
+export type IdInput = z.infer<typeof idInput>;
+
+/** `planner.savedColours.write`: a new colour, or with `id` a change to one. */
+export const savedColourWriteInput = savedColourInput.extend({
+  id: z.string().uuid().optional(),
+});
+
+export type SavedColourWriteInput = z.infer<typeof savedColourWriteInput>;
+
+/** `planner.mealTopics.write`: a new topic, or with `id` a change to one. */
+export const mealTopicWriteInput = mealTopicInput.extend({
+  id: z.string().uuid().optional(),
+});
+
+export type MealTopicWriteInput = z.infer<typeof mealTopicWriteInput>;

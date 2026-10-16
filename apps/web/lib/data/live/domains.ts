@@ -1,5 +1,8 @@
 import type { FixtureServer } from "@/lib/fixtures/server";
 import type { TrpcClient } from "@/lib/trpc/client";
+import { accountDomain } from "./account";
+import { mealTopicsDomain } from "./meal-topics";
+import { savedColoursDomain } from "./saved-colours";
 
 /**
  * A domain served live (USE-90): the server methods it answers, each a call
@@ -13,4 +16,8 @@ export interface LiveDomain {
   methods: (client: TrpcClient) => Partial<FixtureServer>;
 }
 
-export const LIVE_DOMAINS: readonly LiveDomain[] = [];
+export const LIVE_DOMAINS: readonly LiveDomain[] = [
+  accountDomain,
+  savedColoursDomain,
+  mealTopicsDomain,
+];
