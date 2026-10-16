@@ -2,6 +2,7 @@
 
 import type * as React from "react";
 import { DragToPlace } from "@syn/ui";
+import { BlockPanelHost } from "@/components/work/block-panel";
 import { PoolPanel } from "@/components/work/pool";
 import { readPlaceId } from "@/lib/data/place";
 import { useTodayPlacing } from "@/lib/data/use-today-work";
@@ -24,6 +25,9 @@ import { useShownDate } from "./use-shown-date";
  * Nothing planned (USE-82, D-USE-42): the pool panel docks between the rail
  * and the content, the Week's own (USE-74), and a pool row let go over one
  * of today's tiers lands there through USE-75's placing, announced politely.
+ *
+ * A block in the day column opens its Block panel at the right (USE-76):
+ * today's checks, another date's plans.
  */
 export function TodayDesk({ main }: { main: React.ReactNode }) {
   const { todayKey, dateKey, opened } = useShownDate();
@@ -52,6 +56,7 @@ export function TodayDesk({ main }: { main: React.ReactNode }) {
       <p aria-live="polite" className="sr-only">
         {placing.announcement}
       </p>
+      <BlockPanelHost from="today" />
     </DragToPlace>
   );
 }

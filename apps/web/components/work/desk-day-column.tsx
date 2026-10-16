@@ -1,6 +1,7 @@
 "use client";
 
 import type * as React from "react";
+import Link from "next/link";
 import { cn, NowLine, ScheduleAxis, Text } from "@syn/ui";
 import { clockMinutes } from "@syn/utils";
 import {
@@ -20,7 +21,8 @@ import { DayBar, type DayBarSegment } from "@/components/planner/day-bar";
  *
  * Named apart from the planner's `DayColumn` (Review the day, Schedule),
  * which draws a block's items at 96 px an hour; this one names blocks only.
- * Blocks are words here: USE-76 makes a block open its Block panel.
+ * Each block is a link to its Block panel (USE-76, `href`), ringed in ink
+ * while it is open, the panel's way back (`data-block-opener`).
  * Desk-only: the screen mounts it inside `hidden split:block`.
  */
 
@@ -44,6 +46,12 @@ export interface DeskColumnBlock {
   past: boolean;
   /** Events inside it, by start: a plum band each at its time. */
   bands: readonly DeskColumnEvent[];
+  /** Its Block panel (USE-76); unset, the block is words only. */
+  href?: string;
+  /** Its panel is open: a 2 px ink ring, 1 px out, and `aria-current`. */
+  open?: boolean;
+  /** "<date>:<block>": where focus returns when its panel closes. */
+  opener?: string;
 }
 
 export interface DeskDayColumnWords {
@@ -149,9 +157,20 @@ export function DeskDayColumn({
             className={cn(
               "absolute end-0 overflow-hidden rounded-(--radius-control)",
               HUE_CHIP[block.hue],
-              block.past && "opacity-60",
+              block.past && !block.open && "opacity-60",
+              block.open && "outline-2 outline-offset-1 outline-ink",
             )}
           >
+            {block.href ? (
+              <Link
+                href={block.href}
+                scroll={false}
+                aria-label={block.label}
+                aria-current={block.open || undefined}
+                data-block-opener={block.opener}
+                className="absolute inset-0 rounded-(--radius-control) outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+              />
+            ) : null}
             <span
               aria-hidden="true"
               className={cn(
@@ -165,7 +184,7 @@ export function DeskDayColumn({
               weight={600}
               tone={block.past ? "muted" : "ink"}
               truncate
-              className="ps-(--space-3) pe-(--space-2) pt-0.5"
+              className="pointer-events-none relative ps-(--space-3) pe-(--space-2) pt-0.5"
             >
               {block.label}
             </Text>
@@ -227,7 +246,7 @@ function EventBand({
       data-desk-event={event.id}
       style={style}
       className={cn(
-        "absolute flex h-6 items-center overflow-hidden rounded-(--radius-control)",
+        "pointer-events-none absolute flex h-6 items-center overflow-hidden rounded-(--radius-control)",
         HUE_CHIP.plum,
       )}
     >

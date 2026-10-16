@@ -255,13 +255,7 @@ export function settingsRoute(section?: "notifications"): string {
  * The value names the sheet; the path stays the screen beneath.
  */
 export type SheetName =
-  | "install"
-  | "profile"
-  | "meal-topics"
-  | "item"
-  | "todo"
-  | "add"
-  | "new-block";
+  "install" | "profile" | "meal-topics" | "item" | "todo" | "add" | "new-block";
 
 /** `path` with `?sheet=<name>` set, keeping its other query. */
 export function sheetRoute(path: string, sheet: SheetName): string {
@@ -290,9 +284,12 @@ export function itemSheetRoute(
 }
 
 /**
- * The Block panel on one block's date over `path` (`?panel=block&id=&date=`;
- * D-USE-41, D-USE-77): the Week's Time lens sets it (USE-73), USE-76 draws
- * the panel. The path's own query is kept, so `?state=` travels.
+ * The Block panel on one block's date over `path` (D-USE-41, D-USE-77): the
+ * Week's Time lens (USE-73) and Today's day column set it, USE-76 draws the
+ * panel. The path's own query is kept, so `?state=` travels. [ASSUMPTION]
+ * `?panel=block&block=<id>&on=<date>`, not the drawn `&id=&date=`: `id` is
+ * the Item sheet's, which opens over the panel from a row, and `date` is
+ * Today's opened date (`TODAY_DATE_PARAM`).
  */
 export function blockPanelRoute(
   path: string,
@@ -301,11 +298,18 @@ export function blockPanelRoute(
 ): string {
   const [base = "", search = ""] = path.split("?");
   const query = new URLSearchParams(search);
-  query.set("panel", "block");
-  query.set("id", id);
-  query.set("date", date);
+  query.set(BLOCK_PANEL_PARAMS.panel, "block");
+  query.set(BLOCK_PANEL_PARAMS.block, id);
+  query.set(BLOCK_PANEL_PARAMS.on, date);
   return `${base}?${query.toString()}`;
 }
+
+/** The query keys `blockPanelRoute` writes and the Block panel reads (nuqs). */
+export const BLOCK_PANEL_PARAMS = {
+  panel: "panel",
+  block: "block",
+  on: "on",
+} as const;
 
 /**
  * The To-do sheet over `path` (USE-28): one to-do by `id`, or a new one

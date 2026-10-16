@@ -6,8 +6,12 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { DragToPlace, RegionRetry, Text } from "@syn/ui";
 import { OfflineLine } from "@/components/planner";
 import { NewTaskSheet } from "@/components/work/add/new-task/new-task-sheet";
+import { BlockPanelHost } from "@/components/work/block-panel";
 import { PoolPanel } from "@/components/work/pool";
+import { BLOCK_PANEL_WORDS } from "@/lib/data/block-panel";
+import { PLACE_IDS, weekdayOf } from "@/lib/data/place";
 import { useIsOffline } from "@/lib/data/source";
+import { useBlockPanelParams } from "@/lib/data/use-block-panel";
 import {
   useShownWeek,
   useWeekLens,
@@ -15,6 +19,7 @@ import {
   type WeekLens,
 } from "@/lib/data/use-week-view";
 import { daysRoute } from "@/lib/routes";
+import { AddToTierPopover } from "./add-to-tier-popover";
 import { WEEK_COPY as COPY } from "./copy";
 import { PriorityLens } from "./priority-lens";
 import { TimeLens } from "./time-lens";
@@ -28,7 +33,9 @@ import { WeekHeader } from "./week-header";
  * StatusLine under the header and everything still works (D-USE-56). Below
  * 1024 there is no Week: one line to Set my days › This week (D-USE-55).
  * Pool rows drag onto the lens and placed chips back (USE-75, DragToPlace),
- * every placing announced politely.
+ * every placing announced politely. A block clicked in the Time lens opens
+ * its Block panel at the right (USE-76), the pool still docked for dragging
+ * into its tiers.
  */
 export function WeekScreen() {
   const shown = useShownWeek();
@@ -41,6 +48,7 @@ export function WeekScreen() {
   const search = useSearchParams().toString();
   const here = search ? `${pathname}?${search}` : pathname;
   const [announcement, setAnnouncement] = React.useState("");
+  const { opened } = useBlockPanelParams();
 
   const announced = React.useRef(range);
   React.useEffect(() => {
@@ -102,6 +110,7 @@ export function WeekScreen() {
                     nowMin={nowMin}
                     timeZone={timeZone}
                     placing={placing}
+                    opened={opened}
                   />
                 </div>
               ) : (
@@ -127,6 +136,36 @@ export function WeekScreen() {
             </div>
           </div>
         </div>
+        <BlockPanelHost
+          from="week"
+          dropId={(at) => PLACE_IDS.tier(at.dateKey, at.blockId, at.tier)}
+          addRow={(at) => {
+            const here =
+              placing.adding?.dateKey === at.dateKey &&
+              placing.adding.tier === at.tier &&
+              placing.adding.blockId === at.blockId;
+            const spot = {
+              dateKey: at.dateKey,
+              tier: at.tier,
+              blockId: at.blockId,
+            };
+            return (
+              <AddToTierPopover
+                weekday={weekdayOf(at.dateKey)}
+                tier={at.tier}
+                trigger="row"
+                triggerName={COPY.addPanelName(
+                  at.word,
+                  BLOCK_PANEL_WORDS.day(at.dateKey),
+                )}
+                open={here}
+                onOpenChange={(open) => placing.setAdding(open ? spot : null)}
+                onPick={(from) => placing.placeInCell(from, spot)}
+                onNewItem={(title) => placing.openNewItem(spot, title)}
+              />
+            );
+          }}
+        />
       </DragToPlace>
       {placing.newItem ? (
         <NewTaskSheet

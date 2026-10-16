@@ -31,6 +31,8 @@ export const WEEK_COPY = {
   addTo: (tier: string) => `+ Add to ${tier}`,
   addName: (weekday: string, tier: string) => `Add to ${weekday}, ${tier}`,
   addTitle: (weekday: string, tier: string) => `Add to ${weekday} · ${tier}`,
+  /** The Block panel's add row (USE-76): "Add to Primary, Tue 13". */
+  addPanelName: (tier: string, day: string) => `Add to ${tier}, ${day}`,
   addSearch: "Search the pool and Linear",
   poolGroup: "Pool",
   linearGroup: "Linear, not in the pool yet",

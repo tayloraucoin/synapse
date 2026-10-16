@@ -31,6 +31,8 @@ import type { SetUpWeek } from "@/lib/data/use-week";
 export interface AddingAt {
   dateKey: string;
   tier: WorkTier;
+  /** One Work block's tier (USE-76's Block panel); unset is the day's first. */
+  blockId?: string;
 }
 
 export function useWeekPlacing(week: SetUpWeek | undefined) {
@@ -55,10 +57,17 @@ export function useWeekPlacing(week: SetUpWeek | undefined) {
   const dayOf = (dateKey: string) =>
     week?.days.find((day) => day.date === dateKey) ?? null;
 
-  /** A Priority cell's landing: the day's first Work block, after its slots. */
-  const cellLanding = (dateKey: string) => {
+  /**
+   * A Priority cell's landing: the day's first Work block, after its slots;
+   * a Block panel's tier, its own block (USE-76).
+   */
+  const cellLanding = (dateKey: string, blockId?: string) => {
     const day = dayOf(dateKey);
-    const block = day ? workBlocksOf(day)[0] : undefined;
+    const block = day
+      ? blockId
+        ? workBlocksOf(day).find((b) => b.block.id === blockId)
+        : workBlocksOf(day)[0]
+      : undefined;
     if (!day || !block) return null;
     return {
       blockId: block.block.id,
@@ -90,7 +99,7 @@ export function useWeekPlacing(week: SetUpWeek | undefined) {
     from: PlaceSource & { title?: string },
     at: AddingAt,
   ) => {
-    const landing = cellLanding(at.dateKey);
+    const landing = cellLanding(at.dateKey, at.blockId);
     if (!landing) return;
     void placer.place(from, { dateKey: at.dateKey, tier: at.tier, ...landing });
   };
@@ -104,6 +113,11 @@ export function useWeekPlacing(week: SetUpWeek | undefined) {
       return;
     }
     if (from.kind === "row" && to.kind === "cell") {
+      placeInCell({ ...from.source, title: label }, to);
+      return;
+    }
+    // A Block panel's tier (USE-76): that tier, in that block, on that date.
+    if (from.kind === "row" && to.kind === "tier") {
       placeInCell({ ...from.source, title: label }, to);
       return;
     }
@@ -167,7 +181,11 @@ export function useWeekPlacing(week: SetUpWeek | undefined) {
     cellLanding,
     newItem,
     openNewItem: (at: AddingAt, title: string) =>
-      setNewItem({ ...at, blockId: cellLanding(at.dateKey)?.blockId, title }),
+      setNewItem({
+        ...at,
+        blockId: cellLanding(at.dateKey, at.blockId)?.blockId,
+        title,
+      }),
     closeNewItem: () => setNewItem(null),
     /** The popover's opening words, a capture's, until it first closes. */
     seededQuery,

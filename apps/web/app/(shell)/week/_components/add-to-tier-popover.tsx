@@ -40,6 +40,13 @@ export interface AddToTierPopoverProps {
   onNewItem: (title: string) => void;
   /** A capture's words, typed when it opens. */
   initialQuery?: string;
+  /**
+   * `cell` (a Priority cell's): shown on hover and on focus. `row` (the Block
+   * panel's tier, USE-76): "+ Add to <tier>" always shown, subtle, 32 px.
+   */
+  trigger?: "cell" | "row";
+  /** The day in the trigger's name: "Add to Primary, Tue 13" (USE-76). */
+  triggerName?: string;
 }
 
 interface Option {
@@ -56,6 +63,8 @@ export function AddToTierPopover({
   onPick,
   onNewItem,
   initialQuery = "",
+  trigger = "cell",
+  triggerName,
 }: AddToTierPopoverProps) {
   const tierWord = TIER_WORDS[tier];
   return (
@@ -63,11 +72,15 @@ export function AddToTierPopover({
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={COPY.addName(weekday, tierWord)}
+          aria-label={triggerName ?? COPY.addName(weekday, tierWord)}
           className={cn(
-            "h-7 self-start whitespace-nowrap rounded-(--radius-control) border border-input bg-background px-2 text-caption text-ink",
-            "opacity-0 outline-none group-hover/cell:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring",
-            open && "opacity-100",
+            trigger === "row"
+              ? "h-8 self-start whitespace-nowrap rounded-(--radius-control) ps-7 text-(length:--fs-label) text-text-muted outline-none hover:text-ink focus-visible:ring-2 focus-visible:ring-ring"
+              : [
+                  "h-7 self-start whitespace-nowrap rounded-(--radius-control) border border-input bg-background px-2 text-caption text-ink",
+                  "opacity-0 outline-none group-hover/cell:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring",
+                  open && "opacity-100",
+                ],
           )}
         >
           {COPY.addTo(tierWord)}

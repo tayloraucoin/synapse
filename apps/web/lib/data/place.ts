@@ -209,6 +209,9 @@ export const PLACE_IDS = {
   chip: (slotId: string) => `chip:${slotId}`,
   cell: (dateKey: string, tier: WorkTier) => `cell:${dateKey}:${tier}`,
   block: (dateKey: string, blockId: string) => `block:${dateKey}:${blockId}`,
+  /** A tier in one Work block's Block panel (USE-76). */
+  tier: (dateKey: string, blockId: string, tier: WorkTier) =>
+    `tier:${dateKey}:${blockId}:${tier}`,
   pool: "pool",
 } as const;
 
@@ -217,6 +220,7 @@ export type PlaceId =
   | { kind: "chip"; slotId: string }
   | { kind: "cell"; dateKey: string; tier: WorkTier }
   | { kind: "block"; dateKey: string; blockId: string }
+  | { kind: "tier"; dateKey: string; blockId: string; tier: WorkTier }
   | { kind: "pool" };
 
 export function readPlaceId(id: string): PlaceId | null {
@@ -235,6 +239,14 @@ export function readPlaceId(id: string): PlaceId | null {
   }
   if (kind === "block" && rest.length === 2) {
     return { kind: "block", dateKey: rest[0]!, blockId: rest[1]! };
+  }
+  if (kind === "tier" && rest.length === 3) {
+    return {
+      kind: "tier",
+      dateKey: rest[0]!,
+      blockId: rest[1]!,
+      tier: rest[2] as WorkTier,
+    };
   }
   return null;
 }

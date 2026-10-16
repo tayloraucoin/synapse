@@ -38,7 +38,8 @@ import { LandedLine } from "./week-chip";
  * px axis, seven equal columns that keep a 120 px floor and then scroll
  * sideways (D-USE-94); today's shaded surface. Every block sits at its own
  * minutes (`timeLensDay`, never its place in a list), in its kind's colour,
- * and opens its Block panel (`?panel=block&id=&date=`, USE-76 draws it).
+ * and opens its Block panel (`blockPanelRoute`, USE-76), ringed in ink while
+ * it is open (`opened`), its link `aria-current` and the panel's way back.
  * Work holds its chips tier by tier, each edged in its tier's colour with
  * the tier word in its name and hover title (D-USE-101), "1/3" for a session
  * and the column's due badge, never a firing time (D-USE-98); the Fits line
@@ -82,6 +83,8 @@ export interface TimeLensProps {
   timeZone: string;
   /** Placing from the pool (USE-75); without it the blocks only show. */
   placing?: WeekPlacing;
+  /** The block whose panel is open (USE-76): ringed in ink. */
+  opened?: { blockId: string; dateKey: string } | null;
 }
 
 export function TimeLens({
@@ -92,6 +95,7 @@ export function TimeLens({
   nowMin,
   timeZone,
   placing,
+  opened = null,
 }: TimeLensProps) {
   const days: (WeekDayView | null)[] = heads.map(
     (head) => view?.days.find((day) => day.dateKey === head.dateKey) ?? null,
@@ -147,6 +151,9 @@ export function TimeLens({
               loading={view === null}
               here={here}
               placing={placing}
+              openedId={
+                opened?.dateKey === head.dateKey ? opened.blockId : null
+              }
             />
           ))}
           {nowShown ? (
@@ -175,6 +182,7 @@ function DayColumn({
   loading,
   here,
   placing,
+  openedId,
 }: {
   index: number;
   head: WeekHead;
@@ -182,6 +190,7 @@ function DayColumn({
   loading: boolean;
   here: string;
   placing: WeekPlacing | undefined;
+  openedId: string | null;
 }) {
   return (
     <div
@@ -219,6 +228,7 @@ function DayColumn({
               past={day.past}
               href={blockPanelRoute(here, block.id, day.dateKey)}
               placing={placing}
+              isOpen={openedId === block.id}
             />
           ))}
           {day.looseEvents.map((event) => (
@@ -245,12 +255,15 @@ function TimeBlock({
   href,
   past,
   placing,
+  isOpen,
 }: {
   block: TimeBlockView;
   dateKey: string;
   href: string;
   past: boolean;
   placing: WeekPlacing | undefined;
+  /** Its panel is open (USE-76): a 2 px ink ring, 1 px out. */
+  isOpen: boolean;
 }) {
   const router = useRouter();
   const hue = BLOCK_HUE[block.kind];
@@ -263,6 +276,8 @@ function TimeBlock({
   const landed = placing?.landed?.dateKey === dateKey ? placing.landed : null;
   const top = pxOf(block.topMin);
   const height = Math.max(0, pxOf(block.lengthMin) - BLOCK_GAP_PX);
+  const opener = `${dateKey}:${block.id}`;
+  const ring = isOpen && "outline-2 outline-offset-1 outline-ink";
 
   if (block.lengthMin < BAR_UNDER_MIN) {
     return (
@@ -270,12 +285,15 @@ function TimeBlock({
         href={href}
         scroll={false}
         aria-label={block.label}
+        aria-current={isOpen || undefined}
         data-time-block={block.id}
+        data-block-opener={opener}
         style={{ top: `${top}px` }}
         className={cn(
           "absolute inset-x-1 h-3 rounded-(--radius-control) outline-none focus-visible:ring-2 focus-visible:ring-ring",
           HUE_DOT[hue],
-          past && "opacity-60",
+          past && !isOpen && "opacity-60",
+          ring,
         )}
       />
     );
@@ -290,8 +308,9 @@ function TimeBlock({
       className={cn(
         "absolute inset-x-1 overflow-hidden rounded-(--radius-control)",
         HUE_CHIP[hue],
-        past && "opacity-60",
+        past && !isOpen && "opacity-60",
         takesRow && "ring-[1.5px] ring-ink ring-inset",
+        ring,
       )}
     >
       {/* The block's one control: every click on it opens its panel. */}
@@ -299,6 +318,8 @@ function TimeBlock({
         href={href}
         scroll={false}
         aria-label={block.label}
+        aria-current={isOpen || undefined}
+        data-block-opener={opener}
         className="absolute inset-0 rounded-(--radius-control) outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
       />
       {isWork ? (

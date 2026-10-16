@@ -21,7 +21,7 @@ Open one block of one date beside the week, without leaving the week: see what t
 
 - **In:** any block clicked in the Week's Time lens ([`../week/states/time-lens.md`](../week/states/time-lens.md); the time lens note: "Clicking any block opens the Block panel"); a block in Today's day column ([`../today/index.md`](../today/index.md) › Entry and exit; N6: "Clicking a block opens its Block view in the right panel"); a Schedule block at the desk (D-USE-77, `../../day/schedule/`).
 - **Out:** × (the round button, top right), or Esc: the panel closes and the block's ink ring goes. **Open day:** the opened day for that date, [`../today/states/opened-day.md`](../today/states/opened-day.md). An item's row: the Item sheet (`../../day/item-sheet/`) [ASSUMPTION: it takes the same right panel, and closing it returns to this panel; D-USE-60 (3) has the desk Item sheet as a right-side panel and no frame draws the two together].
-- **Route** [ASSUMPTION: a query on the page it opens over, `?panel=block&id=<block>&date=<date>`, as the Item sheet's `?sheet=item&id=` (`../overview.md`); no route is drawn or ruled].
+- **Route** [ASSUMPTION: a query on the page it opens over, `?panel=block&block=<block>&on=<date>` (`blockPanelRoute`, USE-76); no route is drawn or ruled. Not `&id=&date=`: `id` is the Item sheet's, which opens over the panel from a row, and `date` is Today's opened date].
 
 ## Layout, top to bottom (1728, the panel)
 

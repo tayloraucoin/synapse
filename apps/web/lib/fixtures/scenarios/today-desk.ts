@@ -10,7 +10,7 @@ import { fixtureId } from "../ids";
 import { issueId, stateId, withIntegrations } from "../integrations/workspaces";
 import type { FixtureRecords } from "../records";
 import type { Scenario } from "./index";
-import { WEEK_IDS, weekRecords } from "./week";
+import { WEEK_IDS, weekRecords, weekWithTraining } from "./week";
 
 /**
  * The desk's Today frame (USE-58): the Week's 12 to 18 Oct (USE-72's
@@ -284,6 +284,11 @@ function addWork(
 export const TODAY_DESK_SCENARIOS: Record<string, () => Scenario> = {
   "today-desk": desk("today-desk"),
   "today-opened-day": desk("today-opened-day"),
+  // USE-76: today's Training opened from the day column, its first two checked.
+  "panel-checking-today": () => ({
+    ...desk("panel-checking-today")(),
+    records: weekWithTraining(todayDeskRecords(), { done: "2026-10-12" }),
+  }),
   // USE-57: work's Today, at the desk and inside Now's Work block.
   "today-working": work("today-working", { events: PORTAL_FIRING }),
   "today-not-work": work("today-not-work", {

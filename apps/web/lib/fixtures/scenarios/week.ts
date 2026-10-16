@@ -1,4 +1,5 @@
 import {
+  blockItemRecord,
   blockRecord,
   dayBoundsRecord,
   dayEventRecord,
@@ -418,6 +419,106 @@ function spreadRecords(records: FixtureRecords): FixtureRecords {
   };
 }
 
+/**
+ * Training's items on every weekday (USE-76's Block panel): the drives as
+ * transitions at their times, the workout between, 8:00 to 8:57 as the
+ * board's Mon 12 draws them. `done` checks the first two on that date (the
+ * panel opened from Today, checking-today.md).
+ */
+export const WEEK_TRAINING_IDS = {
+  driveThere: id(2, 1),
+  workout: id(2, 2),
+  driveHome: id(2, 3),
+} as const;
+
+function withTraining(
+  records: FixtureRecords,
+  { name, done }: { name?: string; done?: string } = {},
+): FixtureRecords {
+  const T = WEEK_TRAINING_IDS;
+  const item = (seed: {
+    id: string;
+    title: string;
+    glyph: string;
+    lengthMin: number;
+    sortOrder: number;
+    atTime?: string;
+  }) =>
+    blockItemRecord.parse({
+      ...stamps,
+      id: seed.id,
+      blockId: B.training,
+      title: seed.title,
+      icon: { kind: "curated", value: seed.glyph, colorKey: "clay" },
+      isTransition: seed.atTime !== undefined,
+      atTime: seed.atTime ?? null,
+      lengthMin: seed.lengthMin,
+      meal: false,
+      onDate: null,
+      sortOrder: seed.sortOrder,
+    });
+  const items = [
+    item({
+      id: T.driveThere,
+      title: "Drive to the YMCA",
+      glyph: "car",
+      lengthMin: 15,
+      sortOrder: 0,
+      atTime: "08:00",
+    }),
+    item({
+      id: T.workout,
+      title: "Workout: gym",
+      glyph: "dumbbell",
+      lengthMin: 30,
+      sortOrder: 1,
+    }),
+    item({
+      id: T.driveHome,
+      title: "Drive home",
+      glyph: "car",
+      lengthMin: 12,
+      sortOrder: 2,
+      atTime: "08:45",
+    }),
+  ];
+  const checked = done
+    ? [T.driveThere, T.workout].map((blockItemId, index) =>
+        slotRecord.parse({
+          ...stamps,
+          id: id(3, 51 + index),
+          blockId: B.training,
+          onDate: done,
+          skipped: false,
+          sortOrder: index,
+          blockItemId,
+          todoId: null,
+          workItemId: null,
+          tier: null,
+          lengthMin: null,
+          tookMin: index === 0 ? 15 : 30,
+          doneAt: `${done}T12:${index === 0 ? "15" : "45"}:00.000Z`,
+        }),
+      )
+    : [];
+  return {
+    ...records,
+    blocks: name
+      ? records.blocks.map((b) => (b.id === B.training ? { ...b, name } : b))
+      : records.blocks,
+    blockItems: [...records.blockItems, ...items],
+    slots: [...records.slots, ...checked],
+  };
+}
+
+/** USE-76: the Time lens with a block's panel open, as the boards draw it. */
+function panelRecords(name?: string) {
+  return (records: FixtureRecords) =>
+    withTraining(placeRecords(records), { name });
+}
+
+export { withTraining as weekWithTraining };
+
 export const WEEK_SCENARIOS: Record<string, () => Scenario> = {
   "week-priority": week("week-priority"),
   "week-empty": week("week-empty", { placed: false }),
@@ -449,6 +550,17 @@ export const WEEK_SCENARIOS: Record<string, () => Scenario> = {
     now: WEEK_TIME_NOW,
     pool: spreadRecords,
   }),
+  // USE-76: Tue 13's 9:30 Work and Mon 12's Training opened from the Time lens.
+  "panel-work": week("panel-work", {
+    now: WEEK_TIME_NOW,
+    pool: panelRecords(),
+    view: { open: "week:time" },
+  }),
+  "panel-training": week("panel-training", {
+    now: WEEK_TIME_NOW,
+    pool: panelRecords("Training · gym"),
+    view: { open: "week:time" },
+  }),
 };
 
 /** What a USE-75 capture stages on load: a real placing, the add popover open, or (USE-77) Spread's dialog. */
@@ -471,3 +583,18 @@ const WEEK_PLACE_SEEDS: Record<string, WeekPlaceSeed> = {
 
 export const weekPlaceSeedOf = (name: string): WeekPlaceSeed | undefined =>
   WEEK_PLACE_SEEDS[name];
+
+/** What a USE-76 capture opens on load: a block's panel on its date. */
+export interface BlockPanelSeed {
+  blockId: string;
+  dateKey: string;
+}
+
+const BLOCK_PANEL_SEEDS: Record<string, BlockPanelSeed> = {
+  "panel-work": { blockId: B.workMorning, dateKey: "2026-10-13" },
+  "panel-training": { blockId: B.training, dateKey: "2026-10-12" },
+  "panel-checking-today": { blockId: B.training, dateKey: "2026-10-12" },
+};
+
+export const blockPanelSeedOf = (name: string): BlockPanelSeed | undefined =>
+  BLOCK_PANEL_SEEDS[name];
