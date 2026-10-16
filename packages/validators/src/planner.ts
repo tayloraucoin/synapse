@@ -678,6 +678,22 @@ export const dayRecordRecord = z.object({
 
 export type DayRecordRecord = z.infer<typeof dayRecordRecord>;
 
+/**
+ * Orient's open and Ready, go (USE-96): the date and the instant to stamp.
+ * The server keeps the first stamp; a later one never moves it.
+ */
+export const dayStampInput = z.object({
+  dateKey: dateKeySchema,
+  at: instantSchema,
+});
+
+export type DayStampInput = z.infer<typeof dayStampInput>;
+
+/** The date a day read asks about (USE-96's readied-before). */
+export const dateKeyInput = z.object({ dateKey: dateKeySchema });
+
+export type DateKeyInput = z.infer<typeof dateKeyInput>;
+
 /*
  * ---- Meal topics and saved colours ----
  */

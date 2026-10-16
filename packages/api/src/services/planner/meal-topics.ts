@@ -1,7 +1,9 @@
 import { and, asc, eq } from "drizzle-orm";
+
 import { mealTopics, type RlsClient } from "@syn/db";
 import type { IconValue, MealLinkKind } from "@syn/types";
 import type { MealTopicRecord, MealTopicWriteInput } from "@syn/validators";
+
 import { refuse } from "../../errors";
 
 /**
@@ -14,10 +16,7 @@ import { refuse } from "../../errors";
  * over the table through `mealTopicStore(tx, userId)`.
  */
 
-export type MealTopicValues = Omit<
-  MealTopicRecord,
-  "id" | "createdAt" | "updatedAt"
->;
+export type MealTopicValues = Omit<MealTopicRecord, "id" | "createdAt" | "updatedAt">;
 
 export interface MealTopicStore {
   list(): Promise<MealTopicRecord[]>;
@@ -27,9 +26,7 @@ export interface MealTopicStore {
   remove(id: string): Promise<boolean>;
 }
 
-export function listMealTopics(
-  store: MealTopicStore,
-): Promise<MealTopicRecord[]> {
+export function listMealTopics(store: MealTopicStore): Promise<MealTopicRecord[]> {
   return store.list();
 }
 
