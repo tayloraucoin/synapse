@@ -19,6 +19,7 @@ import { NOW_FORM_SCENARIOS } from "./now-forms";
 import { NOW_SYSTEM_SCENARIOS } from "./now-system";
 import { ORIENT_SCENARIOS } from "./orient-morning";
 import { POOL_SCENARIOS } from "./pool";
+import { POOL_SHEET_SCENARIOS } from "./pool-sheet";
 import { READY_SCENARIOS } from "./ready-welcome";
 import { REVIEW_SCENARIOS } from "./review-day";
 import { RUNNING_SCENARIOS } from "./running";
@@ -246,6 +247,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...TODOS_SCENARIOS,
   // ---- The pool and the work writes (USE-55): clients on, on this week ----
   ...POOL_SCENARIOS,
+  // ---- The phone's pool sheet (USE-79): its tabs, filters, search, empty ----
+  ...POOL_SHEET_SCENARIOS,
   // ---- Linear, Google and clients (USE-56): off, a failed write, closed in Linear, clients ----
   ...INTEGRATION_SCENARIOS,
   // ---- Settings › Connections, clients on, and its two sheets (USE-86) ----

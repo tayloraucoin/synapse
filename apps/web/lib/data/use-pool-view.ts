@@ -2,6 +2,8 @@
 
 import {
   poolView,
+  type LinearFilters,
+  type PoolFilters,
   type PoolGroupBy,
   type PoolSort,
   type PoolTab,
@@ -17,24 +19,34 @@ import { usePool } from "./use-pool";
  * `useClients`, with the panel's own choices (tab, Group, Sort, Search) kept
  * here and run on the device (D-USE-57). Reordering a client is the same
  * write Settings › Clients makes, so there is one order (D-USE-96).
+ *
+ * The phone's pool sheet (USE-79) adds its filters and the day it opens
+ * over, whose date the due words count from; the filters narrow the view
+ * only and write nothing.
  */
 export function usePoolView({
   group,
   sort,
   query,
   tab,
+  filters,
+  linearFilters,
+  dateKey,
 }: {
   group: PoolGroupBy;
   sort: PoolSort;
   query: string;
   tab: PoolTab;
+  filters?: PoolFilters;
+  linearFilters?: LinearFilters;
+  dateKey?: string;
 }) {
   const source = useDataSource();
   const pool = usePool();
   const linear = useLinear();
   const clients = useClients();
   const personName = (useAccount().data?.name ?? "").split(" ")[0] ?? "";
-  const todayKey = source.todayKey();
+  const todayKey = dateKey ?? source.todayKey();
 
   // Cheap to work out: every render reads the queries as they stand.
   const view =
@@ -52,6 +64,8 @@ export function usePoolView({
           sort,
           query,
           tab,
+          filters,
+          linearFilters,
         })
       : null;
 
@@ -60,6 +74,9 @@ export function usePoolView({
     isError: pool.isError,
     retry: pool.retry,
     todayKey,
+    /** The open items' sessions: where a placed one sits (USE-79). */
+    slots: pool.slots ?? [],
+    clientsEnabled: clients.clientsEnabled,
     /** useClients' setOrder, USE-55's setClientOrder: the one order Settings › Clients writes (C-USE-week-6). */
     reorderClients: clients.setOrder,
     syncNow: () => linear.syncNow(),

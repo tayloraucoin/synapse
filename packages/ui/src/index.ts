@@ -61,6 +61,8 @@ export {
   PlusIcon as AddIcon,
   SquareCheckIcon as AddTodoIcon,
 } from "lucide-react";
+/** The pool sheet's search glyph (USE-79). */
+export { SearchIcon } from "lucide-react";
 /** Now's block forms (USE-17): the ··· menu's rows, its trigger, a meal, the add row. */
 export {
   CalendarIcon as WholeDayIcon,

@@ -1,3 +1,4 @@
+import type { WorkSize } from "@syn/types";
 import { statusFill, weekdayIndex } from "@syn/utils";
 import type {
   ClientRecord,
@@ -24,6 +25,41 @@ import { dueBadge, SIZE_WORDS, type DueBadge } from "./week-view";
 export type PoolGroupBy = "client" | "workspace" | "project";
 export type PoolSort = "due" | "priority" | "updated";
 export type PoolTab = "pool" | "linear";
+
+/**
+ * The phone's pool filters (USE-79; D-USE-54): one client, one size, a due
+ * window. They narrow the pool's tabs only, never search and never the days.
+ */
+export type PoolDue = "week" | "today";
+export interface PoolFilters {
+  client: string | null;
+  size: WorkSize | null;
+  due: PoolDue | null;
+}
+export const NO_POOL_FILTERS: PoolFilters = {
+  client: null,
+  size: null,
+  due: null,
+};
+
+/** From Linear's two filters, both on by default (D-USE-57). */
+export interface LinearFilters {
+  assigned: boolean;
+  notDone: boolean;
+}
+export const DEFAULT_LINEAR_FILTERS: LinearFilters = {
+  assigned: true,
+  notDone: true,
+};
+
+/** A client in the filter's list: its tile and how many Linear teams it spans. */
+export interface PoolClientChoice {
+  id: string;
+  name: string;
+  letter: string;
+  hue: ClientRecord["colorKey"];
+  teams: number;
+}
 
 export type PriorityLevel = "urgent" | "high" | "normal" | "low";
 export type StatusShapeType =
@@ -83,6 +119,11 @@ export interface PoolRowView {
   noLinear: string | null;
   /** "5 Large", "8 Huge · 20 h" or "unsized". */
   size: string;
+  sizeKey: WorkSize | null;
+  /** Whose work it is; null with clients off or no client. */
+  clientName: string | null;
+  /** The issue behind a row not yet in the pool. */
+  issue: { connectionId: string; issueId: string } | null;
   labels: { name: string; color: string }[];
   due: DueBadge | null;
   /** "on Mon, Tue, Wed": placed rows stay, faded, naming their days. */
@@ -143,6 +184,10 @@ export interface PoolPanelView {
   /** The pool holds nothing (pool-empty.md); never a count. */
   empty: boolean;
   sync: string | null;
+  /** "2 min ago", for the phone's own sync words. */
+  syncAgo: string | null;
+  /** Clients in Taylor's order for the client filter; empty with clients off. */
+  clientChoices: PoolClientChoice[];
 }
 
 export interface PoolViewInput {
@@ -166,6 +211,9 @@ export interface PoolViewInput {
   sort: PoolSort;
   query: string;
   tab: PoolTab;
+  /** The phone's filters (USE-79); none on the desk. */
+  filters?: PoolFilters;
+  linearFilters?: LinearFilters;
 }
 
 /** One row before it is placed in a group: the row and what groups and sorts it. */
@@ -176,6 +224,7 @@ interface Entry {
   line: Omit<PoolLineView, "rows">;
   project: { id: string; emoji: string | null; name: string } | null;
   dueOn: string | null;
+  sizeKey: WorkSize | null;
   priorityRank: number;
   updatedAt: string;
 }
@@ -320,6 +369,9 @@ function poolEntries(input: PoolViewInput): Entry[] {
         identifier,
         noLinear: identifier === null ? POOL_WORDS.noLinear : null,
         size: sizeOf(item.size, item.lengthMaxMin),
+        sizeKey: item.size,
+        clientName: input.clientsEnabled ? (client?.name ?? null) : null,
+        issue: null,
         labels: placed === null ? (issue?.labels ?? []) : [],
         due: dueBadge(dueOn, todayKey),
         placed,
@@ -342,16 +394,48 @@ function poolEntries(input: PoolViewInput): Entry[] {
       line: where.line,
       project: where.project,
       dueOn,
+      sizeKey: item.size,
       priorityRank: level ? Object.values(PRIORITY).indexOf(level) : 4,
       updatedAt: item.updatedAt,
     };
   });
 }
 
+/**
+ * The issues not in the pool. Both of From Linear's filters on is the
+ * snapshot's own list; either off widens it from the workspaces (USE-79).
+ */
+function looseIssues(input: PoolViewInput): LooseIssue[] {
+  const { linear, pool } = input;
+  if (!linear) return [];
+  const filters = input.linearFilters ?? DEFAULT_LINEAR_FILTERS;
+  if (filters.assigned && filters.notDone) return linear.notInPool;
+  const pooled = new Set(
+    pool.items.map(
+      ({ item }) => `${item.linearConnectionId}:${item.linearIssueId}`,
+    ),
+  );
+  return linear.workspaces.flatMap(({ connectionId, payload }) => {
+    const open = new Set(
+      payload.states
+        .filter((s) => !["completed", "canceled", "duplicate"].includes(s.type))
+        .map((s) => s.id),
+    );
+    return payload.issues
+      .filter(
+        (issue) =>
+          !pooled.has(`${connectionId}:${issue.id}`) &&
+          (!filters.assigned || issue.assignedToMe) &&
+          (!filters.notDone || open.has(issue.stateId)),
+      )
+      .map((issue) => ({ ...issue, connectionId }));
+  });
+}
+
 function looseEntries(input: PoolViewInput): Entry[] {
   const { linear, todayKey, personName } = input;
   if (!linear) return [];
-  return linear.notInPool.map((issue: LooseIssue) => {
+  return looseIssues(input).map((issue: LooseIssue) => {
     const workspace = linear.workspaces.find(
       (w) => w.connectionId === issue.connectionId,
     );
@@ -363,6 +447,12 @@ function looseEntries(input: PoolViewInput): Entry[] {
     const project = workspace?.payload.projects.find(
       (p) => p.id === issue.projectId,
     );
+    const client = input.clientFor({
+      id: issue.id,
+      clientId: null,
+      linearConnectionId: issue.connectionId,
+      linearIssueId: issue.id,
+    });
     return {
       row: finish({
         key: `issue:${issue.connectionId}:${issue.id}`,
@@ -373,6 +463,9 @@ function looseEntries(input: PoolViewInput): Entry[] {
         identifier: issue.identifier,
         noLinear: null,
         size: size ? SIZE_WORDS[size] : POOL_WORDS.unsized,
+        sizeKey: size ?? null,
+        clientName: input.clientsEnabled ? (client?.name ?? null) : null,
+        issue: { connectionId: issue.connectionId, issueId: issue.id },
         labels: issue.labels,
         due: dueBadge(issue.dueDate, todayKey),
         placed: null,
@@ -387,16 +480,12 @@ function looseEntries(input: PoolViewInput): Entry[] {
           : null,
         where: null,
       }),
-      client: input.clientFor({
-        id: issue.id,
-        clientId: null,
-        linearConnectionId: issue.connectionId,
-        linearIssueId: issue.id,
-      }),
+      client,
       workspace: where.workspace,
       line: where.line,
       project: where.project,
       dueOn: issue.dueDate,
+      sizeKey: size ?? null,
       priorityRank: level ? Object.values(PRIORITY).indexOf(level) : 4,
       updatedAt: "",
     };
@@ -546,17 +635,71 @@ function groupEntries(
   );
 }
 
-function syncWords(lastSyncedAt: string | null, now: Date): string | null {
+function syncAgo(lastSyncedAt: string | null, now: Date): string | null {
   if (lastSyncedAt === null) return null;
   const min = Math.floor((now.getTime() - Date.parse(lastSyncedAt)) / 60_000);
   // [ASSUMPTION] Under a minute "just now"; from an hour in hours.
-  const ago =
-    min < 1
-      ? POOL_WORDS.justNow
-      : min < 60
-        ? POOL_WORDS.minAgo(min)
-        : POOL_WORDS.hAgo(Math.floor(min / 60));
-  return POOL_WORDS.synced(ago);
+  return min < 1
+    ? POOL_WORDS.justNow
+    : min < 60
+      ? POOL_WORDS.minAgo(min)
+      : POOL_WORDS.hAgo(Math.floor(min / 60));
+}
+
+/** The phone's filters over the rows of a tab (USE-79); search never takes them. */
+function passes(
+  entry: Entry,
+  filters: PoolFilters,
+  input: PoolViewInput,
+): boolean {
+  if (
+    filters.client !== null &&
+    input.clientsEnabled &&
+    entry.client?.id !== filters.client
+  )
+    return false;
+  if (filters.size !== null && entry.sizeKey !== filters.size) return false;
+  if (filters.due !== null) {
+    if (entry.dueOn === null) return false;
+    // [ASSUMPTION] Overdue work counts as due today and this week.
+    const last =
+      filters.due === "today"
+        ? input.todayKey
+        : addDaysKey(mondayOf(input.todayKey), 6);
+    if (entry.dueOn > last) return false;
+  }
+  return true;
+}
+
+const COUNT_WORDS = ["", "one", "two", "three", "four", "five"];
+
+/** Each client in Taylor's order with the Linear teams its work spans. */
+function clientChoices(
+  entries: readonly Entry[],
+  input: PoolViewInput,
+): PoolClientChoice[] {
+  if (!input.clientsEnabled) return [];
+  return input.clients.map((client) => {
+    const teams = new Set(
+      entries
+        .filter((e) => e.client?.id === client.id && e.line.team)
+        .map((e) => e.line.team!.name),
+    );
+    const head = clientHead(client);
+    return {
+      id: client.id,
+      name: client.name,
+      letter: head.kind === "client" ? head.letter : "",
+      hue: client.colorKey,
+      teams: teams.size,
+    };
+  });
+}
+
+/** "two Linear teams", from two; one team says nothing. */
+export function teamsWord(teams: number): string | null {
+  if (teams < 2) return null;
+  return `${COUNT_WORDS[teams] ?? teams} Linear teams`;
 }
 
 function matches(row: PoolRowView, query: string): boolean {
@@ -587,6 +730,12 @@ export function poolView(input: PoolViewInput): PoolPanelView {
       : input.group;
   const byClient = group === "client";
 
+  const ago = linearConnected
+    ? syncAgo(lastSyncedOf(input.linear!.connections), input.now)
+    : null;
+  const sync = ago === null ? null : POOL_WORDS.synced(ago);
+  const choices = clientChoices([...pooled, ...loose], input);
+
   const query = input.query.trim();
   if (query) {
     const where = (row: PoolRowView, place: string) =>
@@ -605,21 +754,23 @@ export function poolView(input: PoolViewInput): PoolPanelView {
         newItem: POOL_WORDS.newItem(query),
       },
       empty: false,
-      sync: linearConnected
-        ? syncWords(lastSyncedOf(input.linear!.connections), input.now)
-        : null,
+      sync,
+      syncAgo: ago,
+      clientChoices: choices,
     };
   }
 
   // The Linear tab: issues not in the pool, and the placed ones faded with
   // their days [ASSUMPTION, from the phone's From Linear card].
-  const tabEntries =
+  const filters = input.filters ?? NO_POOL_FILTERS;
+  const tabEntries = (
     input.tab === "linear" && linearConnected
       ? [
           ...loose,
           ...pooled.filter((e) => e.row.placed !== null && e.row.status),
         ].sort(compare)
-      : pooled;
+      : pooled
+  ).filter((entry) => passes(entry, filters, input));
   const empty = input.tab === "pool" && pooled.length === 0;
   return {
     linearConnected,
@@ -629,8 +780,8 @@ export function poolView(input: PoolViewInput): PoolPanelView {
       : groupEntries(tabEntries, group, input.clients, input.tab === "pool"),
     search: null,
     empty,
-    sync: linearConnected
-      ? syncWords(lastSyncedOf(input.linear!.connections), input.now)
-      : null,
+    sync,
+    syncAgo: ago,
+    clientChoices: choices,
   };
 }

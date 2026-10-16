@@ -17,6 +17,7 @@ import { MealTopicPart, type MealTopicPartState } from "./meal-topic-parts";
 import { NewBlockSheetPart } from "./new-block-parts";
 import { NowPart, type NowPartState } from "./now-parts";
 import { OrientPart, type OrientPartState } from "./orient-parts";
+import { PoolSheetPart } from "./pool-sheet-parts";
 import { ReadyPart, type ReadyPartState } from "./ready-parts";
 import {
   RailAddPart,
@@ -28,6 +29,10 @@ import { RunningPart, type RunningPartState } from "./running-parts";
 import { BLOCK_VIEW_SCENARIOS } from "./scenarios/block-view";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { NEW_BLOCK_SCENARIOS } from "./scenarios/new-block";
+import {
+  POOL_SHEET_SCENARIOS,
+  type PoolSheetScenarioName,
+} from "./scenarios/pool-sheet";
 import { DAYS_SCENARIOS } from "./scenarios/set-up";
 import { SETTINGS_SCENARIOS } from "./scenarios/settings";
 import {
@@ -316,4 +321,10 @@ for (const state of Object.keys(SETTINGS_SCENARIOS)) {
 // USE-48: Block view from the day, under the block-view scenarios' names.
 for (const state of Object.keys(BLOCK_VIEW_SCENARIOS)) {
   registerPart(state, () => createElement(BlockViewPart)); // USE-48
+}
+// USE-79: the phone's pool sheet, by its scenario names.
+for (const state of Object.keys(POOL_SHEET_SCENARIOS)) {
+  registerPart(state, () =>
+    createElement(PoolSheetPart, { state: state as PoolSheetScenarioName }),
+  );
 }
