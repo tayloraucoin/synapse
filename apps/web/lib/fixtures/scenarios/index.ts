@@ -26,7 +26,11 @@ import { RUNNING_SCENARIOS } from "./running";
 import { SCHEDULE_SCENARIOS } from "./schedule";
 import { SET_UP_SCENARIOS, type SetUpScenarioStart } from "./set-up";
 import { SETTINGS_SCENARIOS } from "./settings";
-import { STEP_AWAY_SCENARIOS, TODAY_DESK_SCENARIOS } from "./today-desk";
+import {
+  GESTURE_SCENARIOS,
+  STEP_AWAY_SCENARIOS,
+  TODAY_DESK_SCENARIOS,
+} from "./today-desk";
 import { TODAY_EMPTY_SCENARIOS } from "./today-empty";
 import { TODAY_LINEAR_SCENARIOS } from "./today-linear";
 import { TODAY_MEETING_SCENARIOS } from "./today-meetings";
@@ -281,6 +285,7 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...STEP_AWAY_SCENARIOS,
   // ---- Today with nothing slotted (USE-82): nothing planned, no work slotted ----
   ...TODAY_EMPTY_SCENARIOS,
+  ...GESTURE_SCENARIOS,
 };
 
 export function scenarioNames(): string[] {

@@ -57,4 +57,23 @@ export const WORK_COPY = {
   offline:
     "Offline. Everything works here; Linear catches up when back online.",
   workName: "Work",
+  /** Thumb firing (USE-70; thumb-firing.md, D-USE-53). */
+  swipeHint:
+    "Swipe a work row right to send it firing. The ring on the row still does it with one tap.",
+  swipeHintClose: "Close the hint",
+  /** The work menu (USE-70; work-menu.md, D-USE-57). */
+  menu: {
+    label: (title: string) => `${title} options`,
+    more: (title: string) => `More for ${title}`,
+    start: "Start",
+    promptSent: "Prompt sent",
+    bringBack: "Bring back",
+    done: "Done",
+    moveToTier: "Move to tier",
+    moveToDay: "Move to another day",
+    backToPool: "Back to the pool",
+    openInLinear: "Open in Linear",
+    movedTo: (title: string, tier: string) => `${title} moved to ${tier}.`,
+    backInPool: (title: string) => `${title} is back in the pool.`,
+  },
 } as const;

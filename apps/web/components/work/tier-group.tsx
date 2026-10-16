@@ -53,6 +53,11 @@ export interface TierGroupProps extends WorkRowHandlers {
   /** "Two is the usual for Primary." (D-USE-65). */
   helper?: string | null;
   add?: TierGroupAdd | null;
+  /**
+   * Today's row gestures around a row (USE-70): the swipe and the work menu.
+   * Given the row as drawn; returns it wrapped, or as is.
+   */
+  wrapRow?: (row: WorkRowView, node: React.ReactNode) => React.ReactNode;
   className?: string;
 }
 
@@ -68,6 +73,7 @@ export function TierGroup({
   headingAs = "h3",
   helper = null,
   add = null,
+  wrapRow,
   className,
   ...handlers
 }: TierGroupProps) {
@@ -122,6 +128,11 @@ export function TierGroup({
           <li key={row.id}>
             {lifted?.rowId === row.id ? (
               lifted.content
+            ) : wrapRow ? (
+              wrapRow(
+                row,
+                <WorkRow row={row} planning={planning} {...handlers} />,
+              )
             ) : (
               <WorkRow row={row} planning={planning} {...handlers} />
             )}

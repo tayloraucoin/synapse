@@ -57,3 +57,16 @@ export { WorkTiersSkeleton } from "./work-tiers-skeleton";
 export { WeekStrip, type WeekStripProps } from "./week-strip";
 export { LiftedMeeting, type LiftedMeetingProps } from "./lifted-meeting";
 export { MeetingBand, MeetingTag, type MeetingBandProps } from "./meeting-band";
+export {
+  SwipeHint,
+  SwipeToFire,
+  type SwipeHintProps,
+  type SwipeToFireProps,
+} from "./swipe-to-fire";
+export {
+  WorkMenu,
+  WorkMenuLift,
+  type WorkMenuActions,
+  type WorkMenuProps,
+  type WorkMenuView,
+} from "./work-menu";

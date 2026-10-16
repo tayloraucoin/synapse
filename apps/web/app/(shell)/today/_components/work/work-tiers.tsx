@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { WorkTier } from "@syn/types";
 import { cn, toastUndo, useIsSplit } from "@syn/ui";
 import {
@@ -9,12 +10,17 @@ import {
   NextCard,
   RunningWorkCard,
   StartWhileOneRuns,
+  SwipeHint,
+  SwipeToFire,
   TierAddRow,
   TierGroup,
   WaitingGroup,
   WhileItFiresLine,
+  WorkMenu,
+  WorkMenuLift,
   type StartMoveTo,
   type WorkRowHandlers,
+  type WorkRowView,
 } from "@/components/work";
 import { NewTaskSheet } from "@/components/work/add";
 import { shortDate } from "@/components/work/add/new-task/form";
@@ -28,6 +34,11 @@ import {
 } from "@/lib/data/today-work";
 import type { useTodayLinear } from "@/lib/data/use-today-linear";
 import type { useWorkLoop } from "@/lib/data/use-today-work";
+import { useWorkMenu } from "@/lib/data/use-work-menu";
+import { TIER_WORDS } from "@/lib/data/week-view";
+import { useDismissed } from "@/lib/hooks/use-dismissed";
+import { SWIPE_REVEAL_PX } from "@/lib/hooks/use-swipe-row";
+import { itemSheetRoute } from "@/lib/routes";
 import { WORK_COPY as COPY } from "./copy";
 import { EMPTY_COPY } from "./empty-copy";
 
@@ -63,6 +74,14 @@ import { EMPTY_COPY } from "./empty-copy";
  * under its heading, always shown; at the desk with nothing planned the
  * tiers take pool rows dropped on them, Primary as the dashed zone "Drop
  * here, or + Add to Primary" (D-USE-42). Each opens New task with the tier.
+ * The row gestures (USE-70): on the phone a work row swiped right past its
+ * reveal fires (Prompt sent), never from the screen's edge and never on a
+ * firing row; the one-time hint sits above the tiers until the swipe is used
+ * or ×. A long-press, or at the desk a right-click or the context-menu key,
+ * opens the work menu; its actions are the loop's and the work writes', the
+ * session ask in the row's Item sheet. Move to another day opens the Item
+ * sheet until Move to (USE-69) gives the menu its own sheet. Scenarios
+ * `today-thumb-firing` (a row held mid-swipe) and `today-work-menu`.
  */
 export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
   view: TodayWorkView;
@@ -219,6 +238,111 @@ export function WorkTiers({
     });
   });
 
+  // The row gestures (USE-70).
+  const menuData = useWorkMenu(view.dateKey, view);
+  const router = useRouter();
+  const pathname = usePathname();
+  const search = useSearchParams().toString();
+  const here = search ? `${pathname}?${search}` : pathname;
+  const [hintGone, closeHint] = useDismissed("today-swipe-hint", "forever");
+  const stagedSwipe = staged?.startsWith("swipe:") ? staged.slice(6) : null;
+  const [menuFor, setMenuFor] = React.useState<string | null>(() =>
+    staged?.startsWith("menu:") ? staged.slice(5) : null,
+  );
+  const swipeable =
+    !atDesk &&
+    toggleFiring !== undefined &&
+    view.tiers.some((group) =>
+      group.rows.some((row) => row.form === "idle" || row.form === "next"),
+    );
+  const tierOf = (id: string) =>
+    view.tiers.find((group) => group.rows.some((row) => row.id === id))?.tier;
+
+  async function moveToTier(id: string, tier: WorkTier) {
+    const item = view.workItemIds.get(id);
+    // A session with others to come asks This session or All, in its sheet.
+    if (item && menuData.asksForTier(id)) {
+      router.push(`${itemSheetRoute(here, item)}&step=ask:${tier}`, {
+        scroll: false,
+      });
+      return;
+    }
+    const written = await menuData.setTier(id, tier);
+    toastUndo({
+      text: COPY.menu.movedTo(titleOf(id), TIER_WORDS[tier]),
+      onUndo: () => void menuData.undo(written),
+    });
+  }
+
+  async function backToPool(id: string) {
+    const title = titleOf(id);
+    const written = await menuData.backToPool(id);
+    if (written)
+      toastUndo({
+        text: COPY.menu.backInPool(title),
+        onUndo: () => void menuData.undo(written),
+      });
+  }
+
+  const wrapRow = (row: WorkRowView, node: React.ReactNode) => {
+    if (!loop || row.form === "done") return node;
+    const firing = row.form === "firing";
+    const url = menuData.urlOf(row.id);
+    const current = tierOf(row.id);
+    return (
+      <WorkMenu
+        atDesk={atDesk}
+        open={menuFor === row.id}
+        onOpenChange={(open) => setMenuFor(open ? row.id : null)}
+        clone={<WorkMenuLift row={row} />}
+        view={{
+          label: COPY.menu.label(row.title),
+          more: COPY.menu.more(row.title),
+          start: COPY.menu.start,
+          fire: firing ? COPY.menu.bringBack : COPY.menu.promptSent,
+          firing,
+          done: COPY.menu.done,
+          moveToTier: COPY.menu.moveToTier,
+          tiers: (Object.keys(TIER_WORDS) as WorkTier[]).map((tier) => ({
+            tier,
+            word: TIER_WORDS[tier],
+            current: tier === current,
+          })),
+          moveToDay: COPY.menu.moveToDay,
+          backToPool: COPY.menu.backToPool,
+          openInLinear: url ? COPY.menu.openInLinear : null,
+        }}
+        actions={{
+          onStart: () => void start?.(row.id),
+          onFire: () => toggleFiring?.(row.id, !firing),
+          onDone: () => void done?.(row.id),
+          onMoveToTier: (tier) => void moveToTier(row.id, tier),
+          onMoveToDay: () => onOpen?.(row.id),
+          onBackToPool: () => void backToPool(row.id),
+          onOpenInLinear: () => {
+            if (url) window.open(url, "_blank", "noopener");
+          },
+        }}
+      >
+        {atDesk ? (
+          node
+        ) : (
+          <SwipeToFire
+            word={COPY.promptSent}
+            disabled={firing || !toggleFiring}
+            onFire={() => {
+              toggleFiring?.(row.id, true);
+              closeHint();
+            }}
+            staged={stagedSwipe === row.id ? SWIPE_REVEAL_PX : undefined}
+          >
+            {node}
+          </SwipeToFire>
+        )}
+      </WorkMenu>
+    );
+  };
+
   const hand = view.inHand;
   // A meeting at its time holds the lift on the phone; Next goes back to its row.
   const meetings = meetingsInFlow ? view.meetings : null;
@@ -306,6 +430,13 @@ export function WorkTiers({
 
   return (
     <div className={cn("flex flex-col gap-(--space-6)", className)}>
+      {swipeable && !hintGone ? (
+        <SwipeHint
+          text={COPY.swipeHint}
+          closeName={COPY.swipeHintClose}
+          onClose={closeHint}
+        />
+      ) : null}
       {meetings?.lifted.map((meeting) => (
         <LiftedMeeting
           key={meeting.id}
@@ -364,6 +495,7 @@ export function WorkTiers({
           onToggleFiring={toggleFiring}
           onRetryLinear={onRetryLinear}
           onReopen={onReopen}
+          wrapRow={wrapRow}
         />
       ))}
       <WaitingGroup

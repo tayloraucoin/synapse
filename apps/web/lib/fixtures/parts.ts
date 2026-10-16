@@ -36,6 +36,7 @@ import {
 import { DAYS_SCENARIOS } from "./scenarios/set-up";
 import { SETTINGS_SCENARIOS } from "./scenarios/settings";
 import {
+  GESTURE_SCENARIOS,
   STEP_AWAY_SCENARIOS,
   TODAY_DESK_SCENARIOS,
 } from "./scenarios/today-desk";
@@ -298,6 +299,10 @@ for (const state of Object.keys(STEP_AWAY_SCENARIOS)) {
 }
 // USE-82: nothing planned and no work slotted, on the same frame.
 for (const state of Object.keys(TODAY_EMPTY_SCENARIOS)) {
+  registerPart(state, () => createElement(TodayDeskPart));
+}
+// USE-70: the row gestures, the swipe held and the work menu open.
+for (const state of Object.keys(GESTURE_SCENARIOS)) {
   registerPart(state, () => createElement(TodayDeskPart));
 }
 // USE-27: Schedule's states, `schedule-<state>` (the drawn four by their names).

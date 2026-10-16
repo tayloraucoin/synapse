@@ -47,6 +47,7 @@
  */
 import * as React from "react";
 import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useWorkClock } from "@syn/hooks";
 import type { WorkTier } from "@syn/types";
 import {
@@ -203,7 +204,11 @@ export function WorkItemSheet({
   const offline = useIsOffline();
   const seededStep = seededLinear(source.scenario.view?.open);
   const [statusAsked, setStatusOpen] = React.useState(false);
-  const seedStep = seededSheetStep(source.scenario.view?.open);
+  // The work menu's tier move on a session (USE-70) arrives as `&step=ask:<tier>`.
+  const [urlStep, setUrlStep] = useQueryState("step");
+  const seedStep =
+    seededSheetStep(source.scenario.view?.open) ??
+    (urlStep?.startsWith("ask:") ? urlStep : null);
 
   const [moreAsked, setMore] = React.useState(false);
   // The step is the phone's; at the desk ··· is a pull-down (D-USE-103).
@@ -234,6 +239,7 @@ export function WorkItemSheet({
     if (seedStep.startsWith("ask:")) {
       seededSteps.current = true;
       setStep({ kind: "ask", tier: seedStep.slice(4) as WorkTier });
+      if (urlStep !== null) void setUrlStep(null);
     } else if (seedStep === "place") {
       const sub = sheet.subIssues.find((row) => !row.done);
       if (!sub) return;

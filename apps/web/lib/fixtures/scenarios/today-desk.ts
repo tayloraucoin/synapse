@@ -488,6 +488,24 @@ export const STEP_AWAY_SCENARIOS: Record<string, () => Scenario> = {
   },
 };
 
+/**
+ * USE-70: the phone's row gestures on the Monday. `today-thumb-firing`
+ * (10:43): [Portal sign-in] fired at 10:15, the hint under the Work header
+ * and [Desk Today layout] held mid-swipe over its reveal. `today-work-menu`
+ * (10:20): [Portal sign-in] firing, the SMS copy long-pressed, its menu open.
+ */
+export const GESTURE_SCENARIOS: Record<string, () => Scenario> = {
+  "today-thumb-firing": work("today-thumb-firing", {
+    now: at("10:43"),
+    events: [mondayEvent(1, S.portal, "prompt_sent", "10:15")],
+    view: { open: `swipe:${S.desk}` },
+  }),
+  "today-work-menu": work("today-work-menu", {
+    events: PORTAL_FIRING,
+    view: { open: `menu:${S.sms}` },
+  }),
+};
+
 /** The Monday's Work blocks, for the tests. */
 export const TODAY_WORK_BLOCKS = {
   morning: WEEK_IDS.blocks.workMorning,
