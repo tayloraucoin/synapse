@@ -46,7 +46,12 @@ import {
   AboveFooterToaster,
   useUndoToast,
 } from "@/lib/hooks/use-undo-toast";
-import { daysRoute, itemSheetRoute, newBlockSheetRoute } from "@/lib/routes";
+import {
+  daysBlockRoute,
+  daysRoute,
+  itemSheetRoute,
+  newBlockSheetRoute,
+} from "@/lib/routes";
 import { DAYS_COPY as COPY } from "./copy";
 import { EmptyDayOffer, useCopyFrom } from "./copy-from";
 import {
@@ -682,10 +687,15 @@ function SetDay({
                 }
               : undefined
           }
-          // A block opens its Block view, editing: its tickets' [ASSUMPTION: `&block=`].
+          // A block opens its Block view, editing (USE-49): the usual weekday's, or This week's date.
           onBlock={(id) =>
             router.push(
-              daysRoute({ week: place.week, day: place.day, block: id }),
+              daysBlockRoute(
+                id,
+                place.date === null
+                  ? { weekday: place.day }
+                  : { date: place.date },
+              ),
             )
           }
           timeZone={scenario.records.timeZone}

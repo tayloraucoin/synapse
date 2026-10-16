@@ -1,5 +1,6 @@
 "use client";
 
+import type { IconValue } from "@syn/types";
 import { reflowItems, weekdayIndex, weekKeyOf, type Reflow } from "@syn/utils";
 import type { DayEventRecord } from "@syn/validators";
 import {
@@ -36,6 +37,10 @@ export interface BlockViewItem {
   done: boolean;
   /** The date's own item (added from the day), not the weekday's. */
   onDate: string | null;
+  /** The item's icon (USE-49: editing draws it on every row). */
+  icon: IconValue | null;
+  /** A drive in the flow: editing draws it as an italic row (USE-49). */
+  isTransition: boolean;
 }
 
 export interface BlockView {
@@ -48,13 +53,18 @@ export interface BlockView {
   day: SetUpDay;
 }
 
-export type BlockViewRef =
-  { blockId: string; date: string } | { blockId: string; weekday: number };
+export type BlockViewRef = (
+  { blockId: string; date: string } | { blockId: string; weekday: number }
+) & {
+  /** Transitions as rows, as editing draws them (USE-49); the day leaves them out. */
+  transitions?: boolean;
+};
 
 export function deriveBlockView(
   records: WeekRecords,
   blockId: string,
   weekday: number,
+  transitions = false,
 ): BlockView | null {
   const day = deriveSetUpDay(records.days[weekday]!, records.timeZone);
   const block = day.blocks.find((b) => b.block.id === blockId);
@@ -77,7 +87,7 @@ export function deriveBlockView(
   return {
     block,
     items: rows
-      .filter(({ item }) => !item.isTransition)
+      .filter(({ item }) => transitions || !item.isTransition)
       .map(({ item, slot, sortOrder, lengthMin }) => ({
         id: item.id,
         title: item.title,
@@ -88,6 +98,8 @@ export function deriveBlockView(
         slotId: slot?.id ?? null,
         done: slot?.doneAt != null,
         onDate: item.onDate,
+        icon: item.icon,
+        isTransition: item.isTransition,
       })),
     events,
     reflow,
@@ -145,13 +157,30 @@ export function inOrderOf(
   };
 }
 
+/**
+ * The rows as the rail reads them (USE-49; C-USE-block-view-kind-1): by
+ * planned start, so a set-time item keeps its place as well as its time
+ * while the others re-flow around it; ties keep the given order.
+ */
+export function inTimeOrder<T extends { startsAt: string }>(
+  rows: readonly T[],
+): T[] {
+  return rows
+    .map((row, index) => ({ row, index }))
+    .sort(
+      (a, b) =>
+        a.row.startsAt.localeCompare(b.row.startsAt) || a.index - b.index,
+    )
+    .map(({ row }) => row);
+}
+
 /** Null `view` once read means the block is not on that day. */
 export function useBlockView(ref: BlockViewRef) {
   const dated = "date" in ref;
   const week = dated ? weekKeyOf(ref.date) : "usual";
   const weekday = dated ? weekdayIndex(ref.date) : ref.weekday;
   const query = useWeekQuery(week, (records) =>
-    deriveBlockView(records, ref.blockId, weekday),
+    deriveBlockView(records, ref.blockId, weekday, ref.transitions === true),
   );
   return { ...query, view: query.data };
 }

@@ -77,6 +77,8 @@ export { CoffeeIcon as BreakIcon } from "lucide-react";
 export { SmileIcon as NoIconIcon } from "lucide-react";
 /** Block view's "Icon and colour" (USE-48): a dotted circle. */
 export { CircleDashedIcon as IconAndColourIcon } from "lucide-react";
+/** Block view's set-time mark and a checklist's Set a time (USE-49): a clock. */
+export { Clock3Icon as SetTimeIcon } from "lucide-react";
 /** The account's glyphs (USE-83): the avatar menu's rows and the install steps. */
 export {
   CalendarRangeIcon as SetMyDaysIcon,

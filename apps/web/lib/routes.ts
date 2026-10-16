@@ -242,6 +242,40 @@ export function daysRoute(
   return search ? `/days?${search}` : "/days";
 }
 
+/** The weekday keys `daysBlockRoute` writes, Monday 0. */
+export const DAYS_BLOCK_WEEKDAYS = [
+  "mon",
+  "tue",
+  "wed",
+  "thu",
+  "fri",
+  "sat",
+  "sun",
+] as const;
+
+/** The query keys `daysBlockRoute` writes. */
+export const DAYS_BLOCK_PARAMS = { weekday: "weekday", date: "date" } as const;
+
+/**
+ * A block in Set my days, editing (USE-49; block-view/by-kind.md): the usual
+ * weekday's (`?weekday=mon`, Monday 0 as `daysRoute`'s `day`) or This week's
+ * date (`?date=2026-10-15`), which makes every change that date's only.
+ */
+export function daysBlockRoute(
+  blockId: string,
+  on: { weekday: number } | { date: string },
+): string {
+  const query = new URLSearchParams();
+  if ("date" in on) query.set(DAYS_BLOCK_PARAMS.date, on.date);
+  else {
+    query.set(
+      DAYS_BLOCK_PARAMS.weekday,
+      DAYS_BLOCK_WEEKDAYS[on.weekday] ?? DAYS_BLOCK_WEEKDAYS[0],
+    );
+  }
+  return `${daysRoute()}/block/${encodeURIComponent(blockId)}?${query.toString()}`;
+}
+
 /**
  * Settings (USE-85 builds it): the avatar menu's last row. `section` opens
  * it at one part, as the To-do sheet's Settings does at Notifications.

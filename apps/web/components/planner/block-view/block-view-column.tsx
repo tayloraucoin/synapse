@@ -31,7 +31,9 @@ import {
  * `leading` (the day's checkbox; editing has none), `trailing` (the length,
  * then the grip; editing's set-time clock takes the grip's place),
  * `wrapRow` (the day's swipe and long-press menu around a row's body) and
- * `reorder` (grips on every row while set). Props only.
+ * `reorder` (grips on every row while set). Editing (USE-49) adds
+ * `rowHeight` (the kinds drawn flat at 56 px) and `timeless`: a checklist
+ * with no span has no rail, no end, no free time and no overflow. Props only.
  */
 export interface BlockViewRowModel {
   id: string;
@@ -82,6 +84,12 @@ export interface BlockViewColumnProps<R extends BlockViewRowModel> {
   overMin?: number;
   /** The next block, peeking at the foot. */
   peek?: { name: string; span: string; hue: BlockHue } | null;
+  /** A row's least height in px. Default: by length (`rowHeightPx`). */
+  rowHeight?: (row: R) => number;
+  /** A checklist with no times (D-USE-28): no rail, end, free time or peek. */
+  timeless?: boolean;
+  /** Under the add row: the kinds' lines, the topics, Set a time. */
+  afterAdd?: React.ReactNode;
 }
 
 /** The rail: 44 px. */
@@ -195,10 +203,15 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
   freeFrom = null,
   overMin = 0,
   peek = null,
+  rowHeight,
+  timeless = false,
+  afterAdd = null,
 }: BlockViewColumnProps<R>) {
   const endMin = clockMinutes(block.endsAt);
-  const over = overMin > 0;
-  const firstPast = rows.find((row) => clockMinutes(row.startsAt) >= endMin);
+  const over = !timeless && overMin > 0;
+  const firstPast = over
+    ? rows.find((row) => clockMinutes(row.startsAt) >= endMin)
+    : undefined;
 
   function renderRow(
     row: R,
@@ -232,7 +245,7 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
         )}
       </div>
     );
-    const heightPx = rowHeightPx(row.lengthMin);
+    const heightPx = rowHeight ? rowHeight(row) : rowHeightPx(row.lengthMin);
     const mark = now !== null && now.rowId === row.id ? now : null;
     return (
       <>
@@ -254,7 +267,7 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
           className="relative flex"
           style={{ minHeight: `${heightPx}px` }}
         >
-          <Rail time={row.startsAt} />
+          {timeless ? null : <Rail time={row.startsAt} />}
           <div
             className={cn(
               "bg-background min-w-0 flex-1 border-b border-hairline",
@@ -267,7 +280,10 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
           {lifted ? (
             <span
               aria-hidden="true"
-              className="bg-ink absolute start-11 end-0 -top-1 h-0.5"
+              className={cn(
+                "bg-ink absolute end-0 -top-1 h-0.5",
+                timeless ? "start-0" : "start-11",
+              )}
             />
           ) : null}
           {mark ? (
@@ -287,7 +303,9 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
   return (
     <div data-block-view-column className="flex flex-col">
       {rows.length === 0 && empty !== null ? (
-        <div className="py-(--space-4) ps-11">{empty}</div>
+        <div className={cn("py-(--space-4)", !timeless && "ps-11")}>
+          {empty}
+        </div>
       ) : null}
 
       {reorder !== null ? (
@@ -311,12 +329,18 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
 
       {add ? (
         <div className="flex">
-          <Rail time={add.at} />
+          {timeless ? null : <Rail time={add.at} />}
           <div className="min-w-0 flex-1">{add.node}</div>
         </div>
       ) : null}
 
-      {!over && freeFrom !== null ? (
+      {afterAdd ? (
+        <div className={cn("pb-(--space-3)", !timeless && "ps-11")}>
+          {afterAdd}
+        </div>
+      ) : null}
+
+      {!timeless && !over && freeFrom !== null ? (
         <div className="flex pb-(--space-2)">
           <span className={RAIL} />
           <div
@@ -331,16 +355,19 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
         </div>
       ) : null}
 
-      {over ? null : <EndLine end={block.endsAt} over={false} />}
+      {over || timeless ? null : <EndLine end={block.endsAt} over={false} />}
 
-      {peek ? (
+      {peek && !timeless ? (
         <div className="flex items-center gap-(--space-2) ps-11 pt-(--space-4)">
-          <span
-            aria-hidden="true"
-            className={cn("h-4 w-1 shrink-0", HUE_DOT[peek.hue])}
-          />
+          {peek.span === "" ? null : (
+            <span
+              aria-hidden="true"
+              className={cn("h-4 w-1 shrink-0", HUE_DOT[peek.hue])}
+            />
+          )}
           <Text as="p" variant="caption" tone="muted">
-            {COPY.peek(peek.name, peek.span)}
+            {/* An empty span: "Nothing after this today" alone (USE-49). */}
+            {peek.span === "" ? peek.name : COPY.peek(peek.name, peek.span)}
           </Text>
         </div>
       ) : null}

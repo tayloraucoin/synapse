@@ -7,6 +7,7 @@ import { ADD_SCENARIOS } from "./add";
 import { RAIL_ADD_SCENARIOS } from "./add-from-the-rail";
 import { BASE_NOW, baseRecords, emptyRecords } from "./base-day";
 import { BLOCK_VIEW_SCENARIOS } from "./block-view";
+import { BLOCK_EDIT_SCENARIOS } from "./block-view-editing";
 import { CLOSE_THE_DAY_SCENARIOS } from "./close-the-day";
 import { FROM_LINEAR_SCENARIOS } from "./from-linear";
 import { INTEGRATION_SCENARIOS } from "./integrations";
@@ -282,6 +283,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...SCHEDULE_SCENARIOS,
   // ---- Block view from the day (USE-48): checked, removed, Edit, current, past ----
   ...BLOCK_VIEW_SCENARIOS,
+  // ---- Block view in editing, from Set my days (USE-49) ----
+  ...BLOCK_EDIT_SCENARIOS,
   // ---- Close the day (USE-44): writing, empty, offline, read only ----
   ...CLOSE_THE_DAY_SCENARIOS,
   // ---- The To-do sheet (USE-28): its six drawn states, a failed change, offline ----
