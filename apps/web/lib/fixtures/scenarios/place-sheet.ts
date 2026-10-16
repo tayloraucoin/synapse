@@ -94,7 +94,8 @@ function session(
   });
 }
 
-export type PlaceSheetScenarioName = "place-sheet" | "placed-undo" | "doesnt-fit";
+export type PlaceSheetScenarioName =
+  "place-sheet" | "placed-undo" | "doesnt-fit";
 
 function placeSheet(name: PlaceSheetScenarioName) {
   return (): Scenario => {

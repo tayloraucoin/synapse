@@ -10,8 +10,8 @@ import {
   type WorkTier,
 } from "@syn/utils";
 import type { SlotRecord, WorkItemRecord } from "@syn/validators";
-import { rangeWords } from "@/components/work/from-linear/picker-view";
 import { SIZE_RANGE } from "@/components/work/add/new-task/form";
+import { rangeWords } from "@/components/work/from-linear/picker-view";
 import { workBlocksOf, type PlaceTo } from "./place";
 import { clockWords, lengthWords, shortDate } from "./spread";
 import type { SetUpDay } from "./use-set-up-day";
@@ -97,7 +97,13 @@ export const PLACE_SHEET_WORDS = {
     by === null
       ? `${day}'s Work doesn't fit it`
       : `${day}'s Work doesn't fit it by ${by}`,
-  why: (size: string, range: string, day: string, tier: WorkTier, held: string) =>
+  why: (
+    size: string,
+    range: string,
+    day: string,
+    tier: WorkTier,
+    held: string,
+  ) =>
     `${size} runs ${range}; ${day}'s ${TIER_WORDS[tier]} already holds ${held} at the top of its ranges.`,
   /** [ASSUMPTION] Nothing above or in the tier yet. */
   nothing: "nothing",
@@ -364,7 +370,9 @@ export function placeSheetView(input: PlaceSheetInput): PlaceSheetView {
 
   const only = fits.length === 1 ? fits[0]! : null;
   const doesntFit: DoesntFitView | null =
-    only && !only.fits ? doesntFitOf(input, only, fitDays, chips, topMin) : null;
+    only && !only.fits
+      ? doesntFitOf(input, only, fitDays, chips, topMin)
+      : null;
 
   const fitLine =
     fits.length === 0 || doesntFit
@@ -453,7 +461,10 @@ function doesntFitOf(
     next: nextKey
       ? {
           dateKey: nextKey,
-          line: PLACE_SHEET_WORDS.hasRoom(shortDate(nextKey), lengthWords(freeMin)),
+          line: PLACE_SHEET_WORDS.hasRoom(
+            shortDate(nextKey),
+            lengthWords(freeMin),
+          ),
           use: PLACE_SHEET_WORDS.takeDay(shortDay(nextKey)),
           name: PLACE_SHEET_WORDS.takeDayName(
             longDate(nextKey),

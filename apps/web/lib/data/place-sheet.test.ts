@@ -141,7 +141,9 @@ describe("Place: one item, n of 2, and Undo takes both back", () => {
       [TUE, "primary"],
       [WED, "primary"],
     ]);
-    expect(pool.workItems.filter((w) => w.title.includes("reschedule"))).toHaveLength(1);
+    expect(
+      pool.workItems.filter((w) => w.title.includes("reschedule")),
+    ).toHaveLength(1);
     const sessions = countSessions(
       mine.map((s) => ({ ...s, workItemId: s.workItemId! })),
     );
