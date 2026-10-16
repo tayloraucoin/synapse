@@ -79,22 +79,24 @@ describe("C1: every Linear and Google fixture parses, and nothing returned carri
     }
   });
 
-  it.each(withIntegrations)(
-    "%s: no read or join has a credential key",
-    async (name) => {
-      const server = setup(name);
-      const linear = await server.readLinear();
-      const connections = await server.readConnections();
-      const { workItems } = resolveScenario(name).records;
-      const joins = workItems.map((item) => joinIssue(linear, item));
-      const clients = workItems.map((item) =>
-        clientOf(connections, linear, item),
-      );
-      const keys = keysOf([linear, connections, joins, clients]);
-      expect(keys.length).toBeGreaterThan(0);
-      expect(keys.filter((key) => CREDENTIAL.test(key))).toEqual([]);
-    },
+  // A read that never settles (USE-85's settings-loading) has nothing to check.
+  const settles = withIntegrations.filter(
+    (name) => resolveScenario(name).regions?.connections !== "loading",
   );
+
+  it.each(settles)("%s: no read or join has a credential key", async (name) => {
+    const server = setup(name);
+    const linear = await server.readLinear();
+    const connections = await server.readConnections();
+    const { workItems } = resolveScenario(name).records;
+    const joins = workItems.map((item) => joinIssue(linear, item));
+    const clients = workItems.map((item) =>
+      clientOf(connections, linear, item),
+    );
+    const keys = keysOf([linear, connections, joins, clients]);
+    expect(keys.length).toBeGreaterThan(0);
+    expect(keys.filter((key) => CREDENTIAL.test(key))).toEqual([]);
+  });
 
   it("an outbox row reads back as the view alone", async () => {
     const server = setup("pool");

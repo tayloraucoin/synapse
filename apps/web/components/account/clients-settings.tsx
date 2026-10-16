@@ -4,7 +4,8 @@
  * ClientsSettings — Connections' Linear rows and Clients, wired to
  * `useConnections` and `useClients`, with the client sheet and the
  * workspace sheet they open (USE-86). USE-85's Connections page mounts it
- * below Google Calendar; until then `/dev/parts?state=settings-*` hosts it.
+ * below Google Calendar and hands it `workspaces`: the clients-off explainer,
+ * ··· › Disconnect and the live Add a workspace row.
  *
  * A capture opens a sheet through the scenario's `view.open`:
  * "client:<id>" or "workspace:<connection id>".
@@ -26,7 +27,11 @@ import { useClients } from "@/lib/data/use-clients";
 import { useConnections } from "@/lib/data/use-connections";
 import { useLinearIssues } from "@/lib/data/use-linear";
 import { ClientSheet } from "./client-sheet";
-import { ClientsSection, WorkspaceRows } from "./clients-section";
+import {
+  ClientsSection,
+  WorkspaceRows,
+  type WorkspaceRowsLinear,
+} from "./clients-section";
 import { CLIENTS_COPY as COPY } from "./copy";
 import { WorkspaceSheet } from "./workspace-sheet";
 
@@ -42,7 +47,12 @@ function seededOpen(open: string | undefined): Open {
   return null;
 }
 
-export function ClientsSettings() {
+export interface ClientsSettingsProps {
+  /** Connections' parts of the Linear section (USE-85). */
+  workspaces?: WorkspaceRowsLinear;
+}
+
+export function ClientsSettings({ workspaces }: ClientsSettingsProps = {}) {
   const source = useDataSource();
   const connections = useConnections();
   const clients = useClients();
@@ -96,6 +106,7 @@ export function ClientsSettings() {
             : (live.find((c) => c.id === mapping.connection.clientId) ?? null),
         }))}
         onOpen={(id, from) => show({ kind: "workspace", id }, from)}
+        {...(workspaces ? { linear: workspaces } : {})}
       />
       <ClientsSection
         clientsEnabled={clients.clientsEnabled}
@@ -157,8 +168,10 @@ export function ClientsSettings() {
         onDisconnect={() => {
           if (!openMapping) return;
           setOpen(null);
-          void connections.disconnect(openMapping.connection.id);
+          if (workspaces) workspaces.onDisconnect(openMapping.connection.id);
+          else void connections.disconnect(openMapping.connection.id);
         }}
+        disconnectDisabled={workspaces?.disconnectDisabled ?? false}
         returnFocusRef={opener}
       />
     </>

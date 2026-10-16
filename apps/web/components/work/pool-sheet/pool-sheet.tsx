@@ -37,7 +37,7 @@ import { useAccount } from "@/lib/data/use-account";
 import type { PlaceSheetSource } from "@/lib/data/use-place";
 import { usePoolView } from "@/lib/data/use-pool-view";
 import { SIZE_WORDS } from "@/lib/data/week-view";
-import { itemSheetRoute, settingsRoute } from "@/lib/routes";
+import { connectionsRoute, itemSheetRoute } from "@/lib/routes";
 import { NewTaskSheet } from "../add/new-task/new-task-sheet";
 import { ClientTile } from "../client-tile";
 import { ClientFilterSheet } from "./client-filter-sheet";
@@ -336,7 +336,7 @@ export function PoolSheet({
             className="w-full rounded-(--radius-control)"
             onClick={() => {
               onOpenChange(false);
-              router.push(settingsRoute());
+              router.push(connectionsRoute());
             }}
           >
             {COPY.openSettings}

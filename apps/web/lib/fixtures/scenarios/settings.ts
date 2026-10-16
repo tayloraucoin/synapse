@@ -1,3 +1,4 @@
+import { noIntegrations } from "../integrations/records";
 import { INTEGRATION_IDS, PROJECTS } from "../integrations/workspaces";
 import type { FixtureRecords } from "../records";
 import type { Scenario } from "./index";
@@ -60,7 +61,76 @@ function scenario(name: string, open?: string): () => Scenario {
   });
 }
 
+/**
+ * Settings › Connections as drawn (USE-85; states/connections.md): clients
+ * off, Personal and Lighthouse team on, Family and Holidays off, the two
+ * workspaces "Connected" with ···.
+ */
+export function settingsConnectionsRecords(): FixtureRecords {
+  const records = poolRecords();
+  records.clientsEnabled = false;
+  const integrations = records.integrations!;
+  for (const calendar of integrations.googleCalendars) {
+    if (calendar.id === INTEGRATION_IDS.calendars.family) {
+      calendar.enabled = false;
+    }
+  }
+  for (const { connection } of integrations.linear) {
+    connection.lastSyncedAt = SETTINGS_LAST_SYNCED;
+  }
+  return records;
+}
+
+/** Nothing connected (states/empty.md): no account, no workspace, clients off. */
+function settingsEmptyRecords(): FixtureRecords {
+  const records = settingsConnectionsRecords();
+  records.integrations = noIntegrations();
+  records.workItems = records.workItems.map((item) => ({
+    ...item,
+    linearConnectionId: null,
+    linearIssueId: null,
+  }));
+  return records;
+}
+
+function connections(
+  name: string,
+  extra: Partial<Scenario> = {},
+  records: () => FixtureRecords = settingsConnectionsRecords,
+): () => Scenario {
+  return () => ({
+    name,
+    now: SET_UP_NOW,
+    records: records(),
+    mode: "ready",
+    ...extra,
+  });
+}
+
 export const SETTINGS_SCENARIOS: Record<string, () => Scenario> = {
+  // ---- Settings › Connections (USE-85), at /settings/connections ----
+  "settings-connections": connections("settings-connections"),
+  "settings-empty": connections("settings-empty", {}, settingsEmptyRecords),
+  "settings-loading": connections("settings-loading", {
+    regions: { connections: "loading" },
+  }),
+  "settings-error": connections("settings-error", {
+    regions: { calendars: "error" },
+  }),
+  /** Personal's next switch fails once: "Not saved. Try again." under it. */
+  "settings-save-fails": connections("settings-save-fails", {
+    failWrites: [INTEGRATION_IDS.calendars.personal],
+  }),
+  "settings-connecting": connections("settings-connecting", {
+    connects: "hang",
+    view: { open: "connecting:linear" },
+  }),
+  /** A Google connect came back failed; Try again connects. */
+  "settings-connect-fails": connections("settings-connect-fails", {
+    view: { open: "connect-failed:google" },
+  }),
+  "settings-offline": connections("settings-offline", { offline: true }),
+  // ---- Clients on (USE-86) ----
   "settings-clients-on": scenario("settings-clients-on"),
   "settings-client-sheet": scenario(
     "settings-client-sheet",

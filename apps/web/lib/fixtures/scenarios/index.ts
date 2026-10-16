@@ -88,7 +88,13 @@ export interface Scenario {
     week?: "loading" | "error";
     /** Set my days' column alone (USE-39): the header, chips and bounds paint. */
     setUpColumn?: "loading" | "error";
+    /** Settings › Connections, all of it (USE-85): the header paints. */
+    connections?: "loading" | "error";
+    /** Settings' Google calendar list alone (USE-85); Linear and Clients read. */
+    calendars?: "loading" | "error";
   };
+  /** `hang`: Add a Google account or a workspace stays away at the provider (USE-85). */
+  connects?: "hang";
   /** Record ids whose next write rejects once, then goes through (USE-19). */
   failWrites?: string[];
   /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */

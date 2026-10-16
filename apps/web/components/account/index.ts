@@ -1,4 +1,10 @@
-export { CLIENTS_COPY, INSTALL_COPY, PROFILE_COPY } from "./copy";
+export {
+  CLIENTS_COPY,
+  CONNECTIONS_COPY,
+  INSTALL_COPY,
+  PROFILE_COPY,
+  SETTINGS_COPY,
+} from "./copy";
 export { ClientSheet, type ClientSheetProps } from "./client-sheet";
 export {
   ClientsSection,
@@ -6,8 +12,11 @@ export {
   type ClientRowView,
   type ClientsSectionProps,
   type WorkspaceRowView,
+  type WorkspaceRowsLinear,
 } from "./clients-section";
-export { ClientsSettings } from "./clients-settings";
+export { ClientsSettings, type ClientsSettingsProps } from "./clients-settings";
+export { ConnectionsPage } from "./connections-page";
+export { SettingsList } from "./settings-list";
 export { CropStep, CropStepHeader, type CropStepProps } from "./crop-step";
 export {
   InstallPillMark,

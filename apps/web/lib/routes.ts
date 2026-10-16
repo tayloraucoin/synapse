@@ -277,11 +277,21 @@ export function daysBlockRoute(
 }
 
 /**
- * Settings (USE-85 builds it): the avatar menu's last row. `section` opens
- * it at one part, as the To-do sheet's Settings does at Notifications.
+ * Settings (USE-85): the avatar menu's last row, the list of Connections and
+ * sign out. `section` opens it at one part, as the To-do sheet's Settings
+ * does at Notifications [ASSUMPTION: no Notifications section yet; the list
+ * opens as it is].
  */
 export function settingsRoute(section?: "notifications"): string {
   return section ? `/settings#${section}` : "/settings";
+}
+
+/**
+ * Settings › Connections (USE-85): Google calendars, Linear workspaces,
+ * clients. Connect Linear on the pool sheet and the Item sheet lands here.
+ */
+export function connectionsRoute(): string {
+  return `${settingsRoute()}/connections`;
 }
 
 /**

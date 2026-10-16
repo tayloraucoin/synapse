@@ -73,6 +73,12 @@ import {
   createIntegrationServer,
   type IntegrationServer,
 } from "./integrations";
+import {
+  connectFixture,
+  readGoogleCalendars,
+  type ConnectKind,
+  type GoogleCalendarsRecords,
+} from "./integrations/connect";
 import type { FixtureRecords } from "./records";
 import type { Scenario } from "./scenarios";
 import { createWorkServer, type WorkServer } from "./work";
@@ -261,6 +267,21 @@ export interface FixtureServer
   recoverReading(): void;
   /** The connection is back: writes go through (`offline`). */
   reconnect(): void;
+  /**
+   * Settings' Google section alone (USE-85): it waits or fails on its own
+   * (`regions.calendars`) while Linear and Clients read.
+   */
+  readGoogleCalendars(): Promise<GoogleCalendarsRecords>;
+  /**
+   * Add a Google account or Add a workspace, as the provider's sign-in
+   * coming back (USE-85). Offline it is refused; `failWrites: ["connect"]`
+   * fails it once; `connects: "hang"` leaves it away at the provider.
+   */
+  connect(kind: ConnectKind): Promise<void>;
+  /** Connections' own retry (`regions.connections`). */
+  recoverConnections(): void;
+  /** The calendar list's own retry (`regions.calendars`). */
+  recoverCalendars(): void;
 }
 
 function windowFor(records: FixtureRecords, dateKey: string) {
@@ -340,6 +361,9 @@ export function createFixtureServer(
   let weekFails = scenario.regions?.week === "error";
   // Set my days' column, failing alone while the day's own controls read (USE-39).
   let columnFails = scenario.regions?.setUpColumn === "error";
+  // Settings' Connections and its calendar list, failing alone (USE-85).
+  let connectionsFail = scenario.regions?.connections === "error";
+  let calendarsFail = scenario.regions?.calendars === "error";
   // Each id rejects its next write once (`failWrites`).
   const failNext = new Set(scenario.failWrites ?? []);
 
@@ -1032,6 +1056,58 @@ export function createFixtureServer(
 
     reconnect() {
       offline = false;
+    },
+
+    // Settings › Connections (USE-85). Nothing here reaches Google or Linear.
+    readConnections() {
+      if (scenario.regions?.connections === "loading") {
+        return new Promise(() => {});
+      }
+      if (connectionsFail) return Promise.reject(new FixtureReadError());
+      return integrations.readConnections();
+    },
+
+    readGoogleCalendars() {
+      const wait =
+        scenario.regions?.connections === "loading" ||
+        scenario.regions?.calendars === "loading";
+      if (wait) return new Promise(() => {});
+      if (connectionsFail || calendarsFail) {
+        return Promise.reject(new FixtureReadError());
+      }
+      return Promise.resolve(readGoogleCalendars(records));
+    },
+
+    // A switch saves on the phone offline (offline.md); `failWrites` names it.
+    writeCalendar(input) {
+      if (failNext.delete(input.calendarId)) {
+        return Promise.reject(new FixtureWriteError());
+      }
+      return integrations.writeCalendar(input);
+    },
+
+    connect(kind) {
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      if (scenario.connects === "hang") return new Promise(() => {});
+      if (failNext.delete("connect")) {
+        return Promise.reject(new FixtureWriteError());
+      }
+      connectFixture(records, kind, now().toISOString());
+      return Promise.resolve();
+    },
+
+    // Disconnect needs Linear: refused offline (offline.md).
+    disconnect(connectionId) {
+      if (offline) return Promise.reject(new FixtureOfflineError());
+      return integrations.disconnect(connectionId);
+    },
+
+    recoverConnections() {
+      connectionsFail = false;
+    },
+
+    recoverCalendars() {
+      calendarsFail = false;
     },
   };
   return server;

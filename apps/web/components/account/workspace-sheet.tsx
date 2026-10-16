@@ -54,6 +54,8 @@ export interface WorkspaceSheetProps {
   /** No `projectId`: the workspace's one client. */
   onMap: (projectId: string | undefined, clientId: string | null) => void;
   onDisconnect: () => void;
+  /** Offline: Disconnect needs Linear (USE-85; offline.md). */
+  disconnectDisabled?: boolean;
   returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
@@ -116,6 +118,7 @@ export function WorkspaceSheet({
   onPerProject,
   onMap,
   onDisconnect,
+  disconnectDisabled = false,
   returnFocusRef,
 }: WorkspaceSheetProps) {
   const titleRef = React.useRef<HTMLHeadingElement>(null);
@@ -250,7 +253,8 @@ export function WorkspaceSheet({
           <button
             type="button"
             onClick={onDisconnect}
-            className="text-destructive-text self-start rounded-(--radius-sm) py-(--space-2) text-start text-(length:--fs-body) hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            disabled={disconnectDisabled}
+            className="text-destructive-text disabled:text-muted-foreground self-start rounded-(--radius-sm) py-(--space-2) text-start text-(length:--fs-body) hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
           >
             {COPY.disconnect(name)}
           </button>

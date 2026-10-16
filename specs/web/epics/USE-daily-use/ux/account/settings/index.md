@@ -17,7 +17,7 @@ Handoff pass, the ledger of the boards. Sources: N6 "Connections (Settings)"; th
 
 ## Scope
 
-This epic specs **Settings › Connections only** (D-USE-90). Every other Settings section (Account, Week, Day, Habits, Appearance, Data, About), sign out and Notifications stay as the app has them, untouched. Whether Week, Day and Habits retire beside Set my days is Technical's (D-USE-90).
+This epic specs **Settings › Connections only** (D-USE-90). Technical's calls bend the rest: Settings keeps only what USE draws, Connections, the avatar menu's Profile and Install, and sign out; the other sections (Account, Week, Day, Habits, Appearance, Data, About, Notifications) are legacy and do not return (`../../../technical/calls.md`). As built (USE-85): `/settings` is the list, a Connections row and Sign out, under "‹ Now", pushed from the avatar menu as Set my days is.
 
 ## Job
 
@@ -54,6 +54,8 @@ None on Connections: switches and rows act at once. The client sheet has "Save" 
 | loading                    | `states/loading.md`               | —            | Not drawn                                             |
 | error                      | `states/error.md`                 | —            | Not drawn                                             |
 | offline                    | `states/offline.md`               | —            | Not drawn                                             |
+
+As built (USE-85), each state is a scenario named `settings-<state>` (`settings-connections`, `-empty`, `-loading`, `-error` for the calendar list, `-save-fails`, `-connecting`, `-connect-fails`, `-offline`), at `/settings/connections?state=` and `/dev/parts?state=`.
 
 ## Platforms
 

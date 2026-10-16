@@ -111,3 +111,39 @@ export const CLIENTS_COPY = {
     disconnect: (name: string) => `Disconnect ${name}`,
   },
 } as const;
+
+/**
+ * Settings and Settings › Connections (USE-85; account/settings/
+ * words-and-access.md), as drawn; the undrawn lines are [PROPOSED] in N2's
+ * register. No second person.
+ */
+export const SETTINGS_COPY = {
+  title: "Settings",
+  back: "Now",
+  backLabel: "Back to Now",
+  connections: "Connections",
+  signOut: "Sign out",
+} as const;
+
+export const CONNECTIONS_COPY = {
+  back: "Settings",
+  backLabel: "Back to Settings",
+  title: "Connections",
+  google: "Google Calendar",
+  account: (label: string) => `${label} account`,
+  googleLine:
+    "Events answered yes sit on the day. Maybe or not answered show faintly, to add if wanted.",
+  addGoogle: "Add a Google account",
+  linearLine: (name: string) =>
+    `Issues assigned to ${name}, to slot into work blocks.`,
+  more: (name: string) => `More for ${name}`,
+  disconnect: "Disconnect",
+  disconnected: (name: string) => `${name} disconnected.`,
+  notConnected: "Not connected.",
+  notSaved: "Not saved.",
+  tryAgain: "Try again",
+  calendarsFailed: "Calendars didn't load.",
+  connectionsFailed: "Connections didn't load.",
+  offline: "Offline. Changes wait until the connection is back.",
+  connecting: (label: string) => `${label}, connecting`,
+} as const;

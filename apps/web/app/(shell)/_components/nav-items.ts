@@ -17,15 +17,16 @@ import {
   type LucideIcon,
 } from "@syn/ui";
 import {
+  daysRoute,
   isJournalPath,
   isTodayBlockPath,
   orientRoute,
   reviewRoute,
+  settingsRoute,
   TODAY_BLOCK_FROM_PARAM,
   TODAY_DATE_PARAM,
   todayReadyRoute,
   todayReviewRoute,
-  daysRoute,
   todayRoute,
   todayScheduleRoute,
   weekRoute,
@@ -104,11 +105,13 @@ const FOCUSED_ROUTES = [orientRoute(), todayReviewRoute(), todayReadyRoute()];
 
 /**
  * A pushed screen (USE-39; D-USE-49): no tab bar below 1024, the rail from
- * 1024 with nothing current. Set my days, opened from the avatar menu.
+ * 1024 with nothing current. Set my days and Settings (USE-85), each opened
+ * from the avatar menu.
  */
 export function isPushedPath(pathname: string): boolean {
-  const days = daysRoute();
-  return pathname === days || pathname.startsWith(`${days}/`);
+  return [daysRoute(), settingsRoute()].some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
 }
 
 /**

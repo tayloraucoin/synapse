@@ -11,8 +11,8 @@
  *
  * THE SWITCH. On, the list, the order line, Add a client and the Personal
  * line show, and each workspace row is its mapping line with a chevron
- * (D-USE-91); off, the list hides and the rows read "Connected"
- * [ASSUMPTION: the ··· and its Disconnect are USE-85's]. Turning it off keeps
+ * (D-USE-91); off, the list hides and the rows read "Connected" with ···
+ * and its Disconnect (USE-85). Turning it off keeps
  * every client and mapping for when it is turned on again.
  *
  * Nothing here is written to Linear (C-USE-settings-clients-on-3).
@@ -22,6 +22,7 @@ import {
   AddIcon,
   cn,
   DisclosureIcon,
+  EllipsesMenu,
   SortableHandle,
   SortableList,
   Switch,
@@ -29,7 +30,7 @@ import {
 } from "@syn/ui";
 import type { ClientRecord, LinearConnectionView } from "@syn/validators";
 import { ClientTile } from "@/components/work/client-tile";
-import { CLIENTS_COPY as COPY } from "./copy";
+import { CLIENTS_COPY as COPY, CONNECTIONS_COPY as LINES } from "./copy";
 
 export interface ClientRowView {
   client: ClientRecord;
@@ -73,14 +74,30 @@ function WorkspaceTile({
   );
 }
 
+export interface WorkspaceRowsLinear {
+  /** The explainer, drawn on the clients-off frame only; null until the name is read. */
+  explainer: string | null;
+  /** ··· › Disconnect, clients off (D-USE-91). */
+  onDisconnect: (connectionId: string) => void;
+  /** Offline: Disconnect needs Linear (offline.md). */
+  disconnectDisabled: boolean;
+  /** "+ Add a workspace" and its connect state, from Connections. */
+  addRow: React.ReactNode;
+  /** Skeleton rows while the workspaces are read. */
+  loading?: React.ReactNode;
+}
+
 export function WorkspaceRows({
   rows,
   clientsEnabled,
   onOpen,
+  linear,
 }: {
   rows: readonly WorkspaceRowView[];
   clientsEnabled: boolean;
   onOpen: (connectionId: string, opener: HTMLElement) => void;
+  /** USE-85's page: the explainer, ···, the live Add row. */
+  linear?: WorkspaceRowsLinear;
 }) {
   return (
     <section aria-labelledby="connections-linear" className="flex flex-col">
@@ -93,6 +110,17 @@ export function WorkspaceRows({
       >
         {COPY.linear}
       </Text>
+      {linear?.explainer && !clientsEnabled ? (
+        <Text
+          as="p"
+          variant="secondary"
+          tone="muted"
+          className="pb-(--space-2)"
+        >
+          {linear.explainer}
+        </Text>
+      ) : null}
+      {linear?.loading}
       <ul className="m-0 flex list-none flex-col p-0">
         {rows.map(({ connection, line, client }) => {
           const name = connection.organizationName;
@@ -102,14 +130,35 @@ export function WorkspaceRows({
                 name={name}
                 client={clientsEnabled ? client : null}
               />
-              <span className="flex min-w-0 flex-1 flex-col">
-                <Text as="span" variant="body" className="truncate">
-                  {name}
-                </Text>
-                <Text as="span" variant="secondary" tone="muted">
-                  {clientsEnabled ? line : COPY.connected}
-                </Text>
-              </span>
+              {clientsEnabled ? (
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <Text as="span" variant="body" className="truncate">
+                    {name}
+                  </Text>
+                  <Text as="span" variant="secondary" tone="muted">
+                    {line}
+                  </Text>
+                </span>
+              ) : (
+                // Clients off, as drawn: the name, then "Connected" at the end.
+                <>
+                  <Text
+                    as="span"
+                    variant="body"
+                    className="min-w-0 flex-1 truncate"
+                  >
+                    {name}
+                  </Text>
+                  <Text
+                    as="span"
+                    variant="secondary"
+                    tone="muted"
+                    className="shrink-0"
+                  >
+                    {COPY.connected}
+                  </Text>
+                </>
+              )}
             </>
           );
           return (
@@ -130,18 +179,37 @@ export function WorkspaceRows({
                   />
                 </button>
               ) : (
-                <div className={ROW}>{body}</div>
+                <div className={ROW}>
+                  {body}
+                  {linear ? (
+                    <EllipsesMenu
+                      label={LINES.more(name)}
+                      items={[
+                        {
+                          label: LINES.disconnect,
+                          disabled: linear.disconnectDisabled,
+                          onClick: () => linear.onDisconnect(connection.id),
+                        },
+                      ]}
+                      className="shrink-0"
+                    />
+                  ) : null}
+                </div>
               )}
             </li>
           );
         })}
       </ul>
-      <div className={cn(ROW, "border-b-0 text-foreground")}>
-        <AddIcon aria-hidden="true" className="size-4" />
-        <Text as="span" variant="body">
-          {COPY.addWorkspace}
-        </Text>
-      </div>
+      {linear ? (
+        linear.addRow
+      ) : (
+        <div className={cn(ROW, "border-b-0 text-foreground")}>
+          <AddIcon aria-hidden="true" className="size-4" />
+          <Text as="span" variant="body">
+            {COPY.addWorkspace}
+          </Text>
+        </div>
+      )}
     </section>
   );
 }

@@ -3,7 +3,7 @@ import { createElement } from "react";
 import { AccountPart } from "./account-parts";
 import { EventPopoverPart } from "./add-event-parts";
 import { AddPart, type AddPartState } from "./add-parts";
-import { BlockViewPart } from "./block-view-parts";
+import { BlockEditPart, BlockViewPart } from "./block-view-parts";
 import {
   BlockBandAndHeaderForms,
   TierAndItemForms,
@@ -30,6 +30,7 @@ import {
 } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
 import { BLOCK_VIEW_SCENARIOS } from "./scenarios/block-view";
+import { BLOCK_WORK_TODOS_PATHS } from "./scenarios/block-view-work-todos";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { NEW_BLOCK_SCENARIOS } from "./scenarios/new-block";
 import {
@@ -142,6 +143,10 @@ for (const state of [
   "not-done-do-now", // USE-26
   "last-block", // USE-25
   "all-done", // USE-25
+  "ready-go-not-yet-started", // USE-110
+  "firing-still-firing", // USE-110
+  "wind-down-journal", // USE-110
+  "wind-down-journal-empty", // USE-110
 ] satisfies NowPartState[]) {
   registerPart(`now-${state}`, () => createElement(NowPart, { state })); // USE-16
 }
@@ -186,6 +191,10 @@ for (const state of [
 for (const state of Object.keys(TODO_SHEET_SCENARIOS)) {
   registerPart(state, () => createElement(TodoSheetPart)); // USE-28
 }
+// USE-110: Custom… in the To-do sheet (`&sheet=todo&id=`), and Copy
+// another day's landing: Set my days on Sunday 18 with the picker open.
+registerPart("todo-repeats-custom", () => createElement(TodoSheetPart));
+registerPart("review-nothing-set-copy", () => createElement(DaysPart));
 // USE-12: Orient's states, `orient-<state>` (the /orient scenarios).
 for (const state of [
   "success",
@@ -364,13 +373,21 @@ for (const state of [
 for (const state of Object.keys(TODAY_MEETING_SCENARIOS)) {
   registerPart(state, () => createElement(TodayDeskPart));
 }
-// USE-86: Connections with clients on and its two sheets, by their scenario names.
+// USE-85, USE-86: Settings › Connections, its states, clients and sheets.
 for (const state of Object.keys(SETTINGS_SCENARIOS)) {
   registerPart(state, () => createElement(SettingsClientsPart)); // USE-86
 }
 // USE-48: Block view from the day, under the block-view scenarios' names.
 for (const state of Object.keys(BLOCK_VIEW_SCENARIOS)) {
   registerPart(state, () => createElement(BlockViewPart)); // USE-48
+}
+// USE-50: Block view in editing on This week, Work's tiers and To-dos.
+for (const state of Object.keys(BLOCK_WORK_TODOS_PATHS)) {
+  registerPart(`block-view-${state}`, () =>
+    createElement(BlockEditPart, {
+      state: state as keyof typeof BLOCK_WORK_TODOS_PATHS,
+    }),
+  ); // USE-50
 }
 // USE-79: the phone's pool sheet, by its scenario names.
 for (const state of Object.keys(POOL_SHEET_SCENARIOS)) {

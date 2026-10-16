@@ -86,7 +86,7 @@ import {
 import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { useWorkItemSheet } from "@/lib/data/use-item-sheet";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
-import { settingsRoute } from "@/lib/routes";
+import { connectionsRoute } from "@/lib/routes";
 import { MoveToStep, seededMovePick } from "../move-to";
 import { ConnectLinearRow } from "./connect-linear-row";
 import { clock, ITEM_SHEET_COPY } from "./copy";
@@ -823,7 +823,7 @@ export function WorkItemSheet({
                               document.activeElement as HTMLElement | null,
                             )
                           }
-                          onConnect={() => router.push(settingsRoute())}
+                          onConnect={() => router.push(connectionsRoute())}
                         />
                       ),
                       fields: null,
