@@ -27,6 +27,14 @@ import {
   type WorkLinearView,
 } from "./item-sheet-linear";
 import {
+  ALL_TAB,
+  deriveLinkList,
+  undoLink,
+  writeLink,
+  type LinkServer,
+  type LinkWrite,
+} from "./item-sheet-link";
+import {
   dayPicks,
   deriveSubIssues,
   writeAddSessionDay,
@@ -832,8 +840,10 @@ export function useWorkItemSheet(id: string | null) {
           slots: [...(slots ?? []), ...today.records.slots],
         });
 
-  const server: WorkSheetServer & LinearSheetServer & SessionsServer =
-    source.server;
+  const server: WorkSheetServer &
+    LinearSheetServer &
+    SessionsServer &
+    LinkServer = source.server;
   const viewRef = React.useRef(view);
   viewRef.current = view;
   const linearRef = React.useRef(linearView);
@@ -946,6 +956,35 @@ export function useWorkItemSheet(id: string | null) {
     unlink: () => linearOnly((v) => writeUnlink(server, v)),
     undoPlanner: (write: PlannerWrite) =>
       server.undo(write.undo).finally(invalidate),
+    /**
+     * Link a Linear issue (USE-68): Linear's state, the open issues from the
+     * snapshot on the device (no request while typing), and the link.
+     */
+    linearConnected:
+      linear.data === undefined ? null : linear.connections.length > 0,
+    linearPending: linear.isPending,
+    linkList: (tab: string = ALL_TAB, query = "") =>
+      linear.data === undefined || today === undefined
+        ? null
+        : deriveLinkList({
+            linear: linear.data,
+            workItems: today.records.workItems,
+            slots: today.records.slots,
+            dateKey,
+            tab,
+            query,
+            words: { onToday: ITEM_SHEET_COPY.link.onToday },
+          }),
+    link: (pick: { connectionId: string; issueId: string }) => {
+      const at = viewRef.current;
+      if (at === null || linear.data === undefined) {
+        return Promise.resolve(null);
+      }
+      return writeLink(server, at, pick, linear.data).finally(invalidate);
+    },
+    /** The link's Undo: the item exactly as it was, the description sent back. */
+    undoLink: (written: LinkWrite) =>
+      undoLink(server, written).finally(invalidate),
   };
 
   function linearOnly<T>(

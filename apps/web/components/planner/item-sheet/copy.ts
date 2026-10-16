@@ -11,6 +11,13 @@ export function clock(value: string): string {
   return `${Number(hour)}:${minute}`;
 }
 
+const TIER = {
+  urgent: "Urgent",
+  primary: "Primary",
+  secondary: "Secondary",
+  stretch: "Stretch",
+} as const;
+
 const COUNT_WORDS = ["", "one", "two", "three", "four", "five", "six", "seven"];
 
 /** "three": the ask's count of sessions in words, then digits. */
@@ -89,12 +96,7 @@ export const ITEM_SHEET_COPY = {
    * size dev note). No second person; lengths are the only numbers.
    */
   work: {
-    tier: {
-      urgent: "Urgent",
-      primary: "Primary",
-      secondary: "Secondary",
-      stretch: "Stretch",
-    },
+    tier: TIER,
     session: (n: number, of: number) => `session ${n} of ${of}`,
     pool: "In the pool",
     size: "Size",
@@ -191,6 +193,8 @@ export const ITEM_SHEET_COPY = {
     open: (identifier: string) => `Open ${identifier} in Linear`,
     /** "Linear ↗": the word, then OpenInLinearIcon (no glyph in copy). */
     linear: "Linear",
+    /** Before the issue's own title, for a screen reader (USE-68). */
+    titleInLinear: "In Linear: ",
     done: "done",
     syncing: "Updating Linear",
     offline: "Updates Linear when back online",
@@ -333,6 +337,43 @@ export const ITEM_SHEET_COPY = {
         ? `Prompt sent at ${at}`
         : `Prompt sent at ${at} · worked ${worked} before it`,
     bringBack: "Bring back",
+  },
+  /**
+   * Link a Linear issue (USE-68; linear-search.md, linear-off.md, D-USE-36,
+   * D-USE-56). The footer line is the board's [PROPOSED] words.
+   */
+  link: {
+    row: "Link a Linear issue",
+    connect: "Connect Linear",
+    connectWhere: "In Settings, Connections",
+    /** "‹ [Draft the onboarding email]": back to the item. */
+    back: (name: string) => `Back to ${name}`,
+    title: "Link a Linear issue",
+    search: "Search Linear issues",
+    all: "All",
+    tabs: "Workspace",
+    /** "Assigned to Taylor". */
+    assigned: (name: string | null) =>
+      name === null ? "Assigned to me" : `Assigned to ${name}`,
+    other: "Other open issues",
+    /** "ENG-123 · already on today, in Primary". */
+    onToday: (identifier: string, tier: keyof typeof TIER | null) =>
+      `${identifier} · already on today${tier === null ? "" : `, in ${TIER[tier]}`}`,
+    /** "Link ENG-151, [Add retry queue metrics]". */
+    linkName: (identifier: string, title: string) =>
+      `Link ${identifier}, ${title}`,
+    footer:
+      "Tap one to link it. The item takes the issue's title, size, project emoji and description; any notes it had are added to the end of the description, with Undo.",
+    offline: "Offline. These are the issues from the last sync.",
+    none: "No open issues here.",
+    noMatch: "Nothing called that.",
+    toast: {
+      /** "Linked to ENG-151." and, with notes, where they went. */
+      linked: (identifier: string, joined: boolean) =>
+        `Linked to ${identifier}.${
+          joined ? " The notes are at the end of the description." : ""
+        }`,
+    },
   },
   /** Not found: the item is no longer on today. */
   gone: "This item is no longer on today.",

@@ -24,7 +24,8 @@ const COPY = ITEM_SHEET_COPY.linear;
  * linear-linked.md): the status chip (Linear's shape in the workspace's
  * colour, its word and a chevron; D-USE-35, D-USE-78), the identifier, the
  * project muted and "Linear ↗" to the issue. The chip opens the status list.
- * Props only.
+ * An item that keeps its own title shows the issue's under the line
+ * (linear-item-from-now.md, N4; USE-68). Props only.
  */
 export interface LinearLineProps {
   status: StatusOption;
@@ -32,6 +33,8 @@ export interface LinearLineProps {
   project: string | null;
   url: string;
   onStatus: () => void;
+  /** The issue's own title, when the item's differs (USE-68). */
+  issueTitle?: string | null;
 }
 
 export function LinearLine({
@@ -40,8 +43,9 @@ export function LinearLine({
   project,
   url,
   onStatus,
+  issueTitle = null,
 }: LinearLineProps) {
-  return (
+  const line = (
     <div className="flex min-w-0 items-center gap-(--space-3) pb-(--space-3)">
       <button
         type="button"
@@ -86,6 +90,21 @@ export function LinearLine({
         <OpenInLinearIcon aria-hidden="true" className="size-3.5 shrink-0" />
       </a>
     </div>
+  );
+  if (issueTitle === null) return line;
+  return (
+    <>
+      {line}
+      <Text
+        as="p"
+        variant="secondary"
+        tone="secondary"
+        className="-mt-(--space-1) pb-(--space-3)"
+      >
+        <span className="sr-only">{COPY.titleInLinear}</span>
+        {issueTitle}
+      </Text>
+    </>
   );
 }
 

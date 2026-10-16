@@ -14,6 +14,7 @@ import {
   type WorkItemRecord,
   type workTierSchema,
 } from "@syn/validators";
+import { issueLength } from "@/lib/data/linear-size";
 import type { PoolRecords } from "@/lib/data/pool-records";
 import {
   ALREADY_PLACED,
@@ -26,7 +27,7 @@ import {
 import type { Journal, WriteLog } from "../planner/journal";
 import type { FixtureRecords } from "../records";
 import { writeTask, type CreateTaskInput } from "./create-task";
-import { writeIssues, type PlaceIssuesInput } from "./place-issues";
+import { NO_ISSUE, writeIssues, type PlaceIssuesInput } from "./place-issues";
 import { readPool } from "./read-pool";
 
 /**
@@ -73,6 +74,26 @@ export interface SetWorkTierInput {
   sessions: SessionsChoice;
 }
 
+export interface LinkToLinearInput {
+  workItemId: string;
+  connectionId: string;
+  issueId: string;
+}
+
+export const ALREADY_LINKED = "That task is in Linear already.";
+export const ISSUE_TAKEN = "That issue is on another item already.";
+
+/** D-USE-36: the description, then the item's notes at its end. */
+export function joinNotes(
+  description: string | null,
+  notes: string | null,
+): string | null {
+  const parts = [description, notes]
+    .map((part) => part?.trim() ?? "")
+    .filter((part) => part !== "");
+  return parts.length === 0 ? null : parts.join("\n\n");
+}
+
 export interface WorkServer {
   readPool(): Promise<PoolRecords>;
   placeWork(input: PlaceWorkInput): Promise<PlannerWrite>;
@@ -103,6 +124,13 @@ export interface WorkServer {
    * description kept as its notes; the issue is never written.
    */
   unlinkFromLinear(input: { workItemId: string }): Promise<PlannerWrite>;
+  /**
+   * Link a Linear issue (USE-68, D-USE-36): the item takes the issue's
+   * title, size, length, project emoji and link, and its notes become the
+   * description with the old notes at the end. No new item; Linear is not
+   * written here (the description goes through the outbox).
+   */
+  linkToLinear(input: LinkToLinearInput): Promise<PlannerWrite>;
   /** New task (USE-51): the item, then a slot a picked day; `id` is the item. */
   createTask(input: CreateTaskInput): Promise<PlannerWrite>;
   /**
@@ -476,6 +504,66 @@ export function createWorkServer({
             linearIdentifier: null,
             linearConnectionId: null,
             linearIssueId: null,
+            updatedAt: at,
+          }),
+        );
+        return { id: workItemId };
+      });
+    },
+
+    linkToLinear({ workItemId, connectionId, issueId }) {
+      return write((journal) => {
+        const item = findWorkItem(workItemId);
+        if (item.linearIssueId !== null) {
+          throw new PlannerRefusal("invalid", ALREADY_LINKED);
+        }
+        const workspace = records.integrations?.linear.find(
+          (w) => w.connection.id === connectionId,
+        );
+        const issue = workspace?.snapshot.issues.find(
+          (row) => row.id === issueId,
+        );
+        if (!workspace || !issue) {
+          throw new PlannerRefusal("unknown", NO_ISSUE);
+        }
+        // One issue, one item: a second link would be a copy of the work.
+        if (
+          records.workItems.some(
+            (row) =>
+              row.archivedAt === null &&
+              row.linearConnectionId === connectionId &&
+              row.linearIssueId === issueId,
+          )
+        ) {
+          throw new PlannerRefusal("duplicate", ISSUE_TAKEN);
+        }
+        const project = workspace.snapshot.projects.find(
+          (row) => row.id === issue.projectId,
+        );
+        const length = issueLength(issue.estimate);
+        const at = stamp();
+        journal.put(
+          "workItems",
+          workItemRecord.parse({
+            ...item,
+            title: issue.title,
+            // [ASSUMPTION] With no estimate the item keeps its own size and length.
+            ...(length.size === null
+              ? {}
+              : {
+                  size: length.size,
+                  lengthMinMin: length.lengthMinMin,
+                  lengthMaxMin: length.lengthMaxMin,
+                }),
+            // [ASSUMPTION] A project with no emoji leaves the item's icon.
+            icon:
+              project?.icon == null
+                ? item.icon
+                : { kind: "emoji", value: project.icon },
+            notes: joinNotes(issue.description, item.notes),
+            linearIdentifier: issue.identifier,
+            linearConnectionId: connectionId,
+            linearIssueId: issue.id,
             updatedAt: at,
           }),
         );

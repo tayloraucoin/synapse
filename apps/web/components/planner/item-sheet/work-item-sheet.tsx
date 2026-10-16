@@ -36,8 +36,17 @@
  * its figures from the derived clock at the tick, and Bring back and Done
  * at the foot. Bring back writes `brought_back` alone: firing stops and work
  * time waits for Start.
+ *
+ * LINK A LINEAR ISSUE (USE-68; linear-search.md, linear-off.md): an
+ * unlinked item carries ConnectLinearRow under its name. It opens
+ * LinkLinearStep, a step in this sheet with back on the left; a tap links,
+ * goes back to the fields (now the linked item's) and toasts with Undo,
+ * which puts the item back exactly. With Linear not connected the row reads
+ * "Connect Linear" and goes to Settings, Connections (USE-85 gives it its
+ * own path); Back returns here.
  */
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
 import type { WorkTier } from "@syn/types";
 import {
@@ -60,6 +69,7 @@ import {
   StartWhileOneRuns,
   type StartMoveTo,
 } from "@/components/work/start-while-one-runs";
+import type { LinkRow } from "@/lib/data/item-sheet-link";
 import {
   allSessionsFits,
   canPickDay,
@@ -71,19 +81,22 @@ import {
   type DayPick,
   type SubIssueView,
 } from "@/lib/data/item-sheet-sessions";
-import { useDataSource } from "@/lib/data/source";
+import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { useWorkItemSheet } from "@/lib/data/use-item-sheet";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
-import { ITEM_SHEET_COPY } from "./copy";
+import { settingsRoute } from "@/lib/routes";
+import { ConnectLinearRow } from "./connect-linear-row";
+import { clock, ITEM_SHEET_COPY } from "./copy";
 import { FiringPanel } from "./firing-panel";
 import { LinearFields } from "./linear-fields";
 import { LinearLine, LinearLineStatus } from "./linear-line";
+import { LinkLinearStep } from "./link-linear-step";
 import { PlaceSubIssueStep } from "./place-sub-issue-step";
 import { SessionTierAsk } from "./session-tier-ask";
 import { SessionsField } from "./sessions-field";
 import { StatusList } from "./status-list";
 import { SubIssuesField } from "./sub-issues-field";
-import { WorkItemFields } from "./work-item-fields";
+import { scopeWords, WorkItemFields } from "./work-item-fields";
 import { WorkMoreList, WorkMoreMenu, workMoreRows } from "./work-more";
 
 const COPY = ITEM_SHEET_COPY.work;
@@ -105,9 +118,10 @@ const WEEKDAY_LETTER = ["M", "T", "W", "T", "F", "S", "S"];
 type SheetStep =
   | { kind: "ask"; tier: WorkTier }
   | { kind: "place"; issueId: string }
-  | { kind: "add" };
+  | { kind: "add" }
+  | { kind: "link" };
 
-/** `view.open` from a scenario: "item:ask:<tier>", "item:place", "item:add". */
+/** `view.open` from a scenario: "item:ask:<tier>", "item:place", "item:add", "item:link". */
 function seededSheetStep(open: string | undefined): string | null {
   if (open === undefined || !open.startsWith("item:")) return null;
   return open.slice("item:".length);
@@ -185,6 +199,8 @@ export function WorkItemSheet({
   const work = useTodayWork(dateKey, now);
   const loop = useWorkLoop(dateKey, work.view);
   const atDesk = useIsSplit();
+  const router = useRouter();
+  const offline = useIsOffline();
   const seededStep = seededLinear(source.scenario.view?.open);
   const [statusAsked, setStatusOpen] = React.useState(false);
   const seedStep = seededSheetStep(source.scenario.view?.open);
@@ -226,6 +242,9 @@ export function WorkItemSheet({
     } else if (seedStep === "add") {
       seededSteps.current = true;
       openAdd();
+    } else if (seedStep === "link") {
+      seededSteps.current = true;
+      setStep({ kind: "link" });
     }
     // openPlace and openAdd read the latest view; the seed runs once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -287,6 +306,11 @@ export function WorkItemSheet({
     );
     setPickTier(sub.placed?.tier ?? at.slot?.tier ?? "secondary");
     setStep({ kind: "place", issueId: sub.issueId });
+  }
+
+  function openLink(trigger: HTMLElement | null) {
+    backTo.current = trigger;
+    setStep({ kind: "link" });
   }
 
   function openAdd(trigger: HTMLElement | null = null) {
@@ -418,6 +442,19 @@ export function WorkItemSheet({
     if (effect === "start" && foot && state !== "running") await start();
   }
 
+  async function link(row: LinkRow) {
+    leaveStep();
+    const written = await sheet.link({
+      connectionId: row.connectionId,
+      issueId: row.issueId,
+    });
+    if (written === null) return;
+    toastUndo({
+      text: ITEM_SHEET_COPY.link.toast.linked(row.identifier, written.joined),
+      onUndo: () => void sheet.undoLink(written),
+    });
+  }
+
   type PlannerWritten = Parameters<typeof sheet.undoPlanner>[0];
 
   async function plannerAct(
@@ -472,8 +509,10 @@ export function WorkItemSheet({
     </Button>
   );
 
+  // The ask and the link step carry their own way back.
+  const ownBack = step?.kind === "ask" || step?.kind === "link";
   const header =
-    more || statusOpen || step?.kind === "ask" ? null : (
+    more || statusOpen || ownBack ? null : (
       <div className="flex min-w-0 flex-1 items-center gap-(--space-2)">
         {closeButton}
         <span className="flex-1" />
@@ -556,6 +595,29 @@ export function WorkItemSheet({
         allLine={allLine}
         headingRef={titleRef}
         onMove={(choice) => void moveTier(step.tier, choice)}
+      />
+    );
+  } else if (step?.kind === "link") {
+    const linkScope =
+      slot === null || !slot.today
+        ? scopeWords(view)
+        : [
+            slot.blockName,
+            `${clock(slot.startsAt)} to ${clock(slot.endsAt)}`,
+            slot.tier === null ? null : COPY.tier[slot.tier],
+          ]
+            .filter((part) => part !== null)
+            .join(" · ");
+    stepBody = (
+      <LinkLinearStep
+        itemTitle={item.title}
+        scope={linkScope}
+        list={sheet.linkList}
+        person={sheet.assignee}
+        offline={offline}
+        onPick={(row) => void link(row)}
+        onBack={leaveStep}
+        headingRef={titleRef}
       />
     );
   } else if (step?.kind === "place" || step?.kind === "add") {
@@ -662,10 +724,12 @@ export function WorkItemSheet({
         headerAction={null}
         footer={footer}
         returnFocusRef={returnFocusRef}
-        size={more || step !== null ? "default" : "tall"}
+        size={
+          more || (step !== null && step.kind !== "link") ? "default" : "tall"
+        }
         classes={{
           header:
-            more || statusOpen || step?.kind === "ask"
+            more || statusOpen || ownBack
               ? "hidden"
               : "items-center pt-(--space-2)",
           body: "pt-(--space-1)",
@@ -698,6 +762,8 @@ export function WorkItemSheet({
           />
         ) : (
           <WorkItemFields
+            // A link or an unlink reads the item afresh: Exact or Range from its new length.
+            key={`${item.id}:${item.linked}`}
             view={
               linear === null
                 ? view
@@ -711,7 +777,22 @@ export function WorkItemSheet({
             onWhen={onMoveTo ? () => onMoveTo(item.id) : undefined}
             linear={
               linear === null
-                ? undefined
+                ? item.linked || sheet.linearConnected === null
+                  ? undefined
+                  : {
+                      line: (
+                        <ConnectLinearRow
+                          connected={sheet.linearConnected}
+                          onLink={() =>
+                            openLink(
+                              document.activeElement as HTMLElement | null,
+                            )
+                          }
+                          onConnect={() => router.push(settingsRoute())}
+                        />
+                      ),
+                      fields: null,
+                    }
                 : {
                     line: (
                       <>
@@ -721,6 +802,9 @@ export function WorkItemSheet({
                           project={linear.project}
                           url={linear.url}
                           onStatus={() => setStatusOpen(true)}
+                          issueTitle={
+                            linear.title === item.title ? null : linear.title
+                          }
                         />
                         <LinearLineStatus
                           line={linear.line}

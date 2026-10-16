@@ -272,6 +272,8 @@ export function writeUnlink(server: LinearSheetServer, view: WorkSheetView) {
 /** Everything the sheet draws of a linked item's Linear side. */
 export interface WorkLinearView {
   identifier: string;
+  /** The issue's own title; the item may keep its own (N4, USE-68). */
+  title: string;
   project: string | null;
   url: string;
   /** The workspace's name: "Moves it in Linear (Lighthouse)". */
@@ -308,6 +310,7 @@ export function deriveLinearView(input: {
   const size = sizeFromIssue(view, issue);
   return {
     identifier: issue.identifier,
+    title: issue.title,
     project: issue.project?.name ?? null,
     url: issue.url,
     workspace: input.workspace,

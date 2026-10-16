@@ -10,6 +10,7 @@ import type { FixtureRecords } from "../records";
 import { BASE_DATE } from "./base-day";
 import type { Scenario } from "./index";
 import { ITEM_SHEET_LINEAR_SCENARIOS } from "./item-sheet-linear";
+import { ITEM_SHEET_LINK_SCENARIOS } from "./item-sheet-link";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import {
   mondayEvent,
@@ -315,6 +316,8 @@ export const ITEM_SHEET_SCENARIOS: Record<string, () => Scenario> = {
   }),
   // USE-66: a linked work item's Linear side, `&id=<ITEM_SHEET_LINEAR_IDS.item>`.
   ...ITEM_SHEET_LINEAR_SCENARIOS,
+  // USE-68: link a Linear issue, `&id=<ITEM_SHEET_LINK_IDS.draft | .review>`.
+  ...ITEM_SHEET_LINK_SCENARIOS,
   // USE-67: a session's sheet, `&sheet=item&id=<ITEM_SHEET_IDS.work.desk>`.
   "item-tier-and-sessions": sessions("item-tier-and-sessions", true),
   "item-this-session-or-all": sessions(
