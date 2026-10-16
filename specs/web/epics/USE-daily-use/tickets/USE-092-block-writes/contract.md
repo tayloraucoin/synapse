@@ -7,6 +7,7 @@ non_negotiables:
   - "Every input is a @syn/validators schema; the three writes with none (splitBlock, removeBlockItem, reorderItems) get one here."
   - "Editing 'this date', 'this and following' or 'all' changes exactly the dates the fixture changes (USE-47's scope rules)."
   - "Undo puts back exactly what the write changed, under the same RLS, and refuses a token whose rows are not the caller's."
+  - "The undo token is signed (HMAC-SHA256, key UNDO_TOKEN_KEY through the API's env.ts); a token whose signature fails is refused before any row is read."
   - "The hooks' write results keep their shape: { undo, id?, reach? }."
 devs_call: "The undo token's encoding (base64url JSON is fine); the service split; whether reorder writes sort_order by gaps or renumbers."
 cites:
@@ -21,11 +22,14 @@ operator_review: false
 planned_paths:
   - "packages/api/src/services/planner/"
   - "packages/api/src/services/undo/"
+  - "packages/api/src/env.ts"
+  - ".env.example"
   - "packages/api/src/routers/planner.ts"
   - "packages/validators/src/planner.ts"
   - "apps/web/lib/data/live/planner.ts"
 depends_on:
   - "USE-91"
+  - "MIG-17"
 out_of_scope:
   - "Copy from, Clear and Reset to usual: USE-93"
   - "Slots and slot events: USE-94"
@@ -82,7 +86,7 @@ The fixture's `PlannerServer` writes, apart from the day-level four (USE-93) and
 
 - **The undo token** (decided at the gate; no table):
   - `services/undo/` gives `recordUndo(changes)`, called inside each write's transaction. `changes` lists `{ table, op: "insert" | "update" | "delete", before? }`.
-  - The token is that list, encoded and returned as `undo`.
+  - The token is that list, encoded and signed with HMAC-SHA256 under `UNDO_TOKEN_KEY` (Node `crypto`, no dependency), so a client cannot forge one past the validators (Vigil, 2026-10-16). Taylor sets the key in Vercel.
   - `undo(token)` parses it with a zod schema per table (only the planner, work and to-do tables are allowed), then inside `ctx.rls.execute` in one transaction: deletes inserted rows, restores updated rows to `before`, re-inserts deleted rows.
   - RLS makes another user's row invisible, so the update or insert fails and the whole undo is refused.
   - USE-93, 94, 95, 98 and 99 call the same `recordUndo`.

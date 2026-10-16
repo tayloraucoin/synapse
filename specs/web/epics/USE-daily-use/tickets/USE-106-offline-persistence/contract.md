@@ -44,7 +44,7 @@ criteria:
   - id: C3
     statement: "With the signal off and the app reloaded, Today shows the last-read day with its offline line"
     evidence: capture
-    path: "apps/web/e2e/__captures__/offline-reload-402.png"
+    path: "specs/web/epics/USE-daily-use/tickets/USE-106-offline-persistence/evidence/offline-reload-402.png"
   - id: C4
     statement: "Sign-out empties the persisted cache and the paused mutations"
     evidence: test

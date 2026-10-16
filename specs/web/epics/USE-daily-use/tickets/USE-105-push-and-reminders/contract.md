@@ -25,6 +25,7 @@ planned_paths:
 depends_on:
   - "USE-95"
   - "USE-91"
+  - "USE-102"
 out_of_scope:
   - "The stretch break's push: the finer points of breaks are deferred by the ledger"
   - "A Google event's start: no push (D-USE-92)"

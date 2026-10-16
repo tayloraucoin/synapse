@@ -13,7 +13,7 @@ devs_call: "The account's label (recommended: the primary calendar's summary, wh
 cites:
   - "specs/web/epics/USE-daily-use/ux/dev-notes/google-calendar.md"
   - "D-USE-82"
-truth_files: "none: behaviour is the ledger's; the bands and Connections states are built on fixtures"
+truth_files: "none: behaviour is the ledger's; the bands are USE-109's, built on fixtures first"
 qa: Q1
 reviewers: []
 focus: []
@@ -32,6 +32,7 @@ planned_paths:
 depends_on:
   - "USE-100"
   - "USE-91"
+  - "USE-109"
 out_of_scope:
   - "Push for an event's start (D-USE-92: none)"
   - "Any write to Google, events.watch and syncToken: out of bounds"

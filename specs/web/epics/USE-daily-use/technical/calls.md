@@ -52,3 +52,9 @@ Taylor took every recommended default. The tickets are USE-89 to USE-108, with M
 | W6  | The Linear outbox      | It sends after commit, again on each sync, and from a 5-minute scheduler job.                                                                                                                                              |
 | W7  | New dependencies       | The TanStack persister, `idb-keyval` and `@playwright/test`, pinned by Quartermaster.                                                                                                                                      |
 | W8  | QA                     | As C7. USE-87 is Q3, reviewed by Mason alone; USE-100 is Q3, reviewed by Mason and Warden. Google connect stays Q1 on USE-100's crypto (flagged once). The stretch-break push stays deferred.                              |
+
+**After Vigil's pre-flight (2026-10-16), inside W2 and W4:**
+
+- 0015 puts Notes on the slot (`slots.notes`), because C-USE-item-sheet-1 saves every field for today only. It also carries USE-88's `block_changes.name`, `icon` and `colour`, so USE-88 is Q1 with no migration of its own.
+- The undo token is HMAC-SHA256 signed under `UNDO_TOKEN_KEY` (Warden's concern; no new dependency).
+- USE-109 (Google bands on the day, on fixtures) and USE-110 (three unowned wave 2 states) are new.

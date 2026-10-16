@@ -21,6 +21,7 @@ operator_review: false
 planned_paths:
   - "packages/db/migrations/0015_use_item_values.sql"
   - "packages/db/migrations/meta/"
+  - "packages/db/migrations/migrations.lock.json"
   - "packages/db/SCHEMA_REFERENCE.md"
   - "packages/db/src/schema/"
   - "packages/validators/src/planner.ts"
@@ -28,6 +29,7 @@ planned_paths:
   - "apps/web/lib/fixtures/"
 depends_on:
   - "USE-64"
+  - "USE-30"
 out_of_scope:
   - "Linear's description sync: the Linear tickets"
   - "Running the migration anywhere hosted: Taylor's"
@@ -45,9 +47,13 @@ criteria:
     evidence: check
     command: "yarn check-types"
   - id: C4
-    statement: "0015 adds block_items.notes, slots.at_time and slots.icon and makes only additions"
+    statement: "0015 adds slots.notes, slots.at_time, slots.icon and block_changes.name, icon and colour, makes only additions, and follows 0014"
     evidence: test
     command: "yarn test:migrations"
+  - id: C6
+    statement: "The migration lock and journal list 0015 after 0014"
+    evidence: check
+    command: "yarn check-migrations"
   - id: C5
     statement: "Taylor reads 0015, then applies it on staging after 0014"
     evidence: manual
@@ -65,7 +71,7 @@ id: USE-87
 
 Found building USE-64. The schema has no place for a plain item's Notes (`block_items` has no `notes`), and a slot carries only the date's `length_min`. USE-64 therefore keeps Notes on the device per date [ASSUMPTION], and writes a today-only time, icon or swap as the date's own copy of the item (`on_date`) with the set item skipped on the date; Make it Monday's usual finds the set item behind a copy by its place, since no column links them.
 
-- **Approach (Taylor, wave 3 gate, 2026-10-16: shape (a)):** migration `0015_use_item_values`. It adds `block_items.notes`, plus `slots.at_time` and `slots.icon` as the date's own values. So a today-only time or icon writes the date's slot (first touch, as the data contract says) and no copy; only Swap writes a copy. USE-64's dated copies for a time or icon become slot values, and Make it Monday's usual reads the slot. Not chosen: (b) `replaces_item_id`.
+- **Approach (Taylor, wave 3 gate, 2026-10-16: shape (a)):** migration `0015_use_item_values`. It adds `slots.notes`, `slots.at_time` and `slots.icon` as the date's own values. C-USE-item-sheet-1 saves any field for today only, so Notes is the date's too, on the slot, not the item (Vigil's pre-flight, 2026-10-16). A today-only value writes the date's slot (first touch, as the data contract says) and no copy; only Swap writes a copy. 0015 also carries USE-88's `block_changes.name`, `icon` and `colour` (the date's own look for a block), folded in so there is one migration, not three. USE-64's dated copies for a time or icon become slot values, and Make it Monday's usual reads the slot. Not chosen: (b) `replaces_item_id`.
 - **Interfaces:** the columns; `slotUpdateInput` / `placeSlotInput` or `blockItemInput` gain them; `useItemSheet`'s notes store and `copyOrigin` go.
 - **Gotchas:** the fixture records parse through the validators, so a column must reach `@syn/validators` before the fixtures can hold it.
 - **Model:** Opus 5.5 at medium.

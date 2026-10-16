@@ -22,6 +22,8 @@ planned_paths:
   - "packages/api/src/services/journal/"
   - "packages/api/src/routers/day.ts"
   - "packages/api/src/routers/journal.ts"
+  - "packages/api/src/services/morning/"
+  - "packages/api/src/routers/morning.ts"
   - "packages/api/src/root.ts"
   - "packages/validators/src/"
   - "apps/web/lib/data/live/"

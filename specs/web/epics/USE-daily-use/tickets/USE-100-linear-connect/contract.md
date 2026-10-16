@@ -30,6 +30,7 @@ planned_paths:
   - "packages/db/src/schema/index.ts"
   - "packages/db/migrations/0016_use_integrations.sql"
   - "packages/db/migrations/meta/"
+  - "packages/db/migrations/migrations.lock.json"
   - "packages/db/src/schema/rls/"
   - "packages/db/SCHEMA_REFERENCE.md"
   - "packages/api/src/services/linear/"
@@ -86,6 +87,10 @@ criteria:
     statement: "Taylor connects two Linear workspaces, each shows in Connections with its name and logo or letter tile, and Disconnect revokes and removes one"
     evidence: manual
     reason: "needs the Linear OAuth app, the key in Vercel and 0016 applied on staging, all Taylor's; recorded as an operator check"
+  - id: C10
+    statement: "The migration lock and journal list 0016 after 0015"
+    evidence: check
+    command: "yarn check-migrations"
   - id: C9
     statement: "The web app and the API type-check"
     evidence: check
@@ -105,12 +110,11 @@ id: USE-100
 
 ## Build notes
 
-C7's second Q3 ticket. The integration tables were moved out of 0012 to sit beside the token crypto (calls.md). Migration order: 0015 (USE-87) first, then 0016.
+C7's second Q3 ticket. 0016 follows 0015 (USE-87).
 
 - **0016 tables** (data contract, with the Tickets-gate additions):
   - `linear_connections`, one per workspace: `organization_id` (unique per user), `name`, `url_key`, `logo_url`, `access_token_ct` and `refresh_token_ct` (bytea), `token_expires_at`, `scopes`, `client_id`, `per_project`, `last_synced_at`, `last_sync_error`.
-  - `linear_snapshots`: `connection_id`, `fetched_at`, `payload jsonb`.
-  - `linear_project_clients`: `(connection_id, project_id)` unique, `client_id`.
+  - `linear_snapshots` (`connection_id`, `fetched_at`, `payload jsonb`); `linear_project_clients` (`(connection_id, project_id)` unique, `client_id`).
   - `linear_writes`: `work_item_id`, `connection_id`, `issue_id`, `kind`, `payload jsonb`, `state`, `attempts`, `last_error`, `sent_at`. `kind` is `linear_write_kind`: `status`, `done`, `reopen`, `priority`, `description`, `estimate` (D-USE-113). `state` is `linear_write_state`: `pending`, `sent`, `failed`.
   - `google_accounts`: `label`, `refresh_token_ct`, `token_expires_at`, `refresh_token_expires_at`, `last_synced_at`, `last_sync_error`.
   - `google_calendars`: `account_id`, `calendar_id`, `name`, `color`, `primary`, `access_role`, `enabled`.

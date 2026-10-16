@@ -10,7 +10,7 @@ non_negotiables:
   - "Fit is USE-8's fitInBlock at the top of every range; the consequence is words and lengths, never red."
   - "A step inside the Item sheet with back on the left; from Now's work menu its own sheet with × (D-USE-57)."
   - "Only @syn/ui components and preset tokens."
-devs_call: "File split under components/planner/move-to/; the month grid (@syn/ui's calendar parts); the toast's words for undrawn targets (the state file's assumed forms)."
+devs_call: "File split under components/planner/move-to/; the month grid is @syn/ui's MonthGrid (USE-29's), reused, never forked; the toast's words for undrawn targets (the state file's assumed forms)."
 cites:
   - "specs/web/epics/USE-daily-use/ux/interactions/move-to/index.md"
   - "specs/web/epics/USE-daily-use/ux/interactions/move-to/states/plain-item.md"
@@ -51,6 +51,7 @@ planned_paths:
   - "apps/web/lib/fixtures/"
   - "specs/web/epics/USE-daily-use/tickets/USE-069-move-to/evidence/"
 depends_on:
+  - "USE-29"
   - "USE-4"
   - "USE-7"
   - "USE-8"
