@@ -1,51 +1,65 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import type { IconValue } from "@syn/types";
+import { colourValueSchema, type BlockChangeInput } from "@syn/validators";
+import { usePlannerWrites } from "./use-planner-writes";
 
 /**
- * Today's own name and icon for a block (USE-48; header-menu.md: Rename and
- * Icon and colour, "today only" [ASSUMPTION]). `block_changes` holds no
- * name, icon or colour yet, so the look is kept on this device for the date
- * until the schema follow-up gives it a column; the usual block is never
- * written. Read in an effect, so the first paint is the block's own look.
+ * A block's own name, icon and colour for one date (USE-88; header-menu.md:
+ * Rename and Icon and colour, "today only"): the date's `block_changes` row
+ * (`0015`), so it syncs and reaches every reader of the day through
+ * `readDay`. The usual block is never written. The row carries the
+ * occurrence's times, as `block_changes_skipped_or_times_check` asks; a look
+ * at the block's own times is no move.
  */
 export interface TodayBlockLook {
   name?: string;
   icon?: IconValue;
 }
 
-export function todayBlockLookKey(date: string, blockId: string): string {
-  return `synapse:block-look:${date}:${blockId}`;
+export interface TodayBlockPlace {
+  blockId: string;
+  date: string;
+  /** The occurrence's times on the date (its change's, when moved). */
+  startsAt: string;
+  endsAt: string;
 }
 
-export function useTodayBlockLook(
-  date: string,
-  blockId: string,
-): [TodayBlockLook, (next: TodayBlockLook) => void] {
-  const key = todayBlockLookKey(date, blockId);
-  const [look, setLook] = useState<TodayBlockLook>({});
+/** The colour an icon was picked in, as `block_changes.color` takes it. */
+export function colourOfIcon(icon: IconValue): string | null {
+  const colour =
+    icon.kind === "curated"
+      ? icon.colorKey
+      : icon.kind === "lucide"
+        ? icon.color
+        : null;
+  return colour !== null && colourValueSchema.safeParse(colour).success
+    ? colour
+    : null;
+}
 
-  useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(key);
-      if (stored !== null) setLook(JSON.parse(stored) as TodayBlockLook);
-    } catch {
-      // Storage unavailable or unreadable: the block's own look stands.
-    }
-  }, [key]);
+/** The date's change a look writes; what it leaves out stays as it was. */
+export function todayLookInput(
+  place: TodayBlockPlace,
+  next: TodayBlockLook,
+): BlockChangeInput {
+  return {
+    blockId: place.blockId,
+    onDate: place.date,
+    startsAt: place.startsAt,
+    endsAt: place.endsAt,
+    ...(next.name === undefined ? {} : { name: next.name }),
+    ...(next.icon === undefined
+      ? {}
+      : { icon: next.icon, color: colourOfIcon(next.icon) }),
+  };
+}
 
-  const set = useCallback(
-    (next: TodayBlockLook) => {
-      setLook(next);
-      try {
-        window.localStorage.setItem(key, JSON.stringify(next));
-      } catch {
-        // Best-effort: the look still holds for this session.
-      }
-    },
-    [key],
-  );
-
-  return [look, set];
+/** Writes the look for the date; nothing while the occurrence is not read. */
+export function useTodayBlockLook(place: TodayBlockPlace | null) {
+  const planner = usePlannerWrites();
+  return (next: TodayBlockLook) =>
+    place === null
+      ? Promise.resolve(null)
+      : planner.writeBlockChange(todayLookInput(place, next));
 }

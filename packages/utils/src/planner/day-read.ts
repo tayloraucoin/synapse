@@ -4,6 +4,8 @@ import { occursOn, parseRule } from "./rrule";
 /**
  * A day is read, not built (the data contract): expand every block's rule
  * for the date, apply that date's `block_changes`, then join the slots.
+ * A change's own name, icon and colour (USE-88, `0015`) stand over the
+ * block's on that date only: the occurrence's `block` carries them.
  *
  * The inputs are structural, named as USE-3's records name them, so a record
  * from `@syn/validators` fits without this package importing it. Times are
@@ -25,6 +27,10 @@ export interface DayBlockChange {
   skipped: boolean;
   startsAt: string | null;
   endsAt: string | null;
+  /** The date's own look; null or absent reads the block's. */
+  name?: string | null;
+  icon?: unknown;
+  color?: string | null;
 }
 
 export interface DaySlot {
@@ -35,13 +41,14 @@ export interface DaySlot {
 }
 
 export interface DayOccurrence<B extends DayBlock, S extends DaySlot> {
+  /** The block, with its change's name, icon and colour on this date. */
   block: B;
   /** The times it runs on this date: the block's, or its change's. */
   startsAt: string;
   endsAt: string;
   start: Date;
   end: Date;
-  /** A `block_changes` row moved its times on this date. */
+  /** A `block_changes` row moved its times on this date (a look alone does not). */
   changed: boolean;
   /** Its slots on this date, in sort order. */
   slots: S[];
@@ -55,6 +62,19 @@ export interface DayRead<B extends DayBlock, S extends DaySlot> {
    * archived, or its rule moved off the date. Nothing is dropped silently.
    */
   unplaced: S[];
+}
+
+/** The block as it reads on the change's date: its look over the block's. */
+function withLook<B extends DayBlock>(
+  block: B,
+  change: DayBlockChange | undefined,
+): B {
+  if (change === undefined) return block;
+  const look: Record<string, unknown> = {};
+  if (change.name != null) look.name = change.name;
+  if (change.icon != null) look.icon = change.icon;
+  if (change.color != null) look.color = change.color;
+  return Object.keys(look).length === 0 ? block : { ...block, ...look };
 }
 
 /** Whether a block is on a date, by its rule or its one date. */
@@ -98,15 +118,17 @@ export function readDay<B extends DayBlock, S extends DaySlot>({
     const change = changeFor.get(block.id);
     if (change?.skipped) continue;
 
+    // A look-only row carries the occurrence's own times; that is no move.
     const moved =
       change !== undefined &&
       change.startsAt !== null &&
-      change.endsAt !== null;
+      change.endsAt !== null &&
+      (change.startsAt !== block.startsAt || change.endsAt !== block.endsAt);
     const startsAt = moved ? (change.startsAt as string) : block.startsAt;
     const endsAt = moved ? (change.endsAt as string) : block.endsAt;
 
     read.push({
-      block,
+      block: withLook(block, change),
       startsAt,
       endsAt,
       start: wallClockToInstant(dateKey, startsAt, timeZone),

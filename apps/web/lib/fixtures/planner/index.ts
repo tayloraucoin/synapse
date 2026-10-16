@@ -113,7 +113,10 @@ export interface PlannerServer {
     fromDate: string;
     patch: SplitPatch;
   }): Promise<PlannerWrite>;
-  /** One date of a repeating block: moved or skipped (This week). */
+  /**
+   * One date of a repeating block: moved or skipped (This week), or its own
+   * name, icon and colour for the date (USE-88); an absent look is kept.
+   */
   writeBlockChange(
     input: z.input<typeof blockChangeInput>,
   ): Promise<PlannerWrite>;
@@ -213,6 +216,11 @@ function blockOn(block: BlockRecord, dateKey: string): boolean {
 }
 
 /** The times a block runs at on a read day: its change's, else its own. */
+/** A look field written: absent keeps what the row had, null clears it. */
+function lookOf<T>(next: T | null | undefined, had: T | null | undefined) {
+  return next === undefined ? (had ?? null) : next;
+}
+
 function timesOf(block: BlockRecord, changes: readonly BlockChangeRecord[]) {
   const change = changes.find((c) => c.blockId === block.id);
   return change && change.startsAt !== null && change.endsAt !== null
@@ -622,6 +630,10 @@ export function createPlannerServer({
             skipped,
             startsAt: skipped ? null : (input.startsAt ?? null),
             endsAt: skipped ? null : (input.endsAt ?? null),
+            // The look merges (USE-88): absent keeps the row's, null clears it.
+            name: lookOf(input.name, existing?.name),
+            icon: lookOf(input.icon, existing?.icon),
+            color: lookOf(input.color, existing?.color),
           }),
         );
         return { id: row.id };

@@ -142,10 +142,6 @@ export function DaysBlockScreen({ blockId }: { blockId: string }) {
   const rowsQuery = useBlockView({ blockId, ...place, transitions: true });
   const writes = useBlockEditWrites(blockId, place);
   const topics = useMealTopics();
-  const [look, setLook] = useTodayBlockLook(
-    dated ? place.date : `usual-${weekday}`,
-    blockId,
-  );
   const [leftOut, toggleTopic] = useMealLeftOut(
     blockId,
     weekday,
@@ -173,9 +169,15 @@ export function DaysBlockScreen({ blockId }: { blockId: string }) {
   const data = rowsQuery.view ?? null;
   const record = data?.block.block ?? null;
   const kind = record?.kind ?? "wellness";
-  const name = look.name ?? record?.name ?? "";
+  // A date's own look is already on the block (`readDay`, USE-88).
+  const name = record?.name ?? "";
   const startsAt = data?.block.startsAt ?? null;
   const endsAt = data?.block.endsAt ?? null;
+  const writeLook = useTodayBlockLook(
+    dated && startsAt !== null && endsAt !== null
+      ? { blockId, date: place.date, startsAt, endsAt }
+      : null,
+  );
   const timeless =
     startsAt !== null && endsAt !== null && isTimeless({ startsAt, endsAt });
   const scope = scopeWords(place, weekday);
@@ -330,9 +332,9 @@ export function DaysBlockScreen({ blockId }: { blockId: string }) {
     </>
   );
 
-  /** A name or icon: the usual block's own, or kept on this device for a date. */
+  /** A name or icon: the usual block's own, or the date's change (USE-88). */
   function setLookOrBlock(next: { name?: string; icon?: IconValue }) {
-    if (dated) setLook({ ...look, ...next });
+    if (dated) void writeLook(next);
     else editBlock(next);
   }
 
@@ -595,7 +597,7 @@ export function DaysBlockScreen({ blockId }: { blockId: string }) {
             ? blockEditMeta({ kind, name, startsAt, endsAt, scope })
             : ""
         }
-        hue={hueOf(look.icon ?? record?.icon, kind)}
+        hue={hueOf(record?.icon, kind)}
         headingRef={headingRef}
         titleField={titleField}
         actions={actions}
@@ -620,7 +622,7 @@ export function DaysBlockScreen({ blockId }: { blockId: string }) {
         <IconPickerStep
           name={picking === "add" ? COPY.addTo(name) : name}
           value={
-            picking === "add" ? addIcon : (look.icon ?? record?.icon ?? null)
+            picking === "add" ? addIcon : (record?.icon ?? null)
           }
           backLabel={name}
           onBack={() => setPicking(null)}

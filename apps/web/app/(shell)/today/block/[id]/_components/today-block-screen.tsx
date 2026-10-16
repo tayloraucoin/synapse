@@ -127,7 +127,6 @@ export function TodayBlockScreen({ blockId }: { blockId: string }) {
     day.today?.occurrences.blocks.find((o) => o.block.id === blockId) ?? null;
   const rowsQuery = useBlockView({ blockId, date });
   const writes = useBlockDayWrites({ blockId, date });
-  const [look, setLook] = useTodayBlockLook(date, blockId);
 
   const drag = view?.drag ?? null;
   const [editing, setEditing] = React.useState(
@@ -151,10 +150,18 @@ export function TodayBlockScreen({ blockId }: { blockId: string }) {
 
   const rows = rowsQuery.view;
   const block = occurrence?.block ?? rows?.block.block ?? null;
-  const name = look.name ?? block?.name ?? "";
-  const hue = hueOfIcon(look.icon) ?? (block ? BLOCK_HUE[block.kind] : "slate");
+  // The date's own look is already on the block (`readDay`, USE-88).
+  const name = block?.name ?? "";
+  const hue =
+    hueOfIcon(block?.icon ?? undefined) ??
+    (block ? BLOCK_HUE[block.kind] : "slate");
   const startsAt = occurrence?.startsAt ?? rows?.block.startsAt ?? null;
   const endsAt = occurrence?.endsAt ?? rows?.block.endsAt ?? null;
+  const writeLook = useTodayBlockLook(
+    startsAt !== null && endsAt !== null
+      ? { blockId, date, startsAt, endsAt }
+      : null,
+  );
 
   // The crumb goes back where it came from (current.md [ASSUMPTION]).
   const back =
@@ -315,7 +322,7 @@ export function TodayBlockScreen({ blockId }: { blockId: string }) {
       name={name}
       onDone={(next) => {
         setRenaming(false);
-        if (next !== null && next !== name) setLook({ ...look, name: next });
+        if (next !== null && next !== name) void writeLook({ name: next });
       }}
     />
   ) : null;
@@ -479,14 +486,14 @@ export function TodayBlockScreen({ blockId }: { blockId: string }) {
       >
         <IconPickerStep
           name={name}
-          value={look.icon ?? block?.icon ?? null}
+          value={block?.icon ?? null}
           backLabel={name}
           onBack={() => setPicking(false)}
           onPick={(icon) => {
-            setLook({ ...look, icon });
+            void writeLook({ icon });
             setPicking(false);
           }}
-          onRecolour={(icon) => setLook({ ...look, icon })}
+          onRecolour={(icon) => void writeLook({ icon })}
         />
       </ResponsiveSheet>
     </>
