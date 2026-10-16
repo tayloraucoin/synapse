@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { addDays, weekdayIndex, weekKeyOf } from "@syn/utils";
 import type { IconValue } from "@syn/types";
+import { addDays, weekdayIndex, weekKeyOf } from "@syn/utils";
 import { resolveScenario } from "@/lib/fixtures/scenarios";
 import { BASE_DATE } from "@/lib/fixtures/scenarios/base-day";
 import { NOW_IDS, onNowDay } from "@/lib/fixtures/scenarios/now-day";

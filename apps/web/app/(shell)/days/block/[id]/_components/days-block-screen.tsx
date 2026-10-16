@@ -621,9 +621,7 @@ export function DaysBlockScreen({ blockId }: { blockId: string }) {
       >
         <IconPickerStep
           name={picking === "add" ? COPY.addTo(name) : name}
-          value={
-            picking === "add" ? addIcon : (record?.icon ?? null)
-          }
+          value={picking === "add" ? addIcon : (record?.icon ?? null)}
           backLabel={name}
           onBack={() => setPicking(null)}
           onPick={(icon) => {
