@@ -1071,3 +1071,13 @@ export { ExternalLinkIcon as OpenInLinearIcon } from "lucide-react";
 
 /** A linked item's ··· › Unlink from Linear (USE-66). */
 export { Link2OffIcon as UnlinkIcon } from "lucide-react";
+
+/* ---- composed: carry a pool row onto a day (USE-75) ---- */
+export {
+  DragToPlace,
+  useDragSource,
+  useDropTarget,
+  type DragSourceBinding,
+  type DragToPlaceProps,
+  type DropTargetBinding,
+} from "./composed/control/drag-to-place";

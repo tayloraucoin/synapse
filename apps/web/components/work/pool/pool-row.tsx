@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cn, LinearStatusGlyph } from "@syn/ui";
+import { cn, LinearStatusGlyph, useDragSource } from "@syn/ui";
 import type { PoolRowView } from "@/lib/data/pool-view";
 import { DueBadge } from "../due-badge";
 import { PriorityMarkGlyph } from "../priority-chip";
@@ -12,15 +12,22 @@ import { POOL_PANEL_COPY as COPY } from "./copy";
  * its days; a Huge one offers Spread…; a Synapse-only one reads "No Linear".
  * On the Linear tab the status shape and word lead the meta. Rows are
  * list-like, a hairline under each, never cards (D-USE-42). With `href` the
- * whole row opens the Item sheet; Spread… sits above that link.
+ * whole row opens the Item sheet; Spread… sits above that link. With
+ * `dragId`, inside the Week's DragToPlace, the row carries onto a day
+ * (USE-75); its keyboard path is the day's "+ Add to <tier>".
  */
 export interface PoolRowProps {
   row: PoolRowView;
   href?: string;
   onSpread?: () => void;
+  /** The row's drag id (USE-75's `PLACE_IDS.row`); a plain row without one. */
+  dragId?: string;
 }
 
-export function PoolRow({ row, href, onSpread }: PoolRowProps) {
+export function PoolRow({ row, href, onSpread, dragId }: PoolRowProps) {
+  const drag = useDragSource(dragId ?? row.key, row.title, {
+    disabled: dragId === undefined,
+  });
   const title = (
     <span className="text-label text-foreground min-w-0 flex-1">
       {row.title}
@@ -28,6 +35,8 @@ export function PoolRow({ row, href, onSpread }: PoolRowProps) {
   );
   return (
     <div
+      ref={drag.ref}
+      {...drag.props}
       data-pool-row={row.key}
       data-placed={row.placed ? "" : undefined}
       className={cn(
@@ -35,6 +44,7 @@ export function PoolRow({ row, href, onSpread }: PoolRowProps) {
         href && "hover:bg-fill-muted",
         // Placed rows stay, faded (pool-rows.md); the words keep 4.5:1 on surface.
         row.placed && "opacity-60",
+        drag.isDragging && "opacity-40",
       )}
     >
       <span

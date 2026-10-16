@@ -1,12 +1,21 @@
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { WorkTier } from "@syn/types";
-import { cn, NowLine, ScheduleAxis, Skeleton, Text } from "@syn/ui";
+import {
+  cn,
+  NowLine,
+  ScheduleAxis,
+  Skeleton,
+  Text,
+  useDropTarget,
+} from "@syn/ui";
 import { BLOCK_HUE, HUE_CHIP, HUE_DOT } from "@/components/planner/block-hue";
 import { DueBadge } from "@/components/work";
+import { PLACE_IDS } from "@/lib/data/place";
+import type { Landed } from "@/lib/data/use-place";
 import type { WeekHead } from "@/lib/data/use-week-view";
 import {
   TIER_WORDS,
@@ -20,6 +29,8 @@ import {
 import { blockPanelRoute } from "@/lib/routes";
 import { WEEK_COPY as COPY } from "./copy";
 import { DayHead } from "./priority-lens";
+import type { WeekPlacing } from "./use-week-placing";
+import { LandedLine } from "./week-chip";
 
 /**
  * The Time lens (USE-73, D-USE-41; states/time-lens.md): the week as a
@@ -33,6 +44,8 @@ import { DayHead } from "./priority-lens";
  * and the column's due badge, never a firing time (D-USE-98); the Fits line
  * sits in the day's last Work block. Events are plum inside the block their
  * start falls in, never splitting it. The now line crosses today only.
+ * With `placing` (USE-75) a pool row dropped on a Work block files under the
+ * day's first tier with room, and lands ringed with its line.
  */
 
 const PX_PER_HOUR = 80;
@@ -67,6 +80,8 @@ export interface TimeLensProps {
   /** Today's minute when today is in the week shown; else null. */
   nowMin: number | null;
   timeZone: string;
+  /** Placing from the pool (USE-75); without it the blocks only show. */
+  placing?: WeekPlacing;
 }
 
 export function TimeLens({
@@ -76,6 +91,7 @@ export function TimeLens({
   here,
   nowMin,
   timeZone,
+  placing,
 }: TimeLensProps) {
   const days: (WeekDayView | null)[] = heads.map(
     (head) => view?.days.find((day) => day.dateKey === head.dateKey) ?? null,
@@ -130,6 +146,7 @@ export function TimeLens({
               day={days[index] ?? null}
               loading={view === null}
               here={here}
+              placing={placing}
             />
           ))}
           {nowShown ? (
@@ -157,12 +174,14 @@ function DayColumn({
   day,
   loading,
   here,
+  placing,
 }: {
   index: number;
   head: WeekHead;
   day: WeekDayView | null;
   loading: boolean;
   here: string;
+  placing: WeekPlacing | undefined;
 }) {
   return (
     <div
@@ -196,8 +215,10 @@ function DayColumn({
             <TimeBlock
               key={block.id}
               block={block}
+              dateKey={day.dateKey}
               past={day.past}
               href={blockPanelRoute(here, block.id, day.dateKey)}
+              placing={placing}
             />
           ))}
           {day.looseEvents.map((event) => (
@@ -220,16 +241,26 @@ function DayColumn({
 
 function TimeBlock({
   block,
+  dateKey,
   href,
   past,
+  placing,
 }: {
   block: TimeBlockView;
+  dateKey: string;
   href: string;
   past: boolean;
+  placing: WeekPlacing | undefined;
 }) {
   const router = useRouter();
   const hue = BLOCK_HUE[block.kind];
   const isWork = block.kind === "work";
+  // A pool row only (USE-75): a chip here opens the panel, it does not carry.
+  const drop = useDropTarget(PLACE_IDS.block(dateKey, block.id), {
+    disabled: !isWork || placing === undefined,
+  });
+  const takesRow = drop.isOver && (drop.carriedId?.startsWith("row:") ?? false);
+  const landed = placing?.landed?.dateKey === dateKey ? placing.landed : null;
   const top = pxOf(block.topMin);
   const height = Math.max(0, pxOf(block.lengthMin) - BLOCK_GAP_PX);
 
@@ -253,12 +284,14 @@ function TimeBlock({
   const open = () => router.push(href, { scroll: false });
   return (
     <div
+      ref={drop.ref}
       data-time-block={block.id}
       style={{ top: `${top}px`, height: `${height}px` }}
       className={cn(
         "absolute inset-x-1 overflow-hidden rounded-(--radius-control)",
         HUE_CHIP[hue],
         past && "opacity-60",
+        takesRow && "ring-[1.5px] ring-ink ring-inset",
       )}
     >
       {/* The block's one control: every click on it opens its panel. */}
@@ -287,7 +320,13 @@ function TimeBlock({
         {block.chips.length > 0 ? (
           <ul className="flex flex-col gap-1">
             {block.chips.map((chip) => (
-              <TimeChip key={chip.id} chip={chip} onOpen={open} />
+              <TimeChip
+                key={chip.id}
+                chip={chip}
+                onOpen={open}
+                landed={landed?.workItemId === chip.workItemId ? landed : null}
+                onUndo={() => void placing?.undo()}
+              />
             ))}
           </ul>
         ) : null}
@@ -317,25 +356,50 @@ function TimeBlock({
  * A work chip: the tier by its edge, and by its word in the name and the
  * hover title (D-USE-101); a click opens the block's panel, as the block.
  */
-function TimeChip({ chip, onOpen }: { chip: ChipView; onOpen: () => void }) {
+function TimeChip({
+  chip,
+  onOpen,
+  landed,
+  onUndo,
+}: {
+  chip: ChipView;
+  onOpen: () => void;
+  /** Just placed here (USE-75): ringed, its line under it. */
+  landed: Landed | null;
+  onUndo: () => void;
+}) {
   return (
-    <li
-      data-time-chip={chip.id}
-      title={COPY.chipTitle(chip.title, TIER_WORDS[chip.tier])}
-      onClick={onOpen}
-      className={cn(
-        "pointer-events-auto flex flex-col items-start gap-0.5 rounded-(--radius-control) border-s-2 bg-background px-1.5 py-0.5",
-        TIER_EDGE[chip.tier],
-      )}
-    >
-      <span className="sr-only">{chip.label}</span>
-      <Text as="span" variant="caption" tone="ink" aria-hidden="true">
-        {chip.emoji ? `${chip.emoji}\u00a0` : null}
-        {chip.title}
-        {chip.session ? `\u00a0${chip.session.n}/${chip.session.of}` : null}
-      </Text>
-      {chip.due ? <DueBadge word={chip.due.word} tone={chip.due.tone} /> : null}
-    </li>
+    <>
+      <li
+        data-time-chip={chip.id}
+        title={COPY.chipTitle(chip.title, TIER_WORDS[chip.tier])}
+        onClick={onOpen}
+        className={cn(
+          "pointer-events-auto flex flex-col items-start gap-0.5 rounded-(--radius-control) border-s-2 bg-background px-1.5 py-0.5",
+          TIER_EDGE[chip.tier],
+          landed && "ring-[1.5px] ring-ink",
+        )}
+      >
+        <span className="sr-only">{chip.label}</span>
+        <Text as="span" variant="caption" tone="ink" aria-hidden="true">
+          {chip.emoji ? `${chip.emoji}\u00a0` : null}
+          {chip.title}
+          {chip.session ? `\u00a0${chip.session.n}/${chip.session.of}` : null}
+        </Text>
+        {chip.due ? (
+          <DueBadge word={chip.due.word} tone={chip.due.tone} />
+        ) : null}
+      </li>
+      {landed ? (
+        <li className="pointer-events-auto">
+          <LandedLine
+            line={landed.line}
+            onUndo={landed.undo ? onUndo : null}
+            undoName={COPY.undoName(landed.line)}
+          />
+        </li>
+      ) : null}
+    </>
   );
 }
 

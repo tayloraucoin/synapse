@@ -69,6 +69,8 @@ export function useWeekView(weekKey: string) {
     nowMin,
     timeZone: source.scenario.records.timeZone,
     heads: weekHeads(weekKey, todayKey),
+    /** The week as read, for placing (USE-75): its days' blocks and slots. */
+    week: week.week,
     range: weekRange(dates),
     isError: week.isError,
     retry: week.retry,

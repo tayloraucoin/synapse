@@ -1,10 +1,11 @@
 "use client";
 
-import type * as React from "react";
+import * as React from "react";
 import Link from "next/link";
 import type { WorkTier } from "@syn/types";
-import { cn, HueSquare, Skeleton } from "@syn/ui";
+import { cn, HueSquare, Skeleton, useDropTarget } from "@syn/ui";
 import { TIER_HUE } from "@/components/work";
+import { PLACE_IDS } from "@/lib/data/place";
 import type { WeekHead } from "@/lib/data/use-week-view";
 import {
   NOTHING_SLOTTED,
@@ -13,8 +14,10 @@ import {
   type WeekView,
 } from "@/lib/data/week-view";
 import { itemSheetRoute, todayRoute } from "@/lib/routes";
+import { AddToTierPopover } from "./add-to-tier-popover";
 import { WEEK_COPY as COPY } from "./copy";
-import { EventChip, WorkChip } from "./week-chip";
+import type { WeekPlacing } from "./use-week-placing";
+import { EventChip, LandedLine, WorkChip } from "./week-chip";
 
 /**
  * The Priority lens (USE-72, D-USE-41): a table, days as column headers and
@@ -23,7 +26,8 @@ import { EventChip, WorkChip } from "./week-chip";
  * scroll sideways (D-USE-94). Today's head is marked by its word and a line
  * in the now colour; a day with no Work block is one region, "No work
  * blocks". `view` null is loading: the heads and labels real, still skeleton
- * chips (A-14), the Fits line blank.
+ * chips (A-14), the Fits line blank. With `placing` (USE-75) each tier cell
+ * takes a pool row or a chip dropped on it and offers "+ Add to <tier>".
  */
 
 const TIERS: WorkTier[] = ["urgent", "primary", "secondary", "stretch"];
@@ -44,9 +48,17 @@ export interface PriorityLensProps {
   view: WeekView | null;
   /** The path under the sheet a chip opens, query kept. */
   here: string;
+  /** Placing from the pool (USE-75); without it the cells only show. */
+  placing?: WeekPlacing;
 }
 
-export function PriorityLens({ heads, range, view, here }: PriorityLensProps) {
+export function PriorityLens({
+  heads,
+  range,
+  view,
+  here,
+  placing,
+}: PriorityLensProps) {
   const days: (WeekDayView | null)[] = heads.map(
     (head) => view?.days.find((day) => day.dateKey === head.dateKey) ?? null,
   );
@@ -91,14 +103,15 @@ export function PriorityLens({ heads, range, view, here }: PriorityLensProps) {
         <EventChip key={event.id} event={event} />
       ));
     } else {
-      content = day.cells[row].map((chip) => (
-        <WorkChip
-          key={chip.id}
-          chip={chip}
-          past={day.past}
-          href={itemSheetRoute(here, chip.workItemId)}
+      return (
+        <TierCell
+          key={head.dateKey}
+          day={day}
+          tier={row}
+          here={here}
+          placing={placing}
         />
-      ));
+      );
     }
     return (
       <td key={head.dateKey} className={cn(cellEdge, "p-2 align-top")}>
@@ -196,6 +209,90 @@ export function PriorityLens({ heads, range, view, here }: PriorityLensProps) {
 }
 
 const cellEdge = "border-s border-hairline";
+
+/**
+ * One day's tier (USE-75): a drop target for a pool row or a placed chip,
+ * shaded while one is over it; its chips carry; the chip that just landed is
+ * ringed with its line under it; "+ Add to <tier>" shows on hover and focus.
+ */
+function TierCell({
+  day,
+  tier,
+  here,
+  placing,
+}: {
+  day: WeekDayView;
+  tier: WorkTier;
+  here: string;
+  placing: WeekPlacing | undefined;
+}) {
+  const drop = useDropTarget(PLACE_IDS.cell(day.dateKey, tier), {
+    disabled: placing === undefined,
+  });
+  const chips = day.cells[tier];
+  const landed =
+    placing?.landed?.dateKey === day.dateKey ? placing.landed : null;
+  const adding =
+    placing?.adding?.dateKey === day.dateKey && placing.adding.tier === tier;
+  return (
+    <td
+      ref={drop.ref}
+      data-week-cell={`${day.dateKey}:${tier}`}
+      className={cn(
+        cellEdge,
+        "group/cell p-2 align-top",
+        // The drop target's shade; an empty cell shades on hover too, as drawn.
+        drop.isOver
+          ? "bg-fill-muted"
+          : (chips.length === 0 || adding) &&
+              placing &&
+              "hover:bg-surface has-focus-visible:bg-surface",
+        adding && "bg-surface",
+      )}
+    >
+      <div className="flex flex-col gap-1">
+        {chips.map((chip) => {
+          const ringed = landed?.workItemId === chip.workItemId;
+          return (
+            <React.Fragment key={chip.id}>
+              <WorkChip
+                chip={chip}
+                past={day.past}
+                href={itemSheetRoute(here, chip.workItemId)}
+                dragId={placing ? PLACE_IDS.chip(chip.id) : undefined}
+                ringed={ringed}
+              />
+              {ringed && landed ? (
+                <LandedLine
+                  line={landed.line}
+                  onUndo={landed.undo ? () => void placing?.undo() : null}
+                  undoName={COPY.undoName(landed.line)}
+                />
+              ) : null}
+            </React.Fragment>
+          );
+        })}
+        {placing ? (
+          <AddToTierPopover
+            weekday={day.weekday}
+            tier={tier}
+            open={adding}
+            onOpenChange={(open) =>
+              placing.setAdding(open ? { dateKey: day.dateKey, tier } : null)
+            }
+            onPick={(from) =>
+              placing.placeInCell(from, { dateKey: day.dateKey, tier })
+            }
+            onNewItem={(title) =>
+              placing.openNewItem({ dateKey: day.dateKey, tier }, title)
+            }
+            initialQuery={placing.seededQuery}
+          />
+        ) : null}
+      </div>
+    </td>
+  );
+}
 
 function RowLabel({ row }: { row: "events" | WorkTier }) {
   if (row === "events")

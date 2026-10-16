@@ -262,6 +262,8 @@ export {
   type TodoPoolTodo,
 } from "./planner";
 export { resolveClient, type ClientConnection, type ClientItem } from "./work";
+/* Where a Time lens drop files (USE-75). */
+export { firstTierWithRoom, type TierRoom } from "./work";
 
 /* ---- the icon picker's suggestions (USE-11) ---- */
 export { suggestIcons, type IconSuggestEntry } from "./planner";

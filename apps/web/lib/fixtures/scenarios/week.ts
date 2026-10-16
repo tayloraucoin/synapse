@@ -359,13 +359,20 @@ function week(
   name: string,
   options: Partial<Scenario> & {
     placed?: boolean;
+    /** Slots the scenario leaves out, by their PLACED number (USE-75's drop). */
+    without?: readonly number[];
     /** The pool panel's records (USE-74), over the Week's. */
     pool?: (records: FixtureRecords) => FixtureRecords;
   } = {},
 ): () => Scenario {
-  const { placed, pool, ...rest } = options;
+  const { placed, pool, without = [], ...rest } = options;
   return () => {
-    const records = weekRecords({ placed });
+    const base = weekRecords({ placed });
+    const left = new Set(without.map((n) => id(3, n)));
+    const records = {
+      ...base,
+      slots: base.slots.filter((slot) => !left.has(slot.id)),
+    };
     return {
       name,
       now: WEEK_NOW,
@@ -373,6 +380,24 @@ function week(
       mode: "ready",
       ...rest,
     };
+  };
+}
+
+/**
+ * USE-75's records: the pool panel's, less the pool's own ALD-17 twin
+ * (USE-55's "[Case studies…]"), so the one ALD-17 is the Week's [Alder
+ * intro] and its pool row names the days it sits on.
+ */
+function placeRecords(records: FixtureRecords): FixtureRecords {
+  const panel = poolPanelRecords(records);
+  return {
+    ...panel,
+    workItems: panel.workItems
+      .filter((item) => item.id !== POOL_IDS.workItems.ald17)
+      // [ASSUMPTION] Its sessions are an hour, as the board's: a new one tops at 1 h.
+      .map((item) =>
+        item.id === W.ald17 ? { ...item, lengthMaxMin: 60 } : item,
+      ),
   };
 }
 
@@ -397,4 +422,27 @@ export const WEEK_SCENARIOS: Record<string, () => Scenario> = {
     pool: poolPanelRecords,
     view: { open: "week:time" },
   }),
+  // USE-75: Tuesday's [Alder intro] not yet placed; the screen drops it there
+  // on load (WEEK_PLACE_SEEDS), as the board's moment, its Undo held.
+  "week-drop": week("week-drop", { pool: placeRecords, without: [6] }),
+  // USE-75: "+ Add to Primary" on Friday open with "audit" typed.
+  "week-add-popover": week("week-add-popover", { pool: placeRecords }),
 };
+
+/** What a USE-75 capture stages on load: a real placing, or the add popover open. */
+export interface WeekPlaceSeed {
+  drop?: { workItemId: string; dateKey: string; tier: "primary" };
+  add?: { dateKey: string; tier: "primary"; query: string };
+}
+
+const WEEK_PLACE_SEEDS: Record<string, WeekPlaceSeed> = {
+  "week-drop": {
+    drop: { workItemId: W.ald17, dateKey: "2026-10-13", tier: "primary" },
+  },
+  "week-add-popover": {
+    add: { dateKey: "2026-10-16", tier: "primary", query: "audit" },
+  },
+};
+
+export const weekPlaceSeedOf = (name: string): WeekPlaceSeed | undefined =>
+  WEEK_PLACE_SEEDS[name];

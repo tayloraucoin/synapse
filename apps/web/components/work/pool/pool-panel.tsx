@@ -19,8 +19,10 @@ import {
   TabsList,
   TabsTrigger,
   Text,
+  useDropTarget,
   type SortableHandleProps,
 } from "@syn/ui";
+import { PLACE_IDS } from "@/lib/data/place";
 import {
   POOL_WORDS,
   type PoolGroupBy,
@@ -76,6 +78,9 @@ export function PoolPanel({ mode }: PoolPanelProps) {
   const pool = usePoolView({ group, sort, query, tab });
   const view = pool.view;
   const shownTab: PoolTab = view?.linearConnected ? tab : "pool";
+  // A placed chip carried back here returns to the pool (USE-75).
+  const drop = useDropTarget(PLACE_IDS.pool);
+  const takesChip = drop.carriedId?.startsWith("chip:") ?? false;
 
   const openItem = (id: string) => itemSheetRoute(here, id);
   // [ASSUMPTION] Spread's dialog is USE-77's; until then Spread… opens the Item sheet.
@@ -97,9 +102,13 @@ export function PoolPanel({ mode }: PoolPanelProps) {
 
   return (
     <aside
+      ref={drop.ref}
       aria-label={COPY.pool}
       data-pool-panel={mode}
-      className="sticky top-0 flex h-dvh w-(--pool-w) shrink-0 flex-col gap-3.5 border-e border-border bg-surface px-5 py-(--space-6)"
+      className={cn(
+        "sticky top-0 flex h-dvh w-(--pool-w) shrink-0 flex-col gap-3.5 border-e border-border bg-surface px-5 py-(--space-6)",
+        takesChip && drop.isOver && "bg-fill-muted",
+      )}
     >
       {view?.linearConnected ? (
         <Tabs
@@ -303,6 +312,7 @@ function PanelBody({
     row,
     href: row.workItemId ? openItem(row.workItemId) : undefined,
     onSpread: row.workItemId ? () => onSpread(row.workItemId!) : undefined,
+    dragId: PLACE_IDS.row(row.key),
   });
 
   if (isError) return <RegionRetry label={COPY.poolFailed} onRetry={onRetry} />;

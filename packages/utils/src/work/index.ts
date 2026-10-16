@@ -37,3 +37,4 @@ export {
   type FlowedRow,
   type WorkBlockFlow,
 } from "./flow";
+export { firstTierWithRoom, type TierRoom } from "./first-tier-with-room";

@@ -451,6 +451,10 @@
       "types": "./src/composed/control/drag-layer/index.ts",
       "default": "./src/composed/control/drag-layer/index.ts"
     },
+    "./drag-to-place": {
+      "types": "./src/composed/control/drag-to-place/index.ts",
+      "default": "./src/composed/control/drag-to-place/index.ts"
+    },
     "./confirm-yesterday-rows": {
       "types": "./src/composed/control/confirm-yesterday-rows/index.ts",
       "default": "./src/composed/control/confirm-yesterday-rows/index.ts"
