@@ -5,3 +5,5 @@ export {
   type SpreadCard,
   type SpreadDialogProps,
 } from "./spread-dialog";
+export { DaysAndTierStep } from "./days-and-tier-step";
+export { SpreadSheet, type SpreadSheetProps } from "./spread-sheet";

@@ -1,9 +1,14 @@
 import {
+  addDays,
+  blockFreeMin,
   clockMinutes,
   countSessions,
+  spreadBlockOf,
   topMinutes,
   weekdayIndex,
   type SpreadDay,
+  type SpreadPick,
+  type SpreadReason,
   type SpreadRow,
   type WorkTier,
 } from "@syn/utils";
@@ -177,6 +182,73 @@ export function lengthWords(minutes: number): string {
   return rest === 0
     ? `${hours} h`
     : `${hours} h ${String(rest).padStart(2, "0")}`;
+}
+
+/** Minutes from midnight → "9:30", "12:10": the phone's times. */
+export const clockWords = (minutes: number) =>
+  `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`;
+
+/**
+ * A row's times on the phone (USE-78; across-the-week/402.md): the session
+ * from its block's start [ASSUMPTION: a spread session goes first in its
+ * block, the block's other work after it], and where that day's Work ends
+ * with it in: the block's end less the time it had left, plus the session.
+ * Read from the same days `spreadPreview` counted; nothing re-counted here.
+ */
+export function sessionTimesOf(
+  row: SpreadRow,
+  days: readonly SpreadDay[],
+): { start: string; end: string; workEnds: string } | null {
+  const block = days
+    .find((day) => day.dateKey === row.dateKey)
+    ?.blocks.find((b) => b.id === row.blockId);
+  if (!block) return null;
+  const start = clockMinutes(block.start);
+  const ends = clockMinutes(block.end) - blockFreeMin(block) + row.getsMin;
+  return {
+    start: clockWords(start),
+    end: clockWords(start + row.getsMin),
+    workEnds: clockWords(ends),
+  };
+}
+
+/** A weekday's room for Days and tier: its free time in the picked block, or why it takes none. */
+export type DayRoom =
+  | { kind: "free"; min: number }
+  | {
+      kind: "not";
+      reason: SpreadReason;
+      /** The begun block's start. */ since: string | null;
+    };
+
+export function dayRoomOf(day: SpreadDay, pick: SpreadPick): DayRoom {
+  const block = spreadBlockOf(day, pick);
+  if (typeof block !== "string")
+    return { kind: "free", min: blockFreeMin(block) };
+  if (block !== "begun") return { kind: "not", reason: block, since: null };
+  // The block that began: the one the pick named, else the first by start.
+  const sorted = [...day.blocks].sort(
+    (a, b) => clockMinutes(a.start) - clockMinutes(b.start),
+  );
+  const named =
+    typeof pick === "object"
+      ? sorted.find((b) => b.id === pick.blocks[day.dateKey])
+      : undefined;
+  const begun =
+    named ??
+    (pick === "afternoon" ? sorted.slice(1) : sorted).find((b) => b.begun);
+  return {
+    kind: "not",
+    reason: "begun",
+    since: begun ? clockWords(clockMinutes(begun.start)) : null,
+  };
+}
+
+/** The day what is left carries to: the Monday after the week's days. */
+export function carryDateOf(days: readonly SpreadDay[]): string | null {
+  const first = [...days].map((day) => day.dateKey).sort()[0];
+  if (first === undefined) return null;
+  return addDays(first, 7 - weekdayIndex(first));
 }
 
 export const SPREAD_WORDS = {

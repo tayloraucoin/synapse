@@ -66,6 +66,7 @@ import {
   shortDay,
 } from "@/components/work/add/new-task/form";
 import type { DayPickChip } from "@/components/work/day-pick";
+import { SpreadDialog, SpreadSheet } from "@/components/work/spread";
 import {
   StartWhileOneRuns,
   type StartMoveTo,
@@ -211,6 +212,9 @@ export function WorkItemSheet({
     (urlStep?.startsWith("ask:") ? urlStep : null);
 
   const [moreAsked, setMore] = React.useState(false);
+  // ··· › Spread across the week (USE-78): the full sheet below 1024 in this
+  // one's place, the dialog at the desk; × comes back here.
+  const [spreading, setSpreading] = React.useState(false);
   // The step is the phone's; at the desk ··· is a pull-down (D-USE-103).
   const more = moreAsked && !atDesk;
   const [asking, setAsking] = React.useState(false);
@@ -479,6 +483,10 @@ export function WorkItemSheet({
       void act(sheet.markTaskDone, COPY.toast.taskDone(item.title)),
     onBackToPool: () =>
       void act(sheet.backToPool, COPY.toast.backToPool(item.title)),
+    onSpread: () => {
+      setMore(false);
+      setSpreading(true);
+    },
     onOpenInLinear: () => {
       if (item.url !== null) window.open(item.url, "_blank", "noopener");
     },
@@ -716,7 +724,7 @@ export function WorkItemSheet({
   return (
     <>
       <ResponsiveSheet
-        open={open}
+        open={open && !spreading}
         onOpenChange={(next) => {
           if (next) return;
           // Out of ···'s or the status step goes back to the fields; out of the fields, closed.
@@ -864,6 +872,22 @@ export function WorkItemSheet({
           />
         )}
       </ResponsiveSheet>
+      {atDesk ? (
+        <SpreadDialog
+          workItemId={open && spreading ? item.id : null}
+          card={null}
+          onClose={() => setSpreading(false)}
+        />
+      ) : (
+        <SpreadSheet
+          workItemId={open && spreading ? item.id : null}
+          onClose={() => setSpreading(false)}
+          onSpread={() => {
+            setSpreading(false);
+            close();
+          }}
+        />
+      )}
       <StartWhileOneRuns
         open={asking && running !== undefined}
         title={COPY.ask.title(item.title)}

@@ -26,8 +26,8 @@ import { refusalWords, useWorkWrites } from "./use-work-writes";
 import { thisWeekKey } from "./week-records";
 
 /**
- * Spread across the week at the desk (USE-77): the dialog's fields over this
- * week, the preview from `spreadPreview`, and Add <n> sessions. The sessions
+ * Spread across the week at the desk (USE-77) and on the phone (USE-78): the
+ * dialog's and the full sheet's fields over this week, the preview from `spreadPreview`, and Add <n> sessions. The sessions
  * land through the work writes' `spreadWork`, one write for all of them, so
  * the toast's one Undo removes every one [ASSUMPTION: rather than `usePlace`'s
  * one placing at a time, whose Undo takes back only the last]. Nothing here
@@ -70,7 +70,15 @@ function storeCarryOn(key: string, on: boolean) {
   }
 }
 
-export function useSpread(workItemId: string | null) {
+/** The phone opens on a set length, as its board's "2 h" (USE-78) [ASSUMPTION]; the desk on the whole block. */
+export const PHONE_SESSION_MIN = 120;
+
+export function useSpread(
+  workItemId: string | null,
+  defaults: { eachMin?: EachSession; tier?: WorkTier } = {},
+) {
+  const startEach = defaults.eachMin ?? "whole";
+  const startTier = defaults.tier ?? "primary";
   const source = useDataSource();
   const { timeZone } = source.scenario.records;
   const now = source.now();
@@ -110,8 +118,8 @@ export function useSpread(workItemId: string | null) {
     {},
   );
   const [picked, setPicked] = React.useState<string[] | null>(null);
-  const [eachMin, setEachMin] = React.useState<EachSession>("whole");
-  const [tier, setTier] = React.useState<WorkTier>("primary");
+  const [eachMin, setEachMin] = React.useState<EachSession>(startEach);
+  const [tier, setTier] = React.useState<WorkTier>(startTier);
   const [carryOn, setCarryOnState] = React.useState(true);
   const [announcement, setAnnouncement] = React.useState("");
 
@@ -121,14 +129,14 @@ export function useSpread(workItemId: string | null) {
     setWhich("morning");
     setBlockPicks({});
     setPicked(null);
-    setEachMin("whole");
-    setTier("primary");
+    setEachMin(startEach);
+    setTier(startTier);
     setCarryOnState(
       workItemId
         ? readCarryOn(carryKey(source.scenario.name, workItemId))
         : true,
     );
-  }, [workItemId, source.scenario.name]);
+  }, [workItemId, source.scenario.name, startEach, startTier]);
 
   const pick: SpreadPick = which === "pick" ? { blocks: blockPicks } : which;
   const offeredOf = (p: SpreadPick) =>
@@ -221,6 +229,13 @@ export function useSpread(workItemId: string | null) {
   return {
     ready: item !== null && week !== undefined,
     item,
+    /** The week as the preview read it (the phone's times and free time, USE-78). */
+    days,
+    pick,
+    /** The item's client, for the phone's "Pool · <client> · <ID> · <size>". */
+    client:
+      pool.pool?.items.find((entry) => entry.item.id === workItemId)?.client ??
+      null,
     workLeftMin: left,
     setWorkLeftMin,
     which,

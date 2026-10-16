@@ -36,6 +36,10 @@ import {
 import { DAYS_SCENARIOS } from "./scenarios/set-up";
 import { SETTINGS_SCENARIOS } from "./scenarios/settings";
 import {
+  SPREAD_PHONE_SCENARIOS,
+  type SpreadPhoneScenarioName,
+} from "./scenarios/spread";
+import {
   GESTURE_SCENARIOS,
   STEP_AWAY_SCENARIOS,
   TODAY_DESK_SCENARIOS,
@@ -46,6 +50,7 @@ import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
 import { WEEK_SCENARIOS } from "./scenarios/week";
 import { SchedulePart, type SchedulePartState } from "./schedule-parts";
 import { SettingsClientsPart } from "./settings-parts";
+import { SpreadPhonePart } from "./spread-parts";
 import { TodayDeskPart } from "./today-desk-parts";
 import { TodoSheetPart } from "./todo-sheet-parts";
 import {
@@ -336,5 +341,13 @@ for (const state of Object.keys(BLOCK_VIEW_SCENARIOS)) {
 for (const state of Object.keys(POOL_SHEET_SCENARIOS)) {
   registerPart(state, () =>
     createElement(PoolSheetPart, { state: state as PoolSheetScenarioName }),
+  );
+}
+// USE-78: Spread's full sheet and its Days and tier page, on the phone.
+for (const state of Object.keys(SPREAD_PHONE_SCENARIOS)) {
+  registerPart(state, () =>
+    createElement(SpreadPhonePart, {
+      state: state as SpreadPhoneScenarioName,
+    }),
   );
 }

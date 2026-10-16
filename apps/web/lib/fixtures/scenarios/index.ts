@@ -26,6 +26,7 @@ import { RUNNING_SCENARIOS } from "./running";
 import { SCHEDULE_SCENARIOS } from "./schedule";
 import { SET_UP_SCENARIOS, type SetUpScenarioStart } from "./set-up";
 import { SETTINGS_SCENARIOS } from "./settings";
+import { SPREAD_PHONE_SCENARIOS } from "./spread";
 import {
   GESTURE_SCENARIOS,
   STEP_AWAY_SCENARIOS,
@@ -254,6 +255,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...POOL_SCENARIOS,
   // ---- The phone's pool sheet (USE-79): its tabs, filters, search, empty ----
   ...POOL_SHEET_SCENARIOS,
+  // ---- Spread on the phone (USE-78): the full sheet and Days and tier ----
+  ...SPREAD_PHONE_SCENARIOS,
   // ---- Linear, Google and clients (USE-56): off, a failed write, closed in Linear, clients ----
   ...INTEGRATION_SCENARIOS,
   // ---- Settings › Connections, clients on, and its two sheets (USE-86) ----
