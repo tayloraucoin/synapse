@@ -21,6 +21,7 @@ import {
   splitFrontmatter,
 } from "./lib/docs.ts";
 import { probeLayout } from "./lib/layout.ts";
+import { isBoardsIndex, isNarrative } from "./lib/specs.ts";
 import { loadToolkit } from "./lib/toolkit.ts";
 
 const INDEX = "docs/index.md";
@@ -291,8 +292,11 @@ function contractAndCitedSpec(): string[] {
 }
 const contractSpec = contractAndCitedSpec();
 const contractAndSpec = sum(contractSpec);
+// A critic never cites a narrative or a coverage index (the ledger, 2026-10-12).
 const surfaces = exists(toolkit.specsRoot)
-  ? listFiles(toolkit.specsRoot).filter((f) => /\/ux\/.+\.md$/.test(f))
+  ? listFiles(toolkit.specsRoot).filter(
+      (f) => /\/ux\/.+\.md$/.test(f) && !isNarrative(f) && !isBoardsIndex(f),
+    )
   : [];
 const citedSurface = largest(surfaces);
 const evaluatorBody = tokensOf(".claude/agents/vigil.md");

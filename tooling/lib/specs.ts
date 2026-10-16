@@ -48,7 +48,96 @@ export const SPEC_FILE_CAPS = {
   surface: 2000,
   overview: 1500,
   technical: 2000,
+  // The narrative (adaptation 2026-10-09) and the Paper ledger (2026-10-12).
+  narrative: 4000,
+  "surface-index": 2000,
+  state: 2000,
+  interaction: 2000,
+  "dev-note": 2000,
+  boards: 4000,
 } as const;
+export type SpecFileKind = keyof typeof SPEC_FILE_CAPS;
+
+/** An epic's ux/narrative.md or ux/narrative/<part>.md: read by a person, never promoted. */
+export const isNarrative = (rel: string) =>
+  /\/epics\/[^/]+\/ux\/narrative(\.md|\/[^/]+\.md)$/.test(rel);
+
+/** A coverage index, ux/boards/<page>.md or ux/boards/<page>/<row>.md: never promoted. */
+export const isBoardsIndex = (rel: string) =>
+  /\/epics\/[^/]+\/ux\/boards\/.+\.md$/.test(rel);
+
+/** A ux/ file's kind, worked out from its path alone (A10's caps, A8's rules). */
+export function uxKind(rel: string): SpecFileKind {
+  if (rel.endsWith("/technical.md")) return "technical";
+  if (isNarrative(rel)) return "narrative";
+  if (isBoardsIndex(rel)) return "boards";
+  if (path.posix.basename(rel) === "overview.md") return "overview";
+  if (/\/ux\/(.+\/)?states\/[^/]+\.md$/.test(rel)) return "state";
+  if (/\/ux\/interactions\//.test(rel)) return "interaction";
+  if (/\/ux\/dev-notes\//.test(rel)) return "dev-note";
+  if (path.posix.basename(rel) === "index.md") return "surface-index";
+  return "surface";
+}
+
+/** Every artboard on a coverage index has one of these (ux-boards.template.md). */
+export const BOARD_STATUSES = [
+  "specced",
+  "not picked",
+  "superseded",
+  "archived",
+  "note",
+  "dev note",
+  "row label",
+  "progress",
+  "safe to delete",
+] as const;
+
+export type BoardRow = {
+  line: number;
+  artboard: string;
+  status: string;
+  /** The carrier's path under the epic's ux/, or null for "—" or blank. */
+  carrier: string | null;
+  ruling: string;
+};
+
+const unquote = (cell: string) => cell.trim().replace(/^`(.*)`$/, "$1").trim();
+
+/** The rows of a coverage index's tables, read by their header names. */
+export function readBoardRows(text: string): BoardRow[] {
+  const rows: BoardRow[] = [];
+  let columns: string[] | null = null;
+  text.split("\n").forEach((raw, i) => {
+    const line = raw.trim();
+    if (!line.startsWith("|")) {
+      columns = null;
+      return;
+    }
+    const cells = line
+      .replace(/^\||\|$/g, "")
+      .split("|")
+      .map((c) => c.trim());
+    if (!columns) {
+      columns = cells.map((c) => c.toLowerCase());
+      return;
+    }
+    if (cells.every((c) => /^:?-+:?$/.test(c))) return;
+    const at = (name: string) => {
+      const index = columns!.indexOf(name);
+      return index === -1 ? "" : (cells[index] ?? "");
+    };
+    if (!columns.includes("artboard") || !columns.includes("status")) return;
+    const carrier = unquote(at("carried by"));
+    rows.push({
+      line: i + 1,
+      artboard: unquote(at("artboard")),
+      status: at("status").toLowerCase(),
+      carrier: carrier && carrier !== "—" && carrier !== "-" ? carrier : null,
+      ruling: at("ruling"),
+    });
+  });
+  return rows;
+}
 export const MAX_NON_NEGOTIABLES = 7;
 
 /** The sections every as-built carries (PR-15). Migrations and Test changes are added when the ticket has any. */

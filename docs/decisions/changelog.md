@@ -11,6 +11,10 @@ load_when:
 
 # Changelog
 
+## 2026-10-16 — SYN: check-specs knows the narrative and the ledger of the boards again (MIG-23)
+
+The narrative amendment (2026-10-09) and the Paper ledger amendment (2026-10-12) changed tracked tooling that was never committed, and those edits were lost; their entries, templates and fixtures survived untracked. `tooling/lib/specs.ts` and `check-specs.ts` rebuild the rules from the two entries and their ten fixtures: `uxKind` works out a file's kind from its path (narrative and boards 4,000 tokens; surface index, state, interaction and dev note 2,000), a narrative and a coverage index carry no `target:` and are never promoted, and `checkLedger` checks coverage both ways between `ux/boards/` and the files that carry each artboard. `budget.ts`'s critic row leaves out narratives and coverage indexes. The two entries gain `status: approved` frontmatter, so a contract can cite them. The prose of `docs/workflows/stages/ux.md`, `design.md`, `tracks/` and `glossary.md`, and the adaptation rows of `docs/pem/README.md`, were lost the same way and are not restored here.
+
 ## 2026-10-09 — SYN: PEM is the default for every shared file (audit tier A)
 
 Taylor ruled PEM the default for every file the two repos share; Synapse keeps an adjustment only where the app needs one. The migration had derived 16 shared files by keeping Synapse's text (rulings 42 let Synapse's own conventions govern its code). Tier A of `specs/_shared/audits/2026-10-09-pem-default.md` rewrites `AGENTS.md`, `CLAUDE.md`, `README.md`, `docs/README.md`, `docs/index.md` (PEM's seven-rung ladder), `.claude/rules/ts.md`, `ui.md`, `next.md`, `.claude/settings.json` (PEM's floor rows) and `tooling/tsconfig.json` from PEM's text with named adjustments. `ts.md` and `AGENTS.md` now send placement to `docs/engineering/codebase-conventions.md`, reversing rulings 42 in part; the record that supersedes record 0001 in part is still to be written (plan mode). The adjustments and the runbook finding: [`docs/pem/adaptations/2026-10-09-migration-kept-host-versions.md`](../pem/adaptations/2026-10-09-migration-kept-host-versions.md).

@@ -56,6 +56,7 @@ import {
   parseAsBuilt,
   q2ReviewerProblem,
   readContract,
+  readBoardRows,
   readItemState,
   readRepoText,
   readResults,
@@ -63,10 +64,16 @@ import {
   renderBrief,
   renderStatusFile,
   resultsPath,
+  BOARD_STATUSES,
+  isBoardsIndex,
+  isNarrative,
   SPEC_FILE_CAPS,
   statusPath,
   suggestReviewers,
+  uxKind,
   withoutApplied,
+  type BoardRow,
+  type SpecFileKind,
   type SpecsTree,
 } from "./lib/specs.ts";
 import { loadToolkit, type Toolkit } from "./lib/toolkit.ts";
@@ -289,28 +296,31 @@ function checkUx(tree: SpecsTree, report: Report) {
   for (const file of all.filter(
     (f) => /\/ux\/.+\.md$/.test(f) || /\/technical\.md$/.test(f),
   )) {
-    const text = readRepoText(file);
-    const tokens = estimateTokens(text);
-    const kind = file.endsWith("/technical.md")
-      ? "technical"
-      : path.posix.basename(file) === "overview.md"
-        ? "overview"
-        : "surface";
+    const tokens = estimateTokens(readRepoText(file));
+    const kind = uxKind(file);
     if (tokens > SPEC_FILE_CAPS[kind])
       report.errors.push(
-        `${file} is about ${tokens} tokens, over the ${SPEC_FILE_CAPS[kind]} cap for a ${kind} file (A10); split it${kind === "technical" ? " into technical/" : ""}`,
+        `${file} is about ${tokens} tokens, over the ${SPEC_FILE_CAPS[kind]} cap for ${/^[aeiou]/.test(kind) ? "an" : "a"} ${kind} file (A10); ${SPLIT_ADVICE[kind]}`,
       );
   }
   for (const epic of tree.epics) {
-    const proposals = all.filter(
+    const epicUx = all.filter(
       (f) => f.startsWith(`${epic.dir}/ux/`) && f.endsWith(".md"),
     );
+    // A narrative and a coverage index are never promoted: no target:, no promoted:.
+    for (const file of epicUx.filter(isNarrative)) {
+      const fm = readFrontmatter(file);
+      if (fm && "target" in fm)
+        report.errors.push(
+          `${file}: a narrative carries no target:; it is read by a person and never promoted (A8)`,
+        );
+      if (!fm || !["draft", "approved"].includes(String(fm.status)))
+        report.errors.push(`${file}: status is draft or approved (A8)`);
+    }
+    checkLedger(epic.dir, epicUx, report);
+    const proposals = epicUx.filter((f) => !isNarrative(f) && !isBoardsIndex(f));
     for (const file of proposals) {
-      const raw = splitFrontmatter(readRepoText(file)).raw;
-      const fm = (raw ? YAML.parse(raw) : null) as Record<
-        string,
-        unknown
-      > | null;
+      const fm = readFrontmatter(file);
       const expected = `${tree.specsRoot}/${epic.app}/ux/${file.slice(`${epic.dir}/ux/`.length)}`;
       if (!fm || fm.target !== expected)
         report.errors.push(
@@ -369,6 +379,176 @@ function checkUx(tree: SpecsTree, report: Report) {
   }
 }
 
+/** How a file past its cap is split; never trimmed (A10; the ledger, 2026-10-12). */
+const SPLIT_ADVICE: Record<SpecFileKind, string> = {
+  surface: "split it",
+  overview: "split it",
+  technical: "split it into technical/",
+  narrative: "split it into ux/narrative/<part>.md",
+  "surface-index":
+    "move detail into its states/ and interactions/, or a file beside index.md; never trim it",
+  state: "split it by width; never trim it",
+  interaction: "split it by step into files in its interactions/<flow>/ folder; never trim it",
+  "dev-note": "split it into parts; never trim it",
+  boards: "split it by row into ux/boards/<page>/<row>.md",
+};
+
+function readFrontmatter(file: string): Record<string, unknown> | null {
+  const raw = splitFrontmatter(readRepoText(file)).raw;
+  const fm: unknown = raw ? YAML.parse(raw) : null;
+  return fm && typeof fm === "object" ? (fm as Record<string, unknown>) : null;
+}
+
+const D_LINE = /\bD-[A-Z][A-Z0-9]*-\d+/;
+const SPECCED_NAME = /^[^/]+ \/ [^/]+ \/ \d+ \/ (light|dark)$/;
+
+/** The artboards a spec file lists as its own: boards:[].name and dev_note:. */
+function listedArtboards(fm: Record<string, unknown> | null) {
+  const listed: { name: string; page: string | null; field: string }[] = [];
+  if (!fm) return listed;
+  if (Array.isArray(fm.boards))
+    for (const board of fm.boards as unknown[]) {
+      const entry = (board ?? {}) as Record<string, unknown>;
+      if (entry.name)
+        listed.push({
+          name: String(entry.name),
+          page: entry.page ? String(entry.page) : null,
+          field: "boards:",
+        });
+    }
+  for (const note of [fm.dev_note].flat())
+    if (typeof note === "string" && note.trim())
+      listed.push({ name: note.trim(), page: null, field: "dev_note:" });
+  return listed;
+}
+
+/**
+ * The ledger of the boards (adaptation 2026-10-12): coverage both ways between
+ * an epic's coverage indexes (ux/boards/) and the files that carry each artboard.
+ */
+function checkLedger(epicDir: string, epicUx: string[], report: Report) {
+  const ux = `${epicDir}/ux/`;
+  const indexes = epicUx.filter(isBoardsIndex);
+  const carriers = epicUx.filter((f) => !isNarrative(f) && !isBoardsIndex(f));
+  const listedBy = new Map<string, ReturnType<typeof listedArtboards>>();
+  for (const file of carriers) {
+    const fm = readFrontmatter(file);
+    listedBy.set(file, listedArtboards(fm));
+    const kind = uxKind(file);
+    if (
+      (kind === "state" || kind === "interaction") &&
+      !Array.isArray(fm?.boards)
+    )
+      report.errors.push(
+        `${file}: a ${kind} lists the artboards it carries in boards:, or boards: [] with not_drawn: (the ledger of the boards)`,
+      );
+    else if (
+      kind === "state" &&
+      (fm!.boards as unknown[]).length === 0 &&
+      !String(fm!.not_drawn ?? "").trim()
+    )
+      report.errors.push(
+        `${file}: boards: [] says why in not_drawn: (the ledger of the boards)`,
+      );
+  }
+
+  // Every row on every index: a known status, and what that status asks for.
+  const indexed: { page: string; row: BoardRow; index: string }[] = [];
+  for (const index of indexes) {
+    const fm = readFrontmatter(index);
+    if (fm && "target" in fm)
+      report.errors.push(
+        `${index}: a coverage index carries no target:; it records the Paper page and is never promoted (A8)`,
+      );
+    if (!fm || !String(fm.page ?? "").trim())
+      report.errors.push(
+        `${index}: a coverage index names its Paper page in page:`,
+      );
+    const page = String(fm?.page ?? "");
+    for (const row of readBoardRows(readRepoText(index))) {
+      const at = `${index}:${row.line}`;
+      indexed.push({ page, row, index });
+      if (!(BOARD_STATUSES as readonly string[]).includes(row.status)) {
+        report.errors.push(
+          `${at}: \`${row.artboard}\` has status "${row.status}"; a status is one of ${BOARD_STATUSES.join(", ")}`,
+        );
+        continue;
+      }
+      if (row.status === "specced" && !SPECCED_NAME.test(row.artboard))
+        report.errors.push(
+          `${at}: \`${row.artboard}\` is specced, so its name reads <surface> / <state> / <width> / <scheme>; rename the artboard in Paper and here`,
+        );
+      if (row.status === "not picked" && !D_LINE.test(row.ruling))
+        report.errors.push(
+          `${at}: \`${row.artboard}\` is not picked and cites no D-line in Ruling; name the decision that chose another`,
+        );
+      if (
+        row.status === "superseded" &&
+        (!D_LINE.test(row.ruling) || !row.carrier)
+      )
+        report.errors.push(
+          `${at}: \`${row.artboard}\` is superseded; name the ruling (a D-line) and, in Carried by, the carrier of its replacement`,
+        );
+      if (row.carrier && !fileExists(`${ux}${row.carrier}`))
+        report.errors.push(
+          `${at}: \`${row.artboard}\` is carried by ${row.carrier}, which is not a file under ${ux}`,
+        );
+      if (row.status !== "specced" && row.status !== "dev note") continue;
+      if (!row.carrier) {
+        report.errors.push(
+          `${at}: \`${row.artboard}\` is ${row.status}; name the file that carries it in Carried by`,
+        );
+        continue;
+      }
+      const carrier = `${ux}${row.carrier}`;
+      const field = row.status === "specced" ? "boards:" : "dev_note:";
+      const lists = (listedBy.get(carrier) ?? []).some(
+        (l) => l.name === row.artboard && (!l.page || !page || l.page === page),
+      );
+      if (fileExists(carrier) && !lists)
+        report.errors.push(
+          `${at}: \`${row.artboard}\` is ${row.status}, carried by ${row.carrier}, which does not list it under ${field}`,
+        );
+    }
+  }
+
+  // Every artboard a carrier lists is on an index, and only one file claims it.
+  const claimedBy = new Map<string, string>();
+  for (const [file, listed] of listedBy)
+    for (const board of listed) {
+      const onIndex = indexed.some(
+        ({ page, row }) =>
+          row.artboard === board.name && (!board.page || page === board.page),
+      );
+      if (!onIndex)
+        report.errors.push(
+          `${file} lists \`${board.name}\`${board.page ? ` (${board.page})` : ""} under ${board.field}, which no coverage index under ${ux}boards/ names`,
+        );
+      const key = `${board.page ?? ""}\u0000${board.name}`;
+      const other = claimedBy.get(key);
+      if (other && other !== file)
+        report.errors.push(
+          `\`${board.name}\` is claimed by both ${other} and ${file}; one file carries an artboard, the others cite it`,
+        );
+      else claimedBy.set(key, file);
+    }
+}
+
+/** A flat <surface>.md and a <surface>/ folder never coexist (the ledger, 2026-10-12). */
+function checkFlatAndFolder(tree: SpecsTree, report: Report) {
+  const all = fileExists(tree.specsRoot) ? listFiles(tree.specsRoot) : [];
+  const dirs = new Set(all.map((f) => path.posix.dirname(f)));
+  for (const file of all.filter(
+    (f) => /\/ux\/.+\.md$/.test(f) && !isNarrative(f) && !isBoardsIndex(f),
+  )) {
+    const folder = file.slice(0, -".md".length);
+    if ([...dirs].some((d) => d === folder || d.startsWith(`${folder}/`)))
+      report.errors.push(
+        `${file} sits beside ${folder}/; a surface is one flat file or a folder with index.md, never both`,
+      );
+  }
+}
+
 function checkTree(
   toolkit: Toolkit,
   specsRoot: string,
@@ -379,6 +559,7 @@ function checkTree(
   report.errors.push(...tree.problems);
   checkItems(tree, toolkit, report);
   checkUx(tree, report);
+  checkFlatAndFolder(tree, report);
   if (options.status && (tree.items.length > 0 || tree.epics.length > 0)) {
     const rel = statusPath(specsRoot);
     if (!fileExists(rel) || readRepoText(rel) !== renderStatusFile(tree))

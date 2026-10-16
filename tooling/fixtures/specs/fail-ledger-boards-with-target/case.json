@@ -1,0 +1,4 @@
+{
+  "expect": "fail",
+  "message": "a coverage index carries no target:"
+}
