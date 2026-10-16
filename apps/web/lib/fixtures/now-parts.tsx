@@ -36,7 +36,12 @@ export type NowPartState =
   | "not-done-open"
   | "not-done-do-now"
   | "last-block"
-  | "all-done";
+  | "all-done"
+  // USE-110: wave 2's loose ends on Now.
+  | "ready-go-not-yet-started"
+  | "firing-still-firing"
+  | "wind-down-journal"
+  | "wind-down-journal-empty";
 
 export function NowPart({ state }: { state: NowPartState }) {
   return (

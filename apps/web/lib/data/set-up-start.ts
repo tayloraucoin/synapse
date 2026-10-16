@@ -47,3 +47,15 @@ export interface SetUpScenarioStart {
     add?: boolean;
   };
 }
+
+/**
+ * Copy from's step on load: the scenario's, else the picker when the URL
+ * asks for it (`daysRoute({ copy: "picker" })`, Review the day's Copy
+ * another day, USE-110).
+ */
+export function openingCopyStep(
+  start: Pick<SetUpScenarioStart, "copy"> | undefined,
+  param: string | null,
+): SetUpScenarioStart["copy"] {
+  return start?.copy ?? (param === "picker" ? "picker" : undefined);
+}

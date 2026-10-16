@@ -25,6 +25,10 @@
  * deletes at once with no confirm, the to-do and the slots that took it, and
  * closes, Undo putting both back. The At row's Pick a day… opens the same
  * step for the reminder's day alone. Past days are closed in both.
+ *
+ * REPEATS › CUSTOM… (USE-110) opens USE-47's CustomRecurrenceStep in the
+ * sheet, back on the left, no times and no usual week; its Done stores one
+ * rule on the to-do through `update`'s `rrule`, as a block's (D-USE-80).
  */
 import * as React from "react";
 import type { IconValue } from "@syn/types";
@@ -32,6 +36,7 @@ import {
   Button,
   CloseIcon,
   cn,
+  DisclosureIcon,
   EmojiSlot,
   MoreIcon,
   NotSavedIcon,
@@ -57,9 +62,16 @@ import type { TodoInput, TodoRecord } from "@syn/validators";
 import { useDataSource } from "@/lib/data/source";
 import { useTodoRecord, useTodos } from "@/lib/data/use-todos";
 import { useReminderAvailability } from "@/lib/pwa/reminder-availability";
+import {
+  CUSTOM_RECURRENCE_COPY,
+  CustomRecurrenceStep,
+} from "../custom-recurrence";
 import { IconPickerStep } from "../icon-picker-step";
 import { TODO_SHEET_COPY as COPY } from "./copy";
 import {
+  customRepeatForm,
+  customRepeatLabel,
+  customRepeatWrite,
   giveADayWrite,
   notesWrite,
   reminderSwitchWrite,
@@ -90,7 +102,7 @@ type Field =
   "title" | "icon" | "day" | "type" | "repeats" | "reminder" | "notes";
 
 /** The fields, or a step in the sheet's place. */
-type Step = "fields" | "icon" | "give-a-day" | "remind-on";
+type Step = "fields" | "icon" | "give-a-day" | "remind-on" | "custom";
 
 const ROW =
   "border-hairline flex min-h-(--row-min) items-center gap-(--space-3) border-b";
@@ -98,7 +110,7 @@ const ROW =
 /** How long a capture waits for the sheet to rest before opening a list. */
 const CAPTURE_SETTLE_MS = 600;
 
-/** The value the Repeats select shows for a stored rule, or a custom one's. */
+/** The Custom… row's value: it opens the custom step (USE-110). */
 const CUSTOM = "custom";
 
 function iconName(icon: IconValue | null): string | null {
@@ -136,6 +148,7 @@ export function TodoSheet({
   const [notesDraft, setNotesDraft] = React.useState<string | null>(null);
   const [creating, setCreating] = React.useState(false);
   const titleRef = React.useRef<HTMLInputElement>(null);
+  const repeatsRef = React.useRef<HTMLButtonElement>(null);
 
   // A capture opens a select inside the sheet (`view.open`).
   const startOpen = source.scenario.view?.open;
@@ -149,6 +162,7 @@ export function TodoSheet({
       if (startOpen === "todo-type") setTypeOpen(true);
       if (startOpen === "todo-repeats") setRepeatsOpen(true);
       if (startOpen === "todo-give-a-day") setStep("give-a-day");
+      if (startOpen === "todo-custom") setStep("custom");
     }, CAPTURE_SETTLE_MS);
     return () => window.clearTimeout(timer);
   }, [open, hasTodo, startOpen]);
@@ -316,11 +330,17 @@ export function TodoSheet({
             option.rrule !== null &&
             ruleBody(option.rrule) === ruleBody(todo.rrule!),
         );
-  const repeatValue = repeatIndex === -1 ? CUSTOM : String(repeatIndex);
+  // A custom rule picks no row, so Custom… always opens the step again.
+  const repeatValue = repeatIndex === -1 ? "" : String(repeatIndex);
   const repeatLabel =
     repeatIndex === -1
-      ? COPY.customRepeat
+      ? customRepeatLabel(todo!.rrule!, COPY.customRepeat)
       : (repeatOptions[repeatIndex]?.label ?? "");
+
+  function backToRepeats() {
+    setStep("fields");
+    requestAnimationFrame(() => repeatsRef.current?.focus());
+  }
 
   const reminderOn = todo?.remindAt != null;
   const available = reminder.known && reminder.availability === "available";
@@ -395,7 +415,7 @@ export function TodoSheet({
       classes={{
         // A step brings its own back link: no × row above it.
         header:
-          step === "give-a-day" || step === "remind-on"
+          step === "give-a-day" || step === "remind-on" || step === "custom"
             ? "hidden"
             : "items-center pt-(--space-2)",
         body: "pt-0",
@@ -406,7 +426,22 @@ export function TodoSheet({
         {announce}
       </span>
 
-      {step === "give-a-day" || step === "remind-on" ? (
+      {step === "custom" ? (
+        <CustomRecurrenceStep
+          caption={CUSTOM_RECURRENCE_COPY.caption(title, COPY.customSheet)}
+          backTo={title || COPY.title}
+          startKey={repeatDay}
+          value={customRepeatForm(todo?.rrule ?? null, repeatDay)}
+          usualWeek={false}
+          onBack={backToRepeats}
+          onDone={(form) => {
+            backToRepeats();
+            if (todo === null) return;
+            const patch = customRepeatWrite(form, repeatDay, todo);
+            if (patch) void save("repeats", patch);
+          }}
+        />
+      ) : step === "give-a-day" || step === "remind-on" ? (
         <PickADayStep
           title={
             step === "give-a-day" ? COPY.step.giveADay : COPY.step.remindOn
@@ -539,16 +574,24 @@ export function TodoSheet({
               onOpenChange={setRepeatsOpen}
               disabled={inert}
               onValueChange={(next) => {
-                if (next === repeatValue || next === CUSTOM) return;
+                if (next === CUSTOM) {
+                  setStep("custom");
+                  return;
+                }
+                if (next === repeatValue) return;
                 const rrule = repeatOptions[Number(next)]?.rrule ?? null;
                 void save("repeats", { rrule });
               }}
             >
               <SelectTrigger
+                ref={repeatsRef}
                 aria-label={COPY.repeatsName(repeatLabel)}
                 className="w-fit min-h-(--target)"
               >
-                <SelectValue />
+                {/* A custom rule picks no row: Radix shows the placeholder. */}
+                <SelectValue placeholder={repeatLabel}>
+                  {repeatLabel}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent
                 position="popper"
@@ -561,10 +604,16 @@ export function TodoSheet({
                     {option.label}
                   </SelectItem>
                 ))}
-                {repeatIndex === -1 ? (
-                  <SelectItem value={CUSTOM}>{COPY.customRepeat}</SelectItem>
-                ) : null}
                 <SelectSeparator />
+                <SelectItem value={CUSTOM}>
+                  <span className="flex flex-1 items-center justify-between gap-(--space-2)">
+                    {COPY.custom}
+                    <DisclosureIcon
+                      aria-hidden="true"
+                      className="text-muted-foreground size-4"
+                    />
+                  </span>
+                </SelectItem>
                 <Text
                   as="p"
                   variant="caption"

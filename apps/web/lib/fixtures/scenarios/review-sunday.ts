@@ -21,7 +21,7 @@ import { checklistDayRecords, SCHEDULE_IDS } from "./schedule";
  */
 
 /** The Sunday as Review the day finds it: oriented, not readied. */
-function sundayRecords(
+export function sundayRecords(
   shape: (records: FixtureRecords) => FixtureRecords,
 ): FixtureRecords {
   const records = checklistDayRecords();
@@ -54,7 +54,7 @@ const making = () =>
 
 const withPlans = () => sundayRecords((records) => records);
 
-function sunday(
+export function sunday(
   name: string,
   records: () => FixtureRecords,
   extra: Partial<Scenario> = {},

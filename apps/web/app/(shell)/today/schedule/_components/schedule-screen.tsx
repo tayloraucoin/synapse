@@ -123,7 +123,7 @@ export function ScheduleScreen() {
           weekday={weekdayForDayKey(dateKey)}
           checklist={{ href: todayReviewRoute() }}
           blocksHref={daysRoute({ day: dateKey })}
-          copyHref={daysRoute({ day: dateKey })}
+          copyHref={daysRoute({ day: dateKey, copy: "picker" })}
         />
       ) : null}
 

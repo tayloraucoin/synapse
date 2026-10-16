@@ -23,6 +23,7 @@ import {
   RunningGroup,
   SortableItemRows,
 } from "@/components/planner";
+import { isJournalItem } from "@/lib/data/journal-row";
 import type { NowFooter } from "@/lib/data/now-end";
 import { isTimedDone, runningGroup, useRunningView } from "@/lib/data/running";
 import { useDataSource, useIsOffline } from "@/lib/data/source";
@@ -39,6 +40,7 @@ import {
 } from "@/lib/data/use-now";
 import {
   itemSheetRoute,
+  journalRoute,
   todayBlockRoute,
   todayScheduleRoute,
 } from "@/lib/routes";
@@ -46,6 +48,7 @@ import { BeforeGoList } from "./before-go-list";
 import { nowBlockMenuRows } from "./block-menu";
 import { NOW_COPY as COPY, TOOK_LINE_MS } from "./copy";
 import { EndBreakFooter } from "./end-break-footer";
+import { NotYetStartedLine } from "./not-yet-started-line";
 import { NowCloseCard } from "./now-close-card";
 import { NowCurrentCard } from "./now-current-card";
 import { NowEmpty } from "./now-empty";
@@ -53,6 +56,7 @@ import { NowMealTopics } from "./now-meal-topics";
 import { NowRunningRows } from "./now-running-rows";
 import { NowTodosTray } from "./now-todos-tray";
 import { RUNNING_COPY } from "./running-copy";
+import { StillFiring } from "./still-firing";
 import { TimeTakenSheet } from "./time-taken-sheet";
 import { TimedTook } from "./timed-took";
 import { TookLine } from "./took-line";
@@ -344,6 +348,7 @@ export function NowScreen() {
         running={running}
         onPlainDone={markDone}
         onTimedDone={markTimedDone}
+        onOpenJournal={isJournalItem(item.title) ? openJournal : undefined}
         below={notSavedUnder(item)}
       />
     );
@@ -378,6 +383,11 @@ export function NowScreen() {
     });
   }
 
+  /** The Wind-down block's Journal row: Close the day (USE-110, DYN-18). */
+  function openJournal() {
+    router.push(journalRoute(dateKey));
+  }
+
   /** Swap and Edit open the Item sheet over Now (its own ticket builds it). */
   function openItemSheet(item: NowItemView, swap: boolean) {
     const here = `${window.location.pathname}${window.location.search}`;
@@ -405,12 +415,21 @@ export function NowScreen() {
         noEmoji={item.source !== "todo"}
         fadeChecked
         checkLabel={COPY.boxName(item.title, item.lengthMin)}
-        openLabel={item.done ? undefined : COPY.rowName(item.title)}
+        // A ticked Journal row still opens Close the day (USE-110).
+        openLabel={
+          isJournalItem(item.title)
+            ? COPY.journalRowName(item.title)
+            : item.done
+              ? undefined
+              : COPY.rowName(item.title)
+        }
         onCheckedChange={(_, checked) =>
           checked ? markDone(item) : markUndone(item)
         }
         onOpen={() => {
-          if (!item.done) setChosenId(item.id);
+          // The Journal row opens Close the day, never the card (USE-110).
+          if (isJournalItem(item.title)) openJournal();
+          else if (!item.done) setChosenId(item.id);
         }}
         trailing={
           timed && item.tookMin !== null && item.lengthMin !== null ? (
@@ -587,6 +606,12 @@ export function NowScreen() {
               }
             />
           </div>
+          {block.notYetStarted ? (
+            <NotYetStartedLine words={COPY.startsAt(block.startsAt)} />
+          ) : null}
+          {block.firingFrom ? (
+            <StillFiring dateKey={dateKey} from={block.firingFrom} />
+          ) : null}
 
           {block.form === "checklist" || block.form === "all-day-checklist" ? (
             <ChecklistRows

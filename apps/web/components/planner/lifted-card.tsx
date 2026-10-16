@@ -8,7 +8,9 @@ import { HUE_CHIP, type BlockHue } from "./block-hue";
  * LiftedCard — Now's current item (USE-16; D-USE-7, D-USE-26): a 40 px icon
  * tile on the kind's chip fill, the verdigris dot and the name, the length
  * and planned start, then Start and Done side by side. The card itself is
- * the mark of "this moment"; the dot never stands alone. Props only.
+ * the mark of "this moment"; the dot never stands alone. Before the block's
+ * time (`early`, ready-go/states/not-yet-started.md) the dot is a hollow
+ * verdigris ring, and fills once the time arrives (USE-110). Props only.
  *
  * From 768 the buttons keep a fixed 160 and sit right-aligned (D-USE-39).
  *
@@ -22,6 +24,8 @@ export interface LiftedCardProps {
   hue: BlockHue | "neutral";
   /** "10 min · 7:10". */
   meta: string;
+  /** Readied before the block's time: the dot hollow (USE-110). */
+  early?: boolean;
   /** The group's name: "Meditate, now". */
   label: string;
   /** Null: no Start (a meal), and Done takes the full width. */
@@ -40,7 +44,8 @@ export function LiftedCardHeader({
   icon,
   hue,
   meta,
-}: Pick<LiftedCardProps, "title" | "icon" | "hue" | "meta">) {
+  early = false,
+}: Pick<LiftedCardProps, "title" | "icon" | "hue" | "meta" | "early">) {
   return (
     <div className="flex items-center gap-(--space-3)">
       <span
@@ -56,7 +61,11 @@ export function LiftedCardHeader({
         <div className="flex items-center gap-(--space-2)">
           <span
             aria-hidden="true"
-            className="bg-accent-mark size-2 shrink-0 rounded-full"
+            data-dot={early ? "hollow" : "filled"}
+            className={cn(
+              "size-2 shrink-0 rounded-full",
+              early ? "border-accent-mark border" : "bg-accent-mark",
+            )}
           />
           <Text as="p" variant="row-title" weight={600} truncate>
             {title}
@@ -75,6 +84,7 @@ export function LiftedCard({
   icon,
   hue,
   meta,
+  early = false,
   label,
   start,
   done,
@@ -87,7 +97,13 @@ export function LiftedCard({
       data-lifted-card=""
       className={cn("shadow-none", className)}
     >
-      <LiftedCardHeader title={title} icon={icon} hue={hue} meta={meta} />
+      <LiftedCardHeader
+        title={title}
+        icon={icon}
+        hue={hue}
+        meta={meta}
+        early={early}
+      />
       <div
         className={cn(
           "grid gap-(--space-2)",

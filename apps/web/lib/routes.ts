@@ -226,10 +226,19 @@ export function reviewRoute(): string {
  * Set my days (USE-39): the avatar menu's first row opens it on the week.
  * `week` is "usual", "this" or an ISO week key; `day` opens one day, as its
  * weekday (Monday 0, the New block sheet's own param) or a date key, which
- * names its week too.
+ * names its week too. `copy: "picker"` lands on that day with Copy from's
+ * picker open (USE-110: Review the day's Copy another day, D-USE-68).
  */
+/** Set my days' param that opens Copy from's picker on landing. */
+export const DAYS_COPY_PARAM = "copy";
+
 export function daysRoute(
-  params: { week?: string; day?: string | number; block?: string } = {},
+  params: {
+    week?: string;
+    day?: string | number;
+    block?: string;
+    copy?: "picker";
+  } = {},
 ): string {
   const query = new URLSearchParams();
   if (params.week) query.set("week", params.week);
@@ -238,6 +247,7 @@ export function daysRoute(
   }
   // Open This week scrolls to a block (USE-37) [ASSUMPTION: `&block=`].
   if (params.block) query.set("block", params.block);
+  if (params.copy) query.set(DAYS_COPY_PARAM, params.copy);
   const search = query.toString();
   return search ? `/days?${search}` : "/days";
 }

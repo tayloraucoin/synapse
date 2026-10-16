@@ -41,8 +41,12 @@ export const TODO_SHEET_COPY = {
   repeatsName: (label: string) => `Repeats, ${label}`,
   repeatsNote:
     "A repeat comes back to the tray when it's due, after this one is done.",
-  /** A rule the list does not make (Custom… is its own ticket's). */
+  /** A rule the list does not make, when it cannot be read in words. */
   customRepeat: "Custom repeat",
+  /** The last row: opens the custom step (USE-110). */
+  custom: "Custom…",
+  /** The custom step's caption: "Call the mechanic · To-do". */
+  customSheet: "To-do",
   reminder: "Reminder",
   reminderOff: "Off",
   reminderOn: "On: a notification at the time below",

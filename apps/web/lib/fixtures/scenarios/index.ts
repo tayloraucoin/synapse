@@ -12,6 +12,7 @@ import { CLOSE_THE_DAY_SCENARIOS } from "./close-the-day";
 import { FROM_LINEAR_SCENARIOS } from "./from-linear";
 import { INTEGRATION_SCENARIOS } from "./integrations";
 import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
+import { LOOSE_END_SCENARIOS } from "./loose-ends";
 import { MOVE_TO_SCENARIOS } from "./move-to";
 import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
 import { NEW_BLOCK_SCENARIOS, type NewBlockScenarioStart } from "./new-block";
@@ -256,6 +257,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   // ---- Now's To-dos block and system states (USE-21) ----
   ...NOW_SYSTEM_SCENARIOS,
   ...NOW_END_SCENARIOS,
+  // ---- Wave 2's loose ends (USE-110) ----
+  ...LOOSE_END_SCENARIOS,
   ...ORIENT_SCENARIOS,
   // ---- The avatar menu and the Install sheet (USE-83) ----
   ...ACCOUNT_SCENARIOS,

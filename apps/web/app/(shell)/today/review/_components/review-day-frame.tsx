@@ -328,7 +328,7 @@ export function ReviewDayFrame() {
               }}
               pending={checklistDay.make.isPending || making}
               blocksHref={daysRoute({ day: dateKey })}
-              copyHref={daysRoute({ day: dateKey })}
+              copyHref={daysRoute({ day: dateKey, copy: "picker" })}
               className="pt-(--space-3)"
             />
           ) : editing ? (

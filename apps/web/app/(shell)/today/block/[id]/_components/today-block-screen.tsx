@@ -34,6 +34,7 @@ import {
   type BlockViewBody,
 } from "@/components/planner/block-view";
 import { IconPickerStep } from "@/components/planner/icon-picker-step";
+import { isJournalItem, withJournalTick } from "@/lib/data/journal-row";
 import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { useBlockDayWrites } from "@/lib/data/use-block-day-writes";
 import {
@@ -41,12 +42,14 @@ import {
   useBlockView,
   type BlockViewItem,
 } from "@/lib/data/use-block-view";
+import { useJournalWritten } from "@/lib/data/use-journal";
 import { useTodayKey } from "@/lib/data/use-morning";
 import { useToday } from "@/lib/data/use-today";
 import { useTodayBlockLook } from "@/lib/data/use-today-block-look";
 import { useNow as useMinute } from "@/lib/hooks/use-now";
 import {
   itemSheetRoute,
+  journalRoute,
   TODAY_BLOCK_FROM_PARAM,
   todayReviewRoute,
   todayRoute,
@@ -210,7 +213,9 @@ export function TodayBlockScreen({ blockId }: { blockId: string }) {
       ? inOrderOf(rows, order)
       : { items: rows.items, reflow: rows.reflow }
     : null;
-  const items = shown?.items ?? [];
+  // The Journal row ticks itself while the journal holds an answer (USE-110).
+  const journalWrittenToday = useJournalWritten(date);
+  const items = withJournalTick(shown?.items ?? [], journalWrittenToday);
 
   function check(item: BlockViewItem, done: boolean) {
     void writes.check(item, done);
@@ -374,7 +379,12 @@ export function TodayBlockScreen({ blockId }: { blockId: string }) {
               <button
                 type="button"
                 data-row-open
-                onClick={() => openItemSheet(row, false)}
+                onClick={() =>
+                  // The Journal row opens Close the day, never the Item sheet.
+                  isJournalItem(row.title)
+                    ? router.push(journalRoute(date))
+                    : openItemSheet(row, false)
+                }
                 className="max-w-full truncate rounded-(--radius-control) text-start text-(length:--fs-body) outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {row.title}

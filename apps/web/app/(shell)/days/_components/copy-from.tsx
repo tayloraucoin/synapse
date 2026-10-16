@@ -1,10 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { parseAsString, useQueryState } from "nuqs";
 import { Button, CopyFromIcon, Text } from "@syn/ui";
 import { firstFreeTime } from "@syn/utils";
 import { CopyPicker, DayStrip, type CopyPickerRow } from "@/components/planner";
-import type { SetUpScenarioStart } from "@/lib/data/set-up-start";
+import {
+  openingCopyStep,
+  type SetUpScenarioStart,
+} from "@/lib/data/set-up-start";
 import {
   copyHelper,
   copySources,
@@ -23,6 +27,7 @@ import type { SetUpDay } from "@/lib/data/use-set-up-day";
 import { useWeek } from "@/lib/data/use-week";
 import type { DayRef } from "@/lib/data/week-records";
 import { useUndoToast } from "@/lib/hooks/use-undo-toast";
+import { DAYS_COPY_PARAM } from "@/lib/routes";
 import { DAYS_COPY as COPY } from "./copy";
 import { DayAsk } from "./day-parts";
 
@@ -157,17 +162,25 @@ export function useCopyFrom({
       .catch(() => {});
   };
 
-  // A frame's step open on load (`?state=`), once the week has read.
+  // A frame's step open on load (`?state=`), or the picker Review the
+  // day's Copy another day asks for (`&copy=picker`, USE-110), once the
+  // week has read. The param goes once used, so Back does not reopen it.
+  const [copyParam, setCopyParam] = useQueryState(
+    DAYS_COPY_PARAM,
+    parseAsString,
+  );
+  const step = openingCopyStep(start, copyParam);
   const staged = React.useRef(false);
   React.useEffect(() => {
-    if (staged.current || !ready || days.length === 0 || !start?.copy) return;
+    if (staged.current || !ready || days.length === 0 || !step) return;
     staged.current = true;
-    const from = days[start.copyFrom ?? 0];
-    if (start.copy === "picker") setPicker("days");
-    else if (start.copy === "saved") setPicker("blocks");
-    else if (start.copy === "replace" && from) setAsking(from);
-    else if (start.copy === "copied" && from) copy(from);
-  }, [ready, days, start, copy]);
+    const from = days[start?.copyFrom ?? 0];
+    if (step === "picker") setPicker("days");
+    else if (step === "saved") setPicker("blocks");
+    else if (step === "replace" && from) setAsking(from);
+    else if (step === "copied" && from) copy(from);
+    if (copyParam !== null) void setCopyParam(null);
+  }, [ready, days, start, step, copy, copyParam, setCopyParam]);
 
   const dayRows: CopyPickerRow[] = sources.map((other) => ({
     key: String(other.weekday),

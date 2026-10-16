@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { JournalEntryRecord, JournalSaveInput } from "@syn/validators";
 import type { JournalRecords } from "./journal-records";
+import { journalWritten } from "./journal-row";
 import { useDataSource } from "./source";
 
 /**
@@ -52,4 +53,20 @@ export function useJournal(dateKey: string) {
     return mutation.mutateAsync({ key, value });
   }
   return { query, save };
+}
+
+/**
+ * Whether the date's journal holds any answer (USE-110): the Journal row's
+ * tick on Now and in Block view. The same query as Close the day's, so a
+ * save there ticks the row here; false while it reads or fails.
+ */
+export function useJournalWritten(dateKey: string): boolean {
+  const source = useDataSource();
+  const query = useQuery<JournalRecords, Error, boolean>({
+    queryKey: journalQueryKey(source.scenario.name, dateKey),
+    queryFn: () => source.server.readJournal(dateKey),
+    select: (records) => journalWritten(records.entry),
+    retry: false,
+  });
+  return query.data ?? false;
 }

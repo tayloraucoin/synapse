@@ -57,6 +57,8 @@ export const NOW_COPY = {
   liftedName: (title: string) => `${title}, now`,
   boxName: (title: string, min: number | null) =>
     min === null ? title : `${title}, ${min} min`,
+  /** The Journal row's name: it opens Close the day (USE-110). */
+  journalRowName: (title: string) => `${title}, open Close the day`,
   rowName: (title: string) => `${title}, make current`,
   gripName: (title: string) => `Reorder ${title}`,
   listName: (block: string) => `${block}, in order`,
@@ -80,6 +82,26 @@ export const NOW_COPY = {
   seeTheWholeDay: "See the whole day",
   /** Behind: one quiet line, never a word for late (product rules). */
   plannedToEnd: (endsAt: string) => `Planned to end at ${clockLabel(endsAt)}`,
+  /** Work's firing items on the next block's Now (firing.md step 5, D-USE-57). */
+  stillFiring: {
+    heading: (from: string) => `Still firing, from ${from}`,
+    /**
+     * "Tap the mark when it's back; it waits in Primary for the 13:00 Work
+     * block. Done works from here too." Several wait in their own tiers.
+     */
+    line: (tier: string | null, from: string, nextAt: string | null) => {
+      const where =
+        tier === null ? "they wait in their tiers" : `it waits in ${tier}`;
+      const until =
+        nextAt === null ? "" : ` for the ${clockLabel(nextAt)} ${from} block`;
+      return `Tap the mark when it's back; ${where}${until}. Done works from here too.`;
+    },
+    done: "Done",
+    doneName: (title: string) => `Done, ${title}`,
+  },
+  /** Readied before the block's time (not-yet-started.md) [placeholder]. */
+  startsAt: (startsAt: string) =>
+    `Starts at ${clockLabel(startsAt)}. Anything can be done early.`,
   announceBehind: (block: string, endsAt: string) =>
     `${block} was planned to end at ${clockLabel(endsAt)}.`,
   /** "10:00 to 13:00 · Checklist". */

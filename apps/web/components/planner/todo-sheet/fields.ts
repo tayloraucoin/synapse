@@ -1,3 +1,12 @@
+import {
+  buildRule,
+  defaultRuleForm,
+  describeRule,
+  parseRule,
+  ruleBody,
+  ruleForm,
+  type RuleForm,
+} from "@syn/utils";
 import type { TodoInput, TodoRecord } from "@syn/validators";
 
 /**
@@ -86,4 +95,38 @@ export function remindOnWrite(
 ): Pick<TodoInput, "remindOn"> | null {
   if (dateKey < todayKey || dateKey === saved.remindOn) return null;
   return { remindOn: dateKey };
+}
+
+/**
+ * What Repeats › Custom… opens on (USE-110; repeats-open.md): the to-do's
+ * own rule, or every week on its day when it has none (USE-47's default).
+ */
+export function customRepeatForm(
+  rrule: string | null,
+  startKey: string,
+): RuleForm {
+  const parsed = rrule === null ? null : parseRule(rrule);
+  return parsed?.ok ? ruleForm(parsed.rule) : defaultRuleForm(startKey);
+}
+
+/**
+ * Custom…'s Done: one RFC 5545 rule on the to-do, as a block stores it
+ * (D-USE-80). Null when it is the rule already saved.
+ */
+export function customRepeatWrite(
+  form: RuleForm,
+  startKey: string,
+  saved: Pick<TodoRecord, "rrule">,
+): Pick<TodoInput, "rrule"> | null {
+  const rrule = buildRule(form, startKey);
+  if (saved.rrule !== null && ruleBody(saved.rrule) === ruleBody(rrule)) {
+    return null;
+  }
+  return { rrule };
+}
+
+/** The Repeats trigger's words for a rule the list does not make. */
+export function customRepeatLabel(rrule: string, fallback: string): string {
+  const parsed = parseRule(rrule);
+  return parsed.ok ? describeRule(parsed.rule) : fallback;
 }

@@ -34,6 +34,7 @@ export function NowCurrentCard({
   onPlainDone,
   onTimedDone,
   below = null,
+  onOpenJournal,
 }: {
   item: NowItemView;
   block: NowBlockView;
@@ -43,6 +44,11 @@ export function NowCurrentCard({
   onTimedDone: (item: NowItemView) => void;
   /** Under the card: a Done that did not save (USE-21) [ASSUMPTION]. */
   below?: React.ReactNode;
+  /**
+   * The Journal row lifted (USE-110): Start opens Close the day, where the
+   * row ticks itself, rather than a timer [ASSUMPTION].
+   */
+  onOpenJournal?: () => void;
 }) {
   const writes = useRunningWrites(dateKey, block.id);
   const hue = BLOCK_HUE[block.kind];
@@ -82,6 +88,7 @@ export function NowCurrentCard({
       icon={item.icon}
       hue={meal ? "neutral" : hue}
       meta={meta}
+      early={block.notYetStarted}
       label={COPY.liftedName(item.title)}
       // An item with no length has nothing to count down from.
       start={
@@ -90,7 +97,8 @@ export function NowCurrentCard({
           : {
               label: COPY.start,
               onPress: () => {
-                if (item.lengthMin) void writes.start(item);
+                if (onOpenJournal) onOpenJournal();
+                else if (item.lengthMin) void writes.start(item);
               },
             }
       }

@@ -17,11 +17,13 @@ import type { FixtureServer } from "@/lib/fixtures/server";
 import { useNow as useMinute } from "@/lib/hooks/use-now";
 import { deriveClosing, movedOut, type NowClosing } from "./block-close";
 import { deriveToday, type Today } from "./derive-today";
+import { withJournalTick } from "./journal-row";
 import { deriveNowEnd, type NowEnd } from "./now-end";
 import { useDataSource } from "./source";
 import { itemsOnDate, type TodayRecords } from "./today-records";
 import { useBlockClose, type BlockCloseState } from "./use-block-close";
 import { useBlockFocus } from "./use-block-focus";
+import { useJournalWritten } from "./use-journal";
 import { todayQueryKey } from "./use-today";
 import { todosQueryKey } from "./use-todos";
 
@@ -77,6 +79,18 @@ export interface NowBlockView {
   form: NowBlockForm;
   /** "HH:MM", the planned end, once it has passed; null before (behind). */
   behindSince: string | null;
+  /**
+   * Readied before the block's time (ready-go/states/not-yet-started.md):
+   * the lifted card's dot is hollow and the quiet line names the start,
+   * until the block's time arrives (USE-110).
+   */
+  notYetStarted: boolean;
+  /**
+   * A Work block has ended and this block is not Work's: its firing items
+   * show on top as "Still firing, from <name>" (D-USE-57; firing.md step 5),
+   * with the next Work block's start, or null when none is left today.
+   */
+  firingFrom: { name: string; nextWorkAt: string | null } | null;
   /** The next set-time block after now: the checklist day's "next: …". */
   next: { name: string; startsAt: string } | null;
 }
@@ -258,6 +272,24 @@ function formOf(
   return block.meal ? "meal" : "items";
 }
 
+/**
+ * The last Work block to have ended by `now`, and the next one's start
+ * (USE-110): where firing items are from once their block is over.
+ */
+export function firingFromOf(
+  today: Today,
+  now: Date,
+): { name: string; nextWorkAt: string | null } | null {
+  const work = today.occurrences.blocks.filter(
+    (entry) => entry.block.kind === "work",
+  );
+  const ended = work.filter((entry) => entry.end <= now);
+  const last = ended[ended.length - 1];
+  if (!last) return null;
+  const next = work.find((entry) => entry.start > now);
+  return { name: last.block.name, nextWorkAt: next?.startsAt ?? null };
+}
+
 /** Ready, go not yet given today, and the day not closed. */
 export function phaseOf(dayRecord: DayRecordRecord | null): NowPhase {
   if (dayRecord?.closedAt != null) return "live";
@@ -273,11 +305,13 @@ export function deriveNow(
   focus: NowFocus | null = null,
   /** Blocks closed with items left, and the card up (USE-25). */
   close: BlockCloseState | null = null,
+  /** The day's journal holds an answer: the Journal row ticks (USE-110). */
+  journal = false,
 ): NowView {
   const { records } = today;
   const closed = new Set(close?.closed ?? []);
   const spans = today.occurrences.blocks.map((occurrence) => {
-    const items = itemsOf(occurrence, records);
+    const items = withJournalTick(itemsOf(occurrence, records), journal);
     return {
       id: occurrence.block.id,
       occurrence,
@@ -285,9 +319,14 @@ export function deriveNow(
       start: occurrence.start,
       end: occurrence.end,
       allDay: formOf(occurrence) === "all-day-checklist",
-      // Closed with items left, it holds the screen no longer (USE-25).
+      // Closed with items left, it holds the screen no longer (USE-25). A
+      // Work block never holds past its end: its work waits in the tiers
+      // for the next Work block, firing or brought back (firing.md step 5,
+      // D-USE-57; USE-110) [ASSUMPTION].
       open:
-        !closed.has(occurrence.block.id) && items.some((item) => !item.done),
+        !closed.has(occurrence.block.id) &&
+        occurrence.block.kind !== "work" &&
+        items.some((item) => !item.done),
     };
   });
   const active = activeBlock(spans, now, focus);
@@ -330,6 +369,11 @@ export function deriveNow(
             form,
             // The end behindSince returns is the occurrence's own.
             behindSince: behind === null ? null : occurrence.endsAt,
+            notYetStarted: active !== null && now < active.start,
+            firingFrom:
+              occurrence.block.kind === "work"
+                ? null
+                : firingFromOf(today, now),
             next:
               following && following.occurrence !== occurrence
                 ? {
@@ -393,11 +437,19 @@ export function useNow(dateKey: string, chosenId: string | null = null) {
   useMinute();
   const { focus } = useBlockFocus(dateKey);
   const { state: close } = useBlockClose(dateKey);
+  const journal = useJournalWritten(dateKey);
   const query = useQuery<TodayRecords, Error, NowView>({
     queryKey: todayQueryKey(source.scenario.name, dateKey),
     queryFn: () => source.server.readToday(dateKey),
     select: (records) =>
-      deriveNow(deriveToday(records), source.now(), chosenId, focus, close),
+      deriveNow(
+        deriveToday(records),
+        source.now(),
+        chosenId,
+        focus,
+        close,
+        journal,
+      ),
     retry: false,
   });
   return { ...query, view: query.data };
