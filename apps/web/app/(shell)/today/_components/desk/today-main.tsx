@@ -1,9 +1,10 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useWorkClock } from "@syn/hooks";
-import { Button, GroupHeading, StepAwayIcon, Text } from "@syn/ui";
+import { Button, GroupHeading, StepAwayIcon, Text, useIsSplit } from "@syn/ui";
 import {
   DayBlockBand,
   OfflineLine,
@@ -21,12 +22,18 @@ import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { dayTitle, wallWords } from "@/lib/data/today-work";
 import { useTodayLinear } from "@/lib/data/use-today-linear";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
+import {
+  useNextTitle,
+  useTodayKeys,
+  type TodayKeyRow,
+} from "@/lib/hooks/use-today-keys";
 import { itemSheetRoute, todoSheetRoute, weekRoute } from "@/lib/routes";
 import { PushCheck } from "../push-check";
 import { WORK_COPY as COPY } from "../work/copy";
 import { EMPTY_COPY } from "../work/empty-copy";
 import { useStepAway } from "../work/use-step-away";
-import { WorkTiers } from "../work/work-tiers";
+import { WorkTiers, type WorkTiersKeyActions } from "../work/work-tiers";
+import { DESK_COPY } from "./copy";
 
 /**
  * The desk's Today, the main column (USE-57; work/today/index.md, layout 2):
@@ -52,6 +59,12 @@ import { WorkTiers } from "../work/work-tiers";
  * they were and Plan the week (D-USE-42), the pool docked beside by the
  * frame; with nothing left open, one line to the Week (D-USE-65). The tiers
  * show their add rows either way.
+ *
+ * The keys (USE-71, D-USE-62): F fires the focused row or brings it back,
+ * D is Done, J and K walk the rows (tiers, then To-dos), Enter goes to
+ * Next; through the tiers' own actions, never in a field, menu or sheet.
+ * The tab reads "Next: <title> — Synapse" (D-USE-43). Desk only: both wait
+ * on `useIsSplit`, as the phone's tree is mounted too.
  */
 export function TodayMain() {
   const source = useDataSource();
@@ -68,6 +81,9 @@ export function TodayMain() {
   const pathname = usePathname();
   const search = useSearchParams().toString();
   const here = search ? `${pathname}?${search}` : pathname;
+  const atDesk = useIsSplit();
+  const column = useRef<HTMLDivElement>(null);
+  const keyActions = useRef<WorkTiersKeyActions | null>(null);
 
   const openItem = (slotId: string) => {
     const item = view?.workItemIds.get(slotId);
@@ -83,8 +99,70 @@ export function TodayMain() {
       ?.focus();
   };
 
+  const keyRows: TodayKeyRow[] = [
+    ...(view?.tiers ?? []).flatMap((group) =>
+      group.rows.map((row) => ({
+        key: row.id,
+        kind: "work" as const,
+        firing: view?.states.get(row.id) === "firing",
+        done: view?.states.get(row.id) === "done",
+      })),
+    ),
+    ...(work.todos ?? []).map((todo) => ({
+      key: todo.id,
+      kind: "todo" as const,
+      firing: false,
+      done: todo.checked,
+    })),
+  ];
+  useTodayKeys({
+    root: column,
+    rows: keyRows,
+    enabled: atDesk,
+    actions: {
+      fire: (id) => keyActions.current?.fire(id),
+      bringBack: (id) => keyActions.current?.bringBack(id),
+      done: (id) => keyActions.current?.done(id),
+      goToNext,
+      focusTarget: (root, row) => {
+        const key = CSS.escape(row.key);
+        if (row.kind === "todo") {
+          return root.querySelector<HTMLElement>(
+            `[data-planner-item-row="${key}"] [data-row-open]`,
+          );
+        }
+        return (
+          root.querySelector<HTMLElement>(
+            `[data-work-row="${key}"] [data-open], [data-next-card="${key}"] [data-open]`,
+          ) ??
+          (view?.inHand?.slotId === row.key
+            ? root.querySelector<HTMLElement>(
+                "[data-running-work-card] [data-open]",
+              )
+            : null)
+        );
+      },
+      rowOf: (element) => {
+        const row = element.closest<HTMLElement>(
+          "[data-work-row], [data-next-card], [data-running-work-card], [data-planner-item-row]",
+        );
+        if (!row) return null;
+        if (row.hasAttribute("data-running-work-card")) {
+          return view?.inHand?.slotId ?? null;
+        }
+        return (
+          row.dataset.workRow ??
+          row.dataset.nextCard ??
+          row.dataset.plannerItemRow ??
+          null
+        );
+      },
+    },
+  });
+  useNextTitle(DESK_COPY.tabTitle(view?.nextRow?.title ?? null), atDesk);
+
   return (
-    <div className="flex flex-col gap-(--space-4)">
+    <div ref={column} className="flex flex-col gap-(--space-4)">
       <header className="flex items-baseline justify-between gap-(--space-4)">
         <h1 className="font-serif text-review-title text-ink">
           {view?.title ?? dayTitle(dateKey)}
@@ -236,6 +314,7 @@ export function TodayMain() {
                 ? { dropZones: work.empty.kind === "nothing-planned" }
                 : null
             }
+            keyActions={keyActions}
             className="pt-(--space-2)"
             onOpen={openItem}
             onCheckReminder={work.checkTodo}

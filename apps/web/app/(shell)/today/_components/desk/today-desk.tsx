@@ -1,11 +1,15 @@
 "use client";
 
 import type * as React from "react";
-import { DragToPlace } from "@syn/ui";
+import { DragToPlace, toastUndo } from "@syn/ui";
 import { BlockPanelHost } from "@/components/work/block-panel";
 import { PoolPanel } from "@/components/work/pool";
 import { readPlaceId } from "@/lib/data/place";
+import { readTodayDrag } from "@/lib/data/tier-drop";
+import { useTierDrop } from "@/lib/data/use-tier-drop";
 import { useTodayPlacing } from "@/lib/data/use-today-work";
+import { TIER_WORDS } from "@/lib/data/week-view";
+import { WORK_COPY } from "../work/copy";
 import { DeskDay } from "./desk-day";
 import { DeskStrip } from "./desk-strip";
 import { OpenedDay } from "./opened-day";
@@ -28,18 +32,48 @@ import { useShownDate } from "./use-shown-date";
  *
  * A block in the day column opens its Block panel at the right (USE-76):
  * today's checks, another date's plans.
+ *
+ * A row dragged between today's tiers (USE-71) lands before the row it is
+ * let go over, or at the tier's end (a tier's empty drop zone too), this
+ * session only, with the work menu's toast and Undo.
  */
 export function TodayDesk({ main }: { main: React.ReactNode }) {
   const { todayKey, dateKey, opened } = useShownDate();
   const placing = useTodayPlacing(todayKey);
   const docked = !opened && placing.empty?.kind === "nothing-planned";
+  const tierDrop = useTierDrop(todayKey);
   const onPlace = (sourceId: string, targetId: string, label: string) => {
+    const dragged = readTodayDrag(sourceId);
+    if (dragged?.kind === "row") {
+      void dropRow(dragged.slotId, targetId, label);
+      return;
+    }
     const from = readPlaceId(sourceId);
     const to = readPlaceId(targetId);
     if (from?.kind !== "row" || to?.kind !== "cell") return;
     if (to.dateKey !== todayKey) return;
     void placing.placeAt({ ...from.source, title: label }, to.tier);
   };
+  async function dropRow(slotId: string, targetId: string, title: string) {
+    const over = readTodayDrag(targetId);
+    const cell = readPlaceId(targetId);
+    const before = over?.kind === "before" ? over.slotId : null;
+    const tier =
+      over?.kind === "end"
+        ? over.tier
+        : cell?.kind === "cell" && cell.dateKey === todayKey
+          ? cell.tier
+          : before
+            ? tierDrop.tierOf(before)
+            : null;
+    if (!tier) return;
+    const written = await tierDrop.drop({ slotId, tier, beforeId: before });
+    if (written.length === 0) return;
+    toastUndo({
+      text: WORK_COPY.menu.movedTo(title, TIER_WORDS[tier]),
+      onUndo: () => void tierDrop.undo(written),
+    });
+  }
   return (
     <DragToPlace onPlace={onPlace}>
       <div className="flex">

@@ -39,6 +39,10 @@ export function clockWords(clock: string): string {
 }
 
 export const DESK_COPY = {
+  /** The tab's title at the desk (D-USE-43, USE-71). */
+  tabTitle: (next: string | null) =>
+    next ? `Next: ${next} — Synapse` : "Today — Synapse",
+
   /** The strip. */
   today: "today",
   stripLabel: (range: string) => `Week of ${range}`,

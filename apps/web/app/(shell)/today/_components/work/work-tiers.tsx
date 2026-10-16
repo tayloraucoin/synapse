@@ -8,11 +8,13 @@ import {
   LiftedMeeting,
   MeetingBand,
   NextCard,
+  RowDrag,
   RunningWorkCard,
   StartWhileOneRuns,
   SwipeHint,
   SwipeToFire,
   TierAddRow,
+  TierDrop,
   TierGroup,
   WaitingGroup,
   WhileItFiresLine,
@@ -26,6 +28,7 @@ import { NewTaskSheet } from "@/components/work/add";
 import { shortDate } from "@/components/work/add/new-task/form";
 import { PLACE_IDS } from "@/lib/data/place";
 import { useDataSource } from "@/lib/data/source";
+import { TODAY_DRAG } from "@/lib/data/tier-drop";
 import { TIER_EDGE_COPY } from "@/lib/data/tier-edges";
 import {
   TODAY_WORK_COPY,
@@ -82,7 +85,20 @@ import { EMPTY_COPY } from "./empty-copy";
  * session ask in the row's Item sheet. Move to another day opens the Item
  * sheet until Move to (USE-69) gives the menu its own sheet. Scenarios
  * `today-thumb-firing` (a row held mid-swipe) and `today-work-menu`.
+ *
+ * The desk's keys and drag (USE-71): `keyActions` hands the screen's keys
+ * the same Prompt sent, Bring back and Done, with their words and toast. At
+ * the desk, inside the frame's DragToPlace, each open row (the lifted card
+ * too) lifts with the mouse and lands before another row or at a tier's
+ * end, shown by a line; the screen writes the drop. The work menu's Move to
+ * tier is the keyboard path.
  */
+export interface WorkTiersKeyActions {
+  fire: (slotId: string) => void;
+  bringBack: (slotId: string) => void;
+  done: (slotId: string) => void;
+}
+
 export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
   view: TodayWorkView;
   now: Date;
@@ -98,6 +114,8 @@ export interface WorkTiersProps extends Pick<WorkRowHandlers, "onOpen"> {
   meetingsInFlow?: boolean;
   /** Nothing slotted today (USE-82); `dropZones` while the pool is docked beside. */
   unplanned?: { dropZones: boolean } | null;
+  /** The desk's keys call the tiers' own actions (USE-71). */
+  keyActions?: React.RefObject<WorkTiersKeyActions | null>;
   className?: string;
 }
 
@@ -110,6 +128,7 @@ export function WorkTiers({
   headingAs = "h2",
   meetingsInFlow = false,
   unplanned = null,
+  keyActions,
   className,
   onOpen,
 }: WorkTiersProps) {
@@ -206,6 +225,16 @@ export function WorkTiers({
       }
     : undefined;
 
+  // The desk's F and D (USE-71): the same writes, words and toast.
+  React.useEffect(() => {
+    if (!keyActions) return;
+    keyActions.current = {
+      fire: (id) => toggleFiring?.(id, true),
+      bringBack: (id) => toggleFiring?.(id, false),
+      done: (id) => void done?.(id),
+    };
+  });
+
   // The ask (USE-60): Start meeting an item running asks where it goes.
   const source = useDataSource();
   const staged = source.scenario.view?.open;
@@ -284,12 +313,28 @@ export function WorkTiers({
       });
   }
 
+  // A row lifts and takes drops at the desk only (USE-71).
+  const dragRow = (id: string, title: string, node: React.ReactNode) =>
+    atDesk && loop ? (
+      <RowDrag
+        dragId={TODAY_DRAG.row(id)}
+        dropId={TODAY_DRAG.before(id)}
+        label={title}
+      >
+        {node}
+      </RowDrag>
+    ) : (
+      node
+    );
+
   const wrapRow = (row: WorkRowView, node: React.ReactNode) => {
     if (!loop || row.form === "done") return node;
     const firing = row.form === "firing";
     const url = menuData.urlOf(row.id);
     const current = tierOf(row.id);
-    return (
+    return dragRow(
+      row.id,
+      row.title,
       <WorkMenu
         atDesk={atDesk}
         open={menuFor === row.id}
@@ -339,7 +384,7 @@ export function WorkTiers({
             {node}
           </SwipeToFire>
         )}
-      </WorkMenu>
+      </WorkMenu>,
     );
   };
 
@@ -363,7 +408,9 @@ export function WorkTiers({
   const lifted = hand
     ? {
         rowId: hand.slotId,
-        content: (
+        content: dragRow(
+          hand.slotId,
+          hand.row.title,
           <RunningWorkCard
             row={hand.row}
             figures={workCardFigures(hand, now, view.dayEnd, view.timeZone)}
@@ -382,13 +429,15 @@ export function WorkTiers({
             }
             onDone={done ? () => void done(hand.slotId) : undefined}
             onOpen={onOpen}
-          />
+          />,
         ),
       }
     : next
       ? {
           rowId: next.id,
-          content: (
+          content: dragRow(
+            next.id,
+            next.title,
             <NextCard
               row={next}
               words={{
@@ -401,7 +450,7 @@ export function WorkTiers({
               onDone={done ? () => void done(next.id) : undefined}
               onToggleFiring={toggleFiring}
               onOpen={onOpen}
-            />
+            />,
           ),
         }
       : null;
@@ -451,53 +500,65 @@ export function WorkTiers({
       {meetings?.bands
         .filter((band) => band.afterSlotId === null)
         .map((band) => bandFor(band).content)}
-      {view.tiers.map((group) => (
-        <TierGroup
-          key={group.tier}
-          tier={group.tier}
-          word={group.word}
-          rows={group.rows}
-          headingAs={headingAs}
-          helper={group.helper}
-          add={
-            unplanned
-              ? null
-              : addFor(group.tier, group.word, group.rows.length === 0)
-          }
-          empty={emptyRow(group.tier, group.word)}
-          lifted={
-            lifted && group.rows.some((row) => row.id === lifted.rowId)
-              ? lifted
-              : null
-          }
-          afterRow={
-            reminder
-              ? {
-                  rowId: reminder.rowId,
-                  content: (
-                    <WhileItFiresLine
-                      lead={reminder.lead}
-                      title={reminder.title}
-                      meta={reminder.meta}
-                      checked={false}
-                      onCheckedChange={(checked) =>
-                        onCheckReminder?.(reminder.todoId, checked)
-                      }
-                    />
-                  ),
-                }
-              : null
-          }
-          bands={meetings?.bands
-            .filter((band) => band.afterSlotId !== null)
-            .map(bandFor)}
-          onOpen={onOpen}
-          onToggleFiring={toggleFiring}
-          onRetryLinear={onRetryLinear}
-          onReopen={onReopen}
-          wrapRow={wrapRow}
-        />
-      ))}
+      {view.tiers.map((group) => {
+        const tierGroup = (
+          <TierGroup
+            key={group.tier}
+            tier={group.tier}
+            word={group.word}
+            rows={group.rows}
+            headingAs={headingAs}
+            helper={group.helper}
+            add={
+              unplanned
+                ? null
+                : addFor(group.tier, group.word, group.rows.length === 0)
+            }
+            empty={emptyRow(group.tier, group.word)}
+            lifted={
+              lifted && group.rows.some((row) => row.id === lifted.rowId)
+                ? lifted
+                : null
+            }
+            afterRow={
+              reminder
+                ? {
+                    rowId: reminder.rowId,
+                    content: (
+                      <WhileItFiresLine
+                        lead={reminder.lead}
+                        title={reminder.title}
+                        meta={reminder.meta}
+                        checked={false}
+                        onCheckedChange={(checked) =>
+                          onCheckReminder?.(reminder.todoId, checked)
+                        }
+                      />
+                    ),
+                  }
+                : null
+            }
+            bands={meetings?.bands
+              .filter((band) => band.afterSlotId !== null)
+              .map(bandFor)}
+            onOpen={onOpen}
+            onToggleFiring={toggleFiring}
+            onRetryLinear={onRetryLinear}
+            onReopen={onReopen}
+            wrapRow={wrapRow}
+          />
+        );
+        // Urgent with nothing in it draws nothing, so takes no drop.
+        return atDesk &&
+          loop &&
+          !(group.tier === "urgent" && group.rows.length === 0) ? (
+          <TierDrop key={group.tier} dropId={TODAY_DRAG.end(group.tier)}>
+            {tierGroup}
+          </TierDrop>
+        ) : (
+          tierGroup
+        );
+      })}
       <WaitingGroup
         heading={TODAY_WORK_COPY.waiting}
         rows={view.waiting}

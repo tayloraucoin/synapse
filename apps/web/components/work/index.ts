@@ -25,6 +25,7 @@ export {
   type TierGroupAdd,
   type TierGroupProps,
 } from "./tier-group";
+export { RowDrag, TierDrop } from "./tier-drag";
 export {
   DeskDayColumn,
   type DeskColumnBlock,

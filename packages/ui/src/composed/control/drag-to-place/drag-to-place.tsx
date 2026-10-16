@@ -81,15 +81,23 @@ export function DragToPlace({ onPlace, onLift, children }: DragToPlaceProps) {
     return true;
   }, []);
 
+  // Targets may nest (a row inside its tier): the innermost, the smallest
+  // box under the pointer, takes the drop.
   const targetAt = (x: number, y: number, source: string) => {
+    let found: string | null = null;
+    let area = Infinity;
     for (const [id, node] of targets.current) {
       if (id === source) continue;
       const box = node.getBoundingClientRect();
       if (x >= box.left && x < box.right && y >= box.top && y < box.bottom) {
-        return id;
+        const size = box.width * box.height;
+        if (size < area) {
+          found = id;
+          area = size;
+        }
       }
     }
-    return null;
+    return found;
   };
 
   const start = React.useCallback(
