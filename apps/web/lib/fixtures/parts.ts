@@ -12,6 +12,7 @@ import { DaysPart } from "./days-parts";
 import { FromLinearPart, type FromLinearPartState } from "./from-linear-parts";
 import { IconPickerPart, type IconPickerPartState } from "./icon-picker-parts";
 import { ItemSheetPart } from "./item-sheet-parts";
+import { MoveToPart, type MoveToPartState } from "./move-to-parts";
 import { JournalPart, type JournalPartState } from "./journal-parts";
 import { MealTopicPart, type MealTopicPartState } from "./meal-topic-parts";
 import { NewBlockSheetPart } from "./new-block-parts";
@@ -280,6 +281,17 @@ for (const state of [
 // USE-64: the Item sheet over Now, taken with `&sheet=item&id=`.
 for (const state of Object.keys(ITEM_SHEET_SCENARIOS)) {
   registerPart(state, () => createElement(ItemSheetPart)); // USE-64
+}
+// USE-69: Move to, in the Item sheet over Now, or the work menu's own sheet.
+for (const [state, part] of [
+  ["move-plain", "sheet"],
+  ["move-pick-a-day", "sheet"],
+  ["move-no-kind", "sheet"],
+  ["move-linear", "sheet"],
+  ["move-work", "work"],
+  ["move-undo", "undo"],
+] satisfies [string, MoveToPartState][]) {
+  registerPart(state, () => createElement(MoveToPart, { state: part })); // USE-69
 }
 // USE-46: the New block sheet, opened on load by each scenario.
 for (const state of Object.keys(NEW_BLOCK_SCENARIOS)) {

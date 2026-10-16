@@ -21,9 +21,12 @@
  * A work item's id hands the sheet to WorkItemSheet (USE-65), which keeps
  * this route, close and focus return.
  *
+ * ··· › Move to… opens USE-69's MoveToStep in place, back on the left to the
+ * item; a move closes the sheet with Undo in the toast.
+ *
  * A scenario's `view.open` stands a capture in a step (`item:more`,
- * `item:swap`, `item:icon`); `&view=swap` in the route opens Swap, as Now's
- * long-press Swap does.
+ * `item:swap`, `item:icon`, `item:move`, `item:move:pick:<date>`);
+ * `&view=swap` in the route opens Swap, as Now's long-press Swap does.
  */
 import * as React from "react";
 import { parseAsString, useQueryStates } from "nuqs";
@@ -45,27 +48,27 @@ import {
   type SwapRow,
 } from "@/lib/data/use-item-sheet";
 import { IconPickerStep } from "../icon-picker-step";
+import { MoveToStep, seededMovePick } from "../move-to";
 import { NowBlockMenu } from "../now-block-menu";
 import { ITEM_SHEET_COPY as COPY } from "./copy";
 import { PlainItemFields } from "./plain-item-fields";
 import { SwapStep } from "./swap-step";
 import { WorkItemSheet } from "./work-item-sheet";
 
-type Step = "fields" | "icon" | "swap";
+type Step = "fields" | "icon" | "swap" | "move";
 
 export interface ItemSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Where focus goes on close when the opener (a menu row) is gone. */
   returnFocusRef?: React.RefObject<HTMLElement | null>;
-  /** ··· › Move to…: USE-69's step; absent, the row waits for it. */
-  onMoveTo?: (id: string) => void;
 }
 
 /** `view.open` from a scenario: "item:<start>". */
 function seededStart(open: string | undefined): "more" | Step | null {
   if (open === undefined || !open.startsWith("item:")) return null;
   const start = open.slice("item:".length);
+  if (start.startsWith("move")) return "move";
   return start === "more" || start === "swap" || start === "icon"
     ? start
     : null;
@@ -75,7 +78,6 @@ export function ItemSheet({
   open,
   onOpenChange,
   returnFocusRef,
-  onMoveTo,
 }: ItemSheetProps) {
   const { scenario } = useDataSource();
   const [params, setParams] = useQueryStates({
@@ -121,6 +123,7 @@ export function ItemSheet({
     started.current = true;
     if (params.view === "swap" || seeded === "swap") setStep("swap");
     else if (seeded === "icon") setStep("icon");
+    else if (seeded === "move") setStep("move");
     else setStep("fields");
   }, [open, params.view, seeded]);
 
@@ -220,7 +223,8 @@ export function ItemSheet({
   );
 
   const header =
-    view === null || step === "icon" ? null : step === "swap" ? (
+    view === null || step === "icon" || step === "move" ? null : step ===
+      "swap" ? (
       <div className="flex min-w-0 flex-1 items-center">{closeButton}</div>
     ) : (
       <div className="flex min-w-0 flex-1 items-center gap-(--space-2)">
@@ -241,7 +245,7 @@ export function ItemSheet({
             {
               label: COPY.menu.moveTo,
               icon: MoveToIcon,
-              onSelect: () => onMoveTo?.(view.item.id),
+              onSelect: () => setStep("move"),
             },
             {
               label: COPY.menu.notToday,
@@ -267,7 +271,7 @@ export function ItemSheet({
         onClose={() => close(false)}
         returnFocusRef={returnRef}
         seededMore={seeded === "more"}
-        onMoveTo={onMoveTo}
+        seededMove={seeded === "move"}
       />
     );
   }
@@ -285,8 +289,14 @@ export function ItemSheet({
       returnFocusRef={returnRef}
       size="tall"
       classes={{
-        header: step === "icon" ? "hidden" : "items-center pt-(--space-2)",
-        body: step === "icon" ? "flex flex-col" : "pt-(--space-1)",
+        header:
+          step === "icon" || step === "move"
+            ? "hidden"
+            : "items-center pt-(--space-2)",
+        body:
+          step === "icon" || step === "move"
+            ? "flex flex-col"
+            : "pt-(--space-1)",
       }}
     >
       <span role="status" aria-live="polite" className="sr-only">
@@ -307,6 +317,14 @@ export function ItemSheet({
           onPick={pickIcon}
           onRecolour={(icon) => void sheet.setIcon(icon)}
           onBack={backFromIcon}
+        />
+      ) : step === "move" ? (
+        <MoveToStep
+          itemRef={view.item.id}
+          from="sheet"
+          onBack={() => setStep("fields")}
+          onDone={() => close(false)}
+          seededPick={seededMovePick(scenario.view?.open)}
         />
       ) : step === "swap" ? (
         <SwapStep

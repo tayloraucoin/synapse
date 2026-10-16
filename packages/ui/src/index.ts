@@ -123,6 +123,11 @@ export {
   CalendarIcon as GiveADayIcon,
   Trash2Icon as DeleteIcon,
 } from "lucide-react";
+/** Move to (USE-69): Pick a day's calendar, Back to the pool's stacked layers. */
+export {
+  CalendarIcon as PickADayIcon,
+  LayersIcon as BackToPoolIcon,
+} from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
 export { ThemeProvider } from "./providers/theme-provider";

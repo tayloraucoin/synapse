@@ -12,6 +12,7 @@ import { CLOSE_THE_DAY_SCENARIOS } from "./close-the-day";
 import { FROM_LINEAR_SCENARIOS } from "./from-linear";
 import { INTEGRATION_SCENARIOS } from "./integrations";
 import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
+import { MOVE_TO_SCENARIOS } from "./move-to";
 import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
 import { NEW_BLOCK_SCENARIOS, type NewBlockScenarioStart } from "./new-block";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
@@ -287,6 +288,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...READY_SCENARIOS,
   // ---- The Item sheet (USE-64): a plain item, ···, at a set time, Swap ----
   ...ITEM_SHEET_SCENARIOS,
+  // ---- Move to (USE-69): a plain item, Linear, the work menu, Pick a day, Undo ----
+  ...MOVE_TO_SCENARIOS,
   // ---- Schedule (USE-27): during go, the marks, the checklist day, a meeting ----
   ...SCHEDULE_SCENARIOS,
   // ---- Block view from the day (USE-48): checked, removed, Edit, current, past ----

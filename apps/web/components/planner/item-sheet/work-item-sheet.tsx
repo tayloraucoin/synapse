@@ -87,6 +87,7 @@ import { useDataSource, useIsOffline } from "@/lib/data/source";
 import { useWorkItemSheet } from "@/lib/data/use-item-sheet";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
 import { settingsRoute } from "@/lib/routes";
+import { MoveToStep, seededMovePick } from "../move-to";
 import { ConnectLinearRow } from "./connect-linear-row";
 import { clock, ITEM_SHEET_COPY } from "./copy";
 import { FiringPanel } from "./firing-panel";
@@ -121,7 +122,8 @@ type SheetStep =
   | { kind: "ask"; tier: WorkTier }
   | { kind: "place"; issueId: string }
   | { kind: "add" }
-  | { kind: "link" };
+  | { kind: "link" }
+  | { kind: "move" };
 
 /** `view.open` from a scenario: "item:ask:<tier>", "item:place", "item:add", "item:link". */
 function seededSheetStep(open: string | undefined): string | null {
@@ -181,8 +183,8 @@ export interface WorkItemSheetProps {
   returnFocusRef: React.RefObject<HTMLElement | null>;
   /** ··· open on load, for `?state=item-work-more-open`. */
   seededMore: boolean;
-  /** When's row: Move to (USE-69). */
-  onMoveTo?: (id: string) => void;
+  /** Move to open on load (USE-69), for `?state=move-linear`. */
+  seededMove?: boolean;
 }
 
 export function WorkItemSheet({
@@ -191,7 +193,7 @@ export function WorkItemSheet({
   onClose,
   returnFocusRef,
   seededMore,
-  onMoveTo,
+  seededMove = false,
 }: WorkItemSheetProps) {
   const source = useDataSource();
   const dateKey = source.todayKey();
@@ -232,8 +234,9 @@ export function WorkItemSheet({
     if (!open || seeded.current || view === null) return;
     seeded.current = true;
     if (seededMore) setMore(true);
+    if (seededMove) setStep({ kind: "move" });
     if (seededStep === "status") setStatusOpen(true);
-  }, [open, view, seededMore, seededStep]);
+  }, [open, view, seededMore, seededMove, seededStep]);
 
   // A scenario's step: the ask, Place on its first open sub-issue, Add a day.
   const seededSteps = React.useRef(false);
@@ -504,7 +507,7 @@ export function WorkItemSheet({
               ITEM_SHEET_COPY.linear.toast.unlinked(item.title),
               false,
             ),
-          onMoveTo: () => onMoveTo?.(item.id),
+          onMoveTo: () => setStep({ kind: "move" }),
           onNotToday: () =>
             void plannerAct(
               sheet.notToday,
@@ -526,8 +529,9 @@ export function WorkItemSheet({
     </Button>
   );
 
-  // The ask and the link step carry their own way back.
-  const ownBack = step?.kind === "ask" || step?.kind === "link";
+  // The ask, the link step and Move to carry their own way back.
+  const ownBack =
+    step?.kind === "ask" || step?.kind === "link" || step?.kind === "move";
   const header =
     more || statusOpen || ownBack ? null : (
       <div className="flex min-w-0 flex-1 items-center gap-(--space-2)">
@@ -612,6 +616,16 @@ export function WorkItemSheet({
         allLine={allLine}
         headingRef={titleRef}
         onMove={(choice) => void moveTier(step.tier, choice)}
+      />
+    );
+  } else if (step?.kind === "move") {
+    stepBody = (
+      <MoveToStep
+        itemRef={item.id}
+        from="sheet"
+        onBack={leaveStep}
+        onDone={close}
+        seededPick={seededMovePick(source.scenario.view?.open)}
       />
     );
   } else if (step?.kind === "link") {
@@ -742,7 +756,10 @@ export function WorkItemSheet({
         footer={footer}
         returnFocusRef={returnFocusRef}
         size={
-          more || (step !== null && step.kind !== "link") ? "default" : "tall"
+          more ||
+          (step !== null && step.kind !== "link" && step.kind !== "move")
+            ? "default"
+            : "tall"
         }
         classes={{
           header:
@@ -791,7 +808,8 @@ export function WorkItemSheet({
             onLength={(range) => void sheet.setLength(range)}
             onTier={changeTier}
             onNotes={(notes) => void sheet.setNotes(notes)}
-            onWhen={onMoveTo ? () => onMoveTo(item.id) : undefined}
+            // Move to moves today's session (USE-69); elsewhere the row only reads.
+            onWhen={slot?.today ? () => setStep({ kind: "move" }) : undefined}
             linear={
               linear === null
                 ? item.linked || sheet.linearConnected === null
