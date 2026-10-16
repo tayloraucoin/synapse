@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  createTRPCClient,
   httpBatchLink,
   TRPCClientError,
   type TRPCLink,
@@ -60,32 +61,10 @@ export function TrpcProvider({ children }: TrpcProviderProps) {
       }),
   );
 
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        /*
-         * SY-04's first detection. Every procedure in this app is protected, so
-         * an `UNAUTHORIZED` from any of them means the session went — and the
-         * link is the one place every request passes through, which is what
-         * makes this one listener rather than an error branch in each caller.
-         *
-         * The latch inside `notifySessionExpired` is the ref guard the ticket
-         * asks for: a batch of five failing calls raises the dialog once.
-         */
-        sessionExpiryLink,
-        httpBatchLink({
-          url: `${getBaseUrl()}/api/trpc`,
-          // superjson must be set on BOTH the link and the server's initTRPC
-          // or `Date`s arrive as strings and every time in the app is wrong by
-          // a type. CC learned this one the hard way.
-          transformer: superjson,
-        }),
-      ],
-    }),
-  );
+  const [reactClient] = useState(() => trpc.createClient({ links }));
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+    <trpc.Provider client={reactClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </trpc.Provider>
   );
@@ -115,3 +94,37 @@ const sessionExpiryLink: TRPCLink<AppRouter> = () => (options) =>
     });
     return () => subscription.unsubscribe();
   });
+
+const links: TRPCLink<AppRouter>[] = [
+  /*
+   * SY-04's first detection. Every procedure in this app is protected, so
+   * an `UNAUTHORIZED` from any of them means the session went — and the
+   * link is the one place every request passes through, which is what
+   * makes this one listener rather than an error branch in each caller.
+   *
+   * The latch inside `notifySessionExpired` is the ref guard the ticket
+   * asks for: a batch of five failing calls raises the dialog once.
+   */
+  sessionExpiryLink,
+  httpBatchLink({
+    url: `${getBaseUrl()}/api/trpc`,
+    // superjson must be set on BOTH the link and the server's initTRPC
+    // or `Date`s arrive as strings and every time in the app is wrong by
+    // a type. CC learned this one the hard way.
+    transformer: superjson,
+  }),
+];
+
+/**
+ * The vanilla client over the same links (USE-90): the data hooks'
+ * `queryFn`s call it through the live server (`lib/data/live/`), so their
+ * names and shapes stay their own while one link chain serves both.
+ */
+export const trpcClient = createTRPCClient<AppRouter>({ links });
+
+/**
+ * A production build (USE-90): `?state=` is ignored and nothing reads a
+ * fixture. `NODE_ENV` is inlined by Next, which is why it is read here, in
+ * one of the two files the env seam exempts.
+ */
+export const isProductionBuild = process.env.NODE_ENV === "production";

@@ -49,6 +49,16 @@ import type {
 import type { JournalRecords } from "@/lib/data/journal-records";
 import type { TodayRecords } from "@/lib/data/today-records";
 import type { AccountView } from "@/lib/data/use-account";
+import {
+  AccountNameRefusal,
+  JournalWriteRefusal,
+  MealTopicRefusal,
+  MorningLinesRefusal,
+  SavedColourRefusal,
+  SlotEventRefusal,
+  SlotWriteRefusal,
+  TodoWriteRefusal,
+} from "@/lib/data/refusals";
 import type { TodosRecords } from "@/lib/data/use-todos";
 import {
   ALREADY_PLACED,
@@ -74,52 +84,18 @@ import { createWorkServer, type WorkServer } from "./work";
  * TanStack Query hook, and is never a store the UI reads directly.
  */
 
-export type SlotEventRefusalReason =
-  "invalid" | "unknown-slot" | "before-day" | "after-day" | "ahead-of-now";
-
-/** A write the router would refuse, with the reason it would give. */
-export class SlotEventRefusal extends Error {
-  readonly reason: SlotEventRefusalReason;
-
-  constructor(reason: SlotEventRefusalReason, message: string) {
-    super(message);
-    this.name = "SlotEventRefusal";
-    this.reason = reason;
-  }
-}
-
-/** A saved colour write the router would refuse (USE-11). */
-export class SavedColourRefusal extends Error {
-  readonly reason: "invalid" | "unknown" | "duplicate";
-
-  constructor(reason: SavedColourRefusal["reason"], message: string) {
-    super(message);
-    this.name = "SavedColourRefusal";
-    this.reason = reason;
-  }
-}
-
-/** A meal topic write the router would refuse (USE-22). */
-export class MealTopicRefusal extends Error {
-  readonly reason: "invalid" | "unknown";
-
-  constructor(reason: MealTopicRefusal["reason"], message: string) {
-    super(message);
-    this.name = "MealTopicRefusal";
-    this.reason = reason;
-  }
-}
-
-/** A slot write the router would refuse (USE-16). */
-export class SlotWriteRefusal extends Error {
-  readonly reason: "invalid" | "unknown" | "duplicate";
-
-  constructor(reason: SlotWriteRefusal["reason"], message: string) {
-    super(message);
-    this.name = "SlotWriteRefusal";
-    this.reason = reason;
-  }
-}
+// The refusals are the routers' as much as the fixtures' (USE-90).
+export {
+  AccountNameRefusal,
+  JournalWriteRefusal,
+  MealTopicRefusal,
+  MorningLinesRefusal,
+  SavedColourRefusal,
+  SlotEventRefusal,
+  SlotWriteRefusal,
+  TodoWriteRefusal,
+};
+export type { SlotEventRefusalReason } from "@/lib/data/refusals";
 
 /** The `error` scenario's read, until retried. */
 export class FixtureReadError extends Error {
@@ -153,14 +129,6 @@ export class FixtureProfileError extends Error {
   }
 }
 
-/** A name the user router would refuse: empty, or past the cap. */
-export class AccountNameRefusal extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "AccountNameRefusal";
-  }
-}
-
 /** The to-dos' own read, failing on its own (`regions.todos`) until retried. */
 export class FixtureTodosReadError extends Error {
   constructor() {
@@ -177,25 +145,6 @@ export class FixtureWriteError extends Error {
   }
 }
 
-/** A to-do write the router would refuse (USE-19). */
-export class TodoWriteRefusal extends Error {
-  readonly reason: "invalid" | "unknown" | "past-day";
-
-  constructor(reason: TodoWriteRefusal["reason"], message: string) {
-    super(message);
-    this.name = "TodoWriteRefusal";
-    this.reason = reason;
-  }
-}
-
-/** A journal write the router would refuse (USE-44). */
-export class JournalWriteRefusal extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "JournalWriteRefusal";
-  }
-}
-
 /**
  * A deleted to-do with everything that went with it (USE-29): the slots that
  * took it and their events, as `slots.todo_id`'s cascade takes them. Undo
@@ -205,14 +154,6 @@ export interface RemovedTodo {
   todo: TodoRecord;
   slots: SlotRecord[];
   slotEvents: SlotEventRecord[];
-}
-
-/** A morning-lines write the router would refuse. */
-export class MorningLinesRefusal extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "MorningLinesRefusal";
-  }
 }
 
 export interface FixtureServer

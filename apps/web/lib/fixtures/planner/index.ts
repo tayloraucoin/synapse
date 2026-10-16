@@ -29,6 +29,7 @@ import {
   type BlockRecord,
   type SlotRecord,
 } from "@syn/validators";
+import { PlannerRefusal, type PlannerRefusalReason } from "@/lib/data/refusals";
 import {
   thisWeekDates,
   type DayRef,
@@ -70,19 +71,8 @@ export interface PlannerWrite {
   reach?: PlannerReach;
 }
 
-export type PlannerRefusalReason =
-  "invalid" | "unknown" | "duplicate" | "not-on-date";
-
-/** A planner write the router would refuse, in the schema's words. */
-export class PlannerRefusal extends Error {
-  readonly reason: PlannerRefusalReason;
-
-  constructor(reason: PlannerRefusalReason, message: string) {
-    super(message);
-    this.name = "PlannerRefusal";
-    this.reason = reason;
-  }
-}
+// The router's refusal, kept with the others in lib/data (USE-90).
+export { PlannerRefusal, type PlannerRefusalReason };
 
 export type DayEventWrite = z.input<typeof dayEventInput> & { id?: string };
 

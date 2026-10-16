@@ -12,6 +12,7 @@ export {
   type CreateContextInput,
 } from "./context";
 export { appRouter, createCaller, type AppRouter } from "./root";
+export { refuse, refusalReason, RefusalCause, withRefusal } from "./errors";
 export {
   readPreferences,
   updatePreferences,

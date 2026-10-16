@@ -1,6 +1,7 @@
 "use client";
 
 import { createTRPCReact } from "@trpc/react-query";
+import type { TRPCClient } from "@trpc/client";
 import type { inferRouterOutputs } from "@trpc/server";
 
 import type { AppRouter } from "@syn/api";
@@ -20,3 +21,6 @@ export const trpc = createTRPCReact<AppRouter>();
  * at a shape the router already publishes.
  */
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
+
+/** The vanilla client's type (`trpcClient`), which the live server calls. */
+export type TrpcClient = TRPCClient<AppRouter>;
