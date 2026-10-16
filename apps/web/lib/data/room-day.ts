@@ -9,6 +9,7 @@ import {
 import type { BlockRecord } from "@syn/validators";
 import type { Today } from "./derive-today";
 import { isAllDay } from "./use-now";
+import { itemsOnDate } from "./today-records";
 
 /**
  * The room engine's day with its rows (USE-41): Make room and A later start
@@ -41,7 +42,7 @@ function slotsOf(today: Today, occurrence: Occurrence): AppRoomSlot[] {
   const { records } = today;
   const { block, slots } = occurrence;
   const date = records.date;
-  const set = records.blockItems
+  const set = itemsOnDate(records)
     .filter(
       (item) =>
         item.blockId === block.id &&

@@ -533,3 +533,27 @@ test("C4: yarn verify runs check-migrations and its tests after build", () => {
     "yarn workspace @syn/db test:migrations",
   );
 });
+
+test("USE-87 C4: 0015 adds the six columns, makes only additions, and follows 0014", () => {
+  const sql = readFileSync(
+    path.join(MIGRATIONS_DIR, "0015_use_item_values.sql"),
+    "utf8",
+  );
+  const statements = splitStatements(sql).statements.map((s) => s.text);
+  assert.deepEqual(statements.sort(), [
+    'ALTER TABLE "block_changes" ADD COLUMN "color" text',
+    'ALTER TABLE "block_changes" ADD COLUMN "icon" jsonb',
+    'ALTER TABLE "block_changes" ADD COLUMN "name" text',
+    'ALTER TABLE "slots" ADD COLUMN "at_time" time',
+    'ALTER TABLE "slots" ADD COLUMN "icon" jsonb',
+    'ALTER TABLE "slots" ADD COLUMN "notes" text',
+  ]);
+  const journal = JSON.parse(
+    readFileSync(path.join(MIGRATIONS_DIR, "meta", "_journal.json"), "utf8"),
+  ) as { entries: { idx: number; tag: string }[] };
+  const tags = journal.entries.map((entry) => entry.tag);
+  assert.equal(
+    tags.indexOf("0015_use_item_values"),
+    tags.indexOf("0014_use_todo_remind_on") + 1,
+  );
+});

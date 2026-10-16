@@ -19,7 +19,7 @@ import { deriveClosing, movedOut, type NowClosing } from "./block-close";
 import { deriveToday, type Today } from "./derive-today";
 import { deriveNowEnd, type NowEnd } from "./now-end";
 import { useDataSource } from "./source";
-import type { TodayRecords } from "./today-records";
+import { itemsOnDate, type TodayRecords } from "./today-records";
 import { useBlockClose, type BlockCloseState } from "./use-block-close";
 import { useBlockFocus } from "./use-block-focus";
 import { todayQueryKey } from "./use-today";
@@ -114,7 +114,7 @@ function itemsOf(
   records: TodayRecords,
 ): NowItemView[] {
   const { block, slots } = occurrence;
-  const setItems = records.blockItems
+  const setItems = itemsOnDate(records)
     // A transition is a band in the flow, not an item; a dated item is its date's.
     .filter(
       (item) =>
@@ -151,7 +151,7 @@ function itemsOf(
   const movedIn = slots
     .filter((slot) => slot.blockItemId !== null && !slot.skipped)
     .flatMap((slot): NowItemView[] => {
-      const item = records.blockItems.find(
+      const item = itemsOnDate(records).find(
         (row) => row.id === slot.blockItemId && row.blockId !== block.id,
       );
       if (!item) return [];
@@ -205,7 +205,7 @@ function itemsOf(
     (a, b) => a.sortOrder - b.sortOrder,
   );
   const atTimes = new Map(
-    records.blockItems.map((item) => [item.id, item.atTime]),
+    itemsOnDate(records).map((item) => [item.id, item.atTime]),
   );
   const { placed } = reflowItems({
     startsAt: occurrence.startsAt,

@@ -295,6 +295,10 @@ export const blockChangeRecord = z.object({
   skipped: z.boolean(),
   startsAt: startTimeSchema.nullable(),
   endsAt: endTimeSchema.nullable(),
+  /** `0015` (USE-88's look): null reads the block's. */
+  name: plannerNameSchema.nullable().default(null),
+  icon: iconValueSchema.nullable().default(null),
+  color: colourValueSchema.nullable().default(null),
 });
 
 export type BlockChangeRecord = z.infer<typeof blockChangeRecord>;
@@ -308,6 +312,10 @@ export const blockChangeInput = z
     skipped: z.boolean().optional(),
     startsAt: startTimeSchema.nullish(),
     endsAt: endTimeSchema.nullish(),
+    /** `0015`: the date's own look; a look-only row still carries both times. */
+    name: plannerNameSchema.nullish(),
+    icon: iconValueSchema.nullish(),
+    color: colourValueSchema.nullish(),
   })
   .superRefine((value, ctx) => {
     if (!value.skipped && (value.startsAt == null || value.endsAt == null)) {
@@ -400,6 +408,9 @@ export type EditBlockItemInput = z.infer<typeof editBlockItemInput>;
  * ---- Slots: a block item, a to-do or a work item in a block on a date ----
  */
 
+/** A plain item's Notes for the date (C-USE-item-sheet-1). */
+export const slotNotesSchema = z.string().max(2000);
+
 export const slotRecord = z.object({
   ...rowStamps,
   blockId: z.string().uuid(),
@@ -415,6 +426,13 @@ export const slotRecord = z.object({
   /** `slots_took_min_check`: `>= 0`. */
   tookMin: z.number().int().min(0).nullable(),
   doneAt: instantSchema.nullable(),
+  /**
+   * `0015` (USE-87): a plain item's own values for the date; null reads the
+   * item's. Absent in a record from before 0015 reads null.
+   */
+  notes: slotNotesSchema.nullable().default(null),
+  atTime: startTimeSchema.nullable().default(null),
+  icon: iconValueSchema.nullable().default(null),
 });
 
 export type SlotRecord = z.infer<typeof slotRecord>;
@@ -435,6 +453,9 @@ export const placeSlotInput = z
     workItemId: z.string().uuid().nullish(),
     tier: workTierSchema.nullish(),
     lengthMin: lengthMinutesSchema.nullish(),
+    notes: slotNotesSchema.trim().nullish(),
+    atTime: startTimeSchema.nullish(),
+    icon: iconValueSchema.nullish(),
   })
   .superRefine((value, ctx) => {
     const targets = [value.blockItemId, value.todoId, value.workItemId].filter(
@@ -482,6 +503,10 @@ export const slotUpdateInput = z
     sessions: sessionsChoiceSchema.optional(),
     onDate: dateKeySchema.optional(),
     lengthMin: lengthMinutesSchema.nullish(),
+    /** `0015`: the date's own Notes, time and icon; null clears to the item's. */
+    notes: slotNotesSchema.trim().nullish(),
+    atTime: startTimeSchema.nullish(),
+    icon: iconValueSchema.nullish(),
   })
   .superRefine((value, ctx) => {
     if (value.sessions !== undefined && value.tier == null) {

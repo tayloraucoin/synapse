@@ -761,6 +761,9 @@ export function createPlannerServer({
             doneAt: null,
           }),
         );
+            notes: input.notes || null,
+            atTime: input.atTime ?? null,
+            icon: input.icon ?? null,
         return { id: row.id };
       });
     },

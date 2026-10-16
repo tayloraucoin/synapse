@@ -9,7 +9,7 @@ import type {
   WorkTier,
 } from "@syn/types";
 import { clockFromMinutes, clockToMinutes, reflowItems } from "@syn/utils";
-import type { BlockItemRecord } from "@syn/validators";
+import type { BlockItemRecord, SlotRecord } from "@syn/validators";
 import { ITEM_SHEET_COPY } from "@/components/planner/item-sheet/copy";
 import { weekOf } from "@/components/work/add/new-task/form";
 import type { PlannerWrite } from "@/lib/fixtures/planner";
@@ -76,13 +76,13 @@ import type { WeekRecords } from "./week-records";
  * made, for today only (D-USE-60); the usual week changes only through Make
  * it Monday's usual.
  *
- * TODAY ONLY, ON THE SCHEMA AS IT STANDS. A slot carries the date's own
- * length, so Length writes the slot (placed on first touch). A slot holds no
- * time, icon or title, so At a set time, the icon and Swap leave the set
- * item off the date (a skipped slot) and write the date's own copy of it
- * (`onDate`, "This day only"); later edits change that copy. Notes have no
- * column on an item: they are kept on this device for the date
- * [ASSUMPTION: until the data seam names one, as the chosen item on Now].
+ * TODAY ONLY, ON THE DATE'S SLOT (USE-87, `0015`). The slot carries the
+ * date's own length, time, icon and Notes, placed on first touch; the usual
+ * item is unchanged and no copy is written for them. Only Swap leaves the set
+ * item off the date (a skipped slot) and writes the date's own item in its
+ * place (`onDate`); edits to that item change it. Turning a set time off for
+ * today when the usual item has one is a copy too [ASSUMPTION: the slot's
+ * null reads the item's, so it cannot say "no time today"].
  */
 
 /** D-USE-81: an item with no length counts 5 minutes. */
@@ -95,6 +95,13 @@ export interface ItemSheetItem {
   slotId: string | null;
   /** The slot's own length for the date, when it has one. */
   slotLengthMin: number | null;
+  /** The slot's own time and icon for the date, when it has them. */
+  slotAtTime: string | null;
+  slotIcon: IconValue | null;
+  /** The usual item's set time, under any of the date's. */
+  usualAtTime: string | null;
+  /** The date's Notes, from the slot; "" when none. */
+  notes: string;
   title: string;
   icon: IconValue | null;
   /** The length the date plans with: the slot's, else the item's. */
@@ -175,7 +182,7 @@ function rowsOf(
           id: item.id,
           title: item.title,
           lengthMin: lengthOf(slot?.lengthMin ?? item.lengthMin),
-          atTime: item.atTime,
+          atTime: slot?.atTime ?? item.atTime,
           sortOrder: slot?.sortOrder ?? item.sortOrder,
         },
       ];
@@ -274,10 +281,14 @@ export function deriveItemSheet(
     id: record.id,
     slotId: slot?.id ?? null,
     slotLengthMin: slot?.lengthMin ?? null,
+    slotAtTime: slot?.atTime ?? null,
+    slotIcon: slot?.icon ?? null,
+    usualAtTime: record.atTime,
+    notes: slot?.notes ?? "",
     title: record.title,
-    icon: record.icon,
+    icon: slot?.icon ?? record.icon,
     lengthMin,
-    atTime: record.atTime,
+    atTime: slot?.atTime ?? record.atTime,
     plannedAt: starts.get(record.id) ?? null,
     sortOrder: slot?.sortOrder ?? record.sortOrder,
     dated: record.onDate !== null,
@@ -293,7 +304,7 @@ export function deriveItemSheet(
   const current: SwapRow = {
     id: record.id,
     title: record.title,
-    icon: record.icon,
+    icon: item.icon,
     lengthMin,
     startsAt: item.plannedAt,
     endsAt: withPick({ title: record.title, lengthMin }),
@@ -339,11 +350,7 @@ export type ItemUndoStep =
   /** A planner write's own Undo. */
   | { kind: "token"; token: string }
   /** A slot's fields put back as they were. */
-  | {
-      kind: "slot";
-      id: string;
-      change: { lengthMin?: number | null; skipped?: boolean };
-    }
+  | { kind: "slot"; id: string; change: SlotValues & { skipped?: boolean } }
   /** A slot the write placed: it goes. */
   | { kind: "remove-slot"; id: string };
 
@@ -353,24 +360,36 @@ export interface ItemWrite {
   undo: ItemUndoStep[];
 }
 
-/** Length (C-USE-item-sheet-default-2): the slot's, for the date only. */
-export async function writeItemLength(
+/** The date's own values a slot holds (`0015`); null reads the item's. */
+export type SlotValues = {
+  lengthMin?: number | null;
+  atTime?: string | null;
+  icon?: IconValue | null;
+  notes?: string | null;
+};
+
+/** The slot's values as they stand, for an Undo of `change`. */
+function slotBefore(item: ItemSheetItem, change: SlotValues): SlotValues {
+  const before: SlotValues = {};
+  if ("lengthMin" in change) before.lengthMin = item.slotLengthMin;
+  if ("atTime" in change) before.atTime = item.slotAtTime;
+  if ("icon" in change) before.icon = item.slotIcon;
+  if ("notes" in change) before.notes = item.notes === "" ? null : item.notes;
+  return before;
+}
+
+/** The date's own values on the item's slot, placed on first touch. */
+async function writeSlotValues(
   server: ItemSheetServer,
   view: ItemSheetView,
-  lengthMin: number,
+  change: SlotValues,
 ): Promise<ItemWrite> {
   const { item, block, date } = view;
   if (item.slotId !== null) {
-    await server.writeSlots({ id: item.slotId, lengthMin });
+    await server.writeSlots({ id: item.slotId, ...change });
     return {
       id: item.id,
-      undo: [
-        {
-          kind: "slot",
-          id: item.slotId,
-          change: { lengthMin: item.slotLengthMin },
-        },
-      ],
+      undo: [{ kind: "slot", id: item.slotId, change: slotBefore(item, change) }],
     };
   }
   const placed = await server.writeSlots({
@@ -378,9 +397,28 @@ export async function writeItemLength(
     onDate: date,
     sortOrder: item.sortOrder,
     blockItemId: item.id,
-    lengthMin,
+    ...change,
   });
   return { id: item.id, undo: [{ kind: "remove-slot", id: placed.id }] };
+}
+
+/** Length (C-USE-item-sheet-default-2): the slot's, for the date only. */
+export function writeItemLength(
+  server: ItemSheetServer,
+  view: ItemSheetView,
+  lengthMin: number,
+): Promise<ItemWrite> {
+  return writeSlotValues(server, view, { lengthMin });
+}
+
+/** Notes (C-USE-item-sheet-1): the date's, on the slot; "" clears them. */
+export function writeItemNotes(
+  server: ItemSheetServer,
+  view: ItemSheetView,
+  text: string,
+): Promise<ItemWrite> {
+  const notes = text.trim();
+  return writeSlotValues(server, view, { notes: notes === "" ? null : notes });
 }
 
 type ItemChange = {
@@ -391,8 +429,9 @@ type ItemChange = {
 };
 
 /**
- * A change the slot cannot hold, for the date only: the date's own copy is
- * edited; a set item is left off the date and its copy written in its place.
+ * A change the slot cannot hold (Swap, or a usual set time off for today):
+ * the date's own item is edited; a set item is left off the date and its
+ * copy written in its place, carrying the date's Notes.
  */
 async function writeTodayCopy(
   server: ItemSheetServer,
@@ -418,13 +457,21 @@ async function writeTodayCopy(
     ...change,
   });
   if (copy.id === undefined) throw new Error("The copy has its id.");
-  return {
-    id: copy.id,
-    undo: [
-      { kind: "token", token: off.undo },
-      { kind: "token", token: copy.undo },
-    ],
-  };
+  const undo: ItemUndoStep[] = [
+    { kind: "token", token: off.undo },
+    { kind: "token", token: copy.undo },
+  ];
+  if (item.notes !== "") {
+    const placed = await server.writeSlots({
+      blockId: block.id,
+      onDate: date,
+      sortOrder: item.sortOrder,
+      blockItemId: copy.id,
+      notes: item.notes,
+    });
+    undo.push({ kind: "remove-slot", id: placed.id });
+  }
+  return { id: copy.id, undo };
 }
 
 /** At a set time (C-USE-item-sheet-at-a-set-time-2): on with its time, or off. */
@@ -433,7 +480,12 @@ export function writeItemAtTime(
   view: ItemSheetView,
   atTime: string | null,
 ): Promise<ItemWrite> {
-  return writeTodayCopy(server, view, { atTime });
+  const { item } = view;
+  if (item.dated) return writeTodayCopy(server, view, { atTime });
+  if (atTime === null && item.usualAtTime !== null) {
+    return writeTodayCopy(server, view, { atTime });
+  }
+  return writeSlotValues(server, view, { atTime });
 }
 
 /** The icon tile's pick, for today. */
@@ -442,7 +494,8 @@ export function writeItemIcon(
   view: ItemSheetView,
   icon: IconValue,
 ): Promise<ItemWrite> {
-  return writeTodayCopy(server, view, { icon });
+  if (view.item.dated) return writeTodayCopy(server, view, { icon });
+  return writeSlotValues(server, view, { icon });
 }
 
 /**
@@ -486,14 +539,14 @@ export async function writeItemNotToday(
 }
 
 /**
- * The set item a date's copy stands in for: the set item of the block left
- * off the date at the copy's place [ASSUMPTION: no column links them; the
- * copy is written at the set item's place].
+ * The set item a Swap's copy stands in for: the set item of the block left
+ * off the date at the copy's place [ASSUMPTION: no column links them, (b)
+ * `replaces_item_id` not chosen; only Swap and a usual time off write a copy].
  */
 export function copyOrigin(
   records: TodayRecords,
   view: ItemSheetView,
-): { id: string; slotId: string } | null {
+): { id: string; slot: SlotRecord } | null {
   const { item, block, date } = view;
   for (const candidate of records.blockItems) {
     if (candidate.blockId !== block.id || candidate.onDate !== null) continue;
@@ -504,7 +557,7 @@ export function copyOrigin(
         row.skipped &&
         row.sortOrder === item.sortOrder,
     );
-    if (slot) return { id: candidate.id, slotId: slot.id };
+    if (slot) return { id: candidate.id, slot };
   }
   return null;
 }
@@ -525,14 +578,21 @@ export async function writeMakeUsual(
     const edited = await server.editBlockItem({
       id: item.id,
       lengthMin: item.lengthMin,
+      atTime: item.atTime,
+      icon: item.icon,
     });
     steps.push({ kind: "token", token: edited.undo });
-    if (item.slotId !== null && item.slotLengthMin !== null) {
-      await server.writeSlots({ id: item.slotId, lengthMin: null });
+    // The date reads the usual again; its Notes stay the date's.
+    const own: SlotValues = {};
+    if (item.slotLengthMin !== null) own.lengthMin = null;
+    if (item.slotAtTime !== null) own.atTime = null;
+    if (item.slotIcon !== null) own.icon = null;
+    if (item.slotId !== null && Object.keys(own).length > 0) {
+      await server.writeSlots({ id: item.slotId, ...own });
       steps.push({
         kind: "slot",
         id: item.slotId,
-        change: { lengthMin: item.slotLengthMin },
+        change: slotBefore(item, own),
       });
     }
     return { id: item.id, undo: steps };
@@ -553,8 +613,27 @@ export async function writeMakeUsual(
   steps.push({ kind: "token", token: edited.undo });
   const gone = await server.removeBlockItem({ id: item.id });
   steps.push({ kind: "token", token: gone.undo });
-  await server.writeSlots({ id: origin.slotId, skipped: false });
-  steps.push({ kind: "slot", id: origin.slotId, change: { skipped: true } });
+  // The set item's slot comes back plain, with the copy's Notes.
+  const { slot } = origin;
+  await server.writeSlots({
+    id: slot.id,
+    skipped: false,
+    lengthMin: null,
+    atTime: null,
+    icon: null,
+    notes: item.notes === "" ? null : item.notes,
+  });
+  steps.push({
+    kind: "slot",
+    id: slot.id,
+    change: {
+      skipped: true,
+      lengthMin: slot.lengthMin,
+      atTime: slot.atTime,
+      icon: slot.icon,
+      notes: slot.notes,
+    },
+  });
   return { id: origin.id, undo: steps };
 }
 
@@ -569,32 +648,6 @@ export async function undoItemWrite(
       await server.writeSlots({ id: step.id, ...step.change });
     } else await server.removeSlot({ id: step.id });
   }
-}
-
-/* --------------------------------------------------------------- notes -- */
-
-/** Notes per date and item, on this device (see the file's note). */
-const notesStore = new Map<string, string>();
-const notesListeners = new Set<() => void>();
-
-function notesKey(scenario: string, date: string, id: string) {
-  return `${scenario}:${date}:${id}`;
-}
-
-function setStoredNotes(key: string, text: string) {
-  if (text === "") notesStore.delete(key);
-  else notesStore.set(key, text);
-  notesListeners.forEach((listener) => listener());
-}
-
-/** A new item's notes from the add sheet (USE-54), kept as the sheet's own. */
-export function writeItemNotes(
-  scenario: string,
-  date: string,
-  id: string,
-  text: string,
-) {
-  setStoredNotes(notesKey(scenario, date, id), text.trim());
 }
 
 /* ---------------------------------------------------------------- hook -- */
@@ -626,15 +679,13 @@ export function useItemSheet(
     retry: false,
   });
 
-  const notesId = id ?? "";
-  const notes = React.useSyncExternalStore(
-    (listener) => {
-      notesListeners.add(listener);
-      return () => notesListeners.delete(listener);
-    },
-    () => notesStore.get(notesKey(scenario, dateKey, notesId)) ?? "",
-    () => "",
-  );
+  // Notes as typed, over the stored ones until the sheet moves to another item.
+  const [draft, setDraft] = React.useState<{
+    id: string | null;
+    text: string;
+  } | null>(null);
+  if (draft !== null && draft.id !== id) setDraft(null);
+  const notes = draft?.text ?? query.data?.item.notes ?? "";
 
   const server: ItemSheetServer = {
     writeSlots: source.server.writeSlots,
@@ -691,13 +742,6 @@ export function useItemSheet(
         latest.records,
       );
       if (written.id !== latest.view.item.id) {
-        // The notes follow the item to its copy.
-        const from = notesKey(scenario, dateKey, latest.view.item.id);
-        const kept = notesStore.get(from);
-        if (kept !== undefined) {
-          notesStore.delete(from);
-          setStoredNotes(notesKey(scenario, dateKey, written.id), kept);
-        }
         moved.current.set(latest.view.item.id, written.id);
         onMoved(written.id);
       }
@@ -714,8 +758,14 @@ export function useItemSheet(
     ...query,
     view: query.data ?? null,
     notes,
-    setNotes: (text: string) =>
-      setStoredNotes(notesKey(scenario, dateKey, notesId), text),
+    setNotes: (text: string) => {
+      setDraft({ id, text });
+      return run((s, view) =>
+        view.item.notes === text.trim()
+          ? Promise.resolve({ id: view.item.id, undo: [] })
+          : writeItemNotes(s, view, text),
+      );
+    },
     setLength: (lengthMin: number) =>
       run((s, view) => writeItemLength(s, view, lengthMin)),
     setAtTime: (atTime: string | null) =>

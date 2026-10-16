@@ -89,7 +89,19 @@ export async function writeRailAdd(
     sortOrder,
   });
   if (written.id === undefined) throw new Error("Not added.");
-  return { id: written.id, undo: [{ kind: "token", token: written.undo }] };
+  const undo: RailAddEdit["undo"] = [{ kind: "token", token: written.undo }];
+  // Notes are the date's, on the new item's slot (USE-87).
+  if (notes !== "") {
+    const placed = await server.placeSlot({
+      blockId: landing.blockId,
+      onDate: records.date,
+      sortOrder,
+      blockItemId: written.id,
+      notes,
+    });
+    undo.push({ kind: "token", token: placed.undo });
+  }
+  return { id: written.id, undo };
 }
 
 /**

@@ -46,10 +46,9 @@ export const ITEM_SHEET_IDS = {
     homeWorkout: fixtureId(2, 644),
     yoga: fixtureId(2, 645),
     abs: fixtureId(2, 646),
-    /** Meditate's copy for the date, at a set time (`item-at-a-set-time`). */
-    meditateToday: fixtureId(2, 647),
   },
-  slots: { meditateOff: fixtureId(3, 641) },
+  /** Meditate's slot for the date, at a set time (`item-at-a-set-time`). */
+  slots: { meditateToday: fixtureId(3, 641) },
   /**
    * A work item's sheet (USE-65), on work's Today Monday at 10:20:
    * [Portal sign-in] (KES-42, 3 Medium, Primary in Work 9:30 to 12:00) and
@@ -118,8 +117,8 @@ function training(id: string, day: string) {
 }
 
 /**
- * At a set time on, as the sheet writes it: Meditate off the date and its
- * copy for the date at 7:20.
+ * At a set time on, as the sheet writes it (USE-87): Meditate's slot for the
+ * date holds 7:20; the usual Meditate is unchanged and no copy is written.
  */
 function withMeditateAt(records: FixtureRecords, atTime: string) {
   const meditate = records.blockItems.find(
@@ -128,10 +127,10 @@ function withMeditateAt(records: FixtureRecords, atTime: string) {
   records.slots.push(
     slotRecord.parse({
       ...stamps,
-      id: ITEM_SHEET_IDS.slots.meditateOff,
+      id: ITEM_SHEET_IDS.slots.meditateToday,
       blockId: meditate.blockId,
       onDate: BASE_DATE,
-      skipped: true,
+      skipped: false,
       sortOrder: meditate.sortOrder,
       blockItemId: meditate.id,
       todoId: null,
@@ -140,14 +139,7 @@ function withMeditateAt(records: FixtureRecords, atTime: string) {
       lengthMin: null,
       tookMin: null,
       doneAt: null,
-    }),
-  );
-  records.blockItems.push(
-    blockItemRecord.parse({
-      ...meditate,
-      id: I.meditateToday,
       atTime,
-      onDate: BASE_DATE,
     }),
   );
   return records;

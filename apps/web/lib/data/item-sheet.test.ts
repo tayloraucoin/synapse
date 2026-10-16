@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { IconValue } from "@syn/types";
 import { addDays } from "@syn/utils";
 import { resolveScenario } from "@/lib/fixtures/scenarios";
 import { BASE_DATE } from "@/lib/fixtures/scenarios/base-day";
@@ -6,11 +7,14 @@ import { ITEM_SHEET_IDS } from "@/lib/fixtures/scenarios/item-sheet";
 import { NOW_IDS, onNowDay } from "@/lib/fixtures/scenarios/now-day";
 import { createFixtureServer } from "@/lib/fixtures/server";
 import { deriveToday } from "./derive-today";
+import { itemsOnDate } from "./today-records";
 import {
   deriveItemSheet,
   undoItemWrite,
   writeItemAtTime,
+  writeItemIcon,
   writeItemLength,
+  writeItemNotes,
   writeItemNotToday,
   writeMakeUsual,
   writeSwap,
@@ -114,8 +118,8 @@ describe("Length (C1)", () => {
   });
 });
 
-describe("At a set time (C1)", () => {
-  it("pins 7:20 for today only, on today's own copy; the usual Monday is unchanged; Undo takes it back", async () => {
+describe("At a set time and the icon (USE-87 C2)", () => {
+  it("pins 7:20 on the date's slot; the usual Meditate is unchanged and no copy is written; Undo takes it back", async () => {
     const { server, sheet, records } = setup();
     const before = await records();
 
@@ -125,33 +129,91 @@ describe("At a set time (C1)", () => {
       "07:20",
     );
 
-    expect(written.id).not.toBe(MEDITATE);
-    const today = await sheet(written.id);
-    expect(today.item).toMatchObject({
+    expect(written.id).toBe(MEDITATE);
+    expect((await sheet(MEDITATE)).item).toMatchObject({
       title: "Meditate",
       atTime: "07:20",
       plannedAt: "07:20",
-      dated: true,
+      dated: false,
       lengthMin: 10,
     });
-    const usual = before.blockItems.find((row) => row.id === MEDITATE);
+    const after = await records();
+    expect(after.blockItems).toEqual(before.blockItems);
     expect(
-      (await records()).blockItems.find((row) => row.id === MEDITATE),
-    ).toEqual(usual);
+      after.slots.find((row) => row.blockItemId === MEDITATE),
+    ).toMatchObject({ onDate: BASE_DATE, atTime: "07:20", skipped: false });
     expect((await sheet(MEDITATE, NEXT_MONDAY)).item.atTime).toBeNull();
 
-    // A second change edits the copy; no second copy is made.
-    const again = await writeItemAtTime(server, today, "07:25");
-    expect(again.id).toBe(written.id);
-    expect(
-      (await records()).blockItems.filter((row) => row.title === "Meditate"),
-    ).toHaveLength(2);
+    // A second change writes the same slot.
+    const again = await writeItemAtTime(server, await sheet(MEDITATE), "07:25");
+    expect((await sheet(MEDITATE)).item.atTime).toBe("07:25");
+    expect((await records()).blockItems).toEqual(before.blockItems);
 
     await undoItemWrite(server, again.undo);
     await undoItemWrite(server, written.undo);
+    const undone = await records();
+    expect(undone.blockItems).toEqual(before.blockItems);
+    expect(undone.slots).toEqual(before.slots);
+  });
+
+  it("stores today's icon on the slot; Now's day reads it, the usual item and next Monday do not", async () => {
+    const { server, sheet, records } = setup();
+    const before = await records();
+    const icon: IconValue = { kind: "curated", value: "sun", colorKey: "clay" };
+
+    await writeItemIcon(server, await sheet(MEDITATE), icon);
+
     const after = await records();
     expect(after.blockItems).toEqual(before.blockItems);
-    expect(after.slots).toEqual(before.slots);
+    expect(
+      after.slots.find((row) => row.blockItemId === MEDITATE)?.icon,
+    ).toEqual(icon);
+    expect((await sheet(MEDITATE)).item.icon).toEqual(icon);
+    expect(itemsOnDate(after).find((row) => row.id === MEDITATE)?.icon).toEqual(
+      icon,
+    );
+    expect((await sheet(MEDITATE, NEXT_MONDAY)).item.icon).toEqual(
+      before.blockItems.find((row) => row.id === MEDITATE)?.icon,
+    );
+  });
+
+  it("reads the fixture's set time from the slot (item-at-a-set-time)", async () => {
+    const { sheet, records } = setup("item-at-a-set-time");
+    expect((await sheet(MEDITATE)).item.atTime).toBe("07:20");
+    expect((await records()).blockItems.filter((row) => row.onDate !== null))
+      .toHaveLength(0);
+  });
+});
+
+describe("Notes (USE-87 C1)", () => {
+  it("reads Notes back from the slot for that date only, and clears them", async () => {
+    const { server, sheet, records } = setup();
+    const before = await records();
+
+    await writeItemNotes(server, await sheet(MEDITATE), "  Breathe first. ");
+
+    // A reload: a new read of the stored records, nothing held by the sheet.
+    expect((await sheet(MEDITATE)).item.notes).toBe("Breathe first.");
+    expect(
+      (await records()).slots.find((row) => row.blockItemId === MEDITATE)
+        ?.notes,
+    ).toBe("Breathe first.");
+    expect((await records()).blockItems).toEqual(before.blockItems);
+    expect((await sheet(MEDITATE, NEXT_MONDAY)).item.notes).toBe("");
+
+    await writeItemNotes(server, await sheet(MEDITATE), "");
+    expect((await sheet(MEDITATE)).item.notes).toBe("");
+  });
+
+  it("carries the date's Notes to Swap's pick", async () => {
+    const { server, sheet } = setup("item-swap");
+    await writeItemNotes(server, await sheet(GYM), "Knee: go light.");
+    const gym = await sheet(GYM);
+    const yoga = gym.swap.find((row) => row.title === "Yoga")!;
+
+    const swapped = await writeSwap(server, gym, yoga);
+
+    expect((await sheet(swapped.id)).item.notes).toBe("Knee: go light.");
   });
 });
 
@@ -179,7 +241,7 @@ describe("Make it Monday's usual (C1, C-USE-item-sheet-more-open-2)", () => {
     ).toEqual(before.blockItems.find((row) => row.id === MEDITATE));
   });
 
-  it("makes today's copy the usual item and the date reads the usual again", async () => {
+  it("makes today's time the usual item and the date reads the usual again", async () => {
     const { server, sheet, records } = setup();
     const before = await records();
     const pinned = await writeItemAtTime(

@@ -21,7 +21,6 @@ import type { RoomAddition } from "./room";
 import { roomDayWithRowsOf } from "./room-day";
 import { useDataSource } from "./source";
 import type { useDayEdits } from "./use-day-edits";
-import { writeItemNotes } from "./use-item-sheet";
 import { useToday } from "./use-today";
 import { useWorkWrites } from "./use-work-writes";
 
@@ -62,7 +61,7 @@ export function useRailAdd(
   }, [setQuery]);
 
   async function write(landing: AddLanding, form: AddForm) {
-    const { token, id } = await edits.write((server, records) =>
+    const { token } = await edits.write((server, records) =>
       writeRailAdd(
         { ...server, createTask: work.createTask },
         records,
@@ -70,9 +69,6 @@ export function useRailAdd(
         form,
       ),
     );
-    if (!landing.work && form.notes.trim() !== "") {
-      writeItemNotes(source.scenario.name, dateKey, id, form.notes);
-    }
     showToast({
       text: ADD_SHEET_COPY.added(
         form.title,

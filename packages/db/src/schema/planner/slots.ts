@@ -9,6 +9,10 @@
  * - Each target at most once per date: one item, one block a day.
  * - `skipped` (USE-14, `0013`): a set item left out on that date (Remove for
  *   today, Not today). The item stays in its block; the date's slot says no.
+ * - `notes`, `at_time`, `icon` (USE-87, `0015`): a plain item's own values for
+ *   the date (C-USE-item-sheet-1). Null reads the item's. Notes are the
+ *   date's only; a set time or icon for today never touches the item, and no
+ *   dated copy is written for them.
  * - A session is one work slot on one day. Its Done is this row's `done_at`,
  *   never the task's (D-USE-57, D-USE-65).
  *
@@ -23,15 +27,18 @@ import {
   check,
   date,
   index,
+  jsonb,
   pgEnum,
   pgTable,
   smallint,
+  text,
+  time,
   timestamp,
   unique,
   uuid,
 } from "drizzle-orm/pg-core";
 import { WORK_TIERS } from "@syn/constants";
-import type { WorkTier } from "@syn/types";
+import type { IconValue, WorkTier } from "@syn/types";
 import { enumValues } from "../enum-values";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
@@ -58,8 +65,14 @@ export const slots = pgTable(
       .notNull()
       .defaultNow(),
 
+    /** The date's own time (At a set time, today only); null reads the item's. */
+    atTime: time("at_time"),
     doneAt: timestamp("done_at", { withTimezone: true }),
+    // JSON shape: IconValue — see @syn/types. Null reads the item's icon.
+    icon: jsonb("icon").$type<IconValue>(),
     lengthMin: smallint("length_min"),
+    /** The item's Notes for the date (C-USE-item-sheet-1). */
+    notes: text("notes"),
     onDate: date("on_date").notNull(),
     skipped: boolean("skipped").notNull().default(false),
     sortOrder: smallint("sort_order").notNull(),

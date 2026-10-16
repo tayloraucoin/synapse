@@ -8,6 +8,7 @@ import type { DayRecordRecord } from "@syn/validators";
 import type { Today } from "./derive-today";
 import { lateWakeOf, roomDayOf } from "./late-wake";
 import { useDataSource } from "./source";
+import { itemsOnDate } from "./today-records";
 import { isAllDay } from "./use-now";
 import { todayQueryKey, useToday } from "./use-today";
 
@@ -89,7 +90,7 @@ type Occurrence = Today["occurrences"]["blocks"][number];
 function itemsOf(occurrence: Occurrence, today: Today): ReviewItem[] {
   const { records } = today;
   const { block, slots } = occurrence;
-  const set = records.blockItems
+  const set = itemsOnDate(records)
     .filter(
       (item) =>
         item.blockId === block.id &&

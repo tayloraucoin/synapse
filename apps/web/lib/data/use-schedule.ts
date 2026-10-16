@@ -24,6 +24,7 @@ import {
 } from "./use-review-day";
 import { useToday } from "./use-today";
 
+import { itemsOnDate } from "./today-records";
 /**
  * Schedule's data (USE-27; day/schedule/): the whole day as the day column
  * draws it, from `useToday`'s records. Review the day's blocks and items
@@ -126,7 +127,7 @@ function marksOf(today: Today): Map<string, ScheduleMark> {
 
 /** An item's length and pinned time, for the band's re-flow. */
 function reflowOf(item: ReviewItem, today: Today, occurrence: Occurrence) {
-  const { blockItems } = today.records;
+  const blockItems = itemsOnDate(today.records);
   const slot = occurrence.slots.find((row) => row.id === item.id) ?? null;
   const set = blockItems.find(
     (row) => row.id === (slot?.blockItemId ?? item.id),

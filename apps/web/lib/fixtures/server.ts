@@ -643,6 +643,9 @@ export function createFixtureServer(
         lengthMin: input.lengthMin ?? null,
         tookMin: null,
         doneAt: null,
+        notes: input.notes || null,
+        atTime: input.atTime ?? null,
+        icon: input.icon ?? null,
       });
       records.slots.push(record);
       return Promise.resolve(structuredClone(record));
