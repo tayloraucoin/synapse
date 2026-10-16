@@ -34,6 +34,7 @@ import {
   type PoolTab,
 } from "@/lib/data/pool-view";
 import { useAccount } from "@/lib/data/use-account";
+import type { PlaceSheetSource } from "@/lib/data/use-place";
 import { usePoolView } from "@/lib/data/use-pool-view";
 import { SIZE_WORDS } from "@/lib/data/week-view";
 import { itemSheetRoute, settingsRoute } from "@/lib/routes";
@@ -57,9 +58,8 @@ import { PoolSheetRow } from "./pool-sheet-row";
  * filters narrow this list only, never the days, and nothing here writes
  * to Linear.
  */
-export type PoolPlaceRef =
-  | { kind: "item"; workItemId: string; title: string }
-  | { kind: "issue"; connectionId: string; issueId: string; title: string };
+/** What Place hands the place sheet (USE-80). */
+export type PoolPlaceRef = PlaceSheetSource;
 
 type FilterSheetName = "client" | "size" | "due";
 
@@ -166,7 +166,14 @@ export function PoolSheet({
     if (row.workItemId) {
       onPlace({ kind: "item", workItemId: row.workItemId, title: row.title });
     } else if (row.issue) {
-      onPlace({ kind: "issue", ...row.issue, title: row.title });
+      onPlace({
+        kind: "issue",
+        ...row.issue,
+        title: row.title,
+        identifier: row.identifier,
+        size: row.sizeKey,
+        clientName: row.clientName,
+      });
     }
   }
 

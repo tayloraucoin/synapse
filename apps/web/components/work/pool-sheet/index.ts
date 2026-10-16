@@ -13,3 +13,8 @@ export {
   type PoolSheetProps,
 } from "./pool-sheet";
 export { PoolSheetRow, type PoolSheetRowProps } from "./pool-sheet-row";
+export {
+  DoesntFitCard,
+  type DoesntFitCardProps,
+} from "./doesnt-fit-card";
+export { PlaceSheet, type PlaceSheetProps } from "./place-sheet";

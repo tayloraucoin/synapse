@@ -57,6 +57,10 @@ export interface PoolSheetRow {
   faded: boolean;
   /** The row's accessible name: its title and meta. */
   label: string;
+  /** What the place sheet reads of an issue not in the pool yet (USE-80). */
+  identifier: string | null;
+  sizeKey: PoolRowView["sizeKey"];
+  clientName: string | null;
 }
 
 export interface PoolSheetLine extends Omit<PoolLineView, "rows"> {
@@ -190,6 +194,9 @@ function sheetRow(
     placeable: !placed,
     faded: placed,
     label: `${row.title}, ${meta}`,
+    identifier: row.identifier,
+    sizeKey: row.sizeKey,
+    clientName: row.clientName,
   };
 }
 

@@ -36,6 +36,10 @@ import {
 import { DAYS_SCENARIOS } from "./scenarios/set-up";
 import { SETTINGS_SCENARIOS } from "./scenarios/settings";
 import {
+  PLACE_SHEET_SCENARIOS,
+  type PlaceSheetScenarioName,
+} from "./scenarios/place-sheet";
+import {
   SPREAD_PHONE_SCENARIOS,
   type SpreadPhoneScenarioName,
 } from "./scenarios/spread";
@@ -51,6 +55,7 @@ import { WEEK_SCENARIOS } from "./scenarios/week";
 import { SchedulePart, type SchedulePartState } from "./schedule-parts";
 import { SettingsClientsPart } from "./settings-parts";
 import { SpreadPhonePart } from "./spread-parts";
+import { PlaceSheetPart } from "./place-sheet-parts";
 import { TodayDeskPart } from "./today-desk-parts";
 import { TodoSheetPart } from "./todo-sheet-parts";
 import {
@@ -349,5 +354,11 @@ for (const state of Object.keys(SPREAD_PHONE_SCENARIOS)) {
     createElement(SpreadPhonePart, {
       state: state as SpreadPhoneScenarioName,
     }),
+  );
+}
+// USE-80: the place sheet, placed with Undo and doesn't fit, on the phone.
+for (const state of Object.keys(PLACE_SHEET_SCENARIOS)) {
+  registerPart(state, () =>
+    createElement(PlaceSheetPart, { state: state as PlaceSheetScenarioName }),
   );
 }

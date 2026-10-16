@@ -1,8 +1,14 @@
 "use client";
 
+import * as React from "react";
 import { ScreenFrame, Text } from "@syn/ui";
 import { TabHeader } from "@/app/(shell)/_components/tab-header";
-import { PoolSheet, type PoolSheetProps } from "@/components/work/pool-sheet";
+import {
+  PlaceSheet,
+  PoolSheet,
+  type PoolPlaceRef,
+  type PoolSheetProps,
+} from "@/components/work/pool-sheet";
 import {
   POOL_SHEET_DATE,
   type PoolSheetScenarioName,
@@ -13,7 +19,7 @@ import {
  * until This week's day (USE-81) opens the pool sheet from its Pool button:
  * the Pool tab, the client filter open, a search for "booking" and one with
  * no match, From Linear, Linear not connected, the empty pool and clients
- * off. Place hands the item to USE-80's place sheet, not built here.
+ * off. Place opens USE-80's place sheet over it; placing closes both.
  */
 
 const COPY = {
@@ -33,6 +39,8 @@ const START: Record<PoolSheetScenarioName, PoolSheetProps["initial"]> = {
 };
 
 export function PoolSheetPart({ state }: { state: PoolSheetScenarioName }) {
+  const [open, setOpen] = React.useState(true);
+  const [placing, setPlacing] = React.useState<PoolPlaceRef | null>(null);
   return (
     <>
       <TabHeader title={COPY.week} />
@@ -42,11 +50,17 @@ export function PoolSheetPart({ state }: { state: PoolSheetScenarioName }) {
         </Text>
       </ScreenFrame>
       <PoolSheet
-        open
+        open={open}
         onOpenChange={() => {}}
         dateKey={POOL_SHEET_DATE}
-        onPlace={() => {}}
+        onPlace={setPlacing}
         initial={START[state]}
+      />
+      <PlaceSheet
+        itemRef={placing}
+        dateKey={POOL_SHEET_DATE}
+        onClose={() => setPlacing(null)}
+        onPlaced={() => setOpen(false)}
       />
     </>
   );

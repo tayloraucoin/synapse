@@ -27,6 +27,7 @@ import { SCHEDULE_SCENARIOS } from "./schedule";
 import { SET_UP_SCENARIOS, type SetUpScenarioStart } from "./set-up";
 import { SETTINGS_SCENARIOS } from "./settings";
 import { SPREAD_PHONE_SCENARIOS } from "./spread";
+import { PLACE_SHEET_SCENARIOS } from "./place-sheet";
 import {
   GESTURE_SCENARIOS,
   STEP_AWAY_SCENARIOS,
@@ -257,6 +258,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...POOL_SHEET_SCENARIOS,
   // ---- Spread on the phone (USE-78): the full sheet and Days and tier ----
   ...SPREAD_PHONE_SCENARIOS,
+  // ---- Place on the phone (USE-80): the place sheet, placed with Undo, doesn't fit ----
+  ...PLACE_SHEET_SCENARIOS,
   // ---- Linear, Google and clients (USE-56): off, a failed write, closed in Linear, clients ----
   ...INTEGRATION_SCENARIOS,
   // ---- Settings › Connections, clients on, and its two sheets (USE-86) ----
