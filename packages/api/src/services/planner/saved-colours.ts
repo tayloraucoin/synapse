@@ -1,11 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
-
 import { savedColours, type RlsClient } from "@syn/db";
-import type {
-  SavedColourRecord,
-  SavedColourWriteInput,
-} from "@syn/validators";
-
+import type { SavedColourRecord, SavedColourWriteInput } from "@syn/validators";
 import { refuse } from "../../errors";
 
 /**
@@ -25,7 +20,10 @@ export interface SavedColourStore {
   list(): Promise<SavedColourRecord[]>;
   byHex(hex: string): Promise<SavedColourRecord | null>;
   /** The new row, or null when the hex is already saved (the unique key). */
-  insert(values: { hex: string; sortOrder: number }): Promise<SavedColourRecord | null>;
+  insert(values: {
+    hex: string;
+    sortOrder: number;
+  }): Promise<SavedColourRecord | null>;
   update(
     id: string,
     values: { hex: string; sortOrder: number },
