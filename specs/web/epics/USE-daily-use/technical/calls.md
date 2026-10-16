@@ -37,3 +37,18 @@ Each one follows from "everything is legacy" and can be reversed with a `git mv`
 - One clock for every timed slot, built from append-only events. `timer_sessions` is legacy.
 - Linear syncs by polling, not webhooks. Creating or managing webhooks needs a workspace admin ([Linear docs](https://linear.app/docs/api-and-webhooks)).
 - Linear icons and logos: the workspace's `logoUrl` when there is one, otherwise the letter tile, as drawn. An emoji project icon shows as itself. A named Linear icon shows as the project's colour square beside its name. Uploaded logos (D-USE-42) are their own ticket.
+
+## Wave 3 gate, 2026-10-16
+
+Taylor took every recommended default. The tickets are USE-89 to USE-108, with MIG-23.
+
+| #   | Call                   | Ruling                                                                                                                                                                                                                     |
+| --- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W1  | How the swap is done   | A live server with the fixture server's interface, filled domain by domain (USE-90). The hooks keep their shapes. `?state=` serves fixtures outside production builds only (USE-108 removes the fallback).                 |
+| W2  | Undo                   | A token holding the changed rows' before-images, restored under RLS in one transaction (USE-92). No journal table.                                                                                                         |
+| W3  | OAuth state and PKCE   | A ten-minute httpOnly, Secure, SameSite=Lax cookie. No table.                                                                                                                                                              |
+| W4  | The migrations         | `0015_use_item_values` (USE-87, shape (a): `block_items.notes`, `slots.at_time`, `slots.icon`). `0016_use_integrations` (USE-100: every `linear_*` and `google_*` table; `linear_write_kind` holds D-USE-113's six kinds). |
+| W5  | Google's account label | The primary calendar's name. No `openid email` scope beyond D-USE-116's pair.                                                                                                                                              |
+| W6  | The Linear outbox      | It sends after commit, again on each sync, and from a 5-minute scheduler job.                                                                                                                                              |
+| W7  | New dependencies       | The TanStack persister, `idb-keyval` and `@playwright/test`, pinned by Quartermaster.                                                                                                                                      |
+| W8  | QA                     | As C7. USE-87 is Q3, reviewed by Mason alone; USE-100 is Q3, reviewed by Mason and Warden. Google connect stays Q1 on USE-100's crypto (flagged once). The stretch-break push stays deferred.                              |
