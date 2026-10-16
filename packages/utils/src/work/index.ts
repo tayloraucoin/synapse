@@ -38,3 +38,15 @@ export {
   type WorkBlockFlow,
 } from "./flow";
 export { firstTierWithRoom, type TierRoom } from "./first-tier-with-room";
+export {
+  blockFreeMin,
+  spreadBlockOf,
+  spreadPreview,
+  type SpreadBlock,
+  type SpreadDay,
+  type SpreadPick,
+  type SpreadPreview,
+  type SpreadReason,
+  type SpreadRow,
+  type SpreadSlot,
+} from "./spread";

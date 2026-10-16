@@ -60,6 +60,8 @@ export function useWorkWrites() {
     placeWork: write("placeWork"),
     moveWork: write("moveWork"),
     unplaceWork: write("unplaceWork"),
+    /** Spread: the one item's sessions on several days, one Undo for all. */
+    spreadWork: write("spreadWork"),
     setWorkTier: write("setWorkTier"),
     editWorkItem: write("editWorkItem"),
     markTaskDone: write("markTaskDone"),

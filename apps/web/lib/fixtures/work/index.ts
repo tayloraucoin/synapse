@@ -49,6 +49,15 @@ export interface PlaceWorkInput {
   sortOrder: number;
 }
 
+/** Spread across the week (USE-77): one item's sessions, in one tier. */
+export interface SpreadWorkInput {
+  workItemId: string;
+  tier: WorkTier;
+  sessions: { dateKey: string; blockId: string; lengthMin: number }[];
+  /** The item's hours when Work left was changed; left out, they stay. */
+  lengthMaxMin?: number;
+}
+
 export interface MoveWorkInput {
   slotId: string;
   dateKey?: string;
@@ -70,6 +79,12 @@ export interface WorkServer {
   /** A session to another date, block, tier or place; it stays one session. */
   moveWork(input: MoveWorkInput): Promise<PlannerWrite>;
   unplaceWork(input: { slotId: string }): Promise<PlannerWrite>;
+  /**
+   * Spread (USE-77, D-USE-40): a session of the one item per date, each its
+   * length, after the block's own slots, in one journal so one Undo takes
+   * every one back; a date that holds the item already refuses them all.
+   */
+  spreadWork(input: SpreadWorkInput): Promise<PlannerWrite>;
   setWorkTier(input: SetWorkTierInput): Promise<PlannerWrite>;
   editWorkItem(input: z.input<typeof editWorkItemInput>): Promise<PlannerWrite>;
   /** The task, not a session: it and every open session close. */
@@ -197,6 +212,75 @@ export function createWorkServer({
           }),
         );
         return { id: row.id };
+      });
+    },
+
+    spreadWork(raw) {
+      return write((journal) => {
+        const item = findWorkItem(raw.workItemId);
+        const dates = new Set<string>();
+        const at = stamp();
+        for (const session of raw.sessions) {
+          const input = parse(placeSlotInput, {
+            blockId: session.blockId,
+            onDate: session.dateKey,
+            sortOrder: 0,
+            workItemId: raw.workItemId,
+            tier: raw.tier,
+          });
+          requireBlock(input.blockId);
+          if (dates.has(session.dateKey) || slotClash(records.slots, input)) {
+            throw new PlannerRefusal("duplicate", ALREADY_PLACED);
+          }
+          if (!(session.lengthMin > 0)) {
+            throw new PlannerRefusal("invalid", "A session needs a length.");
+          }
+          dates.add(session.dateKey);
+          const sortOrder =
+            records.slots
+              .filter(
+                (slot) =>
+                  slot.blockId === input.blockId &&
+                  slot.onDate === input.onDate,
+              )
+              .reduce((top, slot) => Math.max(top, slot.sortOrder), -1) + 1;
+          journal.put(
+            "slots",
+            slotRecord.parse({
+              id: crypto.randomUUID(),
+              createdAt: at,
+              updatedAt: at,
+              blockId: input.blockId,
+              onDate: input.onDate,
+              skipped: false,
+              sortOrder,
+              blockItemId: null,
+              todoId: null,
+              workItemId: raw.workItemId,
+              tier: raw.tier,
+              lengthMin: Math.round(session.lengthMin),
+              tookMin: null,
+              doneAt: null,
+            }),
+          );
+        }
+        if (
+          raw.lengthMaxMin !== undefined &&
+          raw.lengthMaxMin !== item.lengthMaxMin
+        ) {
+          const lengthMaxMin = Math.round(raw.lengthMaxMin);
+          const next = patch(item, {
+            lengthMaxMin,
+            lengthMinMin:
+              item.lengthMinMin === null
+                ? null
+                : Math.min(item.lengthMinMin, lengthMaxMin),
+            updatedAt: at,
+          });
+          parse(workItemInput, next);
+          journal.put("workItems", workItemRecord.parse(next));
+        }
+        return { id: raw.workItemId };
       });
     },
 

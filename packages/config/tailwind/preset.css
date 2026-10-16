@@ -179,6 +179,7 @@
   --desk-w: 1108px; --day-col-w: 340px; --strip-card-min: 144px;
   /* The avatar menu's width (D-USE-28). */
   --menu-w: 264px;
+  --spread-w: 560px;   /* Spread across the week's dialog at the desk (USE-77) */
   /* The Profile sheet at 402, and its crop step (USE-84, D-USE-37). */
   --profile-sheet-h: 544px; --profile-crop-h: 704px;
   /* The Meal topics sheet at 402, about three quarters of the height (USE-22). */

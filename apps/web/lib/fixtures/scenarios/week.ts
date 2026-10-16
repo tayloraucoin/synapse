@@ -401,6 +401,23 @@ function placeRecords(records: FixtureRecords): FixtureRecords {
   };
 }
 
+/**
+ * USE-77's records: USE-75's, with Tuesday's [Alder intro] 2/3 and [SMS copy]
+ * in the afternoon's Work, so Tuesday's morning is free as the Spread
+ * board's preview counts it ([ASSUMPTION]: the board's Tue row shares
+ * nothing, and its Priority lens draws tiers, not blocks).
+ */
+function spreadRecords(records: FixtureRecords): FixtureRecords {
+  const placed = placeRecords(records);
+  const tuesday = new Set([id(3, 6), id(3, 7)]);
+  return {
+    ...placed,
+    slots: placed.slots.map((slot) =>
+      tuesday.has(slot.id) ? { ...slot, blockId: B.workAfternoon } : slot,
+    ),
+  };
+}
+
 export const WEEK_SCENARIOS: Record<string, () => Scenario> = {
   "week-priority": week("week-priority"),
   "week-empty": week("week-empty", { placed: false }),
@@ -427,12 +444,19 @@ export const WEEK_SCENARIOS: Record<string, () => Scenario> = {
   "week-drop": week("week-drop", { pool: placeRecords, without: [6] }),
   // USE-75: "+ Add to Primary" on Friday open with "audit" typed.
   "week-add-popover": week("week-add-popover", { pool: placeRecords }),
+  // USE-77: Spread… on SYN-218 at 10:20, the dialog open on load.
+  "week-spread": week("week-spread", {
+    now: WEEK_TIME_NOW,
+    pool: spreadRecords,
+  }),
 };
 
-/** What a USE-75 capture stages on load: a real placing, or the add popover open. */
+/** What a USE-75 capture stages on load: a real placing, the add popover open, or (USE-77) Spread's dialog. */
 export interface WeekPlaceSeed {
   drop?: { workItemId: string; dateKey: string; tier: "primary" };
   add?: { dateKey: string; tier: "primary"; query: string };
+  /** USE-77: the Spread dialog open on this item. */
+  spread?: { workItemId: string };
 }
 
 const WEEK_PLACE_SEEDS: Record<string, WeekPlaceSeed> = {
@@ -442,6 +466,7 @@ const WEEK_PLACE_SEEDS: Record<string, WeekPlaceSeed> = {
   "week-add-popover": {
     add: { dateKey: "2026-10-16", tier: "primary", query: "audit" },
   },
+  "week-spread": { spread: { workItemId: POOL_IDS.workItems.syn218 } },
 };
 
 export const weekPlaceSeedOf = (name: string): WeekPlaceSeed | undefined =>

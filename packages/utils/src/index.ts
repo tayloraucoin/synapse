@@ -264,6 +264,19 @@ export {
 export { resolveClient, type ClientConnection, type ClientItem } from "./work";
 /* Where a Time lens drop files (USE-75). */
 export { firstTierWithRoom, type TierRoom } from "./work";
+/* Spread across the week's preview (USE-77). */
+export {
+  blockFreeMin,
+  spreadBlockOf,
+  spreadPreview,
+  type SpreadBlock,
+  type SpreadDay,
+  type SpreadPick,
+  type SpreadPreview,
+  type SpreadReason,
+  type SpreadRow,
+  type SpreadSlot,
+} from "./work";
 
 /* ---- the icon picker's suggestions (USE-11) ---- */
 export { suggestIcons, type IconSuggestEntry } from "./planner";

@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   cn,
   DoneIcon,
@@ -35,10 +35,12 @@ import {
 } from "@/lib/data/pool-view";
 import { useDataSource } from "@/lib/data/source";
 import { useAccount } from "@/lib/data/use-account";
+import { usePlaceSeed } from "@/lib/data/use-place";
 import { usePoolView } from "@/lib/data/use-pool-view";
 import { useRememberedToggle } from "@/lib/hooks/use-remembered-toggle";
 import { itemSheetRoute } from "@/lib/routes";
 import { NewTaskSheet } from "../add/new-task/new-task-sheet";
+import { spreadCardOf, SpreadDialog } from "../spread";
 import { ClientHead } from "./client-head";
 import { POOL_PANEL_COPY as COPY } from "./copy";
 import { PoolRow } from "./pool-row";
@@ -61,7 +63,6 @@ const SORTS: PoolSort[] = ["due", "priority", "updated"];
 
 export function PoolPanel({ mode }: PoolPanelProps) {
   const source = useDataSource();
-  const router = useRouter();
   const pathname = usePathname();
   const search = useSearchParams().toString();
   const here = search ? `${pathname}?${search}` : pathname;
@@ -83,9 +84,13 @@ export function PoolPanel({ mode }: PoolPanelProps) {
   const takesChip = drop.carriedId?.startsWith("chip:") ?? false;
 
   const openItem = (id: string) => itemSheetRoute(here, id);
-  // [ASSUMPTION] Spread's dialog is USE-77's; until then Spread… opens the Item sheet.
-  const spread = (id: string) =>
-    router.push(itemSheetRoute(here, id), { scroll: false });
+  // Spread… opens Spread across the week over the Week (USE-77); a capture
+  // stages it open (`week-spread`).
+  const seed = usePlaceSeed();
+  const [spreading, setSpreading] = React.useState<string | null>(
+    seed?.spread?.workItemId ?? null,
+  );
+  const spread = (id: string) => setSpreading(id);
 
   const body = (
     <PanelBody
@@ -197,6 +202,11 @@ export function PoolPanel({ mode }: PoolPanelProps) {
         from="pool"
         initial={query.trim() ? { title: query.trim() } : undefined}
         returnFocusRef={newRef}
+      />
+      <SpreadDialog
+        workItemId={spreading}
+        card={spreading ? spreadCardOf(view, spreading) : null}
+        onClose={() => setSpreading(null)}
       />
     </aside>
   );
