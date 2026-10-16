@@ -320,20 +320,23 @@ export function usePlaceSheet(
             dueOn: null,
           };
 
-  const [picked, setPicked] = React.useState<string[] | null>(null);
-  const [tier, setTier] = React.useState<WorkTier | null>(null);
+  const [picked, setPicked] = React.useState<string[] | null>(() =>
+    initial.picked ? [...initial.picked] : null,
+  );
+  const [tier, setTier] = React.useState<WorkTier | null>(initial.tier ?? null);
   const key = source
     ? source.kind === "item"
       ? source.workItemId
       : source.issueId
     : null;
 
-  // A new item opens on its own defaults.
-  React.useEffect(() => {
+  // A new item opens on its own defaults, set as it renders.
+  const [seededKey, setSeededKey] = React.useState(key);
+  if (seededKey !== key) {
+    setSeededKey(key);
     setPicked(initial.picked ? [...initial.picked] : null);
     setTier(initial.tier ?? null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per item
-  }, [key]);
+  }
 
   const opening = week?.days.find((day) => day.date === dateKey);
   const firstBlock = opening ? workBlocksOf(opening)[0] : undefined;

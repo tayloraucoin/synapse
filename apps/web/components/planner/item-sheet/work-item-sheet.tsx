@@ -237,6 +237,11 @@ export function WorkItemSheet({
 
   // A scenario's step: the ask, Place on its first open sub-issue, Add a day.
   const seededSteps = React.useRef(false);
+  // The seed reads the latest openPlace and openAdd, which read the latest view.
+  const opens = React.useRef({ openPlace, openAdd });
+  React.useLayoutEffect(() => {
+    opens.current = { openPlace, openAdd };
+  });
   const ready = view !== null && sheet.week !== null;
   React.useEffect(() => {
     if (!open || seededSteps.current || !ready || seedStep === null) return;
@@ -248,17 +253,15 @@ export function WorkItemSheet({
       const sub = sheet.subIssues.find((row) => !row.done);
       if (!sub) return;
       seededSteps.current = true;
-      openPlace(sub, null);
+      opens.current.openPlace(sub, null);
     } else if (seedStep === "add") {
       seededSteps.current = true;
-      openAdd();
+      opens.current.openAdd();
     } else if (seedStep === "link") {
       seededSteps.current = true;
       setStep({ kind: "link" });
     }
-    // openPlace and openAdd read the latest view; the seed runs once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, ready, seedStep, sheet.subIssues]);
+  }, [open, ready, seedStep, sheet.subIssues, urlStep, setUrlStep]);
 
   // Each opening and each step focuses its heading; back out of a step,
   // focus returns where it came from instead (leaveStep).

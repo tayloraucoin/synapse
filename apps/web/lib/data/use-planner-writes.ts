@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { BlockItemRecord } from "@syn/validators";
 import {
@@ -223,17 +223,16 @@ export function usePlannerWrites() {
   const queue = queueFor(source);
   const scenario = source.scenario.name;
 
-  function invalidate() {
+  const invalidate = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: weekQueryKey(scenario) });
     void queryClient.invalidateQueries({ queryKey: todayQueryKey(scenario) });
-  }
+  }, [queryClient, scenario]);
 
   useEffect(() => {
     void queue.setOnline(online).then(() => {
       if (online) invalidate();
     });
-    // invalidate reads only stable values.
-  }, [queue, online]);
+  }, [queue, online, invalidate]);
 
   const mutation = useMutation<unknown, Error, PlannerCall>({
     mutationFn: (call) => queue.run(call),

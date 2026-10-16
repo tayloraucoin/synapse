@@ -28,5 +28,5 @@ Step 5b round 2, y 8940, notes at y 9870 (each named "Frame", told by its x). Th
 | `Frame`                                                | 2410 | 9870 | note      | `interactions/ready-go/states/reopened-later.md`  |                    |
 | `ready-go / welcome, offline / 402 / light`            | 2892 | 8940 | specced   | `interactions/ready-go/states/offline.md`         | D-USE-71           |
 | `Frame`                                                | 2892 | 9870 | note      | `interactions/ready-go/states/offline.md`         |                    |
-| `How it flows · step 5b round 2`                       | 3374 | 8940 | note      | `interactions/ready-go/index.md`                  | D-USE-71           |
+| `How it flows · step 5b round 2`                       | 3374 | 8940 | note      | `interactions/ready-go/how-it-flows.md`           | D-USE-71           |
 | `Dev note · The Ready, go hand-off`                    | 3856 | 8940 | dev note  | `interactions/ready-go/index.md`                  |                    |

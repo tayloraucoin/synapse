@@ -10,6 +10,7 @@ Inventory: `packages/ui/src/`, stories beside.
 | Undo           | `Toaster`, its one job                                           |
 | Empty, loading | `EmptyState` one sentence; `SkeletonRow`                         |
 | Failure        | `RegionRetry` per region; `ErrorPage` per route                  |
+| Failure detail | `RegionRetry` `detail`: muted small line, what is still true     |
 | Sheet          | `ResponsiveSheet`                                                |
 | Reading        | `PassageCarousel` clamped; `PassageReader` full screen           |
 | Review numbers | `BigNumber` with `FormulaSentence`                               |

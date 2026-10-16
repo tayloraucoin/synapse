@@ -47,13 +47,7 @@ test("C1: the live route folders are the auth, api, legal and logout groups and 
 test("C9: every moved route folder, router and job is under _legacy/, so a deletion fails", () => {
   const web = "apps/web/_legacy/app";
   // orient came back by git mv and is owned live from USE-12.
-  for (const name of [
-    "today",
-    "day",
-    "review",
-    "settings",
-    "workflow",
-  ]) {
+  for (const name of ["today", "day", "review", "settings", "workflow"]) {
     assert.ok(
       existsSync(at(`${web}/(shell)/${name}`)),
       `${name} is in _legacy`,

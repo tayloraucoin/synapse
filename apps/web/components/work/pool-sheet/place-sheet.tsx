@@ -97,13 +97,17 @@ export function PlaceSheet({
     onClose();
   }
 
-  // A capture of the placed state places once, on its own picks.
+  // A capture of the placed state places once, on its own picks, with the
+  // latest place.
   const placedOnce = React.useRef(false);
+  const latestPlace = React.useRef(place);
+  React.useLayoutEffect(() => {
+    latestPlace.current = place;
+  });
   React.useEffect(() => {
     if (!initial?.place || !sheet.ready || placedOnce.current) return;
     placedOnce.current = true;
-    void place();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, when ready
+    void latestPlace.current();
   }, [initial?.place, sheet.ready]);
 
   const card = view?.doesntFit ?? null;

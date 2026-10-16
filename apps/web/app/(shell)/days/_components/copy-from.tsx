@@ -4,6 +4,7 @@ import * as React from "react";
 import { Button, CopyFromIcon, Text } from "@syn/ui";
 import { firstFreeTime } from "@syn/utils";
 import { CopyPicker, DayStrip, type CopyPickerRow } from "@/components/planner";
+import type { SetUpScenarioStart } from "@/lib/data/set-up-start";
 import {
   copyHelper,
   copySources,
@@ -21,7 +22,6 @@ import type { usePlannerWrites } from "@/lib/data/use-planner-writes";
 import type { SetUpDay } from "@/lib/data/use-set-up-day";
 import { useWeek } from "@/lib/data/use-week";
 import type { DayRef } from "@/lib/data/week-records";
-import type { SetUpScenarioStart } from "@/lib/fixtures/scenarios/set-up";
 import { useUndoToast } from "@/lib/hooks/use-undo-toast";
 import { DAYS_COPY as COPY } from "./copy";
 import { DayAsk } from "./day-parts";
