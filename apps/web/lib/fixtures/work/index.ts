@@ -83,6 +83,11 @@ export interface WorkServer {
   backToPool(input: { workItemId: string }): Promise<PlannerWrite>;
   /** Archived here; the Linear issue stays as it is. */
   removeFromSynapse(input: { workItemId: string }): Promise<PlannerWrite>;
+  /**
+   * Unlink from Linear (USE-66): a plain item from here on, the issue's
+   * description kept as its notes; the issue is never written.
+   */
+  unlinkFromLinear(input: { workItemId: string }): Promise<PlannerWrite>;
   /** New task (USE-51): the item, then a slot a picked day; `id` is the item. */
   createTask(input: CreateTaskInput): Promise<PlannerWrite>;
   /**
@@ -358,6 +363,38 @@ export function createWorkServer({
         for (const session of openSessions(workItemId)) {
           journal.remove("slots", session.id);
         }
+        return { id: workItemId };
+      });
+    },
+
+    unlinkFromLinear({ workItemId }) {
+      return write((journal) => {
+        const item = findWorkItem(workItemId);
+        if (item.linearIssueId === null) {
+          throw new PlannerRefusal("invalid", "That task is not in Linear.");
+        }
+        // Synapse's copy of the issue: the description becomes the notes (D-USE-36).
+        const issue = records.integrations?.linear
+          .filter((w) => w.connection.id === item.linearConnectionId)
+          .flatMap((w) => [...w.snapshot.issues, ...w.snapshot.subIssues])
+          .find((row) => row.id === item.linearIssueId);
+        const description = issue?.description ?? null;
+        const at = stamp();
+        journal.put(
+          "workItems",
+          workItemRecord.parse({
+            ...item,
+            notes:
+              description === null || description.trim() === ""
+                ? item.notes
+                : description,
+            // [ASSUMPTION] The identifier goes too, so nothing links it again.
+            linearIdentifier: null,
+            linearConnectionId: null,
+            linearIssueId: null,
+            updatedAt: at,
+          }),
+        );
         return { id: workItemId };
       });
     },

@@ -3,6 +3,7 @@ import { fixtureId } from "../ids";
 import type { FixtureRecords } from "../records";
 import { BASE_DATE } from "./base-day";
 import type { Scenario } from "./index";
+import { ITEM_SHEET_LINEAR_SCENARIOS } from "./item-sheet-linear";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
 import { TODAY_DESK_NOW, todayWorkRecords } from "./today-desk";
 import { WEEK_IDS } from "./week";
@@ -211,4 +212,6 @@ export const ITEM_SHEET_SCENARIOS: Record<string, () => Scenario> = {
     mode: "ready",
     view: { open: "item:more" },
   }),
+  // USE-66: a linked work item's Linear side, `&id=<ITEM_SHEET_LINEAR_IDS.item>`.
+  ...ITEM_SHEET_LINEAR_SCENARIOS,
 };

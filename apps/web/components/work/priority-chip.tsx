@@ -36,10 +36,15 @@ const BARS: Record<Exclude<PriorityLevel, "urgent">, number> = {
   low: 1,
 };
 
+/** `text-current` keeps the tone inside a menu row, which mutes a bare svg. */
 function PriorityGlyph({ level }: { level: PriorityLevel }) {
   if (level === "urgent")
     return (
-      <svg aria-hidden="true" viewBox="0 0 12 12" className="size-3 shrink-0">
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 12 12"
+        className="size-3 shrink-0 text-current"
+      >
         <rect width="12" height="12" rx="2" fill="currentColor" />
         <path
           d="M6 2.75v4"
@@ -52,7 +57,11 @@ function PriorityGlyph({ level }: { level: PriorityLevel }) {
     );
   const lit = BARS[level];
   return (
-    <svg aria-hidden="true" viewBox="0 0 12 12" className="size-3 shrink-0">
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 12 12"
+      className="size-3 shrink-0 text-current"
+    >
       {[0, 1, 2].map((i) => (
         <rect
           key={i}

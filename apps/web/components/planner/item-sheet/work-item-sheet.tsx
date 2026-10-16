@@ -17,6 +17,13 @@
  * ···. On the phone a step in this sheet, as the action sheet draws it; at
  * the desk a pull-down (D-USE-103). Each of its writes closes the sheet and
  * toasts with Undo [ASSUMPTION, as the state file].
+ *
+ * LINEAR (USE-66). A linked item carries the Linear line under its name and
+ * Priority, Assignee and Description under Tier. The status chip opens the
+ * status list as a step in this sheet; a pick writes to Linear, takes its
+ * consequence here and goes back to the fields ("start" is the work loop's
+ * Start). ··· adds Unlink from Linear, which asks nothing and toasts with
+ * Undo; the sheet stays, on a plain item.
  */
 import * as React from "react";
 import { useWorkClock } from "@syn/hooks";
@@ -37,10 +44,20 @@ import { useDataSource } from "@/lib/data/source";
 import { useWorkItemSheet } from "@/lib/data/use-item-sheet";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
 import { ITEM_SHEET_COPY } from "./copy";
+import { LinearFields } from "./linear-fields";
+import { LinearLine, LinearLineStatus } from "./linear-line";
+import { StatusList } from "./status-list";
 import { WorkItemFields } from "./work-item-fields";
 import { WorkMoreList, WorkMoreMenu, workMoreRows } from "./work-more";
 
 const COPY = ITEM_SHEET_COPY.work;
+
+/** A scenario's `view.open` on a linked item: the status list, or Priority open. */
+function seededLinear(open: string | undefined): "status" | "priority" | null {
+  return open === "item:status" || open === "item:priority"
+    ? (open.slice("item:".length) as "status" | "priority")
+    : null;
+}
 
 export interface WorkItemSheetProps {
   open: boolean;
@@ -70,6 +87,8 @@ export function WorkItemSheet({
   const work = useTodayWork(dateKey, now);
   const loop = useWorkLoop(dateKey, work.view);
   const atDesk = useIsSplit();
+  const seededStep = seededLinear(source.scenario.view?.open);
+  const [statusAsked, setStatusOpen] = React.useState(false);
 
   const [moreAsked, setMore] = React.useState(false);
   // The step is the phone's; at the desk ··· is a pull-down (D-USE-103).
@@ -83,7 +102,8 @@ export function WorkItemSheet({
     if (!open || seeded.current || view === null) return;
     seeded.current = true;
     if (seededMore) setMore(true);
-  }, [open, view, seededMore]);
+    if (seededStep === "status") setStatusOpen(true);
+  }, [open, view, seededMore, seededStep]);
 
   // Each opening and each step focuses its heading.
   const loaded = view !== null;
@@ -91,15 +111,18 @@ export function WorkItemSheet({
     if (!open || !loaded) return;
     const frame = requestAnimationFrame(() => titleRef.current?.focus());
     return () => cancelAnimationFrame(frame);
-  }, [open, more, loaded]);
+  }, [open, more, statusAsked, loaded]);
 
   function close() {
     setMore(false);
+    setStatusOpen(false);
     onClose();
   }
 
   if (view === null) return null;
   const { slot, item } = view;
+  const linear = sheet.linear;
+  const statusOpen = statusAsked && linear !== null;
   const loopView = work.view;
   const state = slot ? loopView?.states.get(slot.id) : undefined;
   const foot =
@@ -162,6 +185,26 @@ export function WorkItemSheet({
     toastUndo({ text, onUndo: () => void sheet.undo(written) });
   }
 
+  async function pickStatus(stateId: string) {
+    setStatusOpen(false);
+    const effect = await sheet.setStatus(stateId);
+    // In progress starts the timer, as Start does, once the day has begun.
+    if (effect === "start" && foot && state !== "running") await start();
+  }
+
+  type PlannerWritten = Parameters<typeof sheet.undoPlanner>[0];
+
+  async function plannerAct(
+    write: () => Promise<PlannerWritten | null>,
+    text: string,
+    closes: boolean,
+  ) {
+    if (closes) close();
+    const written = await write();
+    if (written === null) return;
+    toastUndo({ text, onUndo: () => void sheet.undoPlanner(written) });
+  }
+
   const rows = workMoreRows(view, {
     onMarkDone: () =>
       void act(sheet.markTaskDone, COPY.toast.taskDone(item.title)),
@@ -172,6 +215,23 @@ export function WorkItemSheet({
     },
     onRemove: () =>
       void act(sheet.removeFromSynapse, COPY.toast.removed(item.title)),
+    ...(linear === null
+      ? {}
+      : {
+          onUnlink: () =>
+            void plannerAct(
+              sheet.unlink,
+              ITEM_SHEET_COPY.linear.toast.unlinked(item.title),
+              false,
+            ),
+          onMoveTo: () => onMoveTo?.(item.id),
+          onNotToday: () =>
+            void plannerAct(
+              sheet.notToday,
+              ITEM_SHEET_COPY.toast.offToday(item.title),
+              true,
+            ),
+        }),
   });
 
   const closeButton = (
@@ -186,33 +246,34 @@ export function WorkItemSheet({
     </Button>
   );
 
-  const header = more ? null : (
-    <div className="flex min-w-0 flex-1 items-center gap-(--space-2)">
-      {closeButton}
-      <span className="flex-1" />
-      {atDesk ? (
-        <WorkMoreMenu view={view} rows={rows} defaultOpen={seededMore} />
-      ) : (
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label={COPY.more(item.title)}
-          aria-expanded={false}
-          onClick={() => setMore(true)}
-        >
-          <span
-            aria-hidden="true"
-            className="bg-surface text-foreground flex size-8 items-center justify-center rounded-full"
+  const header =
+    more || statusOpen ? null : (
+      <div className="flex min-w-0 flex-1 items-center gap-(--space-2)">
+        {closeButton}
+        <span className="flex-1" />
+        {atDesk ? (
+          <WorkMoreMenu view={view} rows={rows} defaultOpen={seededMore} />
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={COPY.more(item.title)}
+            aria-expanded={false}
+            onClick={() => setMore(true)}
           >
-            <MoreIcon className="size-4" />
-          </span>
-        </Button>
-      )}
-    </div>
-  );
+            <span
+              aria-hidden="true"
+              className="bg-surface text-foreground flex size-8 items-center justify-center rounded-full"
+            >
+              <MoreIcon className="size-4" />
+            </span>
+          </Button>
+        )}
+      </div>
+    );
 
   const footer =
-    foot && !more ? (
+    foot && !more && !statusOpen ? (
       <div className="grid grid-cols-2 gap-(--space-3)">
         {state === "running" ? (
           <span />
@@ -233,8 +294,9 @@ export function WorkItemSheet({
         open={open}
         onOpenChange={(next) => {
           if (next) return;
-          // Out of ···'s step goes back to the fields; out of the fields, closed.
+          // Out of ···'s or the status step goes back to the fields; out of the fields, closed.
           if (more) setMore(false);
+          else if (statusOpen) setStatusOpen(false);
           else close();
         }}
         title={item.title}
@@ -244,7 +306,7 @@ export function WorkItemSheet({
         returnFocusRef={returnFocusRef}
         size={more ? "default" : "tall"}
         classes={{
-          header: more ? "hidden" : "items-center pt-(--space-2)",
+          header: more || statusOpen ? "hidden" : "items-center pt-(--space-2)",
           body: "pt-(--space-1)",
         }}
       >
@@ -260,15 +322,66 @@ export function WorkItemSheet({
             }))}
             headingRef={titleRef}
           />
+        ) : statusOpen && linear !== null ? (
+          <StatusList
+            title={item.title}
+            identifier={linear.identifier}
+            workspace={linear.workspace}
+            groups={linear.groups}
+            currentId={linear.current.id}
+            onPick={(stateId) => void pickStatus(stateId)}
+            onBack={() => setStatusOpen(false)}
+            headingRef={titleRef}
+          />
         ) : (
           <WorkItemFields
-            view={view}
+            view={
+              linear === null
+                ? view
+                : { ...view, item: { ...item, size: linear.size } }
+            }
             titleRef={titleRef}
             onSize={(size) => void sheet.setSize(size)}
             onLength={(range) => void sheet.setLength(range)}
             onTier={(tier) => void sheet.setTier(tier)}
             onNotes={(notes) => void sheet.setNotes(notes)}
             onWhen={onMoveTo ? () => onMoveTo(item.id) : undefined}
+            linear={
+              linear === null
+                ? undefined
+                : {
+                    line: (
+                      <>
+                        <LinearLine
+                          status={linear.current}
+                          identifier={linear.identifier}
+                          project={linear.project}
+                          url={linear.url}
+                          onStatus={() => setStatusOpen(true)}
+                        />
+                        <LinearLineStatus
+                          line={linear.line}
+                          onRetry={(writeId) => void sheet.retryLinear(writeId)}
+                        />
+                      </>
+                    ),
+                    fields: (
+                      <LinearFields
+                        priority={linear.priority}
+                        onPriority={(priority) =>
+                          void sheet.setPriority(priority)
+                        }
+                        priorityOpen={seededStep === "priority"}
+                        assignee={sheet.assignee}
+                        assigneePhoto={sheet.assigneePhoto}
+                        description={linear.description}
+                        onDescription={(text) =>
+                          void sheet.setDescription(text)
+                        }
+                      />
+                    ),
+                  }
+            }
           />
         )}
       </ResponsiveSheet>

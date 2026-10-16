@@ -29,7 +29,8 @@ const COPY = ITEM_SHEET_COPY.work;
  * WorkItemFields — the Item sheet's body on a work item (USE-65;
  * item-sheet/states/size-and-length.md): the scope line, the icon and the
  * name, then Size, Length, Tier, When and, on a Synapse-only item, Notes, on
- * hairlines. A linked item's Linear line and Description are USE-66's.
+ * hairlines. A linked item's Linear line (under the name) and its Priority,
+ * Assignee and Description (under Tier) come in as `linear` (USE-66).
  *
  * Size's five cards set the size and reset the range from it; Length is
  * Exact (one stepper) or Range (two), and its helper names the top the day
@@ -47,6 +48,8 @@ export interface WorkItemFieldsProps {
   onWhen?: () => void;
   /** Huge's "Split it?": Spread (USE-78); absent, it waits for it. */
   onSpread?: () => void;
+  /** A linked item's Linear line and its rows under Tier (USE-66). */
+  linear?: { line: React.ReactNode; fields: React.ReactNode };
 }
 
 const SIZES: readonly WorkSize[] = [
@@ -60,7 +63,7 @@ const ROW =
   "border-hairline flex flex-col gap-(--space-2) border-t py-(--space-3)";
 const LABEL = "text-(length:--fs-body) text-foreground";
 
-/** "Work, 9:30 to 12:00 · Primary · session 1 of 3". */
+/** "Work, 9:30 to 12:00 · Primary · session 1 of 3", and " · done" once checked. */
 export function scopeWords(view: WorkSheetView): string {
   const { slot, session } = view;
   if (slot === null) return COPY.pool;
@@ -71,6 +74,8 @@ export function scopeWords(view: WorkSheetView): string {
     place,
     slot.tier === null ? null : COPY.tier[slot.tier],
     session === null ? null : COPY.session(session.n, session.of),
+    // linear-done.md: "Work, 9:30 to 12:00 · Primary · done".
+    slot.done ? ITEM_SHEET_COPY.linear.done : null,
   ]
     .filter((part) => part !== null)
     .join(" · ");
@@ -93,6 +98,7 @@ export function WorkItemFields({
   onNotes,
   onWhen,
   onSpread,
+  linear,
 }: WorkItemFieldsProps) {
   const { item, slot } = view;
   const ids = {
@@ -179,6 +185,8 @@ export function WorkItemFields({
           {item.title}
         </Text>
       </div>
+
+      {linear?.line}
 
       <div className={ROW}>
         <div className="flex items-baseline justify-between gap-(--space-3)">
@@ -304,6 +312,8 @@ export function WorkItemFields({
           />
         </div>
       ) : null}
+
+      {linear?.fields}
 
       <button
         type="button"

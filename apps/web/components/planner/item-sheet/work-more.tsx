@@ -8,8 +8,11 @@ import {
   DeleteIcon,
   FromPoolIcon,
   ItemIcon,
+  MoveToIcon,
+  NotTodayIcon,
   OpenInLinearIcon,
   Text,
+  UnlinkIcon,
 } from "@syn/ui";
 import { shortDay } from "@/components/work/add/new-task/form";
 import type { WorkSheetView } from "@/lib/data/item-sheet-work";
@@ -17,6 +20,7 @@ import { NowBlockMenu, type NowBlockMenuRow } from "../now-block-menu";
 import { ITEM_SHEET_COPY } from "./copy";
 
 const COPY = ITEM_SHEET_COPY.work;
+const LINEAR = ITEM_SHEET_COPY.linear;
 
 /**
  * A work item's ··· (USE-65; item-sheet/states/work-more-open.md, D-USE-57):
@@ -37,6 +41,23 @@ export interface WorkMoreActions {
   onSpread?: () => void;
   onOpenInLinear: () => void;
   onRemove: () => void;
+  /** A linked item's Unlink from Linear (USE-66). */
+  onUnlink?: () => void;
+  /** Before the day begins, a linked item's Move to… and Not today (USE-66). */
+  onMoveTo?: () => void;
+  onNotToday?: () => void;
+}
+
+/** Unlink, after a rule, with its consequence (linear-more-open.md). */
+function unlinkRow(actions: WorkMoreActions): NowBlockMenuRow | null {
+  if (actions.onUnlink === undefined) return null;
+  return {
+    label: LINEAR.menu.unlink,
+    icon: UnlinkIcon,
+    onSelect: actions.onUnlink,
+    detail: LINEAR.menu.unlinkLine,
+    separated: true,
+  };
 }
 
 export function workMoreRows(
@@ -44,6 +65,27 @@ export function workMoreRows(
   actions: WorkMoreActions,
 ): NowBlockMenuRow[] {
   const { item, otherSessions } = view;
+  // A linked item before the day begins (linear-more-open.md): Move to…,
+  // Not today, then Unlink; no Monday's usual on a work item.
+  if (item.linked && !view.ready && actions.onUnlink !== undefined) {
+    return [
+      {
+        label: ITEM_SHEET_COPY.menu.moveTo,
+        icon: MoveToIcon,
+        onSelect: () => actions.onMoveTo?.(),
+      },
+      ...(view.slot?.today
+        ? [
+            {
+              label: ITEM_SHEET_COPY.menu.notToday,
+              icon: NotTodayIcon,
+              onSelect: () => actions.onNotToday?.(),
+            },
+          ]
+        : []),
+      unlinkRow(actions)!,
+    ];
+  }
   const days = otherSessions.map(shortDay);
   const doneLine = COPY.menu.markDoneLine(days, item.linked);
   const rows: (NowBlockMenuRow | null)[] = [
@@ -76,13 +118,16 @@ export function workMoreRows(
       onSelect: actions.onRemove,
       ...(item.linked ? { detail: COPY.menu.removeLine } : {}),
     },
+    // [ASSUMPTION] Once the day has begun, Unlink follows the work menu's rows.
+    item.linked ? unlinkRow(actions) : null,
   ];
   return rows.filter((row) => row !== null);
 }
 
-/** The heading line: the icon, the name, "· session 1 of 3". */
+/** The heading line: the icon, the name, "· session 1 of 3"; before the day, "<name>, today only". */
 function headingWords(view: WorkSheetView): string {
   const { session, item } = view;
+  if (item.linked && !view.ready) return ITEM_SHEET_COPY.menu.title(item.title);
   return session === null
     ? item.title
     : `${item.title} · ${COPY.session(session.n, session.of)}`;

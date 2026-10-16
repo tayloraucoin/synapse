@@ -175,6 +175,74 @@ export const ITEM_SHEET_COPY = {
       start: "Start",
     },
   },
+  /**
+   * A linked item's Linear side (USE-66; linear-*.md, the status sheet,
+   * words-and-access.md). A failed write is ink, never red, never a miss.
+   */
+  linear: {
+    status: (word: string) => `Status, ${word}. Change`,
+    open: (identifier: string) => `Open ${identifier} in Linear`,
+    /** "Linear ↗": the word, then OpenInLinearIcon (no glyph in copy). */
+    linear: "Linear",
+    done: "done",
+    syncing: "Updating Linear",
+    offline: "Updates Linear when back online",
+    failed: (kept: string) => `Not updated in Linear. ${kept} is kept here.`,
+    tryAgain: "Try again",
+    /** "Done in Linear. Checked off here too, at 10:42." */
+    closed: (at: string) => `Done in Linear. Checked off here too, at ${at}.`,
+    /** What a failed description or estimate keeps [ASSUMPTION]. */
+    keptDescription: "The description",
+    keptSize: "The size",
+    priority: "Priority",
+    priorityHeading: "Priority · changes it in Linear",
+    priorityName: (word: string) => `Priority, ${word}. Change`,
+    priorities: {
+      0: "No priority",
+      1: "Urgent",
+      2: "High",
+      3: "Normal",
+      4: "Low",
+    } as Record<number, string>,
+    mediumInLinear: "Medium in Linear",
+    assignee: "Assignee",
+    /** An issue assigned elsewhere [ASSUMPTION: the snapshot holds Taylor's only]. */
+    unassigned: "Not assigned",
+    description: "Description",
+    synced: "Synced with Linear",
+    showAll: "Show all",
+    showLess: "Show less",
+    statusList: {
+      title: "Status",
+      back: "Close",
+      lead: (workspace: string) => `Moves it in Linear (${workspace})`,
+      scope: (title: string, identifier: string) => `${title} · ${identifier}`,
+      groups: {
+        backlog: "Backlog",
+        unstarted: "Unstarted",
+        started: "Started",
+        closed: "Completed and canceled",
+      },
+      /** The status sheet's consequences, by statusEffect; Backlog none, as drawn. */
+      effects: {
+        waiting: "moves to Waiting",
+        start: "starts the timer",
+        to_pool: "off today, back to the pool",
+        check: "checks it off",
+        off_today: "takes it off today",
+        none: null,
+      } as Record<string, string | null>,
+      current: "current",
+    },
+    menu: {
+      unlink: "Unlink from Linear",
+      unlinkLine:
+        "The item stays here as a plain item. The issue in Linear is untouched. Undo is offered after.",
+    },
+    toast: {
+      unlinked: (name: string) => `${name} is unlinked from Linear.`,
+    },
+  },
   /** Not found: the item is no longer on today. */
   gone: "This item is no longer on today.",
 } as const;

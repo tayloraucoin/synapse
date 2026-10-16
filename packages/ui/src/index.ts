@@ -1068,3 +1068,6 @@ export { CalendarIcon as MeetingIcon } from "lucide-react";
 
 /** A work item's ··· › Open in Linear (USE-65). */
 export { ExternalLinkIcon as OpenInLinearIcon } from "lucide-react";
+
+/** A linked item's ··· › Unlink from Linear (USE-66). */
+export { Link2OffIcon as UnlinkIcon } from "lucide-react";

@@ -10,8 +10,21 @@ import type {
 } from "@syn/types";
 import { clockFromMinutes, clockToMinutes, reflowItems } from "@syn/utils";
 import type { BlockItemRecord } from "@syn/validators";
+import { ITEM_SHEET_COPY } from "@/components/planner/item-sheet/copy";
+import type { PlannerWrite } from "@/lib/fixtures/planner";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import { deriveToday, type Today } from "./derive-today";
+import {
+  deriveLinearView,
+  retryLinear,
+  writeDescription,
+  writeNotToday,
+  writePriority,
+  writeStatus,
+  writeUnlink,
+  type LinearSheetServer,
+  type WorkLinearView,
+} from "./item-sheet-linear";
 import {
   deriveWorkSheet,
   undoWorkSheetWrite,
@@ -26,8 +39,9 @@ import {
   type WorkSheetView,
   type WorkSheetWrite,
 } from "./item-sheet-work";
-import { useDataSource } from "./source";
+import { useDataSource, useIsOffline } from "./source";
 import type { TodayRecords } from "./today-records";
+import { useAccount } from "./use-account";
 import { linearQueryKey, useLinear } from "./use-linear";
 import { usePlannerWrites } from "./use-planner-writes";
 import { poolQueryKey, usePool } from "./use-pool";
@@ -731,7 +745,10 @@ export function useWorkItemSheet(id: string | null) {
   const dateKey = source.todayKey();
   const scenario = source.scenario.name;
   const { slots } = usePool();
-  const { issueFor } = useLinear();
+  const linear = useLinear();
+  const { issueFor } = linear;
+  const offline = useIsOffline();
+  const account = useAccount();
 
   const query = useQuery<TodayRecords, Error, Today>({
     queryKey: todayQueryKey(scenario, dateKey),
@@ -752,9 +769,33 @@ export function useWorkItemSheet(id: string | null) {
           issue: issueFor(record),
         });
 
-  const server: WorkSheetServer = source.server;
+  // A linked item's Linear side (USE-66): the line, the status list, Priority, Description.
+  const issue = record ? issueFor(record) : null;
+  const linearView: WorkLinearView | null =
+    view === null || issue === null || record === undefined || !today
+      ? null
+      : deriveLinearView({
+          view,
+          issue,
+          states: issue.team ? linear.statesFor(issue.team.id) : [],
+          workspace:
+            linear.connections.find((c) => c.id === issue.connectionId)
+              ?.organizationName ?? "",
+          item: record,
+          offline,
+          timeZone: today.records.timeZone,
+          words: {
+            priorities: ITEM_SHEET_COPY.linear.priorities,
+            description: ITEM_SHEET_COPY.linear.keptDescription,
+            size: ITEM_SHEET_COPY.linear.keptSize,
+          },
+        });
+
+  const server: WorkSheetServer & LinearSheetServer = source.server;
   const viewRef = React.useRef(view);
   viewRef.current = view;
+  const linearRef = React.useRef(linearView);
+  linearRef.current = linearView;
 
   function invalidate() {
     for (const queryKey of [
@@ -802,5 +843,38 @@ export function useWorkItemSheet(id: string | null) {
     /** A ··· write's Undo; the day, the week and the pool read again. */
     undo: (done: { write: WorkSheetWrite; view: WorkSheetView }) =>
       undoWorkSheetWrite(server, done.view, done.write).finally(invalidate),
+    linear: linearView,
+    /** The account's name: Assignee on an issue assigned to Taylor (never written). */
+    // [ASSUMPTION] The first name, as the board's "Taylor".
+    assignee: account.data?.name.split(" ")[0] ?? null,
+    assigneePhoto: account.data?.photoUrl ?? null,
+    /** A picked status and its consequence; "start" is the caller's (the work loop's). */
+    setStatus: (stateId: string) => {
+      const at = viewRef.current;
+      const lin = linearRef.current;
+      const status = lin?.statuses.find((row) => row.state.id === stateId);
+      if (at === null || !lin || !status) return Promise.resolve(null);
+      return writeStatus(server, at, status, lin.done).finally(invalidate);
+    },
+    setPriority: (priority: number) =>
+      linearOnly((v) => writePriority(server, v, priority)),
+    setDescription: (description: string) =>
+      linearOnly((v) => writeDescription(server, v, description)),
+    retryLinear: (writeId: string) =>
+      retryLinear(server, writeId).finally(invalidate),
+    /** Not today: the date's session off, with its Undo. */
+    notToday: () => linearOnly((v) => writeNotToday(server, v)),
+    /** Unlink from Linear: nothing asked, nothing written to Linear; Undo restores. */
+    unlink: () => linearOnly((v) => writeUnlink(server, v)),
+    undoPlanner: (write: PlannerWrite) =>
+      server.undo(write.undo).finally(invalidate),
   };
+
+  function linearOnly<T>(
+    write: (v: WorkSheetView) => Promise<T>,
+  ): Promise<T | null> {
+    const at = viewRef.current;
+    if (at === null) return Promise.resolve(null);
+    return write(at).finally(invalidate);
+  }
 }
