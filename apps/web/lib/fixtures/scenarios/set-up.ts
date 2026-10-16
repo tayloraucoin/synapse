@@ -2,6 +2,7 @@ import {
   blockChangeRecord,
   blockItemRecord,
   blockRecord,
+  clientRecord,
   dayBoundsRecord,
   dayEventRecord,
   slotRecord,
@@ -790,6 +791,117 @@ function thursdayOwnRecords(): FixtureRecords {
   };
 }
 
+/* ------------------------------------------------ Add event (USE-53) -- */
+
+/**
+ * Monday 12's Work with lengths, so an event at 11:00 lands on planned
+ * work (event-inside-work.md): [Write the sync spec] 9:30 to 11:00 and
+ * [Review the Paper handoff] 11:00 to 11:30 in Primary, Secondary and
+ * Stretch a quarter hour each to 12:00. A band at 11:00 moves the handoff to
+ * 11:30 whole, and Primary then fills the block, so Secondary and Stretch
+ * slide out of its grid. Clients on, Kestrel Health first, for the desk's
+ * Client (D-USE-95).
+ */
+const SLOT_LENGTHS = [90, 30, 15, 15];
+
+export const ADD_EVENT_CLIENTS = {
+  kestrel: fixtureId(5, 151),
+  alder: fixtureId(5, 152),
+} as const;
+
+export function addEventRecords(): FixtureRecords {
+  const records = setUpThisWeekRecords();
+  return {
+    ...records,
+    slots: records.slots.map((slot, index) =>
+      slot.onDate === "2026-10-12"
+        ? { ...slot, lengthMin: SLOT_LENGTHS[index] ?? null }
+        : slot,
+    ),
+    clients: [
+      {
+        id: ADD_EVENT_CLIENTS.kestrel,
+        name: "Kestrel Health",
+        colorKey: "rose",
+      },
+      { id: ADD_EVENT_CLIENTS.alder, name: "Alder Studio", colorKey: "moss" },
+    ].map((client, sortOrder) =>
+      clientRecord.parse({
+        ...stamps,
+        logoPath: null,
+        archivedAt: null,
+        sortOrder,
+        ...client,
+      }),
+    ),
+    clientsEnabled: true,
+  };
+}
+
+const DESIGN_REVIEW = {
+  title: "[Design review]",
+  tag: "work",
+  startsAt: "11:00",
+  endsAt: "11:30",
+} as const;
+
+/** Each opens on Monday 12 of This week with Add event's sheet, or its add made. */
+const ADD_EVENT_DAYS: [string, () => Scenario][] = [
+  days("add-event", addEventRecords, {
+    week: "this",
+    day: 0,
+    event: DESIGN_REVIEW,
+  }),
+  days("event-name-needed", addEventRecords, {
+    week: "this",
+    day: 0,
+    event: { ...DESIGN_REVIEW, title: "" },
+  }),
+  days("event-inside-work", addEventRecords, {
+    week: "this",
+    day: 0,
+    event: { ...DESIGN_REVIEW, add: true },
+    holdToast: true,
+    holdSaved: true,
+  }),
+  days("event-own-block", addEventRecords, {
+    week: "this",
+    day: 0,
+    event: {
+      title: "Dentist [placeholder]",
+      tag: "personal",
+      startsAt: "15:30",
+      endsAt: "16:15",
+      add: true,
+    },
+    scrollTo: "12:00",
+    holdToast: true,
+    holdSaved: true,
+  }),
+];
+
+/**
+ * The desk popover (interactions/add-event.md), on its own part until the
+ * Week mounts it: Wednesday 14, "+ Event" open at 14:00 to 14:30, Work,
+ * Kestrel Health. `/dev/parts?state=event-popover` at 1728.
+ */
+export const EVENT_POPOVER_SCENARIOS: Record<string, () => Scenario> = {
+  "event-popover": setUp("event-popover", addEventRecords, {
+    seen: ["install-offer"],
+    setUp: {
+      week: "this",
+      day: 2,
+      event: {
+        title: "📞 [Call with Kestrel legal]",
+        tag: "work",
+        startsAt: "14:00",
+        endsAt: "14:30",
+        clientId: ADD_EVENT_CLIENTS.kestrel,
+      },
+    },
+  }),
+};
+
 /** Up at moved from 7:00 to 6:45: the edit Saving, Saved and Not saved catch. */
 const STAGED_MONDAY = { upAt: "06:45", lightsOut: "22:30" };
 
@@ -945,6 +1057,8 @@ export const DAYS_SCENARIOS: Record<string, () => Scenario> =
       { week: "usual", day: 3 },
       { offline: true },
     ),
+    // USE-53: Add event, the band inside Work, its own block.
+    ...ADD_EVENT_DAYS,
   ]);
 
 export const SET_UP_SCENARIOS: Record<string, () => Scenario> = {
@@ -956,4 +1070,5 @@ export const SET_UP_SCENARIOS: Record<string, () => Scenario> = {
     offline: true,
   }),
   ...DAYS_SCENARIOS,
+  ...EVENT_POPOVER_SCENARIOS,
 };

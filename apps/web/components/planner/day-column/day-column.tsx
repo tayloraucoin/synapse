@@ -13,6 +13,7 @@ import {
   IconTile,
   LockedIcon,
   MealIcon,
+  MeetingIcon,
   NowLine,
   ScheduleAxis,
   ScheduleBullets,
@@ -111,6 +112,12 @@ export interface DayColumnEvent {
   meta: string;
   /** On its own and holding now: the one verdigris edge. */
   underWay?: boolean;
+  /**
+   * A Synapse event (USE-53, D-USE-79): the calendar icon in place of the
+   * lock, its tag ("Work", "Personal") trailing a band, and a tap opens it
+   * to edit. Unset, Schedule's locked meeting.
+   */
+  event?: { tag: string; name: string; onOpen: () => void };
 }
 
 /** The block's items between its bands: `bands.length + 1` of them. */
@@ -262,9 +269,13 @@ type WorkRow =
 export function fitWorkRows(
   tiers: DayColumnBlock["tiers"],
   heightPx: number,
+  /** The tier the segment before ended on: it goes on with no second head (USE-53). */
+  continues?: WorkTier,
 ): { rows: WorkRow[]; more: number } {
-  const rows: WorkRow[] = tiers.flatMap(({ tier, items }) => [
-    { kind: "head" as const, tier },
+  const rows: WorkRow[] = tiers.flatMap(({ tier, items }, index) => [
+    ...(index === 0 && tier === continues
+      ? []
+      : [{ kind: "head" as const, tier }]),
     ...items.map((item) => ({ kind: "item" as const, tier, item })),
   ]);
   const total = rows.filter((row) => row.kind === "item").length;
@@ -702,6 +713,18 @@ function segmentPlaces(
   });
 }
 
+/** The tier the segments before this one last drew, if any. */
+function continuedTier(
+  places: readonly SegmentPlace[],
+  index: number,
+): WorkTier | undefined {
+  for (let at = index - 1; at >= 0; at -= 1) {
+    const tiers = places[at]!.segment.tiers;
+    if (tiers.length > 0) return tiers.at(-1)!.tier;
+  }
+  return undefined;
+}
+
 function BlockCard({
   block,
   topPx,
@@ -745,7 +768,7 @@ function BlockCard({
       : place,
   );
   const start = clockMinutes(block.startsAt);
-  const items = (place: SegmentPlace) =>
+  const items = (place: SegmentPlace, index = 0) =>
     block.form === "work" ? (
       <WorkTiers
         tiers={place.segment.tiers}
@@ -753,6 +776,7 @@ function BlockCard({
         hue={hue}
         bullet={bullet}
         tierHue={tierHue}
+        continues={continuedTier(places, index)}
       />
     ) : (
       <ItemGrid
@@ -838,7 +862,7 @@ function BlockCard({
           }}
           className="pointer-events-none absolute [&_button]:pointer-events-auto"
         >
-          {items(place)}
+          {items(place, index + 1)}
         </div>
       ))}
     </div>
@@ -920,35 +944,44 @@ function WorkTiers({
   hue,
   bullet,
   tierHue,
+  continues,
 }: {
   tiers: DayColumnSegment["tiers"];
   roomPx: number;
   hue: BlockHue;
   bullet: (item: DayColumnItem) => ScheduleBullet;
   tierHue?: Record<WorkTier, SquareHue>;
+  /** Past a band, the tier it ends on goes on headless (event-inside-work.md). */
+  continues?: WorkTier;
 }) {
-  const { rows, more } = fitWorkRows(tiers, roomPx);
+  const { rows, more } = fitWorkRows(tiers, roomPx, continues);
   if (rows.length === 0 && more === 0) return null;
   // Each tier's head, then its items one a line, all on the 20 px rhythm.
-  const groups: { tier: WorkTier; items: DayColumnItem[] }[] = [];
+  const groups: { tier: WorkTier; head: boolean; items: DayColumnItem[] }[] =
+    [];
   for (const row of rows) {
-    if (row.kind === "head") groups.push({ tier: row.tier, items: [] });
-    else groups.at(-1)?.items.push(row.item);
+    if (row.kind === "head") {
+      groups.push({ tier: row.tier, head: true, items: [] });
+    } else if (groups.length === 0) {
+      groups.push({ tier: row.tier, head: false, items: [row.item] });
+    } else groups.at(-1)?.items.push(row.item);
   }
   return (
     <div className="flex flex-col gap-(--space-1)">
       {groups.map((group, index) => (
         <div key={group.tier} className="flex flex-col gap-(--space-1)">
-          <Text
-            as="span"
-            variant="caption"
-            tone="muted"
-            weight={500}
-            className="flex h-5 items-center gap-(--space-1)"
-          >
-            {tierHue ? <HueSquare hue={tierHue[group.tier]} /> : null}
-            {COPY.tier[group.tier]}
-          </Text>
+          {group.head ? (
+            <Text
+              as="span"
+              variant="caption"
+              tone="muted"
+              weight={500}
+              className="flex h-5 items-center gap-(--space-1)"
+            >
+              {tierHue ? <HueSquare hue={tierHue[group.tier]} /> : null}
+              {COPY.tier[group.tier]}
+            </Text>
+          ) : null}
           <ScheduleBullets
             layout="lines"
             bullets={group.items.map(bullet)}
@@ -1035,8 +1068,9 @@ function MealBand({
 
 /**
  * An event inside no block (D-USE-38): a fill in its colour with a 4 px
- * rule, the lock (it keeps its time), its name and "<span> · <tag>". Not a
- * target here [ASSUMPTION: an event's sheet is its own ticket's].
+ * rule, the lock (it keeps its time), its name and "<span> · <tag>". A
+ * Synapse event (USE-53) takes the calendar icon and opens to edit on a
+ * tap; Schedule's is not a target.
  */
 function EventCard({
   event,
@@ -1059,13 +1093,20 @@ function EventCard({
         event.underWay ? "border-y border-e border-now" : null,
       )}
     >
+      {event.event ? (
+        <CoverButton label={event.event.name} onOpen={event.event.onOpen} />
+      ) : null}
       <span
         aria-hidden="true"
         className={cn("w-1 shrink-0", HUE_DOT[event.hue])}
       />
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5 pt-(--space-2) ps-(--space-3) pe-(--space-2)">
+      <div className="pointer-events-none flex min-w-0 flex-1 flex-col gap-0.5 pt-(--space-2) ps-(--space-3) pe-(--space-2)">
         <div className="flex min-w-0 items-center gap-(--space-2)">
-          <LockedIcon aria-hidden="true" className="size-3 shrink-0" />
+          {event.event ? (
+            <MeetingIcon aria-hidden="true" className="size-3.5 shrink-0" />
+          ) : (
+            <LockedIcon aria-hidden="true" className="size-3 shrink-0" />
+          )}
           <Text as="span" variant="body" weight={600} truncate>
             {event.title}
           </Text>

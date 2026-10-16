@@ -1,6 +1,7 @@
 import type * as React from "react";
 import { createElement } from "react";
 import { AccountPart } from "./account-parts";
+import { EventPopoverPart } from "./add-event-parts";
 import { AddPart, type AddPartState } from "./add-parts";
 import { BlockViewPart } from "./block-view-parts";
 import {
@@ -39,7 +40,7 @@ import {
   POOL_SHEET_SCENARIOS,
   type PoolSheetScenarioName,
 } from "./scenarios/pool-sheet";
-import { DAYS_SCENARIOS } from "./scenarios/set-up";
+import { DAYS_SCENARIOS, EVENT_POPOVER_SCENARIOS } from "./scenarios/set-up";
 import { SETTINGS_SCENARIOS } from "./scenarios/settings";
 import {
   SPREAD_PHONE_SCENARIOS,
@@ -323,6 +324,10 @@ for (const state of Object.keys(WEEK_SCENARIOS)) {
 // USE-39: Set my days, under its scenarios' names.
 for (const state of Object.keys(DAYS_SCENARIOS)) {
   registerPart(state, () => createElement(DaysPart));
+}
+// USE-53: the desk's Add event popover, until the Week mounts it.
+for (const state of Object.keys(EVENT_POPOVER_SCENARIOS)) {
+  registerPart(state, () => createElement(EventPopoverPart));
 }
 // USE-58: the desk's Today frame, under the today-desk scenarios' names.
 for (const state of Object.keys(TODAY_DESK_SCENARIOS)) {

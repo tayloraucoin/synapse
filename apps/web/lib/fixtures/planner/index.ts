@@ -142,6 +142,8 @@ export interface PlannerServer {
     input: DayEventWrite,
     scope?: WriteScope,
   ): Promise<PlannerWrite>;
+  /** A Synapse event's Delete event (USE-53); Google's are never written. */
+  removeDayEvent(input: { id: string }): Promise<PlannerWrite>;
   /** D-USE-32 and D-USE-87: blocks, times, kinds and items; Work as time only. */
   copyDay(input: { from: DayRef; to: DayRef }): Promise<PlannerWrite>;
   /**
@@ -808,6 +810,16 @@ export function createPlannerServer({
           }),
         );
         return { id: row.id, reach: input.rrule != null ? scope : undefined };
+      });
+    },
+
+    removeDayEvent({ id }) {
+      return write((journal) => {
+        if (!records.dayEvents.some((event) => event.id === id)) {
+          throw new PlannerRefusal("unknown", "No event with that id.");
+        }
+        journal.remove("dayEvents", id);
+        return {};
       });
     },
 

@@ -398,8 +398,8 @@ interface PlusRow {
  * menu is open, a dropdown above it (D-USE-28) titled "Add to <weekday>":
  * Block, Transition, in This week Event (USE-42), a separator, From a
  * saved block, which opens USE-45's picker of other days' blocks
- * (D-USE-87), and takes no tap when none is there. Event's sheet is the
- * Add event ticket's; until then it shows and takes no tap [ASSUMPTION].
+ * (D-USE-87), and takes no tap when none is there. Event opens the Add
+ * event sheet (USE-53).
  */
 export function PlusMenu({
   day,
@@ -411,6 +411,7 @@ export function PlusMenu({
   onBlock,
   onTransition,
   onSaved,
+  onEvent,
 }: {
   day: string;
   disabled: boolean;
@@ -423,6 +424,8 @@ export function PlusMenu({
   onBlock: () => void;
   onTransition: () => void;
   onSaved: () => void;
+  /** Event's Add event sheet (USE-53); unset, the row takes no tap. */
+  onEvent?: () => void;
 }) {
   const [open, setOpen] = React.useState(false);
   // Seeded after mount, so the server and the first paint agree.
@@ -449,7 +452,7 @@ export function PlusMenu({
             label: COPY.event,
             line: COPY.eventLine,
             icon: AddEventIcon,
-            disabled: true,
+            ...(onEvent ? { onSelect: onEvent } : { disabled: true }),
           },
         ]
       : []),

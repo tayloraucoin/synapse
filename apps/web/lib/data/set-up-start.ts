@@ -33,4 +33,17 @@ export interface SetUpScenarioStart {
    */
   copy?: "picker" | "replace" | "copied" | "saved";
   copyFrom?: number;
+  /**
+   * Add event on load (USE-53): its sheet open with these fields typed, or
+   * (`add`) the add sent once, so the band or own block and its Toaster show.
+   */
+  event?: {
+    title?: string;
+    tag?: "work" | "personal";
+    startsAt: string;
+    endsAt?: string;
+    /** A Work event's client (the desk's Client). */
+    clientId?: string;
+    add?: boolean;
+  };
 }

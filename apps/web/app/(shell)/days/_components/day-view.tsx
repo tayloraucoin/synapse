@@ -9,15 +9,22 @@ import {
   boundsEdge,
   clockFromMinutes,
   clockMinutes,
+  firstFreeTime,
   tappedSlot,
   weekKeyOf,
 } from "@syn/utils";
+import type { DayEventRecord } from "@syn/validators";
 import {
   DAY_COLUMN_PX_PER_HOUR,
   DayColumn,
   OfflineLine,
 } from "@/components/planner";
-import { DAY_COLUMN_COPY } from "@/components/planner/day-column/copy";
+import {
+  AddEventSheet,
+  formOf,
+  type AddEventForm,
+  type EventDone,
+} from "@/components/planner/add-event";
 import { TIER_HUE } from "@/components/work";
 import {
   PoolButton,
@@ -63,6 +70,7 @@ import {
   type DayChip,
 } from "./day-parts";
 import { DaysHeader } from "./days-header";
+import { hasBands, ownEventCards, withEventBands } from "./event-bands";
 import { useRepeatMove } from "./repeat-move";
 
 /**
@@ -409,6 +417,39 @@ function SetDay({
   }, [scrollTo, firstHour]);
 
   const ready = !column.isLoading && !column.isError;
+
+  // Add event (USE-53): + › Event's sheet, or a Synapse event tapped to edit.
+  // The time decides where it lands: a band inside its block, or its own.
+  const [eventSheet, setEventSheet] = React.useState<{
+    start: Partial<AddEventForm> & { startsAt: string };
+    addOnOpen?: boolean;
+  } | null>(null);
+  const openEvent = (event: DayEventRecord) =>
+    setEventSheet({ start: formOf(event) });
+  const dayBlocks =
+    place.date === null
+      ? view.blocks
+      : withEventBands(view.blocks, day, openEvent);
+  // [ASSUMPTION] The + starts it at the day's first free time, as Block's.
+  const eventStart = firstFreeTime({
+    upAt: upAt ?? "07:00",
+    blocks: view.blocks,
+  });
+  const eventDone = ({ words, undo }: EventDone) =>
+    undoToast({
+      text: words,
+      onUndo: () => void writes.undo(undo),
+      ...(hold ? { durationMs: Infinity } : {}),
+    });
+  // A frame's Add event on load (`?state=`): the sheet open, or the add sent.
+  const stagedEvent = start?.day === place.day ? start.event : undefined;
+  const eventStaged = React.useRef(false);
+  React.useEffect(() => {
+    if (eventStaged.current || stagedEvent === undefined || !ready) return;
+    eventStaged.current = true;
+    const { add, ...fields } = stagedEvent;
+    setEventSheet({ start: fields, addOnOpen: add === true });
+  }, [stagedEvent, ready]);
   const dayName = weekdayName(place.day);
   const copyFrom = useCopyFrom({
     place,
@@ -601,7 +642,7 @@ function SetDay({
           orient={view.orient}
           blocks={
             ready
-              ? view.blocks.map((b) => ({
+              ? dayBlocks.map((b) => ({
                   ...b,
                   ringed: b.id === changed,
                   moved: b.id === moved,
@@ -631,7 +672,8 @@ function SetDay({
             thisWeek && ready
               ? (block) => {
                   const own = parts.get(block.id);
-                  if (!own) return undefined;
+                  // An event inside it: the block's own tiers around its band (USE-53).
+                  if (!own || hasBands(block)) return undefined;
                   return (
                     <WorkTiersInPlace
                       parts={own}
@@ -654,7 +696,7 @@ function SetDay({
                 }
               : undefined
           }
-          events={thisWeek && ready ? ownEvents(day) : []}
+          events={ready ? ownEventCards(view.blocks, day, openEvent) : []}
           overlaps={
             ready
               ? view.overlaps.map((pair) => ({
@@ -788,12 +830,30 @@ function SetDay({
                   onBlock={() => sheetAt()}
                   onTransition={() => sheetAt(undefined, "transition")}
                   onSaved={copyFrom.openSaved}
+                  onEvent={
+                    place.date === null
+                      ? undefined
+                      : () => setEventSheet({ start: { startsAt: eventStart } })
+                  }
                 />
               </div>
             </div>
           </div>
         )}
       </div>
+      {place.date !== null ? (
+        <AddEventSheet
+          open={eventSheet !== null}
+          onOpenChange={(open) => {
+            if (!open) setEventSheet(null);
+          }}
+          target={{ week: place.week, day: place.day }}
+          start={eventSheet?.start ?? { startsAt: eventStart }}
+          addOnOpen={eventSheet?.addOnOpen ?? false}
+          onDone={eventDone}
+          returnFocusRef={copyFrom.plusRef}
+        />
+      ) : null}
       {thisWeek && place.date !== null ? (
         <ThisWeekPool
           open={poolOpen}
@@ -809,29 +869,4 @@ function SetDay({
       ) : null}
     </div>
   );
-}
-
-/**
- * The day's events outside every block, on their own at their times (USE-81:
- * "15:30 [Dentist]", a plum band). One inside a block is that block's.
- */
-function ownEvents(day: SetUpDay) {
-  const minutes = (time: string) => clockMinutes(time);
-  return day.events
-    .filter(
-      (event) =>
-        !day.blocks.some(
-          (b) =>
-            minutes(event.startsAt) < minutes(b.endsAt) &&
-            minutes(event.endsAt) > minutes(b.startsAt),
-        ),
-    )
-    .map((event) => ({
-      id: event.id,
-      title: event.title,
-      startsAt: event.startsAt,
-      endsAt: event.endsAt,
-      hue: "plum" as const,
-      meta: DAY_COLUMN_COPY.eventMeta(event.startsAt, event.endsAt, event.tag),
-    }));
 }
