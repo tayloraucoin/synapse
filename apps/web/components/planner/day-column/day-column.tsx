@@ -230,6 +230,12 @@ const PAD_END_PX = 8;
 /** The breath under a band before the items after it. */
 const AFTER_BAND_PX = 8;
 
+/**
+ * The labels hang under their hour's line, so the now tag covers its own
+ * hour's label for this long past the hour; that label is hidden.
+ */
+const NOW_TAG_CLEAR_MIN = 30;
+
 const pxOf = (minutes: number) => (minutes / 60) * DAY_COLUMN_PX_PER_HOUR;
 
 /** The room a block's height leaves for lines of items. */
@@ -318,7 +324,16 @@ export function DayColumn({
         timeZone={timeZone}
         ariaLabel={COPY.axis}
         gutterPx={GUTTER_PX}
-        formatHour={hourLabel}
+        // The hour label nearest the now tag gives way to it (D-USE-30).
+        formatHour={
+          now === null
+            ? hourLabel
+            : (minutes) =>
+                now.atMin - minutes >= 0 &&
+                now.atMin - minutes < NOW_TAG_CLEAR_MIN
+                  ? ""
+                  : hourLabel(minutes)
+        }
         hourLinesOnly
         hourLabelAlign="start"
         className="overflow-visible pt-(--space-2)"

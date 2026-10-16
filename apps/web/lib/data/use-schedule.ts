@@ -17,14 +17,15 @@ import type { Today } from "./derive-today";
 import { useDataSource } from "./source";
 import { isAllDay, phaseOf, type NowPhase } from "./use-now";
 import {
+  checklistRows,
   deriveReviewDay,
   type ReviewBlock,
   type ReviewItem,
   type ReviewTier,
 } from "./use-review-day";
 import { useToday } from "./use-today";
-
 import { itemsOnDate } from "./today-records";
+
 /**
  * Schedule's data (USE-27; day/schedule/): the whole day as the day column
  * draws it, from `useToday`'s records. Review the day's blocks and items
@@ -277,31 +278,6 @@ export function deriveSchedule(today: Today, now: Date): ScheduleView {
     allDay,
     empty: blocks.length === 0 && free.length === 0 && allDay === null,
   };
-}
-
-/** The all-day checklist's rows in order, checked from the date's slots. */
-function checklistRows(occurrence: Occurrence, today: Today) {
-  const { records } = today;
-  return records.blockItems
-    .filter(
-      (item) =>
-        item.blockId === occurrence.block.id &&
-        (item.onDate === null || item.onDate === records.date),
-    )
-    .flatMap((item) => {
-      const slot = occurrence.slots.find((row) => row.blockItemId === item.id);
-      if (slot?.skipped) return [];
-      return [
-        {
-          id: item.id,
-          label: item.title,
-          checked: slot?.doneAt != null,
-          order: slot?.sortOrder ?? item.sortOrder,
-        },
-      ];
-    })
-    .sort((a, b) => a.order - b.order)
-    .map(({ id, label, checked }) => ({ id, label, checked }));
 }
 
 export function useSchedule(dateKey: string) {

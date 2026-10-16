@@ -66,6 +66,7 @@ export {
   DAY_COLUMN_PX_PER_HOUR,
   DayColumn,
   DayColumnSkeleton,
+  EmptyDayChoices,
   MeetingBand,
   type AllDayStripRow,
   type DayColumnBlock,

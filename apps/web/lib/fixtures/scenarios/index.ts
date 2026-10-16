@@ -24,6 +24,7 @@ import { POOL_SCENARIOS } from "./pool";
 import { POOL_SHEET_SCENARIOS } from "./pool-sheet";
 import { READY_SCENARIOS } from "./ready-welcome";
 import { REVIEW_SCENARIOS } from "./review-day";
+import { REVIEW_SUNDAY_SCENARIOS } from "./review-sunday";
 import { RUNNING_SCENARIOS } from "./running";
 import { SCHEDULE_SCENARIOS } from "./schedule";
 import { SET_UP_SCENARIOS, type SetUpScenarioStart } from "./set-up";
@@ -147,6 +148,11 @@ export interface ScenarioView {
    * `toast` (held until Undo, for the capture).
    */
   staged?: { swap: { id: string; withId: string }; toast: boolean };
+  /**
+   * Review the day opens on Making the checklist (USE-40) with `draft`
+   * typed in the open row, for its capture.
+   */
+  checklist?: { draft: string };
 }
 
 export const DEFAULT_SCENARIO = "default";
@@ -275,6 +281,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...FROM_LINEAR_SCENARIOS,
   // ---- Review the day (USE-31): the Monday at 6:58, before Ready, go ----
   ...REVIEW_SCENARIOS,
+  // ---- Review the day's loose Sunday (USE-40): the ask, the checklist, the now-line ----
+  ...REVIEW_SUNDAY_SCENARIOS,
   // ---- The Ready, go welcome (USE-43): plain, first go ever, late wake, checklist day, offline ----
   ...READY_SCENARIOS,
   // ---- The Item sheet (USE-64): a plain item, ···, at a set time, Swap ----

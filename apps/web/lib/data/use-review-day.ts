@@ -9,7 +9,7 @@ import {
 import { WORK_TIERS } from "@syn/constants";
 import type { StoredBlockKind, WorkTier } from "@syn/types";
 import { clockFromMinutes, clockMinutes, layoutFromWake } from "@syn/utils";
-import type { DayRecordRecord } from "@syn/validators";
+import type { DayEventRecord, DayRecordRecord } from "@syn/validators";
 import type { Today } from "./derive-today";
 import { lateWakeOf, roomDayOf } from "./late-wake";
 import { useDataSource, type DataSource } from "./source";
@@ -63,6 +63,24 @@ export interface ReviewBlock {
   tiers: ReviewTier[];
 }
 
+/** The date's checklist with no span: the All day strip (D-USE-28). */
+export interface ReviewAllDay {
+  id: string;
+  name: string;
+  rows: { id: string; label: string; checked: boolean }[];
+}
+
+/** An event inside no block, on the rail at its hour (USE-40). */
+export interface ReviewEvent {
+  id: string;
+  title: string;
+  startsAt: string;
+  endsAt: string;
+  tag: DayEventRecord["tag"];
+  /** A palette key or hex; null is plum (D-USE-38). */
+  color: string | null;
+}
+
 /** A block that ended by Orient's end on a late wake, at its planned times. */
 export interface ReviewPassedBlock {
   id: string;
@@ -89,6 +107,12 @@ export interface ReviewDayView {
   late: { wokeAt: string; passed: ReviewPassedBlock[] } | null;
   /** Ready, go already given today. */
   readied: boolean;
+  /** USE-40: the checklist with no span, above the rail. */
+  allDay: ReviewAllDay | null;
+  /** USE-40: events inside no block. */
+  events: ReviewEvent[];
+  /** Nothing set (D-USE-68): no block, no checklist, no event. */
+  empty: boolean;
 }
 
 type Occurrence = Today["occurrences"]["blocks"][number];
@@ -185,8 +209,11 @@ export function deriveReviewDay(today: Today): ReviewDayView {
   const wake = records.usualWakeTime;
   const laid = lateLayout(today, blocks);
   const shown = laid?.blocks ?? blocks;
-  const starts = shown.map((block) => clockMinutes(block.startsAt));
-  const ends = shown.map((block) => clockMinutes(block.endsAt));
+  const events = freeEvents(records.dayEvents, shown);
+  const allDay = allDayOf(today);
+  const timed = [...shown, ...events];
+  const starts = timed.map((row) => clockMinutes(row.startsAt));
+  const ends = timed.map((row) => clockMinutes(row.endsAt));
   const orientAt = laid?.wokeAt ?? (wake ? clockMinutes(wake) : null);
   const first = Math.min(
     ...(orientAt !== null ? [orientAt] : []),
@@ -208,7 +235,73 @@ export function deriveReviewDay(today: Today): ReviewDayView {
       ? { wokeAt: clockFromMinutes(laid.wokeAt), passed: laid.passed }
       : null,
     readied: records.dayRecord?.readyAt != null,
+    allDay,
+    events,
+    empty: shown.length === 0 && events.length === 0 && allDay === null,
   };
+}
+
+/** Events no block holds wholly; a meeting inside a block is the block's. */
+function freeEvents(
+  dayEvents: readonly DayEventRecord[],
+  blocks: readonly ReviewBlock[],
+): ReviewEvent[] {
+  return dayEvents
+    .filter(
+      (event) =>
+        !blocks.some(
+          (block) =>
+            clockMinutes(block.startsAt) <= clockMinutes(event.startsAt) &&
+            clockMinutes(event.endsAt) <= clockMinutes(block.endsAt),
+        ),
+    )
+    .sort((a, b) => clockMinutes(a.startsAt) - clockMinutes(b.startsAt))
+    .map(({ id, title, startsAt, endsAt, tag, color }) => ({
+      id,
+      title,
+      startsAt,
+      endsAt,
+      tag,
+      color,
+    }));
+}
+
+function allDayOf(today: Today): ReviewAllDay | null {
+  const entry = today.occurrences.blocks.find((occurrence) =>
+    isAllDay(occurrence.block, occurrence.startsAt, occurrence.endsAt),
+  );
+  return entry
+    ? {
+        id: entry.block.id,
+        name: entry.block.name,
+        rows: checklistRows(entry, today),
+      }
+    : null;
+}
+
+/** The all-day checklist's rows in order, checked from the date's slots. */
+export function checklistRows(occurrence: Occurrence, today: Today) {
+  const { records } = today;
+  return records.blockItems
+    .filter(
+      (item) =>
+        item.blockId === occurrence.block.id &&
+        (item.onDate === null || item.onDate === records.date),
+    )
+    .flatMap((item) => {
+      const slot = occurrence.slots.find((row) => row.blockItemId === item.id);
+      if (slot?.skipped) return [];
+      return [
+        {
+          id: item.id,
+          label: item.title,
+          checked: slot?.doneAt != null,
+          order: slot?.sortOrder ?? item.sortOrder,
+        },
+      ];
+    })
+    .sort((a, b) => a.order - b.order)
+    .map(({ id, label, checked }) => ({ id, label, checked }));
 }
 
 /**

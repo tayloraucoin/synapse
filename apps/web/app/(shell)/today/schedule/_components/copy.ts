@@ -12,14 +12,4 @@ export const SCHEDULE_COPY = {
   dayFailedDetail: "Nothing is lost. The plan is still there once it loads.",
   /** The one status line with no connection (offline.md). */
   offline: "Offline. Changes are saved on this phone and sync later.",
-  /** The empty day's three choices (D-USE-68, as Review the day's Sunday). */
-  empty: {
-    title: (weekday: string) => `Nothing set for ${weekday}.`,
-    line: "A loose day can be one list, done in any order.",
-    checklist: "Make a checklist",
-    checklistLine: "Things to get through today. No times.",
-    blocks: "Plan with blocks",
-    blocksLine: "Times on the rail, like a weekday.",
-    copy: "Copy another day",
-  },
 } as const;

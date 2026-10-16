@@ -20,3 +20,8 @@ export {
 } from "./all-day-strip";
 export { DayColumnSkeleton } from "./day-column-skeleton";
 export { MeetingBand } from "./meeting-band";
+export {
+  EmptyDayChoices,
+  type EmptyDayAction,
+  type EmptyDayChoicesProps,
+} from "./empty-day-choices";

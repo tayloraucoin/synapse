@@ -83,3 +83,9 @@ export const HUE_BORDER: Record<BlockHue, string> = {
   moss: "border-category-moss-dot",
   yellow: "border-category-yellow-dot",
 };
+
+/** An event's colour: a palette key, else plum (D-USE-38) [ASSUMPTION: hex reads plum]. */
+export function eventHue(color: string | null): BlockHue {
+  const hues = new Set<string>(Object.values(BLOCK_HUE));
+  return color !== null && hues.has(color) ? (color as BlockHue) : "plum";
+}

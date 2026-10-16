@@ -3,19 +3,40 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Breadcrumb, Button, RegionRetry, StatusLine, Text } from "@syn/ui";
-import { clockFromMinutes, weekdayIndex, weekKeyOf } from "@syn/utils";
-import { DayColumn, DayColumnSkeleton, TodosTray } from "@/components/planner";
+import {
+  clockFromMinutes,
+  weekdayForDayKey,
+  weekdayIndex,
+  weekKeyOf,
+} from "@syn/utils";
+import {
+  AllDayStrip,
+  DayColumn,
+  DayColumnSkeleton,
+  EmptyDayChoices,
+  TodosTray,
+  type DayColumnEvent,
+} from "@/components/planner";
 import { AddSheet } from "@/components/planner/add-sheet";
+import { eventHue } from "@/components/planner/block-hue";
 import { DAY_COLUMN_PX_PER_HOUR } from "@/components/planner/day-column";
+import { DAY_COLUMN_COPY } from "@/components/planner/day-column/copy";
 import { snapToStep } from "@/components/planner/rail-add";
 import { LaterStartSheet, MakeRoomSheet } from "@/components/planner/room";
+import { useChecklistDay } from "@/lib/data/checklist-day";
 import { useDataSource } from "@/lib/data/source";
 import { useConnection } from "@/lib/data/use-connection";
 import { useTodayKey } from "@/lib/data/use-morning";
 import { useRailAdd } from "@/lib/data/use-rail-add";
-import { useReadyGo, useReviewDay } from "@/lib/data/use-review-day";
+import {
+  useReadyGo,
+  useReviewDay,
+  type ReviewEvent,
+} from "@/lib/data/use-review-day";
 import { useRoom } from "@/lib/data/use-room";
+import { scheduleNow } from "@/lib/data/use-schedule";
 import { useTodos } from "@/lib/data/use-todos";
+import { useNow as useMinute } from "@/lib/hooks/use-now";
 import { AboveFooterToaster } from "@/lib/hooks/use-undo-toast";
 import {
   addSheetRoute,
@@ -30,6 +51,7 @@ import {
 import { fadeNavigate } from "../../_components/fade-navigate";
 import { dateTitle } from "../../_components/now/copy";
 import { useDayEntryGate } from "../../../_components/day-entry-gate";
+import { ChecklistEditor } from "./checklist-editor";
 import { REVIEW_DAY_COPY as COPY } from "./copy";
 import { EmptyWork } from "./empty-work";
 import { FirstChangeLine } from "./first-change-line";
@@ -37,6 +59,21 @@ import { PassedRow } from "./passed-row";
 import { RailPlus } from "./rail-plus";
 import { TraySkeleton } from "./tray-skeleton";
 import { useReviewEdits } from "./use-review-edits";
+
+/** Where now sits under the top when the column opens at it: an hour down. */
+const NOW_FROM_TOP_PX = DAY_COLUMN_PX_PER_HOUR;
+/** The rail + and the now tag closer than this would overlap on the rail. */
+const PLUS_CLEAR_MIN = 25;
+
+const eventOf = (event: ReviewEvent): DayColumnEvent => ({
+  id: event.id,
+  title: event.title,
+  startsAt: event.startsAt,
+  endsAt: event.endsAt,
+  hue: eventHue(event.color),
+  meta: DAY_COLUMN_COPY.eventMeta(event.startsAt, event.endsAt, event.tag),
+  underWay: false,
+});
 
 /**
  * Review the day (USE-31; day/review-the-day/), the success frame and the
@@ -87,6 +124,14 @@ import { useReviewEdits } from "./use-review-edits";
  * add sheet (`?sheet=add`). With room the addition lands at once, today
  * only, with Undo; with none it goes to Make room. Block hands the time to
  * the New block sheet.
+ *
+ * A loose day (USE-40; D-USE-28, D-USE-30, D-USE-68): with nothing set the
+ * ask sits under the title over no column and no Ready, go; Make a
+ * checklist writes today's checklist and opens it for typing, with Ready,
+ * go back. A checklist with no span is the All day strip above the rail,
+ * beside anything timed. The now-line runs across the column whenever now
+ * falls in its hours, moving each minute, and the column opens scrolled to
+ * it; on a usual morning that is the top, with Orient's line.
  */
 export function ReviewDayFrame() {
   const router = useRouter();
@@ -116,6 +161,32 @@ export function ReviewDayFrame() {
   const dayFailed = day.isError;
   // Both failed: the drawn error frame, no tray; one Try again reads both.
   const bothFailed = dayFailed && todos.isError;
+  const checklistDay = useChecklistDay(dateKey);
+  const seededChecklist = source.scenario.view?.checklist;
+  const [making, setMaking] = React.useState(seededChecklist !== undefined);
+  // A render each minute, so the now-line keeps to the clock.
+  useMinute();
+  const nowView =
+    view === undefined ? null : scheduleNow(source.now(), view.timeZone);
+  const now =
+    view !== undefined &&
+    nowView !== null &&
+    nowView.atMin >= view.startMin &&
+    nowView.atMin < view.endMin
+      ? nowView
+      : null;
+
+  // Once, when the day first arrives: the column opens at now.
+  const opened = React.useRef(false);
+  React.useLayoutEffect(() => {
+    if (opened.current || view === undefined) return;
+    opened.current = true;
+    if (now === null) return;
+    const nowPx = ((now.atMin - view.startMin) / 60) * DAY_COLUMN_PX_PER_HOUR;
+    scrollerRef.current?.scrollTo({
+      top: Math.max(0, nowPx - NOW_FROM_TOP_PX),
+    });
+  }, [view, now]);
 
   React.useEffect(() => {
     if (shown) headingRef.current?.focus();
@@ -129,6 +200,11 @@ export function ReviewDayFrame() {
 
   // Another screen is the day's answer (after Ready, go it goes on).
   if (!shown) return null;
+
+  const checklist = view?.allDay ?? null;
+  const editing = making && checklist !== null;
+  // D-USE-28: no Ready, go until a choice is made.
+  const asking = view?.empty === true && !editing;
 
   function retryDay() {
     retried.current = true;
@@ -208,6 +284,22 @@ export function ReviewDayFrame() {
           />
         ) : null}
 
+        {checklist !== null && !editing ? (
+          <AllDayStrip
+            name={checklist.name}
+            rows={checklist.rows}
+            underWay={false}
+            onOpen={() =>
+              router.push(
+                withSearch(
+                  todayBlockRoute(checklist.id, "review"),
+                  window.location.search,
+                ),
+              )
+            }
+          />
+        ) : null}
+
         <div
           ref={scrollerRef}
           tabIndex={-1}
@@ -225,11 +317,42 @@ export function ReviewDayFrame() {
             ) : (
               <DayColumnSkeleton label={COPY.loading} meals />
             )
+          ) : asking ? (
+            <EmptyDayChoices
+              weekday={weekdayForDayKey(dateKey)}
+              checklist={{
+                onSelect: () =>
+                  checklistDay.make.mutate(undefined, {
+                    onSuccess: () => setMaking(true),
+                  }),
+              }}
+              pending={checklistDay.make.isPending || making}
+              blocksHref={daysRoute({ day: dateKey })}
+              copyHref={daysRoute({ day: dateKey })}
+              className="pt-(--space-3)"
+            />
+          ) : editing ? (
+            <ChecklistEditor
+              checklist={checklist}
+              initialDraft={seededChecklist?.draft}
+              pending={checklistDay.span.isPending}
+              onAdd={(title) =>
+                checklistDay.add.mutate({ blockId: checklist.id, title })
+              }
+              onSpan={(startsAt, endsAt) =>
+                checklistDay.span.mutate(
+                  { blockId: checklist.id, startsAt, endsAt },
+                  { onSuccess: () => setMaking(false) },
+                )
+              }
+            />
           ) : (
             <DayColumn
               hours={{ startMin: view.startMin, endMin: view.endMin }}
               orient={view.orient}
               blocks={view.blocks}
+              events={view.events.map(eventOf)}
+              now={now}
               timeZone={view.timeZone}
               onBlock={(id) =>
                 router.push(
@@ -270,7 +393,10 @@ export function ReviewDayFrame() {
                 />
               )}
             >
-              {edits.plusAtMin !== null ? (
+              {edits.plusAtMin !== null &&
+              // The + gives way to the now tag where they meet [ASSUMPTION].
+              (now === null ||
+                Math.abs(edits.plusAtMin - now.atMin) >= PLUS_CLEAR_MIN) ? (
                 <RailPlus
                   atMin={edits.plusAtMin}
                   startMin={view.startMin}
@@ -300,8 +426,8 @@ export function ReviewDayFrame() {
           <div className="split:self-stretch">
             <AboveFooterToaster />
           </div>
-          {/* The day failed: Ready, go is hidden, nothing at the foot. */}
-          {dayFailed ? null : (
+          {/* The day failed, or nothing is set yet: Ready, go is hidden. */}
+          {dayFailed || asking ? null : (
             <Button
               size="lg"
               className="w-full font-semibold split:w-60"

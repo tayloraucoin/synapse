@@ -250,6 +250,12 @@ for (const state of [
   "partial-todos",
   "partial-day",
   "offline",
+  // USE-40: the loose Sunday, `review-sunday-<state>` and `review-empty`.
+  "sunday-nothing-set",
+  "sunday-making-the-checklist",
+  "sunday-checklist-and-plans",
+  "sunday-now-line",
+  "empty",
 ] satisfies ReviewPartState[]) {
   registerPart(`review-${state}`, () => createElement(ReviewPart, { state }));
 }

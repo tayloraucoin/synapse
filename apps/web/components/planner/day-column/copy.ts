@@ -51,6 +51,16 @@ export const DAY_COLUMN_COPY = {
   /** The strip's button: "Sunday, all day, now". */
   strip: (name: string, underWay: boolean) =>
     `${name}, all day${underWay ? ", now" : ""}`,
+  /** A day with nothing set (D-USE-68): the ask under the title. */
+  empty: {
+    title: (weekday: string) => `Nothing set for ${weekday}.`,
+    line: "A loose day can be one list, done in any order.",
+    checklist: "Make a checklist",
+    checklistLine: "Things to get through today. No times.",
+    blocks: "Plan with blocks",
+    blocksLine: "Times on the rail, like a weekday.",
+    copy: "Copy another day",
+  },
   /** The tapped slot's mark (USE-39; tap-a-time.md). */
   newBlock: "+ New block",
   /** A bullet's button: "Water, in Wellness". */

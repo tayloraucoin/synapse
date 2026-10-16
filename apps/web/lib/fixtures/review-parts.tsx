@@ -17,7 +17,13 @@ export type ReviewPartState =
   | "error"
   | "partial-todos"
   | "partial-day"
-  | "offline";
+  | "offline"
+  // USE-40: the loose Sunday, and empty as its nothing-set frame (D-USE-68).
+  | "sunday-nothing-set"
+  | "sunday-making-the-checklist"
+  | "sunday-checklist-and-plans"
+  | "sunday-now-line"
+  | "empty";
 
 export function ReviewPart({ state }: { state: ReviewPartState }) {
   return (
