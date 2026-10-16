@@ -42,13 +42,23 @@
     "SUPABASE_SERVICE_ROLE_KEY_LOCAL",
     "NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN"
   ],
-  "globalPassThroughEnv": ["TMPDIR"],
+  "globalPassThroughEnv": [
+    "TMPDIR"
+  ],
   "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**"
+      ]
     },
     "dev": {
       "cache": false,
@@ -59,30 +69,44 @@
       "persistent": true
     },
     "start": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "cache": false
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": [
+        "^lint"
+      ]
     },
     "lint:boundaries": {
       "cache": false,
-      "dependsOn": ["lint"]
+      "dependsOn": [
+        "lint"
+      ]
     },
     "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": [
+        "^check-types"
+      ]
     },
     "storybook": {
       "cache": false,
       "persistent": true
     },
     "build-storybook": {
-      "dependsOn": ["^build"],
-      "outputs": ["storybook-static/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "storybook-static/**"
+      ]
     },
     "test": {
       "cache": false,
-      "outputs": ["coverage/**"]
+      "outputs": [
+        "coverage/**"
+      ]
     },
     "db:generate": {
       "cache": false
@@ -104,7 +128,9 @@
     },
     "db:reset-user": {
       "cache": false,
-      "env": ["RESET_USER_EMAIL"]
+      "env": [
+        "RESET_USER_EMAIL"
+      ]
     },
     "db:seed-users": {
       "cache": false

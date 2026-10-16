@@ -316,8 +316,12 @@
           "tableFrom": "users",
           "tableTo": "users",
           "schemaTo": "auth",
-          "columnsFrom": ["id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -329,14 +333,18 @@
           "name": "users_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"users\".\"id\" = current_setting('app.user_id', true)::uuid"
         },
         "users_update": {
           "name": "users_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"users\".\"id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"users\".\"id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -344,14 +352,18 @@
           "name": "users_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "false"
         },
         "users_delete": {
           "name": "users_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         }
       },
@@ -412,8 +424,12 @@
           "name": "user_avatars_user_id_users_id_fk",
           "tableFrom": "user_avatars",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -425,21 +441,27 @@
           "name": "user_avatars_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"user_avatars\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "user_avatars_insert": {
           "name": "user_avatars_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"user_avatars\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "user_avatars_update": {
           "name": "user_avatars_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"user_avatars\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"user_avatars\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -447,7 +469,9 @@
           "name": "user_avatars_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"user_avatars\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -542,8 +566,12 @@
           "name": "categories_user_id_users_id_fk",
           "tableFrom": "categories",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -555,21 +583,27 @@
           "name": "categories_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"categories\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "categories_insert": {
           "name": "categories_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"categories\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "categories_update": {
           "name": "categories_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"categories\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"categories\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -577,7 +611,9 @@
           "name": "categories_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"categories\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -823,8 +859,12 @@
           "name": "habits_category_id_categories_id_fk",
           "tableFrom": "habits",
           "tableTo": "categories",
-          "columnsFrom": ["category_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "category_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -832,8 +872,12 @@
           "name": "habits_user_id_users_id_fk",
           "tableFrom": "habits",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -845,21 +889,27 @@
           "name": "habits_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"habits\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "habits_insert": {
           "name": "habits_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"habits\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "habits_update": {
           "name": "habits_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"habits\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"habits\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -867,7 +917,9 @@
           "name": "habits_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"habits\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -1048,8 +1100,12 @@
           "name": "reasons_user_id_users_id_fk",
           "tableFrom": "reasons",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1061,21 +1117,27 @@
           "name": "reasons_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"reasons\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "reasons_insert": {
           "name": "reasons_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"reasons\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "reasons_update": {
           "name": "reasons_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"reasons\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"reasons\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -1083,7 +1145,9 @@
           "name": "reasons_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"reasons\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -1225,8 +1289,12 @@
           "name": "passages_user_id_users_id_fk",
           "tableFrom": "passages",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1238,21 +1306,27 @@
           "name": "passages_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"passages\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "passages_insert": {
           "name": "passages_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"passages\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "passages_update": {
           "name": "passages_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"passages\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"passages\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -1260,7 +1334,9 @@
           "name": "passages_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"passages\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -1413,8 +1489,12 @@
           "name": "links_user_id_users_id_fk",
           "tableFrom": "links",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1426,21 +1506,27 @@
           "name": "links_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"links\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "links_insert": {
           "name": "links_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"links\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "links_update": {
           "name": "links_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"links\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"links\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -1448,7 +1534,9 @@
           "name": "links_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"links\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -1648,8 +1736,12 @@
           "name": "fixtures_habit_id_habits_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "habits",
-          "columnsFrom": ["habit_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "habit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1657,8 +1749,12 @@
           "name": "fixtures_user_id_users_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1670,21 +1766,27 @@
           "name": "fixtures_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"fixtures\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "fixtures_insert": {
           "name": "fixtures_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"fixtures\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "fixtures_update": {
           "name": "fixtures_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"fixtures\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"fixtures\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -1692,7 +1794,9 @@
           "name": "fixtures_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"fixtures\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -1902,8 +2006,12 @@
           "name": "day_blocks_day_id_days_id_fk",
           "tableFrom": "day_blocks",
           "tableTo": "days",
-          "columnsFrom": ["day_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "day_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1911,8 +2019,12 @@
           "name": "day_blocks_template_id_templates_id_fk",
           "tableFrom": "day_blocks",
           "tableTo": "templates",
-          "columnsFrom": ["template_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1920,8 +2032,12 @@
           "name": "day_blocks_user_id_users_id_fk",
           "tableFrom": "day_blocks",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1933,21 +2049,27 @@
           "name": "day_blocks_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_blocks_insert": {
           "name": "day_blocks_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"day_blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_blocks_update": {
           "name": "day_blocks_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"day_blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -1955,7 +2077,9 @@
           "name": "day_blocks_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -2137,8 +2261,12 @@
           "name": "templates_user_id_users_id_fk",
           "tableFrom": "templates",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2150,21 +2278,27 @@
           "name": "templates_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"templates\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "templates_insert": {
           "name": "templates_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"templates\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "templates_update": {
           "name": "templates_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"templates\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"templates\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -2172,7 +2306,9 @@
           "name": "templates_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"templates\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -2384,8 +2520,12 @@
           "name": "template_slots_habit_id_habits_id_fk",
           "tableFrom": "template_slots",
           "tableTo": "habits",
-          "columnsFrom": ["habit_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "habit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2393,8 +2533,12 @@
           "name": "template_slots_template_id_templates_id_fk",
           "tableFrom": "template_slots",
           "tableTo": "templates",
-          "columnsFrom": ["template_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2402,8 +2546,12 @@
           "name": "template_slots_user_id_users_id_fk",
           "tableFrom": "template_slots",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2415,21 +2563,27 @@
           "name": "template_slots_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"template_slots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "template_slots_insert": {
           "name": "template_slots_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"template_slots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "template_slots_update": {
           "name": "template_slots_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"template_slots\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"template_slots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -2437,7 +2591,9 @@
           "name": "template_slots_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"template_slots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -2757,8 +2913,12 @@
           "name": "days_user_id_users_id_fk",
           "tableFrom": "days",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2766,8 +2926,12 @@
           "name": "days_work_template_id_templates_id_fk",
           "tableFrom": "days",
           "tableTo": "templates",
-          "columnsFrom": ["work_template_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "work_template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -2775,8 +2939,12 @@
           "name": "days_work_focus_habit_id_habits_id_fk",
           "tableFrom": "days",
           "tableTo": "habits",
-          "columnsFrom": ["work_focus_habit_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "work_focus_habit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2788,21 +2956,27 @@
           "name": "days_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"days\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "days_insert": {
           "name": "days_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"days\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "days_update": {
           "name": "days_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"days\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"days\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -2810,7 +2984,9 @@
           "name": "days_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"days\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -3120,8 +3296,12 @@
           "name": "day_plans_activity_template_id_templates_id_fk",
           "tableFrom": "day_plans",
           "tableTo": "templates",
-          "columnsFrom": ["activity_template_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "activity_template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3129,8 +3309,12 @@
           "name": "day_plans_after_work_template_id_templates_id_fk",
           "tableFrom": "day_plans",
           "tableTo": "templates",
-          "columnsFrom": ["after_work_template_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "after_work_template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3138,8 +3322,12 @@
           "name": "day_plans_morning_template_id_templates_id_fk",
           "tableFrom": "day_plans",
           "tableTo": "templates",
-          "columnsFrom": ["morning_template_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "morning_template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3147,8 +3335,12 @@
           "name": "day_plans_prep_template_id_templates_id_fk",
           "tableFrom": "day_plans",
           "tableTo": "templates",
-          "columnsFrom": ["prep_template_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "prep_template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3156,8 +3348,12 @@
           "name": "day_plans_user_id_users_id_fk",
           "tableFrom": "day_plans",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3165,8 +3361,12 @@
           "name": "day_plans_wind_down_template_id_templates_id_fk",
           "tableFrom": "day_plans",
           "tableTo": "templates",
-          "columnsFrom": ["wind_down_template_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "wind_down_template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3174,8 +3374,12 @@
           "name": "day_plans_work_template_id_templates_id_fk",
           "tableFrom": "day_plans",
           "tableTo": "templates",
-          "columnsFrom": ["work_template_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "work_template_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -3187,21 +3391,27 @@
           "name": "day_plans_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_plans\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_plans_insert": {
           "name": "day_plans_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"day_plans\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_plans_update": {
           "name": "day_plans_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_plans\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"day_plans\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -3209,7 +3419,9 @@
           "name": "day_plans_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_plans\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -3631,8 +3843,12 @@
           "name": "day_items_carried_from_item_id_day_items_id_fk",
           "tableFrom": "day_items",
           "tableTo": "day_items",
-          "columnsFrom": ["carried_from_item_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "carried_from_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3640,8 +3856,12 @@
           "name": "day_items_day_block_id_day_blocks_id_fk",
           "tableFrom": "day_items",
           "tableTo": "day_blocks",
-          "columnsFrom": ["day_block_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "day_block_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3649,8 +3869,12 @@
           "name": "day_items_day_id_days_id_fk",
           "tableFrom": "day_items",
           "tableTo": "days",
-          "columnsFrom": ["day_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "day_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3658,8 +3882,12 @@
           "name": "day_items_habit_id_habits_id_fk",
           "tableFrom": "day_items",
           "tableTo": "habits",
-          "columnsFrom": ["habit_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "habit_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3667,8 +3895,12 @@
           "name": "day_items_parent_item_id_day_items_id_fk",
           "tableFrom": "day_items",
           "tableTo": "day_items",
-          "columnsFrom": ["parent_item_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "parent_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3676,8 +3908,12 @@
           "name": "day_items_template_slot_id_template_slots_id_fk",
           "tableFrom": "day_items",
           "tableTo": "template_slots",
-          "columnsFrom": ["template_slot_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "template_slot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -3685,8 +3921,12 @@
           "name": "day_items_user_id_users_id_fk",
           "tableFrom": "day_items",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3698,21 +3938,27 @@
           "name": "day_items_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_items_insert": {
           "name": "day_items_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"day_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_items_update": {
           "name": "day_items_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_items\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"day_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -3720,7 +3966,9 @@
           "name": "day_items_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -3843,8 +4091,12 @@
           "name": "journal_entries_day_id_days_id_fk",
           "tableFrom": "journal_entries",
           "tableTo": "days",
-          "columnsFrom": ["day_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "day_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3852,8 +4104,12 @@
           "name": "journal_entries_user_id_users_id_fk",
           "tableFrom": "journal_entries",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3865,21 +4121,27 @@
           "name": "journal_entries_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"journal_entries\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "journal_entries_insert": {
           "name": "journal_entries_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"journal_entries\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "journal_entries_update": {
           "name": "journal_entries_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"journal_entries\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"journal_entries\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -3887,7 +4149,9 @@
           "name": "journal_entries_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"journal_entries\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -3994,8 +4258,12 @@
           "name": "timer_sessions_day_item_id_day_items_id_fk",
           "tableFrom": "timer_sessions",
           "tableTo": "day_items",
-          "columnsFrom": ["day_item_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "day_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4003,8 +4271,12 @@
           "name": "timer_sessions_user_id_users_id_fk",
           "tableFrom": "timer_sessions",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4016,21 +4288,27 @@
           "name": "timer_sessions_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"timer_sessions\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "timer_sessions_insert": {
           "name": "timer_sessions_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"timer_sessions\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "timer_sessions_update": {
           "name": "timer_sessions_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"timer_sessions\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"timer_sessions\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -4038,7 +4316,9 @@
           "name": "timer_sessions_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"timer_sessions\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -4177,8 +4457,12 @@
           "name": "shifts_day_id_days_id_fk",
           "tableFrom": "shifts",
           "tableTo": "days",
-          "columnsFrom": ["day_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "day_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4186,8 +4470,12 @@
           "name": "shifts_user_id_users_id_fk",
           "tableFrom": "shifts",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4199,21 +4487,27 @@
           "name": "shifts_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"shifts\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "shifts_insert": {
           "name": "shifts_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"shifts\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "shifts_update": {
           "name": "shifts_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"shifts\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"shifts\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -4221,7 +4515,9 @@
           "name": "shifts_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"shifts\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -4382,8 +4678,12 @@
           "name": "misses_day_item_id_day_items_id_fk",
           "tableFrom": "misses",
           "tableTo": "day_items",
-          "columnsFrom": ["day_item_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "day_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -4391,8 +4691,12 @@
           "name": "misses_shift_id_shifts_id_fk",
           "tableFrom": "misses",
           "tableTo": "shifts",
-          "columnsFrom": ["shift_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "shift_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -4400,8 +4704,12 @@
           "name": "misses_traded_up_item_id_day_items_id_fk",
           "tableFrom": "misses",
           "tableTo": "day_items",
-          "columnsFrom": ["traded_up_item_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "traded_up_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -4409,8 +4717,12 @@
           "name": "misses_user_id_users_id_fk",
           "tableFrom": "misses",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4422,21 +4734,27 @@
           "name": "misses_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"misses\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "misses_insert": {
           "name": "misses_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"misses\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "misses_update": {
           "name": "misses_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"misses\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"misses\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -4444,7 +4762,9 @@
           "name": "misses_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"misses\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -4557,8 +4877,12 @@
           "name": "web_push_subscriptions_user_id_users_id_fk",
           "tableFrom": "web_push_subscriptions",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -4570,21 +4894,27 @@
           "name": "web_push_subscriptions_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"web_push_subscriptions\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "web_push_subscriptions_insert": {
           "name": "web_push_subscriptions_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"web_push_subscriptions\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "web_push_subscriptions_update": {
           "name": "web_push_subscriptions_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"web_push_subscriptions\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"web_push_subscriptions\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -4592,7 +4922,9 @@
           "name": "web_push_subscriptions_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"web_push_subscriptions\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -4673,8 +5005,12 @@
           "name": "notification_prefs_user_id_users_id_fk",
           "tableFrom": "notification_prefs",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4684,7 +5020,11 @@
         "notification_prefs_user_id_kind_block_kind_key": {
           "name": "notification_prefs_user_id_kind_block_kind_key",
           "nullsNotDistinct": true,
-          "columns": ["user_id", "kind", "block_kind"]
+          "columns": [
+            "user_id",
+            "kind",
+            "block_kind"
+          ]
         }
       },
       "policies": {
@@ -4692,21 +5032,27 @@
           "name": "notification_prefs_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"notification_prefs\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "notification_prefs_insert": {
           "name": "notification_prefs_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"notification_prefs\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "notification_prefs_update": {
           "name": "notification_prefs_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"notification_prefs\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"notification_prefs\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -4714,7 +5060,9 @@
           "name": "notification_prefs_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"notification_prefs\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -4819,8 +5167,12 @@
           "name": "notification_deliveries_user_id_users_id_fk",
           "tableFrom": "notification_deliveries",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4844,28 +5196,36 @@
           "name": "notification_deliveries_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         },
         "notification_deliveries_insert": {
           "name": "notification_deliveries_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "false"
         },
         "notification_deliveries_update": {
           "name": "notification_deliveries_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         },
         "notification_deliveries_delete": {
           "name": "notification_deliveries_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         }
       },
@@ -4979,8 +5339,12 @@
           "name": "data_exports_user_id_users_id_fk",
           "tableFrom": "data_exports",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4992,21 +5356,27 @@
           "name": "data_exports_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"data_exports\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "data_exports_insert": {
           "name": "data_exports_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"data_exports\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "data_exports_update": {
           "name": "data_exports_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"data_exports\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"data_exports\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -5014,7 +5384,9 @@
           "name": "data_exports_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"data_exports\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -5093,8 +5465,12 @@
           "name": "feedback_messages_user_id_users_id_fk",
           "tableFrom": "feedback_messages",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -5106,28 +5482,36 @@
           "name": "feedback_messages_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"feedback_messages\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "feedback_messages_select": {
           "name": "feedback_messages_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         },
         "feedback_messages_update": {
           "name": "feedback_messages_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         },
         "feedback_messages_delete": {
           "name": "feedback_messages_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         }
       },
@@ -5216,28 +5600,36 @@
           "name": "quotes_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "true"
         },
         "quotes_insert": {
           "name": "quotes_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "false"
         },
         "quotes_update": {
           "name": "quotes_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         },
         "quotes_delete": {
           "name": "quotes_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         }
       },
@@ -5356,8 +5748,12 @@
           "name": "workflow_views_user_id_users_id_fk",
           "tableFrom": "workflow_views",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5369,21 +5765,27 @@
           "name": "workflow_views_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_views\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_views_insert": {
           "name": "workflow_views_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"workflow_views\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_views_update": {
           "name": "workflow_views_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_views\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"workflow_views\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -5391,7 +5793,9 @@
           "name": "workflow_views_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_views\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -5530,8 +5934,12 @@
           "name": "workflow_columns_user_id_users_id_fk",
           "tableFrom": "workflow_columns",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5539,8 +5947,12 @@
           "name": "workflow_columns_view_id_workflow_views_id_fk",
           "tableFrom": "workflow_columns",
           "tableTo": "workflow_views",
-          "columnsFrom": ["view_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "view_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5552,21 +5964,27 @@
           "name": "workflow_columns_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_columns\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_columns_insert": {
           "name": "workflow_columns_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"workflow_columns\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_columns_update": {
           "name": "workflow_columns_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_columns\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"workflow_columns\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -5574,7 +5992,9 @@
           "name": "workflow_columns_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_columns\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -5688,8 +6108,12 @@
           "name": "workflow_groups_user_id_users_id_fk",
           "tableFrom": "workflow_groups",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5701,21 +6125,27 @@
           "name": "workflow_groups_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_groups\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_groups_insert": {
           "name": "workflow_groups_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"workflow_groups\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_groups_update": {
           "name": "workflow_groups_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_groups\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"workflow_groups\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -5723,7 +6153,9 @@
           "name": "workflow_groups_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_groups\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -5898,8 +6330,12 @@
           "name": "workflow_tasks_column_id_workflow_columns_id_fk",
           "tableFrom": "workflow_tasks",
           "tableTo": "workflow_columns",
-          "columnsFrom": ["column_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "column_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -5907,8 +6343,12 @@
           "name": "workflow_tasks_group_id_workflow_groups_id_fk",
           "tableFrom": "workflow_tasks",
           "tableTo": "workflow_groups",
-          "columnsFrom": ["group_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "group_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -5916,8 +6356,12 @@
           "name": "workflow_tasks_user_id_users_id_fk",
           "tableFrom": "workflow_tasks",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -5925,8 +6369,12 @@
           "name": "workflow_tasks_view_id_workflow_views_id_fk",
           "tableFrom": "workflow_tasks",
           "tableTo": "workflow_views",
-          "columnsFrom": ["view_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "view_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -5938,21 +6386,27 @@
           "name": "workflow_tasks_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_tasks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_tasks_insert": {
           "name": "workflow_tasks_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"workflow_tasks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_tasks_update": {
           "name": "workflow_tasks_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_tasks\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"workflow_tasks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -5960,7 +6414,9 @@
           "name": "workflow_tasks_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_tasks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -6039,8 +6495,12 @@
           "name": "workflow_templates_user_id_users_id_fk",
           "tableFrom": "workflow_templates",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -6052,21 +6512,27 @@
           "name": "workflow_templates_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_templates\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_templates_insert": {
           "name": "workflow_templates_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"workflow_templates\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_templates_update": {
           "name": "workflow_templates_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_templates\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"workflow_templates\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -6074,7 +6540,9 @@
           "name": "workflow_templates_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_templates\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -6168,8 +6636,12 @@
           "name": "workflow_day_pins_user_id_users_id_fk",
           "tableFrom": "workflow_day_pins",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -6181,21 +6653,27 @@
           "name": "workflow_day_pins_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_day_pins\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_day_pins_insert": {
           "name": "workflow_day_pins_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"workflow_day_pins\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "workflow_day_pins_update": {
           "name": "workflow_day_pins_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_day_pins\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"workflow_day_pins\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -6203,7 +6681,9 @@
           "name": "workflow_day_pins_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"workflow_day_pins\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -6347,8 +6827,12 @@
           "name": "blocks_user_id_users_id_fk",
           "tableFrom": "blocks",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -6360,21 +6844,27 @@
           "name": "blocks_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "blocks_insert": {
           "name": "blocks_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "blocks_update": {
           "name": "blocks_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -6382,7 +6872,9 @@
           "name": "blocks_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"blocks\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -6501,8 +6993,12 @@
           "name": "block_changes_block_id_blocks_id_fk",
           "tableFrom": "block_changes",
           "tableTo": "blocks",
-          "columnsFrom": ["block_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "block_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6510,8 +7006,12 @@
           "name": "block_changes_user_id_users_id_fk",
           "tableFrom": "block_changes",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -6521,7 +7021,10 @@
         "block_changes_block_id_on_date_key": {
           "name": "block_changes_block_id_on_date_key",
           "nullsNotDistinct": false,
-          "columns": ["block_id", "on_date"]
+          "columns": [
+            "block_id",
+            "on_date"
+          ]
         }
       },
       "policies": {
@@ -6529,21 +7032,27 @@
           "name": "block_changes_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"block_changes\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "block_changes_insert": {
           "name": "block_changes_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"block_changes\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "block_changes_update": {
           "name": "block_changes_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"block_changes\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"block_changes\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -6551,7 +7060,9 @@
           "name": "block_changes_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"block_changes\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -6698,8 +7209,12 @@
           "name": "block_items_block_id_blocks_id_fk",
           "tableFrom": "block_items",
           "tableTo": "blocks",
-          "columnsFrom": ["block_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "block_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -6707,8 +7222,12 @@
           "name": "block_items_user_id_users_id_fk",
           "tableFrom": "block_items",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -6720,21 +7239,27 @@
           "name": "block_items_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"block_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "block_items_insert": {
           "name": "block_items_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"block_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "block_items_update": {
           "name": "block_items_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"block_items\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"block_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -6742,7 +7267,9 @@
           "name": "block_items_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"block_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -6900,8 +7427,12 @@
           "name": "todos_user_id_users_id_fk",
           "tableFrom": "todos",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -6913,21 +7444,27 @@
           "name": "todos_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"todos\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "todos_insert": {
           "name": "todos_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"todos\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "todos_update": {
           "name": "todos_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"todos\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"todos\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -6935,7 +7472,9 @@
           "name": "todos_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"todos\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -7129,8 +7668,12 @@
           "name": "slots_block_id_blocks_id_fk",
           "tableFrom": "slots",
           "tableTo": "blocks",
-          "columnsFrom": ["block_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "block_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7138,8 +7681,12 @@
           "name": "slots_block_item_id_block_items_id_fk",
           "tableFrom": "slots",
           "tableTo": "block_items",
-          "columnsFrom": ["block_item_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "block_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7147,8 +7694,12 @@
           "name": "slots_todo_id_todos_id_fk",
           "tableFrom": "slots",
           "tableTo": "todos",
-          "columnsFrom": ["todo_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "todo_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7156,8 +7707,12 @@
           "name": "slots_user_id_users_id_fk",
           "tableFrom": "slots",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7165,8 +7720,12 @@
           "name": "slots_work_item_id_work_items_id_fk",
           "tableFrom": "slots",
           "tableTo": "work_items",
-          "columnsFrom": ["work_item_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "work_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7176,17 +7735,26 @@
         "slots_work_item_id_on_date_key": {
           "name": "slots_work_item_id_on_date_key",
           "nullsNotDistinct": false,
-          "columns": ["work_item_id", "on_date"]
+          "columns": [
+            "work_item_id",
+            "on_date"
+          ]
         },
         "slots_block_item_id_on_date_key": {
           "name": "slots_block_item_id_on_date_key",
           "nullsNotDistinct": false,
-          "columns": ["block_item_id", "on_date"]
+          "columns": [
+            "block_item_id",
+            "on_date"
+          ]
         },
         "slots_todo_id_on_date_key": {
           "name": "slots_todo_id_on_date_key",
           "nullsNotDistinct": false,
-          "columns": ["todo_id", "on_date"]
+          "columns": [
+            "todo_id",
+            "on_date"
+          ]
         }
       },
       "policies": {
@@ -7194,21 +7762,27 @@
           "name": "slots_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"slots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "slots_insert": {
           "name": "slots_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"slots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "slots_update": {
           "name": "slots_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"slots\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"slots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -7216,7 +7790,9 @@
           "name": "slots_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"slots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -7346,8 +7922,12 @@
           "name": "slot_events_slot_id_slots_id_fk",
           "tableFrom": "slot_events",
           "tableTo": "slots",
-          "columnsFrom": ["slot_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "slot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -7355,8 +7935,12 @@
           "name": "slot_events_user_id_users_id_fk",
           "tableFrom": "slot_events",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7366,7 +7950,10 @@
         "slot_events_user_id_client_event_id_key": {
           "name": "slot_events_user_id_client_event_id_key",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "client_event_id"]
+          "columns": [
+            "user_id",
+            "client_event_id"
+          ]
         }
       },
       "policies": {
@@ -7374,28 +7961,36 @@
           "name": "slot_events_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"slot_events\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "slot_events_insert": {
           "name": "slot_events_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"slot_events\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "slot_events_update": {
           "name": "slot_events_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         },
         "slot_events_delete": {
           "name": "slot_events_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "false"
         }
       },
@@ -7539,8 +8134,12 @@
           "name": "day_events_client_id_clients_id_fk",
           "tableFrom": "day_events",
           "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -7548,8 +8147,12 @@
           "name": "day_events_user_id_users_id_fk",
           "tableFrom": "day_events",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7561,21 +8164,27 @@
           "name": "day_events_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_events\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_events_insert": {
           "name": "day_events_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"day_events\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_events_update": {
           "name": "day_events_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_events\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"day_events\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -7583,7 +8192,9 @@
           "name": "day_events_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_events\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -7677,8 +8288,12 @@
           "name": "day_bounds_user_id_users_id_fk",
           "tableFrom": "day_bounds",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7688,12 +8303,18 @@
         "day_bounds_user_id_weekday_key": {
           "name": "day_bounds_user_id_weekday_key",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "weekday"]
+          "columns": [
+            "user_id",
+            "weekday"
+          ]
         },
         "day_bounds_user_id_on_date_key": {
           "name": "day_bounds_user_id_on_date_key",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "on_date"]
+          "columns": [
+            "user_id",
+            "on_date"
+          ]
         }
       },
       "policies": {
@@ -7701,21 +8322,27 @@
           "name": "day_bounds_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_bounds\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_bounds_insert": {
           "name": "day_bounds_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"day_bounds\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_bounds_update": {
           "name": "day_bounds_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_bounds\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"day_bounds\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -7723,7 +8350,9 @@
           "name": "day_bounds_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_bounds\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -7805,8 +8434,12 @@
           "name": "day_records_user_id_users_id_fk",
           "tableFrom": "day_records",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7816,7 +8449,10 @@
         "day_records_user_id_on_date_key": {
           "name": "day_records_user_id_on_date_key",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "on_date"]
+          "columns": [
+            "user_id",
+            "on_date"
+          ]
         }
       },
       "policies": {
@@ -7824,21 +8460,27 @@
           "name": "day_records_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_records\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_records_insert": {
           "name": "day_records_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"day_records\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "day_records_update": {
           "name": "day_records_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_records\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"day_records\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -7846,7 +8488,9 @@
           "name": "day_records_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"day_records\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -7938,8 +8582,12 @@
           "name": "meal_topics_user_id_users_id_fk",
           "tableFrom": "meal_topics",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -7951,21 +8599,27 @@
           "name": "meal_topics_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"meal_topics\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "meal_topics_insert": {
           "name": "meal_topics_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"meal_topics\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "meal_topics_update": {
           "name": "meal_topics_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"meal_topics\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"meal_topics\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -7973,7 +8627,9 @@
           "name": "meal_topics_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"meal_topics\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -8030,8 +8686,12 @@
           "name": "saved_colours_user_id_users_id_fk",
           "tableFrom": "saved_colours",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8041,7 +8701,10 @@
         "saved_colours_user_id_hex_key": {
           "name": "saved_colours_user_id_hex_key",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "hex"]
+          "columns": [
+            "user_id",
+            "hex"
+          ]
         }
       },
       "policies": {
@@ -8049,21 +8712,27 @@
           "name": "saved_colours_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"saved_colours\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "saved_colours_insert": {
           "name": "saved_colours_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"saved_colours\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "saved_colours_update": {
           "name": "saved_colours_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"saved_colours\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"saved_colours\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -8071,7 +8740,9 @@
           "name": "saved_colours_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"saved_colours\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -8168,8 +8839,12 @@
           "name": "clients_user_id_users_id_fk",
           "tableFrom": "clients",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8181,21 +8856,27 @@
           "name": "clients_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"clients\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "clients_insert": {
           "name": "clients_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"clients\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "clients_update": {
           "name": "clients_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"clients\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"clients\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -8203,7 +8884,9 @@
           "name": "clients_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"clients\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -8407,8 +9090,12 @@
           "name": "work_items_linear_connection_id_linear_connections_id_fk",
           "tableFrom": "work_items",
           "tableTo": "linear_connections",
-          "columnsFrom": ["linear_connection_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "linear_connection_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -8416,8 +9103,12 @@
           "name": "work_items_client_id_clients_id_fk",
           "tableFrom": "work_items",
           "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -8425,8 +9116,12 @@
           "name": "work_items_parent_work_item_id_work_items_id_fk",
           "tableFrom": "work_items",
           "tableTo": "work_items",
-          "columnsFrom": ["parent_work_item_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "parent_work_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -8434,8 +9129,12 @@
           "name": "work_items_user_id_users_id_fk",
           "tableFrom": "work_items",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8447,21 +9146,27 @@
           "name": "work_items_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"work_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "work_items_insert": {
           "name": "work_items_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"work_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "work_items_update": {
           "name": "work_items_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"work_items\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"work_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -8469,7 +9174,9 @@
           "name": "work_items_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"work_items\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -8612,8 +9319,12 @@
           "name": "linear_connections_client_id_clients_id_fk",
           "tableFrom": "linear_connections",
           "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -8621,8 +9332,12 @@
           "name": "linear_connections_user_id_users_id_fk",
           "tableFrom": "linear_connections",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8632,7 +9347,10 @@
         "linear_connections_user_id_organization_id_unique": {
           "name": "linear_connections_user_id_organization_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id", "organization_id"]
+          "columns": [
+            "user_id",
+            "organization_id"
+          ]
         }
       },
       "policies": {
@@ -8640,21 +9358,27 @@
           "name": "linear_connections_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_connections\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "linear_connections_insert": {
           "name": "linear_connections_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"linear_connections\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "linear_connections_update": {
           "name": "linear_connections_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_connections\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"linear_connections\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -8662,7 +9386,9 @@
           "name": "linear_connections_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_connections\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -8755,8 +9481,12 @@
           "name": "linear_snapshots_connection_id_linear_connections_id_fk",
           "tableFrom": "linear_snapshots",
           "tableTo": "linear_connections",
-          "columnsFrom": ["connection_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "connection_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -8764,8 +9494,12 @@
           "name": "linear_snapshots_user_id_users_id_fk",
           "tableFrom": "linear_snapshots",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8777,21 +9511,27 @@
           "name": "linear_snapshots_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "linear_snapshots_insert": {
           "name": "linear_snapshots_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"linear_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "linear_snapshots_update": {
           "name": "linear_snapshots_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"linear_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -8799,7 +9539,9 @@
           "name": "linear_snapshots_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -8893,8 +9635,12 @@
           "name": "linear_project_clients_client_id_clients_id_fk",
           "tableFrom": "linear_project_clients",
           "tableTo": "clients",
-          "columnsFrom": ["client_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -8902,8 +9648,12 @@
           "name": "linear_project_clients_connection_id_linear_connections_id_fk",
           "tableFrom": "linear_project_clients",
           "tableTo": "linear_connections",
-          "columnsFrom": ["connection_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "connection_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -8911,8 +9661,12 @@
           "name": "linear_project_clients_user_id_users_id_fk",
           "tableFrom": "linear_project_clients",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -8922,7 +9676,10 @@
         "linear_project_clients_connection_id_project_id_unique": {
           "name": "linear_project_clients_connection_id_project_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["connection_id", "project_id"]
+          "columns": [
+            "connection_id",
+            "project_id"
+          ]
         }
       },
       "policies": {
@@ -8930,21 +9687,27 @@
           "name": "linear_project_clients_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_project_clients\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "linear_project_clients_insert": {
           "name": "linear_project_clients_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"linear_project_clients\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "linear_project_clients_update": {
           "name": "linear_project_clients_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_project_clients\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"linear_project_clients\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -8952,7 +9715,9 @@
           "name": "linear_project_clients_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_project_clients\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -9107,8 +9872,12 @@
           "name": "linear_writes_connection_id_linear_connections_id_fk",
           "tableFrom": "linear_writes",
           "tableTo": "linear_connections",
-          "columnsFrom": ["connection_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "connection_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9116,8 +9885,12 @@
           "name": "linear_writes_user_id_users_id_fk",
           "tableFrom": "linear_writes",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9125,8 +9898,12 @@
           "name": "linear_writes_work_item_id_work_items_id_fk",
           "tableFrom": "linear_writes",
           "tableTo": "work_items",
-          "columnsFrom": ["work_item_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "work_item_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -9138,21 +9915,27 @@
           "name": "linear_writes_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_writes\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "linear_writes_insert": {
           "name": "linear_writes_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"linear_writes\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "linear_writes_update": {
           "name": "linear_writes_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_writes\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"linear_writes\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -9160,7 +9943,9 @@
           "name": "linear_writes_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"linear_writes\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -9263,8 +10048,12 @@
           "name": "google_accounts_user_id_users_id_fk",
           "tableFrom": "google_accounts",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -9276,21 +10065,27 @@
           "name": "google_accounts_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"google_accounts\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "google_accounts_insert": {
           "name": "google_accounts_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"google_accounts\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "google_accounts_update": {
           "name": "google_accounts_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"google_accounts\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"google_accounts\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -9298,7 +10093,9 @@
           "name": "google_accounts_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"google_accounts\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -9403,8 +10200,12 @@
           "name": "google_calendars_account_id_google_accounts_id_fk",
           "tableFrom": "google_calendars",
           "tableTo": "google_accounts",
-          "columnsFrom": ["account_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9412,8 +10213,12 @@
           "name": "google_calendars_user_id_users_id_fk",
           "tableFrom": "google_calendars",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -9423,7 +10228,10 @@
         "google_calendars_account_id_calendar_id_unique": {
           "name": "google_calendars_account_id_calendar_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["account_id", "calendar_id"]
+          "columns": [
+            "account_id",
+            "calendar_id"
+          ]
         }
       },
       "policies": {
@@ -9431,21 +10239,27 @@
           "name": "google_calendars_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"google_calendars\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "google_calendars_insert": {
           "name": "google_calendars_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"google_calendars\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "google_calendars_update": {
           "name": "google_calendars_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"google_calendars\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"google_calendars\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -9453,7 +10267,9 @@
           "name": "google_calendars_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"google_calendars\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -9531,8 +10347,12 @@
           "name": "google_event_snapshots_account_id_google_accounts_id_fk",
           "tableFrom": "google_event_snapshots",
           "tableTo": "google_accounts",
-          "columnsFrom": ["account_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "account_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -9540,8 +10360,12 @@
           "name": "google_event_snapshots_user_id_users_id_fk",
           "tableFrom": "google_event_snapshots",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -9551,7 +10375,10 @@
         "google_event_snapshots_account_id_week_start_unique": {
           "name": "google_event_snapshots_account_id_week_start_unique",
           "nullsNotDistinct": false,
-          "columns": ["account_id", "week_start"]
+          "columns": [
+            "account_id",
+            "week_start"
+          ]
         }
       },
       "policies": {
@@ -9559,21 +10386,27 @@
           "name": "google_event_snapshots_select",
           "as": "PERMISSIVE",
           "for": "SELECT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"google_event_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "google_event_snapshots_insert": {
           "name": "google_event_snapshots_insert",
           "as": "PERMISSIVE",
           "for": "INSERT",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "withCheck": "\"google_event_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
         "google_event_snapshots_update": {
           "name": "google_event_snapshots_update",
           "as": "PERMISSIVE",
           "for": "UPDATE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"google_event_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid",
           "withCheck": "\"google_event_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         },
@@ -9581,7 +10414,9 @@
           "name": "google_event_snapshots_delete",
           "as": "PERMISSIVE",
           "for": "DELETE",
-          "to": ["authenticated"],
+          "to": [
+            "authenticated"
+          ],
           "using": "\"google_event_snapshots\".\"user_id\" = current_setting('app.user_id', true)::uuid"
         }
       },
@@ -9639,42 +10474,73 @@
     "public.item_type": {
       "name": "item_type",
       "schema": "public",
-      "values": ["habit", "task_appointment", "deep_work", "workout"]
+      "values": [
+        "habit",
+        "task_appointment",
+        "deep_work",
+        "workout"
+      ]
     },
     "public.miss_tier": {
       "name": "miss_tier",
       "schema": "public",
-      "values": ["circumstance", "scoping", "chose_not_to"]
+      "values": [
+        "circumstance",
+        "scoping",
+        "chose_not_to"
+      ]
     },
     "public.scheduling": {
       "name": "scheduling",
       "schema": "public",
-      "values": ["hard", "soft"]
+      "values": [
+        "hard",
+        "soft"
+      ]
     },
     "public.time_mode": {
       "name": "time_mode",
       "schema": "public",
-      "values": ["fixed_time", "window", "unscheduled"]
+      "values": [
+        "fixed_time",
+        "window",
+        "unscheduled"
+      ]
     },
     "public.workout_location": {
       "name": "workout_location",
       "schema": "public",
-      "values": ["home", "gym", "outside"]
+      "values": [
+        "home",
+        "gym",
+        "outside"
+      ]
     },
     "public.anchor_direction": {
       "name": "anchor_direction",
       "schema": "public",
-      "values": ["work_waits", "routine_cut", "depends"]
+      "values": [
+        "work_waits",
+        "routine_cut",
+        "depends"
+      ]
     },
     "public.morning_mode": {
       "name": "morning_mode",
       "schema": "public",
-      "values": ["set_from_plan", "build_each_morning"]
+      "values": [
+        "set_from_plan",
+        "build_each_morning"
+      ]
     },
     "public.overflow_mode": {
       "name": "overflow_mode",
       "schema": "public",
-      "values": ["daily_menu", "variants", "auto_trim"]
+      "values": [
+        "daily_menu",
+        "variants",
+        "auto_trim"
+      ]
     },
     "public.schedule_shape": {
       "name": "schedule_shape",
@@ -9689,42 +10555,71 @@
     "public.theme_preference": {
       "name": "theme_preference",
       "schema": "public",
-      "values": ["system", "light", "dark"]
+      "values": [
+        "system",
+        "light",
+        "dark"
+      ]
     },
     "public.link_kind": {
       "name": "link_kind",
       "schema": "public",
-      "values": ["spotify", "other"]
+      "values": [
+        "spotify",
+        "other"
+      ]
     },
     "public.block_flow": {
       "name": "block_flow",
       "schema": "public",
-      "values": ["forward", "backward"]
+      "values": [
+        "forward",
+        "backward"
+      ]
     },
     "public.block_structure": {
       "name": "block_structure",
       "schema": "public",
-      "values": ["stack", "opener_pool_closer"]
+      "values": [
+        "stack",
+        "opener_pool_closer"
+      ]
     },
     "public.day_block_state": {
       "name": "day_block_state",
       "schema": "public",
-      "values": ["planned", "pooled", "set", "not_today"]
+      "values": [
+        "planned",
+        "pooled",
+        "set",
+        "not_today"
+      ]
     },
     "public.day_plan_state": {
       "name": "day_plan_state",
       "schema": "public",
-      "values": ["draft", "complete"]
+      "values": [
+        "draft",
+        "complete"
+      ]
     },
     "public.day_shape": {
       "name": "day_shape",
       "schema": "public",
-      "values": ["structured", "unstructured"]
+      "values": [
+        "structured",
+        "unstructured"
+      ]
     },
     "public.slot_role": {
       "name": "slot_role",
       "schema": "public",
-      "values": ["stack", "opener", "pool", "closer"]
+      "values": [
+        "stack",
+        "opener",
+        "pool",
+        "closer"
+      ]
     },
     "public.training_placement": {
       "name": "training_placement",
@@ -9740,22 +10635,38 @@
     "public.work_day_kind": {
       "name": "work_day_kind",
       "schema": "public",
-      "values": ["remote", "coworking", "office", "other"]
+      "values": [
+        "remote",
+        "coworking",
+        "office",
+        "other"
+      ]
     },
     "public.day_close_reason": {
       "name": "day_close_reason",
       "schema": "public",
-      "values": ["manual", "auto"]
+      "values": [
+        "manual",
+        "auto"
+      ]
     },
     "public.woke_at_source": {
       "name": "woke_at_source",
       "schema": "public",
-      "values": ["anchor", "manual", "orient"]
+      "values": [
+        "anchor",
+        "manual",
+        "orient"
+      ]
     },
     "public.assignment_state": {
       "name": "assignment_state",
       "schema": "public",
-      "values": ["assigned", "not_assigned", "cut_by_shift"]
+      "values": [
+        "assigned",
+        "not_assigned",
+        "cut_by_shift"
+      ]
     },
     "public.completion_state": {
       "name": "completion_state",
@@ -9785,22 +10696,35 @@
     "public.timer_session_source": {
       "name": "timer_session_source",
       "schema": "public",
-      "values": ["timer", "manual"]
+      "values": [
+        "timer",
+        "manual"
+      ]
     },
     "public.shift_kind": {
       "name": "shift_kind",
       "schema": "public",
-      "values": ["shift", "refit"]
+      "values": [
+        "shift",
+        "refit"
+      ]
     },
     "public.miss_resolved_by": {
       "name": "miss_resolved_by",
       "schema": "public",
-      "values": ["day_review", "shift"]
+      "values": [
+        "day_review",
+        "shift"
+      ]
     },
     "public.device_platform": {
       "name": "device_platform",
       "schema": "public",
-      "values": ["ios", "android", "web"]
+      "values": [
+        "ios",
+        "android",
+        "web"
+      ]
     },
     "public.notification_kind": {
       "name": "notification_kind",
@@ -9825,27 +10749,50 @@
     "public.export_status": {
       "name": "export_status",
       "schema": "public",
-      "values": ["preparing", "ready", "expired", "failed"]
+      "values": [
+        "preparing",
+        "ready",
+        "expired",
+        "failed"
+      ]
     },
     "public.workflow_column_role": {
       "name": "workflow_column_role",
       "schema": "public",
-      "values": ["active", "done"]
+      "values": [
+        "active",
+        "done"
+      ]
     },
     "public.block_fill": {
       "name": "block_fill",
       "schema": "public",
-      "values": ["set_items", "tasks_for_the_day", "from_todos"]
+      "values": [
+        "set_items",
+        "tasks_for_the_day",
+        "from_todos"
+      ]
     },
     "public.todo_type": {
       "name": "todo_type",
       "schema": "public",
-      "values": ["home", "errand", "call", "digital", "other"]
+      "values": [
+        "home",
+        "errand",
+        "call",
+        "digital",
+        "other"
+      ]
     },
     "public.work_tier": {
       "name": "work_tier",
       "schema": "public",
-      "values": ["urgent", "primary", "secondary", "stretch"]
+      "values": [
+        "urgent",
+        "primary",
+        "secondary",
+        "stretch"
+      ]
     },
     "public.slot_event_kind": {
       "name": "slot_event_kind",
@@ -9864,27 +10811,50 @@
     "public.event_tag": {
       "name": "event_tag",
       "schema": "public",
-      "values": ["work", "personal"]
+      "values": [
+        "work",
+        "personal"
+      ]
     },
     "public.meal_link_kind": {
       "name": "meal_link_kind",
       "schema": "public",
-      "values": ["playlist", "channel", "search"]
+      "values": [
+        "playlist",
+        "channel",
+        "search"
+      ]
     },
     "public.client_color_key": {
       "name": "client_color_key",
       "schema": "public",
-      "values": ["rose", "leaf", "amber", "moss", "slate", "ink"]
+      "values": [
+        "rose",
+        "leaf",
+        "amber",
+        "moss",
+        "slate",
+        "ink"
+      ]
     },
     "public.done_source": {
       "name": "done_source",
       "schema": "public",
-      "values": ["synapse", "linear"]
+      "values": [
+        "synapse",
+        "linear"
+      ]
     },
     "public.work_size": {
       "name": "work_size",
       "schema": "public",
-      "values": ["quick", "small", "medium", "large", "huge"]
+      "values": [
+        "quick",
+        "small",
+        "medium",
+        "large",
+        "huge"
+      ]
     },
     "public.linear_write_kind": {
       "name": "linear_write_kind",
@@ -9901,7 +10871,11 @@
     "public.linear_write_state": {
       "name": "linear_write_state",
       "schema": "public",
-      "values": ["pending", "sent", "failed"]
+      "values": [
+        "pending",
+        "sent",
+        "failed"
+      ]
     }
   },
   "schemas": {
