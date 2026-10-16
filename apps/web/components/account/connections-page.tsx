@@ -9,9 +9,10 @@
  * the live Add a workspace row. No primary action: every change saves as
  * made, and nothing is written to Google or Linear (C-USE-settings-4).
  *
- * Add a Google account and Add a workspace run the fixture connect
- * (`useConnections().connect`), standing for the provider's sign-in; the
- * OAuth itself is the connect tickets'. Connecting, the Add row's spinner;
+ * Add a Google account and Add a workspace run `useConnections().connect`:
+ * on fixtures it stands for the provider's sign-in; live, Add a workspace
+ * leaves for Linear's consent (USE-100), and a refused or failed callback
+ * comes back on `?failed=linear`, which opens on the failed line. Connecting, the Add row's spinner;
  * failed, "Not connected. Try again." under it. Offline, the StatusLine,
  * and connect and disconnect disabled (offline.md).
  *
@@ -19,6 +20,7 @@
  * "connecting:<google|linear>" or "connect-failed:<google|linear>".
  */
 import * as React from "react";
+import { useQueryState } from "nuqs";
 import { Breadcrumb, ScreenFrame, SkeletonRow, Text, toast } from "@syn/ui";
 import { OfflineLine } from "@/components/planner/offline-line";
 import { useDataSource, useIsOffline } from "@/lib/data/source";
@@ -28,7 +30,7 @@ import {
   useGoogleCalendarsQuery,
   type ConnectKind,
 } from "@/lib/data/use-connections";
-import { settingsRoute } from "@/lib/routes";
+import { CONNECT_FAILED_PARAM, settingsRoute } from "@/lib/routes";
 import { ClientsSettings } from "./clients-settings";
 import {
   AddConnectionRow,
@@ -40,13 +42,18 @@ import { GoogleSection } from "./google-section";
 
 type ConnectStates = Record<ConnectKind, ConnectState>;
 
-function seededConnect(open: string | undefined): ConnectStates {
+function seededConnect(
+  open: string | undefined,
+  failed: string | null,
+): ConnectStates {
   const states: ConnectStates = { google: "idle", linear: "idle" };
   const [what, kind] = open?.split(":") ?? [];
   if (kind === "google" || kind === "linear") {
     if (what === "connecting") states[kind] = "connecting";
     if (what === "connect-failed") states[kind] = "failed";
   }
+  // Back from a refused or failed OAuth callback (USE-100).
+  if (failed === "linear") states.linear = "failed";
   return states;
 }
 
@@ -92,9 +99,15 @@ export function ConnectionsPage() {
   const calendars = useGoogleCalendarsQuery();
   const account = useAccount();
   const offline = useIsOffline();
+  const [failedParam, setFailedParam] = useQueryState(CONNECT_FAILED_PARAM);
   const [connect, setConnect] = React.useState<ConnectStates>(() =>
-    seededConnect(source.scenario.view?.open),
+    seededConnect(source.scenario.view?.open, failedParam),
   );
+
+  // The failed line is seeded once; the param goes, so a reload is clean.
+  React.useEffect(() => {
+    if (failedParam !== null) void setFailedParam(null);
+  }, [failedParam, setFailedParam]);
   const heading = React.useRef<HTMLHeadingElement>(null);
 
   React.useEffect(() => {

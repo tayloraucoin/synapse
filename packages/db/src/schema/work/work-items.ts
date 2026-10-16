@@ -8,9 +8,9 @@
  * LENGTH is a range (`length_min_min` to `length_max_min`); the fit is
  * measured at its top (D-USE-42). `size` null is unsized.
  *
- * LINEAR. The `linear_*` columns are plain here: Linear connect's migration
- * adds the `linear_connections` table and the foreign key on
- * `linear_connection_id`. Nothing is written to Linear from this table.
+ * LINEAR. `linear_connection_id` points at its workspace (`0016`, USE-100);
+ * a disconnect leaves the item in the pool, unlinked. Nothing is written to
+ * Linear from this table.
  *
  * A sub-issue is a row with `parent_work_item_id`. Deleting the parent leaves
  * the child in the pool, unparented.
@@ -34,6 +34,7 @@ import {
 import { DONE_SOURCES, WORK_SIZES } from "@syn/constants";
 import type { DoneSource, IconValue, WorkSize } from "@syn/types";
 import { enumValues } from "../enum-values";
+import { linearConnections } from "../integrations/linear-connections";
 import { slots } from "../planner/slots";
 import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
 import { users } from "../user/users";
@@ -68,8 +69,10 @@ export const workItems = pgTable(
     icon: jsonb("icon").$type<IconValue>(),
     lengthMaxMin: smallint("length_max_min"),
     lengthMinMin: smallint("length_min_min"),
-    /** Linear connect adds the foreign key to `linear_connections`. */
-    linearConnectionId: uuid("linear_connection_id"),
+    linearConnectionId: uuid("linear_connection_id").references(
+      (): AnyPgColumn => linearConnections.id,
+      { onDelete: "set null" },
+    ),
     /** ENG-123, as Linear shows it. */
     linearIdentifier: text("linear_identifier"),
     linearIssueId: text("linear_issue_id"),
@@ -97,6 +100,7 @@ export const workItems = pgTable(
     ),
     check("work_items_length_min_min_check", sql`${table.lengthMinMin} > 0`),
     index("work_items_client_id_idx").on(table.clientId),
+    index("work_items_linear_connection_id_idx").on(table.linearConnectionId),
     index("work_items_parent_work_item_id_idx").on(table.parentWorkItemId),
     index("work_items_user_id_idx").on(table.userId),
     ...ownerPrivateCrudPolicies({

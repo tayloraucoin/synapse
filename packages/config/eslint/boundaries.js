@@ -22,9 +22,9 @@
  * yet is simply never matched — every later package is born under this rule.
  */
 
-import boundaries from "eslint-plugin-boundaries";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import boundaries from "eslint-plugin-boundaries";
 import tseslint from "typescript-eslint";
 
 const configDir = dirname(fileURLToPath(import.meta.url));
@@ -244,6 +244,40 @@ function buildDependenciesRule(exemptModule) {
   ];
 }
 
+/**
+ * Integration tokens at rest (USE-100, C5): only Linear's and Google's
+ * services may import `token-crypto`, so a plaintext token exists nowhere
+ * else. Every other file under packages/ and apps/ is refused, by path or by
+ * relative import; the module's own test is the one other importer.
+ */
+const TOKEN_CRYPTO_IMPORTERS = [
+  "packages/api/src/services/linear/**",
+  "packages/api/src/services/google/**",
+  "packages/api/src/services/integrations/token-crypto.test.ts",
+];
+
+const tokenCryptoConfig = {
+  files: [
+    "packages/**/*.{ts,tsx,js,jsx,mjs,cjs}",
+    "apps/**/*.{ts,tsx,js,jsx,mjs,cjs}",
+  ],
+  ignores: TOKEN_CRYPTO_IMPORTERS,
+  rules: {
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: [
+          {
+            group: ["**/token-crypto", "**/token-crypto.*"],
+            message:
+              "Only services/linear and services/google import token-crypto (USE-100, C5). Call the service that owns the token instead; never decrypt one here.",
+          },
+        ],
+      },
+    ],
+  },
+};
+
 /** @type {import("eslint").Linter.Config[]} */
 export const boundariesConfig = [
   {
@@ -322,4 +356,5 @@ export const boundariesConfig = [
       "boundaries/dependencies": buildDependenciesRule(module),
     },
   })),
+  tokenCryptoConfig,
 ];

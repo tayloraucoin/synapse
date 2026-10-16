@@ -300,8 +300,33 @@ export function settingsRoute(section?: "notifications"): string {
  * Settings › Connections (USE-85): Google calendars, Linear workspaces,
  * clients. Connect Linear on the pool sheet and the Item sheet lands here.
  */
-export function connectionsRoute(): string {
-  return `${settingsRoute()}/connections`;
+export function connectionsRoute(options: { failed?: "linear" } = {}): string {
+  const path = `${settingsRoute()}/connections`;
+  return options.failed
+    ? `${path}?${CONNECT_FAILED_PARAM}=${options.failed}`
+    : path;
+}
+
+/**
+ * `?failed=linear` on Connections (USE-100): the OAuth callback refused or
+ * failed, so the Add row opens on "Not connected. Try again." Cleared once
+ * read.
+ */
+export const CONNECT_FAILED_PARAM = "failed";
+
+/**
+ * Linear connect's start (USE-100): sets the connect cookie and redirects
+ * to Linear's consent screen. `returnTo` is where a finished connect lands
+ * (Connections by default; only a path on this site).
+ */
+export function linearConnectStartRoute(returnTo?: string): string {
+  const path = "/api/integrations/linear/start";
+  return returnTo ? `${path}?return=${encodeURIComponent(returnTo)}` : path;
+}
+
+/** Linear connect's callback: the OAuth app's registered redirect URI, on the site's origin. */
+export function linearConnectCallbackRoute(): string {
+  return "/api/integrations/linear/callback";
 }
 
 /**

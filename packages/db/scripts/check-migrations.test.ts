@@ -557,3 +557,50 @@ test("USE-87 C4: 0015 adds the six columns, makes only additions, and follows 00
     tags.indexOf("0014_use_todo_remind_on") + 1,
   );
 });
+
+test("USE-100 C1: 0016 creates the seven integration tables, adds work_items' foreign key, makes only additions, and follows 0015", () => {
+  const sql = readFileSync(
+    path.join(MIGRATIONS_DIR, "0016_use_integrations.sql"),
+    "utf8",
+  );
+  const statements = splitStatements(sql).statements.map((s) => s.text);
+  const created = statements
+    .map((text) => /^CREATE TABLE "(\w+)"/.exec(text)?.[1])
+    .filter((name): name is string => name !== undefined);
+  assert.deepEqual(created.sort(), [
+    "google_accounts",
+    "google_calendars",
+    "google_event_snapshots",
+    "linear_connections",
+    "linear_project_clients",
+    "linear_snapshots",
+    "linear_writes",
+  ]);
+  assert.ok(
+    statements.includes(
+      `ALTER TABLE "work_items" ADD CONSTRAINT "work_items_linear_connection_id_linear_connections_id_fk" FOREIGN KEY ("linear_connection_id") REFERENCES "public"."linear_connections"("id") ON DELETE set null ON UPDATE no action`,
+    ),
+    "work_items gains its FK to linear_connections, on delete set null",
+  );
+  assert.ok(
+    statements.includes(
+      `CREATE TYPE "public"."linear_write_kind" AS ENUM('status', 'done', 'reopen', 'priority', 'description', 'estimate')`,
+    ),
+    "linear_write_kind carries D-USE-113's six",
+  );
+  // Additions only: every statement creates, enables RLS or adds a constraint.
+  const addition =
+    /^(CREATE (TYPE|TABLE|INDEX|POLICY) |ALTER TABLE "\w+" (ENABLE ROW LEVEL SECURITY$|ADD CONSTRAINT ))/;
+  for (const statement of statements) {
+    assert.match(statement, addition, `an addition: ${statement.slice(0, 80)}`);
+  }
+  assert.doesNotMatch(sql.toUpperCase(), /\bDROP\b|\bRENAME\b|ALTER COLUMN/);
+  const journal = JSON.parse(
+    readFileSync(path.join(MIGRATIONS_DIR, "meta", "_journal.json"), "utf8"),
+  ) as { entries: { idx: number; tag: string }[] };
+  const tags = journal.entries.map((entry) => entry.tag);
+  assert.equal(
+    tags.indexOf("0016_use_integrations"),
+    tags.indexOf("0015_use_item_values") + 1,
+  );
+});

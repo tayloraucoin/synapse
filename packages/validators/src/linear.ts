@@ -1,6 +1,9 @@
 import { z } from "zod";
+import { LINEAR_WRITE_KINDS, LINEAR_WRITE_STATES } from "@syn/constants";
+import { googleAccountView, googleCalendarView } from "./google";
 import { dateKeySchema } from "./keys";
 import { instantSchema } from "./planner";
+import { clientRecord } from "./work";
 
 /**
  * Linear as Synapse reads it (USE-32): the snapshot's five lists, the
@@ -126,17 +129,8 @@ export const linearConnectionView = z.object({
 
 export type LinearConnectionView = z.infer<typeof linearConnectionView>;
 
-/** What the outbox writes (D-USE-113): never the assignee. */
-export const LINEAR_WRITE_KINDS = [
-  "status",
-  "done",
-  "reopen",
-  "priority",
-  "description",
-  "estimate",
-] as const;
-
-export const LINEAR_WRITE_STATES = ["pending", "sent", "failed"] as const;
+/** What the outbox writes (D-USE-113), spelled once in `@syn/constants` (USE-100). */
+export { LINEAR_WRITE_KINDS, LINEAR_WRITE_STATES };
 
 /** One `linear_writes` row; a `failed` one shows "Not updated in Linear." */
 export const linearWriteView = z.object({
@@ -190,3 +184,29 @@ export const linearProjectClientInput = z.object({
 });
 
 export type LinearProjectClientInput = z.infer<typeof linearProjectClientInput>;
+
+/** Settings' ··· › Disconnect on a workspace (USE-100). */
+export const linearDisconnectInput = z.object({
+  connectionId: z.string().uuid(),
+});
+
+export type LinearDisconnectInput = z.infer<typeof linearDisconnectInput>;
+
+/**
+ * `connections.list` (USE-100): what Settings › Connections reads, every
+ * part a view. Strict, so a column added to a select by mistake fails the
+ * output parse instead of reaching the browser.
+ */
+export const connectionsView = z
+  .object({
+    linear: z.array(linearConnectionView.strict()),
+    googleAccounts: z.array(googleAccountView.strict()),
+    googleCalendars: z.array(googleCalendarView.strict()),
+    /** `users.clients_enabled` (D-USE-40: off by default). */
+    clientsEnabled: z.boolean(),
+    clients: z.array(clientRecord.strict()),
+    projectClients: z.array(linearProjectClientInput.strict()),
+  })
+  .strict();
+
+export type ConnectionsView = z.infer<typeof connectionsView>;

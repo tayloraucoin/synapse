@@ -58,7 +58,10 @@ export {
   type WebPushPayload,
   type WebPushSubscriptionData,
 } from "./services/notifications/web-push";
-export { sendToUser, type FanOutResult } from "./services/notifications/fan-out";
+export {
+  sendToUser,
+  type FanOutResult,
+} from "./services/notifications/fan-out";
 /**
  * N4's *Later*. Exported because its one caller is a route handler serving the
  * service worker, which has no tRPC client — see `api/pwa/push/snooze`.
@@ -70,3 +73,16 @@ export {
   type ScheduledJob,
   type ScheduledJobResult,
 } from "./services/jobs/run-scheduled-jobs";
+/**
+ * Linear connect's two route handlers (USE-100): only a route can take the
+ * provider's redirect. No key, ciphertext or token crosses this export.
+ */
+export {
+  finishLinearConnect,
+  handleLinearCallback,
+  isLocalPath,
+  LINEAR_OAUTH_COOKIE,
+  LINEAR_OAUTH_COOKIE_OPTIONS,
+  startLinearConnect,
+  type LinearCallbackOutcome,
+} from "./services/linear";

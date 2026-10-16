@@ -8,9 +8,7 @@
       "designLayer": "apps/web/docs/design"
     }
   },
-  "toolkitPrefixes": [
-    "SYN"
-  ],
+  "toolkitPrefixes": ["SYN"],
   "verify": {
     "full": "yarn verify",
     "fast": "yarn verify:fast"
@@ -140,23 +138,13 @@
       "status": "draft"
     },
     {
-      "imports": [
-        "@supabase/*",
-        "next-auth",
-        "@clerk/*",
-        "better-auth"
-      ],
+      "imports": ["@supabase/*", "next-auth", "@clerk/*", "better-auth"],
       "role": "mason",
       "why": "One-way door: authorization topology, wherever an auth SDK is called.",
       "status": "draft"
     },
     {
-      "imports": [
-        "@supabase/*",
-        "next-auth",
-        "@clerk/*",
-        "better-auth"
-      ],
+      "imports": ["@supabase/*", "next-auth", "@clerk/*", "better-auth"],
       "role": "warden",
       "why": "Sessions, identity and access, wherever an auth SDK is called.",
       "status": "draft"
@@ -195,6 +183,18 @@
       "glob": "packages/api/src/context.ts",
       "role": "warden",
       "why": "Whose session each API request runs as.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/api/src/services/{integrations,linear,google}/**",
+      "role": "warden",
+      "why": "Integration tokens at rest and in flight: the key, the ciphertext, the OAuth exchange and refresh (USE-100, C5).",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/api/src/services/{integrations,linear,google}/**",
+      "role": "mason",
+      "why": "One-way door: how stored tokens are encrypted; a changed envelope or key strands every connection.",
       "status": "draft"
     }
   ],

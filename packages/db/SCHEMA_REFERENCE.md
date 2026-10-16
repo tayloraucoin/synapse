@@ -11,7 +11,7 @@
 
 ## 1. ENTITY OVERVIEW
 
-**29 tables** in `public`, plus a reference-only mirror of Supabase's `auth.users`. Grouped by domain.
+**36 tables** in `public`, plus a reference-only mirror of Supabase's `auth.users`. Grouped by domain.
 
 **Group 1 — Auth & Users.** `users` is the shadow of `auth.users` — its primary key **is** the foreign key, and the row is created by the `handle_new_user()` trigger, never by the app. It carries every account scalar: timezone, day-close and review-reminder times, theme, display name, the usual wake time, the week-build reminder's day and time, the first-run resume point, the deferred-settings pending pair, and — since UX v1.1 (0005) — the shape of the week (`schedule_shape`, `work_days`, `work_start_time`, `work_end_time`, `anchor_direction`), the wake range, lights-out and devices-off, the overflow mode, the orient frame's settings, the journal's switch and prompts, and the block order — and, since UX v1.2 (0007), how mornings go (`morning_mode`), the quote opt-in, the two further morning lines, and the journal reminder's switch and time. There is no wake anchor since `0006` (v1.1 R11, DYN-21): the orient frame is the wake moment. `user_avatars` is the optional photo, keyed by `user_id` — one per person, no surrogate id. Deleting the auth user cascades through this row to everything.
 
@@ -4454,6 +4454,546 @@ export const workflowDayPinsRelations = relations(workflowDayPins, ({ one }) => 
 
 **RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
 
+### GROUP 8 — INTEGRATIONS
+
+Since USE-100 (0016): Linear and Google, every table owner-private. `linear_connections` is one per workspace, its access and refresh tokens AES-256-GCM ciphertext (`*_ct`, bytea) read only by `@syn/api`'s `services/linear`; `linear_snapshots` holds what a sync fetched, `linear_project_clients` maps a project to a client, and `linear_writes` is the outbox, its `kind` D-USE-113's six. `google_accounts` keeps a ciphertext refresh token, `google_calendars` each calendar on or off, `google_event_snapshots` one account's week. A disconnect cascades its snapshots, mappings and outbox; `work_items.linear_connection_id` is set null.
+
+```ts
+// packages/db/src/schema/integrations/enums.ts
+/**
+ * The outbox's two enums (USE-100, `0016`). Spelled once in `@syn/constants`;
+ * `enumValues` proves the tuple whole.
+ */
+import { pgEnum } from "drizzle-orm/pg-core";
+import { LINEAR_WRITE_KINDS, LINEAR_WRITE_STATES } from "@syn/constants";
+import { enumValues } from "../enum-values";
+
+type LinearWriteKind = (typeof LINEAR_WRITE_KINDS)[number];
+type LinearWriteState = (typeof LINEAR_WRITE_STATES)[number];
+
+/** D-USE-113: status, done, reopen, priority, description, estimate. */
+export const linearWriteKindEnum = pgEnum(
+  "linear_write_kind",
+  enumValues<LinearWriteKind>()(LINEAR_WRITE_KINDS),
+);
+
+export const linearWriteStateEnum = pgEnum(
+  "linear_write_state",
+  enumValues<LinearWriteState>()(LINEAR_WRITE_STATES),
+);
+
+// packages/db/src/schema/integrations/linear-connections.ts
+/**
+ * linear_connections — one per Linear workspace Taylor connected (USE-100,
+ * D-USE-114: OAuth only).
+ *
+ * TOKENS. `access_token_ct` and `refresh_token_ct` are AES-256-GCM envelopes
+ * (`@syn/api`'s `services/integrations/token-crypto.ts`, C5). Only
+ * `services/linear/` selects them, naming each column; every other read
+ * names the view's columns and never these. Linear rotates the refresh token
+ * on every refresh, so the pair is always written together.
+ *
+ * `client_id` is set when every project belongs to one client;
+ * `per_project` maps each project through `linear_project_clients`.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { relations, sql } from "drizzle-orm";
+import {
+  boolean,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { clients } from "../work/clients";
+import { bytea } from "./bytea";
+
+export const linearConnections = pgTable(
+  "linear_connections",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    /** Ciphertext; never in a view. */
+    accessTokenCt: bytea("access_token_ct").notNull(),
+    lastSyncError: text("last_sync_error"),
+    lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+    /** Linear-hosted; may need auth, so the letter tile is the fallback. */
+    logoUrl: text("logo_url"),
+    name: text("name").notNull(),
+    /** Linear's organization id. */
+    organizationId: text("organization_id").notNull(),
+    perProject: boolean("per_project").notNull().default(false),
+    /** Ciphertext; never in a view. */
+    refreshTokenCt: bytea("refresh_token_ct").notNull(),
+    /** As Linear granted them, comma-separated ("read,write"). */
+    scopes: text("scopes").notNull(),
+    tokenExpiresAt: timestamp("token_expires_at", {
+      withTimezone: true,
+    }).notNull(),
+    urlKey: text("url_key").notNull(),
+
+    clientId: uuid("client_id").references(() => clients.id, {
+      onDelete: "set null",
+    }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    unique("linear_connections_user_id_organization_id_unique").on(
+      table.userId,
+      table.organizationId,
+    ),
+    index("linear_connections_client_id_idx").on(table.clientId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "linear_connections",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+export const linearConnectionsRelations = relations(
+  linearConnections,
+  ({ one }) => ({
+    client: one(clients, {
+      fields: [linearConnections.clientId],
+      references: [clients.id],
+    }),
+    user: one(users, {
+      fields: [linearConnections.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+// packages/db/src/schema/integrations/linear-snapshots.ts
+/**
+ * linear_snapshots — what one sync fetched from a workspace (USE-100's table,
+ * USE-101's rows): the payload is `@syn/validators`' `linearSnapshotPayload`,
+ * parsed before it is stored, so Linear's own shape stays out of the tables.
+ * Gone with its connection.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { sql } from "drizzle-orm";
+import { index, jsonb, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { linearConnections } from "./linear-connections";
+
+export const linearSnapshots = pgTable(
+  "linear_snapshots",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull(),
+    // JSON shape: LinearSnapshotPayload — see @syn/validators.
+    payload: jsonb("payload").notNull(),
+
+    connectionId: uuid("connection_id")
+      .notNull()
+      .references(() => linearConnections.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("linear_snapshots_connection_id_fetched_at_idx").on(
+      table.connectionId,
+      table.fetchedAt,
+    ),
+    index("linear_snapshots_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "linear_snapshots",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+// packages/db/src/schema/integrations/linear-project-clients.ts
+/**
+ * linear_project_clients — a project's client in a per-project workspace
+ * (D-USE-57). Never written to Linear. Gone with its connection; a deleted
+ * client leaves the project with none.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { sql } from "drizzle-orm";
+import {
+  index,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { clients } from "../work/clients";
+import { linearConnections } from "./linear-connections";
+
+export const linearProjectClients = pgTable(
+  "linear_project_clients",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    /** Linear's project id. */
+    projectId: text("project_id").notNull(),
+
+    clientId: uuid("client_id").references(() => clients.id, {
+      onDelete: "set null",
+    }),
+    connectionId: uuid("connection_id")
+      .notNull()
+      .references(() => linearConnections.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    unique("linear_project_clients_connection_id_project_id_unique").on(
+      table.connectionId,
+      table.projectId,
+    ),
+    index("linear_project_clients_client_id_idx").on(table.clientId),
+    index("linear_project_clients_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "linear_project_clients",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+// packages/db/src/schema/integrations/linear-writes.ts
+/**
+ * linear_writes — the outbox (USE-100's table, USE-102's sender). Synapse's
+ * value is written first and stands; a row carries the change to the issue.
+ * `failed` shows "Not updated in Linear." with Try again. `kind` is
+ * D-USE-113's six, never the assignee. Gone with its connection or its item.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { sql } from "drizzle-orm";
+import {
+  index,
+  jsonb,
+  pgTable,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { workItems } from "../work/work-items";
+import { linearWriteKindEnum, linearWriteStateEnum } from "./enums";
+import { linearConnections } from "./linear-connections";
+
+export const linearWrites = pgTable(
+  "linear_writes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    attempts: smallint("attempts").notNull().default(0),
+    /** Linear's issue id. */
+    issueId: text("issue_id").notNull(),
+    kind: linearWriteKindEnum("kind").notNull(),
+    lastError: text("last_error"),
+    // JSON shape: the change for `kind` (the state id, priority, text or estimate).
+    payload: jsonb("payload").notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    state: linearWriteStateEnum("state").notNull().default("pending"),
+
+    connectionId: uuid("connection_id")
+      .notNull()
+      .references(() => linearConnections.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    workItemId: uuid("work_item_id")
+      .notNull()
+      .references(() => workItems.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("linear_writes_connection_id_state_idx").on(
+      table.connectionId,
+      table.state,
+    ),
+    index("linear_writes_user_id_idx").on(table.userId),
+    index("linear_writes_work_item_id_idx").on(table.workItemId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "linear_writes",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+// packages/db/src/schema/integrations/google-accounts.ts
+/**
+ * google_accounts — a Google account whose calendars Synapse reads (USE-100's
+ * table, USE-103's OAuth): read-only calendar scope, never the sign-in's.
+ *
+ * TOKEN. `refresh_token_ct` is an AES-256-GCM envelope (`token-crypto`, C5),
+ * selected only by `services/google/`, naming the column. The access token
+ * is never stored.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { sql } from "drizzle-orm";
+import { index, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { bytea } from "./bytea";
+
+export const googleAccounts = pgTable(
+  "google_accounts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    /** The account's address, as Settings shows it under the account line. */
+    email: text("email").notNull(),
+    /** "Personal", Taylor's word for the account. */
+    label: text("label").notNull(),
+    lastSyncError: text("last_sync_error"),
+    lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+    /** Ciphertext; never in a view. */
+    refreshTokenCt: bytea("refresh_token_ct").notNull(),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+      withTimezone: true,
+    }),
+    tokenExpiresAt: timestamp("token_expires_at", { withTimezone: true }),
+
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    index("google_accounts_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "google_accounts",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+// packages/db/src/schema/integrations/google-calendars.ts
+/**
+ * google_calendars — one calendar of a connected account, each on or off
+ * (`enabled`, D-USE-40). A new account's calendars arrive off. Gone with
+ * its account.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { sql } from "drizzle-orm";
+import {
+  boolean,
+  index,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { googleAccounts } from "./google-accounts";
+
+export const googleCalendars = pgTable(
+  "google_calendars",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    /** Google's access role on the calendar ("owner", "reader", …). */
+    accessRole: text("access_role").notNull(),
+    /** Google's calendar id. */
+    calendarId: text("calendar_id").notNull(),
+    color: text("color").notNull(),
+    enabled: boolean("enabled").notNull().default(false),
+    name: text("name").notNull(),
+    primary: boolean("primary").notNull().default(false),
+
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => googleAccounts.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    unique("google_calendars_account_id_calendar_id_unique").on(
+      table.accountId,
+      table.calendarId,
+    ),
+    index("google_calendars_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "google_calendars",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+
+// packages/db/src/schema/integrations/google-event-snapshots.ts
+/**
+ * google_event_snapshots — one account's events for one week, as the last
+ * read fetched them (USE-103's rows). Nothing is ever written to Google.
+ * Gone with its account.
+ *
+ * POLICIES: owner-private CRUD.
+ */
+import { sql } from "drizzle-orm";
+import {
+  date,
+  index,
+  jsonb,
+  pgTable,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { ownerPrivateCrudPolicies } from "../rls/standard-policies";
+import { users } from "../user/users";
+import { googleAccounts } from "./google-accounts";
+
+export const googleEventSnapshots = pgTable(
+  "google_event_snapshots",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull(),
+    // JSON shape: the week's events, parsed by USE-103's schema before storing.
+    payload: jsonb("payload").notNull(),
+    /** The week's Monday. */
+    weekStart: date("week_start").notNull(),
+
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => googleAccounts.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    unique("google_event_snapshots_account_id_week_start_unique").on(
+      table.accountId,
+      table.weekStart,
+    ),
+    index("google_event_snapshots_user_id_idx").on(table.userId),
+    ...ownerPrivateCrudPolicies({
+      prefix: "google_event_snapshots",
+      ownerColumn: sql`${table.userId}`,
+    }),
+  ],
+);
+```
+
+#### `linear_connections`
+
+**PURPOSE.** linear_connections — one per Linear workspace Taylor connected (USE-100, D-USE-114: OAuth only). TOKENS. `access_token_ct` and `refresh_token_ct` are AES-256-GCM envelopes (`@syn/api`'s `services/integrations/token-crypto.ts`, C5). Only `services/linear/` selects them, naming each column; every other read names the view's columns and never these. Linear rotates the refresh token on every refresh, so the pair is always written together. `client_id` is set when every project belongs to one client; `per_project` maps each project through `linear_project_clients`. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `linear_connections_client_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `linear_snapshots`
+
+**PURPOSE.** linear_snapshots — what one sync fetched from a workspace (USE-100's table, USE-101's rows): the payload is `@syn/validators`' `linearSnapshotPayload`, parsed before it is stored, so Linear's own shape stays out of the tables. Gone with its connection. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `linear_snapshots_connection_id_fetched_at_idx`
+- `linear_snapshots_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `linear_project_clients`
+
+**PURPOSE.** linear_project_clients — a project's client in a per-project workspace (D-USE-57). Never written to Linear. Gone with its connection; a deleted client leaves the project with none. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `linear_project_clients_client_id_idx`
+- `linear_project_clients_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `linear_writes`
+
+**PURPOSE.** linear_writes — the outbox (USE-100's table, USE-102's sender). Synapse's value is written first and stands; a row carries the change to the issue. `failed` shows "Not updated in Linear." with Try again. `kind` is D-USE-113's six, never the assignee. Gone with its connection or its item. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `linear_writes_connection_id_state_idx`
+- `linear_writes_user_id_idx`
+- `linear_writes_work_item_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `google_accounts`
+
+**PURPOSE.** google_accounts — a Google account whose calendars Synapse reads (USE-100's table, USE-103's OAuth): read-only calendar scope, never the sign-in's. TOKEN. `refresh_token_ct` is an AES-256-GCM envelope (`token-crypto`, C5), selected only by `services/google/`, naming the column. The access token is never stored. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `google_accounts_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `google_calendars`
+
+**PURPOSE.** google_calendars — one calendar of a connected account, each on or off (`enabled`, D-USE-40). A new account's calendars arrive off. Gone with its account. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `google_calendars_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
+#### `google_event_snapshots`
+
+**PURPOSE.** google_event_snapshots — one account's events for one week, as the last read fetched them (USE-103's rows). Nothing is ever written to Google. Gone with its account. POLICIES: owner-private CRUD.
+
+**INDEXES.**
+- `google_event_snapshots_user_id_idx`
+
+**RLS.** Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.
+
 
 ---
 
@@ -4557,7 +5097,7 @@ Re-running the seed prints zeros across the board, which means idempotent rather
 
 ## 10. OPEN QUESTIONS & FLAGGED DECISIONS
 
-- **29 tables is the whole Phase-1 model.** A later ticket that needs a column adds it as a normal migration with a logged deviation, not as a second domain migration by default.
+- **36 tables is the whole Phase-1 model.** A later ticket that needs a column adds it as a normal migration with a logged deviation, not as a second domain migration by default.
 - **`feedback_messages` readability is `[PROVISIONAL — Taylor]`.** The table is insert-only for its author and is read by the builder out of band. Confirm that is what you want; the row deliberately holds nothing from a person's list.
 - **`day_items.calendar_event_id` is a Phase-2 seam.** The column exists so calendar import (official spec §4.7) is not a migration; nothing in Phase 1 writes it.
 - **`template_slots.multitask_group` is enforced in the service, not the schema.** "Two slots sharing a start offset must share a group" cannot be a partial unique index, because the rule is *unless grouped*. SET-5 owns it, in the words TP-02 shows.
