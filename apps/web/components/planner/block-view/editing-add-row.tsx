@@ -28,6 +28,8 @@ export interface EditingAddRowProps {
   autoOpen?: boolean;
   /** Under the open field: the empty block's hint. */
   hint?: string | null;
+  /** Escape, or a blur with nothing typed: the field closed (USE-50's New to-do). */
+  onClose?: () => void;
 }
 
 export function EditingAddRow({
@@ -38,6 +40,7 @@ export function EditingAddRow({
   onPickIcon,
   autoOpen = false,
   hint = null,
+  onClose,
 }: EditingAddRowProps) {
   const [open, setOpen] = React.useState(autoOpen);
   const [value, setValue] = React.useState("");
@@ -98,6 +101,7 @@ export function EditingAddRow({
             if (event.key === "Escape") {
               setValue("");
               setOpen(false);
+              onClose?.();
             }
           }}
           onBlur={(event) => {
@@ -105,6 +109,7 @@ export function EditingAddRow({
               .closest("[data-add-field]")
               ?.contains(event.relatedTarget as Node | null);
             if (!within && value.trim() === "" && !autoOpen) setOpen(false);
+            if (!within && value.trim() === "") onClose?.();
           }}
           className="placeholder:text-text-muted min-w-0 flex-1 bg-transparent text-(length:--fs-body) outline-none"
         />

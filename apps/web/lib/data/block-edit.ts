@@ -41,8 +41,9 @@ export function scopeWords(place: BlockEditPlace, weekday: number): string {
 
 /**
  * The header's meta (by-kind.md, Words): "<Kind> · <span> · <scope>". The
- * kind is named where the name is not it: Life's plans and a Work block
- * named for what it holds ("Work · 9:30 to 12:00 · every Tuesday"); a
+ * kind is named where the name is not it: Life's plans, a To-dos block
+ * ("To-dos · 10:00 to 12:30 · this Saturday") and a Work block named for
+ * what it holds ("Work · 9:30 to 12:00 · every Tuesday"); a
  * checklist with no times reads "All day · Checklist · every Sunday".
  */
 export function blockEditMeta({
@@ -65,9 +66,12 @@ export function blockEditMeta({
   const named =
     kind === "life"
       ? "Life"
-      : kind === "work" && name !== "Work"
-        ? "Work"
-        : null;
+      : // A To-dos block is named for what it is for (USE-50): "To-dos · 10:00 to 12:30".
+        kind === "todos"
+        ? "To-dos"
+        : kind === "work" && name !== "Work"
+          ? "Work"
+          : null;
   return [named, span, scope].filter(Boolean).join(" · ");
 }
 

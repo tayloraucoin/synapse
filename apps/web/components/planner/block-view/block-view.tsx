@@ -46,7 +46,9 @@ export type BlockViewBody<R extends BlockViewRowModel> =
   | { state: "loading"; label: string }
   /** The rows failed: the caller's `RegionRetry`. */
   | { state: "error"; retry: React.ReactNode }
-  | { state: "ready"; column: BlockViewColumnProps<R> };
+  | { state: "ready"; column: BlockViewColumnProps<R> }
+  /** A kind drawn its own way: a Work block's tiers (USE-50). */
+  | { state: "node"; node: React.ReactNode };
 
 export interface BlockViewProps<R extends BlockViewRowModel> {
   mode: BlockViewMode;
@@ -179,6 +181,8 @@ export function BlockView<R extends BlockViewRowModel>({
           <BlockViewSkeleton label={body.label} />
         ) : body.state === "error" ? (
           body.retry
+        ) : body.state === "node" ? (
+          body.node
         ) : (
           <BlockViewColumn {...body.column} />
         )}

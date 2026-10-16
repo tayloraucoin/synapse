@@ -30,6 +30,7 @@ import { BLOCK_HUE, type BlockHue } from "@/components/planner/block-hue";
 import {
   BLOCK_VIEW_COPY,
   BlockView,
+  BlockViewColumn,
   clockLabel,
   EditingAddRow,
   KindSelectRow,
@@ -72,6 +73,8 @@ import {
   withSearch,
 } from "@/lib/routes";
 import { BLOCK_EDIT_COPY as COPY } from "./copy";
+import { useTodosEditing } from "./todos-editing";
+import { useWorkTiersEditing } from "./work-tiers-editing";
 
 /**
  * Block view in editing (USE-49; day/block-view/by-kind.md): one block
@@ -128,9 +131,17 @@ const PLAIN_BUTTON = cn(
   "focus-visible:ring-ring focus-visible:ring-2",
 );
 
-export function DaysBlockScreen({ blockId }: { blockId: string }) {
+export function DaysBlockScreen({
+  blockId,
+  at,
+}: {
+  blockId: string;
+  /** The place's query ("date=2026-10-17"), for a part on `/dev/parts`. */
+  at?: string;
+}) {
   const router = useRouter();
-  const search = useSearchParams();
+  const params = useSearchParams();
+  const search = at === undefined ? params : new URLSearchParams(at);
   const source = useDataSource();
   const view = source.scenario.view;
   const offline = useIsOffline();
@@ -180,7 +191,30 @@ export function DaysBlockScreen({ blockId }: { blockId: string }) {
   );
   const timeless =
     startsAt !== null && endsAt !== null && isTimeless({ startsAt, endsAt });
-  const scope = scopeWords(place, weekday);
+  // This week's crumb is dated, as its chips are: "‹ Mon 12" (work-tiers.md).
+  const crumbLabel = dated
+    ? `${dayName.slice(0, 3)} ${Number(place.date.slice(8, 10))}`
+    : dayName;
+  // A Work block on This week is "this Monday only" (work-tiers.md).
+  const scope =
+    scopeWords(place, weekday) + (dated && kind === "work" ? " only" : "");
+
+  // USE-50: a This week Work block on its tiers; a To-dos block's to-dos.
+  const work = useWorkTiersEditing({
+    data,
+    dateKey: dated ? place.date : null,
+    open: view?.open,
+    announce: setAnnouncement,
+  });
+  const todos = useTodosEditing({
+    data,
+    dateKey: dated ? place.date : null,
+    open: view?.open,
+    addIcon,
+    onPickIcon: () => setPicking("add"),
+    clearAddIcon: () => setAddIcon(null),
+    announce: setAnnouncement,
+  });
 
   // `?state=` travels back to Set my days; the place is this screen's own.
   const kept = new URLSearchParams(search.toString());
@@ -435,160 +469,185 @@ export function DaysBlockScreen({ blockId }: { blockId: string }) {
 
   const reflow = shown?.reflow ?? null;
   const flat = !stretchesRows(kind) || timeless;
-  const body: BlockViewBody<BlockViewItem> = rowsQuery.isError
-    ? {
-        state: "error",
-        retry: (
-          <RegionRetry
-            label={COPY.failed(name)}
-            detail={COPY.failedDetail}
-            onRetry={() => void rowsQuery.retry()}
-            className="py-(--space-6)"
-          />
-        ),
-      }
-    : !data || !reflow || startsAt === null || endsAt === null
-      ? { state: "loading", label: COPY.loading(name) }
-      : {
-          state: "ready",
-          column: {
-            rows: items,
-            label: name,
-            block: { startsAt, endsAt },
-            timeless,
-            rowHeight: (row) => (flat ? 56 : rowHeightPx(row.lengthMin)),
-            reorder: { onReorder: onDrop },
-            leading: (row) => (
-              <ItemIcon icon={row.icon} size={24} className="shrink-0" />
+  const body: BlockViewBody<BlockViewItem> =
+    !rowsQuery.isError && work
+      ? { state: "node", node: work.node }
+      : !rowsQuery.isError &&
+          todos &&
+          data &&
+          startsAt !== null &&
+          endsAt !== null
+        ? {
+            state: "node",
+            node: (
+              <BlockViewColumn
+                {...todos.column}
+                label={name}
+                block={{ startsAt, endsAt }}
+                peek={peekOf(data, endsAt)}
+              />
             ),
-            title: (row) => (
-              <button
-                type="button"
-                data-row-open
-                onClick={() => openItemSheet(row, false)}
-                className={cn(
-                  "max-w-full truncate rounded-(--radius-control) text-start text-(length:--fs-body) outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  // A transition in the flow: italic, muted (training-editing.md).
-                  row.isTransition && "text-text-muted italic",
-                )}
-              >
-                {row.title}
-              </button>
-            ),
-            trailing: (row, slots) => {
-              const length = timeless ? null : slots.length;
-              const swap =
-                kind === "training" && !row.isTransition ? (
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    data-no-swipe
-                    onClick={() => openItemSheet(row, true)}
-                    className="h-8 shrink-0 px-(--space-2)"
-                  >
-                    {BLOCK_VIEW_COPY.editing.swap}
-                  </Button>
-                ) : null;
-              // Round 8: a set item (not a drive) shows its clock, never a grip.
-              if (row.atTime !== null && !row.isTransition && !timeless) {
-                return (
-                  <>
-                    {swap}
-                    <SetTimeMark atTime={row.atTime} length={length} />
-                  </>
-                );
-              }
-              return (
-                <>
-                  {swap}
-                  {length === null ? null : (
-                    <span className="text-text-muted shrink-0 text-(length:--fs-caption) leading-(--lh-caption) tabular-nums">
-                      {row.lengthMin === null
-                        ? length
-                        : formatMinutesShort(row.lengthMin)}
-                    </span>
-                  )}
-                  {slots.grip}
-                </>
-              );
-            },
-            wrapRow: (row, rowBody) => {
-              const index = items.indexOf(row);
-              return (
-                <SwipeRow
-                  open={swipeId === row.id}
-                  onOpenChange={(open) => setSwipeId(open ? row.id : null)}
-                  removeLabel={COPY.remove}
-                  removeName={COPY.removeName(row.title)}
-                  onRemove={() => void remove(row)}
-                >
-                  <RowMenu
-                    clone={rowBody}
-                    words={{
-                      swap: COPY.row.swap,
-                      edit: COPY.row.edit,
-                      moveUp: COPY.row.moveUp,
-                      moveDown: COPY.row.moveDown,
-                      notToday: COPY.row.notToday,
-                      more: COPY.row.more(row.title),
-                      menu: COPY.row.menu(row.title),
-                    }}
-                    open={menuId === row.id}
-                    onOpenChange={(open) => setMenuId(open ? row.id : null)}
-                    canMoveUp={index > 0}
-                    canMoveDown={index < items.length - 1}
-                    onSwap={() => openItemSheet(row, true)}
-                    onEdit={() => openItemSheet(row, false)}
-                    onMoveUp={() => move(row, -1)}
-                    onMoveDown={() => move(row, 1)}
-                    onNotToday={() => void remove(row)}
-                  >
-                    {rowBody}
-                  </RowMenu>
-                </SwipeRow>
-              );
-            },
-            empty: trueBreak ? (
-              <div className="flex flex-col gap-(--space-1)">
-                <Text as="p" variant="body">
-                  {COPY.trueBreak(name)}
-                </Text>
-                <Caption>{COPY.trueBreakLine}</Caption>
-              </div>
-            ) : (
-              <Text as="p" variant="body">
-                {COPY.empty(name)}
-              </Text>
-            ),
-            add: {
-              at: items.length === 0 ? startsAt : reflow.freeFrom,
-              node: (
-                <EditingAddRow
-                  label={timeless ? COPY.addToChecklist : COPY.addTo(name)}
-                  length={timeless ? null : BLOCK_VIEW_COPY.length(5)}
-                  onSubmit={add}
-                  icon={addIcon}
-                  onPickIcon={() => setPicking("add")}
-                  autoOpen={isNew || view?.open === "add"}
-                  hint={isNew ? BLOCK_VIEW_COPY.editing.addHint : null}
+          }
+        : rowsQuery.isError
+          ? {
+              state: "error",
+              retry: (
+                <RegionRetry
+                  label={COPY.failed(name)}
+                  detail={COPY.failedDetail}
+                  onRetry={() => void rowsQuery.retry()}
+                  className="py-(--space-6)"
                 />
               ),
-            },
-            afterAdd,
-            freeFrom: reflow.freeFrom,
-            overMin: reflow.overMin,
-            peek: peekOf(data, endsAt),
-          },
-        };
+            }
+          : !data || !reflow || startsAt === null || endsAt === null
+            ? { state: "loading", label: COPY.loading(name) }
+            : {
+                state: "ready",
+                column: {
+                  rows: items,
+                  label: name,
+                  block: { startsAt, endsAt },
+                  timeless,
+                  rowHeight: (row) => (flat ? 56 : rowHeightPx(row.lengthMin)),
+                  reorder: { onReorder: onDrop },
+                  leading: (row) => (
+                    <ItemIcon icon={row.icon} size={24} className="shrink-0" />
+                  ),
+                  title: (row) => (
+                    <button
+                      type="button"
+                      data-row-open
+                      onClick={() => openItemSheet(row, false)}
+                      className={cn(
+                        "max-w-full truncate rounded-(--radius-control) text-start text-(length:--fs-body) outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        // A transition in the flow: italic, muted (training-editing.md).
+                        row.isTransition && "text-text-muted italic",
+                      )}
+                    >
+                      {row.title}
+                    </button>
+                  ),
+                  trailing: (row, slots) => {
+                    const length = timeless ? null : slots.length;
+                    const swap =
+                      kind === "training" && !row.isTransition ? (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          data-no-swipe
+                          onClick={() => openItemSheet(row, true)}
+                          className="h-8 shrink-0 px-(--space-2)"
+                        >
+                          {BLOCK_VIEW_COPY.editing.swap}
+                        </Button>
+                      ) : null;
+                    // Round 8: a set item (not a drive) shows its clock, never a grip.
+                    if (row.atTime !== null && !row.isTransition && !timeless) {
+                      return (
+                        <>
+                          {swap}
+                          <SetTimeMark atTime={row.atTime} length={length} />
+                        </>
+                      );
+                    }
+                    return (
+                      <>
+                        {swap}
+                        {length === null ? null : (
+                          <span className="text-text-muted shrink-0 text-(length:--fs-caption) leading-(--lh-caption) tabular-nums">
+                            {row.lengthMin === null
+                              ? length
+                              : formatMinutesShort(row.lengthMin)}
+                          </span>
+                        )}
+                        {slots.grip}
+                      </>
+                    );
+                  },
+                  wrapRow: (row, rowBody) => {
+                    const index = items.indexOf(row);
+                    return (
+                      <SwipeRow
+                        open={swipeId === row.id}
+                        onOpenChange={(open) =>
+                          setSwipeId(open ? row.id : null)
+                        }
+                        removeLabel={COPY.remove}
+                        removeName={COPY.removeName(row.title)}
+                        onRemove={() => void remove(row)}
+                      >
+                        <RowMenu
+                          clone={rowBody}
+                          words={{
+                            swap: COPY.row.swap,
+                            edit: COPY.row.edit,
+                            moveUp: COPY.row.moveUp,
+                            moveDown: COPY.row.moveDown,
+                            notToday: COPY.row.notToday,
+                            more: COPY.row.more(row.title),
+                            menu: COPY.row.menu(row.title),
+                          }}
+                          open={menuId === row.id}
+                          onOpenChange={(open) =>
+                            setMenuId(open ? row.id : null)
+                          }
+                          canMoveUp={index > 0}
+                          canMoveDown={index < items.length - 1}
+                          onSwap={() => openItemSheet(row, true)}
+                          onEdit={() => openItemSheet(row, false)}
+                          onMoveUp={() => move(row, -1)}
+                          onMoveDown={() => move(row, 1)}
+                          onNotToday={() => void remove(row)}
+                        >
+                          {rowBody}
+                        </RowMenu>
+                      </SwipeRow>
+                    );
+                  },
+                  empty: trueBreak ? (
+                    <div className="flex flex-col gap-(--space-1)">
+                      <Text as="p" variant="body">
+                        {COPY.trueBreak(name)}
+                      </Text>
+                      <Caption>{COPY.trueBreakLine}</Caption>
+                    </div>
+                  ) : (
+                    <Text as="p" variant="body">
+                      {COPY.empty(name)}
+                    </Text>
+                  ),
+                  add: {
+                    at: items.length === 0 ? startsAt : reflow.freeFrom,
+                    node: (
+                      <EditingAddRow
+                        label={
+                          timeless ? COPY.addToChecklist : COPY.addTo(name)
+                        }
+                        length={timeless ? null : BLOCK_VIEW_COPY.length(5)}
+                        onSubmit={add}
+                        icon={addIcon}
+                        onPickIcon={() => setPicking("add")}
+                        autoOpen={isNew || view?.open === "add"}
+                        hint={isNew ? BLOCK_VIEW_COPY.editing.addHint : null}
+                      />
+                    ),
+                  },
+                  afterAdd,
+                  freeFrom: reflow.freeFrom,
+                  overMin: reflow.overMin,
+                  peek: peekOf(data, endsAt),
+                },
+              };
 
   return (
     <>
       <BlockView
         mode="editing"
         crumb={{
-          label: dayName,
+          label: crumbLabel,
           href: back,
-          ariaLabel: COPY.backTo(dayName),
+          ariaLabel: COPY.backTo(crumbLabel),
           ...(timeless ? { current: COPY.checklist } : {}),
         }}
         name={name}
@@ -608,6 +667,8 @@ export function DaysBlockScreen({ blockId }: { blockId: string }) {
         <p aria-live="polite" className="sr-only">
           {announcement}
         </p>
+        {work?.sheets}
+        {todos?.sheets}
       </BlockView>
 
       <ResponsiveSheet
