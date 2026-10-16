@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { IntegrationServer } from "@/lib/fixtures/integrations";
 import type { ConnectionsRecords } from "./integration-records";
 import { useDataSource } from "./source";
+import { googleEventsQueryKey } from "./use-google-events";
 import { linearQueryKey } from "./use-linear";
 import { poolQueryKey } from "./use-pool";
 
@@ -55,6 +56,8 @@ export function useConnections() {
     onSettled: () => {
       for (const queryKey of [
         connectionsQueryKey(scenario),
+        // A calendar turned off or on takes its events off or puts them back.
+        googleEventsQueryKey(scenario),
         linearQueryKey(scenario),
         poolQueryKey(scenario),
       ]) {

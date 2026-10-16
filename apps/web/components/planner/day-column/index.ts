@@ -8,6 +8,7 @@ export {
   type DayColumnBlock,
   type DayColumnEvent,
   type DayColumnItem,
+  type DayColumnOffer,
   type DayColumnOverlap,
   type DayColumnProps,
   type DayColumnSegment,
@@ -20,6 +21,7 @@ export {
 } from "./all-day-strip";
 export { DayColumnSkeleton } from "./day-column-skeleton";
 export { MeetingBand } from "./meeting-band";
+export { OfferBand } from "./offer-band";
 export {
   EmptyDayChoices,
   type EmptyDayAction,

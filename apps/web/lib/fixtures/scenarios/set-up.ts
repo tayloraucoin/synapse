@@ -10,6 +10,11 @@ import {
 } from "@syn/validators";
 import type { SetUpScenarioStart } from "@/lib/data/set-up-start";
 import { fixtureId } from "../ids";
+import {
+  INTEGRATION_IDS,
+  integrationId,
+  integrationRecords,
+} from "../integrations/workspaces";
 import type { FixtureRecords } from "../records";
 import { emptyRecords } from "./base-day";
 import type { Scenario } from "./index";
@@ -880,6 +885,67 @@ const ADD_EVENT_DAYS: [string, () => Scenario][] = [
   }),
 ];
 
+/* ------------------------------------- Google events (USE-109) -- */
+
+/** Google event ids: kind 4 in the integration range. */
+export const GOOGLE_EVENT_IDS = {
+  standup: integrationId(4, 1),
+  coffee: integrationId(4, 2),
+  vendorCall: integrationId(4, 3),
+  holiday: integrationId(4, 4),
+} as const;
+
+/**
+ * Monday 12 as google-events.md draws it: Work 9:30 to 12:00 with [Write
+ * the sync spec] for an hour and [Review the Paper handoff] at 10:30 after
+ * it; [Standup] 10:30 to 11:00 answered yes moves the handoff to 11:00;
+ * [Coffee with Ana] at 11:00 is maybe; [Vendor call] at 11:30 was declined,
+ * and [Thanksgiving] sits on Holidays, which is off. None of them is
+ * Synapse's, so Add to day writes the one day event.
+ */
+export function googleEventsRecords(): FixtureRecords {
+  const records = addEventRecords();
+  const C = INTEGRATION_IDS.calendars;
+  const E = GOOGLE_EVENT_IDS;
+  const integrations = integrationRecords("2026-10-11T20:40:00.000Z");
+  integrations.googleEvents = [
+    [E.standup, C.team, "[Standup]", "10:30", "11:00", "yes"],
+    [E.coffee, C.personal, "[Coffee with Ana]", "11:00", "11:30", "maybe"],
+    [E.vendorCall, C.team, "[Vendor call]", "11:30", "12:00", "no"],
+    [E.holiday, C.holidays, "[Thanksgiving]", "09:00", "10:00", "yes"],
+  ].map(([id, calendarId, title, startsAt, endsAt, answer]) => ({
+    id: id!,
+    calendarId: calendarId!,
+    title: title!,
+    date: "2026-10-12",
+    startsAt: startsAt!,
+    endsAt: endsAt!,
+    answer: answer as "yes" | "maybe" | "no",
+  }));
+  return {
+    ...records,
+    slots: records.slots.map((slot, index) =>
+      slot.onDate === "2026-10-12"
+        ? { ...slot, lengthMin: GOOGLE_SLOT_LENGTHS[index] ?? null }
+        : slot,
+    ),
+    clientsEnabled: false,
+    integrations,
+  };
+}
+
+const GOOGLE_SLOT_LENGTHS = [60, 30, 15, 15];
+
+/** `?state=google-events`: This week's Monday 12 with its Google events. */
+const GOOGLE_EVENT_DAYS: [string, () => Scenario][] = [
+  days("google-events", googleEventsRecords, {
+    week: "this",
+    day: 0,
+    scrollTo: "09:00",
+    holdToast: true,
+  }),
+];
+
 /**
  * The desk popover (interactions/add-event.md), on its own part until the
  * Week mounts it: Wednesday 14, "+ Event" open at 14:00 to 14:30, Work,
@@ -1059,6 +1125,8 @@ export const DAYS_SCENARIOS: Record<string, () => Scenario> =
     ),
     // USE-53: Add event, the band inside Work, its own block.
     ...ADD_EVENT_DAYS,
+    // USE-109: Google events on the day.
+    ...GOOGLE_EVENT_DAYS,
   ]);
 
 export const SET_UP_SCENARIOS: Record<string, () => Scenario> = {

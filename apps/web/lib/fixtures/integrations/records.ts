@@ -7,6 +7,7 @@ import type {
   LinearSnapshotPayload,
   LinearWriteView,
 } from "@syn/validators";
+import type { GoogleDayEvent } from "@/lib/data/google-bands";
 
 /**
  * What the fixture server holds for Linear and Google (USE-56): the rows the
@@ -41,6 +42,8 @@ export interface IntegrationRecords {
   prevStateIds: Record<string, string>;
   googleAccounts: GoogleAccountView[];
   googleCalendars: GoogleCalendarView[];
+  /** The calendars' events with the person's answer (USE-109); unset, none. */
+  googleEvents?: GoogleDayEvent[];
 }
 
 export function noIntegrations(): IntegrationRecords {

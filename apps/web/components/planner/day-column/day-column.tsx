@@ -43,6 +43,7 @@ import {
 } from "./copy";
 import { HUE_CHECK } from "./mark-hue";
 import { MeetingBand } from "./meeting-band";
+import { OfferBand } from "./offer-band";
 import { useBlockDrag } from "./use-block-drag";
 import { useContentWidth } from "./use-content-width";
 import { useSwipeAway } from "./use-swipe-away";
@@ -115,9 +116,28 @@ export interface DayColumnEvent {
   /**
    * A Synapse event (USE-53, D-USE-79): the calendar icon in place of the
    * lock, its tag ("Work", "Personal") trailing a band, and a tap opens it
-   * to edit. Unset, Schedule's locked meeting.
+   * to edit. Unset, Schedule's locked meeting. A Google event (USE-109)
+   * trails "Google" and has no `onOpen`: its times are read-only.
    */
-  event?: { tag: string; name: string; onOpen: () => void };
+  event?: { tag: string; name: string; onOpen?: () => void };
+}
+
+/**
+ * A Google event answered maybe or not at all (USE-109; D-USE-87): a faint
+ * dashed band with no fill, "[Coffee with Ana] 11:00 · maybe" and Add to
+ * day. It takes no time: the work around it does not move for it.
+ */
+export interface DayColumnOffer {
+  id: string;
+  /** "HH:MM": the segment it sits in. */
+  startsAt: string;
+  /** "[Coffee with Ana]": truncates first. */
+  title: string;
+  /** "11:00 · maybe": never truncated, as it says what the dash means. */
+  meta: string;
+  actionLabel: string;
+  /** Unset, the button is not drawn (the usual week never gets here). */
+  onAdd?: () => void;
 }
 
 /** The block's items between its bands: `bands.length + 1` of them. */
@@ -142,6 +162,8 @@ export interface DayColumnBlock {
   bands?: readonly DayColumnEvent[];
   /** With `bands`: the items before, between and after them. */
   segments?: readonly DayColumnSegment[];
+  /** Maybe events inside the block, at the head of the segment their time falls in. */
+  offers?: readonly DayColumnOffer[];
   /**
    * Muted lines in place of the items (Set my days, USE-39): a usual Work
    * block's "The time is kept every week.", a To-dos block's rule.
@@ -183,6 +205,8 @@ export interface DayColumnProps {
   blocks: readonly DayColumnBlock[];
   /** Events inside no block, on their own at their times (Schedule). */
   events?: readonly DayColumnEvent[];
+  /** Maybe events inside no block, one line each at their times (USE-109). */
+  offers?: readonly DayColumnOffer[];
   /** The now line at the minute (Schedule): its tag on the rail. */
   now?: { atMin: number; label: string } | null;
   onBlock: (blockId: string) => void;
@@ -236,6 +260,8 @@ const PAD_START_PX = 12;
 const PAD_END_PX = 8;
 /** The breath under a band before the items after it. */
 const AFTER_BAND_PX = 8;
+/** A maybe's line (28 px) and the gap under it. */
+const OFFER_PX = 32;
 
 /**
  * The labels hang under their hour's line, so the now tag covers its own
@@ -292,6 +318,7 @@ export function DayColumn({
   orient,
   blocks,
   events = [],
+  offers = [],
   now = null,
   onBlock,
   onBullet,
@@ -431,6 +458,18 @@ export function DayColumn({
               clockMinutes(event.endsAt) - clockMinutes(event.startsAt),
             )}
           />
+        ))}
+        {offers.map((offer) => (
+          <div
+            key={offer.id}
+            style={{
+              top: `${pxOf(clockMinutes(offer.startsAt) - hours.startMin)}px`,
+              insetInlineStart: `${GUTTER_PX}px`,
+            }}
+            className="absolute end-0"
+          >
+            <OfferBand offer={offer} />
+          </div>
         ))}
         {tapped !== null ? (
           <TappedSlot
@@ -713,6 +752,19 @@ function segmentPlaces(
   });
 }
 
+/** A maybe's segment: after every band that starts at or before it. */
+function offersBySegment(block: DayColumnBlock): DayColumnOffer[][] {
+  const bands = block.bands ?? [];
+  const out: DayColumnOffer[][] = bands.map(() => []).concat([[]]);
+  for (const offer of block.offers ?? []) {
+    const at = clockMinutes(offer.startsAt);
+    out[bands.filter((band) => clockMinutes(band.startsAt) <= at).length]!.push(
+      offer,
+    );
+  }
+  return out;
+}
+
 /** The tier the segments before this one last drew, if any. */
 function continuedTier(
   places: readonly SegmentPlace[],
@@ -761,14 +813,26 @@ function BlockCard({
         }
       : {}),
   });
-  // At half width the span takes a second line under the name.
-  const places = segmentPlaces(block, heightPx).map((place, index) =>
-    index === 0 && lane !== null
-      ? { ...place, roomPx: place.roomPx - BULLET_LINE_PX }
-      : place,
-  );
+  const offersIn = offersBySegment(block);
+  // At half width the span takes a second line under the name; a maybe
+  // takes a line of the segment it heads, never time.
+  const places = segmentPlaces(block, heightPx).map((place, index) => ({
+    ...place,
+    roomPx:
+      place.roomPx -
+      (index === 0 && lane !== null ? BULLET_LINE_PX : 0) -
+      (offersIn[index]?.length ?? 0) * OFFER_PX,
+  }));
   const start = clockMinutes(block.startsAt);
-  const items = (place: SegmentPlace, index = 0) =>
+  const items = (place: SegmentPlace, index = 0) => (
+    <>
+      {offersIn[index]?.map((offer) => (
+        <OfferBand key={offer.id} offer={offer} />
+      ))}
+      {segmentItems(place, index)}
+    </>
+  );
+  const segmentItems = (place: SegmentPlace, index: number) =>
     block.form === "work" ? (
       <WorkTiers
         tiers={place.segment.tiers}
@@ -1093,7 +1157,7 @@ function EventCard({
         event.underWay ? "border-y border-e border-now" : null,
       )}
     >
-      {event.event ? (
+      {event.event?.onOpen ? (
         <CoverButton label={event.event.name} onOpen={event.event.onOpen} />
       ) : null}
       <span

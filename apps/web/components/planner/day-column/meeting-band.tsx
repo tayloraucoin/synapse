@@ -13,7 +13,8 @@ import { HUE_EDGE } from "./mark-hue";
  *
  * A Synapse event (USE-53; event-inside-work.md) draws the calendar icon,
  * its name strong, its span, and its tag at the trailing end ("Work"), and
- * is its own button over the block's, opening the event to edit.
+ * is its own button over the block's, opening the event to edit. A Google
+ * event (USE-109) trails "Google" and has no button: read-only.
  */
 export function MeetingBand({
   event,
@@ -26,6 +27,7 @@ export function MeetingBand({
   heightPx: number;
 }) {
   const own = event.event;
+  const onOpen = own?.onOpen;
   return (
     <div
       data-meeting-band
@@ -33,16 +35,16 @@ export function MeetingBand({
       style={{ top: `${topPx}px`, height: `${heightPx}px` }}
       className={cn(
         "absolute inset-x-0 flex border-y",
-        own ? "pointer-events-auto" : "pointer-events-none",
+        onOpen ? "pointer-events-auto" : "pointer-events-none",
         HUE_CHIP[event.hue],
         HUE_EDGE[event.hue],
       )}
     >
-      {own ? (
+      {own && onOpen ? (
         <button
           type="button"
           aria-label={own.name}
-          onClick={own.onOpen}
+          onClick={onOpen}
           className="focus-visible:ring-ring absolute inset-0 focus-visible:ring-2 focus-visible:outline-none"
         />
       ) : null}

@@ -87,4 +87,11 @@ export const DAYS_COPY = {
   /** The install offer, once (install-offer.md). */
   installOffer: "Synapse can go on the home screen.",
   how: "How",
+  /** Google events on the day (google-events.md, USE-109). */
+  google: "Google",
+  maybeMeta: (at: string) => `${at} · maybe`,
+  addToDay: "Add to day",
+  /** [PROPOSED] Add to day's toast; Undo takes it off the day again. */
+  addedToDay: (title: string, at: string) => `${title} added to the day, ${at}`,
+  googleName: (title: string, span: string) => `${title}, ${span}, Google`,
 } as const;

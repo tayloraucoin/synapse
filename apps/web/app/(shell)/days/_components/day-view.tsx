@@ -25,12 +25,14 @@ import {
   type AddEventForm,
   type EventDone,
 } from "@/components/planner/add-event";
+import { clockLabel } from "@/components/planner/day-column/copy";
 import { TIER_HUE } from "@/components/work";
 import {
   PoolButton,
   ThisWeekPool,
   WorkTiersInPlace,
 } from "@/components/work/this-week";
+import { addToDayInput, googleBandsOf } from "@/lib/data/google-bands";
 import {
   clearWords,
   dayTitle,
@@ -44,6 +46,7 @@ import {
 import { useDataSource } from "@/lib/data/source";
 import { workPartsOf } from "@/lib/data/this-week-day";
 import { useSetUpColumnRead, type DaysPlace } from "@/lib/data/use-days";
+import { useGoogleEvents } from "@/lib/data/use-google-events";
 import type { usePlannerWrites } from "@/lib/data/use-planner-writes";
 import { usePool } from "@/lib/data/use-pool";
 import type { SetUpDay } from "@/lib/data/use-set-up-day";
@@ -70,7 +73,13 @@ import {
   type DayChip,
 } from "./day-parts";
 import { DaysHeader } from "./days-header";
-import { hasBands, ownEventCards, withEventBands } from "./event-bands";
+import {
+  hasBands,
+  ownEventCards,
+  ownOffers,
+  withEventBands,
+  type GoogleOnDay,
+} from "./event-bands";
 import { useRepeatMove } from "./repeat-move";
 
 /**
@@ -426,10 +435,27 @@ function SetDay({
   } | null>(null);
   const openEvent = (event: DayEventRecord) =>
     setEventSheet({ start: formOf(event) });
+  // Google's events (USE-109): a yes is a read-only band, a maybe offers Add
+  // to day, a no is hidden; the usual week reads none.
+  const googleEvents = useGoogleEvents(place.date);
+  const google: GoogleOnDay = {
+    bands: googleBandsOf(day, googleEvents),
+    addToDay: (event) =>
+      void writes
+        .writeDayEvent(addToDayInput(event))
+        .then((write) =>
+          undoToast({
+            text: COPY.addedToDay(event.title, clockLabel(event.startsAt)),
+            onUndo: () => void writes.undo(write.undo),
+            ...(hold ? { durationMs: Infinity } : {}),
+          }),
+        )
+        .catch(() => {}),
+  };
   const dayBlocks =
     place.date === null
       ? view.blocks
-      : withEventBands(view.blocks, day, openEvent);
+      : withEventBands(view.blocks, day, openEvent, google);
   // [ASSUMPTION] The + starts it at the day's first free time, as Block's.
   const eventStart = firstFreeTime({
     upAt: upAt ?? "07:00",
@@ -696,7 +722,10 @@ function SetDay({
                 }
               : undefined
           }
-          events={ready ? ownEventCards(view.blocks, day, openEvent) : []}
+          events={
+            ready ? ownEventCards(view.blocks, day, openEvent, google) : []
+          }
+          offers={ready ? ownOffers(view.blocks, google) : []}
           overlaps={
             ready
               ? view.overlaps.map((pair) => ({

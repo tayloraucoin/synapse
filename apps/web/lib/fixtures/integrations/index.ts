@@ -27,6 +27,7 @@ import type {
   ConnectionsRecords,
   LinearRecords,
 } from "@/lib/data/integration-records";
+import type { GoogleDayEvent } from "@/lib/data/google-bands";
 import { parse, PlannerRefusal } from "../planner";
 import type { FixtureRecords } from "../records";
 import {
@@ -100,6 +101,8 @@ export interface IntegrationServer {
   writeProjectClient(raw: LinearProjectClientInput): Promise<void>;
   writeWorkspaceClient(raw: WorkspaceClientInput): Promise<void>;
   writeCalendar(raw: GoogleCalendarToggleInput): Promise<void>;
+  /** A date's Google events on the calendars that are on (USE-109); read-only. */
+  readGoogleEvents(date: string): Promise<GoogleDayEvent[]>;
   writeClientsEnabled(raw: ClientsEnabledInput): Promise<void>;
   /** A new client, or with `id` a change to one. */
   writeClient(raw: ClientInput & { id?: string }): Promise<ClientRecord>;
@@ -296,6 +299,19 @@ export function createIntegrationServer({
           ),
         }),
       );
+    },
+
+    readGoogleEvents(date) {
+      return run(() => {
+        const on = new Set(
+          data.googleCalendars.filter((c) => c.enabled).map((c) => c.id),
+        );
+        return structuredClone(
+          (data.googleEvents ?? []).filter(
+            (event) => event.date === date && on.has(event.calendarId),
+          ),
+        );
+      });
     },
 
     readLinear() {
