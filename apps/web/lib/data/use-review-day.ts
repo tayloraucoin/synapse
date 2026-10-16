@@ -1,14 +1,20 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  type MutationOptions,
+  type QueryClient,
+} from "@tanstack/react-query";
 import { WORK_TIERS } from "@syn/constants";
 import type { StoredBlockKind, WorkTier } from "@syn/types";
 import { clockFromMinutes, clockMinutes, layoutFromWake } from "@syn/utils";
 import type { DayRecordRecord } from "@syn/validators";
 import type { Today } from "./derive-today";
 import { lateWakeOf, roomDayOf } from "./late-wake";
-import { useDataSource } from "./source";
-import { itemsOnDate } from "./today-records";
+import { useDataSource, type DataSource } from "./source";
+import { itemsOnDate, type TodayRecords } from "./today-records";
+import { whenConnected } from "./use-connection";
 import { isAllDay } from "./use-now";
 import { todayQueryKey, useToday } from "./use-today";
 
@@ -258,16 +264,84 @@ export function useReviewDay(dateKey: string) {
   };
 }
 
-/** Ready, go: `readyAt` once, at the fixture clock's now; the server keeps the first. */
+/**
+ * Ready, go's write (USE-31, USE-34): `readyAt` once, at the fixture clock's
+ * now; the server keeps the first. The day reads it at once (optimistic), so
+ * the entry tree goes on to the welcome even offline; with no connection the
+ * write is held on the phone until the connection is back, then applied
+ * (D-USE-56, D-USE-64). Pure options, so a test drives what the screen does.
+ *
+ * [ASSUMPTION] Held by `whenConnected`, not TanStack's `onlineManager`:
+ * flipping the manager pauses every offline scenario's writes app-wide. The
+ * offline-persistence ticket moves this to paused mutations.
+ */
+export function readyGoOptions(
+  source: Pick<DataSource, "scenario" | "server" | "now">,
+  queryClient: QueryClient,
+): MutationOptions<
+  DayRecordRecord,
+  Error,
+  string,
+  { previous: TodayRecords | undefined }
+> {
+  const keyOf = (dateKey: string) =>
+    todayQueryKey(source.scenario.name, dateKey);
+  return {
+    // Fixed at the press, so a write held offline keeps its moment.
+    mutationFn: async (dateKey) => {
+      const at = source.now().toISOString();
+      await whenConnected(source);
+      return source.server.readyGo(dateKey, at);
+    },
+    onMutate: async (dateKey) => {
+      const queryKey = keyOf(dateKey);
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<TodayRecords>(queryKey);
+      if (previous !== undefined) {
+        queryClient.setQueryData<TodayRecords>(queryKey, {
+          ...previous,
+          dayRecord: readiedRecord(
+            previous.dayRecord,
+            dateKey,
+            source.now().toISOString(),
+          ),
+        });
+      }
+      return { previous };
+    },
+    // Refused online: the day as it was, and the button back.
+    onError: (_error, dateKey, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(keyOf(dateKey), context.previous);
+      }
+    },
+    onSettled: (_record, _error, dateKey) =>
+      queryClient.invalidateQueries({ queryKey: keyOf(dateKey) }),
+  };
+}
+
+/** The day's record with Ready, go given, as the server will keep it. */
+function readiedRecord(
+  record: DayRecordRecord | null,
+  dateKey: string,
+  at: string,
+): DayRecordRecord {
+  if (record !== null) {
+    return record.readyAt === null ? { ...record, readyAt: at } : record;
+  }
+  return {
+    id: crypto.randomUUID(),
+    createdAt: at,
+    updatedAt: at,
+    onDate: dateKey,
+    orientedAt: at,
+    readyAt: at,
+    closedAt: null,
+  };
+}
+
 export function useReadyGo() {
   const source = useDataSource();
   const queryClient = useQueryClient();
-  return useMutation<DayRecordRecord, Error, string>({
-    mutationFn: (dateKey) =>
-      source.server.readyGo(dateKey, source.now().toISOString()),
-    onSettled: (_record, _error, dateKey) =>
-      queryClient.invalidateQueries({
-        queryKey: todayQueryKey(source.scenario.name, dateKey),
-      }),
-  });
+  return useMutation(readyGoOptions(source, queryClient));
 }

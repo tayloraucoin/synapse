@@ -3,7 +3,7 @@
 import { ReviewDayFrame } from "@/app/(shell)/today/review/_components";
 import { PinnedScenarioProvider } from "@/lib/data/source";
 
-/** Review the day's frames (USE-31, USE-37, USE-38), one scenario each, for the capture host. */
+/** Review the day's frames (USE-31, USE-34, USE-37, USE-38), one scenario each, for the capture host. */
 export type ReviewPartState =
   | "success"
   | "tray-open"
@@ -12,7 +12,12 @@ export type ReviewPartState =
   | "after-swap-undo"
   | "no-work"
   | "late"
-  | "late-passed-open";
+  | "late-passed-open"
+  | "loading"
+  | "error"
+  | "partial-todos"
+  | "partial-day"
+  | "offline";
 
 export function ReviewPart({ state }: { state: ReviewPartState }) {
   return (

@@ -235,6 +235,7 @@ for (const state of [
 // USE-31: Review the day's success frame and the tray open, `review-<state>`.
 // USE-37: the edits' frames, `review-first-mornings` and the rest.
 // USE-38: a late wake, `review-late` and `review-late-passed-open`.
+// USE-34: the system states, `review-loading` to `review-offline`.
 for (const state of [
   "success",
   "tray-open",
@@ -244,6 +245,11 @@ for (const state of [
   "no-work",
   "late",
   "late-passed-open",
+  "loading",
+  "error",
+  "partial-todos",
+  "partial-day",
+  "offline",
 ] satisfies ReviewPartState[]) {
   registerPart(`review-${state}`, () => createElement(ReviewPart, { state }));
 }

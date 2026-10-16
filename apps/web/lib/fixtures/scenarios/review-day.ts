@@ -430,8 +430,11 @@ export const REVIEW_SCENARIOS: Record<string, () => Scenario> = {
     mode: "error",
     regions: { todos: "error" },
   }),
+  // The tray seeded open, so its own "To-dos didn't load." row shows
+  // [ASSUMPTION: the closed tray reads "To-dos" alone, as USE-19 left it].
   "review-partial-todos": review("review-partial-todos", {
     regions: { todos: "error" },
+    view: { open: "todos" },
   }),
   "review-partial-day": review("review-partial-day", { mode: "error" }),
   "review-offline": review("review-offline", { offline: true }),

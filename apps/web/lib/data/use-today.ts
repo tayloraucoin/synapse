@@ -1,8 +1,12 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from "@tanstack/react-query";
 import { deriveToday, type Today } from "./derive-today";
-import { useDataSource } from "./source";
+import { useDataSource, type DataSource } from "./source";
 import type { TodayRecords } from "./today-records";
 
 /**
@@ -18,6 +22,21 @@ export function todayQueryKey(scenario: string, dateKey?: string) {
     : (["today", scenario, dateKey] as const);
 }
 
+/**
+ * The day's Try again (USE-34): the day alone is read again, so a region
+ * that loaded (the to-dos) is never refetched by the day's failure.
+ */
+export function retryToday(
+  queryClient: QueryClient,
+  source: Pick<DataSource, "scenario" | "server">,
+  dateKey: string,
+) {
+  source.server.recover();
+  return queryClient.refetchQueries({
+    queryKey: todayQueryKey(source.scenario.name, dateKey),
+  });
+}
+
 export function useToday(dateKey: string) {
   const source = useDataSource();
   const queryClient = useQueryClient();
@@ -29,9 +48,9 @@ export function useToday(dateKey: string) {
     // The error state stays up until the person retries.
     retry: false,
   });
-  function retry() {
-    source.server.recover();
-    return queryClient.refetchQueries({ queryKey });
-  }
-  return { ...query, today: query.data, retry };
+  return {
+    ...query,
+    today: query.data,
+    retry: () => retryToday(queryClient, source, dateKey),
+  };
 }
