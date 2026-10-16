@@ -1,6 +1,6 @@
 ---
 size: small
-objective: "Set my days' day column draws the date's Google events on fixtures: an accepted meeting as a band ending in its calendar's name, a maybe or unanswered one as a dashed band with Add to day, a declined one not at all"
+objective: "Set my days' day column draws the date's Google events on fixtures: an accepted meeting as a plum band ending in 'Google' with the work after it re-flowed, a maybe or unanswered one as a dashed band with Add to day, a declined one not at all"
 slice_type: "a wave 2 UI gap on fixtures; risks a dashed band that reads as an error, an Add to day with no Undo, and colour alone telling yes from maybe"
 non_negotiables:
   - "Only @syn/ui components and preset tokens; no raw colour, spacing or radius."
@@ -26,20 +26,27 @@ planned_paths:
   - "apps/web/lib/fixtures/"
 depends_on:
   - "USE-89"
+  - "USE-42"
+  - "USE-53"
+  - "USE-56"
 out_of_scope:
   - "Reading real calendars: USE-103"
   - "Push for an event's start: none (D-USE-92)"
 criteria:
   - id: C1
-    statement: "An accepted Google event draws as a band at its time ending in its calendar's name"
+    statement: "An accepted Google event draws as a plum band at its time, its times read-only and 'Google' at its end"
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-109-google-events-on-the-day/evidence/days-google-events-402.png"
   - id: C2
     statement: "A maybe or unanswered event draws as a dashed band with Add to day; Add to day lands a day event for that date with a toast whose Undo removes it"
     evidence: test
     command: "yarn test"
+  - id: C5
+    statement: "Work placed after an accepted event re-flows past it, as it does for a day event"
+    evidence: test
+    command: "yarn test"
   - id: C3
-    statement: "A declined event is not drawn"
+    statement: "A declined event is not drawn, and the Usual week view shows no Google events at all"
     evidence: test
     command: "yarn test"
   - id: C4
@@ -60,7 +67,7 @@ Vigil's pre-flight (2026-10-16) found no ticket that draws Google events on the 
   - D-USE-82: several calendars, each on or off.
 - **Approach:**
   - A pure `googleBandsOf(day, events)` in `lib/data/`, beside `set-up-events.ts`. Check the wip branch `wip/use-50-53-drafts`, which holds USE-53's draft of that file.
-  - It maps each event's answer to `band | dashed | hidden`; the column draws the band part.
+  - It maps each event's answer to `band | dashed | hidden` (hidden for every event on the usual week); the column draws the band part. A yes band is busy time to the fit and re-flow, through USE-53's re-flow over day events.
   - Add to day calls `writeDayEvent` with the event's title and times, through `useUndoToast`.
 - **Per path:**
   - `lib/data/google-bands.test.ts`: C2 and C3.

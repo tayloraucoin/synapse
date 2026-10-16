@@ -2,15 +2,15 @@
 
 > Written by `yarn review:run vigil USE` (the Tickets gate). Never edit it: `contract:init` starts a ticket only on its PASS line, and only while the contract's hash still matches.
 
-- head: 1a20f21599054dae99ee36ce025c3f66a525278e
+- head: 68484774c15f3667e90a591802ae5bd7213c5005
 - runner: claude 2.1.295 (Claude Code) (agent vigil; tools Read,Grep,Glob)
 - model: claude-opus-5-5
-- at: 2026-10-16T19:09:30Z
-- tokens_input: 130
-- tokens_cache_read: 16641677
-- tokens_cache_write: 498526
-- tokens_output: 49941
-- seconds: 663.1
+- at: 2026-10-16T19:38:28Z
+- tokens_input: 104
+- tokens_cache_read: 11778251
+- tokens_cache_write: 371938
+- tokens_output: 44105
+- seconds: 447.4
 
 ## Verdicts
 
@@ -53,11 +53,11 @@
 - USE-40: PASS (contract 1d208bb19e71)
 - USE-41: PASS (contract 6cd5a854d4c5)
 - USE-42: FAIL (contract ec826fcdd073)
-- USE-43: FAIL (contract e42e4e903541)
-- USE-44: PASS (contract 7c46bfe554c3)
-- USE-45: FAIL (contract c27575213b91)
+- USE-43: PASS (contract e42e4e903541)
+- USE-44: FAIL (contract 7c46bfe554c3)
+- USE-45: PASS (contract c27575213b91)
 - USE-46: FAIL (contract b2773b52560e)
-- USE-47: FAIL (contract e248d4d5a25b)
+- USE-47: PASS (contract e248d4d5a25b)
 - USE-48: PASS (contract 36438ffaec42)
 - USE-49: PASS (contract 58fec6ba0021)
 - USE-50: PASS (contract 40c0e461d0f0)
@@ -69,7 +69,7 @@
 - USE-56: PASS (contract a50ec49f88f5)
 - USE-57: PASS (contract 6c063f5c8f14)
 - USE-58: PASS (contract 1154c6af94d1)
-- USE-59: PASS (contract cfbae087ca80)
+- USE-59: FAIL (contract cfbae087ca80)
 - USE-60: PASS (contract 083bab36c6a4)
 - USE-61: PASS (contract e64d0b7fd4bb)
 - USE-62: PASS (contract 28f233b62c17)
@@ -79,7 +79,7 @@
 - USE-66: PASS (contract 215345e3712a)
 - USE-67: PASS (contract 6131324b63f2)
 - USE-68: PASS (contract 025e601429c8)
-- USE-69: PASS (contract 80d1126f5f40)
+- USE-69: PASS (contract 1b7e031416c9)
 - USE-70: PASS (contract 7586380855ae)
 - USE-71: PASS (contract 57d03ea92d0e)
 - USE-72: PASS (contract 0305d71149c7)
@@ -97,28 +97,30 @@
 - USE-84: PASS (contract fb89f1bf9d85)
 - USE-85: PASS (contract 0e08a554b775)
 - USE-86: PASS (contract 61d7a2066d16)
-- USE-87: FAIL (contract a8dacf8cf21d)
-- USE-88: FAIL (contract 15194c04e1a7)
-- USE-89: FAIL (contract 93cf0f7f7588)
+- USE-87: PASS (contract 7b791c4993c8)
+- USE-88: PASS (contract 500dfdd66e64)
+- USE-89: PASS (contract c62a748c90f4)
 - USE-90: PASS (contract 5595255057f9)
 - USE-91: PASS (contract f715837af392)
-- USE-92: PASS (contract da9b655ae003)
+- USE-92: PASS (contract ac10b8546d1b)
 - USE-93: PASS (contract 977dad690051)
 - USE-94: PASS (contract b7ae1820f316)
 - USE-95: PASS (contract 04ae763f7372)
-- USE-96: PASS (contract afc04f6be1e0)
+- USE-96: PASS (contract 6a91c9d51568)
 - USE-97: PASS (contract 8ac5d859dbcb)
 - USE-98: PASS (contract 994864bf182a)
 - USE-99: PASS (contract bd006818af4a)
-- USE-100: PASS (contract 4f42c624f9f1)
+- USE-100: PASS (contract 7dc762e4bb19)
 - USE-101: PASS (contract e2b190c3e264)
 - USE-102: PASS (contract 291d105d0a5a)
-- USE-103: FAIL (contract ab1314148dda)
+- USE-103: PASS (contract 8de9d173bf30)
 - USE-104: PASS (contract 561d970f003f)
-- USE-105: PASS (contract 0e694dc98808)
-- USE-106: PASS (contract d9bb8db8d474)
+- USE-105: PASS (contract c6208471b29e)
+- USE-106: PASS (contract 0c65967ccf5e)
 - USE-107: PASS (contract 348333c3b56d)
 - USE-108: PASS (contract f31da72ff1f3)
+- USE-109: FAIL (contract 76a9eace073e)
+- USE-110: FAIL (contract 5ec2df7bd340)
 
 ## Prompt
 
@@ -232,6 +234,8 @@ Read the brief (specs/web/epics/USE-daily-use/brief.md), the approved UX proposa
 - USE-106: specs/web/epics/USE-daily-use/tickets/USE-106-offline-persistence/contract.md
 - USE-107: specs/web/epics/USE-daily-use/tickets/USE-107-app-shell-cache/contract.md
 - USE-108: specs/web/epics/USE-daily-use/tickets/USE-108-live-everywhere/contract.md
+- USE-109: specs/web/epics/USE-daily-use/tickets/USE-109-google-events-on-the-day/contract.md
+- USE-110: specs/web/epics/USE-daily-use/tickets/USE-110-wave-2-loose-ends/contract.md
 
 For each contract, check: every criterion is testable and names the right evidence type; it cites one surface and the criterion IDs it builds; every state and unhappy path of that surface is covered by this or another ticket; planned paths and depends_on are plausible; nothing is out of the epic's appetite.
 
@@ -341,6 +345,8 @@ USE-105: PASS or FAIL, with the reason
 USE-106: PASS or FAIL, with the reason
 USE-107: PASS or FAIL, with the reason
 USE-108: PASS or FAIL, with the reason
+USE-109: PASS or FAIL, with the reason
+USE-110: PASS or FAIL, with the reason
 
 Your last line must be exactly one of:
 VERDICT: PASS
@@ -348,111 +354,115 @@ VERDICT: FAIL
 
 ## Review
 
-USE-2: PASS. C1 to C8 prove 0012 with static tests over its SQL, plus the lock and type checks and Taylor's manual apply. The earlier boundaries finding is fixed: `enumValues` now lives in `@syn/db`.
-USE-3: PASS. Every 0012 CHECK and unique key has a validator criterion. The missing `blockChangeInput` rule is now in C2.
-USE-5: PASS. The ordering, one-in-hand, firing, replay and close-of-day rules are each a unit criterion, and C3 runs a seeded generator over them. The dependency on USE-3 and the paths fit.
-USE-6: PASS. Presets, Custom rules, month ends, the leap day, both DST dates and unplaced slots are each a unit criterion with real dates.
-USE-7: PASS. The seam is testable in node, the clock is the real `deriveClock`, and the imports rule is a text test.
+Twelve of the 107 contracts fail, so the gate fails. The ten tickets from the last pre-flight include seven that are now fixed (USE-43, 45, 47, 87, 88, 89, 103). The other three (USE-39, 42, 46) are unchanged. This pass also turned up two new gaps, in USE-44 and USE-59. The two new tickets (USE-109, USE-110) close earlier gaps but have citation and dependency problems of their own.
+
+USE-2: PASS. C1 to C5 are static tests over 0012's SQL, plus the lock and type checks and Taylor's manual apply; Q3 with Mason and Warden.
+USE-3: PASS. Every 0012 CHECK and unique key has a validator criterion, and the seven kinds and the transition shape are tested.
+USE-5: PASS. Ordering, one in hand, firing, replay, Step away and the day's close are each a unit criterion, and C3 runs the seeded generator.
+USE-6: PASS. Presets, Custom rules, month ends, the leap day, both DST dates and unplaced slots are each tested with real dates.
+USE-7: PASS. The seam runs on the real deriveClock; refusals, `?state=` resolution and the imports rule are tested.
 USE-8: PASS. Next, fit at the top of the range, sessions and the while-it-fires pick each have a unit criterion; the waiver is stated.
-USE-9: PASS. Returned slots, the pool, the pull and client resolution each have a unit criterion. The three undrawn pull defaults are named as Taylor's.
+USE-9: PASS. Returned slots, the pool, the pull and client resolution are tested; the three undrawn pull defaults are named as Taylor's.
 USE-10: PASS. Captures at 402 and 1440, a props-only import test and `lint:boundaries` cover the shared parts.
-USE-11: PASS. All six picker states are captured; a network log proves search makes no request; the pure suggest and pick are tested.
-USE-12: PASS. Six states and the entry tree are covered. Should-fix: "the welcome USE-20 builds" means USE-43, and orient's skipped and lingering criteria are met by C8 and C10 but not cited.
-USE-13: PASS. Both overlays are captured, focus is checked, and the re-tensing is tested. Should-fix: out of scope says "Close the day, USE-21", which means USE-44.
-USE-14: PASS. 0013 is additions only, with RLS, CHECK, lock and validator criteria, and Taylor's apply is manual.
-USE-16: PASS. Three Now states and the time-taken sheet are captured; Done's record and `activeBlock`/`currentItem` are tested.
-USE-17: PASS. Six block forms are captured, and `activeBlock` on a checklist day and `behindSince` are tested.
-USE-18: PASS. "Today only" and "the dropped row never takes the card" are both tested; there is a keyboard path.
-USE-19: PASS. Four tray states are captured; the order, the "From" labels and failure in its own region are tested.
+USE-11: PASS. All six picker states are captured, a network log proves search makes no request, and suggest and pick are tested.
+USE-12: PASS. Six states and the entry tree are covered. Should-fix: "the welcome USE-20 builds" means USE-43.
+USE-13: PASS. Both overlays are captured, focus is checked and the re-tensing is tested. Should-fix: "Close the day, USE-21" means USE-44.
+USE-14: PASS. 0013 is additions only, with RLS, CHECK, lock and validator criteria; Taylor's apply is manual.
+USE-16: PASS. Three Now states and the time-taken sheet are captured; Done's record and activeBlock/currentItem are tested.
+USE-17: PASS. Six block forms are captured; activeBlock on a checklist day and behindSince are tested.
+USE-18: PASS. "Today only" and "the dropped row never takes the card" are tested, and there is a keyboard path.
+USE-19: PASS. Four tray states are captured; order, "From" labels and failure in its own region are tested.
 USE-20: PASS. Five end-of-block and empty states are captured; the footer rule and Start keeping the next block's span are tested.
-USE-21: PASS. The To-dos block and four system states are captured; regions failing apart and failWrites are tested.
-USE-22: PASS. The two meal states and the sheet are captured; `mealTopicUrl` and the pick resetting per meal are tested.
-USE-23: PASS. The `overBand` table pins the percent rule over the drawn frame, which is drawn wrong. A replay test covers Took without the paused time.
-USE-24: PASS. Four Running states are captured; independent counts, one shared tick and no Running group in a Work block are tested.
-USE-25: PASS. The three card states are captured; Later's target, Undo and Leave writing nothing are tested.
-USE-26: PASS. The line and the tap come from one pure function, and a test checks that the slide never reaches the next Monday.
-USE-27: PASS. Four drawn states, plus error and offline, are captured. Should-fix: empty and loading (C-USE-schedule-empty-1, C-USE-schedule-loading-1) have scenarios but no criterion.
-USE-28: PASS. Six states are captured; the repeat options, once-only writes and reminder availability are tested. The Custom… gap is recorded under USE-47.
+USE-21: PASS. The To-dos block and four system states are captured; regions failing apart are tested.
+USE-22: PASS. The meal states and the sheet are captured; mealTopicUrl and a pick resetting per meal are tested.
+USE-23: PASS. overBand's percent rule is pinned by a test, and a replay test covers Took without paused time.
+USE-24: PASS. Four Running states are captured; independent counts and one shared tick are tested.
+USE-25: PASS. Three card states are captured; Later's target, Undo and Leave writing nothing are tested.
+USE-26: PASS. The consequence line and the tap share one pure function, and the slide is tested.
+USE-27: PASS. Four drawn states plus error and offline are captured. Should-fix: empty and loading have scenarios but no criterion.
+USE-28: PASS. Six states are captured; repeat options, once-only writes and reminder availability are tested. Custom… now sits with USE-110.
 USE-29: PASS. The menu, the month step and MonthGrid's stories are captured; Delete/Undo and onDate versus remindOn are tested.
-USE-30: PASS. 0014 is one nullable column with lock and validator criteria. Consider: planned paths leave out `lib/fixtures`, though a gotcha edits the fixtures' to-do builder.
-USE-31: PASS. Success at both widths and the tray open are captured; `bulletGrid` and the once-only `readyAt` are tested.
-USE-32: PASS. The token-key scan, the edit inputs, Linear parsing, `statusFill` and `statusEffect` are each tested. Should-fix: out of scope says "USE-13 and USE-14", which means USE-55 and USE-56.
+USE-30: PASS. 0014 is one nullable column with lock and validator criteria.
+USE-31: PASS. Success at both widths and the open tray are captured; bulletGrid and the once-only readyAt are tested.
+USE-32: PASS. The token-key scan, edit inputs, Linear parsing, statusFill and statusEffect are tested. Should-fix: "USE-13 and USE-14" means USE-55 and USE-56.
 USE-33: PASS. Every set-up rule has its own unit criterion.
-USE-34: PASS. The four system states are captured, and each region failing apart is tested.
-USE-35: PASS. The engine's plans, the minutes adding up and the exact inverse are tested. Consider: a gotcha names "USE-14 or USE-15", but there is no USE-15; the field is 0013's `slots.skipped`.
-USE-36: PASS. Reach, date-only writes, copy/clear/reset with Undo, refusals and the offline split are tested over the fixtures.
+USE-34: PASS. Four system states are captured, and each region failing alone is tested.
+USE-35: PASS. The engine's plans, the minutes adding up and the exact inverse are tested. Should-fix: "USE-14 or USE-15" (there is no USE-15).
+USE-36: PASS. Reach, date-only writes, copy/clear/reset with Undo, refusals and the offline split are tested.
 USE-37: PASS. Four edit states are captured; today-only writes with an exact Undo and the one-time hint are tested.
 USE-38: PASS. The late states are captured; Move later's landing and Leave writing nothing are tested.
-USE-39: FAIL. It cites no criterion ID, yet it builds thirteen drawn states that hold C-USE-set-my-days-1, -3, -7 and their state criteria.
-USE-40: PASS. Four loose-day frames are captured and the checklist write is tested. The Copy another day gap is recorded under USE-45.
-USE-41: PASS. Both sheets are captured; the engine-only figures and the once-a-day opening are tested.
-USE-42: FAIL. It cites no criterion ID for its ten states (C-USE-set-my-days-2, -4, -5, -6 and the state files the-week, the-day, day-menu, overlap, offline and the rest).
-USE-43: FAIL. It hands the not-yet-started state (C-USE-ready-go-not-yet-started-1 and -2) to "Now's tickets", and no Now ticket builds it.
-USE-44: PASS. The journal and three other states are captured; one-key saves and the peek are tested. Should-fix: cite the four state files' criteria.
-USE-45: FAIL. Review the day's "Copy another day" lands nowhere: USE-40 hands its landing to Set my days' tickets, and USE-45 hands it back to Review the day's ticket.
-USE-46: FAIL. It cites none of the 31 C-USE-new-block-sheet criteria, though it builds eleven of its states.
-USE-47: FAIL. Neither USE-47 nor USE-28 adds the To-do sheet's Custom…; each leaves it to the other. USE-47 claims it in a non-negotiable with no criterion, path or dependency on USE-28.
-USE-48: PASS. Eleven states are captured and the today-only rule is a non-negotiable. Should-fix: it cites only the index's criteria, not its states'.
-USE-49: PASS. Eleven editing states are captured. Should-fix: it cites only the by-kind criteria, not the state files'.
-USE-50: PASS. Six Work and To-dos states are captured. Should-fix: it cites only the by-kind criteria.
-USE-51: PASS. Sessions as one item and "no days writes nothing to Linear" are tested. Should-fix: the state criteria aren't cited, and `AddSheet` collides with USE-54's.
+USE-39: FAIL. Unchanged: it cites no C-USE criterion ID, yet builds thirteen Set my days states.
+USE-40: PASS. Four loose-day frames are captured and the checklist write is tested. Should-fix: the Copy another day handoff now belongs to USE-110.
+USE-41: PASS. Both sheets are captured; engine-only figures and the once-a-day opening are tested.
+USE-42: FAIL. Unchanged: it cites no C-USE criterion ID for its ten states.
+USE-43: PASS. The gap from last time is closed: USE-110 now builds the not-yet-started line. Should-fix: point out_of_scope at USE-110.
+USE-44: FAIL. Close the day's only way in (the Wind-down Journal item opening the journal) and the row ticking itself (C-USE-close-the-day-1, -2) are handed to Now and Block view tickets that don't build them.
+USE-45: PASS. USE-110 now owns opening the picker from Review the day. Should-fix: out_of_scope still points at "Review the day's ticket".
+USE-46: FAIL. Unchanged: it cites none of the New block sheet's C-USE criteria, though it builds eleven of its states.
+USE-47: PASS. USE-110 now adds Custom… to the To-do sheet. Should-fix: out_of_scope still says "USE-28 opens this step".
+USE-48: PASS. Eleven states are captured and today-only is a non-negotiable. Should-fix: cite the state files' criteria.
+USE-49: PASS. Eleven editing states are captured. Should-fix: cite the state files' criteria.
+USE-50: PASS. Six Work and To-dos states are captured. Should-fix: cite the state files' criteria.
+USE-51: PASS. Sessions as one item and "no days writes nothing to Linear" are tested.
 USE-52: PASS. The picker is captured; size-based length, no double placing and no Linear write are tested.
-USE-53: PASS. Four landings are captured and the re-flow with Undo is tested. Should-fix: cite Set my days' add-event, event-inside-work and event-own-block criteria.
-USE-54: PASS. The drag mapping and the room hand-off are tested. Should-fix: `AddSheet` and `?sheet=add` are shared ambiguously with USE-51, and the state criteria aren't cited.
+USE-53: PASS. Four landings are captured and the re-flow with Undo is tested. Should-fix: the Google bands now belong to USE-109.
+USE-54: PASS. The drag mapping and the room hand-off are tested.
 USE-55: PASS. Pool parsing, tier "this or all" and an exact Undo for every write are tested.
-USE-56: PASS. The token-key scan, the outbox path and client resolution are tested. Should-fix: non-negotiable 3 contradicts its own C3 (details in findings).
-USE-57: PASS. Working at both widths, loading/error and not-a-work-block are captured. Should-fix: the desk's /today before Ready, go (C-USE-today-before-ready-go-1) is left between USE-31 and USE-57.
+USE-56: PASS. Token scan, outbox path and client resolution are tested. Should-fix: non-negotiable 3 contradicts its own C3, and the Google bands now belong to USE-109.
+USE-57: PASS. Working at both widths, loading/error and not-a-work-block are captured. Should-fix: the desk's /today before Ready, go is still deferred to another ticket.
 USE-58: PASS. The strip, the opened day and the 1023 edge are captured.
-USE-59: PASS. The five ways to fire and "bring back never restarts work time" are tested; six loop states are captured.
+USE-59: FAIL. It hands C-USE-firing-2 ("Still firing, from Work" on the next block's Now) to "the Now thread's block forms", and no ticket builds or cites it.
 USE-60: PASS. Step away tagging, the ask's writes and a session's Done are tested; three overlays are captured.
 USE-61: PASS. The later-block filter and the cap helper are tested; five edges are captured.
-USE-62: PASS. `flowWorkBlock` is tested, and both moments are captured at 402 and 1728.
-USE-63: PASS. Waiting decided by `statusEffect` is tested; four Linear and offline lines are captured.
-USE-64: PASS. Today-only field writes are tested; seven plain-item states are captured, including the desk panel.
-USE-65: PASS. The size range, Mark done closing sessions and Remove not touching Linear are tested; both states are captured.
+USE-62: PASS. flowWorkBlock is tested; both meeting moments are captured.
+USE-63: PASS. Waiting decided by statusEffect is tested; four Linear and offline lines are captured.
+USE-64: PASS. Today-only field writes are tested; the plain-item states and the 1440 panel are captured.
+USE-65: PASS. The size range, Mark done closing sessions and Remove not touching Linear are tested.
 USE-66: PASS. Each status's effect and Unlink are tested; every Linear line state is captured.
-USE-67: PASS. Session tier "this or all", ×, Add a day and the sub-issue check are tested; four states are captured.
-USE-68: PASS. Link with notes joined, no double link and Undo are tested; three entries are captured.
-USE-69: PASS. Today-only moves with no Linear write are tested; six steps are captured. Should-fix: reuse USE-29's MonthGrid and add USE-29 to depends_on.
-USE-70: PASS. The edge zone and the firing-row rule are tested in node; the hint, the menu and the context menu are captured.
+USE-67: PASS. Session tier "this or all", ×, Add a day and the sub-issue check are tested.
+USE-68: PASS. Link with notes joined, no double link and Undo are tested.
+USE-69: PASS. Today-only moves with no Linear write are tested; it now reuses USE-29's MonthGrid and depends on USE-29.
+USE-70: PASS. The edge zone and the firing-row rule are tested; the hint and both menus are captured.
 USE-71: PASS. The pure key map is tested; focus, title, drag and keys are captured.
-USE-72: PASS. The per-column due badge and `fitsLine` are tested; the lens and its edges are captured.
-USE-73: PASS. The Time lens, + Event and the panel link are captured; it mounts USE-53's popover.
-USE-74: PASS. `poolView`'s grouping and sort ties are tested; the panel, the Linear tab and the empty pool are captured.
-USE-75: PASS. `firstTierWithRoom`, sessions over copies, no double placing and Undo are tested.
-USE-76: PASS. Three panel states and focus return are captured; it mounts Block view's body with nothing drawn twice.
-USE-77: PASS. The preview arithmetic and Add n sessions with Undo are tested against the drawn sample.
-USE-78: PASS. It reuses USE-77's preview; the sheet and the Days and tier page are captured.
-USE-79: PASS. Filtering, cross-tab search and clients off are tested; five sheet states are captured.
-USE-80: PASS. `placeSheetView` and doesn't-fit are tested; three states are captured.
+USE-72: PASS. The per-column due badge and fitsLine are tested; the lens and its edges are captured.
+USE-73: PASS. The Time lens, + Event and the panel link are captured. Should-fix: the Google bands now belong to USE-109.
+USE-74: PASS. poolView's grouping and sort ties are tested; the panel, the Linear tab and the empty pool are captured.
+USE-75: PASS. firstTierWithRoom, sessions over copies, no double placing and Undo are tested.
+USE-76: PASS. Three panel states and focus return are captured. Should-fix: the desk Schedule click (D-USE-77) is handed to a Schedule ticket that leaves out the desk.
+USE-77: PASS. The preview arithmetic and Add n sessions with Undo are tested.
+USE-78: PASS. Reuses USE-77's preview; the sheet and the Days and tier page are captured.
+USE-79: PASS. Filtering, cross-tab search and clients off are tested; the sheet states are captured.
+USE-80: PASS. placeSheetView and doesn't-fit are tested; three states are captured.
 USE-81: PASS. The work parts mount in USE-42's day pane; the day and its edges are captured.
-USE-82: PASS. `leftOpen` and "Bring these in" are tested; both empty states are captured.
-USE-83: PASS. The menu, installed and not, and four Install sheet forms are captured.
-USE-84: PASS. Draft and failure handling are tested; five states and the signed-out redirect are captured.
-USE-85: PASS. Connections and its edges are captured. Integrations are fixture-only here, with no writes to Google or Linear.
+USE-82: PASS. leftOpen and Bring these in are tested; both empty states are captured.
+USE-83: PASS. The menu, installed and not, and the Install sheet's forms are captured.
+USE-84: PASS. Draft and failure handling are tested; five states are captured.
+USE-85: PASS. Connections and its edges are captured; nothing is written to Google or Linear.
 USE-86: PASS. Remove, the mapping and the one shared client order are tested; three sheets are captured.
-USE-87: FAIL. C1 asks for Notes "for that date only", but the chosen shape puts them on `block_items` (every date). It also lacks USE-30 (0014) in depends_on and a lock check.
-USE-88: FAIL. A Q3 migration with no migration criteria, no `review:vigil` though Vigil reviews it, and no migration number or order after 0015 and 0016. It also sits outside W4's ratified pair.
-USE-89: FAIL. C5 claims two spec files are split under the 2,000-token cap, but `yarn docs:check-links` can't detect a file over the cap.
+USE-87: PASS. Fixed: Notes now live on slots for the date, it depends on USE-30, and it has a check-migrations criterion, the lock path and review:mason.
+USE-88: PASS. Fixed: no migration now; the columns ride in 0015 and it is Q1. Should-fix: cite C-USE-block-view-header-menu-2 and plan the readDay and live-read paths.
+USE-89: PASS. Fixed: C5 is now manual, with check-specs' sizes as its record.
 USE-90: PASS. Source selection, the production lockout, refusal mapping and the new imports rule are tested.
-USE-91: PASS. The read assembly is pure and tested, the RLS use is a text test, and Taylor's walk on staging is manual.
-USE-92: PASS. Writes, scope edits and undo ownership are tested. A conversation on the undo token follows.
+USE-91: PASS. The read assembly is pure and tested, RLS use is a text test, and Taylor's staging walk is manual.
+USE-92: PASS. Writes, scope edits and undo ownership are tested; the token is now HMAC-signed. Should-fix: no criterion proves a tampered signature is refused.
 USE-93: PASS. Each day write runs in one transaction, and a failure part way is tested.
 USE-94: PASS. Replay as a no-op, the event-time refusal, the all-or-none batch and append-only are tested.
 USE-95: PASS. Remove and restore across three tables, ids included, is tested.
-USE-96: PASS. First-write-wins stamps and the one-key journal merge are tested. Should-fix: planned paths leave out `services/morning/` and its router, which C4 uses.
-USE-97: PASS. Account composition and dedupe on hex are tested; the photo upload is manual.
+USE-96: PASS. First-write-wins stamps and the one-key journal merge are tested; the morning service paths are now planned.
+USE-97: PASS. Account composition and saved-colour dedupe are tested; the photo upload is manual.
 USE-98: PASS. Done closing sessions and Reopen restoring exactly those sessions are tested.
 USE-99: PASS. One item per day, an all-or-none spread and a tier change on open sessions only are tested.
-USE-100: PASS. Crypto, RLS, token-free outputs, OAuth state/PKCE and single-flight refresh are tested, with Mason and Warden at Q3. Should-fix: add a `check-migrations` lock criterion.
-USE-101: PASS. Recorded-response parsing, closing in Linear, rate-limit backoff and query complexity are tested.
+USE-100: PASS. Crypto, RLS, token-free outputs, OAuth state/PKCE and single-flight refresh are tested; it now has the 0016-after-0015 lock check.
+USE-101: PASS. Recorded-response parsing, closing from Linear, rate-limit backoff and query complexity are tested.
 USE-102: PASS. Value-first outbox writes, the prior-state round trip, a single retry and the six kinds are tested.
-USE-103: FAIL. No ticket draws Google events on the day (Set my days' google-events criteria -1 to -3, the dashed band, Add to day). USE-42, 53 and 73 hand them here, but USE-103 plans no UI and calls them "built on fixtures".
+USE-103: PASS. Fixed: it is now server-only and depends on USE-109 for the bands; scopes, answer mapping, all-day dates, invalid_grant and the read join are tested.
 USE-104: PASS. One-transaction ordering and refusing a mapping to another user's connection are tested.
-USE-105: PASS. Delivery at most once, "never reports a miss" and per-user RLS reads are tested. Should-fix: it registers USE-102's job but doesn't depend on USE-102.
-USE-106: PASS. Mutation defaults and clear-on-sign-out are tested. Should-fix: the core offline journey is a manual placeholder until `test:e2e` exists.
-USE-107: PASS. The cache rules are non-negotiables. Should-fix: C1 to C3 could name `yarn test:e2e`, which USE-106 adds.
-USE-108: PASS. The type check proves no domain falls back; the no-fixtures-in-production-chunks rule is tested; Taylor's walk is manual.
+USE-105: PASS. At-most-once delivery, "never reports a miss" and per-user RLS reads are tested; it now depends on USE-102.
+USE-106: PASS. Mutation defaults and clear-on-sign-out are tested; the journey moves to test:e2e once Playwright lands.
+USE-107: PASS. The cache rules are non-negotiables; the journeys are manual until test:e2e exists.
+USE-108: PASS. The type check proves no domain falls back; the production-chunk rule is tested; Taylor's walk is manual.
+USE-109: FAIL. C1 says the band ends in the calendar's name where the spec says "Google"; nothing covers the re-flow or "Usual week shows none"; depends_on lacks USE-42, USE-53 and USE-56.
+USE-110: FAIL. It cites C-USE-ready-go-not-yet-started-2 (the dot fills verdigris at the block's time) with no criterion, cites the wrong copy-from criterion for C2, and depends only on USE-89.
 
 ---
 
@@ -460,109 +470,116 @@ USE-108: PASS. The type check proves no domain falls back; the no-fixtures-in-pr
 
 **What I read:**
 - the brief;
-- the `technical/` folder (there is no `technical.md`; I read the README, calls, data-contract, placement, test-shape and rabbit-holes);
-- all 103 contracts;
-- the earlier `_preflight.md`, as history only;
-- the state files the contracts cite, plus a check of every state directory under `day/`, `work/`, `account/`, `interactions/` and `set-my-days/` for a ticket that builds it.
+- `technical/` (there is no `technical.md`): the README, plus grep checks of calls.md and the dev notes;
+- all 107 contracts;
+- the last `_preflight.md` and `specs/_status.md`, as history only;
+- every state file a finding rests on: not-yet-started, google-events, copy-from, todo-sheet repeats-open, firing, not-a-work-block, close-the-day, schedule, header-menu.
 
-I checked that `test:migrations`, `test:root`, `check-migrations` and the `web` workspace's `test` script exist, and that migrations 0012 to 0014 are on disk. I ran nothing and read no implementation.
+I also searched every out_of_scope handoff for a ticket that takes it. I ran nothing and read no implementation, except a one-line grep to find where readDay and deriveToday live.
 
-**Appetite:** calls C1 ("everything in the ledger, built until done") supersedes the brief's two days. No ticket builds one of the ledger's own deferrals (the whole-pipeline view, a Linear status ending a timer, Evening tasks, the finer points of breaks), so none is out of appetite.
+**Appetite:** the ratified calls supersede the brief's two days with "the whole ledger, until done". No ticket builds one of the ledger's own deferrals, so none is out of appetite.
 
 ## Blocking
 
-1. **USE-39, USE-42 and USE-46 cite no criterion ID.** Their `cites` hold only the surface index and D-lines. Set my days' states hold C-USE-set-my-days-1 to -7 and about 75 state criteria. The New block sheet holds 31. Without the IDs, the cites can't be traced to the states they build, and promotion can't show those states were built.
-   - **Fix:** add the IDs each ticket builds.
-   - **Owner:** the Tickets thread.
+1. **USE-39, USE-42 and USE-46 still cite no criterion ID.** This is unchanged since the last pre-flight. Without the IDs, promotion can't show which of Set my days' and the New block sheet's states were built. Owner: Tickets thread.
 
-2. **USE-43: nobody builds "first block not yet started".**
-   - USE-43's out_of_scope hands the quiet line "Starts at 7:05. Anything can be done early." and the hollow dot to "Now's tickets".
-   - No Now ticket mentions them, and nothing cites C-USE-ready-go-not-yet-started-1 or -2.
-   - Without them, USE-16's card shows the verdigris "this moment" dot before the block has begun, which misreads the morning.
-   - **Fix:** add both criteria to USE-43 or to a Now ticket.
+2. **USE-59: "Still firing, from Work" has no owner.**
+   - C-USE-firing-2 (`interactions/firing.md` row 5, D-USE-57) is handed to "the Now thread's block forms". USE-17 neither cites nor builds it, and no other ticket mentions it.
+   - Taylor's impact: Work ends at 12:00 with an agent firing. On Lunch's Now the item is gone, with no Bring back or Done until the next Work block. That breaks the epic's core promise that firing work is never lost from sight.
+   - Fix: a criterion in USE-59 or a Now ticket, with the capture `firing-still-firing-402`.
 
-3. **USE-45: Review the day's "Copy another day" has no landing.**
-   - `copy-from/index.md` says it opens the picker for today (D-USE-68).
-   - USE-40 hands the landing to Set my days' tickets, and USE-45 hands it back to Review the day's.
-   - The link would dead-end on an empty day, which is the morning it's needed.
-   - **Fix:** USE-45 owns opening `CopyPicker` for today from that link, with one criterion.
+3. **USE-44: Close the day has no way in.**
+   - Its index says the only entry is the Wind-down block's Journal item, which opens the journal rather than the Item sheet (DYN-18).
+   - C-USE-close-the-day-2 and -empty-2 say the row ticks itself.
+   - USE-44 hands both to "Now's and Block view's tickets" and "syncJournalItem's wiring". None of USE-16 to 21, USE-48, USE-49 or USE-96 mentions a Journal row.
+   - Taylor's impact: in the evening, tapping Journal opens the Item sheet, so the journal can only be reached by typing its URL.
+   - Fix: USE-44 owns the row's link and its tick on fixtures, with a criterion; USE-96 carries the tick live.
 
-4. **USE-47: the To-do sheet's Custom… is unowned.**
-   - `todo-sheet/states/repeats-open.md` draws "Custom…" as a step.
-   - USE-28 ends its list at "Every month" and defers Custom… to this ticket. USE-47 says "USE-28 opens this step".
-   - USE-47 has no to-do sheet path, no dependency on USE-28 and no criterion for it.
-   - **Fix:** USE-47 adds the option to the To-do sheet and depends on USE-28, with a criterion that the step stores one rule on the to-do.
+4. **USE-109 doesn't match its own spec.**
+   - C-USE-set-my-days-google-events-1 says the yes band ends in "Google" and the work after it re-flows. C1 says "its calendar's name", with no ruling behind the change, and nothing tests the re-flow.
+   - C-USE-set-my-days-google-events-3 includes "Usual week shows none", which C3 leaves out.
+   - It depends only on USE-89, though it needs USE-42's day column, USE-53's writeDayEvent and re-flow, and USE-56's calendars.
 
-5. **USE-87: C1 contradicts the shape Taylor picked.**
-   - Shape (a) puts Notes on `block_items.notes`, which is every date the item runs.
-   - C1 and C-USE-item-sheet-1 require "for that date only".
-   - Either the column moves to `slots` (like `at_time` and `icon`), or C1 and the item sheet's rule change. That second option is Taylor's call, not a builder's.
-   - Also missing:
-     - USE-30 in depends_on (0015 must follow 0014; USE-30's own gotcha shows the cost);
-     - a `check-migrations` criterion;
-     - `migrations.lock.json` in planned paths.
-   - **Owner:** Mason.
-
-6. **USE-88 is an unframed one-way door.**
-   - It is Q3 with Vigil as reviewer but has no `review:vigil` criterion.
-   - It has no criteria for "additions only", the migration lock, or "Taylor reads and applies".
-   - Its migration has no number or order: W4 ratified only 0015 (USE-87) and 0016 (USE-100), and it depends on neither.
-   - **Fix:** take it to Taylor as a third migration, or fold its columns into 0015, then frame it like USE-14.
-
-7. **USE-89 C5 can't prove what it claims.** `yarn docs:check-links` checks links, not the 2,000-token cap. `check-specs` is red on MIG-23's errors. So either record C5 as manual with the `check-specs` output for those two files, or measure them with `yarn budget` if it covers `ux/`.
-
-8. **USE-103: Google events on the day are never drawn.**
-   - Set my days' google-events state draws three things: a "yes" band ending in "Google", a dashed "maybe" band, and Add to day with Toaster and Undo (D-USE-87).
-   - USE-42, USE-53 and USE-73 send these to "the Google Calendar ticket". USE-56 sends them to "the Schedule and day tickets".
-   - USE-103 plans no `apps/web/components` path and its `truth_files` says the bands are "built on fixtures"; no ticket built them.
-   - **Fix:** a wave 2 UI ticket on USE-56's fixtures, or UI paths and capture criteria in USE-103.
+5. **USE-110 half-closes the gaps it was cut for.**
+   - It cites C-USE-ready-go-not-yet-started-2 (the dot fills verdigris at the block's time; evidence: test) but has no criterion for it. A dot left hollow all block is the misreading the ticket exists to prevent.
+   - C2 cites C-USE-copy-from-1, which is the Replace ask. "Copy another day" is C-USE-review-the-day-sunday-nothing-set-1 and copy-from's step 1.
+   - It depends only on USE-89, though it builds on USE-16, USE-28, USE-40, USE-45 and USE-47.
 
 ## Should-fix
 
-9. **State criteria cited only partly.** USE-12, 27, 44, 45, 48, 49, 50, 51, 53 and 54 cite their index's criteria but not their state files'. The captures do cover the states, so this is traceability, not a gap. The Now, Today, Item sheet, Week and Account tickets show the pattern to follow.
-10. **Stale ticket ids.**
-    - USE-12: "the welcome USE-20 builds" means USE-43.
-    - USE-13: "Close the day, USE-21" means USE-44.
-    - USE-32: "USE-13 and USE-14" means USE-55 and USE-56.
-    - USE-35: "USE-14 or USE-15"; there is no USE-15, and the field is 0013's `slots.skipped`.
-11. **USE-57 and USE-31 each defer the desk's /today before Ready, go** (C-USE-today-before-ready-go-1) to the other. USE-12's entry gate probably covers it. Cite it in USE-57, with a check at 1440 that /today before Ready, go lands on `/today/review`.
-12. **USE-56 contradicts itself.** Non-negotiable 3 says "only status, done and reopen" write to the outbox. Its interfaces, its C3 and D-USE-113 include priority and description (and estimate, in USE-32). Fix the non-negotiable.
-13. **USE-51 and USE-54 both define an `AddSheet`.** USE-37's preset-tier rows open `?sheet=add`, and it's not said which of the two they get. Rename one, and say who owns `?sheet=add`.
-14. **USE-69** builds its PickADay from "@syn/ui's calendar parts", but USE-29 built `MonthGrid` so Move to could reuse it. Name `MonthGrid` and add USE-29 to depends_on, or the grid gets forked.
-15. **USE-27:** add capture criteria for empty (D-USE-68's three choices) and loading. Their scenarios exist.
-16. **USE-96:** add `services/morning/` and its router to planned paths; C4 calls `morning.read`.
-17. **USE-100:** add a `check-migrations` criterion and the lock path, as USE-2, USE-14 and USE-30 have.
-18. **USE-105:** add USE-102 to depends_on, or say the outbox job registers only once USE-102 lands.
-19. **USE-106 and USE-107:** their main risk rows (an offline tap lost or replayed out of order; the shell opening offline) are manual placeholders. Turn them into `yarn test:e2e` criteria in the ticket that adds the script.
-20. **Epic-level test-shape gap.** No ticket owns three journey checks: the loop at 402 (C-USE-firing-1, C-USE-sessions-1, Step away with Resume all), the switch at 1023 and 1024, and C-USE-first-wake-loop-1 to -5. Once `test:e2e` lands, one journey ticket after USE-106 would close it.
+6. **Stale handoffs after USE-109 and USE-110 took the work:**
+   - to USE-110:
+     - USE-43: Now's tickets;
+     - USE-45: Review the day's ticket;
+     - USE-47: USE-28 opens the step;
+     - USE-28: the custom recurrence ticket;
+     - USE-40: Set my days' tickets;
+   - to USE-109:
+     - USE-42, USE-53 and USE-73: the Google Calendar ticket;
+     - USE-56: the Schedule and day tickets.
+
+   Point each at the right ticket, or the next thread will hand the same work around again.
+
+7. **Stale ids, carried from last time:**
+   - USE-12: USE-20 means USE-43.
+   - USE-13: USE-21 means USE-44.
+   - USE-32: USE-13 and USE-14 mean USE-55 and USE-56.
+   - USE-35: USE-15 doesn't exist.
+
+8. **USE-56:** non-negotiable 3 ("only status, done and reopen") contradicts its own C3 and D-USE-113, which include priority and description.
+
+9. **USE-88:**
+   - Cite C-USE-block-view-header-menu-2.
+   - The planned paths miss `packages/utils/src/planner/day-read.ts`, whose DayBlockChange type needs name, icon and colour, and they miss the live read in `services/planner/`. C2 can't pass without those.
+
+10. **USE-92:** the HMAC rule has no proof. Add "a token whose signature fails is refused before any row is read" to C4.
+
+11. **USE-27:** add capture criteria for empty and loading.
+
+12. **USE-57 and USE-31:** the desk's /today before Ready, go (C-USE-today-before-ready-go-1) is still deferred by both.
+
+13. **USE-76:** the desk Schedule click opening the Block panel (D-USE-77, the checking-today state) is handed to "the Schedule ticket". USE-27 leaves out the desk, so no ticket links it.
+
+14. **Uploaded client logos (D-USE-42):** calls.md, USE-86 and USE-104 all name "their own ticket", and none exists. The ledger's deferral list doesn't include it either. Cut the ticket, or record the deferral in calls.md.
+
+15. **Partial citations:** USE-43 (reopened-later -1 and -2, which its C6 covers), USE-44, and USE-48 to 54 cite index criteria but not their state files'. This is traceability only; the captures cover the states.
+
+16. **USE-51 and USE-54's shared `AddSheet` and `?sheet=add`:** carried from last time. I didn't re-check it beyond the planned paths (`components/work/add/` and `components/planner/add-sheet/`).
+
+17. **Journey checks:** no ticket owns the loop at 402, the 1023/1024 switch, or first-wake-loop -1 to -5. Once USE-106 lands test:e2e, one journey ticket would close it.
 
 ## Consider
 
+18. USE-103 stores an integration token at Q1. It was flagged once and calls C7 ratified it, but standing practice puts integration tokens at Q3. Confirm that's still intended.
+19. USE-54's "the rail + on Schedule: Schedule's ticket mounts it" has no source: Schedule's spec draws no rail +.
+20. USE-21 points at "the Life and chores dev note's ticket", which doesn't exist.
 21. USE-30's planned paths leave out `lib/fixtures`, which its gotcha edits.
-22. USE-60 C1 tests "two running slots" with Step away, which reads oddly beside one-in-hand inside a Work block. Say which block the fixture uses.
-23. USE-21's out_of_scope points at "the Life and chores dev note's ticket", which doesn't exist.
-24. USE-88 uses `yarn workspace web test` where every other ticket uses `yarn test`.
+22. USE-106 and USE-107 keep manual placeholders until test:e2e exists; record each through `contract:add` when it does.
+
+## Credit
+
+USE-87, USE-88, USE-89, USE-100, USE-103 and USE-105 fixed their findings from last time. USE-92 now signs the undo token, which settles last pre-flight's HMAC question. USE-69 reuses MonthGrid, and USE-96 plans the morning paths.
 
 ## Conversations
 
-- **USE-92's undo token** (W2, ratified). The token carries row before-images from the client. Anyone holding a session can forge one that writes any column their own rows can hold, without passing the input validators. RLS keeps it inside the account, so the risk is low while Taylor is the only user. Should the server sign the token with an HMAC under an env key? It adds no dependency. This is for Warden.
-- **Wave 2 looks largely built** (USE-89 repairs the reds wave 2 left at HEAD). Several fixes above (items 1 and 9) are paperwork on shipped work. Do they gate anything beyond promotion and `check-specs`, or can they be batched into one docs commit?
+- **"Still firing, from Work"** is the moment the work loop was designed around: an agent keeps running while Taylor eats. Should it be built before wave 3, or is a later-Work-block view (USE-61) enough for now? Taylor's call; as written it is unowned.
+- **Thread size:** USE-110 bundles three gaps under one waiver. If its fixes grow past three criteria, splitting it may give cleaner threads.
 
 ## What I could not verify
 
-- Whether the built code already covers the gaps in items 2, 3, 4 and 8. I judged only the contracts.
-- Whether `yarn budget` measures `ux/` files (item 7).
-- Linear's and Google's fields; the contracts themselves mark them [NOT VERIFIED] until USE-101's spike.
+- Whether the code already built covers items 2, 3 and 13. I judged only the contracts.
+- Whether the earlier contracts' hashes changed. Where a contract read the same as last time's findings describe, I said so.
+- Linear's and Google's fields, which the contracts themselves mark [NOT VERIFIED].
 
 ## Operator checks (by risk)
 
-1. Read 0015 and 0016 before applying them, in order after 0014 (USE-87 C5, USE-100).
+1. Read 0015 and then 0016 before applying each, in order after 0014 (USE-87 C5, USE-100).
 2. Connect two Linear workspaces, then disconnect one (USE-100 C8).
-3. Do one live Linear write of each kind (USE-102 C5).
-4. Start a timer on the phone and confirm it shows running at the desk within 15 s (USE-94 C6).
-5. Check that a daily reminder arrives on the installed iPhone and at the desk (USE-105 C6).
+3. Make one live Linear write of each kind (USE-102 C5).
+4. Start a timer on the phone and see it running at the desk within 15 s (USE-94 C6).
+5. Get a daily reminder on the installed iPhone and at the desk (USE-105 C6).
 6. Open the installed app in airplane mode (USE-107 C4).
-7. Walk the app on staging with your own data (USE-91 C5, USE-108 C4).
-8. Connect Google and confirm a declined meeting is hidden (USE-103 C6).
+7. Walk staging with real data (USE-91 C5, USE-108 C4).
+8. Connect Google and check that a declined meeting is hidden (USE-103 C6).
 
 VERDICT: FAIL
