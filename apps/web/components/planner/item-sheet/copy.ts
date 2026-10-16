@@ -11,6 +11,13 @@ export function clock(value: string): string {
   return `${Number(hour)}:${minute}`;
 }
 
+const COUNT_WORDS = ["", "one", "two", "three", "four", "five", "six", "seven"];
+
+/** "three": the ask's count of sessions in words, then digits. */
+function countWord(count: number): string {
+  return COUNT_WORDS[count] ?? String(count);
+}
+
 /** "Workout", from "Workout: gym": the kind's word in Swap's lines. */
 function kindWord(blockKind: string): { one: string; many: string } {
   switch (blockKind) {
@@ -242,6 +249,90 @@ export const ITEM_SHEET_COPY = {
     toast: {
       unlinked: (name: string) => `${name} is unlinked from Linear.`,
     },
+  },
+  /**
+   * A session's sheet, its sub-issues and a firing item's panel (USE-67;
+   * tier-and-sessions.md, sub-issue-alone.md, while-firing.md,
+   * interactions/sessions.md). No second person; times and lengths only.
+   */
+  sessions: {
+    /** Tier's aside on a session: "Mon 12 only · asks before changing all". */
+    tierAside: (day: string) => `${day} only · asks before changing all`,
+    label: "Sessions",
+    /** "2 to 4 h each". */
+    each: (range: string) => `${range} each`,
+    thisOne: "this one",
+    addDay: "Add a day",
+    /** ×'s name: "Drop Wed 14's session". */
+    drop: (day: string) => `Drop ${day}'s session`,
+    noTier: "no tier",
+    ask: {
+      /** "Move to Primary". */
+      title: (tier: string) => `Move to ${tier}`,
+      /** "[Synapse: desk Today layout] has three sessions: Mon 12, Wed 14, Thu 15." */
+      lead: (title: string, count: number, days: string) =>
+        `${title} has ${countWord(count)} sessions: ${days}.`,
+      thisSession: "This session",
+      /** "Mon 12 only". */
+      thisOnly: (day: string) => `${day} only`,
+      allSessions: "All sessions",
+      /** "Wed's ends 12:10 at the top of its ranges". */
+      ends: (day: string, at: string) =>
+        `${day}'s ends ${at} at the top of its ranges`,
+      /** [ASSUMPTION] Not drawn: a session outside the week read. */
+      movesToo: (day: string) => `${day}'s moves too`,
+      /** [ASSUMPTION] Not drawn: no other session changes. */
+      already: (tier: string) => `The others are already ${tier}`,
+      move: "Move",
+    },
+    toast: {
+      dropped: (day: string) => `${day}'s session is off.`,
+      added: (day: string) => `Session added on ${day}.`,
+      placed: (title: string, day: string) => `${title} placed on ${day}.`,
+    },
+  },
+  subIssues: {
+    label: "Sub-issues",
+    more: (title: string) => `More for ${title}`,
+    place: "Place on a day by itself",
+    /** [ASSUMPTION] A placed one's ··· moves it. */
+    placeAgain: "Place on another day",
+  },
+  /** The one-day step: a sub-issue placed alone, or a session added. */
+  dayStep: {
+    /** "Sub-issue of SYN-212 · [Synapse: desk Today layout]". */
+    scope: (identifier: string, issue: string) =>
+      `Sub-issue of ${identifier} · ${issue}`,
+    title: (title: string) => `Place ${title}`,
+    lead: "It stays checkable inside its issue too. Checking it either place checks it in Linear.",
+    day: "Day",
+    tier: "Tier",
+    /** "Place on Thu 15". */
+    place: (day: string) => `Place on ${day}`,
+    /** [ASSUMPTION] Not drawn: Add a day's step, as Place's. */
+    addTitle: "Add a day",
+    addLead: (title: string) => `Another session of ${title}, on one more day.`,
+    add: (day: string) => `Add ${day}`,
+    /** "Thu's Secondary runs to 11:20 at the top of its ranges." */
+    runsTo: (day: string, tier: string, at: string) =>
+      `${day}'s ${tier} runs to ${at} at the top of its ranges`,
+    pastEnd: (end: string) => `: past Work's end at ${end}`,
+    noTop: (tier: string) => `Where ${tier} ends isn't known: no top yet.`,
+    pickADay: "Pick a day with a Work block.",
+    /** A chip's name: "Thursday 15", "Saturday 17, no Work block". */
+    noWork: "no Work block",
+    past: "already past",
+    taken: "already a session",
+  },
+  firing: {
+    /** "Firing · 22 min". */
+    word: (time: string) => `Firing · ${time}`,
+    /** "Prompt sent at 11:58 · worked 40 min before it". */
+    line: (at: string, worked: string | null) =>
+      worked === null
+        ? `Prompt sent at ${at}`
+        : `Prompt sent at ${at} · worked ${worked} before it`,
+    bringBack: "Bring back",
   },
   /** Not found: the item is no longer on today. */
   gone: "This item is no longer on today.",

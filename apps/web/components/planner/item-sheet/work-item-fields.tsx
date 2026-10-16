@@ -50,6 +50,22 @@ export interface WorkItemFieldsProps {
   onSpread?: () => void;
   /** A linked item's Linear line and its rows under Tier (USE-66). */
   linear?: { line: React.ReactNode; fields: React.ReactNode };
+  /**
+   * A session's or a firing item's sheet (USE-67): the scope reads "Mon 12 ·
+   * Work · session 1 of 3", the firing panel and Tier come first, then
+   * `extra` (Sessions, Sub-issues), then Size, Length, When and Notes.
+   */
+  focused?: boolean;
+  /** The firing panel, under the name (while-firing.md). */
+  firing?: React.ReactNode;
+  /** Sessions and Sub-issues, under Tier. */
+  extra?: React.ReactNode;
+  /** Tier's aside: "Mon 12 only · asks before changing all". */
+  tierAside?: string;
+  /** A session's tier asks first: the segment waits for the answer. */
+  asksTier?: boolean;
+  /** Tier's control, for focus to return to once the ask closes. */
+  tierRef?: React.Ref<HTMLDivElement>;
 }
 
 const SIZES: readonly WorkSize[] = [
@@ -63,10 +79,25 @@ const ROW =
   "border-hairline flex flex-col gap-(--space-2) border-t py-(--space-3)";
 const LABEL = "text-(length:--fs-body) text-foreground";
 
-/** "Work, 9:30 to 12:00 · Primary · session 1 of 3", and " · done" once checked. */
-export function scopeWords(view: WorkSheetView): string {
+/**
+ * "Work, 9:30 to 12:00 · Primary · session 1 of 3"; on a session's or a
+ * firing item's sheet as those boards print it, "Mon 12 · Work · session 1
+ * of 3" and "Mon 12 · Work · Primary" (USE-67).
+ */
+export function scopeWords(view: WorkSheetView, focused = false): string {
   const { slot, session } = view;
   if (slot === null) return COPY.pool;
+  if (focused) {
+    const last =
+      session !== null
+        ? COPY.session(session.n, session.of)
+        : slot.tier === null
+          ? null
+          : COPY.tier[slot.tier];
+    return [shortDate(slot.dateKey), slot.blockName, last]
+      .filter((part) => part !== null)
+      .join(" · ");
+  }
   const place = slot.today
     ? `${slot.blockName}, ${clock(slot.startsAt)} to ${clock(slot.endsAt)}`
     : `${shortDate(slot.dateKey)}, ${slot.blockName} ${clock(slot.startsAt)}`;
@@ -99,6 +130,12 @@ export function WorkItemFields({
   onWhen,
   onSpread,
   linear,
+  focused = false,
+  firing,
+  extra,
+  tierAside,
+  asksTier = false,
+  tierRef,
 }: WorkItemFieldsProps) {
   const { item, slot } = view;
   const ids = {
@@ -162,32 +199,8 @@ export function WorkItemFields({
     />
   );
 
-  return (
-    <div className="flex flex-col">
-      <Text as="p" variant="secondary" tone="secondary">
-        {scopeWords(view)}
-      </Text>
-
-      <div className="flex items-center gap-(--space-3) py-(--space-3)">
-        <span
-          aria-hidden="true"
-          className="bg-surface inline-flex size-(--target) shrink-0 items-center justify-center rounded-(--radius)"
-        >
-          <ItemIcon icon={item.icon} size={24} />
-        </span>
-        <Text
-          ref={titleRef}
-          as="h2"
-          variant="heading"
-          tabIndex={-1}
-          className="min-w-0 outline-none"
-        >
-          {item.title}
-        </Text>
-      </div>
-
-      {linear?.line}
-
+  const sizeRow = (
+    <>
       <div className={ROW}>
         <div className="flex items-baseline justify-between gap-(--space-3)">
           <Text as="span" id={ids.size} variant="body" className={LABEL}>
@@ -213,7 +226,10 @@ export function WorkItemFields({
           }}
         />
       </div>
-
+    </>
+  );
+  const lengthRow = (
+    <>
       <div className={ROW}>
         <div className="flex items-center justify-between gap-(--space-3)">
           <Text as="span" id={ids.length} variant="body" className={LABEL}>
@@ -300,21 +316,27 @@ export function WorkItemFields({
           </Button>
         ) : null}
       </div>
-
+    </>
+  );
+  const tierRow = (
+    <>
       {slot !== null && tier !== null ? (
-        <div className={ROW}>
+        <div ref={tierRef} className={ROW}>
           <TierField
             value={tier}
+            {...(tierAside === undefined ? {} : { aside: tierAside })}
             onChange={(next) => {
-              setTier(next);
+              // A session's change asks first; the segment shows its answer.
+              if (!asksTier) setTier(next);
               onTier(next);
             }}
           />
         </div>
       ) : null}
-
-      {linear?.fields}
-
+    </>
+  );
+  const whenRow = (
+    <>
       <button
         type="button"
         aria-label={COPY.whenName(whenWords(view))}
@@ -335,7 +357,10 @@ export function WorkItemFields({
           className="text-muted-foreground size-4 shrink-0"
         />
       </button>
-
+    </>
+  );
+  const notesRow = (
+    <>
       {item.linked ? null : (
         <div className={ROW}>
           <Textarea
@@ -350,6 +375,58 @@ export function WorkItemFields({
             rows={2}
           />
         </div>
+      )}
+    </>
+  );
+
+  return (
+    <div className="flex flex-col">
+      <Text as="p" variant="secondary" tone="secondary">
+        {scopeWords(view, focused)}
+      </Text>
+
+      <div className="flex items-center gap-(--space-3) py-(--space-3)">
+        <span
+          aria-hidden="true"
+          className="bg-surface inline-flex size-(--target) shrink-0 items-center justify-center rounded-(--radius)"
+        >
+          <ItemIcon icon={item.icon} size={24} />
+        </span>
+        <Text
+          ref={titleRef}
+          as="h2"
+          variant="heading"
+          tabIndex={-1}
+          className="min-w-0 outline-none"
+        >
+          {item.title}
+        </Text>
+      </div>
+
+      {linear?.line}
+
+      {focused ? (
+        <>
+          {firing === undefined ? null : (
+            <div className="pb-(--space-3)">{firing}</div>
+          )}
+          {tierRow}
+          {extra}
+          {linear?.fields}
+          {sizeRow}
+          {lengthRow}
+          {whenRow}
+          {notesRow}
+        </>
+      ) : (
+        <>
+          {sizeRow}
+          {lengthRow}
+          {tierRow}
+          {linear?.fields}
+          {whenRow}
+          {notesRow}
+        </>
       )}
     </div>
   );

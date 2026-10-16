@@ -83,10 +83,13 @@ export interface IntegrationServer {
   /**
    * The check (data contract): done moves the issue to its team's first
    * completed state and keeps the one it left; undone moves it back there.
+   * With `issueId`, one of the linked issue's own sub-issues not yet in
+   * Synapse (USE-67): its check, on the item's row of the outbox.
    */
   writeLinearDone(raw: {
     workItemId: string;
     done: boolean;
+    issueId?: string;
   }): Promise<LinearWriteView>;
   /** Try again: a failed row goes pending and is sent again. */
   retryLinearWrite(id: string): Promise<LinearWriteView>;
@@ -362,18 +365,31 @@ export function createIntegrationServer({
       });
     },
 
-    writeLinearDone({ workItemId, done }) {
+    writeLinearDone({ workItemId, done, issueId }) {
       return run(() => {
-        const { workspace, issue } = findLinked(workItemId);
+        const linked = findLinked(workItemId);
+        const { workspace } = linked;
+        let issue = linked.issue;
+        if (issueId !== undefined) {
+          const sub = workspace.snapshot.subIssues.find(
+            (row) => row.id === issueId && row.parentId === linked.issue.id,
+          );
+          if (!sub) {
+            throw new PlannerRefusal("unknown", "No sub-issue with that id.");
+          }
+          issue = sub;
+        }
+        // The state it left, kept per issue: a sub-issue's beside its parent's.
+        const key = issueId ?? workItemId;
         let target: string | undefined;
         if (done) {
-          data.prevStateIds[workItemId] = issue.stateId;
+          data.prevStateIds[key] = issue.stateId;
           target = firstOfType(workspace, issue.teamId, "completed")?.id;
         } else {
           target =
-            data.prevStateIds[workItemId] ??
+            data.prevStateIds[key] ??
             firstOfType(workspace, issue.teamId, "unstarted")?.id;
-          delete data.prevStateIds[workItemId];
+          delete data.prevStateIds[key];
         }
         if (target === undefined) {
           throw new PlannerRefusal("unknown", "No status to move to.");

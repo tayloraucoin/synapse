@@ -24,33 +24,131 @@
  * consequence here and goes back to the fields ("start" is the work loop's
  * Start). ··· adds Unlink from Linear, which asks nothing and toasts with
  * Undo; the sheet stays, on a plain item.
+ *
+ * A SESSION (USE-67; tier-and-sessions.md): Tier for this session first,
+ * then Sessions and Sub-issues. A tier change with other open sessions asks
+ * This session or All sessions (SessionTierAsk) before anything is written;
+ * Add a day and a sub-issue's Place are PlaceSubIssueStep. Each is a step in
+ * this sheet, as ··· is, so no second sheet stacks; leaving a step writes
+ * nothing and focus goes back where it came from.
+ *
+ * WHILE FIRING (while-firing.md, D-USE-44): the firing panel under the name,
+ * its figures from the derived clock at the tick, and Bring back and Done
+ * at the foot. Bring back writes `brought_back` alone: firing stops and work
+ * time waits for Start.
  */
 import * as React from "react";
 import { useWorkClock } from "@syn/hooks";
+import type { WorkTier } from "@syn/types";
 import {
   Button,
   CloseIcon,
+  ItemIcon,
   MoreIcon,
   ResponsiveSheet,
   toastUndo,
   useIsSplit,
 } from "@syn/ui";
-import { shortDate } from "@/components/work/add/new-task/form";
+import { weekdayIndex } from "@syn/utils";
+import {
+  rangeWords,
+  shortDate,
+  shortDay,
+} from "@/components/work/add/new-task/form";
+import type { DayPickChip } from "@/components/work/day-pick";
 import {
   StartWhileOneRuns,
   type StartMoveTo,
 } from "@/components/work/start-while-one-runs";
+import {
+  allSessionsFits,
+  canPickDay,
+  dayFit,
+  firingPanel,
+  sessionTop,
+  subIssueTop,
+  type DayFit,
+  type DayPick,
+  type SubIssueView,
+} from "@/lib/data/item-sheet-sessions";
 import { useDataSource } from "@/lib/data/source";
 import { useWorkItemSheet } from "@/lib/data/use-item-sheet";
 import { useTodayWork, useWorkLoop } from "@/lib/data/use-today-work";
 import { ITEM_SHEET_COPY } from "./copy";
+import { FiringPanel } from "./firing-panel";
 import { LinearFields } from "./linear-fields";
 import { LinearLine, LinearLineStatus } from "./linear-line";
+import { PlaceSubIssueStep } from "./place-sub-issue-step";
+import { SessionTierAsk } from "./session-tier-ask";
+import { SessionsField } from "./sessions-field";
 import { StatusList } from "./status-list";
+import { SubIssuesField } from "./sub-issues-field";
 import { WorkItemFields } from "./work-item-fields";
 import { WorkMoreList, WorkMoreMenu, workMoreRows } from "./work-more";
 
 const COPY = ITEM_SHEET_COPY.work;
+const SESSIONS = ITEM_SHEET_COPY.sessions;
+const STEP = ITEM_SHEET_COPY.dayStep;
+
+const WEEKDAY_LONG = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+const WEEKDAY_LETTER = ["M", "T", "W", "T", "F", "S", "S"];
+
+/** The sheet's own steps beside ···: the ask, Place, Add a day (USE-67). */
+type SheetStep =
+  | { kind: "ask"; tier: WorkTier }
+  | { kind: "place"; issueId: string }
+  | { kind: "add" };
+
+/** `view.open` from a scenario: "item:ask:<tier>", "item:place", "item:add". */
+function seededSheetStep(open: string | undefined): string | null {
+  if (open === undefined || !open.startsWith("item:")) return null;
+  return open.slice("item:".length);
+}
+
+/** The pick's chips: "Thursday 15", "Saturday 17, no Work block". */
+function chipsOf(picks: readonly DayPick[]): DayPickChip[] {
+  return picks.map((pick) => {
+    const index = weekdayIndex(pick.dateKey);
+    const long = `${WEEKDAY_LONG[index]} ${Number(pick.dateKey.slice(8))}`;
+    const why =
+      pick.block === null
+        ? STEP.noWork
+        : pick.past
+          ? STEP.past
+          : pick.taken
+            ? STEP.taken
+            : null;
+    return {
+      dateKey: pick.dateKey,
+      letter: WEEKDAY_LETTER[index]!,
+      date: Number(pick.dateKey.slice(8)),
+      name: why === null ? long : `${long}, ${why}`,
+      disabled: !canPickDay(pick),
+    };
+  });
+}
+
+/** "Thu's Secondary runs to 11:20 at the top of its ranges." */
+function fitWords(
+  day: string | null,
+  tier: WorkTier,
+  fit: DayFit | null,
+): string {
+  if (day === null || fit === null) return STEP.pickADay;
+  const word = COPY.tier[tier];
+  if (fit.runsTo === null) return STEP.noTop(word);
+  return `${STEP.runsTo(shortDay(day), word, fit.runsTo)}${
+    fit.fits ? "" : STEP.pastEnd(fit.endsAt)
+  }.`;
+}
 
 /** A scenario's `view.open` on a linked item: the status list, or Priority open. */
 function seededLinear(open: string | undefined): "status" | "priority" | null {
@@ -89,6 +187,7 @@ export function WorkItemSheet({
   const atDesk = useIsSplit();
   const seededStep = seededLinear(source.scenario.view?.open);
   const [statusAsked, setStatusOpen] = React.useState(false);
+  const seedStep = seededSheetStep(source.scenario.view?.open);
 
   const [moreAsked, setMore] = React.useState(false);
   // The step is the phone's; at the desk ··· is a pull-down (D-USE-103).
@@ -96,6 +195,12 @@ export function WorkItemSheet({
   const [asking, setAsking] = React.useState(false);
   const titleRef = React.useRef<HTMLHeadingElement>(null);
   const seeded = React.useRef(false);
+  const [step, setStep] = React.useState<SheetStep | null>(null);
+  // The one-day step's picks, set as it opens.
+  const [pickDay, setPickDay] = React.useState<string | null>(null);
+  const [pickTier, setPickTier] = React.useState<WorkTier>("secondary");
+  const tierRef = React.useRef<HTMLDivElement>(null);
+  const backTo = React.useRef<HTMLElement | null>(null);
 
   // ··· open on load: the step on the phone; the desk's menu opens itself.
   React.useEffect(() => {
@@ -105,18 +210,93 @@ export function WorkItemSheet({
     if (seededStep === "status") setStatusOpen(true);
   }, [open, view, seededMore, seededStep]);
 
-  // Each opening and each step focuses its heading.
+  // A scenario's step: the ask, Place on its first open sub-issue, Add a day.
+  const seededSteps = React.useRef(false);
+  const ready = view !== null && sheet.week !== null;
+  React.useEffect(() => {
+    if (!open || seededSteps.current || !ready || seedStep === null) return;
+    if (seedStep.startsWith("ask:")) {
+      seededSteps.current = true;
+      setStep({ kind: "ask", tier: seedStep.slice(4) as WorkTier });
+    } else if (seedStep === "place") {
+      const sub = sheet.subIssues.find((row) => !row.done);
+      if (!sub) return;
+      seededSteps.current = true;
+      openPlace(sub, null);
+    } else if (seedStep === "add") {
+      seededSteps.current = true;
+      openAdd();
+    }
+    // openPlace and openAdd read the latest view; the seed runs once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, ready, seedStep, sheet.subIssues]);
+
+  // Each opening and each step focuses its heading; back out of a step,
+  // focus returns where it came from instead (leaveStep).
   const loaded = view !== null;
+  const returning = React.useRef(false);
   React.useEffect(() => {
     if (!open || !loaded) return;
+    if (returning.current) {
+      returning.current = false;
+      return;
+    }
     const frame = requestAnimationFrame(() => titleRef.current?.focus());
     return () => cancelAnimationFrame(frame);
-  }, [open, more, statusAsked, loaded]);
+  }, [open, more, statusAsked, loaded, step]);
 
   function close() {
     setMore(false);
     setStatusOpen(false);
+    setStep(null);
     onClose();
+  }
+
+  /** Out of a step, focus back where it came from: the tier, ···, Add a day. */
+  function leaveStep() {
+    const back = step?.kind === "ask" ? null : backTo.current;
+    returning.current = true;
+    setStep(null);
+    requestAnimationFrame(() => {
+      if (back?.isConnected) back.focus();
+      else {
+        const tier = tierRef.current;
+        (
+          tier?.querySelector<HTMLElement>("input:checked") ??
+          tier?.querySelector<HTMLElement>("input")
+        )?.focus();
+      }
+    });
+  }
+
+  function openPlace(sub: SubIssueView, trigger: HTMLElement | null) {
+    const at = sheet.view;
+    if (at === null) return;
+    backTo.current = trigger;
+    const picks = sheet.picks();
+    const pickable = (date: string | undefined) =>
+      picks.find((pick) => pick.dateKey === date && canPickDay(pick))
+        ?.dateKey ?? null;
+    // Placed: where it is; else with the issue's last open share [ASSUMPTION].
+    const last = at.sessions.filter((row) => !row.done).at(-1)?.dateKey;
+    setPickDay(
+      pickable(sub.placed?.dateKey) ??
+        pickable(last) ??
+        picks.find(canPickDay)?.dateKey ??
+        null,
+    );
+    setPickTier(sub.placed?.tier ?? at.slot?.tier ?? "secondary");
+    setStep({ kind: "place", issueId: sub.issueId });
+  }
+
+  function openAdd(trigger: HTMLElement | null = null) {
+    const at = sheet.view;
+    if (at === null) return;
+    backTo.current = trigger;
+    const picks = sheet.picks(at.sessions.map((row) => row.dateKey));
+    setPickDay(picks.find(canPickDay)?.dateKey ?? null);
+    setPickTier(at.slot?.tier ?? "secondary");
+    setStep({ kind: "add" });
   }
 
   if (view === null) return null;
@@ -131,8 +311,25 @@ export function WorkItemSheet({
     view.ready &&
     !slot.done &&
     loopView !== null &&
-    state !== "firing" &&
     state !== "done";
+  const firing =
+    slot !== null && loopView !== null && state === "firing"
+      ? firingPanel(
+          loopView.clocks.get(slot.id),
+          now,
+          loopView.dayEnd,
+          loopView.timeZone,
+        )
+      : null;
+  // A spread task asks before changing the others (D-USE-57).
+  const othersOpen = view.sessions.some((row) => !row.thisOne && !row.done);
+  const focused = view.session !== null || firing !== null;
+  const tierAside =
+    slot === null || !focused
+      ? undefined
+      : view.session !== null
+        ? SESSIONS.tierAside(shortDate(slot.dateKey))
+        : shortDate(slot.dateKey);
   const oneDay = slot
     ? (loopView?.oneDay.get(slot.id) ?? view.session === null)
     : true;
@@ -173,6 +370,35 @@ export function WorkItemSheet({
     close();
     const undo = await loop.done(slot.id);
     if (undo) toastUndo({ text, onUndo: () => void undo() });
+  }
+
+  function bringBack() {
+    if (slot === null) return;
+    void loop.bringBack(slot.id);
+  }
+
+  function changeTier(tier: WorkTier) {
+    if (slot === null || tier === slot.tier) return;
+    if (view !== null && view.session !== null && othersOpen) {
+      setStep({ kind: "ask", tier });
+      return;
+    }
+    void sheet.setTier(tier);
+  }
+
+  async function moveTier(tier: WorkTier, choice: "this" | "all") {
+    leaveStep();
+    await sheet.setTier(tier, choice);
+  }
+
+  async function drop(slotId: string) {
+    const session = view?.sessions.find((row) => row.slotId === slotId);
+    const written = await sheet.dropSession(slotId);
+    if (written === null || !session) return;
+    toastUndo({
+      text: SESSIONS.toast.dropped(shortDate(session.dateKey)),
+      onUndo: () => void sheet.undo(written),
+    });
   }
 
   async function act(
@@ -247,11 +473,11 @@ export function WorkItemSheet({
   );
 
   const header =
-    more || statusOpen ? null : (
+    more || statusOpen || step?.kind === "ask" ? null : (
       <div className="flex min-w-0 flex-1 items-center gap-(--space-2)">
         {closeButton}
         <span className="flex-1" />
-        {atDesk ? (
+        {step !== null ? null : atDesk ? (
           <WorkMoreMenu view={view} rows={rows} defaultOpen={seededMore} />
         ) : (
           <Button
@@ -273,9 +499,13 @@ export function WorkItemSheet({
     );
 
   const footer =
-    foot && !more && !statusOpen ? (
+    foot && !more && !statusOpen && step === null ? (
       <div className="grid grid-cols-2 gap-(--space-3)">
-        {state === "running" ? (
+        {state === "firing" ? (
+          <Button variant="secondary" size="lg" onClick={bringBack}>
+            {ITEM_SHEET_COPY.firing.bringBack}
+          </Button>
+        ) : state === "running" ? (
           <span />
         ) : (
           <Button variant="secondary" size="lg" onClick={() => void start()}>
@@ -288,6 +518,133 @@ export function WorkItemSheet({
       </div>
     ) : undefined;
 
+  const week = sheet.week;
+  const workItems = sheet.workItems;
+  let stepBody: React.ReactNode = null;
+  if (step?.kind === "ask" && slot !== null) {
+    const others = allSessionsFits({
+      view,
+      tier: step.tier,
+      days: week?.days ?? [],
+      workItems,
+      slots: sheet.slots,
+      timeZone: week?.timeZone ?? source.scenario.records.timeZone,
+    });
+    const tierWord = COPY.tier[step.tier];
+    const allLine =
+      others.length === 0
+        ? SESSIONS.ask.already(tierWord)
+        : others
+            .map(({ dateKey, fit }) =>
+              fit === null || fit.runsTo === null
+                ? SESSIONS.ask.movesToo(shortDay(dateKey))
+                : `${SESSIONS.ask.ends(shortDay(dateKey), fit.runsTo)}${
+                    fit.fits ? "" : STEP.pastEnd(fit.endsAt)
+                  }`,
+            )
+            .join("; ");
+    const openSessions = view.sessions.filter((row) => !row.done);
+    stepBody = (
+      <SessionTierAsk
+        title={SESSIONS.ask.title(tierWord)}
+        lead={SESSIONS.ask.lead(
+          item.title,
+          openSessions.length,
+          openSessions.map((row) => shortDate(row.dateKey)).join(", "),
+        )}
+        thisLine={SESSIONS.ask.thisOnly(shortDate(slot.dateKey))}
+        allLine={allLine}
+        headingRef={titleRef}
+        onMove={(choice) => void moveTier(step.tier, choice)}
+      />
+    );
+  } else if (step?.kind === "place" || step?.kind === "add") {
+    const sub =
+      step.kind === "place"
+        ? sheet.subIssues.find((row) => row.issueId === step.issueId)
+        : undefined;
+    const picks =
+      step.kind === "add"
+        ? sheet.picks(view.sessions.map((row) => row.dateKey))
+        : sheet.picks();
+    const pick = picks.find((row) => row.dateKey === pickDay);
+    const record = workItems.find((row) => row.id === item.id);
+    const top =
+      step.kind === "add"
+        ? record
+          ? sessionTop(record, null)
+          : view.topMin
+        : subIssueTop(sub?.estimate ?? null);
+    const fit =
+      pick && canPickDay(pick)
+        ? dayFit({
+            days: week?.days ?? [],
+            dateKey: pick.dateKey,
+            tier: pickTier,
+            topMin: top,
+            // What moves rather than adds: the sub-issue's own slot, or this item's.
+            ...(step.kind === "add"
+              ? { leaveOut: item.id }
+              : sub?.workItemId
+                ? { leaveOut: sub.workItemId }
+                : {}),
+            workItems,
+            timeZone: week?.timeZone ?? source.scenario.records.timeZone,
+          })
+        : null;
+    const day = pick && canPickDay(pick) ? pick.dateKey : null;
+    const place = async () => {
+      if (day === null || !pick?.block) return;
+      const target = { dateKey: day, blockId: pick.block.id, tier: pickTier };
+      leaveStep();
+      const written =
+        step.kind === "add"
+          ? await sheet.addSessionDay(target)
+          : sub
+            ? await sheet.placeSubIssue(sub, target)
+            : null;
+      if (written === null) return;
+      toastUndo({
+        text:
+          step.kind === "add"
+            ? SESSIONS.toast.added(shortDate(day))
+            : SESSIONS.toast.placed(sub?.title ?? "", shortDate(day)),
+        onUndo: () => void sheet.undo(written),
+      });
+    };
+    stepBody = (
+      <PlaceSubIssueStep
+        scope={
+          step.kind === "place" ? (
+            <>
+              {STEP.scope(linear?.identifier ?? "", "")}
+              <ItemIcon icon={item.icon} size={20} />
+              {item.title}
+            </>
+          ) : undefined
+        }
+        title={
+          step.kind === "place" ? STEP.title(sub?.title ?? "") : STEP.addTitle
+        }
+        lead={step.kind === "place" ? STEP.lead : STEP.addLead(item.title)}
+        chips={chipsOf(picks)}
+        day={day}
+        onDay={setPickDay}
+        tier={pickTier}
+        onTier={setPickTier}
+        line={fitWords(day, pickTier, fit)}
+        action={
+          step.kind === "place"
+            ? STEP.place(day === null ? "" : shortDate(day))
+            : STEP.add(day === null ? "" : shortDate(day))
+        }
+        canAct={day !== null && (step.kind === "add" || sub !== undefined)}
+        onAct={() => void place()}
+        headingRef={titleRef}
+      />
+    );
+  }
+
   return (
     <>
       <ResponsiveSheet
@@ -297,6 +654,7 @@ export function WorkItemSheet({
           // Out of ···'s or the status step goes back to the fields; out of the fields, closed.
           if (more) setMore(false);
           else if (statusOpen) setStatusOpen(false);
+          else if (step !== null) leaveStep();
           else close();
         }}
         title={item.title}
@@ -304,13 +662,18 @@ export function WorkItemSheet({
         headerAction={null}
         footer={footer}
         returnFocusRef={returnFocusRef}
-        size={more ? "default" : "tall"}
+        size={more || step !== null ? "default" : "tall"}
         classes={{
-          header: more || statusOpen ? "hidden" : "items-center pt-(--space-2)",
+          header:
+            more || statusOpen || step?.kind === "ask"
+              ? "hidden"
+              : "items-center pt-(--space-2)",
           body: "pt-(--space-1)",
         }}
       >
-        {more ? (
+        {step !== null ? (
+          stepBody
+        ) : more ? (
           <WorkMoreList
             view={view}
             rows={rows.map((row) => ({
@@ -343,7 +706,7 @@ export function WorkItemSheet({
             titleRef={titleRef}
             onSize={(size) => void sheet.setSize(size)}
             onLength={(range) => void sheet.setLength(range)}
-            onTier={(tier) => void sheet.setTier(tier)}
+            onTier={changeTier}
             onNotes={(notes) => void sheet.setNotes(notes)}
             onWhen={onMoveTo ? () => onMoveTo(item.id) : undefined}
             linear={
@@ -381,6 +744,32 @@ export function WorkItemSheet({
                       />
                     ),
                   }
+            }
+            focused={focused}
+            firing={firing ? <FiringPanel view={firing} /> : undefined}
+            tierAside={tierAside}
+            asksTier={view.session !== null && othersOpen}
+            tierRef={tierRef}
+            extra={
+              <>
+                {view.session === null ? null : (
+                  <SessionsField
+                    sessions={view.sessions}
+                    range={rangeWords(item.lengthMinMin, item.lengthMaxMin)}
+                    onDrop={(slotId) => void drop(slotId)}
+                    onAddDay={() =>
+                      openAdd(document.activeElement as HTMLElement | null)
+                    }
+                  />
+                )}
+                {sheet.subIssues.length === 0 ? null : (
+                  <SubIssuesField
+                    subIssues={sheet.subIssues}
+                    onCheck={(sub, done) => void sheet.checkSubIssue(sub, done)}
+                    onPlace={openPlace}
+                  />
+                )}
+              </>
             }
           />
         )}

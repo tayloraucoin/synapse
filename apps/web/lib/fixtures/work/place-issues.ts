@@ -30,6 +30,8 @@ export const placeIssuesInput = z.object({
   dateKey: dateKeySchema,
   blockId: z.string().uuid(),
   tier: z.enum(WORK_TIERS),
+  /** A sub-issue placed on a day by itself (USE-67): its issue's work item. */
+  parentWorkItemId: z.string().uuid().optional(),
 });
 
 export type PlaceIssuesInput = z.input<typeof placeIssuesInput>;
@@ -97,7 +99,15 @@ export function writeIssues(
     ) {
       throw new PlannerRefusal("duplicate", ALREADY_PLACED);
     }
-    const item = linked ?? createItem(journal, connectionId, issue, stamps);
+    const item =
+      linked ??
+      createItem(
+        journal,
+        connectionId,
+        issue,
+        stamps,
+        input.parentWorkItemId ?? null,
+      );
 
     const slot = parse(placeSlotInput, {
       blockId: block.id,
@@ -134,6 +144,7 @@ function createItem(
   connectionId: string,
   issue: LinearIssue,
   stamps: () => { id: string; createdAt: string; updatedAt: string },
+  parentWorkItemId: string | null,
 ): WorkItemRecord {
   const length = issueLength(issue.estimate);
   const fields = parse(workItemInput, {
@@ -156,7 +167,7 @@ function createItem(
       dueOn: null,
       // Whose work it is resolves through the workspace (USE-9).
       clientId: null,
-      parentWorkItemId: null,
+      parentWorkItemId,
       doneAt: null,
       doneSource: null,
       archivedAt: null,

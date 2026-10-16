@@ -148,14 +148,28 @@ export function ClientPicker({
 export function TierField({
   value,
   onChange,
+  aside,
 }: {
   value: WorkTier;
   onChange: (tier: WorkTier) => void;
+  /** Muted on the label's right: the Item sheet's "Mon 12 only · …" (USE-67). */
+  aside?: string;
 }) {
   return (
     <div className="flex flex-col gap-(--space-2)">
       <SegmentedControl
-        label={<span className={LABEL}>{COPY.fields.tier}</span>}
+        label={
+          aside === undefined ? (
+            <span className={LABEL}>{COPY.fields.tier}</span>
+          ) : (
+            <span className="flex w-full items-baseline justify-between gap-(--space-3)">
+              <span className={LABEL}>{COPY.fields.tier}</span>
+              <span className="text-muted-foreground text-(length:--fs-caption) font-normal">
+                {aside}
+              </span>
+            </span>
+          )
+        }
         stacked={false}
         value={value}
         onChange={onChange}

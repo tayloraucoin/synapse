@@ -1,11 +1,22 @@
-import { blockItemRecord, blockRecord, slotRecord } from "@syn/validators";
+import {
+  blockItemRecord,
+  blockRecord,
+  slotRecord,
+  workItemRecord,
+} from "@syn/validators";
 import { fixtureId } from "../ids";
+import { issueId } from "../integrations/workspaces";
 import type { FixtureRecords } from "../records";
 import { BASE_DATE } from "./base-day";
 import type { Scenario } from "./index";
 import { ITEM_SHEET_LINEAR_SCENARIOS } from "./item-sheet-linear";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
-import { TODAY_DESK_NOW, todayWorkRecords } from "./today-desk";
+import {
+  mondayEvent,
+  TODAY_DESK_NOW,
+  TODAY_WORK_IDS,
+  todayWorkRecords,
+} from "./today-desk";
 import { WEEK_IDS } from "./week";
 
 /**
@@ -46,6 +57,16 @@ export const ITEM_SHEET_IDS = {
   work: {
     portal: WEEK_IDS.workItems.kes42,
     desk: WEEK_IDS.workItems.syn212,
+  },
+  /**
+   * A session's sheet (USE-67): [Desk Today layout] as tier-and-sessions.md
+   * draws it, Mon 12 (Secondary, this one), Wed 14 (Primary), Thu 15
+   * (Secondary), 2 to 4 h each, and SYN-214 [Firing in place on the row]
+   * placed alone on Thu 15.
+   */
+  sessions: {
+    subItem: fixtureId(4, 671),
+    subSlot: fixtureId(3, 671),
   },
 } as const;
 
@@ -179,6 +200,86 @@ function scenario(
   });
 }
 
+/** The week's ids as the week fixture numbers them (`week.ts`'s PLACED). */
+const WEEK_SLOT = {
+  deskThu: fixtureId(3, 409),
+  deskNext: fixtureId(3, 411),
+} as const;
+
+/**
+ * Work's Monday with [Desk Today layout] spread as the board draws it:
+ * Mon 12 Secondary, Wed 14 Primary, Thu 15 Secondary, 2 to 4 h each, and
+ * with `placed` SYN-214 on Thu 15's Secondary by itself.
+ */
+function sessionsRecords(placed: boolean): FixtureRecords {
+  const records = todayWorkRecords();
+  const desk = WEEK_IDS.workItems.syn212;
+  records.workItems = records.workItems.map((row) =>
+    row.id === desk ? { ...row, lengthMinMin: 120, lengthMaxMin: 240 } : row,
+  );
+  // Thu's share is 80 min, so a 30 min sub-issue there runs Secondary to 11:20.
+  records.slots = records.slots.map((row) =>
+    row.id === WEEK_SLOT.deskThu
+      ? { ...row, tier: "secondary", lengthMin: 80 }
+      : row.id === WEEK_SLOT.deskNext
+        ? { ...row, onDate: "2026-10-14", tier: "primary" }
+        : row,
+  );
+  // SYN-214 is a quick one in Linear: 1 point, at most 30 min.
+  for (const workspace of records.integrations?.linear ?? []) {
+    for (const issue of workspace.snapshot.subIssues) {
+      if (issue.id === issueId("SYN-214")) issue.estimate = 1;
+    }
+  }
+  if (!placed) return records;
+  const sub = issueId("SYN-214");
+  const workspace = records.integrations?.linear.find((row) =>
+    row.snapshot.subIssues.some((issue) => issue.id === sub),
+  );
+  const parent = records.workItems.find((row) => row.id === desk)!;
+  records.workItems.push(
+    workItemRecord.parse({
+      ...parent,
+      id: ITEM_SHEET_IDS.sessions.subItem,
+      title: "[Firing in place on the row]",
+      icon: null,
+      size: "quick",
+      lengthMinMin: 15,
+      lengthMaxMin: 30,
+      parentWorkItemId: desk,
+      linearIdentifier: "SYN-214",
+      linearConnectionId: workspace?.connection.id ?? parent.linearConnectionId,
+      linearIssueId: sub,
+    }),
+  );
+  const thu = records.slots.find((row) => row.id === WEEK_SLOT.deskThu)!;
+  records.slots.push(
+    slotRecord.parse({
+      ...thu,
+      id: ITEM_SHEET_IDS.sessions.subSlot,
+      workItemId: ITEM_SHEET_IDS.sessions.subItem,
+      tier: "secondary",
+      lengthMin: null,
+      sortOrder: thu.sortOrder + 1,
+    }),
+  );
+  return records;
+}
+
+function sessions(
+  name: string,
+  placed: boolean,
+  open?: string,
+): () => Scenario {
+  return () => ({
+    name,
+    now: TODAY_DESK_NOW,
+    records: sessionsRecords(placed),
+    mode: "ready",
+    ...(open === undefined ? {} : { view: { open } }),
+  });
+}
+
 /** `view.open` names the sheet's start: ··· open, Swap, or the icon step. */
 export const ITEM_SHEET_SCENARIOS: Record<string, () => Scenario> = {
   "item-default": scenario("item-default"),
@@ -214,4 +315,23 @@ export const ITEM_SHEET_SCENARIOS: Record<string, () => Scenario> = {
   }),
   // USE-66: a linked work item's Linear side, `&id=<ITEM_SHEET_LINEAR_IDS.item>`.
   ...ITEM_SHEET_LINEAR_SCENARIOS,
+  // USE-67: a session's sheet, `&sheet=item&id=<ITEM_SHEET_IDS.work.desk>`.
+  "item-tier-and-sessions": sessions("item-tier-and-sessions", true),
+  "item-this-session-or-all": sessions(
+    "item-this-session-or-all",
+    true,
+    "item:ask:primary",
+  ),
+  "item-sub-issue-alone": sessions("item-sub-issue-alone", false, "item:place"),
+  // 12:20: [Portal sign-in] started 11:18, its prompt out at 11:58, so
+  // "Firing · 22 min" and "worked 40 min before it"; `&id=<work.portal>`.
+  "item-while-firing": () => ({
+    name: "item-while-firing",
+    now: "2026-10-12T12:20:00-04:00",
+    records: todayWorkRecords([
+      mondayEvent(1, TODAY_WORK_IDS.slots.portal, "started", "11:18"),
+      mondayEvent(2, TODAY_WORK_IDS.slots.portal, "prompt_sent", "11:58"),
+    ]),
+    mode: "ready",
+  }),
 };

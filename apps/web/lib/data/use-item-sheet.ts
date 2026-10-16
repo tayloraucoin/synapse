@@ -11,6 +11,7 @@ import type {
 import { clockFromMinutes, clockToMinutes, reflowItems } from "@syn/utils";
 import type { BlockItemRecord } from "@syn/validators";
 import { ITEM_SHEET_COPY } from "@/components/planner/item-sheet/copy";
+import { weekOf } from "@/components/work/add/new-task/form";
 import type { PlannerWrite } from "@/lib/fixtures/planner";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import { deriveToday, type Today } from "./derive-today";
@@ -25,6 +26,16 @@ import {
   type LinearSheetServer,
   type WorkLinearView,
 } from "./item-sheet-linear";
+import {
+  dayPicks,
+  deriveSubIssues,
+  writeAddSessionDay,
+  writeCheckSubIssue,
+  writeDropSession,
+  writePlaceSubIssue,
+  type SessionsServer,
+  type SubIssueView,
+} from "./item-sheet-sessions";
 import {
   deriveWorkSheet,
   undoWorkSheetWrite,
@@ -45,8 +56,10 @@ import { useAccount } from "./use-account";
 import { linearQueryKey, useLinear } from "./use-linear";
 import { usePlannerWrites } from "./use-planner-writes";
 import { poolQueryKey, usePool } from "./use-pool";
+import { deriveSetUpDay, type SetUpDay } from "./use-set-up-day";
 import { todayQueryKey } from "./use-today";
-import { weekQueryKey } from "./use-week";
+import { useWeekQuery, weekQueryKey } from "./use-week";
+import type { WeekRecords } from "./week-records";
 
 /**
  * The Item sheet's data (USE-64; day/item-sheet): one plain item on today's
@@ -739,6 +752,17 @@ export function useIsWorkItem(id: string | null): boolean {
  * fields save as made; ···'s three writes resolve to their Undo. Start and
  * Done are the work loop's (USE-59, USE-60), never this hook's.
  */
+/** The week as the day picks and the fit lines read it (USE-67). */
+function selectSetUpWeek(records: WeekRecords): {
+  days: SetUpDay[];
+  timeZone: string;
+} {
+  return {
+    days: records.days.map((day) => deriveSetUpDay(day, records.timeZone)),
+    timeZone: records.timeZone,
+  };
+}
+
 export function useWorkItemSheet(id: string | null) {
   const source = useDataSource();
   const queryClient = useQueryClient();
@@ -746,9 +770,10 @@ export function useWorkItemSheet(id: string | null) {
   const scenario = source.scenario.name;
   const { slots } = usePool();
   const linear = useLinear();
-  const { issueFor } = linear;
+  const { issueFor, subIssuesFor } = linear;
   const offline = useIsOffline();
   const account = useAccount();
+  const week = useWeekQuery(weekOf(dateKey).key, selectSetUpWeek).data;
 
   const query = useQuery<TodayRecords, Error, Today>({
     queryKey: todayQueryKey(scenario, dateKey),
@@ -790,8 +815,25 @@ export function useWorkItemSheet(id: string | null) {
             size: ITEM_SHEET_COPY.linear.keptSize,
           },
         });
+  // Its sub-issues from Linear's snapshot, each with its place once placed.
+  const estimates = new Map<string, number | null>();
+  for (const workspace of linear.data?.workspaces ?? []) {
+    for (const sub of workspace.payload.subIssues) {
+      estimates.set(sub.id, sub.estimate);
+    }
+  }
+  const subIssues: SubIssueView[] =
+    record === undefined || today === undefined
+      ? []
+      : deriveSubIssues({
+          subs: subIssuesFor(record),
+          estimates,
+          workItems: today.records.workItems,
+          slots: [...(slots ?? []), ...today.records.slots],
+        });
 
-  const server: WorkSheetServer & LinearSheetServer = source.server;
+  const server: WorkSheetServer & LinearSheetServer & SessionsServer =
+    source.server;
   const viewRef = React.useRef(view);
   viewRef.current = view;
   const linearRef = React.useRef(linearView);
@@ -810,7 +852,7 @@ export function useWorkItemSheet(id: string | null) {
 
   function run(
     write: (
-      s: WorkSheetServer,
+      s: WorkSheetServer & LinearSheetServer & SessionsServer,
       v: WorkSheetView,
     ) => Promise<WorkSheetWrite | null>,
   ): Promise<{ write: WorkSheetWrite; view: WorkSheetView } | null> {
@@ -835,7 +877,43 @@ export function useWorkItemSheet(id: string | null) {
     setSize: (size: WorkSize) => run((s, v) => writeSize(s, v, size)),
     setLength: (range: { min: number; max: number | null }) =>
       run((s, v) => writeLength(s, v, range)),
-    setTier: (tier: WorkTier) => run((s, v) => writeTier(s, v, tier)),
+    /** This session's tier, or every session's (the ask's All sessions). */
+    setTier: (tier: WorkTier, sessions: "this" | "all" = "this") =>
+      run((s, v) => writeTier(s, v, tier, sessions)),
+    /** Sub-issues, the week's days and its read, for the ask and the steps. */
+    subIssues,
+    week: week ?? null,
+    workItems: today?.records.workItems ?? [],
+    slots: [...(slots ?? []), ...(today?.records.slots ?? [])],
+    picks: (taken: readonly string[] = []) =>
+      dayPicks(week?.days ?? [], dateKey, taken),
+    /** × on a session: that day only. */
+    dropSession: (slotId: string) =>
+      run((s, v) => writeDropSession(s, v, slotId)),
+    /** Add a day: another session, at the end of that day's Work block. */
+    addSessionDay: (place: {
+      dateKey: string;
+      blockId: string;
+      tier: WorkTier;
+    }) =>
+      run((s, v) =>
+        writeAddSessionDay(s, v, place, sortAfter(week?.days, place)),
+      ),
+    /** A sub-issue's check, here and in Linear; resolves to its Undo. */
+    checkSubIssue: async (sub: SubIssueView, done: boolean) => {
+      const at = viewRef.current;
+      if (at === null) return null;
+      try {
+        return await writeCheckSubIssue(server, at, sub, done);
+      } finally {
+        invalidate();
+      }
+    },
+    /** Place on a day by itself: its own slot, still under its issue. */
+    placeSubIssue: (
+      sub: SubIssueView,
+      place: { dateKey: string; blockId: string; tier: WorkTier },
+    ) => run((s, v) => writePlaceSubIssue(s, v, sub, place)),
     setNotes: (notes: string) => run((s, v) => writeNotes(s, v, notes)),
     markTaskDone: () => run(writeMarkTaskDone),
     backToPool: () => run(writeBackToPool),
@@ -877,4 +955,19 @@ export function useWorkItemSheet(id: string | null) {
     if (at === null) return Promise.resolve(null);
     return write(at).finally(invalidate);
   }
+}
+
+/** The next place in that day's block, after its own slots. */
+function sortAfter(
+  days: readonly SetUpDay[] | undefined,
+  place: { dateKey: string; blockId: string },
+): number {
+  const day = days?.find((row) => row.date === place.dateKey);
+  const block = day?.blocks.find((entry) => entry.block.id === place.blockId);
+  return (
+    (block?.slots ?? []).reduce(
+      (top, slot) => Math.max(top, slot.sortOrder),
+      -1,
+    ) + 1
+  );
 }

@@ -75,6 +75,17 @@ export interface WorkSheetSlot {
   done: boolean;
 }
 
+/** One of the item's sessions, for the sheet's Sessions (USE-67, D-USE-54). */
+export interface WorkSheetSession {
+  slotId: string;
+  dateKey: string;
+  blockId: string;
+  tier: WorkTier | null;
+  done: boolean;
+  /** The session the sheet is open on: "this one", and no ×. */
+  thisOne: boolean;
+}
+
 export interface WorkSheetView {
   date: string;
   /** The day has begun (Ready, go): Start and Done may show (C-USE-item-sheet-linear-linked-1). */
@@ -99,6 +110,12 @@ export interface WorkSheetView {
   session: { n: number; of: number } | null;
   /** The other open sessions' dates, in order: "Closes Wed's and Thu's sessions". */
   otherSessions: string[];
+  /** Every placed session, by date; one for a one-day item. */
+  sessions: WorkSheetSession[];
+  /** A sub-issue's work item (USE-67): its issue's item; null otherwise. */
+  parentId: string | null;
+  /** The item's own Linear issue, for its sub-issues; null on a Synapse-only item. */
+  linear: { connectionId: string; issueId: string } | null;
   /** What the day plans with, minutes; null with no size and no length. */
   topMin: number | null;
   /** One length, not a range. */
@@ -204,6 +221,22 @@ export function deriveWorkSheet(input: WorkSheetInput): WorkSheetView | null {
     slot,
     session: count && count.of > 1 ? count : null,
     otherSessions,
+    sessions: placed.map((row) => ({
+      slotId: row.id,
+      dateKey: row.onDate!,
+      blockId: row.blockId,
+      tier: row.tier,
+      done: row.doneAt !== null,
+      thisOne: row.id === shown?.id,
+    })),
+    parentId: record.parentWorkItemId,
+    linear:
+      record.linearConnectionId !== null && record.linearIssueId !== null
+        ? {
+            connectionId: record.linearConnectionId,
+            issueId: record.linearIssueId,
+          }
+        : null,
     topMin: topOf(lengthMinMin, lengthMaxMin),
     exact: lengthMinMin !== null && lengthMinMin === lengthMaxMin,
   };
@@ -285,19 +318,20 @@ export async function writeNotes(
 }
 
 /**
- * A tier segment: this session's tier [ASSUMPTION: a session's This session
- * or All sessions ask is USE-67's; until then the default, This session].
+ * A tier segment: this session's tier, or with `sessions` "all" every
+ * session's (USE-67's ask, D-USE-57; This session is the default).
  */
 export async function writeTier(
   server: WorkSheetServer,
   view: WorkSheetView,
   tier: WorkTier,
+  sessions: "this" | "all" = "this",
 ): Promise<WorkSheetWrite | null> {
   if (view.slot === null) return null;
   const written = await server.setWorkTier({
     slotId: view.slot.id,
     tier,
-    sessions: "this",
+    sessions,
   });
   return { undo: written.undo, linearDone: false };
 }
