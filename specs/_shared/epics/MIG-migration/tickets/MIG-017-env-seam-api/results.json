@@ -8,10 +8,10 @@
       "run": {
         "command": "yarn lint",
         "exit": 0,
-        "at": "2026-10-18T22:57:30Z",
-        "head": "a9fdb7243321767d3dd77db7e86cc4734a676189",
+        "at": "2026-10-18T23:00:09Z",
+        "head": "e3349fd51efa5eaba97735acd402d98279c10675",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-017-env-seam-api/evidence/C1.log",
-        "evidence_sha256": "7bd355605c863e1748e442b5bdf2c83f091599d9310566c137e8893ff792d2f9"
+        "evidence_sha256": "552c6500c057cd10bd34b381197107b915a8704823408fb82fecfc8aaf0a6807"
       }
     },
     "C2": {
@@ -20,24 +20,24 @@
       "run": {
         "command": "yarn test",
         "exit": 0,
-        "at": "2026-10-18T22:57:46Z",
-        "head": "a9fdb7243321767d3dd77db7e86cc4734a676189",
+        "at": "2026-10-18T23:00:11Z",
+        "head": "e3349fd51efa5eaba97735acd402d98279c10675",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-017-env-seam-api/evidence/C2.log",
-        "evidence_sha256": "d977aa51a7dee3c968edd6538afa272f718404aeb33372036f882c4cb7e7f830",
+        "evidence_sha256": "c7ea7cbcd6f2d1810d72bed28faeffa8d121c9819aa04dca4df96bbc90cc339c",
         "tests": 32
       }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test:env-seam",
-        "exit": 1,
-        "at": "2026-10-18T22:58:01Z",
-        "head": "a9fdb7243321767d3dd77db7e86cc4734a676189",
+        "exit": 0,
+        "at": "2026-10-18T23:00:26Z",
+        "head": "e3349fd51efa5eaba97735acd402d98279c10675",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-017-env-seam-api/evidence/C3.log",
-        "evidence_sha256": "9bd66e92faa959d3ca5d5eb029e4bc01d35f8888ccb18eec2324e61981ad816c",
-        "tests": 5
+        "evidence_sha256": "af3117cf29e3ec64c6cf49276cac1224549857e40ca9d10c16033883c554a1ef",
+        "tests": 7
       }
     },
     "C4": {
@@ -46,13 +46,13 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T22:58:06Z",
-        "head": "a9fdb7243321767d3dd77db7e86cc4734a676189",
+        "at": "2026-10-18T23:00:36Z",
+        "head": "e3349fd51efa5eaba97735acd402d98279c10675",
         "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-017-env-seam-api/evidence/C4.log",
-        "evidence_sha256": "1ce5246c44a18bec27643143d8de60d79beebf533fb5c8eece73db9284c0ebfe"
+        "evidence_sha256": "f2a0686a244d74b90cddd0ce52f678fef648815edb2096dc4300ed86ea090375"
       }
     }
   },
   "built_at": "2026-10-18T22:57:28Z",
-  "updated_at": "2026-10-18T22:58:26Z"
+  "updated_at": "2026-10-18T23:00:37Z"
 }
