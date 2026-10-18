@@ -4,7 +4,7 @@ import type {
   SetUpDayRead,
   WeekReadOutput,
 } from "@syn/validators";
-
+import { googleEventsOn } from "../google/events";
 import { eventOn } from "./day-assembly";
 import type { PlannerRows } from "./planner-rows";
 
@@ -50,6 +50,8 @@ export function assembleSetUpDay(rows: PlannerRows, ref: DayRef): SetUpDayRead {
       events: usualDay(rows.dayEvents, ref.weekday),
       workItems: [],
       todos: [],
+      // The usual week has no dates, so no Google events (google-events.md).
+      googleEvents: [],
     };
   }
 
@@ -88,6 +90,12 @@ export function assembleSetUpDay(rows: PlannerRows, ref: DayRef): SetUpDayRead {
     events: rows.dayEvents.filter((event) => eventOn(event, date)),
     workItems: rows.workItems.filter((item) => workIds.has(item.id)),
     todos: rows.todos.filter((todo) => todoIds.has(todo.id)),
+    googleEvents: googleEventsOn(
+      rows.googleSnapshots,
+      rows.googleCalendars,
+      date,
+      rows.timeZone,
+    ),
   };
 }
 

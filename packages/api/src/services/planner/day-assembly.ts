@@ -1,5 +1,6 @@
 import { dayWindow, occursOn, parseRule } from "@syn/utils";
 import type { DayEventRecord, DayReadOutput } from "@syn/validators";
+import { googleEventsOn } from "../google/events";
 import type { PlannerRows } from "./planner-rows";
 
 /**
@@ -39,5 +40,11 @@ export function assembleDay(rows: PlannerRows, dateKey: string): DayReadOutput {
     dayRecord:
       rows.dayRecords.find((record) => record.onDate === dateKey) ?? null,
     usualWakeTime: rows.usualWakeTime,
+    googleEvents: googleEventsOn(
+      rows.googleSnapshots,
+      rows.googleCalendars,
+      dateKey,
+      rows.timeZone,
+    ),
   };
 }

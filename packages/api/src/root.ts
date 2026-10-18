@@ -3,6 +3,7 @@ import { clientRouter } from "./routers/client";
 import { connectionsRouter } from "./routers/connections";
 import { dayRouter } from "./routers/day";
 import { feedbackRouter } from "./routers/feedback";
+import { googleRouter } from "./routers/google";
 import { journalRouter } from "./routers/journal";
 import { linearRouter } from "./routers/linear";
 import { morningRouter } from "./routers/morning";
@@ -26,6 +27,7 @@ export const appRouter = router({
   connections: connectionsRouter,
   day: dayRouter,
   feedback: feedbackRouter,
+  google: googleRouter,
   journal: journalRouter,
   linear: linearRouter,
   morning: morningRouter,

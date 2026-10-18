@@ -1,4 +1,8 @@
-import type { DayEventInput, DayEventRecord } from "@syn/validators";
+import type {
+  DayEventInput,
+  DayEventRecord,
+  GoogleDayEvent,
+} from "@syn/validators";
 
 /**
  * Google events on a dated day (USE-109; google-events.md, D-USE-87). Each
@@ -7,33 +11,21 @@ import type { DayEventInput, DayEventRecord } from "@syn/validators";
  * dashed band with Add to day, taking no time; declined is hidden. The
  * usual week shows none. Nothing here writes to Google.
  *
- * [ASSUMPTION] The event's shape is this file's until USE-103 reads real
- * calendars and puts its view in `@syn/validators`.
+ * The event's shape is `@syn/validators`' `googleDayEvent` (USE-103).
+ * [ASSUMPTION] An all-day event (a holiday, an offsite) is not drawn as a
+ * band: it would fill the whole day as busy time. It waits for a drawn row.
  */
 
-/** The person's answer: Google's accepted, tentative, needsAction, declined. */
-export type GoogleAnswer = "yes" | "maybe" | "none" | "no";
-
-export interface GoogleDayEvent {
-  id: string;
-  calendarId: string;
-  title: string;
-  /** "YYYY-MM-DD" */
-  date: string;
-  /** "HH:MM" */
-  startsAt: string;
-  endsAt: string;
-  answer: GoogleAnswer;
-}
+export type { GoogleAnswer, GoogleDayEvent } from "@syn/validators";
 
 export type GoogleBandShape = "band" | "dashed" | "hidden";
 
 /** How one event shows on a day: `date` null is the usual week. */
 export function bandShapeOf(
-  event: Pick<GoogleDayEvent, "answer" | "date">,
+  event: Pick<GoogleDayEvent, "answer" | "date"> & { allDay?: boolean },
   date: string | null,
 ): GoogleBandShape {
-  if (date === null || event.date !== date) return "hidden";
+  if (date === null || event.date !== date || event.allDay) return "hidden";
   switch (event.answer) {
     case "yes":
       return "band";

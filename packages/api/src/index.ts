@@ -86,3 +86,15 @@ export {
   startLinearConnect,
   type LinearCallbackOutcome,
 } from "./services/linear";
+/**
+ * Google Calendar connect's two route handlers (USE-103), read-only. No key,
+ * ciphertext or token crosses this export.
+ */
+export {
+  finishGoogleConnect,
+  GOOGLE_OAUTH_COOKIE,
+  GOOGLE_OAUTH_COOKIE_OPTIONS,
+  handleGoogleCallback,
+  startGoogleConnect,
+  type GoogleCallbackOutcome,
+} from "./services/google";

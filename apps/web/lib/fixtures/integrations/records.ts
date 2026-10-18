@@ -1,13 +1,14 @@
 import type {
   GoogleAccountView,
   GoogleCalendarView,
+  GoogleDayEvent,
   LinearConnectionView,
   LinearIssueWriteInput,
   LinearProjectClientInput,
   LinearSnapshotPayload,
   LinearWriteView,
 } from "@syn/validators";
-import type { GoogleDayEvent } from "@/lib/data/google-bands";
+import type { FixtureRecords } from "../records";
 
 /**
  * What the fixture server holds for Linear and Google (USE-56): the rows the
@@ -44,6 +45,24 @@ export interface IntegrationRecords {
   googleCalendars: GoogleCalendarView[];
   /** The calendars' events with the person's answer (USE-109); unset, none. */
   googleEvents?: GoogleDayEvent[];
+}
+
+/**
+ * A date's Google events on the calendars that are on (USE-109), as the
+ * day read, the week read and the day column's read return them (USE-103).
+ */
+export function googleEventsOnDate(
+  records: FixtureRecords,
+  date: string,
+): GoogleDayEvent[] {
+  const data = records.integrations;
+  if (!data) return [];
+  const on = new Set(
+    data.googleCalendars.filter((c) => c.enabled).map((c) => c.id),
+  );
+  return (data.googleEvents ?? []).filter(
+    (event) => event.date === date && on.has(event.calendarId),
+  );
 }
 
 export function noIntegrations(): IntegrationRecords {

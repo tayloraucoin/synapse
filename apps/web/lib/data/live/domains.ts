@@ -3,9 +3,11 @@ import type { TrpcClient } from "@/lib/trpc/client";
 import { accountDomain } from "./account";
 import { clientsDomain } from "./clients";
 import { connectionsDomain } from "./connections";
+import { googleEventsDomain } from "./google";
 import { mealTopicsDomain } from "./meal-topics";
 import { orientDomain } from "./orient";
 import { plannerRead } from "./planner";
+import { plannerWrites } from "./planner-writes";
 import { savedColoursDomain } from "./saved-colours";
 
 /**
@@ -27,5 +29,6 @@ export const LIVE_DOMAINS: readonly LiveDomain[] = [
   mealTopicsDomain,
   orientDomain,
   plannerRead,
+  plannerWrites,
   clientsDomain,
 ];

@@ -12,7 +12,7 @@
  * Add a Google account and Add a workspace run `useConnections().connect`:
  * on fixtures it stands for the provider's sign-in; live, Add a workspace
  * leaves for Linear's consent (USE-100), and a refused or failed callback
- * comes back on `?failed=linear`, which opens on the failed line. Connecting, the Add row's spinner;
+ * comes back on `?failed=linear` (or `google`), which opens on the failed line. Connecting, the Add row's spinner;
  * failed, "Not connected. Try again." under it. Offline, the StatusLine,
  * and connect and disconnect disabled (offline.md).
  *
@@ -54,6 +54,7 @@ function seededConnect(
   }
   // Back from a refused or failed OAuth callback (USE-100).
   if (failed === "linear") states.linear = "failed";
+  if (failed === "google") states.google = "failed";
   return states;
 }
 

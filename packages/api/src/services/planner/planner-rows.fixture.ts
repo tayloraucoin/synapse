@@ -186,6 +186,8 @@ export function rows(over: Partial<PlannerRows> = {}): PlannerRows {
     dayEvents: [],
     dayRecords: [],
     dayBounds: [],
+    googleSnapshots: [],
+    googleCalendars: [],
     ...over,
   };
 }

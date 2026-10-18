@@ -19,6 +19,7 @@ import {
   type ClientRecord,
   type ClientsEnabledInput,
   type GoogleCalendarToggleInput,
+  type GoogleDayEvent,
   type LinearIssue,
   type LinearIssueWriteInput,
   type LinearProjectClientInput,
@@ -26,7 +27,6 @@ import {
   type WorkItemRecord,
   type WorkspaceClientInput,
 } from "@syn/validators";
-import type { GoogleDayEvent } from "@/lib/data/google-bands";
 import type {
   ConnectionsRecords,
   LinearRecords,
@@ -34,6 +34,7 @@ import type {
 import { parse, PlannerRefusal } from "../planner";
 import type { FixtureRecords } from "../records";
 import {
+  googleEventsOnDate,
   noIntegrations,
   type IntegrationRecords,
   type LinearOutboxRow,
@@ -288,16 +289,7 @@ export function createIntegrationServer({
     },
 
     readGoogleEvents(date) {
-      return run(() => {
-        const on = new Set(
-          data.googleCalendars.filter((c) => c.enabled).map((c) => c.id),
-        );
-        return structuredClone(
-          (data.googleEvents ?? []).filter(
-            (event) => event.date === date && on.has(event.calendarId),
-          ),
-        );
-      });
+      return run(() => structuredClone(googleEventsOnDate(records, date)));
     },
 
     readLinear() {

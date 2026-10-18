@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { googleDayEvent } from "./google";
 import { dateKeySchema, weekKeySchema } from "./keys";
 import {
   blockChangeRecord,
@@ -51,6 +52,8 @@ export const dayReadOutput = z.object({
   dayRecord: dayRecordRecord.nullable(),
   /** "Up at", `HH:MM`: the day lays out from the wake against it. */
   usualWakeTime: clockTimeSchema,
+  /** The date's Google events on the calendars that are on (USE-103); read-only. */
+  googleEvents: z.array(googleDayEvent),
 });
 
 export type DayReadOutput = z.infer<typeof dayReadOutput>;
@@ -86,6 +89,8 @@ export const setUpDayRead = z.object({
   /** The work items and to-dos the date's slots hold. */
   workItems: z.array(workItemRecord),
   todos: z.array(todoRecord),
+  /** The date's Google events on the calendars that are on; none in the usual week (USE-103). */
+  googleEvents: z.array(googleDayEvent),
 });
 
 export type SetUpDayRead = z.infer<typeof setUpDayRead>;

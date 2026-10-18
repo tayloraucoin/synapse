@@ -27,6 +27,7 @@ import {
   todoRecord,
   workItemRecord,
 } from "@syn/validators";
+import { selectGoogleRows } from "../google/read-events";
 import type { PlannerRows } from "./planner-rows";
 import { recordsOf } from "./row-records";
 
@@ -112,5 +113,7 @@ export async function selectPlannerRows(
         .where(inArray(dayRecords.onDate, dateList)),
     ),
     dayBounds: recordsOf(dayBoundsRecord, await tx.select().from(dayBounds)),
+    // USE-103: the dates' weeks' Google snapshots and the calendars that are on.
+    ...(await selectGoogleRows(tx, dateList)),
   };
 }

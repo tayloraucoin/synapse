@@ -921,6 +921,7 @@ export function googleEventsRecords(): FixtureRecords {
     startsAt: startsAt!,
     endsAt: endsAt!,
     answer: answer as "yes" | "maybe" | "no",
+    allDay: false,
   }));
   return {
     ...records,

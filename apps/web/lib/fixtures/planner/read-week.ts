@@ -13,6 +13,7 @@ import type {
   WeekRecords,
   WeekRef,
 } from "@/lib/data/week-records";
+import { googleEventsOnDate } from "../integrations/records";
 import type { FixtureRecords } from "../records";
 
 /**
@@ -65,6 +66,8 @@ export function readSetUpDay(
       events: usualDay(records.dayEvents, ref.weekday),
       workItems: [],
       todos: [],
+      // The usual week has no dates, so no Google events (google-events.md).
+      googleEvents: [],
     };
   }
 
@@ -103,6 +106,7 @@ export function readSetUpDay(
     events: records.dayEvents.filter((event) => eventOn(event, date)),
     workItems: records.workItems.filter((item) => workIds.has(item.id)),
     todos: records.todos.filter((todo) => todoIds.has(todo.id)),
+    googleEvents: googleEventsOnDate(records, date),
   };
 }
 

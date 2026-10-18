@@ -79,6 +79,7 @@ import {
   type ConnectKind,
   type GoogleCalendarsRecords,
 } from "./integrations/connect";
+import { googleEventsOnDate } from "./integrations/records";
 import type { FixtureRecords } from "./records";
 import type { Scenario } from "./scenarios";
 import { createWorkServer, type WorkServer } from "./work";
@@ -311,6 +312,7 @@ function readRecords(records: FixtureRecords, dateKey: string): TodayRecords {
     dayRecord:
       records.dayRecords.find((record) => record.onDate === dateKey) ?? null,
     usualWakeTime: records.usualWakeTime,
+    googleEvents: googleEventsOnDate(records, dateKey),
   });
 }
 
