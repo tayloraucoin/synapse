@@ -20,12 +20,28 @@
     "C4": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:16:02Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-011-icon-picker/evidence/C4.log",
+        "evidence_sha256": "612bd8f8a03c068f2ab81725c0c3bf9a5376407f2415e510ad7fe709b271913b",
+        "tests": 0
+      }
     },
     "C5": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:16:02Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-011-icon-picker/evidence/C5.log",
+        "evidence_sha256": "612bd8f8a03c068f2ab81725c0c3bf9a5376407f2415e510ad7fe709b271913b",
+        "tests": 0
+      }
     },
     "C6": {
       "status": "FAIL",
@@ -33,11 +49,18 @@
       "run": null
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:16:24Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-011-icon-picker/evidence/C7.log",
+        "evidence_sha256": "4b66dbbc080e709bfd3a5964c32a7f21d57e2e1c633d081186e634869437acf5"
+      }
     }
   },
   "built_at": "2026-10-18T18:50:31Z",
-  "updated_at": "2026-10-18T18:50:31Z"
+  "updated_at": "2026-10-18T19:16:24Z"
 }

@@ -5,44 +5,107 @@
     "C1": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:14:23Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-006-repeat-rule-day-read/evidence/C1.log",
+        "evidence_sha256": "16084cbb310290debdf22c64a9f6bcf9b4d9c5b13b85a5467e09f52c53806189",
+        "tests": 0
+      }
     },
     "C2": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:14:23Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-006-repeat-rule-day-read/evidence/C2.log",
+        "evidence_sha256": "16084cbb310290debdf22c64a9f6bcf9b4d9c5b13b85a5467e09f52c53806189",
+        "tests": 0
+      }
     },
     "C3": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:14:23Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-006-repeat-rule-day-read/evidence/C3.log",
+        "evidence_sha256": "16084cbb310290debdf22c64a9f6bcf9b4d9c5b13b85a5467e09f52c53806189",
+        "tests": 0
+      }
     },
     "C4": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:14:23Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-006-repeat-rule-day-read/evidence/C4.log",
+        "evidence_sha256": "16084cbb310290debdf22c64a9f6bcf9b4d9c5b13b85a5467e09f52c53806189",
+        "tests": 0
+      }
     },
     "C5": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:14:23Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-006-repeat-rule-day-read/evidence/C5.log",
+        "evidence_sha256": "16084cbb310290debdf22c64a9f6bcf9b4d9c5b13b85a5467e09f52c53806189",
+        "tests": 0
+      }
     },
     "C6": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:14:23Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-006-repeat-rule-day-read/evidence/C6.log",
+        "evidence_sha256": "16084cbb310290debdf22c64a9f6bcf9b4d9c5b13b85a5467e09f52c53806189",
+        "tests": 0
+      }
     },
     "C7": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:14:23Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-006-repeat-rule-day-read/evidence/C7.log",
+        "evidence_sha256": "16084cbb310290debdf22c64a9f6bcf9b4d9c5b13b85a5467e09f52c53806189",
+        "tests": 0
+      }
     },
     "C8": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:14:47Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-006-repeat-rule-day-read/evidence/C8.log",
+        "evidence_sha256": "1c705e677e3362d74c8c877dbfbcb948f98d1c83c0d4cfed9382647306e568e5"
+      }
     }
   },
   "built_at": "2026-10-18T18:50:13Z",
-  "updated_at": "2026-10-18T18:50:13Z"
+  "updated_at": "2026-10-18T19:14:47Z"
 }

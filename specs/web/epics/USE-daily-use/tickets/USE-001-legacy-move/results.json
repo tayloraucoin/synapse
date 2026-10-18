@@ -3,44 +3,104 @@
   "criteria_sha256": "45149f99ab2771e45081a727b9cf38750c342ec4ea3c70d39e039df7eb252390",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:root",
+        "exit": 0,
+        "at": "2026-10-18T19:12:53Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-001-legacy-move/evidence/C1.log",
+        "evidence_sha256": "f32ce5458f98b41fb4cd759a7bdd7d11b857719106d27a97b68c9da417558790",
+        "tests": 32
+      }
     },
     "C9": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:root",
+        "exit": 0,
+        "at": "2026-10-18T19:12:53Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-001-legacy-move/evidence/C9.log",
+        "evidence_sha256": "f32ce5458f98b41fb4cd759a7bdd7d11b857719106d27a97b68c9da417558790",
+        "tests": 32
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:root",
+        "exit": 0,
+        "at": "2026-10-18T19:12:53Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-001-legacy-move/evidence/C2.log",
+        "evidence_sha256": "f32ce5458f98b41fb4cd759a7bdd7d11b857719106d27a97b68c9da417558790",
+        "tests": 32
+      }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:root",
+        "exit": 0,
+        "at": "2026-10-18T19:12:53Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-001-legacy-move/evidence/C3.log",
+        "evidence_sha256": "f32ce5458f98b41fb4cd759a7bdd7d11b857719106d27a97b68c9da417558790",
+        "tests": 32
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:12:58Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-001-legacy-move/evidence/C4.log",
+        "evidence_sha256": "f47a59bd3de9cfa2115ddc5a5ab38abb0ead5ef29e874fdc679d7db9bf658766"
+      }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:12:59Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-001-legacy-move/evidence/C5.log",
+        "evidence_sha256": "7deb4895b8c0cc6a063728403930178fd346e4058173f3ae67cf899245694bd6"
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint:boundaries",
+        "exit": 0,
+        "at": "2026-10-18T19:13:00Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-001-legacy-move/evidence/C6.log",
+        "evidence_sha256": "38ae5883c300529dec5b416a7142df2a461c3e31e4acc14bb24936bfe9bfd996"
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn build",
+        "exit": 0,
+        "at": "2026-10-18T19:27:34Z",
+        "head": "6ce5b13fe7ef9101a68993074421392b9acb533e",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-001-legacy-move/evidence/C7.log",
+        "evidence_sha256": "05589826b0575106e5d74e35e79fbcc95fcc02d74113ccfbfa550eac4a976e7d"
+      }
     },
     "C8": {
       "status": "FAIL",
@@ -49,5 +109,5 @@
     }
   },
   "built_at": "2026-10-13T19:56:51Z",
-  "updated_at": "2026-10-13T19:56:51Z"
+  "updated_at": "2026-10-18T19:29:22Z"
 }
