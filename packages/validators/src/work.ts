@@ -11,8 +11,10 @@ import {
   instantSchema,
   lengthMinutesSchema,
   plannerNameSchema,
+  sessionsChoiceSchema,
   slotRecord,
   sortOrderSchema,
+  workTierSchema,
 } from "./planner";
 
 /**
@@ -185,3 +187,94 @@ export const poolReadOutput = z.object({
 });
 
 export type PoolReadOutput = z.infer<typeof poolReadOutput>;
+
+/*
+ * ---- Work sessions (USE-99, moved from the fixture's WorkServer) ----
+ *
+ * Each names a work item's session in the words the sheets use; the server
+ * parses it again through `placeSlotInput` or `slotUpdateInput`, so a slot's
+ * own rules refuse in their words. One item sits once a day
+ * (`slots_work_item_id_on_date_key`, D-USE-40).
+ */
+
+/** Place, or a drop from the pool: one session, in a block, on a date. */
+export const placeWorkInput = z.object({
+  workItemId: z.string().uuid(),
+  dateKey: dateKeySchema,
+  blockId: z.string().uuid(),
+  tier: workTierSchema.nullable(),
+  sortOrder: sortOrderSchema,
+});
+
+export type PlaceWorkInput = z.infer<typeof placeWorkInput>;
+
+/** Move to, or the tier drag (USE-71): a session's date, block, tier or place. */
+export const moveWorkInput = z.object({
+  slotId: z.string().uuid(),
+  dateKey: dateKeySchema.optional(),
+  blockId: z.string().uuid().optional(),
+  tier: workTierSchema.nullish(),
+  sortOrder: sortOrderSchema.optional(),
+});
+
+export type MoveWorkInput = z.input<typeof moveWorkInput>;
+
+/** A session's ×: off its day, the item stays in the pool. */
+export const unplaceWorkInput = z.object({ slotId: z.string().uuid() });
+
+export type UnplaceWorkInput = z.infer<typeof unplaceWorkInput>;
+
+/**
+ * Spread across the week (USE-77, C-USE-spread-1): one session a picked
+ * day, each its length, in one tier; `lengthMaxMin` is the item's hours
+ * when Work left was changed, left out they stay.
+ */
+export const spreadWorkInput = z.object({
+  workItemId: z.string().uuid(),
+  tier: workTierSchema,
+  sessions: z
+    .array(
+      z.object({
+        dateKey: dateKeySchema,
+        blockId: z.string().uuid(),
+        lengthMin: z.number(),
+      }),
+    )
+    .min(1),
+  lengthMaxMin: z.number().optional(),
+});
+
+export type SpreadWorkInput = z.input<typeof spreadWorkInput>;
+
+/**
+ * A tier change (D-USE-57): This session, or All the item's open sessions.
+ * A missing tier passes here so `slotUpdateInput` refuses it in its words.
+ */
+export const setWorkTierInput = z.object({
+  slotId: z.string().uuid(),
+  tier: workTierSchema.nullable(),
+  sessions: sessionsChoiceSchema,
+});
+
+export type SetWorkTierInput = z.infer<typeof setWorkTierInput>;
+
+/**
+ * The place sheet's Place (USE-80): the one item on every picked day, a
+ * session each in the one tier, all in one write with one Undo. A day's
+ * `sortOrder` left out is after the block's own slots on the date.
+ */
+export const placeOnDaysInput = z.object({
+  workItemId: z.string().uuid(),
+  tier: workTierSchema,
+  days: z
+    .array(
+      z.object({
+        dateKey: dateKeySchema,
+        blockId: z.string().uuid(),
+        sortOrder: sortOrderSchema.optional(),
+      }),
+    )
+    .min(1),
+});
+
+export type PlaceOnDaysInput = z.input<typeof placeOnDaysInput>;

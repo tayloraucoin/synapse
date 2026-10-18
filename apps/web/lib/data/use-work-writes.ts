@@ -58,6 +58,8 @@ export function useWorkWrites() {
 
   return {
     placeWork: write("placeWork"),
+    /** The place sheet's Place: a session each picked day, one Undo for all. */
+    placeOnDays: write("placeOnDays"),
     moveWork: write("moveWork"),
     unplaceWork: write("unplaceWork"),
     /** Spread: the one item's sessions on several days, one Undo for all. */

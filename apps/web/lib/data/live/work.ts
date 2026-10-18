@@ -2,6 +2,12 @@ import type { z } from "zod";
 import {
   createTaskInput,
   editWorkItemInput,
+  moveWorkInput,
+  placeOnDaysInput,
+  placeWorkInput,
+  setWorkTierInput,
+  spreadWorkInput,
+  unplaceWorkInput,
   workItemIdInput,
 } from "@syn/validators";
 import { PlannerRefusal } from "@/lib/data/refusals";
@@ -14,9 +20,10 @@ import { callLive } from "./errors";
  * create, edit, done, reopen, back to the pool and remove. Each input is
  * parsed here first, so a bad one is refused "invalid" with the schema's
  * words, as the fixture refuses it, before any call. Every write hands back
- * `{ undo, id? }`, and its Undo goes through `planner.undo`. Placing and
- * moving sessions stay on fixtures until USE-99, the Linear snapshot and
- * placing issues until USE-101.
+ * `{ undo, id? }`, and its Undo goes through `planner.undo`. USE-99 adds
+ * the sessions: place, place on several days, move, unplace, spread and a
+ * tier change. The Linear snapshot and placing issues stay on fixtures until
+ * USE-101.
  */
 
 function parsed<S extends z.ZodTypeAny>(schema: S, raw: unknown): z.output<S> {
@@ -75,6 +82,36 @@ export const workDomain: LiveDomain = {
         send(
           () => parsed(workItemIdInput, raw),
           (input) => w.removeFromSynapse.mutate(input),
+        ),
+      placeWork: (raw) =>
+        send(
+          () => parsed(placeWorkInput, raw),
+          (input) => w.placeWork.mutate(input),
+        ),
+      placeOnDays: (raw) =>
+        send(
+          () => parsed(placeOnDaysInput, raw),
+          (input) => w.placeOnDays.mutate(input),
+        ),
+      moveWork: (raw) =>
+        send(
+          () => parsed(moveWorkInput, raw),
+          (input) => w.moveWork.mutate(input),
+        ),
+      unplaceWork: (raw) =>
+        send(
+          () => parsed(unplaceWorkInput, raw),
+          (input) => w.unplaceWork.mutate(input),
+        ),
+      spreadWork: (raw) =>
+        send(
+          () => parsed(spreadWorkInput, raw),
+          (input) => w.spreadWork.mutate(input),
+        ),
+      setWorkTier: (raw) =>
+        send(
+          () => parsed(setWorkTierInput, raw),
+          (input) => w.setWorkTier.mutate(input),
         ),
     };
   },

@@ -3,14 +3,25 @@ import {
   clientOrderInput,
   clientRecord,
   editWorkItemInput,
+  moveWorkInput,
+  placeOnDaysInput,
   placeSlotInput,
+  placeWorkInput,
   removeSlotInput,
+  setWorkTierInput,
   slotRecord,
   slotUpdateInput,
+  spreadWorkInput,
+  unplaceWorkInput,
   workItemInput,
   workItemRecord,
+  type MoveWorkInput,
+  type PlaceOnDaysInput,
+  type PlaceWorkInput,
   type sessionsChoiceSchema,
+  type SetWorkTierInput,
   type SlotRecord,
+  type SpreadWorkInput,
   type WorkItemRecord,
   type workTierSchema,
 } from "@syn/validators";
@@ -42,37 +53,14 @@ import { readPool } from "./read-pool";
 export type WorkTier = z.infer<typeof workTierSchema>;
 export type SessionsChoice = z.infer<typeof sessionsChoiceSchema>;
 
-export interface PlaceWorkInput {
-  workItemId: string;
-  dateKey: string;
-  blockId: string;
-  tier: WorkTier | null;
-  sortOrder: number;
-}
-
-/** Spread across the week (USE-77): one item's sessions, in one tier. */
-export interface SpreadWorkInput {
-  workItemId: string;
-  tier: WorkTier;
-  sessions: { dateKey: string; blockId: string; lengthMin: number }[];
-  /** The item's hours when Work left was changed; left out, they stay. */
-  lengthMaxMin?: number;
-}
-
-export interface MoveWorkInput {
-  slotId: string;
-  dateKey?: string;
-  blockId?: string;
-  tier?: WorkTier | null;
-  sortOrder?: number;
-}
-
-export interface SetWorkTierInput {
-  slotId: string;
-  tier: WorkTier;
-  /** D-USE-57: This session (the default) or All sessions. */
-  sessions: SessionsChoice;
-}
+/** The session writes' inputs, moved to `@syn/validators` (USE-99). */
+export type {
+  MoveWorkInput,
+  PlaceOnDaysInput,
+  PlaceWorkInput,
+  SetWorkTierInput,
+  SpreadWorkInput,
+};
 
 export interface LinkToLinearInput {
   workItemId: string;
@@ -97,6 +85,12 @@ export function joinNotes(
 export interface WorkServer {
   readPool(): Promise<PoolRecords>;
   placeWork(input: PlaceWorkInput): Promise<PlannerWrite>;
+  /**
+   * The place sheet's Place (USE-80, one write in USE-99): a session on every
+   * picked day in the one tier, one Undo for all; a day that holds the item
+   * already refuses them all. `id` is the item.
+   */
+  placeOnDays(input: PlaceOnDaysInput): Promise<PlannerWrite>;
   /** A session to another date, block, tier or place; it stays one session. */
   moveWork(input: MoveWorkInput): Promise<PlannerWrite>;
   unplaceWork(input: { slotId: string }): Promise<PlannerWrite>;
@@ -204,8 +198,9 @@ export function createWorkServer({
       return Promise.resolve(readPool(records));
     },
 
-    placeWork(raw) {
+    placeWork(sent) {
       return write((journal) => {
+        const raw = parse(placeWorkInput, sent);
         const input = parse(placeSlotInput, {
           blockId: raw.blockId,
           onDate: raw.dateKey,
@@ -243,8 +238,58 @@ export function createWorkServer({
       });
     },
 
-    spreadWork(raw) {
+    placeOnDays(sent) {
       return write((journal) => {
+        const raw = parse(placeOnDaysInput, sent);
+        findWorkItem(raw.workItemId);
+        const at = stamp();
+        for (const day of raw.days) {
+          const input = parse(placeSlotInput, {
+            blockId: day.blockId,
+            onDate: day.dateKey,
+            sortOrder:
+              day.sortOrder ??
+              records.slots
+                .filter(
+                  (slot) =>
+                    slot.blockId === day.blockId && slot.onDate === day.dateKey,
+                )
+                .reduce((top, slot) => Math.max(top, slot.sortOrder), -1) + 1,
+            workItemId: raw.workItemId,
+            tier: raw.tier,
+          });
+          requireBlock(input.blockId);
+          // The journal's rows are the records: a day already placed clashes.
+          if (slotClash(records.slots, input)) {
+            throw new PlannerRefusal("duplicate", ALREADY_PLACED);
+          }
+          journal.put(
+            "slots",
+            slotRecord.parse({
+              id: crypto.randomUUID(),
+              createdAt: at,
+              updatedAt: at,
+              blockId: input.blockId,
+              onDate: input.onDate,
+              skipped: false,
+              sortOrder: input.sortOrder,
+              blockItemId: null,
+              todoId: null,
+              workItemId: raw.workItemId,
+              tier: raw.tier,
+              lengthMin: null,
+              tookMin: null,
+              doneAt: null,
+            }),
+          );
+        }
+        return { id: raw.workItemId };
+      });
+    },
+
+    spreadWork(sent) {
+      return write((journal) => {
+        const raw = parse(spreadWorkInput, sent);
         const item = findWorkItem(raw.workItemId);
         const dates = new Set<string>();
         const at = stamp();
@@ -312,8 +357,9 @@ export function createWorkServer({
       });
     },
 
-    moveWork(raw) {
+    moveWork(sent) {
       return write((journal) => {
+        const raw = parse(moveWorkInput, sent);
         const { id, ...change } = parse(slotUpdateInput, {
           id: raw.slotId,
           onDate: raw.dateKey,
@@ -337,8 +383,9 @@ export function createWorkServer({
       });
     },
 
-    unplaceWork(raw) {
+    unplaceWork(sent) {
       return write((journal) => {
+        const raw = parse(unplaceWorkInput, sent);
         const { id } = parse(removeSlotInput, { id: raw.slotId });
         findWorkSlot(id);
         journal.remove("slots", id);
@@ -346,18 +393,22 @@ export function createWorkServer({
       });
     },
 
-    setWorkTier(raw) {
+    setWorkTier(sent) {
       return write((journal) => {
+        const raw = parse(setWorkTierInput, sent);
         const input = parse(slotUpdateInput, {
           id: raw.slotId,
           tier: raw.tier,
           sessions: raw.sessions,
         });
         const slot = findWorkSlot(input.id);
-        // D-USE-57: All moves every session of the item; This, the one.
+        // D-USE-57: All moves every open session of the item; This, the one.
+        // A done session keeps the tier it was done in (USE-99).
         const moved =
           input.sessions === "all"
-            ? records.slots.filter((s) => s.workItemId === slot.workItemId)
+            ? records.slots.filter(
+                (s) => s.workItemId === slot.workItemId && s.doneAt === null,
+              )
             : [slot];
         const at = stamp();
         for (const session of moved) {

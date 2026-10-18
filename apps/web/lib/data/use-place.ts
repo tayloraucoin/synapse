@@ -196,11 +196,12 @@ export function usePlace({ holdMs = UNDO_SHORT_MS }: { holdMs?: number } = {}) {
 
   /**
    * The phone's Place (USE-80): the one item on every picked day, a session
-   * on each (D-USE-40), in order, a Linear issue joining the pool on the
-   * first. One toast with one Undo takes every one back
-   * (C-USE-place-from-the-pool-placed-undo-2); a refusal part way undoes
-   * what landed, so nothing is left half placed. The item's id once it
-   * landed, else null.
+   * on each (D-USE-40). A pool item lands in one write (USE-99's
+   * `placeOnDays`), all or none, with one Undo
+   * (C-USE-place-from-the-pool-placed-undo-2). A Linear issue joins the pool
+   * on its first day, then takes the rest as sessions; a refusal part way
+   * undoes what landed, so nothing is left half placed. The item's id once
+   * it landed, else null.
    */
   async function placeAll(
     source: PlaceSource,
@@ -210,11 +211,26 @@ export function usePlace({ holdMs = UNDO_SHORT_MS }: { holdMs?: number } = {}) {
     const undos: PlannerWrite["undo"][] = [];
     let from: PlaceSource = source;
     try {
-      for (const to of targets) {
-        const write = await writePlace(writes, from, to, pool.slots ?? []);
+      let rest = targets;
+      if ("issueId" in from && rest[0]) {
+        // The issue becomes a work item through placeIssues on its first day.
+        const write = await writePlace(writes, from, rest[0], pool.slots ?? []);
         undos.push(write.undo);
-        // The issue is a work item now: the next days are its sessions.
-        if ("issueId" in from && write.id) from = { workItemId: write.id };
+        if (write.id) from = { workItemId: write.id };
+        rest = rest.slice(1);
+      }
+      const tier = rest[0]?.tier;
+      if ("workItemId" in from && tier) {
+        const write = await writes.placeOnDays({
+          workItemId: from.workItemId,
+          tier,
+          days: rest.map((to) => ({
+            dateKey: to.dateKey,
+            blockId: to.blockId,
+            ...(to.sortOrder === undefined ? {} : { sortOrder: to.sortOrder }),
+          })),
+        });
+        undos.push(write.undo);
       }
     } catch (error) {
       for (const token of undos.reverse()) await writes.undo(token);

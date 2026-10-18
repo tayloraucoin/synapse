@@ -30,7 +30,7 @@ export const NO_WORK_BLOCK = "That day has no Work block.";
 export const ONE_SESSION_A_DAY = "Pick each day once.";
 
 /** An archived item has left Synapse: no write reaches it. */
-function findWorkItem(journal: WorkJournal, id: string): WorkItemRecord {
+export function findWorkItem(journal: WorkJournal, id: string): WorkItemRecord {
   const item = journal.rows.workItems.find(
     (row) => row.id === id && row.archivedAt === null,
   );

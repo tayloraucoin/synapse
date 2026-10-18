@@ -88,22 +88,42 @@ export async function selectPoolRows(
   };
 }
 
-/** What a write names: the items whose sessions, the blocks whose slots. */
+/**
+ * What a write names: the items whose sessions, the blocks whose slots, and
+ * slots by id with every other session of their items (USE-99: a session
+ * write names only its slot, and the one-a-day key reaches its siblings).
+ */
 export interface WorkScope {
   workItemIds: readonly string[];
   blockIds?: readonly string[];
+  slotIds?: readonly string[];
 }
 
 export async function selectWorkRows(
   tx: Tx,
   userId: string,
-  { workItemIds, blockIds = [] }: WorkScope,
+  { workItemIds, blockIds = [], slotIds = [] }: WorkScope,
 ): Promise<WorkRows> {
   const items = [...new Set(workItemIds)];
   const blockList = [...new Set(blockIds)];
+  const slotList = [...new Set(slotIds)];
   const reach = [
     ...(items.length === 0 ? [] : [inArray(slots.workItemId, items)]),
     ...(blockList.length === 0 ? [] : [inArray(slots.blockId, blockList)]),
+    ...(slotList.length === 0
+      ? []
+      : [
+          inArray(slots.id, slotList),
+          inArray(
+            slots.workItemId,
+            tx
+              .select({ id: slots.workItemId })
+              .from(slots)
+              .where(
+                and(eq(slots.userId, userId), inArray(slots.id, slotList)),
+              ),
+          ),
+        ]),
   ];
   return {
     blocks: recordsOf(
