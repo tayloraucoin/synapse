@@ -3,24 +3,53 @@
   "criteria_sha256": "0d93dc23e79af00ac4abf01b0f45fb1cd4ff2d9296ec9a2f6aa93358191bcf9e",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:17:49Z",
+        "head": "a6fdd294d98e35b3d805bd7b0da47d4b46e01add",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-089-head-green/evidence/C1.log",
+        "evidence_sha256": "74869aebd8458604d097ef671f37c9b81c02cfbdf57ca44c4cbe9c3f108abda5"
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:17:51Z",
+        "head": "a6fdd294d98e35b3d805bd7b0da47d4b46e01add",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-089-head-green/evidence/C2.log",
+        "evidence_sha256": "2e25071c33d17c36304a223ec05bcd28d4093e505696e5c010bc3d63820c80fb",
+        "tests": 32
+      }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:18:06Z",
+        "head": "a6fdd294d98e35b3d805bd7b0da47d4b46e01add",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-089-head-green/evidence/C3.log",
+        "evidence_sha256": "cb796bfba437c19d2bc29eb2f3a96fdfcd9a68f4fb831102814aba494d45dbd8"
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint:boundaries",
+        "exit": 0,
+        "at": "2026-10-18T20:18:07Z",
+        "head": "a6fdd294d98e35b3d805bd7b0da47d4b46e01add",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-089-head-green/evidence/C4.log",
+        "evidence_sha256": "8e1e7a73feecf4a242cf55a30c1f8ea0105550572a149132513205af4048b36f"
+      }
     },
     "C5": {
       "status": "FAIL",
@@ -29,5 +58,5 @@
     }
   },
   "built_at": "2026-10-16T20:21:42Z",
-  "updated_at": "2026-10-16T20:21:42Z"
+  "updated_at": "2026-10-18T20:18:19Z"
 }
