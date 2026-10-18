@@ -246,6 +246,47 @@ describe("placeIssues (C-USE-101-4)", () => {
   });
 });
 
+/** USE-112 C2: an exponential team's 8 is Large, on place and on link. */
+const exponential = new Map([
+  [
+    CONNECTION,
+    {
+      ...payload,
+      issues: [issue({ estimate: 8 })],
+      teams: [{ ...payload.teams[0]!, estimationType: "exponential" }],
+    },
+  ],
+]);
+
+describe("an issue's size on its team's scale (USE-112 C2)", () => {
+  it("place reads the estimate on the team's scale", () => {
+    const work = workBlock();
+    const journal = workJournal({ blocks: [work] });
+    planPlaceIssues(journal, exponential, {
+      issueIds: ["issue-1"],
+      dateKey: MON,
+      blockId: work.id,
+      tier: "urgent",
+    });
+    expect(journal.rows.workItems[0]).toMatchObject({
+      size: "large",
+      lengthMinMin: 120,
+      lengthMaxMin: 240,
+    });
+  });
+
+  it("link reads the estimate on the team's scale", () => {
+    const item = workItem({ title: "Sync" });
+    const journal = workJournal({ workItems: [item] });
+    planLinkToLinear(journal, exponential, {
+      workItemId: item.id,
+      connectionId: CONNECTION,
+      issueId: "issue-1",
+    });
+    expect(journal.rows.workItems[0]).toMatchObject({ size: "large" });
+  });
+});
+
 describe("linkToLinear and unlinkFromLinear (C-USE-101-4)", () => {
   it("link takes the issue's title, size, project emoji and link, the notes after the description", () => {
     const item = workItem({ title: "Sync", notes: "My own notes." });

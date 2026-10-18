@@ -11,7 +11,7 @@ import {
   type ConnectionsRecords,
   type LinearRecords,
 } from "@/lib/data/integration-records";
-import { issueLength } from "@/lib/data/linear-size";
+import { estimationTypeOf, issueLength } from "@/lib/data/linear-size";
 import {
   lineOf,
   type PoolLineView,
@@ -176,7 +176,10 @@ export function derivePicker(input: {
     for (const issue of [...payload.issues, ...payload.subIssues]) {
       const state = payload.states.find((s) => s.id === issue.stateId);
       if (!state) continue;
-      const length = issueLength(issue.estimate);
+      const length = issueLength(
+        issue.estimate,
+        estimationTypeOf(payload.teams, issue.teamId),
+      );
       const where = placed.get(`${connectionId}:${issue.id}`);
       const isPlaced = where !== undefined;
       const ticked = !isPlaced && input.ticked.includes(issue.id);

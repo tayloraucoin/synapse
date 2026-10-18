@@ -282,6 +282,8 @@ export {
 
 /* ---- an issue's size from Linear's estimate (USE-52, shared in USE-101) ---- */
 export {
+  estimateScale,
+  estimationTypeOf,
   issueLength,
   sizeOfEstimate,
   UNSIZED_MIN,

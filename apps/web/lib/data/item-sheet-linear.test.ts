@@ -9,6 +9,7 @@ import { joinIssue, statesOfTeam } from "./integration-records";
 import {
   deriveLinearView,
   retryLinear,
+  sizeFromIssue,
   writeStatus,
   writeUnlink,
 } from "./item-sheet-linear";
@@ -297,5 +298,37 @@ describe("the lines under the Linear line (C4's words)", () => {
     expect(COPY.closed("10:42")).toBe(
       "Done in Linear. Checked off here too, at 10:42.",
     );
+  });
+});
+
+/** USE-112 C2: the sheet's size reads the estimate on the issue's team's scale. */
+describe("the sheet's size on the team's scale (USE-112)", () => {
+  const view = { item: { size: "small" } } as Parameters<
+    typeof sizeFromIssue
+  >[0];
+  const team = (estimationType: string | null) => ({
+    id: "team-syn",
+    key: "SYN",
+    name: "Synapse",
+    icon: null,
+    estimationType,
+  });
+
+  it("an exponential team's 8 is Large; Fibonacci's is Huge", () => {
+    expect(
+      sizeFromIssue(view, { estimate: 8, team: team("exponential") }),
+    ).toBe("large");
+    expect(sizeFromIssue(view, { estimate: 8, team: team("fibonacci") })).toBe(
+      "huge",
+    );
+    expect(sizeFromIssue(view, { estimate: 4, team: team("linear") })).toBe(
+      "large",
+    );
+  });
+
+  it("no estimate keeps the item's own size", () => {
+    expect(
+      sizeFromIssue(view, { estimate: null, team: team("exponential") }),
+    ).toBe("small");
   });
 });

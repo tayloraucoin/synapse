@@ -667,7 +667,7 @@ export function WorkItemSheet({
         ? record
           ? sessionTop(record, null)
           : view.topMin
-        : subIssueTop(sub?.estimate ?? null);
+        : subIssueTop(sub?.estimate ?? null, sub?.estimationType);
     const fit =
       pick && canPickDay(pick)
         ? dayFit({

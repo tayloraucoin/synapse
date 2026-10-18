@@ -6,7 +6,7 @@ import type { FixtureServer } from "@/lib/fixtures/server";
 import type { LinearRecords } from "./integration-records";
 import type { WorkSheetView } from "./item-sheet-work";
 import { joinNotes } from "./join-notes";
-import { issueLength } from "./linear-size";
+import { estimationTypeOf, issueLength } from "./linear-size";
 
 /**
  * Link a Linear issue (USE-68; day/item-sheet/states/linear-search.md,
@@ -99,7 +99,10 @@ export function deriveLinkList(input: {
       const item = linked.get(`${connectionId}:${issue.id}`);
       if (item !== undefined && !tierOn.has(item.id)) continue;
       const project = payload.projects.find((p) => p.id === issue.projectId);
-      const length = issueLength(issue.estimate);
+      const length = issueLength(
+        issue.estimate,
+        estimationTypeOf(payload.teams, issue.teamId),
+      );
       const base = {
         key: `${connectionId}:${issue.id}`,
         connectionId,

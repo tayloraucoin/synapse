@@ -3,7 +3,7 @@
 import * as React from "react";
 import { toast } from "@syn/ui";
 import type { WorkTier } from "@syn/utils";
-import { issueLength } from "@/lib/data/linear-size";
+import { estimationTypeOf, issueLength } from "@/lib/data/linear-size";
 import {
   nextSortOrder,
   PLACE_WORDS,
@@ -90,7 +90,13 @@ export function useWeekPlacing(week: SetUpWeek | undefined) {
       };
     }
     const issue = linear?.notInPool.find((i) => i.id === from.issueId);
-    const length = issueLength(issue?.estimate ?? null);
+    const teams =
+      linear?.workspaces.find((w) => w.connectionId === issue?.connectionId)
+        ?.payload.teams ?? [];
+    const length = issueLength(
+      issue?.estimate ?? null,
+      issue ? estimationTypeOf(teams, issue.teamId) : null,
+    );
     return { size: length.size, lengthMaxMin: length.lengthMaxMin };
   };
 

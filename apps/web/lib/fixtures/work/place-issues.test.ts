@@ -21,7 +21,7 @@ function setup() {
 
 describe("C2: the size sets the length, the estimate the size", () => {
   it("maps Linear's points to the five words, the nearest on another scale", () => {
-    expect([1, 2, 3, 5, 8].map(sizeOfEstimate)).toEqual([
+    expect([1, 2, 3, 5, 8].map((p) => sizeOfEstimate(p))).toEqual([
       "quick",
       "small",
       "medium",

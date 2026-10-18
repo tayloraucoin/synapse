@@ -48,12 +48,16 @@ export interface SubIssueView {
   placed: { slotId: string; dateKey: string; tier: WorkTier | null } | null;
   /** Linear's estimate, for its top on the day it is placed. */
   estimate: number | null;
+  /** Its team's estimate scale, which the estimate is read on (USE-112). */
+  estimationType?: string | null;
 }
 
 export function deriveSubIssues(input: {
   /** `subIssuesOf` over the snapshot: Linear's order, done by its state. */
   subs: readonly { id: string; title: string; done: boolean }[];
   estimates?: ReadonlyMap<string, number | null>;
+  /** Each sub-issue's team's estimate scale (USE-112). */
+  scales?: ReadonlyMap<string, string | null>;
   workItems: readonly WorkItemRecord[];
   slots: readonly SlotRecord[];
 }): SubIssueView[] {
@@ -81,6 +85,7 @@ export function deriveSubIssues(input: {
         ? { slotId: slot.id, dateKey: slot.onDate!, tier: slot.tier }
         : null,
       estimate: input.estimates?.get(sub.id) ?? null,
+      estimationType: input.scales?.get(sub.id) ?? null,
     };
   });
 }
@@ -211,9 +216,15 @@ export function sessionTop(
   });
 }
 
-/** A sub-issue's top on its day: its estimate's range (USE-52's sizes). */
-export function subIssueTop(estimate: number | null): number | null {
-  const length = issueLength(estimate);
+/**
+ * A sub-issue's top on its day: its estimate's range (USE-52's sizes), read
+ * on its team's scale (USE-112).
+ */
+export function subIssueTop(
+  estimate: number | null,
+  estimationType?: string | null,
+): number | null {
+  const length = issueLength(estimate, estimationType);
   return topMinutes({
     lengthMin: null,
     lengthMaxMin: length.lengthMaxMin,

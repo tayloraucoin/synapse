@@ -51,6 +51,8 @@ export {
   type SpreadSlot,
 } from "./spread";
 export {
+  estimateScale,
+  estimationTypeOf,
   issueLength,
   sizeOfEstimate,
   UNSIZED_MIN,

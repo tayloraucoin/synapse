@@ -167,14 +167,17 @@ export function linearLineOf(input: {
 
 /**
  * Size follows Linear's estimate on read (C-USE-item-sheet-size-and-length-2):
- * the estimate's nearest size, else the item's own.
+ * the estimate's nearest size on the issue's team's scale (USE-112), else
+ * the item's own.
  */
 export function sizeFromIssue(
   view: WorkSheetView,
-  issue: Pick<LinearIssueJoin, "estimate"> | null,
+  issue: Pick<LinearIssueJoin, "estimate" | "team"> | null,
 ): WorkSize | null {
   if (issue === null) return view.item.size;
-  return sizeOfEstimate(issue.estimate) ?? view.item.size;
+  return (
+    sizeOfEstimate(issue.estimate, issue.team?.estimationType) ?? view.item.size
+  );
 }
 
 /* ------------------------------------------------------------- writes -- */

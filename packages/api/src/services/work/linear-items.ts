@@ -1,4 +1,4 @@
-import { issueLength } from "@syn/utils";
+import { estimationTypeOf, issueLength } from "@syn/utils";
 import {
   linkToLinearInput,
   placeIssuesInput,
@@ -99,7 +99,7 @@ export function planPlaceIssues(
   let first: string | null = null;
 
   for (const issueId of input.issueIds) {
-    const { connectionId, issue } = findIssue(snapshots, issueId);
+    const { connectionId, issue, payload } = findIssue(snapshots, issueId);
     const linked = journal.rows.workItems.find(
       (row) =>
         row.linearConnectionId === connectionId &&
@@ -121,6 +121,7 @@ export function planPlaceIssues(
         journal,
         connectionId,
         issue,
+        estimationTypeOf(payload.teams, issue.teamId),
         input.parentWorkItemId ?? null,
       );
 
@@ -158,9 +159,10 @@ function putIssueItem(
   journal: WorkJournal,
   connectionId: string,
   issue: LinearIssue,
+  estimationType: string | null,
   parentWorkItemId: string | null,
 ): WorkItemRecord {
-  const length = issueLength(issue.estimate);
+  const length = issueLength(issue.estimate, estimationType);
   const fields = parseOrRefuse(workItemInput, {
     title: issue.title,
     size: length.size,
@@ -222,7 +224,10 @@ export function planLinkToLinear(
     throw refuse("duplicate", ISSUE_TAKEN);
   }
   const project = payload.projects.find((row) => row.id === issue.projectId);
-  const length = issueLength(issue.estimate);
+  const length = issueLength(
+    issue.estimate,
+    estimationTypeOf(payload.teams, issue.teamId),
+  );
   journal.put(
     "workItems",
     workItemRecord.parse({

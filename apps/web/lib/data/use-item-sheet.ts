@@ -8,7 +8,12 @@ import type {
   WorkSize,
   WorkTier,
 } from "@syn/types";
-import { clockFromMinutes, clockToMinutes, reflowItems } from "@syn/utils";
+import {
+  clockFromMinutes,
+  clockToMinutes,
+  estimationTypeOf,
+  reflowItems,
+} from "@syn/utils";
 import type { BlockItemRecord, SlotRecord } from "@syn/validators";
 import { ITEM_SHEET_COPY } from "@/components/planner/item-sheet/copy";
 import { weekOf } from "@/components/work/add/new-task/form";
@@ -389,7 +394,9 @@ async function writeSlotValues(
     await server.writeSlots({ id: item.slotId, ...change });
     return {
       id: item.id,
-      undo: [{ kind: "slot", id: item.slotId, change: slotBefore(item, change) }],
+      undo: [
+        { kind: "slot", id: item.slotId, change: slotBefore(item, change) },
+      ],
     };
   }
   const placed = await server.writeSlots({
@@ -875,9 +882,11 @@ export function useWorkItemSheet(id: string | null) {
         });
   // Its sub-issues from Linear's snapshot, each with its place once placed.
   const estimates = new Map<string, number | null>();
+  const scales = new Map<string, string | null>();
   for (const workspace of linear.data?.workspaces ?? []) {
     for (const sub of workspace.payload.subIssues) {
       estimates.set(sub.id, sub.estimate);
+      scales.set(sub.id, estimationTypeOf(workspace.payload.teams, sub.teamId));
     }
   }
   const subIssues: SubIssueView[] =
@@ -886,6 +895,7 @@ export function useWorkItemSheet(id: string | null) {
       : deriveSubIssues({
           subs: subIssuesFor(record),
           estimates,
+          scales,
           workItems: today.records.workItems,
           slots: [...(slots ?? []), ...today.records.slots],
         });
