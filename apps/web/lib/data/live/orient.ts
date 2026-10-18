@@ -8,15 +8,23 @@ import { callLive } from "./errors";
  * last night (`morning.*`), the day's stamps and the welcome's first-go read
  * (`day.*`), and Close the day's journal (`journal.*`). The writes parse
  * their input here first, so a bad one is refused with the schema's words,
- * as the fixture refuses it, before any call. `readMorning` is not served:
- * nothing reads both together.
+ * as the fixture refuses it, before any call. `readMorning` is the two
+ * reads together (USE-108).
  */
-export const orientDomain: LiveDomain = {
+export const orientDomain = {
   name: "orient",
   methods: (client) => ({
     readReading: (dateKey) => client.morning.reading.query({ dateKey }),
 
     readMorningDay: (dateKey) => client.morning.day.query({ dateKey }),
+
+    async readMorning(dateKey) {
+      const [reading, day] = await Promise.all([
+        client.morning.reading.query({ dateKey }),
+        client.morning.day.query({ dateKey }),
+      ]);
+      return { ...reading, ...day };
+    },
 
     async writeMorningLines(raw) {
       const parsed = morningLinesInput.safeParse(raw);
@@ -49,4 +57,4 @@ export const orientDomain: LiveDomain = {
       return callLive("journal", () => client.journal.save.mutate(parsed.data));
     },
   }),
-};
+} satisfies LiveDomain;

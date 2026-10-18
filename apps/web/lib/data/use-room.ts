@@ -9,8 +9,6 @@ import {
   type RoomTake,
 } from "@syn/utils";
 import { ROOM_COPY as COPY } from "@/components/planner/room/copy";
-import { DEFAULT_SCENARIO } from "@/lib/fixtures/scenarios";
-import { roomSeedOf } from "@/lib/fixtures/scenarios/review-day";
 import { readDismissal, writeDismissal } from "@/lib/hooks/use-dismissed";
 import { useUndoToast } from "@/lib/hooks/use-undo-toast";
 import { deriveToday, type Today } from "./derive-today";
@@ -35,6 +33,7 @@ import {
   roomDayWithRowsOf,
   type AppRoomDay,
 } from "./room-day";
+import { DEFAULT_SCENARIO } from "./scenario-names";
 import { useDataSource } from "./source";
 import type { TodayRecords } from "./today-records";
 import {
@@ -298,7 +297,7 @@ export function useRoom(
     () => (today === undefined ? undefined : roomDayWithRowsOf(today)),
     [today],
   );
-  const seed = roomSeedOf(scenario.name);
+  const seed = source.seeds.room;
 
   /* ---- Make room ---- */
 

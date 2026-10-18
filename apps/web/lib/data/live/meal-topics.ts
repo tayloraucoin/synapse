@@ -8,7 +8,7 @@ import { callLive } from "./errors";
  * here first, so a bad topic is refused "invalid" with the schema's words, as
  * the fixture refuses it, before any call.
  */
-export const mealTopicsDomain: LiveDomain = {
+export const mealTopicsDomain = {
   name: "meal-topics",
   methods: (client) => ({
     listMealTopics: () =>
@@ -28,6 +28,8 @@ export const mealTopicsDomain: LiveDomain = {
     },
 
     removeMealTopic: (id) =>
-      callLive("mealTopic", () => client.planner.mealTopics.remove.mutate({ id })),
+      callLive("mealTopic", () =>
+        client.planner.mealTopics.remove.mutate({ id }),
+      ),
   }),
-};
+} satisfies LiveDomain;

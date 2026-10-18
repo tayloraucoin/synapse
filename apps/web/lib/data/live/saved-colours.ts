@@ -8,7 +8,7 @@ import { callLive } from "./errors";
  * here first, so a bad hex is refused "invalid" with the schema's words, as
  * the fixture refuses it, before any call.
  */
-export const savedColoursDomain: LiveDomain = {
+export const savedColoursDomain = {
   name: "saved-colours",
   methods: (client) => ({
     listSavedColours: () =>
@@ -32,4 +32,4 @@ export const savedColoursDomain: LiveDomain = {
         client.planner.savedColours.remove.mutate({ id }),
       ),
   }),
-};
+} satisfies LiveDomain;

@@ -3,9 +3,9 @@ import type { SlotRecord, WorkItemRecord } from "@syn/validators";
 import { rangeWords } from "@/components/work/from-linear/picker-view";
 import type { PlannerWrite } from "@/lib/fixtures/planner";
 import type { FixtureServer } from "@/lib/fixtures/server";
-import { joinNotes } from "@/lib/fixtures/work";
 import type { LinearRecords } from "./integration-records";
 import type { WorkSheetView } from "./item-sheet-work";
+import { joinNotes } from "./join-notes";
 import { issueLength } from "./linear-size";
 
 /**

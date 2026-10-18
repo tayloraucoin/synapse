@@ -6,7 +6,11 @@ import {
   editBlockItemInput,
 } from "@syn/validators";
 import { block, bounds, event, item, slot } from "./planner-rows.fixture";
-import { planWriteBounds, planWriteDayEvent } from "./write-bounds";
+import {
+  planRemoveDayEvent,
+  planWriteBounds,
+  planWriteDayEvent,
+} from "./write-bounds";
 import {
   planEditBlockItem,
   planRemoveBlockItem,
@@ -226,6 +230,19 @@ describe("the item, bounds and event writes (C-USE-92-1)", () => {
         ),
       "unknown",
       "No client with that id.",
+    );
+  });
+
+  it("removeDayEvent removes the event by id and refuses an unknown one (USE-108)", () => {
+    const coffee = event({ onDate: TUE });
+    const dentist = event({ onDate: MON, title: "Dentist" });
+    const journal = journalOver({ dayEvents: [coffee, dentist] });
+    expect(planRemoveDayEvent(journal, { id: coffee.id })).toEqual({});
+    expect(journal.rows.dayEvents.map((e) => e.id)).toEqual([dentist.id]);
+    expectRefusal(
+      () => planRemoveDayEvent(journal, { id: coffee.id }),
+      "unknown",
+      "No event with that id.",
     );
   });
 });

@@ -60,7 +60,7 @@ function storedSlot(out: { slot?: SlotRecord }): SlotRecord {
   return out.slot;
 }
 
-export const slotsAndClock: LiveDomain = {
+export const slotsAndClock = {
   name: "slots-and-clock",
   methods: (client) => {
     const p = client.planner;
@@ -99,4 +99,4 @@ export const slotsAndClock: LiveDomain = {
         }),
     };
   },
-};
+} satisfies LiveDomain;

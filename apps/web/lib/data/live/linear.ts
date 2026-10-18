@@ -14,7 +14,7 @@ import { callLive } from "./errors";
  * send after its transaction, so the fixture's sender has nothing to do
  * here. A refusal (not linked, no such status or row) is the planner's.
  */
-export const linearDomain: LiveDomain = {
+export const linearDomain = {
   name: "linear",
   methods: (client) => ({
     readLinear: () => client.linear.read.query(),
@@ -37,4 +37,4 @@ export const linearDomain: LiveDomain = {
     // The server sends each row after its own write; nothing waits here.
     sendLinearOutbox: () => undefined,
   }),
-};
+} satisfies LiveDomain;

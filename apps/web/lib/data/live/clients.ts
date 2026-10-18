@@ -31,7 +31,7 @@ function parsed<S extends z.ZodTypeAny>(schema: S, raw: unknown): z.output<S> {
   return result.data;
 }
 
-export const clientsDomain: LiveDomain = {
+export const clientsDomain = {
   name: "clients",
   methods: (client) => ({
     writeClient: async (raw) =>
@@ -65,4 +65,4 @@ export const clientsDomain: LiveDomain = {
       return { undo: "" };
     },
   }),
-};
+} satisfies LiveDomain;

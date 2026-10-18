@@ -10,7 +10,7 @@ import type { PlanOut, WriteScope } from "./write-plan";
 
 /**
  * Set my days' Up at and Lights out, and Add event's write (USE-92), as the
- * fixture server's `writeBounds` and `writeDayEvent`.
+ * fixture server's `writeBounds`, `writeDayEvent` and `removeDayEvent`.
  */
 
 /** A weekday's usual Up at and Lights out, or one date's own. */
@@ -82,4 +82,16 @@ export function planWriteDayEvent(
     }),
   );
   return { id: row.id, reach: input.rrule != null ? scope : undefined };
+}
+
+/** An event's removal (USE-108): an id not held is refused. */
+export function planRemoveDayEvent(
+  journal: WriteJournal,
+  { id }: { id: string },
+): PlanOut {
+  if (!journal.rows.dayEvents.some((event) => event.id === id)) {
+    throw refuse("unknown", "No event with that id.");
+  }
+  journal.remove("dayEvents", id);
+  return {};
 }

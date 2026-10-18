@@ -28,7 +28,7 @@ function parsed<S extends z.ZodTypeAny>(schema: S, raw: unknown): z.output<S> {
   return result.data;
 }
 
-export const todosDomain: LiveDomain = {
+export const todosDomain = {
   name: "todos",
   methods: (client) => {
     const t = client.todo;
@@ -45,4 +45,4 @@ export const todosDomain: LiveDomain = {
         callLive("todo", () => t.restore.mutate(parsed(removedTodoInput, raw))),
     };
   },
-};
+} satisfies LiveDomain;

@@ -3,7 +3,6 @@
 import * as React from "react";
 import { parseAsString, useQueryStates } from "nuqs";
 import { weekKeyOf, type WorkTier } from "@syn/utils";
-import { blockPanelSeedOf } from "@/lib/fixtures/scenarios/week";
 import { BLOCK_PANEL_PARAMS } from "@/lib/routes";
 import {
   blockPanelHead,
@@ -46,7 +45,7 @@ export function useBlockPanelParams(): {
   });
 
   // A capture's panel, once: closing it leaves it closed.
-  const seed = blockPanelSeedOf(source.scenario.name);
+  const seed = source.seeds.blockPanel;
   const seeded = React.useRef(false);
   React.useEffect(() => {
     if (seeded.current || !seed) return;

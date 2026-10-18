@@ -49,7 +49,7 @@ function send<T>(parse: () => unknown, call: (input: never) => Promise<T>) {
   }
 }
 
-export const workDomain: LiveDomain = {
+export const workDomain = {
   name: "work",
   methods: (client) => {
     const w = client.work;
@@ -132,4 +132,4 @@ export const workDomain: LiveDomain = {
         ),
     };
   },
-};
+} satisfies LiveDomain;

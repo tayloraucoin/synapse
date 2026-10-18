@@ -6,9 +6,9 @@ import type { LiveDomain } from "./domains";
  * calendars that are on, its week synced first when stale. Read-only, and
  * it refuses nothing, so no refusal is mapped.
  */
-export const googleEventsDomain: LiveDomain = {
+export const googleEventsDomain = {
   name: "google-events",
   methods: (client: TrpcClient) => ({
     readGoogleEvents: (date) => client.google.events.query({ date }),
   }),
-};
+} satisfies LiveDomain;

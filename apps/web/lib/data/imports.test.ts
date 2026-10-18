@@ -76,7 +76,8 @@ describe("C5: the seam's imports", () => {
   it("reaches tRPC only through lib/trpc, and only from lib/data", () => {
     const viaTrpc = (spec: string) => /^@\/lib\/trpc(\/|$)/.test(spec);
     const trpc = (spec: string) =>
-      /^@trpc\//.test(spec) || (/(^|\/)trpc(\/|$)/.test(spec) && !viaTrpc(spec));
+      /^@trpc\//.test(spec) ||
+      (/(^|\/)trpc(\/|$)/.test(spec) && !viaTrpc(spec));
     const hits = [
       ...data.flatMap((file) =>
         specifiers(file)
@@ -108,5 +109,85 @@ describe("C5: the seam's imports", () => {
           .map((spec) => `${rel(file)} → ${spec}`),
       );
     expect(hits).toEqual([]);
+  });
+});
+
+/**
+ * USE-108's C2: no fixture module in a production build. Outside
+ * `lib/fixtures`, a module loads a fixture only through one of the two
+ * entries, and `next.config.ts` resolves both to their stubs in
+ * `lib/no-fixtures/` in a production build; the stubs name the fixtures
+ * only as types. A new run-time import of a fixture anywhere else fails here.
+ */
+describe("C2: the fixtures stay out of a production build", () => {
+  const ENTRIES = ["@/lib/fixtures/entry", "@/lib/fixtures/parts"];
+
+  /** Each import's specifier and whether it loads anything at run time. */
+  function loads(file: string): { spec: string; runtime: boolean }[] {
+    const text = readFileSync(file, "utf8");
+    const found: { spec: string; runtime: boolean }[] = [];
+    for (const match of text.matchAll(
+      /\b(import|export)(\s+type\b)?\s*([^;"']*?)\s*from\s+["']([^"']+)["']/g,
+    )) {
+      const clause = match[3]!.replace(/[{}]/g, "").trim();
+      const names = clause
+        .split(",")
+        .map((name) => name.trim())
+        .filter(Boolean);
+      const typeOnly =
+        match[2] !== undefined ||
+        (names.length > 0 && names.every((name) => name.startsWith("type ")));
+      found.push({ spec: match[4]!, runtime: !typeOnly });
+    }
+    for (const match of text.matchAll(
+      /\bimport\s*\(\s*["']([^"']+)["']|^import\s+["']([^"']+)["']/gm,
+    )) {
+      found.push({ spec: (match[1] ?? match[2])!, runtime: true });
+    }
+    return found;
+  }
+
+  const fixturePath = (file: string, spec: string) =>
+    spec.startsWith("@/lib/fixtures")
+      ? spec
+      : spec.startsWith(".") &&
+          rel(path.resolve(path.dirname(file), spec)).startsWith("lib/fixtures")
+        ? `@/${rel(path.resolve(path.dirname(file), spec))}`
+        : null;
+
+  const shipped = sourceFiles(WEB).filter(
+    (file) =>
+      !rel(file).startsWith("lib/fixtures/") &&
+      !/\.(test|stories)\.tsx?$/.test(file),
+  );
+
+  it("loads a fixture only through the two entries", () => {
+    const hits = shipped.flatMap((file) =>
+      loads(file)
+        .filter(({ runtime }) => runtime)
+        .map(({ spec }) => fixturePath(file, spec))
+        .filter((spec): spec is string => spec !== null)
+        .filter((spec) => !ENTRIES.includes(spec))
+        .map((spec) => `${rel(file)} → ${spec}`),
+    );
+    expect(hits).toEqual([]);
+  });
+
+  it("resolves each entry to its stub in a production build", () => {
+    const config = readFileSync(path.join(WEB, "next.config.ts"), "utf8");
+    expect(config).toMatch(
+      /env\.NODE_ENV === "production" \? \{ \.\.\.FIXTURE_ENTRIES \} : \{\}/,
+    );
+    expect(config).toMatch(/resolveAlias: fixtureAliases/);
+    for (const entry of ENTRIES) {
+      const stub = config.match(
+        new RegExp(`"${entry}": "\\./(lib/no-fixtures/[\\w-]+\\.ts)"`),
+      )?.[1];
+      expect(stub, entry).toBeDefined();
+      const loaded = loads(path.join(WEB, stub!)).filter(
+        ({ spec, runtime }) => runtime && fixturePath(WEB, spec) !== null,
+      );
+      expect(loaded, stub).toEqual([]);
+    }
   });
 });

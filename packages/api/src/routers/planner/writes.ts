@@ -5,6 +5,7 @@ import {
   dayEventWriteInput,
   editBlockInput,
   editBlockItemInput,
+  idInput,
   newBlockInput,
   newTransitionInput,
   plannerWriteOutput,
@@ -23,6 +24,7 @@ import {
   planSplitBlock,
 } from "../../services/planner/write-blocks";
 import {
+  planRemoveDayEvent,
   planWriteBounds,
   planWriteDayEvent,
 } from "../../services/planner/write-bounds";
@@ -145,6 +147,13 @@ export const plannerWrites = {
         plan: (journal) => planWriteDayEvent(journal, input, id, scope),
       }),
     ),
+
+  removeDayEvent: write.input(idInput).mutation(({ ctx, input }) =>
+    runPlannerWrite(ctx.rls, ctx.authContext.userId, {
+      blocks: none,
+      plan: (journal) => planRemoveDayEvent(journal, input),
+    }),
+  ),
 
   /** Any planner, work or to-do write's Undo, by its signed token. */
   undo: protectedProcedure

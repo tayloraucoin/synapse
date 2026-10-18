@@ -1,3 +1,4 @@
+import { DEFAULT_SCENARIO } from "@/lib/data/scenario-names";
 import type { ProfileSheetStart } from "@/lib/data/use-profile";
 import type { ReminderDevice } from "@/lib/pwa/reminder-availability";
 import type { InstallOverride } from "@/lib/pwa/use-install-state";
@@ -164,7 +165,7 @@ export interface ScenarioView {
   checklist?: { draft: string };
 }
 
-export const DEFAULT_SCENARIO = "default";
+export { DEFAULT_SCENARIO };
 
 /** Wellness's first three items, checked by 7:14 on Now's Monday. */
 const WELLNESS_DONE = ["peeAndWeigh", "water", "startColdBath"] as const;

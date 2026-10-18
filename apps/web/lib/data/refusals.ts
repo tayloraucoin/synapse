@@ -101,3 +101,15 @@ export class PlannerRefusal extends Error {
     this.reason = reason;
   }
 }
+
+/**
+ * A write with no connection (a scenario's `offline`): it waits on the
+ * device. Here with the refusals (USE-108), so a hook names it without
+ * loading a fixture.
+ */
+export class FixtureOfflineError extends Error {
+  constructor() {
+    super("No connection.");
+    this.name = "FixtureOfflineError";
+  }
+}

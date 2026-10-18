@@ -1,7 +1,7 @@
 "use client";
 
-import { DEFAULT_SCENARIO } from "@/lib/fixtures/scenarios";
 import { useDismissed } from "@/lib/hooks/use-dismissed";
+import { DEFAULT_SCENARIO } from "./scenario-names";
 import { useDataSource } from "./source";
 
 /**

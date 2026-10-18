@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { MealTopicInput, MealTopicRecord } from "@syn/validators";
-import { MealTopicRefusal, type FixtureServer } from "@/lib/fixtures/server";
+import type { FixtureServer } from "@/lib/fixtures/server";
+import { MealTopicRefusal } from "./refusals";
 import { useDataSource } from "./source";
 
 /**

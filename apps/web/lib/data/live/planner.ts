@@ -8,7 +8,7 @@ import { callLive } from "./errors";
  * `planner.week`. The set-up column has no read of its own live: its gate is
  * the week query's own loading state, so it resolves at once.
  */
-export const plannerRead: LiveDomain = {
+export const plannerRead = {
   name: "planner-read",
   methods: (client: TrpcClient) => ({
     readToday: (dateKey) =>
@@ -17,4 +17,4 @@ export const plannerRead: LiveDomain = {
       callLive("planner", () => client.planner.week.query({ week })),
     readSetUpColumn: () => Promise.resolve(),
   }),
-};
+} satisfies LiveDomain;

@@ -14,7 +14,6 @@ import {
   type AddStart,
 } from "@/components/planner/add-sheet";
 import { clockLabel } from "@/components/planner/day-column/copy";
-import { railAddSeedOf } from "@/lib/fixtures/scenarios/add-from-the-rail";
 import { useUndoToast } from "@/lib/hooks/use-undo-toast";
 import { sendAdd, writeRailAdd } from "./rail-add";
 import type { RoomAddition } from "./room";
@@ -48,7 +47,7 @@ export function useRailAdd(
     tier: parseAsString,
     block: parseAsString,
   });
-  const seed = railAddSeedOf(source.scenario.name);
+  const seed = source.seeds.railAdd;
 
   const start: AddStart = {
     ...(query.at ? { at: query.at } : {}),

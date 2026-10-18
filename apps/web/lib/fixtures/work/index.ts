@@ -26,6 +26,7 @@ import {
   type WorkItemRecord,
   type workTierSchema,
 } from "@syn/validators";
+import { joinNotes } from "@/lib/data/join-notes";
 import { issueLength } from "@/lib/data/linear-size";
 import type { PoolRecords } from "@/lib/data/pool-records";
 import {
@@ -69,16 +70,7 @@ export type { LinkToLinearInput };
 export const ALREADY_LINKED = "That task is in Linear already.";
 export const ISSUE_TAKEN = "That issue is on another item already.";
 
-/** D-USE-36: the description, then the item's notes at its end. */
-export function joinNotes(
-  description: string | null,
-  notes: string | null,
-): string | null {
-  const parts = [description, notes]
-    .map((part) => part?.trim() ?? "")
-    .filter((part) => part !== "");
-  return parts.length === 0 ? null : parts.join("\n\n");
-}
+export { joinNotes };
 
 export interface WorkServer {
   readPool(): Promise<PoolRecords>;

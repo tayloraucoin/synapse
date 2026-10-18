@@ -1,3 +1,4 @@
+import { DEFAULT_JOURNAL_PROMPTS } from "@syn/constants";
 import {
   addDays,
   checkEventTime,
@@ -5,7 +6,6 @@ import {
   nextTodoDue,
   resolveDayKey,
 } from "@syn/utils";
-import { DEFAULT_JOURNAL_PROMPTS } from "@syn/constants";
 import {
   dayRecordRecord,
   displayNameSchema,
@@ -41,16 +41,15 @@ import {
   type TodoInput,
   type TodoRecord,
 } from "@syn/validators";
+import type { JournalRecords } from "@/lib/data/journal-records";
 import type {
   MorningDayRecords,
   MorningRecords,
   ReadingRecords,
 } from "@/lib/data/morning-records";
-import type { JournalRecords } from "@/lib/data/journal-records";
-import type { TodayRecords } from "@/lib/data/today-records";
-import type { AccountView } from "@/lib/data/use-account";
 import {
   AccountNameRefusal,
+  FixtureOfflineError,
   JournalWriteRefusal,
   MealTopicRefusal,
   MorningLinesRefusal,
@@ -59,16 +58,9 @@ import {
   SlotWriteRefusal,
   TodoWriteRefusal,
 } from "@/lib/data/refusals";
+import type { TodayRecords } from "@/lib/data/today-records";
+import type { AccountView } from "@/lib/data/use-account";
 import type { TodosRecords } from "@/lib/data/use-todos";
-import {
-  ALREADY_PLACED,
-  createPlannerServer,
-  PlannerRefusal,
-  slotClash,
-  type PlannerServer,
-} from "./planner";
-import { createWriteLog } from "./planner/journal";
-import { eventOn } from "./planner/read-week";
 import {
   createIntegrationServer,
   type IntegrationServer,
@@ -80,6 +72,15 @@ import {
   type GoogleCalendarsRecords,
 } from "./integrations/connect";
 import { googleEventsOnDate } from "./integrations/records";
+import {
+  ALREADY_PLACED,
+  createPlannerServer,
+  PlannerRefusal,
+  slotClash,
+  type PlannerServer,
+} from "./planner";
+import { createWriteLog } from "./planner/journal";
+import { eventOn } from "./planner/read-week";
 import type { FixtureRecords } from "./records";
 import type { Scenario } from "./scenarios";
 import { createWorkServer, type WorkServer } from "./work";
@@ -94,6 +95,7 @@ import { createWorkServer, type WorkServer } from "./work";
 // The refusals are the routers' as much as the fixtures' (USE-90).
 export {
   AccountNameRefusal,
+  FixtureOfflineError,
   JournalWriteRefusal,
   MealTopicRefusal,
   MorningLinesRefusal,
@@ -117,14 +119,6 @@ export class FixtureReadingError extends Error {
   constructor() {
     super("The morning's reading could not be read.");
     this.name = "FixtureReadingError";
-  }
-}
-
-/** A write with no connection (`offline`): it waits on the device. */
-export class FixtureOfflineError extends Error {
-  constructor() {
-    super("No connection.");
-    this.name = "FixtureOfflineError";
   }
 }
 
@@ -164,9 +158,7 @@ export interface RemovedTodo {
 }
 
 export interface FixtureServer
-  extends PlannerServer,
-    WorkServer,
-    IntegrationServer {
+  extends PlannerServer, WorkServer, IntegrationServer {
   readToday(dateKey: string): Promise<TodayRecords>;
   writeSlotEvents(inputs: SlotEventInput[]): Promise<SlotEventRecord[]>;
   /**

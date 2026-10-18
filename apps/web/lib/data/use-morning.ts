@@ -7,8 +7,8 @@ import type {
   MorningLinesInput,
   MorningLinesRecord,
 } from "@syn/validators";
-import { FixtureOfflineError } from "@/lib/fixtures/server";
 import type { MorningDayRecords, ReadingRecords } from "./morning-records";
+import { FixtureOfflineError } from "./refusals";
 import { useDataSource } from "./source";
 import { todayQueryKey } from "./use-today";
 

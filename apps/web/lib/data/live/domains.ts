@@ -16,17 +16,17 @@ import { workDomain } from "./work";
 
 /**
  * A domain served live (USE-90): the server methods it answers, each a call
- * through the tRPC client with its refusal mapped (`callLive`). Wave 3's
- * tickets (USE-91 to USE-105) add one module each beside this file and list
- * it in `LIVE_DOMAINS`; a method no live domain answers falls back to the
- * fixtures outside production and fails as `UnwiredDomain` in a build.
+ * through the tRPC client with its refusal mapped (`callLive`). Each module
+ * beside this file declares its domain with `satisfies LiveDomain`, so its
+ * method names stay in its type and `createLiveServer` can check that the
+ * domains together answer every method (USE-108).
  */
 export interface LiveDomain {
   name: string;
   methods: (client: TrpcClient) => Partial<FixtureServer>;
 }
 
-export const LIVE_DOMAINS: readonly LiveDomain[] = [
+export const LIVE_DOMAINS = [
   accountDomain,
   connectionsDomain,
   savedColoursDomain,
@@ -40,4 +40,17 @@ export const LIVE_DOMAINS: readonly LiveDomain[] = [
   linearDomain,
   todosDomain,
   workDomain,
-];
+] as const satisfies readonly LiveDomain[];
+
+type MethodsOf<D> = D extends LiveDomain ? ReturnType<D["methods"]> : never;
+
+/** Every method one of `LIVE_DOMAINS` answers. */
+export type LiveMethods = UnionToIntersection<
+  MethodsOf<(typeof LIVE_DOMAINS)[number]>
+>;
+
+type UnionToIntersection<U> = (
+  U extends unknown ? (arg: U) => void : never
+) extends (arg: infer I) => void
+  ? I
+  : never;

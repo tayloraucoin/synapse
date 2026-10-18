@@ -10,7 +10,7 @@ import type { LiveDomain } from "./domains";
  * Clients writes are USE-104's, so they stay unwired (the fixtures in
  * development).
  */
-export const connectionsDomain: LiveDomain = {
+export const connectionsDomain = {
   name: "connections",
   methods: (client) => ({
     readConnections: () => client.connections.list.query(),
@@ -37,4 +37,4 @@ export const connectionsDomain: LiveDomain = {
       return new Promise<void>(() => {});
     },
   }),
-};
+} satisfies LiveDomain;

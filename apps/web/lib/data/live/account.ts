@@ -29,7 +29,9 @@ function photoType(photo: Blob): string {
   return IMAGE_TYPES.includes(photo.type) ? photo.type : "image/jpeg";
 }
 
-export async function readLiveAccount(client: TrpcClient): Promise<AccountView> {
+export async function readLiveAccount(
+  client: TrpcClient,
+): Promise<AccountView> {
   const [me, avatar] = await Promise.all([
     client.user.me.query(),
     client.user.avatar.query(),
@@ -41,7 +43,7 @@ export async function readLiveAccount(client: TrpcClient): Promise<AccountView> 
   };
 }
 
-export const accountDomain: LiveDomain = {
+export const accountDomain = {
   name: "account",
   methods: (client) => ({
     readAccount: () => readLiveAccount(client),
@@ -79,4 +81,4 @@ export const accountDomain: LiveDomain = {
       return readLiveAccount(client);
     },
   }),
-};
+} satisfies LiveDomain;

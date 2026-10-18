@@ -3,14 +3,10 @@
 import { useCallback, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { BlockItemRecord } from "@syn/validators";
-import {
-  PlannerRefusal,
-  type PlannerServer,
-  type PlannerWrite,
-} from "@/lib/fixtures/planner";
+import type { PlannerServer, PlannerWrite } from "@/lib/fixtures/planner";
 import type { SplitPatch } from "@/lib/fixtures/planner/split-block";
-import { FixtureOfflineError } from "@/lib/fixtures/server";
 import { offlineWrite } from "@/lib/offline/writes";
+import { FixtureOfflineError, PlannerRefusal } from "./refusals";
 import { useDataSource } from "./source";
 import { useConnection } from "./use-connection";
 import { todayQueryKey } from "./use-today";

@@ -2,26 +2,28 @@ import { createContext, useContext } from "react";
 import { QueryClientContext, type QueryClient } from "@tanstack/react-query";
 import { useQueryState } from "nuqs";
 import { resolveDayKey } from "@syn/utils";
-import {
-  DEFAULT_SCENARIO,
-  resolveScenario,
-  type Scenario,
-} from "@/lib/fixtures/scenarios";
-import { createFixtureServer, type FixtureServer } from "@/lib/fixtures/server";
+import { fixtures } from "@/lib/fixtures/entry";
+import type { Scenario } from "@/lib/fixtures/scenarios";
+import type { RailAddSeed } from "@/lib/fixtures/scenarios/add-from-the-rail";
+import type { RoomSeed } from "@/lib/fixtures/scenarios/review-day";
+import type {
+  BlockPanelSeed,
+  WeekPlaceSeed,
+} from "@/lib/fixtures/scenarios/week";
+import type { FixtureServer } from "@/lib/fixtures/server";
 import { useOnline } from "@/lib/hooks/use-online";
 import type { TrpcClient } from "@/lib/trpc/client";
 import { isProductionBuild, trpcClient } from "@/lib/trpc/provider";
 import { deviceZone, liveRecords, readAccountZone } from "./live/clock";
-import { LIVE_DOMAINS, type LiveDomain } from "./live/domains";
 import { createLiveServer } from "./live/server";
 
 /**
- * The one place a data hook gets its server (USE-7, USE-90). Outside a
- * production build, `?state=` names a scenario and its fixture server, the
- * captures' source. Otherwise the server is the live one: each domain's
- * methods call tRPC once its wave 3 ticket lists it in `LIVE_DOMAINS`, and an
- * unwired method falls back to the default scenario (development) or fails
- * as `UnwiredDomain` (a production build, which never reads a fixture).
+ * The one place a data hook gets its server (USE-7, USE-90, USE-108).
+ * Outside a production build, `?state=` names a scenario and its fixture
+ * server, the captures' source. Otherwise the server is the live one, every
+ * method a tRPC call. The fixtures come only through `@/lib/fixtures/entry`,
+ * which a production build resolves to `lib/no-fixtures/entry.ts`, so no
+ * fixture module is in it.
  *
  * One source per name for the life of the page. What the UI reads still
  * comes through TanStack Query under the hooks' own keys; the live source's
@@ -37,6 +39,23 @@ export interface DataSource {
   todayKey: () => string;
   /** Whether this is the live source rather than a fixture scenario. */
   live: boolean;
+  /** What a capture opens on load; none live. */
+  seeds: ScenarioSeeds;
+}
+
+/** The scenario's capture seeds (USE-51, USE-76, USE-80): what opens on load. */
+export interface ScenarioSeeds {
+  blockPanel?: BlockPanelSeed;
+  railAdd?: RailAddSeed;
+  room?: RoomSeed;
+  weekPlace?: WeekPlaceSeed;
+}
+
+/** `@/lib/fixtures/entry`'s shape: `?state=`'s source, or none in a build. */
+export interface FixtureEntry {
+  /** The scenario a name resolves to: the default for an unknown one. */
+  scenarioName(name: string): string;
+  createSource(name: string): DataSource;
 }
 
 export const LIVE_SCENARIO = "live";
@@ -57,29 +76,9 @@ export const LIVE_QUERY_DEFAULTS = {
 export interface SourceOptions {
   production: boolean;
   client: TrpcClient;
-  domains?: readonly LiveDomain[];
 }
 
-function createFixtureSource(scenario: Scenario): DataSource {
-  const base = Date.parse(scenario.now);
-  const loadedAt = Date.now();
-  const now = () => new Date(base + (Date.now() - loadedAt));
-  const { timeZone, dayCloseTime } = scenario.records;
-  const todayKey = () => resolveDayKey(now(), timeZone, dayCloseTime);
-  return {
-    scenario,
-    server: createFixtureServer(scenario, now),
-    now,
-    todayKey,
-    live: false,
-  };
-}
-
-function createLiveSource({
-  production,
-  client,
-  domains,
-}: SourceOptions): DataSource {
+function createLiveSource({ client }: SourceOptions): DataSource {
   const records = liveRecords(deviceZone());
   const scenario: Scenario = {
     name: LIVE_SCENARIO,
@@ -91,16 +90,6 @@ function createLiveSource({
   const todayKey = () =>
     resolveDayKey(now(), records.timeZone, records.dayCloseTime);
 
-  // The default scenario answers what is not live yet, on the live clock.
-  let fallbackServer: FixtureServer | null = null;
-  const fallback = production
-    ? null
-    : () =>
-        (fallbackServer ??= createFixtureServer(
-          resolveScenario(DEFAULT_SCENARIO),
-          now,
-        ));
-
   if (typeof window !== "undefined") {
     void readAccountZone(client).then((zone) => {
       if (zone) Object.assign(records, zone);
@@ -109,10 +98,11 @@ function createLiveSource({
 
   return {
     scenario,
-    server: createLiveServer(client, { domains, fallback }),
+    server: createLiveServer(client),
     now,
     todayKey,
     live: true,
+    seeds: {},
   };
 }
 
@@ -121,8 +111,8 @@ export function createDataSource(
   name: string | null,
   options: SourceOptions,
 ): DataSource {
-  if (name !== null && !options.production) {
-    return createFixtureSource(resolveScenario(name));
+  if (name !== null && !options.production && fixtures) {
+    return fixtures.createSource(name);
   }
   return createLiveSource(options);
 }
@@ -130,14 +120,13 @@ export function createDataSource(
 const sources = new Map<string, DataSource>();
 
 export function getDataSource(name: string | null): DataSource {
-  const fixture = name !== null && !isProductionBuild;
-  const key = fixture ? resolveScenario(name).name : LIVE_SCENARIO;
+  const entry = isProductionBuild ? null : fixtures;
+  const key = name !== null && entry ? entry.scenarioName(name) : LIVE_SCENARIO;
   const existing = sources.get(key);
   if (existing) return existing;
-  const source = createDataSource(fixture ? name : null, {
+  const source = createDataSource(key === LIVE_SCENARIO ? null : name, {
     production: isProductionBuild,
     client: trpcClient,
-    domains: LIVE_DOMAINS,
   });
   sources.set(key, source);
   return source;

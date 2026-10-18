@@ -1,14 +1,11 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
-
+import { loadEnvConfig } from "@next/env";
 import { buildSupabaseEnvForNextConfig } from "@syn/auth";
 import { buildDatabaseEnvForNextConfig } from "@syn/db/build-database-env-for-next-config";
-
 import { getLocalDevOrigins } from "../../scripts/local-dev-origins.mjs";
-
 import { env } from "./env";
 
 const webRoot = path.dirname(fileURLToPath(import.meta.url));
@@ -56,6 +53,20 @@ const versionEnv = {
   NEXT_PUBLIC_BUILD_DATE: new Date().toISOString().slice(0, 10),
   NEXT_PUBLIC_BUILD_ID: buildId,
 };
+
+/**
+ * No fixture in a production build (USE-108). The live path reaches the
+ * fixtures only through these two modules (`lib/data/imports.test.ts`); a
+ * build resolves each to its stub in `lib/no-fixtures/`, so `?state=` and
+ * the dev parts page have nothing to load and no fixture module is bundled.
+ */
+const FIXTURE_ENTRIES = {
+  "@/lib/fixtures/entry": "./lib/no-fixtures/entry.ts",
+  "@/lib/fixtures/parts": "./lib/no-fixtures/parts.ts",
+} as const;
+
+const fixtureAliases: Record<string, string> =
+  env.NODE_ENV === "production" ? { ...FIXTURE_ENTRIES } : {};
 
 const nextConfig: NextConfig = {
   /**
@@ -125,6 +136,7 @@ const nextConfig: NextConfig = {
 
   turbopack: {
     root: path.resolve(webRoot, "../.."),
+    resolveAlias: fixtureAliases,
   },
   outputFileTracingRoot: path.resolve(webRoot, "../.."),
 

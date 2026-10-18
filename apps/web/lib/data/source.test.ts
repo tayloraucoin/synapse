@@ -2,16 +2,15 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
+import { scenarioNames } from "@/lib/fixtures/scenarios";
 import type { TrpcClient } from "@/lib/trpc/client";
-import { UnwiredDomain } from "./live/errors";
-import type { LiveDomain } from "./live/domains";
 import { createDataSource, getDataSource, LIVE_SCENARIO } from "./source";
 
 /**
- * USE-90's switch: `?state=` keeps the fixtures outside production; without
- * it the live server answers, a wired domain through tRPC and the rest from
- * the default scenario (development) or as `UnwiredDomain` (a build). C4,
- * the refusal over the wire, is `lib/trpc/refusal.test.ts`.
+ * USE-90's switch, without its fallback (USE-108): `?state=` keeps the
+ * fixtures outside production; without it every method is a tRPC call, and
+ * a production build never reads a fixture. C4, the refusal over the wire,
+ * is `lib/trpc/refusal.test.ts`; the bundle is `imports.test.ts`.
  */
 
 const fixtures = vi.hoisted(() => ({ server: 0, scenario: 0 }));
@@ -20,7 +19,9 @@ vi.mock("@/lib/fixtures/server", async (importActual) => {
   const actual = await importActual<typeof import("@/lib/fixtures/server")>();
   return {
     ...actual,
-    createFixtureServer: (...args: Parameters<typeof actual.createFixtureServer>) => {
+    createFixtureServer: (
+      ...args: Parameters<typeof actual.createFixtureServer>
+    ) => {
       fixtures.server += 1;
       return actual.createFixtureServer(...args);
     },
@@ -28,7 +29,8 @@ vi.mock("@/lib/fixtures/server", async (importActual) => {
 });
 
 vi.mock("@/lib/fixtures/scenarios", async (importActual) => {
-  const actual = await importActual<typeof import("@/lib/fixtures/scenarios")>();
+  const actual =
+    await importActual<typeof import("@/lib/fixtures/scenarios")>();
   return {
     ...actual,
     resolveScenario: (name: string | null) => {
@@ -38,46 +40,32 @@ vi.mock("@/lib/fixtures/scenarios", async (importActual) => {
   };
 });
 
-const COLOURS = [
-  { id: "c1", hex: "#5B4B8A", label: null, sortOrder: 1 },
-];
-
-/** A tRPC client with one made-up procedure, counting its calls. */
+/**
+ * A tRPC client that answers every procedure, recording its path: a query
+ * resolves to `[]`, `user.me` to an account's zone.
+ */
 function fakeClient() {
   const calls: string[] = [];
-  const client = {
-    colour: {
-      list: {
-        query: () => {
-          calls.push("colour.list");
-          return Promise.resolve(COLOURS);
-        },
+  const at = (keys: string[]): unknown =>
+    new Proxy(() => {}, {
+      get: (_target, key) =>
+        typeof key === "string" && key !== "then"
+          ? at([...keys, key])
+          : undefined,
+      apply: () => {
+        const name = keys.slice(0, -1).join(".");
+        calls.push(name);
+        return Promise.resolve(
+          name === "user.me"
+            ? { timezone: "Europe/Paris", dayCloseTime: "04:00:00" }
+            : [],
+        );
       },
-    },
-    user: {
-      me: {
-        query: () =>
-          Promise.resolve({ timezone: "Europe/Paris", dayCloseTime: "04:00:00" }),
-      },
-    },
-  };
-  return { calls, client: client as unknown as TrpcClient };
+    });
+  return { calls, client: at([]) as TrpcClient };
 }
 
-type FakeClient = ReturnType<typeof fakeClient>["client"] & {
-  colour: { list: { query: () => Promise<typeof COLOURS> } };
-};
-
-/** A domain marked live: saved colours, from the made-up procedure. */
-const colours: LiveDomain = {
-  name: "colours",
-  methods: (client) => ({
-    listSavedColours: () =>
-      (client as FakeClient).colour.list.query() as never,
-  }),
-};
-
-describe("C1: ?state= outside production", () => {
+describe("?state= outside production", () => {
   it("returns the fixture server for that scenario, as before", async () => {
     const source = getDataSource("empty");
     expect(source.live).toBe(false);
@@ -94,64 +82,80 @@ describe("C1: ?state= outside production", () => {
   it("names the default scenario for an unknown name", () => {
     expect(getDataSource("no-such-state").scenario.name).toBe("default");
   });
+
+  it("C3: resolves each registered name to its own scenario", () => {
+    const names = scenarioNames();
+    expect(names.length).toBeGreaterThan(50);
+    const wrong = names.filter((name) => {
+      const source = getDataSource(name);
+      return source.live || source.scenario.name !== name;
+    });
+    expect(wrong).toEqual([]);
+  });
+
+  it("carries a capture's seeds, and none live", () => {
+    expect(getDataSource("panel-training").seeds.blockPanel).toEqual(
+      expect.objectContaining({ dateKey: "2026-10-12" }),
+    );
+    const { client } = fakeClient();
+    expect(createDataSource(null, { production: false, client }).seeds).toEqual(
+      {},
+    );
+  });
 });
 
-describe("C2: without ?state=", () => {
-  it("calls the tRPC client for a domain marked live", async () => {
+describe("C1: without ?state=, every domain is live", () => {
+  it("calls tRPC for a domain the fixtures used to answer", async () => {
     const { calls, client } = fakeClient();
-    const source = createDataSource(null, {
-      production: false,
-      client,
-      domains: [colours],
-    });
+    const source = createDataSource(null, { production: false, client });
     expect(source.live).toBe(true);
     expect(source.scenario.name).toBe(LIVE_SCENARIO);
-    await expect(source.server.listSavedColours()).resolves.toEqual(COLOURS);
-    expect(calls).toEqual(["colour.list"]);
-  });
-
-  it("falls back to the default scenario for a domain not yet live", async () => {
-    const { calls, client } = fakeClient();
-    const source = createDataSource(null, {
-      production: false,
-      client,
-      domains: [colours],
+    fixtures.server = 0;
+    fixtures.scenario = 0;
+    await source.server.listMealTopics();
+    await source.server.removeDayEvent({
+      id: "00000000-0000-4000-8000-000000000001",
     });
-    const fixture = getDataSource("default");
-    await expect(source.server.listMealTopics()).resolves.toEqual(
-      await fixture.server.listMealTopics(),
-    );
-    expect(calls).toEqual([]);
+    await source.server.readMorning("2026-10-12");
+    expect(calls).toEqual([
+      "planner.mealTopics.list",
+      "planner.removeDayEvent",
+      "morning.reading",
+      "morning.day",
+    ]);
+    expect(fixtures).toEqual({ server: 0, scenario: 0 });
   });
 
-  it("rejects with UnwiredDomain in a production build", async () => {
+  it("answers every fixture server method, with no fallback", () => {
     const { client } = fakeClient();
-    const source = createDataSource(null, {
-      production: true,
-      client,
-      domains: [colours],
-    });
-    const read = source.server.listMealTopics();
-    await expect(read).rejects.toBeInstanceOf(UnwiredDomain);
-    await expect(read).rejects.toMatchObject({ method: "listMealTopics" });
-    await expect(source.server.listSavedColours()).resolves.toEqual(COLOURS);
+    const live = createDataSource(null, { production: false, client }).server;
+    const fixture = getDataSource("default").server;
+    const missing = Object.keys(fixture).filter(
+      (method) =>
+        typeof (live as unknown as Record<string, unknown>)[method] !==
+        "function",
+    );
+    expect(missing).toEqual([]);
   });
 
   it("makes the fixtures' retries no-ops and runs on the real clock", () => {
-    const { client } = fakeClient();
+    const { calls, client } = fakeClient();
     const source = createDataSource(null, { production: true, client });
     expect(() => {
       source.server.recover();
       source.server.recoverReading();
       source.server.recoverTodos();
       source.server.reconnect();
+      source.server.recoverConnections();
+      source.server.recoverCalendars();
     }).not.toThrow();
+    expect(calls).toEqual([]);
     expect(Math.abs(source.now().getTime() - Date.now())).toBeLessThan(1000);
     expect(source.todayKey()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });
 
-describe("C3: a production build", () => {
+describe("a production build", () => {
   it("ignores ?state= and loads no fixture on the live path", async () => {
     const { client } = fakeClient();
     fixtures.server = 0;
@@ -159,7 +163,6 @@ describe("C3: a production build", () => {
     const source = createDataSource("now-running", {
       production: true,
       client,
-      domains: [colours],
     });
     expect(source.live).toBe(true);
     expect(source.scenario.name).toBe(LIVE_SCENARIO);

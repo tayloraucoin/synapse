@@ -5,10 +5,7 @@ import { UNDO_SHORT_MS } from "@syn/constants";
 import { toast } from "@syn/ui";
 import { weekKeyOf, type WorkTier } from "@syn/utils";
 import type { PlannerWrite } from "@/lib/fixtures/planner";
-import {
-  weekPlaceSeedOf,
-  type WeekPlaceSeed,
-} from "@/lib/fixtures/scenarios/week";
+import type { WeekPlaceSeed } from "@/lib/fixtures/scenarios/week";
 import {
   PLACE_WORDS,
   sessionAfterPlacing,
@@ -280,7 +277,7 @@ export function usePlace({ holdMs = UNDO_SHORT_MS }: { holdMs?: number } = {}) {
 
 /** What a capture stages on the Week (USE-75's `week-drop`, `week-add-popover`). */
 export function usePlaceSeed(): WeekPlaceSeed | undefined {
-  return weekPlaceSeedOf(useDataSource().scenario.name);
+  return useDataSource().seeds.weekPlace;
 }
 
 /** What Place on a pool sheet row hands the place sheet (USE-79's onPlace). */

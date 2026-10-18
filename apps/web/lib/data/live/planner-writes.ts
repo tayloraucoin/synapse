@@ -9,6 +9,7 @@ import {
   dayRefInput,
   editBlockInput,
   editBlockItemInput,
+  idInput,
   newBlockInput,
   newTransitionInput,
   removeBlockItemInput,
@@ -55,7 +56,7 @@ function send<T>(parse: () => unknown, call: (input: never) => Promise<T>) {
   }
 }
 
-export const plannerWrites: LiveDomain = {
+export const plannerWrites = {
   name: "planner-writes",
   methods: (client) => {
     const p = client.planner;
@@ -65,17 +66,17 @@ export const plannerWrites: LiveDomain = {
           () => parsed(dayBoundsInput, raw),
           (input) => p.writeBounds.mutate(input),
         ),
-      createBlock: (raw, scope) =>
+      createBlock: (raw, scope?) =>
         send(
           () => parsed(newBlockInput, raw),
           (input) => p.createBlock.mutate({ input, scope }),
         ),
-      createTransition: (raw, scope) =>
+      createTransition: (raw, scope?) =>
         send(
           () => parsed(newTransitionInput, raw),
           (input) => p.createTransition.mutate({ input, scope }),
         ),
-      editBlock: (raw, scope) =>
+      editBlock: (raw, scope?) =>
         send(
           () => parsed(editBlockInput, raw),
           (input) => p.editBlock.mutate({ input, scope }),
@@ -90,30 +91,35 @@ export const plannerWrites: LiveDomain = {
           () => parsed(blockChangeInput, raw),
           (input) => p.writeBlockChange.mutate(input),
         ),
-      writeBlockItem: (raw, scope) =>
+      writeBlockItem: (raw, scope?) =>
         send(
           () => parsed(blockItemInput, raw),
           (input) => p.writeBlockItem.mutate({ input, scope }),
         ),
-      editBlockItem: (raw, scope) =>
+      editBlockItem: (raw, scope?) =>
         send(
           () => parsed(editBlockItemInput, raw),
           (input) => p.editBlockItem.mutate({ input, scope }),
         ),
-      removeBlockItem: (raw, scope) =>
+      removeBlockItem: (raw, scope?) =>
         send(
           () => parsed(removeBlockItemInput, raw),
           (input) => p.removeBlockItem.mutate({ input, scope }),
         ),
-      reorderItems: (raw, scope) =>
+      reorderItems: (raw, scope?) =>
         send(
           () => parsed(reorderItemsInput, raw),
           (input) => p.reorderItems.mutate({ input, scope }),
         ),
-      writeDayEvent: ({ id, ...raw }, scope) =>
+      writeDayEvent: ({ id, ...raw }, scope?) =>
         send(
           () => parsed(dayEventInput, raw),
           (input) => p.writeDayEvent.mutate({ input, id, scope }),
+        ),
+      removeDayEvent: (raw) =>
+        send(
+          () => parsed(idInput, raw),
+          (input) => p.removeDayEvent.mutate(input),
         ),
       copyDay: (raw) =>
         send(
@@ -139,4 +145,4 @@ export const plannerWrites: LiveDomain = {
         callLive("planner", () => p.undo.mutate({ token })).then(() => {}),
     };
   },
-};
+} satisfies LiveDomain;

@@ -1,9 +1,10 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { PlannerRefusal, type PlannerWrite } from "@/lib/fixtures/planner";
+import type { PlannerWrite } from "@/lib/fixtures/planner";
 import type { WorkServer } from "@/lib/fixtures/work";
 import { offlineWrite } from "@/lib/offline/writes";
+import { PlannerRefusal } from "./refusals";
 import { useDataSource } from "./source";
 import { linearQueryKey } from "./use-linear";
 import { usePlannerWrites } from "./use-planner-writes";
