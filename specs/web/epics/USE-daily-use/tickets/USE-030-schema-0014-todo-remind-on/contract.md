@@ -60,6 +60,10 @@ criteria:
     statement: "Taylor has read 0014 and applied it on staging after 0012 and 0013"
     evidence: manual
     reason: "only Taylor runs migrations; the builder defers it"
+  - id: review:mason
+    statement: Mason reviews this ticket in fresh context against its contract and evidence.
+    evidence: manual
+    reason: a reviewer's judgment, recorded only by yarn review:run mason <id>
 ---
 
 # Contract — schema-0014-todo-remind-on

@@ -1,0 +1,48 @@
+{
+  "id": "USE-25",
+  "criteria_sha256": "c61f22bfd40f2c6980e4a325742fb81c5edb96c231cab01c1b64be6f2dafafc5",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C6": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C7": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    },
+    "C8": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    }
+  },
+  "built_at": "2026-10-18T18:53:40Z",
+  "updated_at": "2026-10-18T18:53:40Z"
+}
