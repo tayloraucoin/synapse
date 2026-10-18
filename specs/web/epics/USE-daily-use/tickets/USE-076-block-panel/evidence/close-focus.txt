@@ -1,0 +1,2 @@
+before: panel=true url=http://localhost:3120/dev/parts?state=panel-work&panel=block&block=00000000-0000-4000-8000-100000000402&on=2026-10-13 focus=H2  "Work"
+after Esc: panel=false url=http://localhost:3120/dev/parts?state=panel-work focus=A Work, 9:30 to 12:00 ""

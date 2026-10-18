@@ -1,0 +1,6 @@
+Tab 1: NEXTJS-PORTAL href=null aria-current=null ""
+Tab 2: NEXTJS-PORTAL href=null aria-current=null ""
+Tab 3: NEXTJS-PORTAL href=null aria-current=null ""
+Tab 4: A href=#main aria-current=null "Skip to the page"
+Tab 5: A href=/today aria-current=null "Today"
+Tab 6: A href=/week aria-current=null "Week"
