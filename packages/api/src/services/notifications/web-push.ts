@@ -9,17 +9,24 @@
  */
 
 import webpush from "web-push";
-
 import { VAPID_MAILTO_SUBJECT } from "@syn/constants";
+import { readApiEnv } from "../../env";
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || VAPID_MAILTO_SUBJECT;
+/** The VAPID pair and subject, read through the package's env.ts (MIG-17). */
+function readVapid() {
+  const env = readApiEnv();
+  return {
+    VAPID_PUBLIC_KEY: env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY: env.VAPID_PRIVATE_KEY,
+    VAPID_SUBJECT: env.VAPID_SUBJECT || VAPID_MAILTO_SUBJECT,
+  };
+}
 
 let configured = false;
 
 function ensureConfigured() {
   if (configured) return;
+  const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT } = readVapid();
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     throw new Error(
       "Missing VAPID keys. Set NEXT_PUBLIC_VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY.",
@@ -132,5 +139,6 @@ export async function sendWebPush(
 }
 
 export function isVapidConfigured(): boolean {
+  const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT } = readVapid();
   return Boolean(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_SUBJECT);
 }

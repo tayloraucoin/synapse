@@ -4,7 +4,8 @@
  * three reads here.
  *
  * Server-only: the web app imports `@syn/api` from server code, and its
- * client files import only types. Nothing here is `NEXT_PUBLIC_`.
+ * client files import only types. The one `NEXT_PUBLIC_` name, the VAPID
+ * public key, is read here only for the server's own send.
  *
  * Read when used, not at import, so a type-check, a test or a build with no
  * secrets succeeds; the thing that needs a value throws naming it.
@@ -25,6 +26,10 @@ const schema = z.object({
    */
   GOOGLE_CALENDAR_CLIENT_ID: z.string().min(1).optional(),
   GOOGLE_CALENDAR_CLIENT_SECRET: z.string().min(1).optional(),
+  /** Web Push's VAPID pair and contact (MIG-17); `npx web-push generate-vapid-keys`. */
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().min(1).optional(),
+  VAPID_PRIVATE_KEY: z.string().min(1).optional(),
+  VAPID_SUBJECT: z.string().min(1).optional(),
 });
 
 export type ApiEnv = z.infer<typeof schema>;
@@ -38,5 +43,9 @@ export function readApiEnv(): ApiEnv {
       process.env.GOOGLE_CALENDAR_CLIENT_ID || undefined,
     GOOGLE_CALENDAR_CLIENT_SECRET:
       process.env.GOOGLE_CALENDAR_CLIENT_SECRET || undefined,
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY:
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || undefined,
+    VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY || undefined,
+    VAPID_SUBJECT: process.env.VAPID_SUBJECT || undefined,
   });
 }

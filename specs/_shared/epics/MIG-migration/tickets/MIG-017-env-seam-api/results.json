@@ -1,0 +1,27 @@
+{
+  "id": "MIG-17",
+  "criteria_sha256": "c0ccfdbd7ad4978dda66c3b1802fd5aafb2740267b0b7c3e9dee87eff3567d3b",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    }
+  },
+  "updated_at": "2026-10-18T22:56:12Z"
+}
