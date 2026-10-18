@@ -485,9 +485,6 @@ export {
   type SplitBlockInput,
   type UndoInput,
   type WriteScopeInput,
-  // The slot writes (USE-94).
-  slotWriteOutput,
-  type SlotWriteOutput,
 } from "./planner";
 
 export {
@@ -547,8 +544,11 @@ export {
   clientRecord,
   clientsEnabledInput,
   clientWriteInput,
+  createTaskInput,
   doneSourceSchema,
   editWorkItemInput,
+  poolReadOutput,
+  workItemIdInput,
   workItemInput,
   workItemRecord,
   workSizeSchema,
@@ -558,7 +558,10 @@ export {
   type ClientRecord,
   type ClientsEnabledInput,
   type ClientWriteInput,
+  type CreateTaskInput,
   type EditWorkItemInput,
+  type PoolReadOutput,
+  type WorkItemIdInput,
   type WorkItemInput,
   type WorkItemRecord,
 } from "./work";

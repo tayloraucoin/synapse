@@ -10,7 +10,6 @@ import type {
   BlockItemRecord,
   BlockRecord,
   PlannerWriteOutput,
-  SlotRecord,
   WriteScopeInput,
 } from "@syn/validators";
 import { refuse } from "../../errors";
@@ -27,8 +26,6 @@ export type WriteScope = WriteScopeInput;
 /** What a plan hands back: the row it made or changed, and its reach. */
 export interface PlanOut {
   id?: string;
-  /** A slot write's slot as stored (USE-94), the fixture's `writeSlots` return. */
-  slot?: SlotRecord;
   reach?: { weekday: number; changedOn?: ReadonlySet<string> };
 }
 

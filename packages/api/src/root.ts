@@ -1,6 +1,5 @@
 import { assetRouter } from "./routers/asset";
 import { clientRouter } from "./routers/client";
-import { clockRouter } from "./routers/clock";
 import { connectionsRouter } from "./routers/connections";
 import { dayRouter } from "./routers/day";
 import { feedbackRouter } from "./routers/feedback";
@@ -12,6 +11,7 @@ import { notificationRouter } from "./routers/notification";
 import { plannerRouter } from "./routers/planner";
 import { todoRouter } from "./routers/todo";
 import { userRouter } from "./routers/user";
+import { workRouter } from "./routers/work";
 import { createCallerFactory, router } from "./trpc";
 
 /**
@@ -26,7 +26,6 @@ import { createCallerFactory, router } from "./trpc";
 export const appRouter = router({
   asset: assetRouter,
   client: clientRouter,
-  clock: clockRouter,
   connections: connectionsRouter,
   day: dayRouter,
   feedback: feedbackRouter,
@@ -38,6 +37,7 @@ export const appRouter = router({
   planner: plannerRouter,
   todo: todoRouter,
   user: userRouter,
+  work: workRouter,
 });
 
 export type AppRouter = typeof appRouter;

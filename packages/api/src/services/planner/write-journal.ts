@@ -1,3 +1,4 @@
+import type { UndoTable } from "../undo/tables";
 import type { RowChange } from "../undo/undo";
 import type { PlannerRows } from "./planner-rows";
 
@@ -45,14 +46,21 @@ export const systemClock: WriteClock = {
 
 type Row = { id: string };
 
-export class WriteJournal {
+/** Any rows a journal plans over: some of them Undo's tables. */
+type JournalRows = Partial<Record<UndoTable, Row[]>>;
+
+/**
+ * The journal over any of Undo's tables (USE-98 widened it for the work
+ * writes): `T` is the tables a plan may touch, each a list in `rows`.
+ */
+export class RowJournal<R extends JournalRows, T extends UndoTable & keyof R> {
   private readonly before = new Map<
     string,
-    { table: WriteTable; id: string; row: Row | null }
+    { table: T; id: string; row: Row | null }
   >();
 
   constructor(
-    readonly rows: WriteRows,
+    readonly rows: R,
     private readonly clock: WriteClock = systemClock,
   ) {}
 
@@ -70,11 +78,11 @@ export class WriteJournal {
     return { id: this.clock.newId(), createdAt: at, updatedAt: at };
   }
 
-  private list(table: WriteTable): Row[] {
+  private list(table: T): Row[] {
     return this.rows[table] as Row[];
   }
 
-  private note(table: WriteTable, id: string) {
+  private note(table: T, id: string) {
     const key = `${table}:${id}`;
     if (this.before.has(key)) return;
     const row = this.list(table).find((r) => r.id === id);
@@ -86,7 +94,7 @@ export class WriteJournal {
   }
 
   /** Inserts the row, or replaces the row with its id. */
-  put<T extends Row>(table: WriteTable, row: T): T {
+  put<V extends Row>(table: T, row: V): V {
     this.note(table, row.id);
     const rows = this.list(table);
     const index = rows.findIndex((r) => r.id === row.id);
@@ -95,13 +103,31 @@ export class WriteJournal {
     return row;
   }
 
-  remove(table: WriteTable, id: string) {
+  remove(table: T, id: string) {
     this.note(table, id);
     const rows = this.list(table);
     const index = rows.findIndex((r) => r.id === id);
     if (index !== -1) rows.splice(index, 1);
   }
 
+  /** Every row the write touched, in first-touch order, before and after. */
+  changes(): RowChange[] {
+    return [...this.before.values()].map(({ table, id, row }) => {
+      const after = this.list(table).find((r) => r.id === id) ?? null;
+      return {
+        table,
+        id,
+        before: row as RowChange["before"],
+        after:
+          after === null
+            ? null
+            : (structuredClone(after) as RowChange["after"]),
+      };
+    });
+  }
+}
+
+export class WriteJournal extends RowJournal<WriteRows, WriteTable> {
   /** A block goes with its changes, items and slots (0012's cascades). */
   removeBlock(id: string) {
     for (const change of this.rows.blockChanges.filter(
@@ -124,21 +150,5 @@ export class WriteJournal {
       this.remove("slots", slot.id);
     }
     this.remove("blockItems", id);
-  }
-
-  /** Every row the write touched, in first-touch order, before and after. */
-  changes(): RowChange[] {
-    return [...this.before.values()].map(({ table, id, row }) => {
-      const after = this.list(table).find((r) => r.id === id) ?? null;
-      return {
-        table,
-        id,
-        before: row as RowChange["before"],
-        after:
-          after === null
-            ? null
-            : (structuredClone(after) as RowChange["after"]),
-      };
-    });
   }
 }

@@ -9,8 +9,8 @@ import { orientDomain } from "./orient";
 import { plannerRead } from "./planner";
 import { plannerWrites } from "./planner-writes";
 import { savedColoursDomain } from "./saved-colours";
-import { slotsAndClock } from "./slots-and-clock";
 import { todosDomain } from "./todos";
+import { workDomain } from "./work";
 
 /**
  * A domain served live (USE-90): the server methods it answers, each a call
@@ -32,8 +32,8 @@ export const LIVE_DOMAINS: readonly LiveDomain[] = [
   orientDomain,
   plannerRead,
   plannerWrites,
-  slotsAndClock,
   clientsDomain,
   googleEventsDomain,
   todosDomain,
+  workDomain,
 ];

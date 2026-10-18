@@ -1,13 +1,12 @@
-import { z } from "zod";
-import { WORK_TIERS } from "@syn/constants";
 import { occursOn, parseRule } from "@syn/utils";
 import {
-  dateKeySchema,
+  createTaskInput,
   placeSlotInput,
   slotRecord,
   workItemInput,
   workItemRecord,
   type BlockRecord,
+  type CreateTaskInput,
 } from "@syn/validators";
 import { parse, PlannerRefusal } from "../planner";
 import type { Journal } from "../planner/journal";
@@ -22,16 +21,8 @@ import type { FixtureRecords } from "../records";
  * Linear field is set: a Synapse-only task never reaches Linear.
  */
 
-export const createTaskInput = z.object({
-  /** `workItemInput`'s fields; parsed there, with its words. */
-  item: z.unknown(),
-  tier: z.enum(WORK_TIERS),
-  days: z.array(
-    z.object({ dateKey: dateKeySchema, blockId: z.string().uuid() }),
-  ),
-});
-
-export type CreateTaskInput = z.input<typeof createTaskInput>;
+// The input's schema is `@syn/validators`' (USE-98), the work router's too.
+export { createTaskInput, type CreateTaskInput };
 
 export const NO_WORK_BLOCK = "That day has no Work block.";
 export const ONE_SESSION_A_DAY = "Pick each day once.";

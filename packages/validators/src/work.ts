@@ -1,11 +1,17 @@
 import { z } from "zod";
-import { CLIENT_COLOR_KEYS, DONE_SOURCES, WORK_SIZES } from "@syn/constants";
+import {
+  CLIENT_COLOR_KEYS,
+  DONE_SOURCES,
+  WORK_SIZES,
+  WORK_TIERS,
+} from "@syn/constants";
 import { iconValueSchema } from "./icon";
 import { dateKeySchema } from "./keys";
 import {
   instantSchema,
   lengthMinutesSchema,
   plannerNameSchema,
+  slotRecord,
   sortOrderSchema,
 } from "./planner";
 
@@ -144,3 +150,38 @@ export type ClientOrderInput = z.infer<typeof clientOrderInput>;
 export const clientsEnabledInput = z.object({ enabled: z.boolean() });
 
 export type ClientsEnabledInput = z.infer<typeof clientsEnabledInput>;
+
+/**
+ * New task (USE-51, moved here by USE-98): the item, its tier, and the days
+ * to place it on, each in that day's Work block. `item` is
+ * `workItemInput`'s fields, parsed there with its words.
+ */
+export const createTaskInput = z.object({
+  item: z.unknown(),
+  tier: z.enum(WORK_TIERS),
+  days: z.array(
+    z.object({ dateKey: dateKeySchema, blockId: z.string().uuid() }),
+  ),
+});
+
+export type CreateTaskInput = z.input<typeof createTaskInput>;
+
+/** Mark done, reopen, back to the pool, remove from Synapse (USE-98). */
+export const workItemIdInput = z.object({ workItemId: z.string().uuid() });
+
+export type WorkItemIdInput = z.infer<typeof workItemIdInput>;
+
+/**
+ * The pool read (USE-55, live in USE-98): the work neither done nor
+ * archived, their sessions with skipped ones left out, the clients not
+ * archived in their order, and the Clients switch. The web app's
+ * `PoolRecords`; USE-101 adds the Linear snapshot.
+ */
+export const poolReadOutput = z.object({
+  clientsEnabled: z.boolean(),
+  clients: z.array(clientRecord),
+  workItems: z.array(workItemRecord),
+  slots: z.array(slotRecord),
+});
+
+export type PoolReadOutput = z.infer<typeof poolReadOutput>;

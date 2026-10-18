@@ -18,13 +18,11 @@ import {
   dayBoundsRecord,
   dayEventRecord,
   slotRecord,
-  type SlotRecord,
 } from "@syn/validators";
 import type { RowStore } from "../undo/row-store";
 import type { RowChange } from "../undo/undo";
 import { recordsOf } from "./row-records";
 import type { WriteRows } from "./write-journal";
-import type { SlotKeys } from "./write-slots";
 
 /**
  * The planner writes' database half (USE-92): read the rows a plan needs,
@@ -97,49 +95,6 @@ export async function selectBlockRows(
     ),
     slots: recordsOf(slotRecord, slotRows),
   };
-}
-
-/**
- * The slots a slot write names beyond its block's (USE-94), merged into
- * `read`: the slots by id, then every slot holding the same item, to-do or
- * work item as those or as `keys` names, on any date and in any block.
- */
-export async function selectSlotRows(
-  tx: Tx,
-  read: readonly SlotRecord[],
-  keys: SlotKeys,
-): Promise<SlotRecord[]> {
-  const byId = new Map(read.map((slot) => [slot.id, slot]));
-  const add = (rows: readonly Record<string, unknown>[]) => {
-    for (const slot of recordsOf(slotRecord, rows)) byId.set(slot.id, slot);
-  };
-  const ids = [...(keys.ids ?? [])];
-  const own =
-    ids.length === 0
-      ? []
-      : recordsOf(
-          slotRecord,
-          await tx.select().from(slots).where(inArray(slots.id, ids)),
-        );
-  add(own);
-  const of = (key: keyof SlotRecord, given: readonly string[] = []) => [
-    ...new Set([
-      ...given,
-      ...own.flatMap((slot) => (slot[key] ? [slot[key] as string] : [])),
-    ]),
-  ];
-  const blockItemIds = of("blockItemId", keys.blockItemIds);
-  const todoIds = of("todoId", keys.todoIds);
-  const workItemIds = of("workItemId", keys.workItemIds);
-  const filters = [
-    blockItemIds.length > 0 && inArray(slots.blockItemId, blockItemIds),
-    todoIds.length > 0 && inArray(slots.todoId, todoIds),
-    workItemIds.length > 0 && inArray(slots.workItemId, workItemIds),
-  ].filter((filter) => filter !== false);
-  if (filters.length > 0) {
-    add(await tx.select().from(slots).where(or(...filters)));
-  }
-  return [...byId.values()];
 }
 
 /**
