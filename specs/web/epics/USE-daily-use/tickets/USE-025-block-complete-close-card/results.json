@@ -18,31 +18,69 @@
       "run": null
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:45:10Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-025-block-complete-close-card/evidence/C4.log",
+        "evidence_sha256": "8b1ac5d7755d92838ca20e64b35b9de3df9993e4d8a4cd76e967d060af0de9c2",
+        "tests": 32
+      }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:45:10Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-025-block-complete-close-card/evidence/C5.log",
+        "evidence_sha256": "8b1ac5d7755d92838ca20e64b35b9de3df9993e4d8a4cd76e967d060af0de9c2",
+        "tests": 32
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:45:10Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-025-block-complete-close-card/evidence/C6.log",
+        "evidence_sha256": "8b1ac5d7755d92838ca20e64b35b9de3df9993e4d8a4cd76e967d060af0de9c2",
+        "tests": 32
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:45:27Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-025-block-complete-close-card/evidence/C7.log",
+        "evidence_sha256": "01913298326ca71ac1070bdf9d22f4c03b0fdeae0fe0aa852350009e79c788c1"
+      }
     },
     "C8": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:45:28Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-025-block-complete-close-card/evidence/C8.log",
+        "evidence_sha256": "7d8af80a8d70286d6cb033d1c506f33f822c41a9b8abd667e5e196002c53b5ee"
+      }
     }
   },
   "built_at": "2026-10-18T18:53:40Z",
-  "updated_at": "2026-10-18T18:53:40Z"
+  "updated_at": "2026-10-18T19:45:28Z"
 }

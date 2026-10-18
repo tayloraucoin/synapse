@@ -23,19 +23,43 @@
       "run": null
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:42:11Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/C5.log",
+        "evidence_sha256": "e96ae13b66b8a9607b1959a97bfe6960a18623e662b9747c836250daa45e9a15",
+        "tests": 32
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:42:11Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/C6.log",
+        "evidence_sha256": "e96ae13b66b8a9607b1959a97bfe6960a18623e662b9747c836250daa45e9a15",
+        "tests": 32
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:42:11Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/C7.log",
+        "evidence_sha256": "e96ae13b66b8a9607b1959a97bfe6960a18623e662b9747c836250daa45e9a15",
+        "tests": 32
+      }
     },
     "C8": {
       "status": "FAIL",
@@ -43,16 +67,30 @@
       "run": null
     },
     "C9": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:42:28Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/C9.log",
+        "evidence_sha256": "71e0a27a9cc10600390d1d1464fa30c3a5bf1e663bab98b7c7dbb2be78ea9523"
+      }
     },
     "C10": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:42:29Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-016-now-lifted-card/evidence/C10.log",
+        "evidence_sha256": "436addf85245870312d1c0dccb4d6250a4f9a70d273c8a2ca1f5bb4ebde1324c"
+      }
     }
   },
   "built_at": "2026-10-18T18:51:55Z",
-  "updated_at": "2026-10-18T18:51:55Z"
+  "updated_at": "2026-10-18T19:42:30Z"
 }
