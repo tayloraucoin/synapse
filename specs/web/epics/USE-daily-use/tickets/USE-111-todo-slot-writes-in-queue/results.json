@@ -5,7 +5,15 @@
     "C1": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:56:54Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-111-todo-slot-writes-in-queue/evidence/C1.log",
+        "evidence_sha256": "ffd432d339e4358dfa95f9b124396d24ee566d0629874ac4fbcd699085ccdf42",
+        "tests": 0
+      }
     },
     "C2": {
       "status": "FAIL",
@@ -13,11 +21,18 @@
       "run": null
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:57:10Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-111-todo-slot-writes-in-queue/evidence/C3.log",
+        "evidence_sha256": "0247fe5da8612169aab7d80ab4511e253b44819452803f255c165561fac186ac"
+      }
     }
   },
   "built_at": "2026-10-18T19:31:28Z",
-  "updated_at": "2026-10-18T19:31:28Z"
+  "updated_at": "2026-10-18T19:57:11Z"
 }
