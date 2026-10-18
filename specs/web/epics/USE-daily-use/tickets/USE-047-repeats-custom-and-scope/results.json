@@ -15,24 +15,54 @@
     "C3": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:20:33Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C3.log",
+        "evidence_sha256": "35a7d2c5c73d327a00f92ba7480028762c0c6df792256263adb7efd5ec599244",
+        "tests": 0
+      }
     },
     "C4": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:20:33Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C4.log",
+        "evidence_sha256": "35a7d2c5c73d327a00f92ba7480028762c0c6df792256263adb7efd5ec599244",
+        "tests": 0
+      }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:21:01Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C5.log",
+        "evidence_sha256": "0530b260c074edff68ffbbd48772e9be34e746f8aa34b887b9a44a8b42844327"
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:21:02Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C6.log",
+        "evidence_sha256": "34958cc3f02f78c74ffdd2f839cb51d1729917ecdba068ffe1a3ea30daa4303e"
+      }
     }
   },
   "built_at": "2026-10-18T18:57:24Z",
-  "updated_at": "2026-10-18T18:57:24Z"
+  "updated_at": "2026-10-18T19:21:03Z"
 }

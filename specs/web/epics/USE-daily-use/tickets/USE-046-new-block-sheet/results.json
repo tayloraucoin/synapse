@@ -60,19 +60,41 @@
     "C12": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:20:07Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-046-new-block-sheet/evidence/C12.log",
+        "evidence_sha256": "c629961d9afe7ffb1575f91eb990b7c2a7387c515b2108aa2fac384104ceace5",
+        "tests": 0
+      }
     },
     "C13": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:20:30Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-046-new-block-sheet/evidence/C13.log",
+        "evidence_sha256": "1571a99a0c854589f6c7d2e2c5c32520b1daa172b1abdfb6858c6ce8bcf9e12f"
+      }
     },
     "C14": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:20:31Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-046-new-block-sheet/evidence/C14.log",
+        "evidence_sha256": "28e8b147f407168c836fcb09c65ae69681c853c8bbc45d2f023595926ff239bd"
+      }
     }
   },
   "built_at": "2026-10-18T18:57:20Z",
-  "updated_at": "2026-10-18T18:57:20Z"
+  "updated_at": "2026-10-18T19:20:32Z"
 }
