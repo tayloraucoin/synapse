@@ -485,6 +485,15 @@ export {
   type SplitBlockInput,
   type UndoInput,
   type WriteScopeInput,
+  // The day-level writes (USE-93).
+  copyBlockInput,
+  copyDayInput,
+  dayRefInput,
+  resetDayInput,
+  type CopyBlockInput,
+  type CopyDayInput,
+  type DayRefInput,
+  type ResetDayInput,
 } from "./planner";
 
 export {

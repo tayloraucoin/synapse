@@ -80,6 +80,7 @@ export {
   usualChangeReach,
   usualDay,
 } from "./usual-week";
+export { weeklyRule, withoutWeekday } from "./usual-rules";
 export { suggestIcons, type IconSuggestEntry } from "./icon-suggest";
 export {
   activeBlock,

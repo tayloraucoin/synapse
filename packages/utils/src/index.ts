@@ -283,6 +283,9 @@ export {
 /* ---- the icon picker's suggestions (USE-11) ---- */
 export { suggestIcons, type IconSuggestEntry } from "./planner";
 
+/* ---- the usual week's rule text (USE-93) ---- */
+export { weeklyRule, withoutWeekday } from "./planner";
+
 /* ---- where the day's first screen goes (USE-12) ---- */
 export { resolveDayEntry, type DayEntry, type DayEntryRecord } from "./planner";
 

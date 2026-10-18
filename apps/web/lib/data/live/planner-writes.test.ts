@@ -38,6 +38,10 @@ function fakeClient(fail = false) {
     "removeBlockItem",
     "reorderItems",
     "writeDayEvent",
+    "copyDay",
+    "copyBlock",
+    "clearDay",
+    "resetDay",
     "undo",
   ];
   const client = {
@@ -118,6 +122,45 @@ describe("the planner-writes domain (USE-92)", () => {
       ],
       ["undo", { token: "token" }],
     ]);
+  });
+
+  it("sends the day-level four (USE-93) as parsed", async () => {
+    const { client, calls } = fakeClient();
+    const m = plannerWrites.methods(client);
+    await m.copyDay!({ from: { weekday: 0 }, to: { date: "2026-10-22" } });
+    await m.copyBlock!({
+      blockId: BLOCK,
+      from: { date: "2026-10-19" },
+      to: { weekday: 3 },
+      startsAt: "09:00",
+    });
+    await m.clearDay!({ date: "2026-10-22" });
+    await m.resetDay!({ date: "2026-10-22" });
+    expect(calls).toEqual([
+      ["copyDay", { from: { weekday: 0 }, to: { date: "2026-10-22" } }],
+      [
+        "copyBlock",
+        {
+          blockId: BLOCK,
+          from: { date: "2026-10-19" },
+          to: { weekday: 3 },
+          startsAt: "09:00",
+        },
+      ],
+      ["clearDay", { date: "2026-10-22" }],
+      ["resetDay", { date: "2026-10-22" }],
+    ]);
+  });
+
+  it("refuses a day named both ways before any call", async () => {
+    const { client, calls } = fakeClient();
+    await expect(
+      plannerWrites.methods(client).clearDay!({
+        weekday: 1,
+        date: "2026-10-20",
+      } as never),
+    ).rejects.toMatchObject({ reason: "invalid" });
+    expect(calls).toEqual([]);
   });
 
   it("refuses a bad input with the schema's words before any call", async () => {

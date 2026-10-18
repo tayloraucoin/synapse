@@ -1,4 +1,5 @@
 import { router } from "../../trpc";
+import { plannerDayWrites } from "./day-writes";
 import { mealTopicsRouter } from "./meal-topics";
 import { plannerReads } from "./reads";
 import { savedColoursRouter } from "./saved-colours";
@@ -9,11 +10,13 @@ import { plannerWrites } from "./writes";
  * its own file beside this one. Wave 3's other planner domains join here;
  * the day and week reads (USE-91) sit at the top, `planner.today` and
  * `planner.week`, and so do its writes (USE-92), `planner.createBlock` and
- * the rest, with `planner.undo`.
+ * the rest, with `planner.undo`, and the day-level four (USE-93),
+ * `planner.copyDay` and the rest.
  */
 export const plannerRouter = router({
   ...plannerReads,
   ...plannerWrites,
+  ...plannerDayWrites,
   mealTopics: mealTopicsRouter,
   savedColours: savedColoursRouter,
 });

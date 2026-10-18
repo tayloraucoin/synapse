@@ -838,3 +838,38 @@ export const plannerWriteOutput = z.object({
 });
 
 export type PlannerWriteOutput = z.infer<typeof plannerWriteOutput>;
+
+/*
+ * ---- The day-level writes (USE-93): Copy from, Clear the day, Reset ----
+ */
+
+/**
+ * One day of Set my days: a usual weekday, or a date. Exactly one key, so a
+ * router can tell the two apart by which is there.
+ */
+export const dayRefInput = z.union([
+  z.object({ weekday: weekdaySchema }).strict(),
+  z.object({ date: dateKeySchema }).strict(),
+]);
+
+export type DayRefInput = z.infer<typeof dayRefInput>;
+
+/** D-USE-32: `to` takes `from`'s blocks, times, kinds and items. */
+export const copyDayInput = z.object({ from: dayRefInput, to: dayRefInput });
+
+export type CopyDayInput = z.infer<typeof copyDayInput>;
+
+/** D-USE-87's From a saved block: one block of `from` onto `to` at `startsAt`. */
+export const copyBlockInput = z.object({
+  blockId: z.string().uuid(),
+  from: dayRefInput,
+  to: dayRefInput,
+  startsAt: startTimeSchema,
+});
+
+export type CopyBlockInput = z.infer<typeof copyBlockInput>;
+
+/** D-USE-33: only a date resets to usual. */
+export const resetDayInput = z.object({ date: dateKeySchema });
+
+export type ResetDayInput = z.infer<typeof resetDayInput>;
