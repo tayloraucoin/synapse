@@ -205,6 +205,8 @@ export const NOW_SYSTEM_SCENARIOS: Record<string, () => Scenario> = {
     mode: "ready",
   }),
   offline: atWellness("offline", { offline: true }),
+  // A new build's worker waits behind this one (USE-114): the shell's update line.
+  "update-ready": atWellness("update-ready", { updateReady: true }),
   // Cold bath's slot is placed on its first touch; the change then fails once.
   "error-on-check": atWellness("error-on-check", {
     failWrites: [NOW_IDS.items.coldBath],

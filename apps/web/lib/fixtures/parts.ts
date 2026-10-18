@@ -150,6 +150,11 @@ for (const state of [
 ] satisfies NowPartState[]) {
   registerPart(`now-${state}`, () => createElement(NowPart, { state })); // USE-16
 }
+// USE-114: the shell's update line over Now. Unprefixed, because the shell
+// reads the same `?state=` as the part.
+registerPart("update-ready", () =>
+  createElement(NowPart, { state: "update-ready" }),
+);
 // USE-23: the running card and a timed Done, `running-<state>` (the /today scenarios).
 for (const state of [
   "counting-down",

@@ -14,6 +14,10 @@
  * pushed one (`isPushedPath`, Set my days) keeps the rail and drops the tabs.
  *
  * `?sheet=` is read once, here, by `SheetHost` (USE-83), over any screen.
+ *
+ * SY-02's update line (USE-114) heads the content column, above the page's
+ * own header, on every screen with the rail or the tabs; a focused path stays
+ * bare.
  */
 "use client";
 
@@ -28,6 +32,7 @@ import { Rail } from "./rail";
 import { useMarkShellPainted } from "./day-entry-gate";
 import { SheetHost, SheetOpenerProvider } from "./sheet-host";
 import { TabBar } from "./tab-bar";
+import { UpdateStatus } from "./update-status";
 import { useBlockViewFrom } from "./use-block-view-from";
 
 export interface AppShellProps {
@@ -81,6 +86,7 @@ export function AppShell({ children }: AppShellProps) {
               : "pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom))]",
           )}
         >
+          <UpdateStatus />
           {children}
         </div>
 

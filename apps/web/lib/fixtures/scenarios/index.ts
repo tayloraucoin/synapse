@@ -77,6 +77,8 @@ export interface Scenario {
   reading?: "loading" | "error";
   /** No connection: reads come from cache, writes wait (USE-12). */
   offline?: boolean;
+  /** A new build's worker is waiting (USE-114): the shell's update line shows. */
+  updateReady?: boolean;
   /** Stands the install check on a device for a capture (USE-83); unset, the device's own. */
   install?: InstallOverride;
   /** Stands the reminder check on a device for a capture (USE-28); unset, the device's own. */

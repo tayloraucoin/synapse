@@ -41,7 +41,9 @@ export type NowPartState =
   | "ready-go-not-yet-started"
   | "firing-still-firing"
   | "wind-down-journal"
-  | "wind-down-journal-empty";
+  | "wind-down-journal-empty"
+  // USE-114: a new build's worker waits; the shell's update line shows.
+  | "update-ready";
 
 export function NowPart({ state }: { state: NowPartState }) {
   return (
