@@ -6,8 +6,8 @@ import type { LiveDomain } from "./domains";
  * `linear.disconnect`. "+ Add a workspace" leaves for Linear's consent
  * through the start route, so its promise never settles here; the callback
  * lands back on Connections, or on `?failed=linear`. Google's connect and
- * the calendar, mapping and Clients writes are USE-103's and USE-104's, so
- * they stay unwired (the fixtures in development).
+ * the calendar writes are USE-103's, so they stay unwired (the fixtures in
+ * development); the mapping and Clients writes are `clients.ts` (USE-104).
  */
 export const connectionsDomain: LiveDomain = {
   name: "connections",

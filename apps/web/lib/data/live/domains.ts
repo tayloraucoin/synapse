@@ -1,6 +1,7 @@
 import type { FixtureServer } from "@/lib/fixtures/server";
 import type { TrpcClient } from "@/lib/trpc/client";
 import { accountDomain } from "./account";
+import { clientsDomain } from "./clients";
 import { connectionsDomain } from "./connections";
 import { mealTopicsDomain } from "./meal-topics";
 import { orientDomain } from "./orient";
@@ -26,4 +27,5 @@ export const LIVE_DOMAINS: readonly LiveDomain[] = [
   mealTopicsDomain,
   orientDomain,
   plannerRead,
+  clientsDomain,
 ];

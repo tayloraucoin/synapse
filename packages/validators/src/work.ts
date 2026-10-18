@@ -115,6 +115,21 @@ export const clientInput = z.object({
 
 export type ClientInput = z.infer<typeof clientInput>;
 
+/** A new client, or with `id` a change to one (USE-104's `client.write`). */
+export const clientWriteInput = clientInput.extend({
+  id: z.string().uuid().optional(),
+});
+
+export type ClientWriteInput = z.infer<typeof clientWriteInput>;
+
+/** Remove client, or its Undo (USE-86): `archived_at` set or cleared. */
+export const clientArchivedInput = z.object({
+  id: z.string().uuid(),
+  archived: z.boolean(),
+});
+
+export type ClientArchivedInput = z.infer<typeof clientArchivedInput>;
+
 /** The clients' order as dragged (USE-32): every id once, top first. */
 export const clientOrderInput = z.object({
   ids: z

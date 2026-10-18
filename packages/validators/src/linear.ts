@@ -185,6 +185,15 @@ export const linearProjectClientInput = z.object({
 
 export type LinearProjectClientInput = z.infer<typeof linearProjectClientInput>;
 
+/** The workspace's one client, or set per project (D-USE-91). */
+export const workspaceClientInput = z.object({
+  connectionId: z.string().uuid(),
+  clientId: z.string().uuid().nullable(),
+  perProject: z.boolean(),
+});
+
+export type WorkspaceClientInput = z.infer<typeof workspaceClientInput>;
+
 /** Settings' ··· › Disconnect on a workspace (USE-100). */
 export const linearDisconnectInput = z.object({
   connectionId: z.string().uuid(),

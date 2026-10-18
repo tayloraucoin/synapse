@@ -1,4 +1,5 @@
 import { assetRouter } from "./routers/asset";
+import { clientRouter } from "./routers/client";
 import { connectionsRouter } from "./routers/connections";
 import { dayRouter } from "./routers/day";
 import { feedbackRouter } from "./routers/feedback";
@@ -21,6 +22,7 @@ import { createCallerFactory, router } from "./trpc";
  */
 export const appRouter = router({
   asset: assetRouter,
+  client: clientRouter,
   connections: connectionsRouter,
   day: dayRouter,
   feedback: feedbackRouter,

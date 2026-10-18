@@ -1,5 +1,5 @@
-import { z } from "zod";
 import {
+  clientArchivedInput,
   clientInput,
   clientRecord,
   clientsEnabledInput,
@@ -13,6 +13,8 @@ import {
   linearWriteView,
   slotRecord,
   workItemRecord,
+  workspaceClientInput,
+  type ClientArchivedInput,
   type ClientInput,
   type ClientRecord,
   type ClientsEnabledInput,
@@ -22,12 +24,13 @@ import {
   type LinearProjectClientInput,
   type LinearWriteView,
   type WorkItemRecord,
+  type WorkspaceClientInput,
 } from "@syn/validators";
+import type { GoogleDayEvent } from "@/lib/data/google-bands";
 import type {
   ConnectionsRecords,
   LinearRecords,
 } from "@/lib/data/integration-records";
-import type { GoogleDayEvent } from "@/lib/data/google-bands";
 import { parse, PlannerRefusal } from "../planner";
 import type { FixtureRecords } from "../records";
 import {
@@ -51,23 +54,6 @@ import {
 
 /** How long the fake sender takes, so a capture can see pending. */
 export const LINEAR_SEND_MS = 600;
-
-/** The workspace's one client, or set per project (D-USE-91). */
-export const workspaceClientInput = z.object({
-  connectionId: z.string().uuid(),
-  clientId: z.string().uuid().nullable(),
-  perProject: z.boolean(),
-});
-
-export type WorkspaceClientInput = z.infer<typeof workspaceClientInput>;
-
-/** Remove client, or its Undo (USE-86). */
-export const clientArchivedInput = z.object({
-  id: z.string().uuid(),
-  archived: z.boolean(),
-});
-
-export type ClientArchivedInput = z.infer<typeof clientArchivedInput>;
 
 export interface IntegrationOptions {
   /** `fail`: each outbox row's first send fails; Try again sends it. */
