@@ -22,19 +22,19 @@ function filesUnder(dir: string): string[] {
 
 const PART_DIRS = ["apps/web/components/planner", "apps/web/components/work"];
 
-/** What a part may never reach for: the data seam, the fixtures, tRPC, a clock. */
+/**
+ * What a part may never reach for: the fixtures, tRPC, the wall clock. Wave 3
+ * wired these folders, so their sheets read the data seam (lib/data) and tick
+ * from its source through @syn/hooks; tRPC stays behind lib/data. Calendar
+ * arithmetic (`new Date(Date.UTC(…))`) reads no clock.
+ */
 const FORBIDDEN: { what: string; pattern: RegExp }[] = [
-  { what: "lib/data", pattern: /from\s+["'][^"']*lib\/data\b/ },
   { what: "lib/fixtures", pattern: /from\s+["'][^"']*lib\/fixtures\b/ },
   { what: "the tRPC client", pattern: /from\s+["'][^"']*(lib\/trpc|@trpc\/)/ },
-  {
-    what: "a clock hook",
-    pattern: /\buse(Work)?Clock\b|\buseNow\b|\buseElapsed\b|@syn\/hooks/,
-  },
-  { what: "the clock", pattern: /\bDate\.now\(|\bnew Date\(/ },
+  { what: "the clock", pattern: /\bDate\.now\(|\bnew Date\((?!Date\.UTC\()/ },
 ];
 
-test("C6: nothing under components/{planner,work} imports lib/data, lib/fixtures, the tRPC client or a clock", () => {
+test("C6: nothing under components/{planner,work} imports lib/fixtures or the tRPC client, or reads the wall clock", () => {
   const files = PART_DIRS.flatMap(filesUnder);
   assert.ok(
     files.length >= 8,

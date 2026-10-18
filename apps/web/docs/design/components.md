@@ -1,28 +1,19 @@
 # Synapse — components.md
 
-Inventory: `packages/ui/src/`, stories beside.
+Job: component (`packages/ui/src/`).
 
-| Job            | Component                                                        |
-| -------------- | ---------------------------------------------------------------- |
-| Primary action | `Button` default (ink); `destructive` on Delete account only     |
-| A row's state  | `StateWord`, one word                                            |
-| A system line  | `StatusLine`, one at most; never an `Alert`                      |
-| Undo           | `Toaster`, its one job                                           |
-| Empty, loading | `EmptyState` one sentence; `SkeletonRow`                         |
-| Failure        | `RegionRetry` per region; `ErrorPage` per route                  |
-| Failure detail | `RegionRetry` `detail`: muted small line, what is still true     |
-| Sheet          | `ResponsiveSheet`                                                |
-| Reading        | `PassageCarousel` clamped; `PassageReader` full screen           |
-| Review numbers | `BigNumber` with `FormulaSentence`                               |
-| Category       | `CategoryChip`                                                   |
-| Firing         | `FiringMark` `halo`: clay dot, grey halo, beside its words       |
-| Linear status  | `LinearStatusShape` (Linear's colour, its word); `LinearLine`    |
-| Running clock  | `CountdownFace`; "over" always beside the figure                 |
-| Running row    | `ProgressRing` (elapsed over plan), the count in its words       |
-| Pick a day     | `MonthGrid`: past faded and closed, today ringed, picked filled  |
-| Tier heading   | `GroupHeading` `leading` with a `HueSquare`, beside its word     |
-| Icon           | `IconPicker`, a step in its sheet; `ColourPopover` for custom    |
-| Day in time    | `ScheduleAxis` at 96/h; `ScheduleBullets` fixed cells, "+n more" |
-| Way back       | `Breadcrumb` "‹ <place>" on a focused screen                     |
-
-Forbidden: a toast confirming a visible save; `dark:` colour classes.
+- Primary action: `Button` default (ink); `destructive` on Delete account only.
+- Row state: `StateWord`, one word. System line: `StatusLine`, one at most, never `Alert`.
+- Undo: `Toaster`, its one job; never a toast for a visible save.
+- Empty, loading: `EmptyState` one sentence; `SkeletonRow`.
+- Failure: `RegionRetry` per region (`detail`: a muted line, what is still true); `ErrorPage` per route.
+- Sheet: `ResponsiveSheet`. Reading: `PassageCarousel`, `PassageReader` full screen.
+- Review numbers: `BigNumber` with `FormulaSentence`. Category: `CategoryChip`.
+- Firing: `FiringMark` `halo` beside its words. Linear: `LinearStatusShape` with its word; `LinearLine`.
+- Running: `CountdownFace`, "over" beside the figure; `ProgressRing` (elapsed over plan), the count in words.
+- Pick a day: `MonthGrid`.
+- Tier heading: `GroupHeading` with a `HueSquare` and its word.
+- Icon: `IconPicker`, a step in its sheet; `ColourPopover`.
+- Day in time: `ScheduleAxis` 96/h; `ScheduleBullets`, "+n more".
+- Way back: `Breadcrumb` "‹ <place>".
+- No `dark:` colour classes.

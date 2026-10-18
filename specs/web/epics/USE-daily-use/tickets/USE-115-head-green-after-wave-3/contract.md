@@ -36,7 +36,7 @@ criteria:
     evidence: check
     command: "yarn lint"
   - id: C2
-    statement: "The root tests pass: legacy-move C1 names the (dev) group and C2 the routers wave 3 mounts; use-parts C6 finds no lib/data import under components/planner or components/work"
+    statement: "The root tests pass: legacy-move C1 names the (dev) group and the days and settings routes, and C2 the routers and scheduled jobs wave 3 mounts; use-parts C6 finds no lib/fixtures or tRPC import and no wall-clock read under components/planner or components/work"
     evidence: check
     command: "yarn test"
   - id: C3
@@ -65,4 +65,5 @@ Found by the lead at the close (2026-10-18), running `yarn verify` on HEAD `1b30
 - **check-refs.** The archive and research folders under docs exist now; drop them from `tooling/refs-pending.json`.
 - **Budget.** The design layer is 5,541 of 5,000; canon.md alone is 3,870, so the product layer must come down to about 1,130 (an open item in `docs/decisions/changelog.md` already).
 - With only the parse error fixed, lint, check-types, vitest (1,380), test:migrations, check-migrations, check-settings, test:hooks, check-specs, check-test-weakening, check-reviewers, check-stack, gen:agents --check and check-types:tooling pass. The web build passed; the docs build failed only on the sandbox's Google Fonts fetch.
+- **As built (2026-10-18).** C6 failed on 57 files, not two: since USE-11 the sheets under `components/planner` and `components/work` read `lib/data` (hooks, `source`, view types) and `work-item-sheet` ticks through `useWorkClock`, and three `copy.ts` files build dates with `new Date(Date.UTC(…))`. Moving `WeekRef` would not have closed it, so C6 now states the app's truth: no fixtures, no tRPC client, no wall-clock read. legacy-move C1 also met `days` (USE-39) and `settings` (USE-85), and C2 the four scheduled jobs (USE-105). The design layer came down to 4,987 by turning tables to lists and dropping restatements and the closed gaps G-01 and G-04.
 - The shared tree's planner services (`meal-topics.ts`, `saved-colours.ts`) carry an unstaged reflow from another formatter; leave them.

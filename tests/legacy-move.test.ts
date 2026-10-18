@@ -16,14 +16,16 @@ const dirs = (path: string) =>
     statSync(at(`${path}/${name}`)).isDirectory(),
   );
 
-test("C1: the live route folders are the auth, api, legal and logout groups and a Today-only shell", () => {
+test("C1: the live route folders are the auth, api, dev, legal and logout groups and a Today-only shell", () => {
   // "_" folders are private in Next (not routes); dot folders are tooling's.
+  // (dev) is USE-7's /dev/parts host, not found in a production build.
   const isRoute = (name: string) =>
     !name.startsWith("_") && !name.startsWith(".");
   const routes = dirs("apps/web/app").filter(isRoute);
   assert.deepEqual(routes.sort(), [
     "(auth)",
     "(auth-pending)",
+    "(dev)",
     "(shell)",
     "api",
     "auth",
@@ -32,9 +34,19 @@ test("C1: the live route folders are the auth, api, legal and logout groups and 
   ]);
   // The shell holds Today and the routes USE redraws as it lands (USE-4: week
   // and review, new pages, not the old folders; USE-12: orient, reworked from
-  // the legacy frame; USE-44: day/[date]/journal, Close the day, by git mv);
-  // nothing else comes back.
-  const useRoutes = ["layout.tsx", "today", "week", "review", "orient", "day"];
+  // the legacy frame; USE-44: day/[date]/journal, Close the day, by git mv;
+  // USE-39: days, Set my days; USE-85: settings, redrawn); nothing else comes
+  // back.
+  const useRoutes = [
+    "layout.tsx",
+    "today",
+    "week",
+    "review",
+    "orient",
+    "day",
+    "days",
+    "settings",
+  ];
   const shell = readdirSync(at("apps/web/app/(shell)")).filter(isRoute);
   assert.ok(shell.includes("today"));
   assert.deepEqual(
@@ -104,11 +116,28 @@ test("C9: every moved route folder, router and job is under _legacy/, so a delet
   }
 });
 
-test("C2: appRouter mounts exactly user, notification, asset and feedback; the scheduler runs expire_exports alone", () => {
+test("C2: appRouter mounts user, notification, asset, feedback and wave 3's routers, none from _legacy; the scheduler runs the four live jobs", () => {
   const rootRouter = read("packages/api/src/root.ts");
   const body = /router\(\{([\s\S]*?)\}\)/.exec(rootRouter)?.[1] ?? "";
   const keys = [...body.matchAll(/^\s*(\w+):/gm)].map((match) => match[1]);
-  assert.deepEqual(keys.sort(), ["asset", "feedback", "notification", "user"]);
+  assert.deepEqual(keys.sort(), [
+    "asset",
+    "client",
+    "clock",
+    "connections",
+    "day",
+    "feedback",
+    "google",
+    "journal",
+    "linear",
+    "morning",
+    "notification",
+    "planner",
+    "todo",
+    "user",
+    "work",
+  ]);
+  assert.doesNotMatch(rootRouter, /from\s+["'][^"']*_legacy/);
 
   const jobs = read("packages/api/src/services/jobs/run-scheduled-jobs.ts");
   const list = /SCHEDULED_JOBS[^=]*=\s*\[([\s\S]*?)\]/.exec(jobs)?.[1] ?? "";
@@ -117,7 +146,12 @@ test("C2: appRouter mounts exactly user, notification, asset and feedback; the s
       .split(",")
       .map((entry) => entry.trim())
       .filter(Boolean),
-    ["expireExportsJob"],
+    [
+      "expireExportsJob",
+      "todoRemindersJob",
+      "blockStartsJob",
+      "sendLinearWritesJob",
+    ],
   );
   assert.match(
     read("packages/api/src/services/jobs/expire-exports.ts"),
