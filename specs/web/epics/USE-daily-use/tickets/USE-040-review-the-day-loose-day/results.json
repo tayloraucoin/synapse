@@ -23,21 +23,43 @@
       "run": null
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:49:42Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-040-review-the-day-loose-day/evidence/C5.log",
+        "evidence_sha256": "623b03c7cc819b29664bcb4b4be75127eb24309099d0c622035948ca12c187fb",
+        "tests": 32
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:49:57Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-040-review-the-day-loose-day/evidence/C6.log",
+        "evidence_sha256": "78bfcf06c219cc688fe704a53dd2da7fea91fdb3cc35ef662016e1a28eeaac9c"
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:49:58Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-040-review-the-day-loose-day/evidence/C7.log",
+        "evidence_sha256": "d766702995915cdfd4a9dcaab3def128846550a8ef6a8d0c022a235d9d3bd7ae"
+      }
     }
   },
   "built_at": "2026-10-18T19:30:07Z",
-  "updated_at": "2026-10-18T19:30:07Z"
+  "updated_at": "2026-10-18T19:49:59Z"
 }

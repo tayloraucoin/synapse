@@ -13,29 +13,29 @@
       "run": null
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:20:33Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:51:35Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C3.log",
-        "evidence_sha256": "35a7d2c5c73d327a00f92ba7480028762c0c6df792256263adb7efd5ec599244",
-        "tests": 0
+        "evidence_sha256": "e7bde6465dc6f055b1ab1bd06990600e1a49afa00e182f3b4c662146d87d0290",
+        "tests": 32
       }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:20:33Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:51:35Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C4.log",
-        "evidence_sha256": "35a7d2c5c73d327a00f92ba7480028762c0c6df792256263adb7efd5ec599244",
-        "tests": 0
+        "evidence_sha256": "e7bde6465dc6f055b1ab1bd06990600e1a49afa00e182f3b4c662146d87d0290",
+        "tests": 32
       }
     },
     "C5": {
@@ -44,10 +44,10 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:21:01Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "at": "2026-10-18T19:51:55Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C5.log",
-        "evidence_sha256": "0530b260c074edff68ffbbd48772e9be34e746f8aa34b887b9a44a8b42844327"
+        "evidence_sha256": "fa1668524e51840d90714e55450d7c5fd0896258a5bf1312d51ce38b64ad3e12"
       }
     },
     "C6": {
@@ -56,13 +56,13 @@
       "run": {
         "command": "yarn lint",
         "exit": 0,
-        "at": "2026-10-18T19:21:02Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "at": "2026-10-18T19:51:56Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C6.log",
-        "evidence_sha256": "34958cc3f02f78c74ffdd2f839cb51d1729917ecdba068ffe1a3ea30daa4303e"
+        "evidence_sha256": "46f7aee5b04693e4d2282ee2424e9261ff26b54556fdd7066c1fecb7114d0c87"
       }
     }
   },
   "built_at": "2026-10-18T18:57:24Z",
-  "updated_at": "2026-10-18T19:21:03Z"
+  "updated_at": "2026-10-18T19:51:57Z"
 }

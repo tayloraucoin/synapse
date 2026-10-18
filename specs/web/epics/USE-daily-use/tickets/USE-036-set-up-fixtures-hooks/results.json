@@ -3,81 +3,81 @@
   "criteria_sha256": "4f10b4ef82e18108a749ebf472fb6ac08c3453e1046df5d3461495eaa3aba4a3",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:19:01Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:48:42Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-036-set-up-fixtures-hooks/evidence/C1.log",
-        "evidence_sha256": "8f1e989dd14e5e8bd1a191447ed69be86ee126e0464c80cdb98275630383a409",
-        "tests": 0
+        "evidence_sha256": "9cd75918e00775f031e03ffd8de8ac7f764f186f51d3e31c465a653a9e96e353",
+        "tests": 32
       }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:19:01Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:48:42Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-036-set-up-fixtures-hooks/evidence/C2.log",
-        "evidence_sha256": "8f1e989dd14e5e8bd1a191447ed69be86ee126e0464c80cdb98275630383a409",
-        "tests": 0
+        "evidence_sha256": "9cd75918e00775f031e03ffd8de8ac7f764f186f51d3e31c465a653a9e96e353",
+        "tests": 32
       }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:19:01Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:48:42Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-036-set-up-fixtures-hooks/evidence/C3.log",
-        "evidence_sha256": "8f1e989dd14e5e8bd1a191447ed69be86ee126e0464c80cdb98275630383a409",
-        "tests": 0
+        "evidence_sha256": "9cd75918e00775f031e03ffd8de8ac7f764f186f51d3e31c465a653a9e96e353",
+        "tests": 32
       }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:19:01Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:48:42Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-036-set-up-fixtures-hooks/evidence/C4.log",
-        "evidence_sha256": "8f1e989dd14e5e8bd1a191447ed69be86ee126e0464c80cdb98275630383a409",
-        "tests": 0
+        "evidence_sha256": "9cd75918e00775f031e03ffd8de8ac7f764f186f51d3e31c465a653a9e96e353",
+        "tests": 32
       }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:19:01Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:48:42Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-036-set-up-fixtures-hooks/evidence/C5.log",
-        "evidence_sha256": "8f1e989dd14e5e8bd1a191447ed69be86ee126e0464c80cdb98275630383a409",
-        "tests": 0
+        "evidence_sha256": "9cd75918e00775f031e03ffd8de8ac7f764f186f51d3e31c465a653a9e96e353",
+        "tests": 32
       }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:19:01Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:48:42Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-036-set-up-fixtures-hooks/evidence/C6.log",
-        "evidence_sha256": "8f1e989dd14e5e8bd1a191447ed69be86ee126e0464c80cdb98275630383a409",
-        "tests": 0
+        "evidence_sha256": "9cd75918e00775f031e03ffd8de8ac7f764f186f51d3e31c465a653a9e96e353",
+        "tests": 32
       }
     },
     "C7": {
@@ -86,13 +86,13 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:19:29Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "at": "2026-10-18T19:49:01Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-036-set-up-fixtures-hooks/evidence/C7.log",
-        "evidence_sha256": "1c404924fc2f6c54f2f1ff12fd84d9f1073c0669bb4e883c7544d87bf653870f"
+        "evidence_sha256": "234212783124bdc7094a84b7f074303cb2eade0157533567a1b9c4421244c6c0"
       }
     }
   },
   "built_at": "2026-10-18T18:55:39Z",
-  "updated_at": "2026-10-18T19:19:30Z"
+  "updated_at": "2026-10-18T19:49:01Z"
 }

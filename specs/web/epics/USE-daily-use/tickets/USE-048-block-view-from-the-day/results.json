@@ -58,16 +58,30 @@
       "run": null
     },
     "C12": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:51:58Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-048-block-view-from-the-day/evidence/C12.log",
+        "evidence_sha256": "40ba058e4523a3df92cde9c5c42838ee59188a4f18be39988fbe40dbcca85467"
+      }
     },
     "C13": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:52:00Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-048-block-view-from-the-day/evidence/C13.log",
+        "evidence_sha256": "af01c7226e8861330f2e1bcea047a10f44bfa37361c0040a015aa1d16b01c5ba"
+      }
     }
   },
   "built_at": "2026-10-18T19:30:14Z",
-  "updated_at": "2026-10-18T19:30:14Z"
+  "updated_at": "2026-10-18T19:52:00Z"
 }
