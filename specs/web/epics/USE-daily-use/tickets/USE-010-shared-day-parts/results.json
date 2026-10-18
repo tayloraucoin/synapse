@@ -28,21 +28,43 @@
       "run": null
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:root",
+        "exit": 0,
+        "at": "2026-10-18T19:40:54Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-010-shared-day-parts/evidence/C6.log",
+        "evidence_sha256": "edc108e1bb00dda0266f7f199a283fee1f6e9b15bf9a2ec2487338488ff33313",
+        "tests": 32
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:40:57Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-010-shared-day-parts/evidence/C7.log",
+        "evidence_sha256": "7ea6e5704a95c6546121fafd33d1b6222dba00fbad4deab825186b4575e61b7a"
+      }
     },
     "C8": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint:boundaries",
+        "exit": 0,
+        "at": "2026-10-18T19:40:58Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-010-shared-day-parts/evidence/C8.log",
+        "evidence_sha256": "221eae2c4741481f9a310110a586f3b6d73deedd856cc105728287e847f1fae2"
+      }
     }
   },
   "built_at": "2026-10-18T18:50:27Z",
-  "updated_at": "2026-10-18T18:50:27Z"
+  "updated_at": "2026-10-18T19:41:10Z"
 }

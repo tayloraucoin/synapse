@@ -3,81 +3,81 @@
   "criteria_sha256": "0e645cf5375c4cf655978667d5a90867984b6ed0cf5c1213c871375718c09891",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:15:36Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C1.log",
-        "evidence_sha256": "1a438ad7fd93de90f90f035f0372d803a4256a466a9b3346609d7f1a3a4955f1",
-        "tests": 0
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
       }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:15:36Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C2.log",
-        "evidence_sha256": "1a438ad7fd93de90f90f035f0372d803a4256a466a9b3346609d7f1a3a4955f1",
-        "tests": 0
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
       }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:15:36Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C3.log",
-        "evidence_sha256": "1a438ad7fd93de90f90f035f0372d803a4256a466a9b3346609d7f1a3a4955f1",
-        "tests": 0
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
       }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:15:36Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C4.log",
-        "evidence_sha256": "1a438ad7fd93de90f90f035f0372d803a4256a466a9b3346609d7f1a3a4955f1",
-        "tests": 0
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
       }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:15:36Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C5.log",
-        "evidence_sha256": "1a438ad7fd93de90f90f035f0372d803a4256a466a9b3346609d7f1a3a4955f1",
-        "tests": 0
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
       }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:15:36Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C6.log",
-        "evidence_sha256": "1a438ad7fd93de90f90f035f0372d803a4256a466a9b3346609d7f1a3a4955f1",
-        "tests": 0
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
       }
     },
     "C7": {
@@ -86,13 +86,13 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:15:59Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "at": "2026-10-18T19:40:52Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C7.log",
-        "evidence_sha256": "6cd8dae6b1522709b8a4ec488039f89cc60a38e4bc3cfe6cae662a4724b99325"
+        "evidence_sha256": "da0424e71219860f84e57c28cdd4af9890dc0c97b8792b4c1e760aa38235ed62"
       }
     }
   },
   "built_at": "2026-10-18T18:50:24Z",
-  "updated_at": "2026-10-18T19:15:59Z"
+  "updated_at": "2026-10-18T19:40:53Z"
 }

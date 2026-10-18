@@ -23,21 +23,43 @@
       "run": null
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:41:52Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-013-orient-reader-and-last-night/evidence/C5.log",
+        "evidence_sha256": "be2c7009cc2f1a666d5338fddaebdb55f98e3a0f976653810839e84375c6bb76",
+        "tests": 32
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:42:08Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-013-orient-reader-and-last-night/evidence/C6.log",
+        "evidence_sha256": "147e0c90f1b79355a98ed963149c8683e8c8afd1611c9e794609bf27d65aff07"
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:42:09Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-013-orient-reader-and-last-night/evidence/C7.log",
+        "evidence_sha256": "9eb00709df035286773db71201642cc91f82db506c22aba50eb43703bc5db6e7"
+      }
     }
   },
   "built_at": "2026-10-18T18:51:48Z",
-  "updated_at": "2026-10-18T18:51:48Z"
+  "updated_at": "2026-10-18T19:42:10Z"
 }
