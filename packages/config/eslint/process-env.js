@@ -74,8 +74,9 @@ export const processEnvConfig = [
     },
   },
   {
-    // The seam itself: the workspace's own env.ts.
-    files: ["env.ts", "src/env.ts"],
+    // The seam itself: the workspace's own env.ts, and the journeys' (USE-113:
+    // Playwright loads them as CommonJS, which apps/web/env.ts cannot be).
+    files: ["env.ts", "src/env.ts", "e2e/env.ts"],
     rules: { "no-restricted-properties": "off" },
   },
   {

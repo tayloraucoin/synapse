@@ -79,6 +79,9 @@ const nextConfig: NextConfig = {
    */
   agentRules: false,
 
+  /** The journeys' dev server builds apart (USE-113); unset, `.next`. */
+  ...(env.E2E_DIST_DIR ? { distDir: env.E2E_DIST_DIR } : {}),
+
   // Next 16 blocks cross-origin `/_next/*` in dev unless listed here. Phone and
   // LAN access through `yarn web:dev:local` needs these or React never hydrates.
   allowedDevOrigins: getLocalDevOrigins(),

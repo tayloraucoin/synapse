@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { env } from "../env";
+import { env } from "./env";
 
 /**
  * USE-107: the service worker's app-shell cache, on the local dev server,

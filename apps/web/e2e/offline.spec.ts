@@ -1,5 +1,5 @@
 import { expect, test, type Page, type Request } from "@playwright/test";
-import { env } from "../env";
+import { env } from "./env";
 
 /**
  * USE-106 C1: offline, Start then Prompt sent then Done on a work item; the

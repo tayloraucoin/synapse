@@ -67,6 +67,9 @@ const rawEnv = createEnv({
     // The journeys' local test account (USE-106): `yarn test:e2e` only.
     E2E_EMAIL: z.string().email().optional(),
     E2E_PASSWORD: z.string().min(1).optional(),
+    // The journeys' own build folder (USE-113), set by playwright.config.ts
+    // so their dev server runs beside another: Next locks one per folder.
+    E2E_DIST_DIR: z.string().min(1).optional(),
 
     // Google OAuth is configured in the Supabase dashboard, not by this app.
     // Declared so a deploy that sets them does not trip t3-env's unknown-key
@@ -130,6 +133,7 @@ const rawEnv = createEnv({
     CRON_SECRET: process.env.CRON_SECRET,
     E2E_EMAIL: process.env.E2E_EMAIL,
     E2E_PASSWORD: process.env.E2E_PASSWORD,
+    E2E_DIST_DIR: process.env.E2E_DIST_DIR,
     GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID,
     GOOGLE_OAUTH_CLIENT_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
     NEXT_PUBLIC_SUPABASE_URL_STAGING:
