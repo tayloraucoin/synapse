@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import { resolveScenario } from "@/lib/fixtures/scenarios";
 import { SET_UP_IDS, SET_UP_NOW } from "@/lib/fixtures/scenarios/set-up";
 import { createFixtureServer } from "@/lib/fixtures/server";
-import { todoOrderWrites, todosBlock, withPendingTodos } from "./block-view-todos";
+import {
+  todoOrderWrites,
+  todosBlock,
+  withPendingTodos,
+} from "./block-view-todos";
 import { deriveBlockView } from "./use-block-view";
 import { createPlannerQueue } from "./use-planner-writes";
 
@@ -93,7 +97,9 @@ describe("C1: offline, a to-do reordered and one added in Errands", () => {
       "Buy stamps",
     ]);
     // Nothing has landed while offline.
-    expect(titles(todosBlock(await view()).todos)).toEqual(titles(before.todos));
+    expect(titles(todosBlock(await view()).todos)).toEqual(
+      titles(before.todos),
+    );
 
     await queue.setOnline(true);
     await Promise.all([reordered, added]);
