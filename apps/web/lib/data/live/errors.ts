@@ -67,17 +67,3 @@ export async function callLive<T>(
     throw toRefusal(error, kind);
   }
 }
-
-/**
- * A method whose domain is not live yet, in a production build: it fails
- * loudly, as an error state, and never answers with fixture records.
- */
-export class UnwiredDomain extends Error {
-  readonly method: string;
-
-  constructor(method: string) {
-    super(`${method} is not served live yet.`);
-    this.name = "UnwiredDomain";
-    this.method = method;
-  }
-}
