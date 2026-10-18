@@ -3,29 +3,69 @@
   "criteria_sha256": "2af0edb23d892b11a35cb7051a1e216f3cc218c9983503223a10c8733312de3b",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:11:37Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-103-google-calendar/evidence/C1.log",
+        "evidence_sha256": "430e0d0a5e97afbdecfc1f825ed3c8d25cb75b6e1275128da87819ea0a763504",
+        "tests": 32
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:11:37Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-103-google-calendar/evidence/C2.log",
+        "evidence_sha256": "430e0d0a5e97afbdecfc1f825ed3c8d25cb75b6e1275128da87819ea0a763504",
+        "tests": 32
+      }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:11:37Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-103-google-calendar/evidence/C3.log",
+        "evidence_sha256": "430e0d0a5e97afbdecfc1f825ed3c8d25cb75b6e1275128da87819ea0a763504",
+        "tests": 32
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:11:37Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-103-google-calendar/evidence/C4.log",
+        "evidence_sha256": "430e0d0a5e97afbdecfc1f825ed3c8d25cb75b6e1275128da87819ea0a763504",
+        "tests": 32
+      }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:11:37Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-103-google-calendar/evidence/C5.log",
+        "evidence_sha256": "430e0d0a5e97afbdecfc1f825ed3c8d25cb75b6e1275128da87819ea0a763504",
+        "tests": 32
+      }
     },
     "C6": {
       "status": "FAIL",
@@ -33,11 +73,18 @@
       "run": null
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T23:11:54Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-103-google-calendar/evidence/C7.log",
+        "evidence_sha256": "f76b3dffe6d35c7eed9b8fb2a759e06d98328bfb101e3ec948d832a9a74b5dfb"
+      }
     }
   },
   "built_at": "2026-10-18T23:04:14Z",
-  "updated_at": "2026-10-18T23:04:14Z"
+  "updated_at": "2026-10-18T23:11:55Z"
 }

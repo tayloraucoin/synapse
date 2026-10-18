@@ -3,36 +3,83 @@
   "criteria_sha256": "1e9a375dd89a85921b7efba1de2af00c7273318fb4b83acc6dc55ed3c419617d",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:40Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-098-work-pool-and-items/evidence/C1.log",
+        "evidence_sha256": "83f44cfa2c99ed0e2d8ef9d9c991f7c3271dc0d46d001c924119234321ee84a7",
+        "tests": 32
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:40Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-098-work-pool-and-items/evidence/C2.log",
+        "evidence_sha256": "83f44cfa2c99ed0e2d8ef9d9c991f7c3271dc0d46d001c924119234321ee84a7",
+        "tests": 32
+      }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:40Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-098-work-pool-and-items/evidence/C3.log",
+        "evidence_sha256": "83f44cfa2c99ed0e2d8ef9d9c991f7c3271dc0d46d001c924119234321ee84a7",
+        "tests": 32
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:40Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-098-work-pool-and-items/evidence/C4.log",
+        "evidence_sha256": "83f44cfa2c99ed0e2d8ef9d9c991f7c3271dc0d46d001c924119234321ee84a7",
+        "tests": 32
+      }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:40Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-098-work-pool-and-items/evidence/C5.log",
+        "evidence_sha256": "83f44cfa2c99ed0e2d8ef9d9c991f7c3271dc0d46d001c924119234321ee84a7",
+        "tests": 32
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T23:09:59Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-098-work-pool-and-items/evidence/C6.log",
+        "evidence_sha256": "db890a3632288c8a6e80ea36b169c5c21114167a9416ecf73700f902d95804a7"
+      }
     }
   },
   "built_at": "2026-10-18T23:04:00Z",
-  "updated_at": "2026-10-18T23:04:00Z"
+  "updated_at": "2026-10-18T23:10:00Z"
 }

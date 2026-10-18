@@ -3,26 +3,57 @@
   "criteria_sha256": "1815967747e090755f74c3976d9da3f5e097e449b1f7dc58f18ee216a8cedef5",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:21Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-095-todos/evidence/C1.log",
+        "evidence_sha256": "e6213dec0d69f795e0c769d0f638e49167d057249c749464926fda03ba48e925",
+        "tests": 32
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:21Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-095-todos/evidence/C2.log",
+        "evidence_sha256": "e6213dec0d69f795e0c769d0f638e49167d057249c749464926fda03ba48e925",
+        "tests": 32
+      }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:21Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-095-todos/evidence/C3.log",
+        "evidence_sha256": "e6213dec0d69f795e0c769d0f638e49167d057249c749464926fda03ba48e925",
+        "tests": 32
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T23:09:39Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-095-todos/evidence/C4.log",
+        "evidence_sha256": "fffdd1ac6ab1440f4f7a23249ea203a4371109bcc229b44dfbb97d06e6ccd387"
+      }
     }
   },
   "built_at": "2026-10-18T23:03:56Z",
-  "updated_at": "2026-10-18T23:03:56Z"
+  "updated_at": "2026-10-18T23:09:39Z"
 }
