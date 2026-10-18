@@ -5,34 +5,81 @@
     "C1": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:22:11Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C1.log",
+        "evidence_sha256": "6afb21bb1ddf3ea7be882396cd31615dd230fdf8484e83d0dfac4d8656ab0602",
+        "tests": 0
+      }
     },
     "C2": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:22:11Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C2.log",
+        "evidence_sha256": "6afb21bb1ddf3ea7be882396cd31615dd230fdf8484e83d0dfac4d8656ab0602",
+        "tests": 0
+      }
     },
     "C3": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:22:11Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C3.log",
+        "evidence_sha256": "6afb21bb1ddf3ea7be882396cd31615dd230fdf8484e83d0dfac4d8656ab0602",
+        "tests": 0
+      }
     },
     "C4": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:22:11Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C4.log",
+        "evidence_sha256": "6afb21bb1ddf3ea7be882396cd31615dd230fdf8484e83d0dfac4d8656ab0602",
+        "tests": 0
+      }
     },
     "C5": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:22:11Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C5.log",
+        "evidence_sha256": "6afb21bb1ddf3ea7be882396cd31615dd230fdf8484e83d0dfac4d8656ab0602",
+        "tests": 0
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:22:35Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C6.log",
+        "evidence_sha256": "8c499de1915f65ad9b1d0550347c579a781c4880ca9ca0588a8ff299f76a41ed"
+      }
     }
   },
   "built_at": "2026-10-18T18:57:51Z",
-  "updated_at": "2026-10-18T18:57:51Z"
+  "updated_at": "2026-10-18T19:22:36Z"
 }
