@@ -18,26 +18,56 @@
       "run": null
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:46:25Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-029-todo-sheet-more-menu/evidence/C4.log",
+        "evidence_sha256": "12dca6873c92e79e164113f70b48fa57f05f4d42a0bab4c08db476e1439bb1bb",
+        "tests": 32
+      }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:46:25Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-029-todo-sheet-more-menu/evidence/C5.log",
+        "evidence_sha256": "12dca6873c92e79e164113f70b48fa57f05f4d42a0bab4c08db476e1439bb1bb",
+        "tests": 32
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:46:42Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-029-todo-sheet-more-menu/evidence/C6.log",
+        "evidence_sha256": "0606155f15e8025c71f1ae2a408ccc3cc63082dda9955b3b5085467b738c2d1a"
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:46:43Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-029-todo-sheet-more-menu/evidence/C7.log",
+        "evidence_sha256": "774b105ae59fdd015ccbf31e88dcae1a87611baa5b6e20a1f0699522b2a08a1d"
+      }
     }
   },
   "built_at": "2026-10-18T18:54:01Z",
-  "updated_at": "2026-10-18T18:54:01Z"
+  "updated_at": "2026-10-18T19:46:43Z"
 }

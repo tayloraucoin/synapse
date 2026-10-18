@@ -8,31 +8,69 @@
       "run": null
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:45:29Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-026-block-complete-do-now/evidence/C2.log",
+        "evidence_sha256": "d3f1cd2b322e8469160d63374ebc15228445ab9323137f16b33307b14b21221c",
+        "tests": 32
+      }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:45:29Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-026-block-complete-do-now/evidence/C3.log",
+        "evidence_sha256": "d3f1cd2b322e8469160d63374ebc15228445ab9323137f16b33307b14b21221c",
+        "tests": 32
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:45:29Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-026-block-complete-do-now/evidence/C4.log",
+        "evidence_sha256": "d3f1cd2b322e8469160d63374ebc15228445ab9323137f16b33307b14b21221c",
+        "tests": 32
+      }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:45:46Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-026-block-complete-do-now/evidence/C5.log",
+        "evidence_sha256": "83af6179ded36054c0edd5d85c059cf9e46c50208ce6f257580e3c92e6047a3e"
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:45:47Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-026-block-complete-do-now/evidence/C6.log",
+        "evidence_sha256": "7d96e50ddd0733a2cb1d1e3e5735e6e556f14889642cfa390eb1a08ffc43fceb"
+      }
     }
   },
   "built_at": "2026-10-18T18:53:44Z",
-  "updated_at": "2026-10-18T18:53:44Z"
+  "updated_at": "2026-10-18T19:45:47Z"
 }

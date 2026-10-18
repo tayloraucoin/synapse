@@ -8,10 +8,10 @@
       "run": {
         "command": "yarn test:root",
         "exit": 0,
-        "at": "2026-10-18T19:17:06Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "at": "2026-10-18T19:46:44Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C1.log",
-        "evidence_sha256": "e5dcfcaabf50eb3fc2e2d06b1680f7a8e60a396587225cb57da95ab405c525d4",
+        "evidence_sha256": "8db038dcb8dd4b85d1b498986455e6bf7af9bd250a52c1a3ab43256754ab4433",
         "tests": 32
       }
     },
@@ -21,23 +21,23 @@
       "run": {
         "command": "yarn check-migrations",
         "exit": 0,
-        "at": "2026-10-18T19:17:10Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "at": "2026-10-18T19:46:47Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C2.log",
-        "evidence_sha256": "9bf27c1af1786048f47b5d7ba635678afd93abe2e279d5ecee696d7fc9375674"
+        "evidence_sha256": "1b59e2fa95b91feb8b1d347936a48a4803f67c469f5e4735e14f1076315c063e"
       }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:11Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:46:48Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C3.log",
-        "evidence_sha256": "4ebe856cfdb8ed696449fad1d4af478636893851d64ba6174b188d2caad6c210",
-        "tests": 0
+        "evidence_sha256": "bc1cd7e60d67087e1a44a707a4c0f6f85813b11336bdc8facd1e5a4ce0f1c840",
+        "tests": 32
       }
     },
     "C4": {
@@ -46,10 +46,10 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:17:32Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "at": "2026-10-18T19:47:03Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C4.log",
-        "evidence_sha256": "3e22fa2639eab2bc3aaebf71538fa50a09c1f599c0baf055b7694b32c407f548"
+        "evidence_sha256": "a429b5a1bd63484d6660c6bb92fb9cac425b1ceb31c291df89572a507ce49b2f"
       }
     },
     "C5": {
@@ -64,5 +64,5 @@
     }
   },
   "built_at": "2026-10-18T18:53:52Z",
-  "updated_at": "2026-10-18T19:17:32Z"
+  "updated_at": "2026-10-18T19:47:04Z"
 }

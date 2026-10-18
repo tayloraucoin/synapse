@@ -28,26 +28,56 @@
       "run": null
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:46:07Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-028-todo-sheet/evidence/C6.log",
+        "evidence_sha256": "bc359987674a2d6522d81b4a46a186bcb52bc57faf0bb53b69c46ae14c8350c9",
+        "tests": 32
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:46:07Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-028-todo-sheet/evidence/C7.log",
+        "evidence_sha256": "bc359987674a2d6522d81b4a46a186bcb52bc57faf0bb53b69c46ae14c8350c9",
+        "tests": 32
+      }
     },
     "C8": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:46:22Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-028-todo-sheet/evidence/C8.log",
+        "evidence_sha256": "65859736d38a874c446eb53cbd79ddbe46dca9bfca46e77162e675d7f33ff5e5"
+      }
     },
     "C9": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:46:23Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-028-todo-sheet/evidence/C9.log",
+        "evidence_sha256": "e4c064bfd37f06809d011d9cbce5ff9f14b6496b51e148761b0f372d41ed6cf3"
+      }
     }
   },
   "built_at": "2026-10-18T18:53:57Z",
-  "updated_at": "2026-10-18T18:53:57Z"
+  "updated_at": "2026-10-18T19:46:24Z"
 }

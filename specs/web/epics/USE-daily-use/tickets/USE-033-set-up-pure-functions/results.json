@@ -3,94 +3,94 @@
   "criteria_sha256": "9ac994207305c89618a11a35377e2d99c170a6c7092ea81dfcd32b37ffe31135",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:58Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:43Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-033-set-up-pure-functions/evidence/C1.log",
-        "evidence_sha256": "a34bb25056d3f51e6bffdb60f0147d1b9f6ae3947f0f5ae6e45da1fa2bff5b90",
-        "tests": 0
+        "evidence_sha256": "cc62a15fb690d1c622d66e5139924ac333b7475fecc9f0eaf380c7a6751bc932",
+        "tests": 32
       }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:58Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:43Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-033-set-up-pure-functions/evidence/C2.log",
-        "evidence_sha256": "a34bb25056d3f51e6bffdb60f0147d1b9f6ae3947f0f5ae6e45da1fa2bff5b90",
-        "tests": 0
+        "evidence_sha256": "cc62a15fb690d1c622d66e5139924ac333b7475fecc9f0eaf380c7a6751bc932",
+        "tests": 32
       }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:58Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:43Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-033-set-up-pure-functions/evidence/C3.log",
-        "evidence_sha256": "a34bb25056d3f51e6bffdb60f0147d1b9f6ae3947f0f5ae6e45da1fa2bff5b90",
-        "tests": 0
+        "evidence_sha256": "cc62a15fb690d1c622d66e5139924ac333b7475fecc9f0eaf380c7a6751bc932",
+        "tests": 32
       }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:58Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:43Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-033-set-up-pure-functions/evidence/C4.log",
-        "evidence_sha256": "a34bb25056d3f51e6bffdb60f0147d1b9f6ae3947f0f5ae6e45da1fa2bff5b90",
-        "tests": 0
+        "evidence_sha256": "cc62a15fb690d1c622d66e5139924ac333b7475fecc9f0eaf380c7a6751bc932",
+        "tests": 32
       }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:58Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:43Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-033-set-up-pure-functions/evidence/C5.log",
-        "evidence_sha256": "a34bb25056d3f51e6bffdb60f0147d1b9f6ae3947f0f5ae6e45da1fa2bff5b90",
-        "tests": 0
+        "evidence_sha256": "cc62a15fb690d1c622d66e5139924ac333b7475fecc9f0eaf380c7a6751bc932",
+        "tests": 32
       }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:58Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:43Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-033-set-up-pure-functions/evidence/C6.log",
-        "evidence_sha256": "a34bb25056d3f51e6bffdb60f0147d1b9f6ae3947f0f5ae6e45da1fa2bff5b90",
-        "tests": 0
+        "evidence_sha256": "cc62a15fb690d1c622d66e5139924ac333b7475fecc9f0eaf380c7a6751bc932",
+        "tests": 32
       }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:58Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:43Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-033-set-up-pure-functions/evidence/C7.log",
-        "evidence_sha256": "a34bb25056d3f51e6bffdb60f0147d1b9f6ae3947f0f5ae6e45da1fa2bff5b90",
-        "tests": 0
+        "evidence_sha256": "cc62a15fb690d1c622d66e5139924ac333b7475fecc9f0eaf380c7a6751bc932",
+        "tests": 32
       }
     },
     "C8": {
@@ -99,13 +99,13 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:18:21Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "at": "2026-10-18T19:48:02Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-033-set-up-pure-functions/evidence/C8.log",
-        "evidence_sha256": "247b75c2adf635c0b325a7f78eb50f14040e04e69b72db43db8b1b4ec6a0ca77"
+        "evidence_sha256": "d2951a5d9b77a36e885e0b2c64f579ddc5adb0944cead22584f08bf1d1ac3ce7"
       }
     }
   },
   "built_at": "2026-10-18T18:54:13Z",
-  "updated_at": "2026-10-18T19:18:21Z"
+  "updated_at": "2026-10-18T19:48:03Z"
 }

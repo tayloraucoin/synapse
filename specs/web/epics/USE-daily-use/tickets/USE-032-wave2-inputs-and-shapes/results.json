@@ -3,68 +3,68 @@
   "criteria_sha256": "d372ab0da0c81f303ab3a1b598b28c7975ea9efd025dce2b9471e8496a74daf2",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:35Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:24Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-032-wave2-inputs-and-shapes/evidence/C1.log",
-        "evidence_sha256": "80c466b725f1ac8ceaeb99867edae35fdeb5cfacee3ba7906c9f3ca8da8c1197",
-        "tests": 0
+        "evidence_sha256": "99d55c888c30337587317c005c2665e9a5bd3ea02a6d65398b14e0d8f689f0e6",
+        "tests": 32
       }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:35Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:24Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-032-wave2-inputs-and-shapes/evidence/C2.log",
-        "evidence_sha256": "80c466b725f1ac8ceaeb99867edae35fdeb5cfacee3ba7906c9f3ca8da8c1197",
-        "tests": 0
+        "evidence_sha256": "99d55c888c30337587317c005c2665e9a5bd3ea02a6d65398b14e0d8f689f0e6",
+        "tests": 32
       }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:35Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:24Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-032-wave2-inputs-and-shapes/evidence/C3.log",
-        "evidence_sha256": "80c466b725f1ac8ceaeb99867edae35fdeb5cfacee3ba7906c9f3ca8da8c1197",
-        "tests": 0
+        "evidence_sha256": "99d55c888c30337587317c005c2665e9a5bd3ea02a6d65398b14e0d8f689f0e6",
+        "tests": 32
       }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:35Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:24Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-032-wave2-inputs-and-shapes/evidence/C4.log",
-        "evidence_sha256": "80c466b725f1ac8ceaeb99867edae35fdeb5cfacee3ba7906c9f3ca8da8c1197",
-        "tests": 0
+        "evidence_sha256": "99d55c888c30337587317c005c2665e9a5bd3ea02a6d65398b14e0d8f689f0e6",
+        "tests": 32
       }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:17:35Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "exit": 0,
+        "at": "2026-10-18T19:47:24Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-032-wave2-inputs-and-shapes/evidence/C5.log",
-        "evidence_sha256": "80c466b725f1ac8ceaeb99867edae35fdeb5cfacee3ba7906c9f3ca8da8c1197",
-        "tests": 0
+        "evidence_sha256": "99d55c888c30337587317c005c2665e9a5bd3ea02a6d65398b14e0d8f689f0e6",
+        "tests": 32
       }
     },
     "C6": {
@@ -73,13 +73,13 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:17:56Z",
-        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "at": "2026-10-18T19:47:41Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-032-wave2-inputs-and-shapes/evidence/C6.log",
-        "evidence_sha256": "7028197774c7b3110f885f6b1c11aca1f7629e37f2c40503d6d95b920383751c"
+        "evidence_sha256": "61fe26cef538f92fe9d8b96537f871365aa48f8326deeb1503832cbc65614e0c"
       }
     }
   },
   "built_at": "2026-10-18T18:54:09Z",
-  "updated_at": "2026-10-18T19:17:57Z"
+  "updated_at": "2026-10-18T19:47:42Z"
 }
