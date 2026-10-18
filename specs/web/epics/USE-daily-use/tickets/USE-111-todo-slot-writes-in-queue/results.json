@@ -3,16 +3,16 @@
   "criteria_sha256": "1115f6ac235ea5475378a613b696d008aabd027ca2f90cfb820c546842e66891",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:56:54Z",
-        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "exit": 0,
+        "at": "2026-10-18T20:16:18Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-111-todo-slot-writes-in-queue/evidence/C1.log",
-        "evidence_sha256": "ffd432d339e4358dfa95f9b124396d24ee566d0629874ac4fbcd699085ccdf42",
-        "tests": 0
+        "evidence_sha256": "5c796ec0a02b96b396759352be756936f16921e2a25640f4eed2bbc9653ee767",
+        "tests": 32
       }
     },
     "C2": {
@@ -26,13 +26,13 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:57:10Z",
-        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "at": "2026-10-18T20:16:33Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-111-todo-slot-writes-in-queue/evidence/C3.log",
-        "evidence_sha256": "0247fe5da8612169aab7d80ab4511e253b44819452803f255c165561fac186ac"
+        "evidence_sha256": "078259a1e117134950b01fba50693d7ee24a321c0a2a582898313759344c0cb9"
       }
     }
   },
   "built_at": "2026-10-18T19:31:28Z",
-  "updated_at": "2026-10-18T19:57:11Z"
+  "updated_at": "2026-10-18T20:16:33Z"
 }
