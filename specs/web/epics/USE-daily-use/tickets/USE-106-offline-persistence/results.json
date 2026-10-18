@@ -8,9 +8,17 @@
       "run": null
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:12:35Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-106-offline-persistence/evidence/C2.log",
+        "evidence_sha256": "7195dab3a9b5ef7530a63476485430d13c35b3c6c2c712f012463b1a01dc224e",
+        "tests": 32
+      }
     },
     "C3": {
       "status": "FAIL",
@@ -18,16 +26,31 @@
       "run": null
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:12:35Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-106-offline-persistence/evidence/C4.log",
+        "evidence_sha256": "7195dab3a9b5ef7530a63476485430d13c35b3c6c2c712f012463b1a01dc224e",
+        "tests": 32
+      }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T23:12:52Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-106-offline-persistence/evidence/C5.log",
+        "evidence_sha256": "ccc7f33a5893df9ae0257d4ad6a79975cdaa3a68c88b5d73e9332975bb6990f2"
+      }
     }
   },
   "built_at": "2026-10-18T23:04:21Z",
-  "updated_at": "2026-10-18T23:04:21Z"
+  "updated_at": "2026-10-18T23:12:52Z"
 }

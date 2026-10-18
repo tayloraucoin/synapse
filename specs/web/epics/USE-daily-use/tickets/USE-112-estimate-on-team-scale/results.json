@@ -3,21 +3,44 @@
   "criteria_sha256": "4c3c038b2dcee48dde31730b639c85348bacdf08a5ea9fe70bb8bcfea6dd7b8b",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:13:13Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-112-estimate-on-team-scale/evidence/C1.log",
+        "evidence_sha256": "ca6817622cc56594bc7ca300e1bf9ec7a1022471ca3c76e6d1a972778bddea4f",
+        "tests": 32
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:13:13Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-112-estimate-on-team-scale/evidence/C2.log",
+        "evidence_sha256": "ca6817622cc56594bc7ca300e1bf9ec7a1022471ca3c76e6d1a972778bddea4f",
+        "tests": 32
+      }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T23:13:29Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-112-estimate-on-team-scale/evidence/C3.log",
+        "evidence_sha256": "78c4f522ecc3881433f2fda94ec0cbc92e1756a503e73c0f4039899a40055246"
+      }
     }
   },
   "built_at": "2026-10-18T23:04:31Z",
-  "updated_at": "2026-10-18T23:04:31Z"
+  "updated_at": "2026-10-18T23:13:30Z"
 }
