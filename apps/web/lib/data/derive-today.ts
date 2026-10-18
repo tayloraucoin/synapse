@@ -1,9 +1,5 @@
 import { deriveClock, readDay, type DayClock, type DayRead } from "@syn/utils";
-import type {
-  BlockRecord,
-  SlotEventInput,
-  SlotRecord,
-} from "@syn/validators";
+import type { BlockRecord, SlotEventInput, SlotRecord } from "@syn/validators";
 import type { TodayRecords } from "./today-records";
 
 /**
