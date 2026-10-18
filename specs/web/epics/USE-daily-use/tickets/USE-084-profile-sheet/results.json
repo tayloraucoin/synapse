@@ -5,7 +5,15 @@
     "C1": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:23:43Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-084-profile-sheet/evidence/C1.log",
+        "evidence_sha256": "d65db91b19ea5dbc7237879da6caacb458687e0acfd90363b90aab75fdf8951b",
+        "tests": 0
+      }
     },
     "C2": {
       "status": "FAIL",
@@ -28,16 +36,30 @@
       "run": null
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:24:08Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-084-profile-sheet/evidence/C6.log",
+        "evidence_sha256": "488071b5a46d08eba7b560b3173c2c5b0984ef048e7a23d75cb75c6aedf3fe12"
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:24:09Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-084-profile-sheet/evidence/C7.log",
+        "evidence_sha256": "ebce259d74f841259f5a16ee4da682849ffa4872bf782c9f6fef7ae66c511105"
+      }
     }
   },
   "built_at": "2026-10-18T19:01:28Z",
-  "updated_at": "2026-10-18T19:01:28Z"
+  "updated_at": "2026-10-18T19:24:10Z"
 }

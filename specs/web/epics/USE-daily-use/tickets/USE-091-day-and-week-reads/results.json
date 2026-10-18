@@ -5,22 +5,54 @@
     "C1": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:25:12Z",
+        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C1.log",
+        "evidence_sha256": "5f3b59d49bb85d373f674f409a84bc5575f018d197fde50fb0e166e4feb7b493",
+        "tests": 0
+      }
     },
     "C2": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:25:12Z",
+        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C2.log",
+        "evidence_sha256": "5f3b59d49bb85d373f674f409a84bc5575f018d197fde50fb0e166e4feb7b493",
+        "tests": 0
+      }
     },
     "C3": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:25:12Z",
+        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C3.log",
+        "evidence_sha256": "5f3b59d49bb85d373f674f409a84bc5575f018d197fde50fb0e166e4feb7b493",
+        "tests": 0
+      }
     },
     "C4": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:25:12Z",
+        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C4.log",
+        "evidence_sha256": "5f3b59d49bb85d373f674f409a84bc5575f018d197fde50fb0e166e4feb7b493",
+        "tests": 0
+      }
     },
     "C5": {
       "status": "FAIL",
@@ -28,10 +60,17 @@
       "run": null
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:25:34Z",
+        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C6.log",
+        "evidence_sha256": "36f61d47c6350a1fb21aa46abb8d83db4fc716cf5356716270f6838a257f0bb5"
+      }
     }
   },
-  "updated_at": "2026-10-16T22:04:05Z"
+  "updated_at": "2026-10-18T19:25:35Z"
 }
