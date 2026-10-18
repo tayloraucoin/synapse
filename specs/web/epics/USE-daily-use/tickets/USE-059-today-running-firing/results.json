@@ -3,14 +3,30 @@
   "criteria_sha256": "f7078180749d7ff463c035dd3f3d33b104ec65d3371ce9d372f70542754a1a6e",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:08:06Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-059-today-running-firing/evidence/C1.log",
+        "evidence_sha256": "37367fece5b679ec369a3a7b91ee1c76b7c36aa49b7877f1396f9121194bd4cf",
+        "tests": 32
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:08:06Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-059-today-running-firing/evidence/C2.log",
+        "evidence_sha256": "37367fece5b679ec369a3a7b91ee1c76b7c36aa49b7877f1396f9121194bd4cf",
+        "tests": 32
+      }
     },
     "C3": {
       "status": "FAIL",
@@ -33,16 +49,30 @@
       "run": null
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:08:22Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-059-today-running-firing/evidence/C7.log",
+        "evidence_sha256": "a15737df8ba5779c6075d0259a1174622f279ed22d5e052a83f08a4a1980d20e"
+      }
     },
     "C8": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:08:23Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-059-today-running-firing/evidence/C8.log",
+        "evidence_sha256": "b834c36c053aa9d3ff28506f307c6fe3a40bf529a09ba9bb220d8f7775d81f02"
+      }
     }
   },
   "built_at": "2026-10-18T18:58:03Z",
-  "updated_at": "2026-10-18T18:58:03Z"
+  "updated_at": "2026-10-18T20:08:23Z"
 }

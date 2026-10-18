@@ -58,16 +58,16 @@
       "run": null
     },
     "C12": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:51:04Z",
-        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "exit": 0,
+        "at": "2026-10-18T20:06:14Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-046-new-block-sheet/evidence/C12.log",
-        "evidence_sha256": "5fb2438f798d2ff2b0aa7ae2a59c71fda48354e58e584615bcae521aac58abbd",
-        "tests": 0
+        "evidence_sha256": "a2ccf25f6d474336079f91576fdb4d58e82ba1457fb61825fd5e788e759aa207",
+        "tests": 32
       }
     },
     "C13": {
@@ -76,10 +76,10 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:51:33Z",
-        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "at": "2026-10-18T20:06:32Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-046-new-block-sheet/evidence/C13.log",
-        "evidence_sha256": "dcd955e9a492e0486163a1a5536a1dbdaaa81b234916e63ab302e2f94e6e67c3"
+        "evidence_sha256": "0e9dcef2299a98d2c8af4c5f9928a82a846ba2750eab35d1730eaee80ed9a6ca"
       }
     },
     "C14": {
@@ -88,13 +88,13 @@
       "run": {
         "command": "yarn lint",
         "exit": 0,
-        "at": "2026-10-18T19:51:34Z",
-        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "at": "2026-10-18T20:06:33Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-046-new-block-sheet/evidence/C14.log",
-        "evidence_sha256": "1dbf6bab0d0855a7bd34c3b32ce05ca65951f4bf94ca79aa0066fc2a0ef882e1"
+        "evidence_sha256": "67b70ea4dbaa05d5242d2b4f51a966fa951f8224797a4442454c3c63564afa55"
       }
     }
   },
   "built_at": "2026-10-18T18:57:20Z",
-  "updated_at": "2026-10-18T19:51:34Z"
+  "updated_at": "2026-10-18T20:06:40Z"
 }

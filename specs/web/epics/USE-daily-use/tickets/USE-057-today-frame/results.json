@@ -23,16 +23,30 @@
       "run": null
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:07:59Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-057-today-frame/evidence/C5.log",
+        "evidence_sha256": "6443143952d511f498590997c9cbb950f65e093e9fbd7c48291df7b80b237862"
+      }
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:08:00Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-057-today-frame/evidence/C6.log",
+        "evidence_sha256": "b6b92b8db5173bf662a64f1151540515d6bbde5883eb53ec7b36502d00dc8b59"
+      }
     }
   },
   "built_at": "2026-10-18T18:57:55Z",
-  "updated_at": "2026-10-18T18:57:55Z"
+  "updated_at": "2026-10-18T20:08:01Z"
 }
