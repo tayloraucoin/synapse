@@ -30,6 +30,10 @@ criteria:
     statement: "The line's state is reachable by ?state= (canon C-P08)"
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-114-update-line-in-shell/evidence/update-line-402.png"
+  - id: C3
+    statement: Taylor has looked this ticket over and approved it.
+    evidence: manual
+    reason: "operator_review: true; the builder defers it with what to look at"
 id: USE-114
 ---
 

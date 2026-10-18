@@ -8,7 +8,7 @@ non_negotiables:
   - "The design layer is trimmed to deltas on the canon, never by moving rules out of the loaded files."
 devs_call: "Where WeekRef lives so components/planner/add-event takes it without lib/data (a type in @syn/types or @syn/validators, or a prop shape local to the part); which design-layer lines are restatements of the canon."
 cites:
-  - "docs/index.md"
+  - "tooling/budget.ts"
 truth_files: "none: no surface changes"
 qa: Q1
 reviewers: []

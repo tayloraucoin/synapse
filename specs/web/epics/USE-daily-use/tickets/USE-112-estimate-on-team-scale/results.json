@@ -1,0 +1,23 @@
+{
+  "id": "USE-112",
+  "criteria_sha256": "4c3c038b2dcee48dde31730b639c85348bacdf08a5ea9fe70bb8bcfea6dd7b8b",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    }
+  },
+  "built_at": "2026-10-18T23:04:31Z",
+  "updated_at": "2026-10-18T23:04:31Z"
+}
