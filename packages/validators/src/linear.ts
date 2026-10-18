@@ -54,6 +54,12 @@ export const linearTeamSchema = z.object({
   key: z.string().min(1),
   name: z.string(),
   icon: z.string().nullable(),
+  /**
+   * The team's estimate scale, as Linear names it (`issueEstimationType`:
+   * notUsed, exponential, fibonacci, linear, tShirt) [NOT VERIFIED live]. A
+   * snapshot from before USE-102 has none.
+   */
+  estimationType: z.string().nullable().optional(),
 });
 
 export type LinearTeam = z.infer<typeof linearTeamSchema>;
@@ -167,6 +173,9 @@ export const linearIssueWriteInput = z
     description: z.string().max(100_000).nullable().optional(),
     estimate: z.number().nonnegative().nullable().optional(),
   })
+  // Strict (USE-102, C4): a client, a firing time, work time or a session's
+  // Done never reaches Linear, so a key naming one is refused, not dropped.
+  .strict()
   .superRefine((value, ctx) => {
     const sent = ISSUE_WRITE_FIELDS.filter((key) => value[key] !== undefined);
     if (sent.length !== 1) {
@@ -179,6 +188,26 @@ export const linearIssueWriteInput = z
   });
 
 export type LinearIssueWriteInput = z.infer<typeof linearIssueWriteInput>;
+
+/**
+ * The check's side in Linear (USE-102, the data contract): done moves the
+ * issue to its team's first completed state, undone back to the one it left.
+ * With `issueId`, one of the linked issue's sub-issues not yet in Synapse.
+ */
+export const linearDoneInput = z
+  .object({
+    workItemId: z.string().uuid(),
+    done: z.boolean(),
+    issueId: z.string().min(1).optional(),
+  })
+  .strict();
+
+export type LinearDoneInput = z.infer<typeof linearDoneInput>;
+
+/** Try again: the same failed row, sent again. */
+export const linearRetryInput = z.object({ id: z.string().uuid() }).strict();
+
+export type LinearRetryInput = z.infer<typeof linearRetryInput>;
 
 /** `linear_project_clients`: a project's client, or none. */
 export const linearProjectClientInput = z.object({
@@ -295,6 +324,7 @@ export const linearTeamStatesData = z.object({
         key: z.string().min(1),
         name: z.string(),
         icon: z.string().nullable(),
+        issueEstimationType: z.string(),
         states: z.object({
           nodes: z.array(linearWorkflowStateSchema.omit({ teamId: true })),
         }),
@@ -302,6 +332,11 @@ export const linearTeamStatesData = z.object({
     ),
     pageInfo: linearPageInfo,
   }),
+});
+
+/** `IssueUpdate` (USE-102): Linear's answer to one outbox row. */
+export const linearIssueUpdateData = z.object({
+  issueUpdate: z.object({ success: z.boolean() }),
 });
 
 /*

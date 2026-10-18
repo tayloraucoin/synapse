@@ -2,14 +2,21 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
   linearDisconnectInput,
+  linearDoneInput,
+  linearIssueWriteInput,
   linearReadOutput,
+  linearRetryInput,
   linearSyncInput,
+  linearWriteView,
 } from "@syn/validators";
 import {
   disconnectLinearConnection,
   LinearConnectionMissing,
   readLinearFor,
+  retryLinearWriteFor,
   syncLinearNow,
+  writeLinearDoneFor,
+  writeLinearIssueFor,
 } from "../services/linear";
 import { protectedProcedure, router } from "../trpc";
 
@@ -18,7 +25,9 @@ import { protectedProcedure, router } from "../trpc";
  * (`apps/web/app/api/integrations/linear/`), since only a route can take
  * the provider's redirect. USE-101 adds the read and Sync now: polling
  * only, each sync a full snapshot, a placed issue closed in Linear closing
- * its task and sessions. USE-102's outbox adds here.
+ * its task and sessions. USE-102 adds the outbox: a status, Done, Reopen,
+ * a priority, the description or an estimate written in Synapse first and
+ * sent to Linear after the transaction, each returning its row's view.
  */
 export const linearRouter = router({
   /** Each workspace's latest snapshot; a stale one is synced first. */
@@ -32,6 +41,30 @@ export const linearRouter = router({
     .output(linearReadOutput)
     .mutation(({ ctx, input }) =>
       syncLinearNow(ctx.rls, ctx.authContext.userId, input?.connectionId),
+    ),
+
+  /** Status, priority, description or estimate on a linked item: one at a time. */
+  write: protectedProcedure
+    .input(linearIssueWriteInput)
+    .output(linearWriteView)
+    .mutation(({ ctx, input }) =>
+      writeLinearIssueFor(ctx.rls, ctx.authContext.userId, input),
+    ),
+
+  /** The check: Done moves the issue to its team's Done; undone, back. */
+  writeDone: protectedProcedure
+    .input(linearDoneInput)
+    .output(linearWriteView)
+    .mutation(({ ctx, input }) =>
+      writeLinearDoneFor(ctx.rls, ctx.authContext.userId, input),
+    ),
+
+  /** Try again: the same failed row, sent again. */
+  retry: protectedProcedure
+    .input(linearRetryInput)
+    .output(linearWriteView)
+    .mutation(({ ctx, input }) =>
+      retryLinearWriteFor(ctx.rls, ctx.authContext.userId, input.id),
     ),
 
   disconnect: protectedProcedure

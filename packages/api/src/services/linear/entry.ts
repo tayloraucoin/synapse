@@ -5,12 +5,20 @@
  * their dependencies, for the tests.
  */
 import type { RlsClient } from "@syn/db";
-import type { LinearReadOutput } from "@syn/validators";
+import type { LinearReadOutput, LinearWriteView } from "@syn/validators";
 import { linearServiceConfig } from "./config";
 import { completeLinearConnect } from "./connect";
 import { disconnectLinear } from "./disconnect";
 import { buildLinearAuthorizeUrl, createLinearAuthorization } from "./oauth";
 import { encodeLinearOAuthCookie } from "./oauth-cookie";
+import {
+  retryLinearWrite,
+  sendDueLinearWrites,
+  writeLinearDone,
+  writeLinearIssue,
+  type LinearSendDeps,
+} from "./outbox";
+import { createLinearOutboxStore } from "./outbox-store";
 import { readLinear } from "./read";
 import { createLinearTokens } from "./refresh";
 import { syncLinear, type LinearSyncDeps } from "./sync";
@@ -84,14 +92,27 @@ function linearSyncDeps(rls: RlsClient, userId: string): LinearSyncDeps {
   };
 }
 
+function linearSendDeps(rls: RlsClient, userId: string): LinearSendDeps {
+  return {
+    store: createLinearOutboxStore(rls, userId),
+    tokens: {
+      accessToken: (id) => linearTokensFor(rls).accessToken(id),
+      refresh: (id, options) => linearTokensFor(rls).refresh(id, options),
+    },
+    fetch,
+  };
+}
+
 /**
  * `linear.read` (USE-101): a connection whose snapshot is two minutes old
  * is synced first (the cadence's server side), then the snapshots are read.
+ * Any row a request left pending for a minute is sent before (USE-102).
  */
 export async function readLinearFor(
   rls: RlsClient,
   userId: string,
 ): Promise<LinearReadOutput> {
+  await sendDueLinearWrites(linearSendDeps(rls, userId));
   await syncLinear(linearSyncDeps(rls, userId));
   return readLinear(rls);
 }
@@ -102,9 +123,45 @@ export async function syncLinearNow(
   userId: string,
   connectionId?: string,
 ): Promise<LinearReadOutput> {
+  await sendDueLinearWrites(linearSendDeps(rls, userId));
   await syncLinear(linearSyncDeps(rls, userId), {
     connectionId,
     force: true,
   });
   return readLinear(rls);
+}
+
+/** `linear.write` (USE-102): Synapse's value and the row, then the send. */
+export function writeLinearIssueFor(
+  rls: RlsClient,
+  userId: string,
+  input: unknown,
+): Promise<LinearWriteView> {
+  return writeLinearIssue(input, linearSendDeps(rls, userId));
+}
+
+/** `linear.writeDone`: the check's side in Linear. */
+export function writeLinearDoneFor(
+  rls: RlsClient,
+  userId: string,
+  input: unknown,
+): Promise<LinearWriteView> {
+  return writeLinearDone(input, linearSendDeps(rls, userId));
+}
+
+/** `linear.retry`: Try again on a failed row. */
+export function retryLinearWriteFor(
+  rls: RlsClient,
+  userId: string,
+  id: string,
+): Promise<LinearWriteView> {
+  return retryLinearWrite(id, linearSendDeps(rls, userId));
+}
+
+/** The scheduler's pass for one account: rows a request left pending. */
+export function sendDueLinearWritesFor(
+  rls: RlsClient,
+  userId: string,
+): Promise<number> {
+  return sendDueLinearWrites(linearSendDeps(rls, userId));
 }

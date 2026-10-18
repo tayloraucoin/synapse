@@ -1,7 +1,8 @@
 /**
  * Linear's GraphQL API, read-only (USE-101): the three documents in
  * `documents.ts`, every page followed on `endCursor`, every page's `data`
- * parsed by `@syn/validators` before it is returned. Writes are USE-102's.
+ * parsed by `@syn/validators` before it is returned. The one write,
+ * `updateIssue`, is the outbox's (USE-102).
  *
  * RATE LIMITS. Over a limit Linear answers with an error coded
  * `RATELIMITED` (HTTP 400). The client never retries it: it throws
@@ -12,11 +13,13 @@ import type { z } from "zod";
 import {
   linearAssignedIssuesData,
   linearIssuesByIdData,
+  linearIssueUpdateData,
   linearTeamStatesData,
   type LinearApiIssueWithChildren,
 } from "@syn/validators";
 import {
   ASSIGNED_ISSUES,
+  ISSUE_UPDATE,
   ISSUES_BY_ID,
   ISSUES_PAGE,
   TEAM_STATES,
@@ -35,7 +38,7 @@ const RESET_HEADERS = [
 export class LinearRateLimited extends Error {
   readonly resetAt: Date;
   constructor(resetAt: Date) {
-    super(`Linear rate limited the sync until ${resetAt.toISOString()}.`);
+    super(`Linear rate limited the call until ${resetAt.toISOString()}.`);
     this.name = "LinearRateLimited";
     this.resetAt = resetAt;
   }
@@ -198,7 +201,29 @@ export function createLinearClient(
       } while (after);
       return teams;
     },
+
+    /**
+     * One outbox row's change on one issue (USE-102). `success: false` is a
+     * refusal: Linear documents no code for it.
+     */
+    async updateIssue(id: string, input: LinearIssueUpdate): Promise<void> {
+      const data = await request(
+        ISSUE_UPDATE,
+        { id, input },
+        linearIssueUpdateData,
+        "issue update",
+      );
+      if (!data.issueUpdate.success) throw new LinearApiError(200, null);
+    },
   };
+}
+
+/** The fields the outbox writes (D-USE-113), as `IssueUpdateInput` names them. */
+export interface LinearIssueUpdate {
+  stateId?: string;
+  priority?: number;
+  description?: string | null;
+  estimate?: number | null;
 }
 
 export type LinearClient = ReturnType<typeof createLinearClient>;

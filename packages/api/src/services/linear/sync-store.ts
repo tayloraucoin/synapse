@@ -1,15 +1,17 @@
 /**
  * The sync's reads and writes through `ctx.rls` (USE-101), every one inside
  * `rls.execute`, so each row is the caller's. `writeSync` is one
- * transaction: the snapshot, the closed-issue pass (`planLinearCloses`,
+ * transaction: the snapshot, with the outbox's unsent values laid back over
+ * it (USE-102, `overlayUnsent`), the closed-issue pass (`planLinearCloses`,
  * applied as the work writes apply theirs), and `last_synced_at`. Only the
  * latest snapshot per connection is kept [ASSUMPTION: the read needs no
  * other, and one every five minutes would grow the table without end].
  */
-import { and, eq, isNotNull, isNull, lt } from "drizzle-orm";
+import { and, asc, eq, isNotNull, isNull, lt } from "drizzle-orm";
 import {
   linearConnections,
   linearSnapshots,
+  linearWrites,
   workItems,
   type RlsClient,
 } from "@syn/db";
@@ -18,6 +20,7 @@ import { applyChanges } from "../planner/write-rows";
 import { rowStore } from "../undo/row-store";
 import { planLinearCloses } from "../work/linear-items";
 import { selectWorkRows, type WorkJournal } from "../work/work-rows";
+import { overlayUnsent, type LinearWritePayload } from "./outbox";
 import type { LinearSyncStore } from "./sync";
 
 export function createLinearSyncStore(
@@ -63,8 +66,31 @@ export function createLinearSyncStore(
       return rows.flatMap((row) => (row.issueId === null ? [] : [row.issueId]));
     },
 
-    writeSync(connectionId, payload, at) {
+    writeSync(connectionId, fetched, at) {
       return rls.execute(async (tx) => {
+        // Synapse's value stands while its row is pending or failed.
+        const writes = await tx
+          .select({
+            issueId: linearWrites.issueId,
+            kind: linearWrites.kind,
+            state: linearWrites.state,
+            payload: linearWrites.payload,
+          })
+          .from(linearWrites)
+          .where(
+            and(
+              eq(linearWrites.userId, userId),
+              eq(linearWrites.connectionId, connectionId),
+            ),
+          )
+          .orderBy(asc(linearWrites.createdAt), asc(linearWrites.id));
+        const payload = overlayUnsent(
+          fetched,
+          writes.map((row) => ({
+            ...row,
+            payload: row.payload as LinearWritePayload,
+          })),
+        );
         await tx.insert(linearSnapshots).values({
           userId,
           connectionId,

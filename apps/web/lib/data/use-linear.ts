@@ -23,7 +23,8 @@ import { weekQueryKey } from "./use-week";
  * Live (USE-101), `linear.read` syncs a workspace whose snapshot is two
  * minutes old first, so the cadence is this query's: on opening the pool
  * (its first read), on focus after two minutes, every five while visible,
- * and Sync now. The writes stay on fixtures until USE-102.
+ * and Sync now. Live (USE-102), each write comes back settled by the
+ * server's send; a row a request left pending is sent by the next read.
  */
 
 export function linearQueryKey(scenario: string) {

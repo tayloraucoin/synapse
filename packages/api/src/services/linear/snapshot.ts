@@ -31,6 +31,7 @@ export interface LinearFetched {
     key: string;
     name: string;
     icon: string | null;
+    issueEstimationType: string;
     states: {
       nodes: {
         id: string;
@@ -99,12 +100,15 @@ export function snapshotOf(fetched: LinearFetched): LinearSnapshotPayload {
   return linearSnapshotPayload.parse({
     issues: issueNodes.map((node) => issueOf(node, fetched.viewerId)),
     subIssues: childNodes.map((node) => issueOf(node, fetched.viewerId)),
-    teams: fetched.teams.map(({ id, key, name, icon }) => ({
-      id,
-      key,
-      name,
-      icon,
-    })),
+    teams: fetched.teams.map(
+      ({ id, key, name, icon, issueEstimationType }) => ({
+        id,
+        key,
+        name,
+        icon,
+        estimationType: issueEstimationType,
+      }),
+    ),
     projects: [...projects.values()],
     states: fetched.teams.flatMap((team) =>
       team.states.nodes.map((state) => ({ ...state, teamId: team.id })),

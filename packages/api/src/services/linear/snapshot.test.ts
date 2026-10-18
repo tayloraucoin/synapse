@@ -20,6 +20,7 @@ const teams: LinearFetched["teams"] = [
     key: "SYN",
     name: "Synapse",
     icon: null,
+    issueEstimationType: "fibonacci",
     states: {
       nodes: [
         {
@@ -92,7 +93,13 @@ describe("the snapshot schema (C-USE-101-1)", () => {
       assignedToMe: true,
     });
     expect(payload.teams).toEqual([
-      { id: TEAM, key: "SYN", name: "Synapse", icon: null },
+      {
+        id: TEAM,
+        key: "SYN",
+        name: "Synapse",
+        icon: null,
+        estimationType: "fibonacci",
+      },
     ]);
     expect(payload.states.map((state) => state.teamId)).toEqual([
       TEAM,

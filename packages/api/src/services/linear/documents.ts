@@ -10,7 +10,9 @@
  * - `ISSUES_BY_ID`: the issues placed in Synapse, read by id whatever their
  *   state, so a placed issue closed in Linear is seen (D-USE-115).
  * - `TEAM_STATES`: every team and its workflow states, for the status sheet
- *   and the fill (C-USE-linear-status-1).
+ *   and the fill (C-USE-linear-status-1), and its estimate scale (USE-102).
+ * - `ISSUE_UPDATE`: the outbox's one write (USE-102), a row's field set on
+ *   one issue [NOT VERIFIED live: C5's check].
  */
 
 export const ISSUES_PAGE = 25;
@@ -80,8 +82,14 @@ query TeamStates($after: String) {
       key
       name
       icon
+      issueEstimationType
       states(first: ${STATES_PAGE}) { nodes { id name type position color } }
     }
     pageInfo { hasNextPage endCursor }
   }
+}`;
+
+export const ISSUE_UPDATE = `
+mutation IssueUpdate($id: String!, $input: IssueUpdateInput!) {
+  issueUpdate(id: $id, input: $input) { success }
 }`;

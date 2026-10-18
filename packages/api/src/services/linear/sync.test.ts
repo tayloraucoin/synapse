@@ -55,6 +55,7 @@ const teams: LinearFetched["teams"] = [
     key: "SYN",
     name: "Synapse",
     icon: null,
+    issueEstimationType: "fibonacci",
     states: {
       nodes: Object.values(STATES).map((state, position) => ({
         ...state,
