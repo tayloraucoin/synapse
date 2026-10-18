@@ -3,9 +3,17 @@
   "criteria_sha256": "50f856dc9600adda7c333667fd6ea964890423a7c6a432f308c0d0d7608bba2a",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:13:30Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-079-pool-sheet/evidence/C1.log",
+        "evidence_sha256": "c6130341d08b2a9231e007788b1fe0583cbb8510f98f36c9b69b41f063e6445b",
+        "tests": 32
+      }
     },
     "C2": {
       "status": "FAIL",
@@ -28,16 +36,30 @@
       "run": null
     },
     "C6": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:13:45Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-079-pool-sheet/evidence/C6.log",
+        "evidence_sha256": "f1603430595b92fc4ae7e97107f8d9276fa1f8ea1582b810e6359bb134e11cd3"
+      }
     },
     "C7": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:13:46Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-079-pool-sheet/evidence/C7.log",
+        "evidence_sha256": "fd3df57e640740b23241a8c2efe1de268eeca5e4bef3dd5edb77e2940e25d4f4"
+      }
     }
   },
   "built_at": "2026-10-18T19:31:03Z",
-  "updated_at": "2026-10-18T19:31:03Z"
+  "updated_at": "2026-10-18T20:13:47Z"
 }

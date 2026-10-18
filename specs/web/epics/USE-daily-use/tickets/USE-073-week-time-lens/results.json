@@ -13,16 +13,30 @@
       "run": null
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:12:29Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-073-week-time-lens/evidence/C3.log",
+        "evidence_sha256": "2108b1756220eabb6f3de23b2f7b8c887b2f84a2891c0548a43289157b4c1d4a"
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:12:31Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-073-week-time-lens/evidence/C4.log",
+        "evidence_sha256": "80c60790752a9bbea6d1d15531aeee5275c32a8ab92f168a06a32f6ab13015eb"
+      }
     }
   },
   "built_at": "2026-10-18T18:59:51Z",
-  "updated_at": "2026-10-18T18:59:51Z"
+  "updated_at": "2026-10-18T20:12:31Z"
 }

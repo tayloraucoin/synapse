@@ -3,16 +3,16 @@
   "criteria_sha256": "9aad2f56e7c842503b60a5688bb60a9c4d98260b939b30b1eee5b364ed2e5947",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:23:43Z",
-        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "exit": 0,
+        "at": "2026-10-18T20:14:27Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-084-profile-sheet/evidence/C1.log",
-        "evidence_sha256": "d65db91b19ea5dbc7237879da6caacb458687e0acfd90363b90aab75fdf8951b",
-        "tests": 0
+        "evidence_sha256": "4bc50074a56fbd79f3f2c82d01510071a46a856e0172ab021122bf4c20db02a3",
+        "tests": 32
       }
     },
     "C2": {
@@ -41,10 +41,10 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:24:08Z",
-        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "at": "2026-10-18T20:14:42Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-084-profile-sheet/evidence/C6.log",
-        "evidence_sha256": "488071b5a46d08eba7b560b3173c2c5b0984ef048e7a23d75cb75c6aedf3fe12"
+        "evidence_sha256": "7d07dff1abefe4fae77674a856e0489f1a24cabfd7535fa487338613badb552f"
       }
     },
     "C7": {
@@ -53,13 +53,13 @@
       "run": {
         "command": "yarn lint",
         "exit": 0,
-        "at": "2026-10-18T19:24:09Z",
-        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "at": "2026-10-18T20:14:43Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-084-profile-sheet/evidence/C7.log",
-        "evidence_sha256": "ebce259d74f841259f5a16ee4da682849ffa4872bf782c9f6fef7ae66c511105"
+        "evidence_sha256": "6236e483a558bd62989509b70ec7e82bfeb322699c59d6c3d891332d3b0a0ee0"
       }
     }
   },
   "built_at": "2026-10-18T19:01:28Z",
-  "updated_at": "2026-10-18T19:24:10Z"
+  "updated_at": "2026-10-18T20:14:44Z"
 }
