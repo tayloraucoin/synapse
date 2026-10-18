@@ -11,6 +11,7 @@ import {
 import type {
   DayEventRecord,
   PlaceSlotInput,
+  SlotRecord,
   TodoRecord,
 } from "@syn/validators";
 import { clockWords, weekdayName } from "./set-up-view";
@@ -550,4 +551,72 @@ export function todoOrderWrites(
       ? []
       : [{ slotId, sortOrder: spread[index]! }],
   );
+}
+
+/**
+ * A New to-do not yet landed (USE-111): offline it waits in the planner
+ * queue, and the rail shows it at once, after the last, as it will land.
+ */
+export interface PendingTodo {
+  /** The row's id until the write lands; never sent. */
+  key: string;
+  title: string;
+  icon: IconValue | null;
+  sortOrder: number;
+}
+
+/** The view with the pending to-dos slotted in, as `todosBlock` reads it. */
+export function withPendingTodos(
+  view: BlockView,
+  dateKey: string,
+  pending: readonly PendingTodo[],
+): BlockView {
+  if (pending.length === 0) return view;
+  const stamp = new Date(0).toISOString();
+  const todos: TodoRecord[] = pending.map((p) => ({
+    id: p.key,
+    createdAt: stamp,
+    updatedAt: stamp,
+    title: p.title,
+    type: "other",
+    icon: p.icon,
+    lengthMin: null,
+    notes: null,
+    onDate: null,
+    rrule: null,
+    remindAt: null,
+    remindOn: null,
+    doneAt: null,
+    archivedAt: null,
+  }));
+  const slots: SlotRecord[] = pending.map((p) => ({
+    id: p.key,
+    createdAt: stamp,
+    updatedAt: stamp,
+    blockId: view.block.block.id,
+    onDate: dateKey,
+    skipped: false,
+    sortOrder: p.sortOrder,
+    blockItemId: null,
+    todoId: p.key,
+    workItemId: null,
+    tier: null,
+    lengthMin: null,
+    tookMin: null,
+    doneAt: null,
+    notes: null,
+    atTime: null,
+    icon: null,
+  }));
+  return {
+    ...view,
+    block: { ...view.block, slots: [...view.block.slots, ...slots] },
+    day: {
+      ...view.day,
+      records: {
+        ...view.day.records,
+        todos: [...view.day.records.todos, ...todos],
+      },
+    },
+  };
 }

@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { BlockItemRecord } from "@syn/validators";
 import type { PlannerServer, PlannerWrite } from "@/lib/fixtures/planner";
 import type { SplitPatch } from "@/lib/fixtures/planner/split-block";
+import type { FixtureServer } from "@/lib/fixtures/server";
 import { offlineWrite } from "@/lib/offline/writes";
 import { FixtureOfflineError, PlannerRefusal } from "./refusals";
 import { useDataSource } from "./source";
@@ -22,10 +23,18 @@ import { weekQueryKey } from "./use-week";
  * order rule as its tests prove it, over a server.
  */
 
-export type PlannerMethod = Exclude<keyof PlannerServer, "readWeek">;
+/**
+ * What the queue sends: the planner's writes, and a To-dos block's two that
+ * the planner server has no method for (USE-111): a to-do slot's order
+ * (`writeSlots`) and New to-do with its slot (`writeTodoSlot`).
+ */
+export type QueuedServer = PlannerServer &
+  Pick<FixtureServer, "writeSlots" | "writeTodoSlot">;
+
+export type PlannerMethod = Exclude<keyof QueuedServer, "readWeek">;
 
 export type PlannerCall = {
-  [M in PlannerMethod]: { method: M; args: Parameters<PlannerServer[M]> };
+  [M in PlannerMethod]: { method: M; args: Parameters<QueuedServer[M]> };
 }[PlannerMethod];
 
 /** D-USE-82: the day's own controls (Up at, Lights out, the ···, the +). */
@@ -70,7 +79,7 @@ export interface PlannerQueue {
 
 /** The writes in the order made; one at a time, so they land in that order. */
 export function createPlannerQueue(
-  server: PlannerServer,
+  server: QueuedServer,
   online: boolean,
 ): PlannerQueue {
   let isOnline = online;
@@ -234,11 +243,9 @@ export function usePlannerWrites() {
 
   function call<M extends PlannerMethod>(
     method: M,
-    ...args: Parameters<PlannerServer[M]>
-  ): ReturnType<PlannerServer[M]> {
-    return send({ method, args } as PlannerCall) as ReturnType<
-      PlannerServer[M]
-    >;
+    ...args: Parameters<QueuedServer[M]>
+  ): ReturnType<QueuedServer[M]> {
+    return send({ method, args } as PlannerCall) as ReturnType<QueuedServer[M]>;
   }
 
   const saveStatus: SaveStatus = mutation.isPending
@@ -257,7 +264,7 @@ export function usePlannerWrites() {
     return send(mutation.variables);
   }
 
-  type Args<M extends PlannerMethod> = Parameters<PlannerServer[M]>;
+  type Args<M extends PlannerMethod> = Parameters<QueuedServer[M]>;
   const write =
     <M extends PlannerMethod>(method: M) =>
     (...args: Args<M>) =>
@@ -283,6 +290,10 @@ export function usePlannerWrites() {
     reorderItems: write("reorderItems"),
     placeSlot: write("placeSlot"),
     removeSlot: write("removeSlot"),
+    /** A to-do slot's place in its block (USE-111). */
+    writeSlots: write("writeSlots"),
+    /** New to-do and its slot, one write (USE-111). */
+    writeTodoSlot: write("writeTodoSlot"),
     writeDayEvent: write("writeDayEvent"),
     removeDayEvent: write("removeDayEvent"),
     copyDay: write("copyDay"),

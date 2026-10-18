@@ -102,29 +102,32 @@ export function TodosAddMenu({
  * edge at the leading side, the calendar icon, its name strong, and
  * "Personal · 11:00 to 11:30" trailing, muted; no grip, no length. It is
  * pinned: the rows re-flow around it. Events stay plum, told from violet by
- * form (a fill with the calendar icon). Props only.
+ * form (a fill with the calendar icon). With `onOpen` the band is a button
+ * that opens its event (USE-111, "Tap the band: the event"). Props only.
  */
 export function EventBandRow({
   title,
   words,
+  onOpen,
 }: {
   title: string;
   /** "Personal · 11:00 to 11:30". */
   words: string;
+  onOpen?: () => void;
 }) {
-  return (
-    <div
-      data-event-band
-      className={cn(
-        "flex min-h-(--row-min) items-stretch overflow-hidden rounded-(--radius-control)",
-        HUE_CHIP.plum,
-      )}
-    >
+  const className = cn(
+    "flex min-h-(--row-min) w-full items-stretch overflow-hidden rounded-(--radius-control) text-start",
+    HUE_CHIP.plum,
+    onOpen !== undefined &&
+      "outline-none focus-visible:ring-2 focus-visible:ring-ring",
+  );
+  const body = (
+    <>
       <span
         aria-hidden="true"
         className={cn("w-0.75 shrink-0", HUE_DOT.plum)}
       />
-      <div className="flex min-w-0 flex-1 items-center gap-(--space-2) px-(--space-3)">
+      <span className="flex min-w-0 flex-1 items-center gap-(--space-2) px-(--space-3)">
         <MeetingIcon aria-hidden="true" className="size-4 shrink-0" />
         <Text as="span" variant="body" weight={600} truncate>
           {title}
@@ -137,7 +140,22 @@ export function EventBandRow({
         >
           {words}
         </Text>
-      </div>
+      </span>
+    </>
+  );
+  return onOpen === undefined ? (
+    <div data-event-band className={className}>
+      {body}
     </div>
+  ) : (
+    <button
+      type="button"
+      data-event-band
+      data-row-open
+      onClick={onOpen}
+      className={className}
+    >
+      {body}
+    </button>
   );
 }

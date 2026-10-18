@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import type { IconValue } from "@syn/types";
 import { ItemIcon, Text, toastUndo } from "@syn/ui";
-import { formatMinutesShort } from "@syn/utils";
-import { todoInput } from "@syn/validators";
+import { formatMinutesShort, weekdayIndex, weekKeyOf } from "@syn/utils";
+import { todoInput, type DayEventRecord } from "@syn/validators";
+import { AddEventSheet, formOf } from "@/components/planner/add-event";
 import {
   BLOCK_VIEW_COPY,
   EditingAddRow,
@@ -21,6 +22,8 @@ import {
   todoOrderWrites,
   TODOS_BLOCK_COPY as TODOS,
   todosBlock,
+  withPendingTodos,
+  type PendingTodo,
   type TodosBlockRow,
   type TodoTypeFilter,
 } from "@/lib/data/block-view-todos";
@@ -44,6 +47,10 @@ import { BLOCK_EDIT_COPY as COPY } from "./copy";
  * places one per to-do after the last (`placeSlot`), a swipe takes the slot
  * off and the to-do is back in To-dos with no day (`removeSlot`, Undo), and
  * New to-do makes the to-do then its slot, so it lands here and in To-dos.
+ * Every write, a drag's order and New to-do among them, goes through the
+ * planner queue (USE-111): offline it shows at once and waits (D-USE-67).
+ * A dated plan's band opens its event in the Add event sheet, as Set my
+ * days does.
  */
 
 /** "pool", "pool:<id>,<id>", "pool-type:home" from a scenario's `view.open`. */
@@ -104,48 +111,48 @@ export function useTodosEditing({
   const [adding, setAdding] = React.useState(open === "new-todo");
   const [swipeId, setSwipeId] = React.useState<string | null>(null);
   const [order, setOrder] = React.useState<string[] | null>(null);
+  const [pending, setPending] = React.useState<PendingTodo[]>([]);
+  const [event, setEvent] = React.useState<DayEventRecord | null>(null);
 
   if (!data || dateKey === null || data.block.block.kind !== "todos") {
     return null;
   }
-  const view = data;
+  const view = withPendingTodos(data, dateKey, pending);
   const date = dateKey;
   const name = view.block.block.name;
   const weekday = weekdayName(view.day.weekday);
   const read = todosBlock(view, order ?? undefined);
 
   function settle() {
-    void queryClient.invalidateQueries({
-      queryKey: weekQueryKey(source.scenario.name),
-    });
-    void queryClient.invalidateQueries({
-      queryKey: todosQueryKey(source.scenario.name),
-    });
+    return Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: weekQueryKey(source.scenario.name),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: todosQueryKey(source.scenario.name),
+      }),
+    ]);
   }
 
   function reorder(ids: string[]) {
     const moves = todoOrderWrites(read.todos, ids);
     if (moves.length === 0) return;
     setOrder(ids.filter((id) => read.todos.some((row) => row.id === id)));
+    // Through the queue: offline the order holds here until they land.
     void Promise.all(
       moves.map((move) =>
-        source.server.writeSlots({
-          id: move.slotId,
-          sortOrder: move.sortOrder,
-        }),
+        planner.writeSlots({ id: move.slotId, sortOrder: move.sortOrder }),
       ),
     )
       .catch(() => {})
-      .finally(() => {
-        settle();
-        setOrder(null);
-      });
+      .then(settle)
+      .finally(() => setOrder(null));
   }
 
   async function remove(row: Extract<TodosBlockRow, { kind: "todo" }>) {
     setSwipeId(null);
     const write = await planner.removeSlot({ id: row.id });
-    settle();
+    void settle();
     const words = TODOS.removed(row.title, weekday);
     announce(words);
     toastUndo({
@@ -161,7 +168,7 @@ export function useTodosEditing({
     for (const input of placeTodosInputs(view, todoIds)) {
       done.push(await planner.placeSlot(input));
     }
-    settle();
+    void settle();
     const words = TODOS.added(titles, name);
     announce(words);
     toastUndo({
@@ -170,7 +177,7 @@ export function useTodosEditing({
         void (async () => {
           for (const write of [...done].reverse())
             await planner.undo(write.undo);
-          settle();
+          await settle();
         })(),
     });
   }
@@ -178,23 +185,44 @@ export function useTodosEditing({
   async function addNew(title: string) {
     const icon = addIcon;
     clearAddIcon();
-    // A new one lands here and in To-dos (todoInput, then placeSlot).
-    const todo = await source.server.writeTodo(
-      todoInput.parse({ title, type: "other", ...(icon ? { icon } : {}) }),
-    );
-    await planner.placeSlot({
-      blockId: view.block.block.id,
-      onDate: date,
+    // On the rail at once; the to-do and its slot land as one write, so
+    // offline it waits whole and lands once (USE-111).
+    const row: PendingTodo = {
+      key: crypto.randomUUID(),
+      title,
+      icon,
       sortOrder: todosBlock(view).nextSortOrder,
-      todoId: todo.id,
-    });
-    settle();
+    };
+    setPending((rows) => [...rows, row]);
     const words = TODOS.newAdded(title, name);
     announce(words);
+    const landed = planner.writeTodoSlot({
+      todo: todoInput.parse({
+        title,
+        type: "other",
+        ...(icon ? { icon } : {}),
+      }),
+      slot: {
+        blockId: view.block.block.id,
+        onDate: date,
+        sortOrder: row.sortOrder,
+      },
+    });
     toastUndo({
       text: words,
-      onUndo: () => void source.server.removeTodo(todo.id).then(() => settle()),
+      // [ASSUMPTION] Undo before it lands waits for it, then deletes.
+      onUndo: () =>
+        void landed
+          .then(({ todo }) => source.server.removeTodo(todo.id))
+          .then(settle)
+          .catch(() => {}),
     });
+    try {
+      await landed;
+      await settle();
+    } finally {
+      setPending((rows) => rows.filter((p) => p.key !== row.key));
+    }
   }
 
   const column: Column = {
@@ -240,7 +268,13 @@ export function useTodosEditing({
       row.kind === "event" ? (
         // Pinned: no grip, no length, no swipe (todos-dated-plan.md).
         <div className="py-(--space-1)">
-          <EventBandRow title={row.title} words={row.words} />
+          <EventBandRow
+            title={row.title}
+            words={row.words}
+            onOpen={() =>
+              setEvent(view.events.find((e) => e.id === row.id) ?? null)
+            }
+          />
         </div>
       ) : (
         <SwipeRow
@@ -298,18 +332,37 @@ export function useTodosEditing({
   };
 
   const sheets = (
-    <TodosPicker
-      open={picking}
-      onOpenChange={setPicking}
-      block={view}
-      dateKey={date}
-      onAdd={(ids, titles) => void addPicked(ids, titles).catch(() => {})}
-      onNewTodo={() => {
-        setPicking(false);
-        setAdding(true);
-      }}
-      initial={seed ?? undefined}
-    />
+    <>
+      <TodosPicker
+        open={picking}
+        onOpenChange={setPicking}
+        block={view}
+        dateKey={date}
+        onAdd={(ids, titles) => void addPicked(ids, titles).catch(() => {})}
+        onNewTodo={() => {
+          setPicking(false);
+          setAdding(true);
+        }}
+        initial={seed ?? undefined}
+      />
+      {/* "Tap the band: the event" (todos-dated-plan.md), as Set my days. */}
+      <AddEventSheet
+        open={event !== null}
+        onOpenChange={(next) => {
+          if (!next) setEvent(null);
+        }}
+        target={{ week: weekKeyOf(date), day: weekdayIndex(date) }}
+        start={event ? formOf(event) : { startsAt: view.block.startsAt }}
+        onDone={({ words, undo }) => {
+          void settle();
+          announce(words);
+          toastUndo({
+            text: words,
+            onUndo: () => void planner.undo(undo).then(settle),
+          });
+        }}
+      />
+    </>
   );
 
   return { column, sheets };

@@ -1,3 +1,4 @@
+import { writeTodoSlot } from "@/lib/data/write-todo-slot";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import type { TrpcClient } from "@/lib/trpc/client";
 import { LIVE_DOMAINS, type LiveMethods } from "./domains";
@@ -26,6 +27,11 @@ export function createLiveServer(client: TrpcClient): FixtureServer {
     {},
     ...LIVE_DOMAINS.map((domain) => domain.methods(client)),
   ) as LiveMethods;
-  const server: FixtureServer = { ...FIXTURE_ONLY, ...wired };
+  const server: FixtureServer = {
+    ...FIXTURE_ONLY,
+    ...wired,
+    // Two live calls behind the queue's one write (USE-111).
+    writeTodoSlot: (input) => writeTodoSlot(wired, input),
+  };
   return server;
 }

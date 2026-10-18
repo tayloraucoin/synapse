@@ -62,6 +62,11 @@ import type { TodayRecords } from "@/lib/data/today-records";
 import type { AccountView } from "@/lib/data/use-account";
 import type { TodosRecords } from "@/lib/data/use-todos";
 import {
+  writeTodoSlot,
+  type TodoSlotInput,
+  type TodoSlotWrite,
+} from "@/lib/data/write-todo-slot";
+import {
   createIntegrationServer,
   type IntegrationServer,
 } from "./integrations";
@@ -227,6 +232,11 @@ export interface FixtureServer
   readTodos(dateKey: string): Promise<TodosRecords>;
   /** A new to-do (`todoInput`). */
   writeTodo(input: TodoInput): Promise<TodoRecord>;
+  /**
+   * New to-do in a To-dos block (USE-111): the to-do, then its slot, as the
+   * planner queue's one write.
+   */
+  writeTodoSlot(input: TodoSlotInput): Promise<TodoSlotWrite>;
   /**
    * The To-do sheet's change (USE-28): only the keys sent change, checked
    * against `todoInput` as the to-do will be after it.
@@ -914,6 +924,10 @@ export function createFixtureServer(
       });
       records.todos.push(record);
       return Promise.resolve(structuredClone(record));
+    },
+
+    writeTodoSlot(input) {
+      return writeTodoSlot(server, input);
     },
 
     writeTodoDone({ id, doneAt }) {
