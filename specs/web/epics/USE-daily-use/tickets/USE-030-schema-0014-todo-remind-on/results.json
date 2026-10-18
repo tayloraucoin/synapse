@@ -3,24 +3,54 @@
   "criteria_sha256": "068db1a600eaf80b0192d981ef0f502b3826c136bd16edd53181e1238b78f60e",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:root",
+        "exit": 0,
+        "at": "2026-10-18T19:17:06Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C1.log",
+        "evidence_sha256": "e5dcfcaabf50eb3fc2e2d06b1680f7a8e60a396587225cb57da95ab405c525d4",
+        "tests": 32
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-migrations",
+        "exit": 0,
+        "at": "2026-10-18T19:17:10Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C2.log",
+        "evidence_sha256": "9bf27c1af1786048f47b5d7ba635678afd93abe2e279d5ecee696d7fc9375674"
+      }
     },
     "C3": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:17:11Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C3.log",
+        "evidence_sha256": "4ebe856cfdb8ed696449fad1d4af478636893851d64ba6174b188d2caad6c210",
+        "tests": 0
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:17:32Z",
+        "head": "f43eed6856b5ee090335bbe6bd01ea5ddc32508b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C4.log",
+        "evidence_sha256": "3e22fa2639eab2bc3aaebf71538fa50a09c1f599c0baf055b7694b32c407f548"
+      }
     },
     "C5": {
       "status": "FAIL",
@@ -34,5 +64,5 @@
     }
   },
   "built_at": "2026-10-18T18:53:52Z",
-  "updated_at": "2026-10-18T18:53:52Z"
+  "updated_at": "2026-10-18T19:17:32Z"
 }
