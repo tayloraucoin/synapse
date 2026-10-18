@@ -485,6 +485,9 @@ export {
   type SplitBlockInput,
   type UndoInput,
   type WriteScopeInput,
+  // The slot writes (USE-94).
+  slotWriteOutput,
+  type SlotWriteOutput,
 } from "./planner";
 
 export {
