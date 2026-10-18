@@ -5,12 +5,28 @@
     "C1": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:23:13Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-077-spread-desk/evidence/C1.log",
+        "evidence_sha256": "b42ba86cc7287409d72bfe814b884450103094f879383a12713d996bda04aaf3",
+        "tests": 0
+      }
     },
     "C2": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 1,
+        "at": "2026-10-18T19:23:13Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-077-spread-desk/evidence/C2.log",
+        "evidence_sha256": "b42ba86cc7287409d72bfe814b884450103094f879383a12713d996bda04aaf3",
+        "tests": 0
+      }
     },
     "C3": {
       "status": "FAIL",
@@ -18,16 +34,30 @@
       "run": null
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:23:33Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-077-spread-desk/evidence/C4.log",
+        "evidence_sha256": "a91b0873b14f05ee8f1b99bbcda6c7d0d179131aa305a0b421aade553e12c9db"
+      }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:23:34Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-077-spread-desk/evidence/C5.log",
+        "evidence_sha256": "535c6aef2046415e45f05e66b9110d64143a0f925e5c9014b66b5218c46832da"
+      }
     }
   },
   "built_at": "2026-10-18T19:00:06Z",
-  "updated_at": "2026-10-18T19:00:06Z"
+  "updated_at": "2026-10-18T19:23:35Z"
 }
