@@ -839,6 +839,13 @@ export const plannerWriteOutput = z.object({
 
 export type PlannerWriteOutput = z.infer<typeof plannerWriteOutput>;
 
+/** A slot write's result (USE-94): the token, and the slot as stored. */
+export const slotWriteOutput = plannerWriteOutput.extend({
+  slot: slotRecord.optional(),
+});
+
+export type SlotWriteOutput = z.infer<typeof slotWriteOutput>;
+
 /*
  * ---- The day-level writes (USE-93): Copy from, Clear the day, Reset ----
  */

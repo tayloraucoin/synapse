@@ -494,6 +494,9 @@ export {
   type CopyDayInput,
   type DayRefInput,
   type ResetDayInput,
+  // The slot writes (USE-94).
+  slotWriteOutput,
+  type SlotWriteOutput,
 } from "./planner";
 
 export {
