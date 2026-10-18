@@ -1,0 +1,33 @@
+{
+  "id": "USE-92",
+  "criteria_sha256": "b94b5a7577bd5d06f944c855da1167ca4a08340c9ed91f6aee7284e2ddc73f87",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    }
+  },
+  "built_at": "2026-10-18T23:03:45Z",
+  "updated_at": "2026-10-18T23:03:45Z"
+}
