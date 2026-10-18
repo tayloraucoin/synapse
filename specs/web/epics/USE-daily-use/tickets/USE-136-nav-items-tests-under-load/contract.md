@@ -7,7 +7,7 @@ non_negotiables:
   - "No suite-wide testTimeout raise: the fix is in the two tests or in what nav-items pulls in."
 devs_call: "Whether to import nav-items statically at the top of each test file, or to cut what nav-items imports so its first load is cheap."
 cites:
-  - "docs/index.md"
+  - "apps/web/lib/data/settings-connections.test.ts"
 truth_files: "none: no surface changes"
 qa: Q1
 reviewers: []
