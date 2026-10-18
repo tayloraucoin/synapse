@@ -1,0 +1,37 @@
+# /dev/parts?state=now-success at 402, Playwright ariaSnapshot of <main> (assay, 2026-10-18)
+# level-1 headings: []
+
+- main:
+  - button "To-dos Call the mechanic about the brakes"
+  - region "Wellness 7:05 to 8:00 Wellness options":
+    - heading "Wellness" [level=2]
+    - paragraph: 7:05 to 8:00
+    - button "Wellness options"
+    - list "Wellness, in order":
+      - listitem:
+        - checkbox "Pee and weigh, 2 min" [checked]
+        - button "Pee and weigh"
+        - text: 2 min
+      - listitem:
+        - checkbox "Water, 1 min" [checked]
+        - button "Water"
+        - text: 1 min
+      - listitem:
+        - checkbox "Start the cold bath, 2 min" [checked]
+        - button "Start the cold bath"
+        - text: 2 min
+      - listitem:
+        - group "Meditate, now":
+          - paragraph: Meditate
+          - paragraph: 10 min · 7:10
+          - button "Start"
+          - button "Done, Meditate": Done
+      - listitem:
+        - checkbox "Cold bath, 10 min"
+        - button "Cold bath, make current": Cold bath
+        - text: 10 min
+        - button "Reorder Cold bath"
+        - button "More for Cold bath"
+    - status
+    - status
+  - paragraph

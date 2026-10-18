@@ -1,0 +1,6 @@
+# /dev/parts?state=now-success at 402, Playwright, keyboard only (assay, 2026-10-18)
+focus on row: button "Cold bath, make current"
+buttons named More/options: ["Wellness options","More for Cold bath"]
+menu open: ["Swap","Edit","Move up","Move down","Not today"]
+after Escape focus: button "More for Cold bath"
+grips: ["Reorder Cold bath"]
