@@ -18,8 +18,12 @@ import { weekQueryKey } from "./use-week";
  * Linear on fixtures (USE-56). `useLinearIssues` is the one snapshot query
  * (USE-52 reads it for From Linear); `useLinear` joins each work item to its
  * issue and sends the writes. Synapse's value is shown at once and stands; a
- * failed row is the item's `write`, and `retry` sends it again. Wave 3 swaps
- * the query and mutation functions for the Linear router.
+ * failed row is the item's `write`, and `retry` sends it again.
+ *
+ * Live (USE-101), `linear.read` syncs a workspace whose snapshot is two
+ * minutes old first, so the cadence is this query's: on opening the pool
+ * (its first read), on focus after two minutes, every five while visible,
+ * and Sync now. The writes stay on fixtures until USE-102.
  */
 
 export function linearQueryKey(scenario: string) {
@@ -28,16 +32,21 @@ export function linearQueryKey(scenario: string) {
 
 /** While a row is pending, read again until the sender has settled it. */
 const SETTLE_POLL_MS = 400;
+const STALE_MS = 2 * 60_000;
+const VISIBLE_EVERY_MS = 5 * 60_000;
 
 export function useLinearIssues() {
   const source = useDataSource();
   return useQuery<LinearRecords>({
     queryKey: linearQueryKey(source.scenario.name),
     queryFn: () => source.server.readLinear(),
+    staleTime: STALE_MS,
+    refetchOnWindowFocus: true,
     refetchInterval: (query) =>
       query.state.data?.outbox.some((row) => row.state === "pending")
         ? SETTLE_POLL_MS
-        : false,
+        : VISIBLE_EVERY_MS,
+    refetchIntervalInBackground: false,
   });
 }
 

@@ -4,6 +4,7 @@ import { accountDomain } from "./account";
 import { clientsDomain } from "./clients";
 import { connectionsDomain } from "./connections";
 import { googleEventsDomain } from "./google";
+import { linearDomain } from "./linear";
 import { mealTopicsDomain } from "./meal-topics";
 import { orientDomain } from "./orient";
 import { plannerRead } from "./planner";
@@ -36,6 +37,7 @@ export const LIVE_DOMAINS: readonly LiveDomain[] = [
   slotsAndClock,
   clientsDomain,
   googleEventsDomain,
+  linearDomain,
   todosDomain,
   workDomain,
 ];

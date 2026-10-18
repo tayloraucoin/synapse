@@ -2,7 +2,9 @@ import type { z } from "zod";
 import {
   createTaskInput,
   editWorkItemInput,
+  linkToLinearInput,
   moveWorkInput,
+  placeIssuesInput,
   placeOnDaysInput,
   placeWorkInput,
   setWorkTierInput,
@@ -22,8 +24,8 @@ import { callLive } from "./errors";
  * words, as the fixture refuses it, before any call. Every write hands back
  * `{ undo, id? }`, and its Undo goes through `planner.undo`. USE-99 adds
  * the sessions: place, place on several days, move, unplace, spread and a
- * tier change. The Linear snapshot and placing issues stay on fixtures until
- * USE-101.
+ * tier change. USE-101 adds From Linear's place, Link and Unlink, each
+ * planned over the latest Linear snapshot.
  */
 
 function parsed<S extends z.ZodTypeAny>(schema: S, raw: unknown): z.output<S> {
@@ -112,6 +114,21 @@ export const workDomain: LiveDomain = {
         send(
           () => parsed(setWorkTierInput, raw),
           (input) => w.setWorkTier.mutate(input),
+        ),
+      placeIssues: (raw) =>
+        send(
+          () => parsed(placeIssuesInput, raw),
+          (input) => w.placeIssues.mutate(input),
+        ),
+      linkToLinear: (raw) =>
+        send(
+          () => parsed(linkToLinearInput, raw),
+          (input) => w.linkToLinear.mutate(input),
+        ),
+      unlinkFromLinear: (raw) =>
+        send(
+          () => parsed(workItemIdInput, raw),
+          (input) => w.unlinkFromLinear.mutate(input),
         ),
     };
   },

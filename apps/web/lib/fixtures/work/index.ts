@@ -15,6 +15,7 @@ import {
   unplaceWorkInput,
   workItemInput,
   workItemRecord,
+  type LinkToLinearInput,
   type MoveWorkInput,
   type PlaceOnDaysInput,
   type PlaceWorkInput,
@@ -62,11 +63,8 @@ export type {
   SpreadWorkInput,
 };
 
-export interface LinkToLinearInput {
-  workItemId: string;
-  connectionId: string;
-  issueId: string;
-}
+/** `@syn/validators`' since USE-101, shared with the work router. */
+export type { LinkToLinearInput };
 
 export const ALREADY_LINKED = "That task is in Linear already.";
 export const ISSUE_TAKEN = "That issue is on another item already.";

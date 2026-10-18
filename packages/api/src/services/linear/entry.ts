@@ -5,12 +5,16 @@
  * their dependencies, for the tests.
  */
 import type { RlsClient } from "@syn/db";
+import type { LinearReadOutput } from "@syn/validators";
 import { linearServiceConfig } from "./config";
 import { completeLinearConnect } from "./connect";
 import { disconnectLinear } from "./disconnect";
 import { buildLinearAuthorizeUrl, createLinearAuthorization } from "./oauth";
 import { encodeLinearOAuthCookie } from "./oauth-cookie";
+import { readLinear } from "./read";
 import { createLinearTokens } from "./refresh";
+import { syncLinear, type LinearSyncDeps } from "./sync";
+import { createLinearSyncStore } from "./sync-store";
 import { createLinearTokenStore } from "./token-store";
 
 /** The start route's redirect and the cookie it sets, for one connect. */
@@ -65,4 +69,42 @@ export function linearTokensFor(rls: RlsClient) {
     key,
     clientId,
   });
+}
+
+function linearSyncDeps(rls: RlsClient, userId: string): LinearSyncDeps {
+  return {
+    store: createLinearSyncStore(rls, userId),
+    // Read the config only when a connection is due, so an account with no
+    // workspace never needs the Linear app's environment.
+    tokens: {
+      accessToken: (id) => linearTokensFor(rls).accessToken(id),
+      refresh: (id, options) => linearTokensFor(rls).refresh(id, options),
+    },
+    fetch,
+  };
+}
+
+/**
+ * `linear.read` (USE-101): a connection whose snapshot is two minutes old
+ * is synced first (the cadence's server side), then the snapshots are read.
+ */
+export async function readLinearFor(
+  rls: RlsClient,
+  userId: string,
+): Promise<LinearReadOutput> {
+  await syncLinear(linearSyncDeps(rls, userId));
+  return readLinear(rls);
+}
+
+/** Sync now: one workspace or every one, refused within 30 s of the last. */
+export async function syncLinearNow(
+  rls: RlsClient,
+  userId: string,
+  connectionId?: string,
+): Promise<LinearReadOutput> {
+  await syncLinear(linearSyncDeps(rls, userId), {
+    connectionId,
+    force: true,
+  });
+  return readLinear(rls);
 }

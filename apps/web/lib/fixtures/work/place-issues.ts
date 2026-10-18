@@ -1,12 +1,11 @@
-import { z } from "zod";
-import { WORK_TIERS } from "@syn/constants";
 import {
-  dateKeySchema,
+  placeIssuesInput,
   placeSlotInput,
   slotRecord,
   workItemInput,
   workItemRecord,
   type LinearIssue,
+  type PlaceIssuesInput,
   type WorkItemRecord,
 } from "@syn/validators";
 import { issueLength } from "@/lib/data/linear-size";
@@ -25,16 +24,8 @@ import { NO_WORK_BLOCK, runsOn } from "./create-task";
  * written to Linear: no outbox row, the snapshot untouched.
  */
 
-export const placeIssuesInput = z.object({
-  issueIds: z.array(z.string().min(1)).min(1),
-  dateKey: dateKeySchema,
-  blockId: z.string().uuid(),
-  tier: z.enum(WORK_TIERS),
-  /** A sub-issue placed on a day by itself (USE-67): its issue's work item. */
-  parentWorkItemId: z.string().uuid().optional(),
-});
-
-export type PlaceIssuesInput = z.input<typeof placeIssuesInput>;
+/** The input lives in `@syn/validators` (USE-101), shared with the work router. */
+export { placeIssuesInput, type PlaceIssuesInput };
 
 export const NO_ISSUE = "No Linear issue with that id.";
 export const TICK_EACH_ONCE = "Tick each issue once.";

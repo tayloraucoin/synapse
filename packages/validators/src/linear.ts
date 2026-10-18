@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { LINEAR_WRITE_KINDS, LINEAR_WRITE_STATES } from "@syn/constants";
+import {
+  LINEAR_WRITE_KINDS,
+  LINEAR_WRITE_STATES,
+  WORK_TIERS,
+} from "@syn/constants";
 import { googleAccountView, googleCalendarView } from "./google";
 import { dateKeySchema } from "./keys";
 import { instantSchema } from "./planner";
@@ -219,3 +223,145 @@ export const connectionsView = z
   .strict();
 
 export type ConnectionsView = z.infer<typeof connectionsView>;
+
+/*
+ * ---- Linear's own responses (USE-101) ----
+ *
+ * What the sync's three GraphQL documents select, checked against Linear's
+ * published SDK schema on 2026-10-17 (`Issue`, `WorkflowState`, `Team`,
+ * `Project`, `IssueLabel`). Each response's `data` is parsed here before the
+ * sync maps it into the snapshot: an unknown key is stripped, a missing
+ * required one fails the parse and the sync records `last_sync_error`.
+ */
+
+const linearRef = z.object({ id: z.string().min(1) });
+
+const linearPageInfo = z.object({
+  hasNextPage: z.boolean(),
+  endCursor: z.string().nullable(),
+});
+
+/** One issue node as the documents' `IssueFields` fragment selects it. */
+export const linearApiIssue = z.object({
+  id: z.string().min(1),
+  identifier: z.string().min(1),
+  title: z.string(),
+  description: z.string().nullable(),
+  url: z.string().url(),
+  priority: linearPrioritySchema,
+  estimate: z.number().nonnegative().nullable(),
+  dueDate: dateKeySchema.nullable(),
+  state: linearRef,
+  team: linearRef,
+  project: linearProjectSchema.nullable(),
+  parent: linearRef.nullable(),
+  assignee: linearRef.nullable(),
+  labels: z.object({ nodes: z.array(linearLabelSchema) }),
+});
+
+export type LinearApiIssue = z.infer<typeof linearApiIssue>;
+
+/** An assigned (or placed) issue with its first page of sub-issues. */
+export const linearApiIssueWithChildren = linearApiIssue.extend({
+  children: z.object({ nodes: z.array(linearApiIssue) }),
+});
+
+export type LinearApiIssueWithChildren = z.infer<
+  typeof linearApiIssueWithChildren
+>;
+
+const linearIssuePage = z.object({
+  nodes: z.array(linearApiIssueWithChildren),
+  pageInfo: linearPageInfo,
+});
+
+/** `AssignedIssues`: the viewer's open assigned issues, one page. */
+export const linearAssignedIssuesData = z.object({
+  viewer: z.object({ id: z.string().min(1), assignedIssues: linearIssuePage }),
+});
+
+/** `IssuesById`: placed issues read by id, so a closed one is seen. */
+export const linearIssuesByIdData = z.object({
+  viewer: z.object({ id: z.string().min(1) }),
+  issues: linearIssuePage,
+});
+
+/** `TeamStates`: every team's workflow, one page of teams. */
+export const linearTeamStatesData = z.object({
+  teams: z.object({
+    nodes: z.array(
+      z.object({
+        id: z.string().min(1),
+        key: z.string().min(1),
+        name: z.string(),
+        icon: z.string().nullable(),
+        states: z.object({
+          nodes: z.array(linearWorkflowStateSchema.omit({ teamId: true })),
+        }),
+      }),
+    ),
+    pageInfo: linearPageInfo,
+  }),
+});
+
+/*
+ * ---- The Linear router (USE-101) ----
+ */
+
+/** An assigned, open issue with no work item yet: placing it creates the row. */
+export const linearLooseIssue = linearIssueSchema.extend({
+  connectionId: z.string().uuid(),
+});
+
+export type LinearLooseIssue = z.infer<typeof linearLooseIssue>;
+
+/**
+ * `linear.read`: each workspace's latest snapshot, the outbox (USE-102 fills
+ * it) and the pool's issues not yet placed. Views only.
+ */
+export const linearReadOutput = z
+  .object({
+    connections: z.array(linearConnectionView.strict()),
+    workspaces: z.array(
+      z.object({
+        connectionId: z.string().uuid(),
+        payload: linearSnapshotPayload,
+      }),
+    ),
+    outbox: z.array(linearWriteView.strict()),
+    notInPool: z.array(linearLooseIssue),
+  })
+  .strict();
+
+export type LinearReadOutput = z.infer<typeof linearReadOutput>;
+
+/** Sync now: one workspace, or every one. */
+export const linearSyncInput = z
+  .object({ connectionId: z.string().uuid().optional() })
+  .optional();
+
+export type LinearSyncInput = z.infer<typeof linearSyncInput>;
+
+/**
+ * From Linear (USE-52; moved from the fixtures in USE-101): each ticked
+ * issue's work item (or the one already linked) and a session in the tier.
+ */
+export const placeIssuesInput = z.object({
+  issueIds: z.array(z.string().min(1)).min(1),
+  dateKey: dateKeySchema,
+  blockId: z.string().uuid(),
+  tier: z.enum(WORK_TIERS),
+  /** A sub-issue placed on a day by itself (USE-67): its issue's work item. */
+  parentWorkItemId: z.string().uuid().optional(),
+});
+
+export type PlaceIssuesInput = z.input<typeof placeIssuesInput>;
+
+/** Link a Linear issue to a Synapse item (USE-68, D-USE-36). */
+export const linkToLinearInput = z.object({
+  workItemId: z.string().uuid(),
+  connectionId: z.string().uuid(),
+  issueId: z.string().min(1),
+});
+
+export type LinkToLinearInput = z.infer<typeof linkToLinearInput>;

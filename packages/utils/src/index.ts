@@ -280,6 +280,14 @@ export {
   type SpreadSlot,
 } from "./work";
 
+/* ---- an issue's size from Linear's estimate (USE-52, shared in USE-101) ---- */
+export {
+  issueLength,
+  sizeOfEstimate,
+  UNSIZED_MIN,
+  type IssueLength,
+} from "./work";
+
 /* ---- the icon picker's suggestions (USE-11) ---- */
 export { suggestIcons, type IconSuggestEntry } from "./planner";
 

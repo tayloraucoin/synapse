@@ -50,3 +50,9 @@ export {
   type SpreadRow,
   type SpreadSlot,
 } from "./spread";
+export {
+  issueLength,
+  sizeOfEstimate,
+  UNSIZED_MIN,
+  type IssueLength,
+} from "./linear-size";

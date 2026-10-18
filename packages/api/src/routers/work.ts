@@ -1,7 +1,9 @@
 import {
   createTaskInput,
   editWorkItemInput,
+  linkToLinearInput,
   moveWorkInput,
+  placeIssuesInput,
   placeOnDaysInput,
   placeWorkInput,
   plannerWriteOutput,
@@ -12,6 +14,7 @@ import {
   workItemIdInput,
 } from "@syn/validators";
 import { refuse } from "../errors";
+import { readLinearSnapshots } from "../services/linear";
 import {
   planBackToPool,
   planCreateTask,
@@ -20,6 +23,12 @@ import {
   planRemoveFromSynapse,
   planReopenTask,
 } from "../services/work/items";
+import {
+  planLinkToLinear,
+  planPlaceIssues,
+  planUnlinkFromLinear,
+} from "../services/work/linear-items";
+import { selectLinkedItemIds } from "../services/work/linear-rows";
 import { readPool } from "../services/work/read-pool";
 import { runWorkWrite } from "../services/work/run-work-write";
 import {
@@ -40,8 +49,9 @@ import { protectedProcedure, router } from "../trpc";
  * `rls.execute` (`runWorkWrite`) and hands back `{ undo, id? }`, taken back
  * by `planner.undo`. USE-99 adds the sessions: place, place on several
  * days, move, unplace, spread and a tier change, however many days each
- * names in one transaction. Linear's snapshot and placing issues are
- * USE-101's.
+ * names in one transaction. USE-101 adds From Linear's place, Link and
+ * Unlink, each planned over the latest Linear snapshot; none writes to
+ * Linear.
  */
 
 const write = protectedProcedure.output(plannerWriteOutput);
@@ -169,4 +179,38 @@ export const workRouter = router({
       plan: (journal) => planSetWorkTier(journal, input),
     }),
   ),
+
+  placeIssues: write
+    .input(placeIssuesInput)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.authContext.userId;
+      const snapshots = await readLinearSnapshots(ctx.rls);
+      const linked = await selectLinkedItemIds(ctx.rls, userId, input.issueIds);
+      return refusingClash(
+        runWorkWrite(ctx.rls, userId, {
+          scope: { workItemIds: linked, blockIds: [input.blockId] },
+          plan: (journal) => planPlaceIssues(journal, snapshots, input),
+        }),
+      );
+    }),
+
+  linkToLinear: write
+    .input(linkToLinearInput)
+    .mutation(async ({ ctx, input }) => {
+      const snapshots = await readLinearSnapshots(ctx.rls);
+      return runWorkWrite(ctx.rls, ctx.authContext.userId, {
+        scope: { workItemIds: [input.workItemId] },
+        plan: (journal) => planLinkToLinear(journal, snapshots, input),
+      });
+    }),
+
+  unlinkFromLinear: write
+    .input(workItemIdInput)
+    .mutation(async ({ ctx, input }) => {
+      const snapshots = await readLinearSnapshots(ctx.rls);
+      return runWorkWrite(ctx.rls, ctx.authContext.userId, {
+        scope: { workItemIds: [input.workItemId] },
+        plan: (journal) => planUnlinkFromLinear(journal, snapshots, input),
+      });
+    }),
 });

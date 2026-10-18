@@ -11,8 +11,10 @@ import type {
   GoogleCalendarView,
   LinearConnectionView,
   LinearIssue,
+  LinearLooseIssue,
   LinearProject,
   LinearProjectClientInput,
+  LinearReadOutput,
   LinearSnapshotPayload,
   LinearTeam,
   LinearWorkflowState,
@@ -21,8 +23,8 @@ import type {
 } from "@syn/validators";
 
 /**
- * What the integration reads return (USE-56), from the fixture server now and
- * the Linear and connections routers in wave 3, and the joins the hooks make
+ * What the integration reads return (USE-56), from the fixture server or the
+ * Linear and connections routers (USE-100, USE-101), and the joins the hooks make
  * from them. Views only: no field here can hold a credential. A status's fill
  * and effect are recomputed on every read, never stored.
  */
@@ -33,15 +35,10 @@ export interface LinearWorkspace {
 }
 
 /** An assigned, open issue with no work item yet: placing it creates the row. */
-export type LooseIssue = LinearIssue & { connectionId: string };
+export type LooseIssue = LinearLooseIssue;
 
-export interface LinearRecords {
-  connections: LinearConnectionView[];
-  workspaces: LinearWorkspace[];
-  /** Every outbox row, oldest first. */
-  outbox: LinearWriteView[];
-  notInPool: LooseIssue[];
-}
+/** `linear.read`'s output, so the fixture and the router cannot drift. */
+export type LinearRecords = LinearReadOutput;
 
 export interface ConnectionsRecords {
   linear: LinearConnectionView[];
