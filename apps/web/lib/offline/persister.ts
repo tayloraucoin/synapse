@@ -1,6 +1,6 @@
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import type { Mutation, Query } from "@tanstack/react-query";
 import type { PersistQueryClientOptions } from "@tanstack/react-query-persist-client";
-import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { del, get, set } from "idb-keyval";
 import superjson from "superjson";
 import { isOfflineWriteKey } from "./writes";
@@ -47,9 +47,7 @@ export function shouldPersistQuery(query: Query): boolean {
 /** A paused live write (TanStack's default), and only one of the offline writes. */
 export function shouldPersistMutation(mutation: Mutation): boolean {
   const key = mutation.options.mutationKey;
-  return (
-    mutation.state.isPaused && isOfflineWriteKey(key) && key?.[2] === LIVE
-  );
+  return mutation.state.isPaused && isOfflineWriteKey(key) && key?.[2] === LIVE;
 }
 
 const storage = {

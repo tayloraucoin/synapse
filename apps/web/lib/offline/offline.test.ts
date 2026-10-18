@@ -1,16 +1,16 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { afterEach, describe, expect, it } from "vitest";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import {
   dehydrate,
-  type DehydratedState,
   hydrate,
   onlineManager,
   QueryClient,
+  type DehydratedState,
 } from "@tanstack/react-query";
 import { persistQueryClientSave } from "@tanstack/react-query-persist-client";
-import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import superjson from "superjson";
+import { afterEach, describe, expect, it } from "vitest";
 import { withQueuedEvents } from "@/lib/data/derive-today";
 import { clearOfflineStore } from "./clear";
 import { persistOptions, shouldPersistQuery } from "./persister";
@@ -48,7 +48,11 @@ function client(sent: Sent[] = []) {
 }
 
 /** A tap as a hook makes it: by key, with no function of its own. */
-function tap(queryClient: QueryClient, write: OfflineWrite, variables: unknown) {
+function tap(
+  queryClient: QueryClient,
+  write: OfflineWrite,
+  variables: unknown,
+) {
   const mutation = queryClient
     .getMutationCache()
     .build(queryClient, offlineWrite(write, "live"));

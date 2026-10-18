@@ -11,13 +11,10 @@ import {
 } from "@trpc/client";
 import { observable } from "@trpc/server/observable";
 import superjson from "superjson";
-
 import type { AppRouter } from "@syn/api";
-
 import { notifySessionExpired } from "@/lib/auth/session-expired";
 import { persistOptions } from "@/lib/offline/persister";
 import { registerOfflineWrites, type SendWrite } from "@/lib/offline/writes";
-
 import { trpc } from "./client";
 
 /**
@@ -87,7 +84,9 @@ export function TrpcProvider({ children }: TrpcProviderProps) {
           {children}
         </PersistQueryClientProvider>
       ) : (
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
       )}
     </trpc.Provider>
   );
