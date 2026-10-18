@@ -1,12 +1,12 @@
 ---
 id: USE-123
 size: small
-objective: "On the Week at the desk, hovering or focusing a day head shows \"+ Event\" beside it, and it opens USE-53's event popover anchored under it, set to that day"
+objective: 'On the Week at the desk, hovering or focusing a day head shows "+ Event" beside it, and it opens USE-53''s event popover anchored under it, set to that day'
 slice_type: "a fix found by the Paper assay (thread C, 2026-10-18) on USE-73 C2; the button lives only in the /dev/parts fixture today; risks a hover-only control with no keyboard path"
 non_negotiables:
-  - "\"+ Event\" shows on a weekday head's hover and on focus within the head, never on Sat or Sun heads that have no ›."
+  - '"+ Event" shows on a weekday head''s hover and on focus within the head, never on Sat or Sun heads that have no ›.'
   - "It is 24 px, --color-background, a --color-input hairline, semibold caption, as time-lens.md draws it."
-  - "It is named \"Add an event on <weekday> <date>\" (ADD_EVENT_COPY.plusEventName) and reachable by Tab."
+  - 'It is named "Add an event on <weekday> <date>" (ADD_EVENT_COPY.plusEventName) and reachable by Tab.'
   - "It opens USE-53's EventPopover anchored under the head, set to that date; Add event writes as USE-53 does."
   - "It shows in both lenses' heads, Priority and Time, and the head's › still opens the day."
   - "Only @syn/ui components and preset tokens (canon §2)."
@@ -35,11 +35,11 @@ out_of_scope:
   - "Google events' read-only rule"
 criteria:
   - id: C1
-    statement: "Rendering the Week's head row, a weekday head has a button named \"Add an event on Wednesday 14\" that opens the event popover set to 2026-10-14; Sat and Sun heads have none"
+    statement: 'Rendering the Week''s head row, a weekday head has a button named "Add an event on Wednesday 14" that opens the event popover set to 2026-10-14; Sat and Sun heads have none'
     evidence: test
     command: "yarn test"
   - id: C2
-    statement: "At 1728 on /dev/parts?state=week-time, hovering Wednesday's head shows \"+ Event\" beside \"Wed 14 ›\", and pressing it opens \"New event · Wednesday 14\" under the head"
+    statement: 'At 1728 on /dev/parts?state=week-time, hovering Wednesday''s head shows "+ Event" beside "Wed 14 ›", and pressing it opens "New event · Wednesday 14" under the head'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-123-week-head-plus-event/evidence/plus-event-1728.png"
   - id: C3

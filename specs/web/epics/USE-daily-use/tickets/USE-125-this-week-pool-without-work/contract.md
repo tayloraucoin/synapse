@@ -13,7 +13,7 @@ devs_call: "The words the place sheet uses for a day with no Work block, kept to
 cites:
   - "specs/web/epics/USE-daily-use/ux/work/this-week/words-and-access.md"
   - "C-USE-this-week-2"
-truth_files: "none: index.md already says \"Pool still opens; Place lists no tier\"; the code is brought to it"
+truth_files: 'none: index.md already says "Pool still opens; Place lists no tier"; the code is brought to it'
 qa: Q1
 reviewers:
   - assay
@@ -33,7 +33,7 @@ out_of_scope:
   - "The empty first day's Up at and Lights out form, apart from adding Pool under it"
 criteria:
   - id: C1
-    statement: "Rendering This week on Saturday 17 (no Work block), a button named \"Pool\" is present and pressing it opens the dialog named \"Pool\""
+    statement: 'Rendering This week on Saturday 17 (no Work block), a button named "Pool" is present and pressing it opens the dialog named "Pool"'
     evidence: test
     command: "yarn test"
   - id: C2

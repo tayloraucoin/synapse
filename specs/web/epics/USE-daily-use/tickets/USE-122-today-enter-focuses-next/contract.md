@@ -36,7 +36,7 @@ criteria:
     evidence: test
     command: "yarn test"
   - id: C2
-    statement: "In the browser at 1440 on /dev/parts?state=today-working, Enter from a fresh page focuses \"[Alder intro], next\", and F and D each leave focus on a row, read back from the accessibility tree"
+    statement: 'In the browser at 1440 on /dev/parts?state=today-working, Enter from a fresh page focuses "[Alder intro], next", and F and D each leave focus on a row, read back from the accessibility tree'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-122-today-enter-focuses-next/evidence/keys.txt"
   - id: C3

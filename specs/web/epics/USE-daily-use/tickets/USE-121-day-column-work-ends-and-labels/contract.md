@@ -4,8 +4,8 @@ size: small
 objective: "The desk's day column reads as drawn: the day bar names when Work ends (17:00, the last Work block's end), every block's label is readable, Breakfast stands at 9:00, and the bar's segments carry no cramped letters"
 slice_type: "a fix found by the Paper assay (thread C, 2026-10-18) on USE-58 C1; risks moving the Week's Fits value along with the label, or clipping a label again at another block size"
 non_negotiables:
-  - "The day bar's middle label reads \"Work ends <end of the day's last Work block>\": 17:00 on Monday 12, as words-and-access lists it."
-  - "The Week's Fits row keeps its own value (\"Work ends 16:20\"); only the day column's label changes."
+  - 'The day bar''s middle label reads "Work ends <end of the day''s last Work block>": 17:00 on Monday 12, as words-and-access lists it.'
+  - 'The Week''s Fits row keeps its own value ("Work ends 16:20"); only the day column''s label changes.'
   - "No block label is clipped by the block after it: a short block (Stretch break, 15:00 to 15:10) shows its name whole or shortens it with an ellipsis, never cut through the text."
   - "Every block of the date shows in the column, Breakfast 9:00 to 9:30 included."
   - "The day bar's segments are colour with no letters, as drawn; the column's hours carry the names."
@@ -33,11 +33,11 @@ out_of_scope:
   - "The phone's day (USE-81) and Set my days' day view"
 criteria:
   - id: C1
-    statement: "deskColumn on the today-working records names \"Work ends 17:00\" and lists Breakfast 9:00 to 9:30 among the blocks"
+    statement: 'deskColumn on the today-working records names "Work ends 17:00" and lists Breakfast 9:00 to 9:30 among the blocks'
     evidence: test
     command: "yarn test"
   - id: C2
-    statement: "At 1728, /dev/parts?state=today-working shows the day bar with \"Work ends 17:00\" and no letters on its segments, Breakfast at 9:00, and \"Stretch break\" readable between the 13:00 and 15:10 Work blocks"
+    statement: 'At 1728, /dev/parts?state=today-working shows the day bar with "Work ends 17:00" and no letters on its segments, Breakfast at 9:00, and "Stretch break" readable between the 13:00 and 15:10 Work blocks'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-121-day-column-work-ends-and-labels/evidence/day-column-1728.png"
   - id: C3

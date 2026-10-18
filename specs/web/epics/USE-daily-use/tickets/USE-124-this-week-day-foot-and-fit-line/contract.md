@@ -5,7 +5,7 @@ objective: "On the phone's This week day, Pool and the + sit above the tabs wher
 slice_type: "a fix found by the Paper assay (thread C, 2026-10-18) on USE-81 C1 and C3; risks content hidden under fixed chrome at other heights, and a block's text clipped by its time-height"
 non_negotiables:
   - "Pool and the + sit wholly above BottomNav at 402 × 874, with nothing they cover; the day's last block scrolls clear of them."
-  - "The fit line \"Doesn't fit by 40 min at the top of the ranges\" shows whole, in ink, medium, never red (D-USE-105)."
+  - 'The fit line "Doesn''t fit by 40 min at the top of the ranges" shows whole, in ink, medium, never red (D-USE-105).'
   - "A Work block open to its tiers grows to hold its rows and fit line, or the fit line sits under it; its text is never cut by the block's height."
   - "Offline, Pool stays live and the + reads as read-only, both visible."
   - "Pool is 52 px high and the + a --size-row circle, both above the 44 px target."
@@ -33,7 +33,7 @@ out_of_scope:
   - "The desk's day column (USE-121)"
 criteria:
   - id: C1
-    statement: "At 402 × 874 on /dev/parts?state=this-week-day, Pool's and the +'s bounding boxes end above BottomNav's top, and the Work block shows \"Doesn't fit by 40 min at the top of the ranges\" uncut"
+    statement: 'At 402 × 874 on /dev/parts?state=this-week-day, Pool''s and the +''s bounding boxes end above BottomNav''s top, and the Work block shows "Doesn''t fit by 40 min at the top of the ranges" uncut'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-124-this-week-day-foot-and-fit-line/evidence/the-day-402.png"
   - id: C2
