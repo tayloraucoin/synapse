@@ -3,55 +3,55 @@
   "criteria_sha256": "165d39c76b3a04b5cb4770b8766acd274befdfe80b985031bc55baea54ed4d36",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:25:12Z",
-        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "exit": 0,
+        "at": "2026-10-18T19:55:52Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C1.log",
-        "evidence_sha256": "5f3b59d49bb85d373f674f409a84bc5575f018d197fde50fb0e166e4feb7b493",
-        "tests": 0
+        "evidence_sha256": "68fad690851c2b6e98037011f5b44bb6c47e86c7cec7eed82f10f4344a4f0c3b",
+        "tests": 32
       }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:25:12Z",
-        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "exit": 0,
+        "at": "2026-10-18T19:55:52Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C2.log",
-        "evidence_sha256": "5f3b59d49bb85d373f674f409a84bc5575f018d197fde50fb0e166e4feb7b493",
-        "tests": 0
+        "evidence_sha256": "68fad690851c2b6e98037011f5b44bb6c47e86c7cec7eed82f10f4344a4f0c3b",
+        "tests": 32
       }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:25:12Z",
-        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "exit": 0,
+        "at": "2026-10-18T19:55:52Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C3.log",
-        "evidence_sha256": "5f3b59d49bb85d373f674f409a84bc5575f018d197fde50fb0e166e4feb7b493",
-        "tests": 0
+        "evidence_sha256": "68fad690851c2b6e98037011f5b44bb6c47e86c7cec7eed82f10f4344a4f0c3b",
+        "tests": 32
       }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:25:12Z",
-        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "exit": 0,
+        "at": "2026-10-18T19:55:52Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C4.log",
-        "evidence_sha256": "5f3b59d49bb85d373f674f409a84bc5575f018d197fde50fb0e166e4feb7b493",
-        "tests": 0
+        "evidence_sha256": "68fad690851c2b6e98037011f5b44bb6c47e86c7cec7eed82f10f4344a4f0c3b",
+        "tests": 32
       }
     },
     "C5": {
@@ -65,12 +65,12 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:25:34Z",
-        "head": "23b1f97daa9831394033516ea4c426262fd0f264",
+        "at": "2026-10-18T19:56:10Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-091-day-and-week-reads/evidence/C6.log",
-        "evidence_sha256": "36f61d47c6350a1fb21aa46abb8d83db4fc716cf5356716270f6838a257f0bb5"
+        "evidence_sha256": "34957c0f6d78dc3e53fa335f5d2bfd237fd7b98f2548e363cf74ee437b1787f9"
       }
     }
   },
-  "updated_at": "2026-10-18T19:25:35Z"
+  "updated_at": "2026-10-18T19:56:10Z"
 }

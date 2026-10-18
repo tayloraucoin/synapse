@@ -3,68 +3,68 @@
   "criteria_sha256": "3cd128a5e0197b2986f807de23f94445286856f97410792574700769911cd16b",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:21:37Z",
-        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "exit": 0,
+        "at": "2026-10-18T19:53:11Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-055-work-writes-fixtures/evidence/C1.log",
-        "evidence_sha256": "ce83185174f02cc86d9b48c7e138056f66f1c72926a846dcb0a292ce429f35e1",
-        "tests": 0
+        "evidence_sha256": "c3ec1ce8a787abe87ec325addb52601f1d9daeb0a0062668912ea5dbd66194fd",
+        "tests": 32
       }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:21:37Z",
-        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "exit": 0,
+        "at": "2026-10-18T19:53:11Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-055-work-writes-fixtures/evidence/C2.log",
-        "evidence_sha256": "ce83185174f02cc86d9b48c7e138056f66f1c72926a846dcb0a292ce429f35e1",
-        "tests": 0
+        "evidence_sha256": "c3ec1ce8a787abe87ec325addb52601f1d9daeb0a0062668912ea5dbd66194fd",
+        "tests": 32
       }
     },
     "C3": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:21:37Z",
-        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "exit": 0,
+        "at": "2026-10-18T19:53:11Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-055-work-writes-fixtures/evidence/C3.log",
-        "evidence_sha256": "ce83185174f02cc86d9b48c7e138056f66f1c72926a846dcb0a292ce429f35e1",
-        "tests": 0
+        "evidence_sha256": "c3ec1ce8a787abe87ec325addb52601f1d9daeb0a0062668912ea5dbd66194fd",
+        "tests": 32
       }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:21:37Z",
-        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "exit": 0,
+        "at": "2026-10-18T19:53:11Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-055-work-writes-fixtures/evidence/C4.log",
-        "evidence_sha256": "ce83185174f02cc86d9b48c7e138056f66f1c72926a846dcb0a292ce429f35e1",
-        "tests": 0
+        "evidence_sha256": "c3ec1ce8a787abe87ec325addb52601f1d9daeb0a0062668912ea5dbd66194fd",
+        "tests": 32
       }
     },
     "C5": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
       "run": {
         "command": "yarn test",
-        "exit": 1,
-        "at": "2026-10-18T19:21:37Z",
-        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "exit": 0,
+        "at": "2026-10-18T19:53:11Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-055-work-writes-fixtures/evidence/C5.log",
-        "evidence_sha256": "ce83185174f02cc86d9b48c7e138056f66f1c72926a846dcb0a292ce429f35e1",
-        "tests": 0
+        "evidence_sha256": "c3ec1ce8a787abe87ec325addb52601f1d9daeb0a0062668912ea5dbd66194fd",
+        "tests": 32
       }
     },
     "C6": {
@@ -73,13 +73,13 @@
       "run": {
         "command": "yarn check-types",
         "exit": 0,
-        "at": "2026-10-18T19:22:09Z",
-        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "at": "2026-10-18T19:53:31Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
         "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-055-work-writes-fixtures/evidence/C6.log",
-        "evidence_sha256": "3f56db4f939800f667178bc2b0eed9ebaaf88f1517971b2862a67d44f1dcda07"
+        "evidence_sha256": "d0d99ec7676aa88fbe1ebe3925d41184a10d2467ef81ec18246cea5baef8341b"
       }
     }
   },
   "built_at": "2026-10-18T18:57:47Z",
-  "updated_at": "2026-10-18T19:22:09Z"
+  "updated_at": "2026-10-18T19:53:31Z"
 }
