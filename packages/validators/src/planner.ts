@@ -759,3 +759,82 @@ export const mealTopicWriteInput = mealTopicInput.extend({
 });
 
 export type MealTopicWriteInput = z.infer<typeof mealTopicWriteInput>;
+
+/*
+ * ---- The planner's writes as the router takes them (USE-92) ----
+ */
+
+/** The usual weekday an edit was made on, so the router can name its reach. */
+export const writeScopeInput = z.object({ weekday: weekdaySchema });
+
+export type WriteScopeInput = z.infer<typeof writeScopeInput>;
+
+/** A write's own input with the usual weekday it was made on, when it was. */
+export function scopedWriteInput<S extends z.ZodTypeAny>(input: S) {
+  return z.object({ input, scope: writeScopeInput.optional() });
+}
+
+/**
+ * This and following (USE-47): what the block's dates from `fromDate` take,
+ * a block's own fields, never its repeat. The server checks a lone time
+ * against the stored other one, as `editBlockInput`.
+ */
+export const splitBlockInput = z.object({
+  id: z.string().uuid(),
+  fromDate: dateKeySchema,
+  patch: z
+    .object({
+      name: plannerNameSchema.optional(),
+      icon: iconValueSchema.nullish(),
+      color: colourValueSchema.nullish(),
+      startsAt: startTimeSchema.optional(),
+      endsAt: endTimeSchema.optional(),
+      fill: blockFillSchema.nullish(),
+      checklist: z.boolean().optional(),
+      meal: z.boolean().optional(),
+      notify: z.boolean().optional(),
+    })
+    .superRefine(refineEndsAfterStarts),
+});
+
+export type SplitBlockInput = z.infer<typeof splitBlockInput>;
+
+/** With `date`, a set item is skipped on that date and stays usual. */
+export const removeBlockItemInput = z.object({
+  id: z.string().uuid(),
+  date: dateKeySchema.optional(),
+});
+
+export type RemoveBlockItemInput = z.infer<typeof removeBlockItemInput>;
+
+/** The block's items in their new order; with `date`, for that date only. */
+export const reorderItemsInput = z.object({
+  blockId: z.string().uuid(),
+  ids: z.array(z.string().uuid()).max(500),
+  date: dateKeySchema.optional(),
+});
+
+export type ReorderItemsInput = z.infer<typeof reorderItemsInput>;
+
+/** Add event's write, or with `id` its edit. */
+export const dayEventWriteInput = scopedWriteInput(dayEventInput).extend({
+  id: z.string().uuid().optional(),
+});
+
+export type DayEventWriteInput = z.infer<typeof dayEventWriteInput>;
+
+/** A write's Undo: the signed token it handed back. */
+export const undoInput = z.object({ token: z.string().min(1).max(500_000) });
+
+export type UndoInput = z.infer<typeof undoInput>;
+
+/** What every planner write hands back: its Undo, the row, the reach. */
+export const plannerWriteOutput = z.object({
+  undo: z.string(),
+  id: z.string().uuid().optional(),
+  reach: z
+    .object({ weekday: weekdaySchema, follows: dateKeySchema.nullable() })
+    .optional(),
+});
+
+export type PlannerWriteOutput = z.infer<typeof plannerWriteOutput>;

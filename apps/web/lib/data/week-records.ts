@@ -1,11 +1,3 @@
-import {
-  addDays,
-  dateKeyIn,
-  defaultWeek,
-  weekDates,
-  weekdayIndex,
-  weekKeyOf,
-} from "@syn/utils";
 import type { SetUpDayRead, WeekReadOutput } from "@syn/validators";
 
 /**
@@ -25,18 +17,6 @@ export type SetUpDayRecords = SetUpDayRead;
 
 export type WeekRecords = WeekReadOutput;
 
-/**
- * This week's key: the week of today, and from Sunday 18:00 the coming one,
- * as Set my days opens on it (`defaultWeek`). [ASSUMPTION] The same turn
- * names the week a usual change reaches.
- */
-export function thisWeekKey(now: Date, timeZone: string): string {
-  const today = dateKeyIn(now, timeZone);
-  const turned =
-    weekdayIndex(today) === 6 && defaultWeek(now, timeZone) === "this";
-  return weekKeyOf(turned ? addDays(today, 1) : today);
-}
-
-export function thisWeekDates(now: Date, timeZone: string): string[] {
-  return weekDates(thisWeekKey(now, timeZone));
-}
+// This week's key and dates moved to @syn/utils (USE-92), so the planner
+// router reaches the same dates; kept here for their callers.
+export { thisWeekDates, thisWeekKey } from "@syn/utils";

@@ -469,6 +469,22 @@ export {
   type SlotEventInput,
   type SlotEventRecord,
   type SlotRecord,
+  // The planner's writes as the router takes them (USE-92).
+  dayEventWriteInput,
+  plannerWriteOutput,
+  removeBlockItemInput,
+  reorderItemsInput,
+  scopedWriteInput,
+  splitBlockInput,
+  undoInput,
+  writeScopeInput,
+  type DayEventWriteInput,
+  type PlannerWriteOutput,
+  type RemoveBlockItemInput,
+  type ReorderItemsInput,
+  type SplitBlockInput,
+  type UndoInput,
+  type WriteScopeInput,
 } from "./planner";
 
 export {

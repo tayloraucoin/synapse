@@ -165,6 +165,8 @@ export {
   overlaps,
   reflowItems,
   tappedSlot,
+  thisWeekDates,
+  thisWeekKey,
   usualChangeReach,
   usualDay,
   type BlockOverlap,

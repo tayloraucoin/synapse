@@ -75,6 +75,8 @@ export {
 export {
   defaultWeek,
   isOwnChange,
+  thisWeekDates,
+  thisWeekKey,
   usualChangeReach,
   usualDay,
 } from "./usual-week";

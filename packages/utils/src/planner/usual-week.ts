@@ -1,9 +1,10 @@
 import {
+  addDays,
   dateKeyIn,
   instantToWallClockMinutes,
   wallClockToInstant,
 } from "../day/wall-clock";
-import { weekdayIndex } from "../day/week";
+import { weekDates, weekdayIndex, weekKeyOf } from "../day/week";
 import { parseRule } from "./rrule";
 
 /**
@@ -45,6 +46,25 @@ export function defaultWeek(now: Date, timeZone: string): "usual" | "this" {
     instantToWallClockMinutes(now, timeZone) >= SUNDAY_EVENING_MIN
     ? "this"
     : "usual";
+}
+
+/**
+ * This week's key: the week of today, and from Sunday 18:00 the coming one,
+ * as Set my days opens on it (`defaultWeek`). [ASSUMPTION] The same turn
+ * names the week a usual change reaches. Moved from the web app's
+ * `lib/data/week-records.ts` (USE-92), so the planner router reaches the
+ * same dates.
+ */
+export function thisWeekKey(now: Date, timeZone: string): string {
+  const today = dateKeyIn(now, timeZone);
+  const turned =
+    weekdayIndex(today) === SUNDAY && defaultWeek(now, timeZone) === "this";
+  return weekKeyOf(turned ? addDays(today, 1) : today);
+}
+
+/** This week's seven date keys, Monday first. */
+export function thisWeekDates(now: Date, timeZone: string): string[] {
+  return weekDates(thisWeekKey(now, timeZone));
 }
 
 /**

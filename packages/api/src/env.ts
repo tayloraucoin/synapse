@@ -16,6 +16,8 @@ const schema = z.object({
   INTEGRATION_TOKEN_KEY: z.string().min(1).optional(),
   /** The Linear OAuth application's client id (public; PKCE, no secret). */
   LINEAR_CLIENT_ID: z.string().min(1).optional(),
+  /** 32 random bytes, base64: HMAC-SHA256's key for every Undo token (USE-92). */
+  UNDO_TOKEN_KEY: z.string().min(32).optional(),
   /**
    * Google Calendar's own OAuth client (USE-103): a Web application client
    * in its own Cloud project, never the sign-in's. Google's token endpoint
@@ -31,6 +33,7 @@ export function readApiEnv(): ApiEnv {
   return schema.parse({
     INTEGRATION_TOKEN_KEY: process.env.INTEGRATION_TOKEN_KEY || undefined,
     LINEAR_CLIENT_ID: process.env.LINEAR_CLIENT_ID || undefined,
+    UNDO_TOKEN_KEY: process.env.UNDO_TOKEN_KEY || undefined,
     GOOGLE_CALENDAR_CLIENT_ID:
       process.env.GOOGLE_CALENDAR_CLIENT_ID || undefined,
     GOOGLE_CALENDAR_CLIENT_SECRET:
