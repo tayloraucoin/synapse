@@ -31,4 +31,5 @@ export const LIVE_DOMAINS: readonly LiveDomain[] = [
   plannerRead,
   plannerWrites,
   clientsDomain,
+  googleEventsDomain,
 ];
