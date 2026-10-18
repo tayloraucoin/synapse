@@ -1,21 +1,22 @@
 import { createLogger } from "@syn/observability";
+import { blockStartsJob } from "./block-starts";
 import { expireExportsJob } from "./expire-exports";
+import { sendLinearWritesJob } from "./send-linear-writes";
+import { todoRemindersJob } from "./todo-reminders";
 
 const log = createLogger("jobs/scheduler");
 
 /**
  * The scheduled-job registry.
  *
- * A cron calls `/api/jobs/scheduler` every fifteen minutes and this runs
- * whatever is registered. The interval is the ceiling on how late a reminder
- * can be, which is why it is fifteen minutes and not a day: official spec
- * §8.2's N1 fires at an item's `scheduled_start`, and a reminder that arrives
- * hours later is worse than none.
+ * A cron calls `/api/jobs/scheduler` every 5 minutes (C12, USE-105) and this
+ * runs whatever is registered. The interval is the ceiling on how late a
+ * reminder can be: a to-do's reminder or a block's start that arrives long
+ * after its time is worse than none.
  *
- * Since the legacy move (USE-1, 2026-10-13) only `expire_exports` is live:
- * the old day close and the notification jobs read the old domains and went
- * to `_legacy/` with them. USE's reminder and push tickets register their jobs
- * here the same way; nothing about this file changes when they do.
+ * Since the legacy move (USE-1, 2026-10-13) the old day close and the old
+ * notification jobs live in `_legacy/`; USE-105 registers USE's own pushes
+ * (`todo_reminder`, `block_start`) and USE-102's Linear outbox sweep.
  *
  * A job that throws is logged and does not stop the others: one broken job
  * must not silence every notification in the product.
@@ -32,8 +33,13 @@ export type ScheduledJob = {
   run: () => Promise<number>;
 };
 
-/** `expire_exports` (SET-10) is order-independent; it touches nothing else reads. */
-export const SCHEDULED_JOBS: readonly ScheduledJob[] = [expireExportsJob];
+/** Order-independent: no job reads what another writes. */
+export const SCHEDULED_JOBS: readonly ScheduledJob[] = [
+  expireExportsJob,
+  todoRemindersJob,
+  blockStartsJob,
+  sendLinearWritesJob,
+];
 
 export async function runScheduledJobs(): Promise<ScheduledJobResult[]> {
   const results: ScheduledJobResult[] = [];

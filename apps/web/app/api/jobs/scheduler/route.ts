@@ -1,9 +1,8 @@
 import { runScheduledJobs } from "@syn/api";
-
 import { env } from "@/env";
 
 /**
- * The scheduler's HTTP face. Vercel Cron calls this every fifteen minutes with
+ * The scheduler's HTTP face. Vercel Cron calls this every 5 minutes (C12) with
  * `Authorization: Bearer $CRON_SECRET`; `runScheduledJobs()` drives whatever
  * time-based jobs are registered.
  *
