@@ -3,6 +3,7 @@
 import * as React from "react";
 import { ScreenFrame, Text } from "@syn/ui";
 import { TabHeader } from "@/app/(shell)/_components/tab-header";
+import { DaysScreen } from "@/app/(shell)/days/_components/days-screen";
 import { PlaceSheet, type PlaceSheetProps } from "@/components/work/pool-sheet";
 import {
   PLACE_SHEET_DATE,
@@ -11,11 +12,11 @@ import {
 import { POOL_SHEET_IDS } from "./scenarios/pool-sheet";
 
 /**
- * USE-80's states on `/dev/parts?state=<name>`, named as their scenarios,
- * until This week's day (USE-81) opens the pool sheet and Place from it: the
- * place sheet for KES-58 with Tue and Wed picked in Primary; the same placed
- * on load, its toast and Undo over the day (the day's new row and fit line
- * are USE-81's); KES-61 on Tue alone, which Tue's Work cannot hold.
+ * USE-80's states on `/dev/parts?state=<name>`, named as their scenarios:
+ * the place sheet for KES-58 with Tue and Wed picked in Primary; the same
+ * placed on load, its toast and Undo over This week's Tuesday (USE-81's day,
+ * its new row marked and its fit line); KES-61 on Tue alone, which Tue's
+ * Work cannot hold.
  */
 
 const COPY = {
@@ -53,12 +54,18 @@ export function PlaceSheetPart({ state }: { state: PlaceSheetScenarioName }) {
   const [open, setOpen] = React.useState(true);
   return (
     <>
-      <TabHeader title={COPY.week} />
-      <ScreenFrame>
-        <Text as="p" variant="body" tone="muted">
-          {COPY.line}
-        </Text>
-      </ScreenFrame>
+      {state === "placed-undo" ? (
+        <DaysScreen />
+      ) : (
+        <>
+          <TabHeader title={COPY.week} />
+          <ScreenFrame>
+            <Text as="p" variant="body" tone="muted">
+              {COPY.line}
+            </Text>
+          </ScreenFrame>
+        </>
+      )}
       <PlaceSheet
         itemRef={
           open

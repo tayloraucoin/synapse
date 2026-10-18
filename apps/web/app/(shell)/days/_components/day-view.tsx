@@ -367,7 +367,9 @@ function SetDay({
   const past = place.date !== null && place.date < todayKey;
   const [poolOpen, setPoolOpen] = React.useState(false);
   const poolRef = React.useRef<HTMLButtonElement>(null);
-  const [marked, setMarked] = React.useState<string | null>(null);
+  const [marked, setMarked] = React.useState<string | null>(
+    start?.day === place.day ? (start.marked ?? null) : null,
+  );
   React.useEffect(() => {
     if (marked === null) return;
     // [ASSUMPTION] The mark fades as the desk drop's ink edge does.

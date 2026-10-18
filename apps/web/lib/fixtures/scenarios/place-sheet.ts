@@ -5,6 +5,7 @@ import { POOL_IDS } from "./pool";
 import { POOL_SHEET_IDS } from "./pool-sheet";
 import { SET_UP_IDS } from "./set-up";
 import { SPREAD_PHONE_NOW, SPREAD_PHONE_SCENARIOS } from "./spread";
+import { tuesdayRecords } from "./this-week-tuesday";
 
 /**
  * The phone's place sheet (USE-80): Spread's phone week (USE-78: the pool
@@ -18,7 +19,9 @@ import { SPREAD_PHONE_NOW, SPREAD_PHONE_SCENARIOS } from "./spread";
  * 2 h and gives KES-61 2 h [ASSUMPTION: the board's 5 Large at its full
  * 4 h fits no 2 h 30 Work block on any day, so it could have no "next day
  * with room"]: Tue's Work then misses it by 1 h 40, Wed by 10 min, and
- * Thu 15 has room, 2 h 30. Bracketed names are the boards' placeholders.
+ * Thu 15 has room, 2 h 30. `placed-undo` lands on This week's Tuesday
+ * (this-week-tuesday.ts), opened in Set my days with KES-58's row marked.
+ * Bracketed names are the boards' placeholders.
  */
 
 const STAMP = "2026-10-01T12:00:00.000Z";
@@ -116,6 +119,10 @@ function placeSheet(name: PlaceSheetScenarioName) {
       session(S.ald17Tue, W.ald17, "2026-10-13", "primary", 10),
       session(S.ald17Wed, W.ald17, "2026-10-14", "primary", 40),
     ];
+    // The day beneath Undo is This week's Tuesday (USE-81), before KES-58.
+    const tuesday =
+      name === "placed-undo" ? tuesdayRecords({ kes58: false }) : null;
+    if (tuesday) slots.push(...tuesday.slots);
     if (name === "doesnt-fit") {
       workItems.push(
         item({
@@ -140,8 +147,19 @@ function placeSheet(name: PlaceSheetScenarioName) {
             : w,
         ),
         slots,
+        dayEvents: [...records.dayEvents, ...(tuesday?.dayEvents ?? [])],
       },
       mode: "ready",
+      ...(tuesday
+        ? {
+            seen: ["install-offer"],
+            setUp: {
+              week: "this",
+              day: 1,
+              marked: POOL_SHEET_IDS.workItems.kes58,
+            },
+          }
+        : {}),
     };
   };
 }

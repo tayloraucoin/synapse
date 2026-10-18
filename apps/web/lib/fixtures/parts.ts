@@ -54,6 +54,7 @@ import {
   TODAY_DESK_SCENARIOS,
 } from "./scenarios/today-desk";
 import { TODAY_EMPTY_SCENARIOS } from "./scenarios/today-empty";
+import { TODAY_LINEAR_SCENARIOS } from "./scenarios/today-linear";
 import { TODAY_MEETING_SCENARIOS } from "./scenarios/today-meetings";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
 import { WEEK_SCENARIOS } from "./scenarios/week";
@@ -353,6 +354,10 @@ for (const state of Object.keys(STEP_AWAY_SCENARIOS)) {
 }
 // USE-82: nothing planned and no work slotted, on the same frame.
 for (const state of Object.keys(TODAY_EMPTY_SCENARIOS)) {
+  registerPart(state, () => createElement(TodayDeskPart));
+}
+// USE-63: Linear's side of work's Today, waiting, failed, updating, offline.
+for (const state of Object.keys(TODAY_LINEAR_SCENARIOS)) {
   registerPart(state, () => createElement(TodayDeskPart));
 }
 // USE-70: the row gestures, the swipe held and the work menu open.

@@ -10,6 +10,8 @@ export interface SetUpScenarioStart {
   reach?: string;
   /** The block just moved by a drag: its ink edge (overlap.md). */
   moved?: string;
+  /** The work item just placed on this day: its row marked once (placed-undo.md). */
+  marked?: string;
   /** A repeating block dragged to this start on a date: the scope question open (USE-47). */
   askScope?: { block: string; startsAt: string };
   /** The day's Toaster stays, for its capture. */
