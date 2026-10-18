@@ -9,6 +9,7 @@ import { linearRouter } from "./routers/linear";
 import { morningRouter } from "./routers/morning";
 import { notificationRouter } from "./routers/notification";
 import { plannerRouter } from "./routers/planner";
+import { todoRouter } from "./routers/todo";
 import { userRouter } from "./routers/user";
 import { createCallerFactory, router } from "./trpc";
 
@@ -33,6 +34,7 @@ export const appRouter = router({
   morning: morningRouter,
   notification: notificationRouter,
   planner: plannerRouter,
+  todo: todoRouter,
   user: userRouter,
 });
 

@@ -5,6 +5,7 @@ import {
   clients,
   dayBounds,
   dayEvents,
+  slotEvents,
   slots,
   todos,
   workItems,
@@ -16,6 +17,7 @@ import {
   clientRecord,
   dayBoundsRecord,
   dayEventRecord,
+  slotEventRecord,
   slotRecord,
   todoRecord,
   workItemRecord,
@@ -26,12 +28,17 @@ import {
  * the to-dos', each with the record its rows are kept as. A token naming any
  * other table is refused when it is read. Keys are the records' own names, as
  * the fixture's write log names them.
+ *
+ * `slotEvents` (USE-95) is here only for a deleted to-do's Undo, which puts
+ * its slots' events back; slot_events is append-only, so its insert is the
+ * one step a token can take there (an update or delete reaches no row).
  */
 export const UNDO_TABLES = {
   blocks: { table: blocks, record: blockRecord },
   blockChanges: { table: blockChanges, record: blockChangeRecord },
   blockItems: { table: blockItems, record: blockItemRecord },
   slots: { table: slots, record: slotRecord },
+  slotEvents: { table: slotEvents, record: slotEventRecord },
   dayEvents: { table: dayEvents, record: dayEventRecord },
   dayBounds: { table: dayBounds, record: dayBoundsRecord },
   workItems: { table: workItems, record: workItemRecord },
