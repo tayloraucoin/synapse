@@ -1,11 +1,15 @@
 "use client";
 
+import { useCallback } from "react";
 import {
+  useMutationState,
   useQuery,
   useQueryClient,
   type QueryClient,
 } from "@tanstack/react-query";
-import { deriveToday, type Today } from "./derive-today";
+import type { SlotEventInput } from "@syn/validators";
+import { offlineWriteKey } from "@/lib/offline/writes";
+import { deriveToday, withQueuedEvents, type Today } from "./derive-today";
 import { useDataSource, type DataSource } from "./source";
 import type { TodayRecords } from "./today-records";
 
@@ -41,10 +45,23 @@ export function useToday(dateKey: string) {
   const source = useDataSource();
   const queryClient = useQueryClient();
   const queryKey = todayQueryKey(source.scenario.name, dateKey);
+  // The clock's taps still waiting (USE-106), counted as made.
+  const queued = useMutationState({
+    filters: {
+      mutationKey: offlineWriteKey("slotEvents", source.scenario.name),
+      status: "pending",
+    },
+    select: (mutation) => mutation.state.variables as SlotEventInput[],
+  });
+  const select = useCallback(
+    (records: TodayRecords) =>
+      deriveToday(withQueuedEvents(records, queued.flat())),
+    [queued],
+  );
   const query = useQuery<TodayRecords, Error, Today>({
     queryKey,
     queryFn: () => source.server.readToday(dateKey),
-    select: deriveToday,
+    select,
     // The error state stays up until the person retries.
     retry: false,
   });

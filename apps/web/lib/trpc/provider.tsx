@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import {
   createTRPCClient,
   httpBatchLink,
@@ -14,6 +15,8 @@ import superjson from "superjson";
 import type { AppRouter } from "@syn/api";
 
 import { notifySessionExpired } from "@/lib/auth/session-expired";
+import { persistOptions } from "@/lib/offline/persister";
+import { registerOfflineWrites, type SendWrite } from "@/lib/offline/writes";
 
 import { trpc } from "./client";
 
@@ -47,28 +50,68 @@ interface TrpcProviderProps {
 }
 
 export function TrpcProvider({ children }: TrpcProviderProps) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            // Thirty seconds: long enough that switching tabs does not refetch
-            // the day, short enough that a change made on another device shows
-            // up without a reload.
-            staleTime: 30_000,
-          },
+  const [queryClient] = useState(() => {
+    const client = new QueryClient({
+      defaultOptions: {
+        queries: {
+          // Thirty seconds: long enough that switching tabs does not refetch
+          // the day, short enough that a change made on another device shows
+          // up without a reload.
+          staleTime: 30_000,
         },
-      }),
-  );
+      },
+    });
+    // Before the cache is restored, so a persisted paused write finds its
+    // function by key (USE-106).
+    registerOfflineWrites(client, sendOfflineWrite);
+    return client;
+  });
 
   const [reactClient] = useState(() => trpc.createClient({ links }));
+  const [persisted] = useState(persistsCache);
+
+  // Restored: the writes made offline go, in order, then every read again.
+  const onRestored = () =>
+    queryClient
+      .resumePausedMutations()
+      .then(() => queryClient.invalidateQueries());
 
   return (
     <trpc.Provider client={reactClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      {persisted ? (
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={persistOptions}
+          onSuccess={onRestored}
+        >
+          {children}
+        </PersistQueryClientProvider>
+      ) : (
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      )}
     </trpc.Provider>
   );
 }
+
+/**
+ * The cache persists on the live source only (USE-106): outside a production
+ * build, `?state=` names a fixture scenario, and a fixture runs with no
+ * persister. The server renders the persisted tree; the two differ only in
+ * context, never in markup.
+ */
+function persistsCache(): boolean {
+  if (isProductionBuild || typeof window === "undefined") return true;
+  return !new URLSearchParams(window.location.search).has("state");
+}
+
+/**
+ * The offline writes' sender, loaded on first use: `lib/offline/send.ts`
+ * reads the data source, which imports this file.
+ */
+const sendOfflineWrite: SendWrite = (write, scenario, variables) =>
+  import("@/lib/offline/send").then(({ sendWrite }) =>
+    sendWrite(write, scenario, variables),
+  );
 
 /**
  * A pass-through link that watches for `UNAUTHORIZED` on the way back.

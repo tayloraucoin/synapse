@@ -63,7 +63,7 @@ resolver, and the privacy grammar — never the plumbing.
 | Choice | Version | Notes |
 |---|---|---|
 | tRPC | **11.18.0** + `superjson` **2.2.6** | Two procedure tiers. `AppRouter` is exported as a type — that is why tRPC is here, for the future Expo client. |
-| TanStack Query | **5.102.8** | The server-data cache, and the only one. |
+| TanStack Query | **5.102.8** | The server-data cache, and the only one. Persisted on the device by `@tanstack/react-query-persist-client` and `@tanstack/query-async-storage-persister` **5.102.8** (matched to the core) over `idb-keyval` **6.3.0** (USE-106). |
 | React Hook Form + Zod | **7.87.0** / **zod 3.25.76** | Zod stays on **v3**: `@hookform/resolvers` and `@t3-oss/env-nextjs` are validated against it. |
 | Zustand | **5.0.15** | Declared, with **no store on disk**. See `apps/web/lib/stores/README.md` for the rule and the one sanctioned escalation. |
 
@@ -92,5 +92,11 @@ resolver, and the privacy grammar — never the plumbing.
   "no tests yet"). Vitest per workspace, reached by `yarn test` through Turbo;
   a criterion's evidence type says when a test is owed
   (`.claude/rules/testing.md`). Coverage thresholds wait for a measurement.
-- **No offline caching.** The service worker pushes and caches nothing; Phase 1
-  blocks writes offline with the standard line (cross-cutting §6.1).
+- **Offline data, not an offline shell** (USE-106, 2026-10-17, amending "no
+  offline caching"). On the live source TanStack's cache and its paused writes
+  persist to IndexedDB (`apps/web/lib/offline/`): the last-read day shows
+  offline, and the clock, work and planner writes made offline survive a
+  reload and replay in order with their own times. A fixture scenario is never
+  persisted; sign-out empties it. The service worker still caches nothing
+  until USE-107. Playwright **1.63.0** runs the journeys (`yarn test:e2e` in
+  `apps/web`).

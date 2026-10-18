@@ -1,5 +1,9 @@
 import { deriveClock, readDay, type DayClock, type DayRead } from "@syn/utils";
-import type { BlockRecord, SlotRecord } from "@syn/validators";
+import type {
+  BlockRecord,
+  SlotEventInput,
+  SlotRecord,
+} from "@syn/validators";
 import type { TodayRecords } from "./today-records";
 
 /**
@@ -32,4 +36,32 @@ export function deriveToday(records: TodayRecords): Today {
     workSlotIds,
   });
   return { occurrences, clock, records };
+}
+
+/**
+ * The clock's taps not yet on the server (USE-106): a write paused offline,
+ * or one in flight, counts in the derived clock as made, so Start offline
+ * shows the item running and Prompt sent is there to tap. One the read
+ * already holds (same `clientEventId`) is not counted twice; the read
+ * replaces them all once the writes land.
+ */
+export function withQueuedEvents(
+  records: TodayRecords,
+  queued: readonly SlotEventInput[],
+): TodayRecords {
+  const held = new Set(records.slotEvents.map((e) => e.clientEventId));
+  const added = queued
+    .filter((input) => !held.has(input.clientEventId))
+    .map((input) => ({
+      id: input.clientEventId,
+      createdAt: input.at,
+      slotId: input.slotId,
+      kind: input.kind,
+      clientEventId: input.clientEventId,
+      at: input.at,
+      receivedAt: input.at,
+      stepAwayId: input.stepAwayId ?? null,
+    }));
+  if (added.length === 0) return records;
+  return { ...records, slotEvents: [...records.slotEvents, ...added] };
 }

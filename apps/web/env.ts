@@ -64,6 +64,9 @@ const rawEnv = createEnv({
     // The scheduler route's bearer secret. Unset = the route answers 503 and
     // no scheduled notification is ever sent, which is the safe failure.
     CRON_SECRET: z.string().min(16).optional(),
+    // The journeys' local test account (USE-106): `yarn test:e2e` only.
+    E2E_EMAIL: z.string().email().optional(),
+    E2E_PASSWORD: z.string().min(1).optional(),
 
     // Google OAuth is configured in the Supabase dashboard, not by this app.
     // Declared so a deploy that sets them does not trip t3-env's unknown-key
@@ -123,6 +126,8 @@ const rawEnv = createEnv({
     VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
     VAPID_SUBJECT: process.env.VAPID_SUBJECT,
     CRON_SECRET: process.env.CRON_SECRET,
+    E2E_EMAIL: process.env.E2E_EMAIL,
+    E2E_PASSWORD: process.env.E2E_PASSWORD,
     GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID,
     GOOGLE_OAUTH_CLIENT_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
     NEXT_PUBLIC_SUPABASE_URL_STAGING:
@@ -162,6 +167,7 @@ export const env = {
   vapidPrivateKey: rawEnv.VAPID_PRIVATE_KEY,
   vapidSubject: rawEnv.VAPID_SUBJECT,
   cronSecret: rawEnv.CRON_SECRET,
+  e2e: { email: rawEnv.E2E_EMAIL, password: rawEnv.E2E_PASSWORD },
 };
 
 export type Env = typeof env;

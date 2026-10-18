@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SlotEventKind } from "@syn/types";
 import type { SlotEventInput, SlotEventRecord } from "@syn/validators";
+import { offlineWrite } from "@/lib/offline/writes";
 import { useDataSource } from "./source";
 import { resumeAllInputs, stepAwayInputs } from "./step-away";
 import { todayQueryKey, useToday } from "./use-today";
@@ -12,6 +13,9 @@ import { todayQueryKey, useToday } from "./use-today";
  * the fixture server now and `writeSlotEvents` on tRPC in wave 3. Every way
  * to fire writes one `prompt_sent` (C-USE-firing-1). The day is invalidated
  * after each write and the clock derived again; nothing is set by hand.
+ * The write is found by its key (USE-106): offline it pauses with its own
+ * `at` and `clientEventId`, survives a reload, and a replay the server
+ * already has is dropped there.
  */
 export function useSlotEvents(dateKey: string) {
   const source = useDataSource();
@@ -19,7 +23,7 @@ export function useSlotEvents(dateKey: string) {
   const { today } = useToday(dateKey);
 
   const mutation = useMutation<SlotEventRecord[], Error, SlotEventInput[]>({
-    mutationFn: (inputs) => source.server.writeSlotEvents(inputs),
+    ...offlineWrite("slotEvents", source.scenario.name),
     onSettled: () =>
       queryClient.invalidateQueries({
         queryKey: todayQueryKey(source.scenario.name),

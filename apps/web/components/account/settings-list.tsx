@@ -5,12 +5,13 @@
  *
  * A pushed screen: no tabs below 1024, so the crumb is the way back
  * [ASSUMPTION: to Now, as Set my days']. Sign out posts to the logout
- * route (AU-06: never a GET).
+ * route (AU-06: never a GET), once the device's cache is emptied (USE-106).
  */
 import Link from "next/link";
 import { Breadcrumb, cn, DisclosureIcon, ScreenFrame, Text } from "@syn/ui";
-import { connectionsRoute, logoutRoute, todayRoute } from "@/lib/routes";
+import { connectionsRoute, todayRoute } from "@/lib/routes";
 import { SETTINGS_COPY as COPY } from "./copy";
+import { SignOutForm } from "./sign-out-form";
 
 const ROW = cn(
   "border-border flex min-h-(--row-min) w-full items-center gap-(--space-3) border-b text-start",
@@ -51,13 +52,7 @@ export function SettingsList() {
         <ul className="m-0 flex list-none flex-col p-0">
           <SettingsRow href={connectionsRoute()} label={COPY.connections} />
         </ul>
-        <form action={logoutRoute()} method="post">
-          <button type="submit" className={cn(ROW, "border-b-0")}>
-            <Text as="span" variant="body">
-              {COPY.signOut}
-            </Text>
-          </button>
-        </form>
+        <SignOutForm label={COPY.signOut} className={cn(ROW, "border-b-0")} />
       </div>
     </ScreenFrame>
   );

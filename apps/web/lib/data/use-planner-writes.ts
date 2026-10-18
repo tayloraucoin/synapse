@@ -10,7 +10,8 @@ import {
 } from "@/lib/fixtures/planner";
 import type { SplitPatch } from "@/lib/fixtures/planner/split-block";
 import { FixtureOfflineError } from "@/lib/fixtures/server";
-import { useDataSource, type DataSource } from "./source";
+import { offlineWrite } from "@/lib/offline/writes";
+import { useDataSource } from "./source";
 import { useConnection } from "./use-connection";
 import { todayQueryKey } from "./use-today";
 import { weekQueryKey } from "./use-week";
@@ -20,7 +21,9 @@ import { weekQueryKey } from "./use-week";
  * and one mutation, saved as made (C-USE-set-my-days-3) with one
  * `saveStatus` for the header. Offline (D-USE-82) the day's own writes are
  * refused at once; block and item writes wait and land in the order made.
- * Wave 3 swaps the queue's `send` for the routers.
+ * The hook runs them through TanStack's one write scope (USE-106), found by
+ * key, so a write made offline survives a reload; `createPlannerQueue` is the
+ * order rule as its tests prove it, over a server.
  */
 
 export type PlannerMethod = Exclude<keyof PlannerServer, "readWeek">;
@@ -133,18 +136,6 @@ export function createPlannerQueue(
   };
 }
 
-const queues = new Map<string, PlannerQueue>();
-
-function queueFor(source: DataSource): PlannerQueue {
-  const name = source.scenario.name;
-  let queue = queues.get(name);
-  if (!queue) {
-    queue = createPlannerQueue(source.server, source.scenario.offline !== true);
-    queues.set(name, queue);
-  }
-  return queue;
-}
-
 /** D-USE-81: a new item is 5 minutes, after the last in its block. */
 export function nextItemInput({
   blockId,
@@ -221,7 +212,6 @@ export function usePlannerWrites() {
   const source = useDataSource();
   const queryClient = useQueryClient();
   const { online } = useConnection();
-  const queue = queueFor(source);
   const scenario = source.scenario.name;
 
   const invalidate = useCallback(() => {
@@ -230,21 +220,27 @@ export function usePlannerWrites() {
   }, [queryClient, scenario]);
 
   useEffect(() => {
-    void queue.setOnline(online).then(() => {
-      if (online) invalidate();
-    });
-  }, [queue, online, invalidate]);
+    if (online) invalidate();
+  }, [online, invalidate]);
 
   const mutation = useMutation<unknown, Error, PlannerCall>({
-    mutationFn: (call) => queue.run(call),
+    ...offlineWrite("planner", scenario),
     onSettled: invalidate,
   });
+
+  /** Offline, the day's own write is refused before it is made (D-USE-82). */
+  function send(planned: PlannerCall): Promise<unknown> {
+    if (!online && isDayWrite(planned)) {
+      return Promise.reject(new PlannerOfflineRefusal());
+    }
+    return mutation.mutateAsync(planned);
+  }
 
   function call<M extends PlannerMethod>(
     method: M,
     ...args: Parameters<PlannerServer[M]>
   ): ReturnType<PlannerServer[M]> {
-    return mutation.mutateAsync({ method, args } as PlannerCall) as ReturnType<
+    return send({ method, args } as PlannerCall) as ReturnType<
       PlannerServer[M]
     >;
   }
@@ -262,7 +258,7 @@ export function usePlannerWrites() {
   /** The failed write again, as it was made. */
   function retry(): Promise<unknown> | undefined {
     if (!mutation.isError || mutation.variables === undefined) return undefined;
-    return mutation.mutateAsync(mutation.variables);
+    return send(mutation.variables);
   }
 
   type Args<M extends PlannerMethod> = Parameters<PlannerServer[M]>;
@@ -284,7 +280,7 @@ export function usePlannerWrites() {
      * splits the block, All edits it.
      */
     editRepeating: (edit: EditRepeating) =>
-      mutation.mutateAsync(repeatingCall(edit)) as Promise<PlannerWrite>,
+      send(repeatingCall(edit)) as Promise<PlannerWrite>,
     writeBlockItem: write("writeBlockItem"),
     editBlockItem: write("editBlockItem"),
     removeBlockItem: write("removeBlockItem"),

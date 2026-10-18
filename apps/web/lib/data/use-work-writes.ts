@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlannerRefusal, type PlannerWrite } from "@/lib/fixtures/planner";
 import type { WorkServer } from "@/lib/fixtures/work";
+import { offlineWrite } from "@/lib/offline/writes";
 import { useDataSource } from "./source";
 import { linearQueryKey } from "./use-linear";
 import { usePlannerWrites } from "./use-planner-writes";
@@ -16,7 +17,8 @@ import { weekQueryKey } from "./use-week";
  * this session or all, edit the item, mark the task done, send it back to the
  * pool, remove it from Synapse and set client order. Each is a mutation that
  * invalidates the day, the week and the pool; its Undo is USE-36's `undo`.
- * Nothing here writes to Linear (D-USE-57).
+ * Nothing here writes to Linear (D-USE-57). Offline a write pauses under its
+ * key and replays in order after a reload (USE-106).
  */
 
 export type WorkMethod = Exclude<keyof WorkServer, "readPool">;
@@ -44,10 +46,7 @@ export function useWorkWrites() {
   }
 
   const mutation = useMutation<PlannerWrite, Error, WorkCall>({
-    mutationFn: ({ method, args }) =>
-      (source.server[method] as (...a: unknown[]) => Promise<PlannerWrite>)(
-        ...args,
-      ),
+    ...offlineWrite("work", scenario),
     onSettled: invalidate,
   });
 
