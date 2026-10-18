@@ -3,25 +3,56 @@
   "criteria_sha256": "c0ccfdbd7ad4978dda66c3b1802fd5aafb2740267b0b7c3e9dee87eff3567d3b",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T22:57:30Z",
+        "head": "a9fdb7243321767d3dd77db7e86cc4734a676189",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-017-env-seam-api/evidence/C1.log",
+        "evidence_sha256": "7bd355605c863e1748e442b5bdf2c83f091599d9310566c137e8893ff792d2f9"
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T22:57:46Z",
+        "head": "a9fdb7243321767d3dd77db7e86cc4734a676189",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-017-env-seam-api/evidence/C2.log",
+        "evidence_sha256": "d977aa51a7dee3c968edd6538afa272f718404aeb33372036f882c4cb7e7f830",
+        "tests": 32
+      }
     },
     "C3": {
       "status": "FAIL",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn test:env-seam",
+        "exit": 1,
+        "at": "2026-10-18T22:58:01Z",
+        "head": "a9fdb7243321767d3dd77db7e86cc4734a676189",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-017-env-seam-api/evidence/C3.log",
+        "evidence_sha256": "9bd66e92faa959d3ca5d5eb029e4bc01d35f8888ccb18eec2324e61981ad816c",
+        "tests": 5
+      }
     },
     "C4": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "check",
-      "run": null
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T22:58:06Z",
+        "head": "a9fdb7243321767d3dd77db7e86cc4734a676189",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-017-env-seam-api/evidence/C4.log",
+        "evidence_sha256": "1ce5246c44a18bec27643143d8de60d79beebf533fb5c8eece73db9284c0ebfe"
+      }
     }
   },
-  "updated_at": "2026-10-18T22:56:12Z"
+  "built_at": "2026-10-18T22:57:28Z",
+  "updated_at": "2026-10-18T22:58:26Z"
 }

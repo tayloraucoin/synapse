@@ -41,7 +41,6 @@ function frozen(workspace) {
 
 const FROZEN_WORKSPACES = [
   "apps/web",
-  "packages/api",
   "packages/auth",
   "packages/db",
   "packages/observability",
@@ -143,6 +142,10 @@ test("C2: each committed count is exact, and a read added to a frozen file fails
       `${workspace}: a count above the reads fails until pruned`,
     );
   }
+});
+
+test("C2: a workspace whose reads have all moved commits no suppressions file (MIG-17)", () => {
+  assert.equal(frozen("packages/api"), null);
 });
 
 test("C3: the two NEXT_PUBLIC_* literal readers are exempt by name, and only they", async () => {

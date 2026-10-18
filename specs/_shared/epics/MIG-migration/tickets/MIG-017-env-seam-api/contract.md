@@ -22,6 +22,7 @@ planned_paths:
   - "packages/api/src/env.ts"
   - "packages/api/eslint-suppressions.json"
   - "packages/api/src/services/notifications/web-push.test.ts"
+  - "scripts/check-env-seam.test.mjs"
 out_of_scope:
   - "Changing any variable's name or value"
 depends_on: [ MIG-6 ] # work-ids that must be built first (their own criteria PASS)
