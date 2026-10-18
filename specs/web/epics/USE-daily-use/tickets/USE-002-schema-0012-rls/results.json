@@ -1,0 +1,58 @@
+{
+  "id": "USE-2",
+  "criteria_sha256": "f2442eb53cc88fa48b4214ae7e8d26591a6b80970926a78650af17edd45736e6",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C6": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    },
+    "C7": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    },
+    "C8": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "review:mason": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "review:warden": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    }
+  },
+  "built_at": "2026-10-18T18:50:01Z",
+  "updated_at": "2026-10-18T18:50:01Z"
+}
