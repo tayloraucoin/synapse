@@ -1,0 +1,78 @@
+{
+  "id": "USE-46",
+  "criteria_sha256": "f06088af9f5b2940372e28074a39d09bc47255ab0ad6c91caeb4d06cc2cd32ce",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C6": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C7": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C8": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C9": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C10": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C11": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C12": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    },
+    "C13": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    },
+    "C14": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    }
+  },
+  "built_at": "2026-10-18T18:57:20Z",
+  "updated_at": "2026-10-18T18:57:20Z"
+}
