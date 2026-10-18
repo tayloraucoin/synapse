@@ -41,9 +41,20 @@ const packageJson = JSON.parse(
   readFileSync(path.join(webRoot, "package.json"), "utf8"),
 ) as { version?: string };
 
+/**
+ * The service worker's build (USE-107): the registration leaf registers
+ * `/sw.js?build=<id>`, so each build installs a new worker with its own shell
+ * cache and SY-02's update line offers it. Stamped once per build, like the
+ * date. Development is always "dev": a restarted dev server is not a new
+ * version to offer, and the worker keeps static files network first there.
+ */
+const buildId =
+  env.NODE_ENV === "development" ? "dev" : Date.now().toString(36);
+
 const versionEnv = {
   NEXT_PUBLIC_APP_VERSION: packageJson.version ?? "0.0.0",
   NEXT_PUBLIC_BUILD_DATE: new Date().toISOString().slice(0, 10),
+  NEXT_PUBLIC_BUILD_ID: buildId,
 };
 
 const nextConfig: NextConfig = {

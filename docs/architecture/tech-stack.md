@@ -92,11 +92,14 @@ resolver, and the privacy grammar — never the plumbing.
   "no tests yet"). Vitest per workspace, reached by `yarn test` through Turbo;
   a criterion's evidence type says when a test is owed
   (`.claude/rules/testing.md`). Coverage thresholds wait for a measurement.
-- **Offline data, not an offline shell** (USE-106, 2026-10-17, amending "no
-  offline caching"). On the live source TanStack's cache and its paused writes
-  persist to IndexedDB (`apps/web/lib/offline/`): the last-read day shows
-  offline, and the clock, work and planner writes made offline survive a
-  reload and replay in order with their own times. A fixture scenario is never
-  persisted; sign-out empties it. The service worker still caches nothing
-  until USE-107. Playwright **1.63.0** runs the journeys (`yarn test:e2e` in
-  `apps/web`).
+- **Offline data and an offline shell** (USE-106 and USE-107, 2026-10-17,
+  amending "no offline caching"). On the live source TanStack's cache and its
+  paused writes persist to IndexedDB (`apps/web/lib/offline/`): the last-read
+  day shows offline, and the clock, work and planner writes made offline
+  survive a reload and replay in order with their own times. A fixture
+  scenario is never persisted; sign-out empties it. The service worker
+  (`apps/web/public/sw.js`) keeps the shell: the signed-in tabs' documents
+  network first, `/_next/static/*` cache first, one cache per build
+  (`/sw.js?build=<id>`), never `/api/*`, an auth route or another origin;
+  sign-out deletes it too. Playwright **1.63.0** runs the journeys
+  (`yarn test:e2e` in `apps/web`).

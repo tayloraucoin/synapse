@@ -1,15 +1,193 @@
 /**
- * Push-only service worker. NO CACHING.
+ * The push worker, and the app shell's cache (USE-107, C4).
  *
- * Phase 1 has no offline contract (cross-cutting §6.1: writes are blocked with
- * the standard line), so a cache here would serve stale days with nothing to
- * invalidate it and no story for what happens when two devices disagree.
- * Offline is a Phase 2 ticket that arrives with its own rules.
+ * Offline is two tickets: USE-106 persists the data in IndexedDB, and this
+ * worker keeps the shell that data fills, so the installed app opens with no
+ * signal. It caches only two things, both same-origin GETs:
  *
- * Handles exactly three events: `push` shows the notification,
- * `notificationclick` focuses an open tab or opens the deep link, and `message`
- * answers the update line's *Reload*.
+ * - shell documents (the signed-in tabs below): network first, the cached copy
+ *   only when the network fails;
+ * - `/_next/static/*`: cache first in a build, where every name is hashed;
+ *   network first in development, where they are not.
+ *
+ * Everything else passes through untouched: `/api/*` and every tRPC call, the
+ * auth routes, RSC fetches, other origins. A request the worker does not
+ * claim never reaches the cache.
+ *
+ * EACH BUILD HAS ITS OWN CACHE. The registration leaf registers
+ * `/sw.js?build=<id>`, a new URL per build, which installs a new worker that
+ * waits behind the old one (SY-02's update line); `activate` deletes every
+ * other shell cache. Sign-out deletes them too (`lib/pwa/shell-cache.ts`).
+ *
+ * Handles `install` and `activate` (the cache), `fetch`, `push`,
+ * `notificationclick` and `message`.
  */
+
+const BUILD = new URL(self.location.href).searchParams.get("build") || "none";
+const DEV = BUILD === "dev";
+const CACHE_PREFIX = "syn-shell-";
+const CACHE = CACHE_PREFIX + BUILD;
+
+/** The document opened with no signal when its own path was never cached. */
+const SHELL_HOME = "/today";
+
+/** The signed-in tabs (`app/(shell)/`). Auth routes are never on this list. */
+const SHELL_ROOTS = [
+  "/today",
+  "/day",
+  "/days",
+  "/week",
+  "/orient",
+  "/review",
+  "/settings",
+];
+
+function isShellPath(pathname) {
+  return SHELL_ROOTS.some(function (root) {
+    return pathname === root || pathname.startsWith(root + "/");
+  });
+}
+
+/*
+ * What may be stored. A redirect (signed out, sent to /signin) or an error is
+ * never the shell. A static asset marked private is never stored. Shell
+ * documents are the exception to that last rule on purpose: Next marks every
+ * signed-in page `private, no-store`, and the signed-in page IS the shell
+ * [ASSUMPTION: the copy lives on this device only, like USE-106's IndexedDB
+ * copy, and sign-out deletes both].
+ */
+function storable(response, isDocument) {
+  if (!response || !response.ok || response.status !== 200) return false;
+  if (response.type !== "basic" || response.redirected) return false;
+  if (isDocument) return true;
+  const cacheControl = response.headers.get("Cache-Control") || "";
+  return !/private/i.test(cacheControl);
+}
+
+/** A document is stored under its path alone: `?date=` and `?state=` share one. */
+function documentKey(url) {
+  return new URL(url).origin + new URL(url).pathname;
+}
+
+/*
+ * INSTALL: the home document and the static files it names, read from its
+ * HTML, so the very first visit can reopen offline. A failure here (offline,
+ * signed out) leaves the cache to fill on fetch rather than failing the
+ * install, which would hold the update line back for no gain.
+ */
+self.addEventListener("install", function (event) {
+  event.waitUntil(
+    (async function () {
+      try {
+        const cache = await caches.open(CACHE);
+        const response = await fetch(SHELL_HOME, {
+          credentials: "same-origin",
+        });
+        if (!storable(response, true)) return;
+        const html = await response.clone().text();
+        await cache.put(documentKey(response.url), response);
+        const assets = html.match(/\/_next\/static\/[^"'\s)\\]+/g) || [];
+        const unique = Array.from(new Set(assets));
+        await Promise.all(
+          unique.map(function (path) {
+            return fetch(path)
+              .then(function (asset) {
+                if (storable(asset, false)) return cache.put(path, asset);
+              })
+              .catch(function () {});
+          }),
+        );
+      } catch {
+        // Filled on fetch instead.
+      }
+    })(),
+  );
+});
+
+/*
+ * ACTIVATE: every shell cache but this build's is deleted, then the worker
+ * takes the open pages, so the first visit's later requests are cached too.
+ * Only `syn-shell-*` caches are touched.
+ */
+self.addEventListener("activate", function (event) {
+  event.waitUntil(
+    (async function () {
+      const names = await caches.keys();
+      await Promise.all(
+        names
+          .filter(function (name) {
+            return name.startsWith(CACHE_PREFIX) && name !== CACHE;
+          })
+          .map(function (name) {
+            return caches.delete(name);
+          }),
+      );
+      await self.clients.claim();
+    })(),
+  );
+});
+
+async function networkFirstDocument(request) {
+  const cache = await caches.open(CACHE);
+  const key = documentKey(request.url);
+  try {
+    const response = await fetch(request);
+    if (storable(response, true)) await cache.put(key, response.clone());
+    return response;
+  } catch (error) {
+    const cached =
+      (await cache.match(key)) ||
+      (await cache.match(self.location.origin + SHELL_HOME));
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+async function cacheFirstStatic(request) {
+  const cache = await caches.open(CACHE);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (storable(response, false)) await cache.put(request, response.clone());
+  return response;
+}
+
+async function networkFirstStatic(request) {
+  const cache = await caches.open(CACHE);
+  try {
+    const response = await fetch(request);
+    if (storable(response, false)) await cache.put(request, response.clone());
+    return response;
+  } catch (error) {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+/*
+ * FETCH: a request is claimed only when it is a same-origin GET for a shell
+ * document or a static file. Not calling `respondWith` hands it to the
+ * network exactly as if there were no worker.
+ */
+self.addEventListener("fetch", function (event) {
+  const request = event.request;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return;
+
+  if (request.mode === "navigate") {
+    if (!isShellPath(url.pathname)) return;
+    event.respondWith(networkFirstDocument(request));
+    return;
+  }
+
+  if (url.pathname.startsWith("/_next/static/")) {
+    event.respondWith(
+      DEV ? networkFirstStatic(request) : cacheFirstStatic(request),
+    );
+  }
+});
 
 /*
  * SY-02. The page raises *A new version is ready.* and, ONLY when the person

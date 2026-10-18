@@ -1,13 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Newsreader, Public_Sans } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-
 import { ThemeProvider, Toaster } from "@syn/ui";
-
 import { PwaModeSync } from "@/app/_components/pwa-mode-sync";
 import { ServiceWorkerRegistration } from "@/app/_components/service-worker-registration";
+import { env } from "@/env";
 import { TrpcProvider } from "@/lib/trpc/provider";
-
 import "./globals.css";
 
 /**
@@ -86,7 +84,10 @@ export default function RootLayout({
           </NuqsAdapter>
           <Toaster />
         </ThemeProvider>
-        <ServiceWorkerRegistration />
+        <ServiceWorkerRegistration
+          build={env.NEXT_PUBLIC_BUILD_ID ?? "none"}
+          development={env.NODE_ENV === "development"}
+        />
         <PwaModeSync />
       </body>
     </html>

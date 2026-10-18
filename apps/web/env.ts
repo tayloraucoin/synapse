@@ -102,6 +102,8 @@ const rawEnv = createEnv({
     // the build date; never set by hand in an environment file.
     NEXT_PUBLIC_APP_VERSION: z.string().optional(),
     NEXT_PUBLIC_BUILD_DATE: z.string().optional(),
+    // The service worker's build (USE-107), stamped by next.config.ts.
+    NEXT_PUBLIC_BUILD_ID: z.string().optional(),
   },
   runtimeEnv: {
     DATABASE_ENVIRONMENT: process.env.DATABASE_ENVIRONMENT,
@@ -153,6 +155,7 @@ const rawEnv = createEnv({
       process.env.NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN,
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
     NEXT_PUBLIC_BUILD_DATE: process.env.NEXT_PUBLIC_BUILD_DATE,
+    NEXT_PUBLIC_BUILD_ID: process.env.NEXT_PUBLIC_BUILD_ID,
   },
   emptyStringAsUndefined: true,
   skipValidation: process.env.SKIP_ENV_VALIDATION === "true",
