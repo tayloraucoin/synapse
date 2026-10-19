@@ -16,12 +16,7 @@
  */
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import {
-  parseAsInteger,
-  parseAsString,
-  useQueryState,
-  useQueryStates,
-} from "nuqs";
+import { parseAsString, useQueryState, useQueryStates } from "nuqs";
 import { useIsSplit } from "@syn/ui";
 import { InstallSheet, ProfileSheet } from "@/components/account";
 import { ItemSheet } from "@/components/planner/item-sheet";
@@ -33,7 +28,7 @@ import { MealTopicsSheet } from "@/components/planner/meal-topics-sheet";
 import { TodoSheet } from "@/components/planner/todo-sheet";
 import { useDataSource } from "@/lib/data/source";
 import { isInstallOffered, useInstallState } from "@/lib/pwa/use-install-state";
-import { settingsRoute, type SheetName } from "@/lib/routes";
+import { readDayParam, settingsRoute, type SheetName } from "@/lib/routes";
 
 type OpenerRef = React.RefObject<HTMLElement | null>;
 
@@ -77,7 +72,7 @@ export function SheetHost() {
   // The New block sheet's start (USE-46): Set my days' day, the time, the mode.
   const [newBlock, setNewBlock] = useQueryStates({
     week: parseAsString,
-    day: parseAsInteger,
+    day: parseAsString,
     at: parseAsString,
     mode: parseAsString,
   });
@@ -125,7 +120,7 @@ export function SheetHost() {
   // A scenario's start stands for the opener's (`?state=`).
   const newBlockStart: NewBlockSheetStart = scenario.newBlock?.start ?? {
     week: newBlock.week ?? "usual",
-    day: newBlock.day ?? 0,
+    day: readDayParam(newBlock.day) ?? 0,
     mode: newBlock.mode === "transition" ? "transition" : "block",
     ...(newBlock.at ? { at: newBlock.at } : {}),
   };

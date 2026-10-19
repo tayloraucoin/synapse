@@ -4,7 +4,14 @@ import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import { UNDO_SHORT_MS } from "@syn/constants";
-import { RegionRetry, Skeleton, Text, toast } from "@syn/ui";
+import {
+  Button,
+  CopyFromIcon,
+  RegionRetry,
+  Skeleton,
+  Text,
+  toast,
+} from "@syn/ui";
 import {
   boundsEdge,
   clockFromMinutes,
@@ -35,6 +42,7 @@ import {
 import { addToDayInput, googleBandsOf } from "@/lib/data/google-bands";
 import {
   clearWords,
+  firstDaySet,
   dayTitle,
   EDGE_LINE,
   railClock,
@@ -198,6 +206,7 @@ export function DayView({
       ) : !day.isSet ? (
         <FirstDay
           place={place}
+          day={day}
           writes={writes}
           key={`${place.week}:${place.day}`}
           onSet={() => setJustSet(here)}
@@ -278,44 +287,153 @@ function useBoundsDraft(
   return { value, commit };
 }
 
-/** Nothing set yet: the line, then Up at and Lights out labelled above, grey suggestions. */
+/**
+ * A day not set yet (empty-first-day.md, unset-day-copy.md; USE-140): Up at
+ * and Lights out labelled above with grey suggestions, and the way forward,
+ * "Set Monday, 7:00 to 22:30", whose label is the times it saves. The
+ * fields only hold a draft: nothing is written until the button, so a
+ * suggestion is never saved on its own. Once another day is built the
+ * copy offer comes first, and the set button steps down to secondary.
+ */
 function FirstDay({
   place,
+  day,
   writes,
   onSet,
 }: {
   place: DaysPlace & { day: number };
+  day: SetUpDay;
   writes: DayViewProps["writes"];
-  /** Both bounds landed: the day opens on the copy offer (copy-offer.md). */
+  /** The bounds landed: the day opens on its column. */
   onSet: () => void;
 }) {
-  const bounds = useBoundsDraft(place, null, writes, onSet);
+  const [draft, setDraft] = React.useState<Partial<Bounds>>({});
+  const [saving, setSaving] = React.useState(false);
+  const copyFrom = useCopyFrom({
+    place,
+    day,
+    writes,
+    start: undefined,
+    ready: true,
+  });
+  const offline = !writes.online;
+  const { upAt, lightsOut, label } = firstDaySet(place.day, draft, {
+    upAt: COPY.suggestUpAt,
+    lightsOut: COPY.suggestLightsOut,
+  });
+  const dayName = weekdayName(place.day);
+  const offered = copyFrom.offered;
+
+  const set = () => {
+    setSaving(true);
+    writes
+      .writeBounds({ ...boundsTarget(place), upAt, lightsOut })
+      .then(() => onSet())
+      .catch(() => {
+        // Kept on screen; SaveStatus offers Try again.
+      })
+      .finally(() => setSaving(false));
+  };
+
   return (
-    <div className="flex flex-col gap-(--space-6) border-t border-border px-(--space-4) pt-(--space-8) mt-(--space-3)">
+    <div className="mt-(--space-3) flex flex-col gap-(--space-6) border-t border-border px-(--space-4) pt-(--space-8)">
       <div className="flex flex-col gap-(--space-1)">
         <Text as="h2" variant="body" weight={600}>
-          {COPY.firstDayHeading}
+          {offered === null
+            ? COPY.firstDayHeading
+            : COPY.emptyHeading(dayName)}
         </Text>
         <Text as="p" variant="body" tone="muted">
-          {COPY.firstDayBody}
+          {offered === null ? COPY.firstDayBody : COPY.unsetBody}
         </Text>
       </div>
+      {offered !== null ? (
+        <div className="flex flex-col gap-(--space-4)">
+          <div className="flex flex-wrap items-center gap-(--space-3)">
+            <Button
+              size="lg"
+              disabled={!copyFrom.canCopy}
+              onClick={copyFrom.copyOffered}
+            >
+              <CopyFromIcon aria-hidden="true" className="size-4" />
+              {COPY.copyFromDay(weekdayName(offered.weekday))}
+            </Button>
+            <Button
+              variant="ghost"
+              size="lg"
+              disabled={!copyFrom.canCopy}
+              onClick={copyFrom.openPicker}
+              className="px-(--space-3)"
+            >
+              {COPY.otherDay}
+            </Button>
+          </div>
+          <div
+            role="separator"
+            aria-label={COPY.orOwnTimes}
+            className="flex items-center gap-(--space-3)"
+          >
+            <span className="h-px flex-1 bg-border" />
+            <Text as="span" variant="secondary" tone="muted" aria-hidden="true">
+              {COPY.orOwnTimes}
+            </Text>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </div>
+      ) : null}
       <div className="flex gap-(--space-3)">
         <BoundsField
           stacked
           label={COPY.upAt}
-          value={bounds.value("upAt")}
+          value={draft.upAt ?? null}
           suggestion={COPY.suggestUpAt}
-          onCommit={(upAt) => bounds.commit({ upAt })}
+          disabled={offline}
+          onCommit={(next) => setDraft((d) => ({ ...d, upAt: next }))}
         />
         <BoundsField
           stacked
           label={COPY.lightsOut}
-          value={bounds.value("lightsOut")}
+          value={draft.lightsOut ?? null}
           suggestion={COPY.suggestLightsOut}
-          onCommit={(lightsOut) => bounds.commit({ lightsOut })}
+          disabled={offline}
+          onCommit={(next) => setDraft((d) => ({ ...d, lightsOut: next }))}
         />
       </div>
+      <div className="flex flex-col gap-(--space-2)">
+        <Button
+          size="lg"
+          variant={offered === null ? "default" : "secondary"}
+          disabled={offline || saving}
+          onClick={set}
+          className="w-full"
+        >
+          {label}
+        </Button>
+        <Text as="p" variant="secondary" tone="muted">
+          {COPY.setHelper}
+        </Text>
+      </div>
+      {copyFrom.element}
+    </div>
+  );
+}
+
+/**
+ * The first day just set with nothing else built (first-day-set.md): under
+ * Orient, only the first block, since there is no day to copy.
+ */
+function FirstBlockPrompt({ weekday }: { weekday: number }) {
+  return (
+    <div className="flex flex-col gap-(--space-1)">
+      <Text as="h2" variant="body" weight={600}>
+        {COPY.emptyHeading(weekdayName(weekday))}
+      </Text>
+      <Text as="p" variant="secondary" tone="muted">
+        {COPY.firstBlockLine(
+          weekdayName(weekday),
+          weekdayName((weekday + 1) % 7),
+        )}
+      </Text>
     </div>
   );
 }
@@ -785,6 +903,17 @@ function SetDay({
                 />
               ))
             : null}
+          {ready &&
+          day.blocks.length === 0 &&
+          view.orient !== null &&
+          copyFrom.offered === null ? (
+            <div
+              style={{ top: `${orientTop + 20}px` }}
+              className="absolute start-10 end-0"
+            >
+              <FirstBlockPrompt weekday={place.day} />
+            </div>
+          ) : null}
           {ready &&
           day.blocks.length === 0 &&
           view.orient !== null &&

@@ -9,6 +9,7 @@ import {
   weekdayIndex,
   weekKeyOf,
 } from "@syn/utils";
+import { DAYS_BLOCK_WEEKDAYS, readDayParam } from "@/lib/routes";
 import { useDataSource } from "./source";
 import { useOpeningWeek } from "./use-week";
 import type { WeekRef } from "./week-records";
@@ -17,7 +18,8 @@ import type { WeekRef } from "./week-records";
  * Set my days' place (USE-39): which week and which day are open, from the
  * URL (`?week=&day=`, the New block sheet's own params), else the
  * scenario's start, else the opening rule (This week from Sunday evening).
- * `day` is a weekday, Monday 0; a date key names its week too.
+ * `day` is a weekday key (`mon` to `sun`, USE-140), or the number old links
+ * carry (Monday 0); a date key names its week too.
  */
 
 const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
@@ -51,8 +53,8 @@ export function resolveDaysPlace({
   if (day !== null && DATE_KEY.test(day)) {
     ref = weekKeyOf(day);
     weekday = weekdayIndex(day);
-  } else if (day !== null && /^[0-6]$/.test(day)) {
-    weekday = Number(day);
+  } else {
+    weekday = readDayParam(day);
   }
   const dates = ref === "usual" ? [] : weekDates(ref);
   return {
@@ -119,13 +121,13 @@ export function useDaysPlace() {
     /** A row or a chip opens a day (A), pushed. */
     openDay: (day: number) =>
       void setParams(
-        { week: place.week, day: String(day) },
+        { week: place.week, day: DAYS_BLOCK_WEEKDAYS[day] ?? String(day) },
         { history: "push" },
       ),
     /** At 1024 a row selects its day in place (list-detail). */
     selectDay: (day: number) =>
       void setParams(
-        { week: place.week, day: String(day) },
+        { week: place.week, day: DAYS_BLOCK_WEEKDAYS[day] ?? String(day) },
         { history: "replace" },
       ),
   };

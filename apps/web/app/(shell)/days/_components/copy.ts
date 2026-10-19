@@ -31,6 +31,14 @@ export const DAYS_COPY = {
   firstDayHeading: "Set when the day starts and ends.",
   firstDayBody:
     "They are the top and bottom of the day. Blocks go in between. Orient takes the first 5 minutes.",
+  /** The way forward (USE-140); its label is `firstDaySet`'s. */
+  setHelper: "Saves the two times shown. Either can change later.",
+  /** An unset day once another is built (unset-day-copy.md). */
+  unsetBody: "Start from a day that's built, or set its own times.",
+  orOwnTimes: "or set its own times",
+  /** The first day just set, nothing to copy (first-day-set.md). */
+  firstBlockLine: (day: string, next: string) =>
+    `Tap a time, or +, to add the first block. Once ${day} is built, ${next} can copy it.`,
   /** The grey suggestions, never saved as a time. */
   suggestUpAt: "07:00",
   suggestLightsOut: "22:30",

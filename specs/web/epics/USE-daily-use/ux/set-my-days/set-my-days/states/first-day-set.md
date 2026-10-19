@@ -18,7 +18,7 @@ Monday in Usual week, its bounds just saved by "Set Monday", and no other day bu
 ## What shows, top to bottom
 
 - Status bar 21:10. "‹ Now" over "Set my days"; `SaveStatus` "✓ Saved".
-- "Usual week" selected. `WeekdayChips`: "M" ink (open), no dots (no day is built: bounds alone are not a built day).
+- "Usual week" selected. `WeekdayChips`: "M" ink (open) with its dot: a day with times reads as set ("Monday, set"), as the chips already do; the board draws no dot, and the app wins [named 2026-10-19, USE-140].
 - Day line: "Monday", the compact `TimeField`s "Up at 7:00" and "Lights out 22:30", the ···. A hairline.
 - The column from 7: Orient's ink line with the lock and "Orient · 5 min".
 - **The first-block prompt**, under Orient, left-aligned (D-USE-30): "Nothing on Monday yet." (body, semibold), then muted "Tap a time, or +, to add the first block. Once Monday is built, Tuesday can copy it." No copy button: there is no built day to name.

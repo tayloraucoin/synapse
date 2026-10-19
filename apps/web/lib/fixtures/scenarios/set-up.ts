@@ -629,6 +629,11 @@ function mondayOnlyRecords(): FixtureRecords {
   return keepWeekdays(setUpUsualRecords(), [0]);
 }
 
+/** first-day-set.md (USE-140): Monday's times just set, no block anywhere. */
+function mondayBoundsOnlyRecords(): FixtureRecords {
+  return { ...emptyRecords(), dayBounds: mondayOnlyRecords().dayBounds };
+}
+
 /**
  * Set my days' frames (USE-39), each by `?state=`. The install offer is a
  * one-time line, so every frame but its own counts it seen. [ASSUMPTION]
@@ -978,6 +983,13 @@ export const DAYS_SCENARIOS: Record<string, () => Scenario> =
     // USE-139: the first-time week and the week with Monday built.
     days("usual-week-empty", emptyRecords, { week: "usual" }),
     days("usual-week-monday", mondayOnlyRecords, { week: "usual" }),
+    // USE-140: the first day just set, and an unset day once Monday is built.
+    days("first-day-set", mondayBoundsOnlyRecords, {
+      week: "usual",
+      day: 0,
+      justSet: true,
+    }),
+    days("unset-day-copy", mondayOnlyRecords, { week: "usual", day: 1 }),
     days("empty-first-day", emptyRecords, { week: "usual", day: 0 }),
     days("usual-saturday", setUpUsualRecords, { week: "usual", day: 5 }),
     days("usual-thursday-evening", setUpUsualRecords, {

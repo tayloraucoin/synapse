@@ -225,8 +225,8 @@ export function reviewRoute(): string {
 /**
  * Set my days (USE-39): the avatar menu's first row opens it on the week.
  * `week` is "usual", "this" or an ISO week key; `day` opens one day, as its
- * weekday (Monday 0, the New block sheet's own param) or a date key, which
- * names its week too. `copy: "picker"` lands on that day with Copy from's
+ * weekday (Monday 0, written as its key, `mon` to `sun`, USE-140) or a date
+ * key, which names its week too. `copy: "picker"` lands on that day with Copy from's
  * picker open (USE-110: Review the day's Copy another day, D-USE-68).
  */
 /** Set my days' param that opens Copy from's picker on landing. */
@@ -243,7 +243,7 @@ export function daysRoute(
   const query = new URLSearchParams();
   if (params.week) query.set("week", params.week);
   if (params.day !== undefined && params.day !== "") {
-    query.set("day", String(params.day));
+    query.set("day", dayParam(params.day));
   }
   // Open This week scrolls to a block (USE-37) [ASSUMPTION: `&block=`].
   if (params.block) query.set("block", params.block);
@@ -262,6 +262,26 @@ export const DAYS_BLOCK_WEEKDAYS = [
   "sat",
   "sun",
 ] as const;
+
+/** A weekday as Set my days' `day` writes it (USE-140); a date key as is. */
+function dayParam(day: string | number): string {
+  return typeof day === "number"
+    ? (DAYS_BLOCK_WEEKDAYS[day] ?? String(day))
+    : day;
+}
+
+/**
+ * Set my days' `day` read back as a weekday, Monday 0: its key (`mon` to
+ * `sun`), or the number old links carry (`0` to `6`); anything else null.
+ */
+export function readDayParam(raw: string | null | undefined): number | null {
+  if (raw === null || raw === undefined) return null;
+  const keyed = DAYS_BLOCK_WEEKDAYS.indexOf(
+    raw as (typeof DAYS_BLOCK_WEEKDAYS)[number],
+  );
+  if (keyed !== -1) return keyed;
+  return /^[0-6]$/.test(raw) ? Number(raw) : null;
+}
 
 /** The query keys `daysBlockRoute` writes. */
 export const DAYS_BLOCK_PARAMS = { weekday: "weekday", date: "date" } as const;
@@ -459,7 +479,7 @@ export function newBlockSheetRoute(
   const query = new URLSearchParams(search);
   const values = {
     week: start.week,
-    day: start.day === undefined ? undefined : String(start.day),
+    day: start.day === undefined ? undefined : dayParam(start.day),
     at: start.at,
     mode: start.mode,
   };

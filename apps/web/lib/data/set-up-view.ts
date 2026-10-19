@@ -569,3 +569,23 @@ export function usualWeekHint(
     ? null
     : `A day not set yet opens on Copy from ${weekdayName(from)}.`;
 }
+
+/**
+ * The first day's way forward (USE-140; empty-first-day.md): the times the
+ * button saves, each the field's draft or else its grey suggestion, and the
+ * button's words, which name them. Nothing is written until it is tapped.
+ */
+export function firstDaySet(
+  weekday: number,
+  draft: { upAt?: string; lightsOut?: string },
+  suggested: { upAt: string; lightsOut: string },
+): { upAt: string; lightsOut: string; label: string } {
+  const upAt = draft.upAt ?? suggested.upAt;
+  const lightsOut = draft.lightsOut ?? suggested.lightsOut;
+  return {
+    upAt,
+    lightsOut,
+    label: `Set ${weekdayName(weekday)}, ${clockWords(upAt)} to ${clockWords(lightsOut)}`,
+  };
+}
+

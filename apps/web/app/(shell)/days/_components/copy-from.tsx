@@ -26,6 +26,7 @@ import type { usePlannerWrites } from "@/lib/data/use-planner-writes";
 import type { SetUpDay } from "@/lib/data/use-set-up-day";
 import { useWeek } from "@/lib/data/use-week";
 import type { DayRef } from "@/lib/data/week-records";
+import { copyOntoDay } from "@/lib/data/copy-onto-day";
 import { useUndoToast } from "@/lib/hooks/use-undo-toast";
 import { DAYS_COPY_PARAM } from "@/lib/routes";
 import { DAYS_COPY as COPY } from "./copy";
@@ -40,6 +41,10 @@ import { DayAsk } from "./day-parts";
  * day being set left out; From a saved block (D-USE-87) opens the same
  * picker with other days' blocks, and the picked one lands with its items
  * at the first free time. Offline none of it takes a tap (D-USE-82).
+ *
+ * USE-140: a day with no times yet takes the source's Up at and Lights out
+ * first, then its blocks; the one Undo takes both back, so the day is unset
+ * again (unset-day-copy.md).
  */
 
 type Writes = ReturnType<typeof usePlannerWrites>;
@@ -93,13 +98,12 @@ export function useCopyFrom({
     (from: SetUpDay) => {
       // The words are the day's as it stood, before the copy lands.
       const { done } = copyWords({ to: day, from });
-      void writes
-        .copyDay({ from: refOf(from), to: refOf(day) })
-        .then((write) =>
+      void copyOntoDay(writes, { from, to: day })
+        .then(({ undo }) =>
           undoToast({
             text: done,
             undoOf: COPY.undoCopy,
-            onUndo: () => void writes.undo(write.undo),
+            onUndo: () => void undo(),
             ...(hold ? { durationMs: Infinity } : {}),
           }),
         )
