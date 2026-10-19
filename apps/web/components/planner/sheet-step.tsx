@@ -55,8 +55,7 @@ export function SheetStep({
     return () => {
       sheet.style.height = before;
     };
-    // Locked once, as the step opens.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Locked once, as the step opens: `height` is read at mount only.
   }, []);
 
   const left = React.useRef(onLeft);
