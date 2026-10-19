@@ -2,6 +2,7 @@
 
 import { DaysBlockScreen } from "@/app/(shell)/days/block/[id]/_components/days-block-screen";
 import { TodayBlockScreen } from "@/app/(shell)/today/block/[id]/_components/today-block-screen";
+import { BLOCK_EDIT_PATHS } from "./scenarios/block-view-editing";
 import { BLOCK_WORK_TODOS_PATHS } from "./scenarios/block-view-work-todos";
 import { NOW_IDS } from "./scenarios/now-day";
 
@@ -27,6 +28,21 @@ export function BlockEditPart({
   state: keyof typeof BLOCK_WORK_TODOS_PATHS;
 }) {
   const [path = "", query = ""] = BLOCK_WORK_TODOS_PATHS[state].split("?");
+  const blockId = decodeURIComponent(path.split("/").at(-1) ?? "");
+  return <DaysBlockScreen blockId={blockId} at={query} />;
+}
+
+/**
+ * USE-49's Set-my-days editing states on `/dev/parts?state=block-view-<state>`:
+ * Block view in editing, the block and weekday or date its `BLOCK_EDIT_PATHS`
+ * path names, so it renders as `/days/block/<id>` does without the sign-in.
+ */
+export function BlockSetDaysEditPart({
+  state,
+}: {
+  state: keyof typeof BLOCK_EDIT_PATHS;
+}) {
+  const [path = "", query = ""] = BLOCK_EDIT_PATHS[state].split("?");
   const blockId = decodeURIComponent(path.split("/").at(-1) ?? "");
   return <DaysBlockScreen blockId={blockId} at={query} />;
 }

@@ -3,7 +3,11 @@ import { createElement } from "react";
 import { AccountPart } from "./account-parts";
 import { EventPopoverPart } from "./add-event-parts";
 import { AddPart, type AddPartState } from "./add-parts";
-import { BlockEditPart, BlockViewPart } from "./block-view-parts";
+import {
+  BlockEditPart,
+  BlockSetDaysEditPart,
+  BlockViewPart,
+} from "./block-view-parts";
 import {
   BlockBandAndHeaderForms,
   TierAndItemForms,
@@ -30,6 +34,7 @@ import {
 } from "./review-parts";
 import { RunningPart, type RunningPartState } from "./running-parts";
 import { BLOCK_VIEW_SCENARIOS } from "./scenarios/block-view";
+import { BLOCK_EDIT_PATHS } from "./scenarios/block-view-editing";
 import { BLOCK_WORK_TODOS_PATHS } from "./scenarios/block-view-work-todos";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
 import { NEW_BLOCK_SCENARIOS } from "./scenarios/new-block";
@@ -398,6 +403,14 @@ for (const state of Object.keys(BLOCK_WORK_TODOS_PATHS)) {
       state: state as keyof typeof BLOCK_WORK_TODOS_PATHS,
     }),
   ); // USE-50
+}
+// USE-49: Block view in editing on Set my days, by weekday or date.
+for (const state of Object.keys(BLOCK_EDIT_PATHS)) {
+  registerPart(`block-view-${state}`, () =>
+    createElement(BlockSetDaysEditPart, {
+      state: state as keyof typeof BLOCK_EDIT_PATHS,
+    }),
+  ); // USE-49
 }
 // USE-79: the phone's pool sheet, by its scenario names.
 for (const state of Object.keys(POOL_SHEET_SCENARIOS)) {
