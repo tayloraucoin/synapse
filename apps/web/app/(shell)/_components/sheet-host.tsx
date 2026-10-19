@@ -166,11 +166,12 @@ export function SheetHost() {
         preset={scenario.newBlock?.preset}
         // Add block lands in the new block's Block view, its add row focused
         // (USE-147; C-USE-new-block-sheet-wellness-2); a transition closes to
-        // the column.
+        // the column. The new route carries none of the sheet's params, and
+        // clearing them too would race the push and keep the page.
         onAdded={(id, form, scope) => {
           const to = addedRoute(id, form, scope);
-          closeNewBlock(false);
-          if (to !== null) router.push(to);
+          if (to === null) closeNewBlock(false);
+          else router.push(to);
         }}
         returnFocusRef={opener ?? undefined}
       />
