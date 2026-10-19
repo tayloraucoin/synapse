@@ -1,0 +1,29 @@
+Fresh /dev/parts?state=today-working at 1440 per case; focus and rows read from the DOM after each key.
+
+J then K (move across rows)
+  start: focus=BODY "Skip to the page Synapse Today Week Schedule Taylo" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  j: focus=BUTTON "🔐 [Portal sign-in]" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  j: focus=BUTTON "[Alder intro], next" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  j: focus=BUTTON "💬 [SMS copy]" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  k: focus=BUTTON "[Alder intro], next" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+
+Enter (focus Next)
+  start: focus=BODY "Skip to the page Synapse Today Week Schedule Taylo" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  Enter: focus=BODY "Skip to the page Synapse Today Week Schedule Taylo" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+
+J to the firing row, F (bring back)
+  start: focus=BODY "Skip to the page Synapse Today Week Schedule Taylo" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  j: focus=BUTTON "🔐 [Portal sign-in]" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  f: focus=BODY "Skip to the page Synapse Today Week Schedule Taylo" firingLabels=0 dialog=false doneMarks=2 title="Next: [Portal sign-in] — Synapse"
+
+J J to the idle Next row, F (fire)
+  start: focus=BODY "Skip to the page Synapse Today Week Schedule Taylo" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  j: focus=BUTTON "🔐 [Portal sign-in]" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  j: focus=BUTTON "[Alder intro], next" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  f: focus=BODY "Skip to the page Synapse Today Week Schedule Taylo" firingLabels=4 dialog=false doneMarks=2 title="Next: [SMS copy] — Synapse"
+
+J J to the idle Next row, D (done)
+  start: focus=BODY "Skip to the page Synapse Today Week Schedule Taylo" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  j: focus=BUTTON "🔐 [Portal sign-in]" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  j: focus=BUTTON "[Alder intro], next" firingLabels=2 dialog=false doneMarks=2 title="Next: [Alder intro] — Synapse"
+  d: focus=BODY "Skip to the page Synapse Today Week Schedule Taylo" firingLabels=2 dialog=false doneMarks=2 title="Next: [SMS copy] — Synapse"

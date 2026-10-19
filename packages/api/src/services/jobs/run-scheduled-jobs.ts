@@ -1,30 +1,22 @@
 import { createLogger } from "@syn/observability";
-
-import { autoCloseDaysJob } from "./auto-close-days";
+import { blockStartsJob } from "./block-starts";
 import { expireExportsJob } from "./expire-exports";
-import {
-  notifyJournalReminderJob,
-  notifyStartsJob,
-  notifyPendingReviewJob,
-  notifyReviewReminderJob,
-  notifyWeekBuildJob,
-} from "./notify";
+import { sendLinearWritesJob } from "./send-linear-writes";
+import { todoRemindersJob } from "./todo-reminders";
 
 const log = createLogger("jobs/scheduler");
 
 /**
  * The scheduled-job registry.
  *
- * A cron calls `/api/jobs/scheduler` every fifteen minutes and this runs
- * whatever is registered. The interval is the ceiling on how late a reminder
- * can be, which is why it is fifteen minutes and not a day: official spec
- * §8.2's N1 fires at an item's `scheduled_start`, and a reminder that arrives
- * hours later is worse than none.
+ * A cron calls `/api/jobs/scheduler` every 5 minutes (C12, USE-105) and this
+ * runs whatever is registered. The interval is the ceiling on how late a
+ * reminder can be: a to-do's reminder or a block's start that arrives long
+ * after its time is worse than none.
  *
- * `auto_close_days` (USE-1) is the first entry. The notification jobs — the
- * four start kinds in one scan (UX v1.1 §9, DYN-20), N4 review reminder, N5
- * pending review, N6 week build — register the same way as USE-8 lands
- * them; nothing about this file changes when they do.
+ * Since the legacy move (USE-1, 2026-10-13) the old day close and the old
+ * notification jobs live in `_legacy/`; USE-105 registers USE's own pushes
+ * (`todo_reminder`, `block_start`) and USE-102's Linear outbox sweep.
  *
  * A job that throws is logged and does not stop the others: one broken job
  * must not silence every notification in the product.
@@ -41,24 +33,12 @@ export type ScheduledJob = {
   run: () => Promise<number>;
 };
 
-/**
- * The order matters in one place: auto-close runs FIRST, so a day that ended
- * overnight is closed before the notification jobs decide what to send about
- * it. N5 asks about yesterday's auto-closed day, and it must not miss it
- * because the close had not happened yet in the same scan.
- *
- * `expire_exports` (SET-10) is last and order-independent — it touches nothing
- * the others read.
- */
+/** Order-independent: no job reads what another writes. */
 export const SCHEDULED_JOBS: readonly ScheduledJob[] = [
-  autoCloseDaysJob,
-  notifyStartsJob,
-  notifyReviewReminderJob,
-  notifyPendingReviewJob,
-  notifyWeekBuildJob,
-  // UX v1.2 §9 N2 (RUN-6) — order-independent; it reads the journal alone.
-  notifyJournalReminderJob,
   expireExportsJob,
+  todoRemindersJob,
+  blockStartsJob,
+  sendLinearWritesJob,
 ];
 
 export async function runScheduledJobs(): Promise<ScheduledJobResult[]> {

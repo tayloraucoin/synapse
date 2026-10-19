@@ -4,7 +4,7 @@
  */
 
 /** The frame's column. */
-export const STEP_FRAME_ROOT = "flex min-h-0 flex-1 flex-col gap-(--space-5)";
+export const STEP_FRAME_ROOT = "flex min-h-0 flex-1 flex-col gap-(--space-6)";
 
 /** The action row, in flow: last in the DOM and on the screen (§2). */
 export const STEP_FRAME_ACTIONS = "mt-auto flex items-center justify-end gap-(--space-3)";

@@ -8,7 +8,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./errors": "./src/auth-errors.ts",
-    "./context": "./src/context.ts"
+    "./context": "./src/context.ts",
+    "./browser": "./src/browser.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

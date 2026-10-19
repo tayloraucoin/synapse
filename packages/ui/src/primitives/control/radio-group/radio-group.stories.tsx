@@ -16,7 +16,7 @@ type Story = StoryObj<typeof RadioGroup>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <RadioGroup defaultValue="circumstance" className="max-w-sm p-(--space-6)">
+    <RadioGroup defaultValue="circumstance" className="max-w-sm p-(--space-8)">
       {[
         ["circumstance", "Something came up", "done for the record"],
         ["scoping", "Planned it wrong", "counts half"],

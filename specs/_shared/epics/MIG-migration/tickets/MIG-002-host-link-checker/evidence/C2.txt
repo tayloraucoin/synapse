@@ -1,0 +1,24 @@
+Before (scripts/check-doc-links.mjs at 35d13df): 117 broken markdown link(s).
+After, yarn docs:check-links at 16fa705:
+docs/decisions/records/README.md:28  →  0001-repo-is-reference-and-starter.md
+docs/decisions/records/README.md:29  →  0002-package-scope-pem.md
+docs/decisions/records/README.md:31  →  0004-docs-as-root-markdown-rendered-by-apps-docs.md
+docs/decisions/records/README.md:32  →  0005-two-packages-and-boundaries-lint.md
+docs/decisions/records/README.md:34  →  0007-docs-app-extends-its-renderer.md
+docs/decisions/records/README.md:35  →  0008-subagents-are-generated-opt-in.md
+docs/decisions/records/README.md:38  →  0011-component-kit-and-catalog.md
+docs/decisions/records/README.md:39  →  0012-adoption-tiers.md
+docs/product/2026-09-16-ux-v1.2-engineering-handoff.md:5  →  ../specs/epic-5-first-run-rebuilt/TECHNICAL-DECISIONS.md
+docs/product/2026-09-16-ux-v1.2-engineering-handoff.md:5  →  ../specs/epic-5-first-run-rebuilt/README.md
+docs/product/2026-09-24-first-run-walkthrough-feedback-v1.2.md:5  →  ../specs/epic-6-day-first-first-run/
+docs/ux/landing-page-ux.md:5  →  ../specs/cross-cutting-system/SYS-6-landing-page.md
+docs/ux/ux-spec-v1.1.md:5  →  ../specs/epic-4-dynamic-schedule/README.md
+docs/ux/workflow-ux-spec-v0.1.md:5  →  ../specs/epic-7-workflow/01-technology-assessment.md
+
+14 broken markdown link(s).
+exit: 1
+
+Lines under docs/decisions/imported/ or docs/archive/: 0
+Judgment (Scribe's test: a reader following the link today reaches nothing, and the file is live): every remaining line is real.
+- docs/decisions/records/README.md 28-39 (8): the generated table lists toolkit records absent here; yarn directory-map rewrites it.
+- docs/product (3), docs/ux (3): bodies naming old docs/specs/ paths; reported until MIG-1 archives docs/ux, per the Build notes.

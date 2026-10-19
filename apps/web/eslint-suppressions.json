@@ -1,0 +1,7 @@
+{
+  "lib/pwa/push-subscribe.ts": {
+    "no-restricted-properties": {
+      "count": 1
+    }
+  }
+}

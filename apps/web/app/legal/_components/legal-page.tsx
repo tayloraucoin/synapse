@@ -23,7 +23,7 @@ export function LegalPage({ title }: { title: string }) {
       className="mx-auto flex w-full max-w-(--content-text) flex-col"
     >
       <ScreenFrame width="text" prose>
-        <div className="flex flex-col gap-(--space-5)">
+        <div className="flex flex-col gap-(--space-6)">
           <Heading>{title}</Heading>
           {/* [COPY — needs Vesper sign-off; a placeholder, not a policy.] */}
           <Text as="p" tone="body">

@@ -1,0 +1,73 @@
+{
+  "id": "USE-18",
+  "criteria_sha256": "9222304bd9e41c7458c30497e0b99e3b5169903b2059016a7870c577b6d56480",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:42:50Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-018-now-row-menu-reorder/evidence/C3.log",
+        "evidence_sha256": "5eae2e74c3c473d7cc6899eca19aa36dcaf00b26c47227bf2bb139c8b6cf1ff2",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:42:50Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-018-now-row-menu-reorder/evidence/C4.log",
+        "evidence_sha256": "5eae2e74c3c473d7cc6899eca19aa36dcaf00b26c47227bf2bb139c8b6cf1ff2",
+        "tests": 32
+      }
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:43:06Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-018-now-row-menu-reorder/evidence/C6.log",
+        "evidence_sha256": "08d8ccfea6b34a691f928b2405cfcb666188d847e0ee8f26c4f185b6e1a30083"
+      }
+    },
+    "C7": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:43:07Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-018-now-row-menu-reorder/evidence/C7.log",
+        "evidence_sha256": "3e70241181b862f17cd7f49bf83d0ffc9083ef31c3f669c9855cc31b358d19ea"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:52:03Z",
+  "updated_at": "2026-10-18T19:43:08Z"
+}

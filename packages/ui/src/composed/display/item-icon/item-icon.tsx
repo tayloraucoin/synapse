@@ -22,14 +22,14 @@ import { getCuratedGlyph } from "./curated-glyphs";
 
 /** Static so Tailwind's scanner sees every class — see CategoryChip. */
 const GLYPH_TINT: Record<CategoryKey, string> = {
-  leaf: "text-cat-leaf-500",
-  sky: "text-cat-sky-500",
-  clay: "text-cat-clay-500",
-  rose: "text-cat-rose-500",
-  amber: "text-cat-amber-500",
-  slate: "text-cat-slate-500",
-  plum: "text-cat-plum-500",
-  moss: "text-cat-moss-500",
+  leaf: "text-category-leaf-dot",
+  sky: "text-category-sky-dot",
+  clay: "text-category-clay-dot",
+  rose: "text-category-rose-dot",
+  amber: "text-category-amber-dot",
+  slate: "text-category-slate-dot",
+  plum: "text-category-plum-dot",
+  moss: "text-category-moss-dot",
 };
 
 export type ItemIconSize = 20 | 24 | 48;
@@ -41,6 +41,8 @@ export interface ItemIconProps {
   imageUrl?: string | null;
   /** Phase 2 — a calendar-sourced item carries its own glyph. */
   calendar?: boolean;
+  /** A line icon in the muted tone, its category tint set aside (the To-dos tray's rows, USE-19). */
+  muted?: boolean;
   className?: string;
 }
 
@@ -64,6 +66,7 @@ export function ItemIcon({
   size = 24,
   imageUrl = null,
   calendar = false,
+  muted = false,
   className,
 }: ItemIconProps) {
   const box = cn(
@@ -90,9 +93,11 @@ export function ItemIcon({
           aria-hidden="true"
           className={cn(
             box,
-            icon.colorKey === null
-              ? "text-text-body"
-              : GLYPH_TINT[icon.colorKey],
+            muted
+              ? "text-text-muted"
+              : icon.colorKey === null
+                ? "text-text-body"
+                : GLYPH_TINT[icon.colorKey],
           )}
         >
           <Icon size={GLYPH_PX[size]} strokeWidth={1.75} />
@@ -116,7 +121,7 @@ export function ItemIcon({
 
   return (
     <span aria-hidden="true" className={cn(box, calendar && "text-text-muted")}>
-      <span className="block size-1.5 rounded-full bg-edge" />
+      <span className="block size-1.5 bg-edge" />
     </span>
   );
 }

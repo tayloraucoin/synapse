@@ -1,0 +1,78 @@
+{
+  "id": "USE-31",
+  "criteria_sha256": "74223badf52747392f8c6932f3916abd88a5870544704e8470665608dddffb27",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:47:05Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-031-review-the-day-frame/evidence/C5.log",
+        "evidence_sha256": "06039f39e625bc3e4290b9516664d4f10bba8ef4cdaa3fd3a03b3a1cfd4f5936",
+        "tests": 32
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:47:05Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-031-review-the-day-frame/evidence/C6.log",
+        "evidence_sha256": "06039f39e625bc3e4290b9516664d4f10bba8ef4cdaa3fd3a03b3a1cfd4f5936",
+        "tests": 32
+      }
+    },
+    "C7": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:47:22Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-031-review-the-day-frame/evidence/C7.log",
+        "evidence_sha256": "8cec41b45e437c5083a05e982e84874a151cd0ff45d06fd927347f4b36b0fb2e"
+      }
+    },
+    "C8": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:47:23Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-031-review-the-day-frame/evidence/C8.log",
+        "evidence_sha256": "27629133494b2bfbce75d9477c7a3f666f4b5de8461a1340f581e12fe94ec065"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:54:05Z",
+  "updated_at": "2026-10-18T19:47:23Z"
+}

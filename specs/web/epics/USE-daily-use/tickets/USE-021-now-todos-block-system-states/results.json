@@ -1,0 +1,83 @@
+{
+  "id": "USE-21",
+  "criteria_sha256": "9899b8da9d3afc4dee00222d65f4ad4aea9ac6aec9b3d812c4e87246f67b65db",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:43:47Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-021-now-todos-block-system-states/evidence/C6.log",
+        "evidence_sha256": "12a336865d8ba8f189bc8ad14829ec71e05473ac2ffa49b19e636bdd5c2b9bdd",
+        "tests": 32
+      }
+    },
+    "C7": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:43:47Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-021-now-todos-block-system-states/evidence/C7.log",
+        "evidence_sha256": "12a336865d8ba8f189bc8ad14829ec71e05473ac2ffa49b19e636bdd5c2b9bdd",
+        "tests": 32
+      }
+    },
+    "C8": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:44:04Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-021-now-todos-block-system-states/evidence/C8.log",
+        "evidence_sha256": "d717b0b65dd9f1d4e51055c4f6755636b5174c5e2b3c40d6663957aea111b094"
+      }
+    },
+    "C9": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:44:05Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-021-now-todos-block-system-states/evidence/C9.log",
+        "evidence_sha256": "c4105218e9e436f7b0010c9f079876dab88537298f5b6b7e877d66ae25a6e9c8"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:52:14Z",
+  "updated_at": "2026-10-18T19:44:06Z"
+}

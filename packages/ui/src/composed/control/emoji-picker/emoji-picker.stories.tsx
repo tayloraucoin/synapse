@@ -15,7 +15,7 @@ import { EmojiPicker } from "./emoji-picker";
 const meta: Meta<typeof EmojiPicker> = {
   title: "Composed/Control/EmojiPicker",
   component: EmojiPicker,
-  decorators: [(Story) => <div className="max-w-sm p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-sm p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

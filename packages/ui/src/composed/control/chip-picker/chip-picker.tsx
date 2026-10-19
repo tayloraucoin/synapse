@@ -66,7 +66,7 @@ export function ChipPicker({
 
   const chipShell = (selected: boolean) =>
     cn(
-      "inline-flex min-h-(--target) cursor-pointer items-center rounded-(--radius-full)",
+      "inline-flex min-h-(--target) cursor-pointer items-center rounded-(--radius)",
       "border px-(--space-1) py-(--space-1)",
       "transition-colors duration-(--dur-state) ease-(--ease-settle)",
       "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",

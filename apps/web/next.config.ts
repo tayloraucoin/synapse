@@ -1,14 +1,11 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadEnvConfig } from "@next/env";
 import type { NextConfig } from "next";
-
+import { loadEnvConfig } from "@next/env";
 import { buildSupabaseEnvForNextConfig } from "@syn/auth";
 import { buildDatabaseEnvForNextConfig } from "@syn/db/build-database-env-for-next-config";
-
 import { getLocalDevOrigins } from "../../scripts/local-dev-origins.mjs";
-
 import { env } from "./env";
 
 const webRoot = path.dirname(fileURLToPath(import.meta.url));
@@ -41,10 +38,35 @@ const packageJson = JSON.parse(
   readFileSync(path.join(webRoot, "package.json"), "utf8"),
 ) as { version?: string };
 
+/**
+ * The service worker's build (USE-107): the registration leaf registers
+ * `/sw.js?build=<id>`, so each build installs a new worker with its own shell
+ * cache and SY-02's update line offers it. Stamped once per build, like the
+ * date. Development is always "dev": a restarted dev server is not a new
+ * version to offer, and the worker keeps static files network first there.
+ */
+const buildId =
+  env.NODE_ENV === "development" ? "dev" : Date.now().toString(36);
+
 const versionEnv = {
   NEXT_PUBLIC_APP_VERSION: packageJson.version ?? "0.0.0",
   NEXT_PUBLIC_BUILD_DATE: new Date().toISOString().slice(0, 10),
+  NEXT_PUBLIC_BUILD_ID: buildId,
 };
+
+/**
+ * No fixture in a production build (USE-108). The live path reaches the
+ * fixtures only through these two modules (`lib/data/imports.test.ts`); a
+ * build resolves each to its stub in `lib/no-fixtures/`, so `?state=` and
+ * the dev parts page have nothing to load and no fixture module is bundled.
+ */
+const FIXTURE_ENTRIES = {
+  "@/lib/fixtures/entry": "./lib/no-fixtures/entry.ts",
+  "@/lib/fixtures/parts": "./lib/no-fixtures/parts.ts",
+} as const;
+
+const fixtureAliases: Record<string, string> =
+  env.NODE_ENV === "production" ? { ...FIXTURE_ENTRIES } : {};
 
 const nextConfig: NextConfig = {
   /**
@@ -56,6 +78,9 @@ const nextConfig: NextConfig = {
    * warning by hand.
    */
   agentRules: false,
+
+  /** The journeys' dev server builds apart (USE-113); unset, `.next`. */
+  ...(env.E2E_DIST_DIR ? { distDir: env.E2E_DIST_DIR } : {}),
 
   // Next 16 blocks cross-origin `/_next/*` in dev unless listed here. Phone and
   // LAN access through `yarn web:dev:local` needs these or React never hydrates.
@@ -114,6 +139,7 @@ const nextConfig: NextConfig = {
 
   turbopack: {
     root: path.resolve(webRoot, "../.."),
+    resolveAlias: fixtureAliases,
   },
   outputFileTracingRoot: path.resolve(webRoot, "../.."),
 

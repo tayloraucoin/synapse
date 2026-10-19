@@ -628,7 +628,7 @@ export function DragLayer({
 
       {/* `m` then a time (§10.4): a small labelled entry; Enter moves, Escape leaves. */}
       {timeEntry === null ? null : (
-        <div className="bg-paper border-hairline absolute end-(--space-2) top-(--space-2) z-30 rounded-(--radius) border p-(--space-2) shadow-sm">
+        <div className="bg-paper border-hairline absolute end-(--space-2) top-(--space-2) z-30 rounded-(--radius) border p-(--space-2)">
           <Input
             autoFocus
             label={DRAG_LAYER_COPY.timeEntryLabel(itemById.get(timeEntry.id)?.title ?? "")}
@@ -649,7 +649,7 @@ export function DragLayer({
 
       {/* `g` then a number (§3.11): the gap before the focused block, in minutes. */}
       {gapEntry === null ? null : (
-        <div className="bg-paper border-hairline absolute end-(--space-2) top-(--space-2) z-30 rounded-(--radius) border p-(--space-2) shadow-sm">
+        <div className="bg-paper border-hairline absolute end-(--space-2) top-(--space-2) z-30 rounded-(--radius) border p-(--space-2)">
           <Input
             autoFocus
             label={DRAG_LAYER_COPY.gapEntryLabel(itemById.get(gapEntry.id)?.title ?? "")}

@@ -42,7 +42,7 @@ export function ScreenFrame({
         width === "canvas" && "max-w-(--content-canvas)",
         // `board` has no cap; `min-w-0` lets the board's own region scroll sideways.
         width === "board" && "min-w-0",
-        padded && "px-(--space-4) py-(--space-4) wide:px-(--space-6) wide:py-(--space-6)",
+        padded && "px-(--space-4) py-(--space-4) wide:px-(--space-8) wide:py-(--space-8)",
         prose && "[&_p]:max-w-(--measure)",
         className,
       )}

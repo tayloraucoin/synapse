@@ -9,7 +9,7 @@ const meta: Meta<typeof TemplateUsageRow> = {
   parameters: { layout: "fullscreen" },
   decorators: [
     (Story) => (
-      <ul className="divide-hairline max-w-xl divide-y p-(--space-6)">
+      <ul className="divide-hairline max-w-xl divide-y p-(--space-8)">
         <Story />
       </ul>
     ),

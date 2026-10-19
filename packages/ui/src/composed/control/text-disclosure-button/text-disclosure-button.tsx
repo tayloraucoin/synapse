@@ -24,6 +24,8 @@ export interface TextDisclosureButtonProps
   collapsedLabel: React.ReactNode;
   expandedLabel: React.ReactNode;
   classes?: TextDisclosureButtonClasses;
+  /** Where a sheet it opens sends focus back (USE-13). */
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
 export function TextDisclosureButton({

@@ -1,0 +1,68 @@
+{
+  "id": "USE-30",
+  "criteria_sha256": "068db1a600eaf80b0192d981ef0f502b3826c136bd16edd53181e1238b78f60e",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:root",
+        "exit": 0,
+        "at": "2026-10-18T19:46:44Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C1.log",
+        "evidence_sha256": "8db038dcb8dd4b85d1b498986455e6bf7af9bd250a52c1a3ab43256754ab4433",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-migrations",
+        "exit": 0,
+        "at": "2026-10-18T19:46:47Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C2.log",
+        "evidence_sha256": "1b59e2fa95b91feb8b1d347936a48a4803f67c469f5e4735e14f1076315c063e"
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:46:48Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C3.log",
+        "evidence_sha256": "bc1cd7e60d67087e1a44a707a4c0f6f85813b11336bdc8facd1e5a4ce0f1c840",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:47:03Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-030-schema-0014-todo-remind-on/evidence/C4.log",
+        "evidence_sha256": "a429b5a1bd63484d6660c6bb92fb9cac425b1ceb31c291df89572a507ce49b2f"
+      }
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "review:mason": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    }
+  },
+  "built_at": "2026-10-18T18:53:52Z",
+  "updated_at": "2026-10-18T19:47:04Z"
+}

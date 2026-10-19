@@ -33,21 +33,21 @@ export const toggleVariants = cva(
         default:
           "rounded-md bg-transparent text-sm hover:bg-muted hover:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
         outline:
-          "rounded-md border border-input bg-transparent text-sm shadow-xs hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
+          "rounded-md border border-input bg-transparent text-sm hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
         /** The 44px square — Stepper17, WeekdayChips, ColorSwatchRow. */
         cell: [
-          "border-neutral-300 text-ink rounded-(--radius) border bg-transparent",
+          "border-input text-ink rounded-(--radius) border bg-transparent",
           "text-(length:--fs-body)",
-          "hover:bg-neutral-100 dark:border-neutral-600 dark:hover:bg-neutral-800",
+          "hover:bg-surface",
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground",
           "data-[state=on]:border-transparent",
         ],
         /** The wrapping word chip — ReasonChips, ChipPicker. */
         chip: [
-          "rounded-(--radius-full) border border-transparent bg-neutral-100",
+          "rounded-(--radius) border border-transparent bg-surface",
           "text-text-body text-(length:--fs-caption)",
-          "hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700",
+          "hover:bg-border",
           "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
           "data-[state=on]:border-ink data-[state=on]:text-ink",
         ],

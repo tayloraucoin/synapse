@@ -1,126 +1,164 @@
 # Brand tokens — the name to type, for the thing you mean
 
-**Authority:** official UX spec §9 is the brand. `packages/config/tailwind/preset.css`
-is that spec expressed as CSS, and the **only file in the repository where a hex
-may appear**. This page is the lookup table, so you can find `bg-paper` without
-reading the CSS.
-
-There is no `branding-design-system.md` here. Conscious Connections needs one
-because its visual system lives in a document; Synapse's lives in §9 and in the
-token file, and a third description would be a third thing to keep true.
+**Authority:** the operator's brand kit (Design System artifact
+`EhNLGGfozdciR27ukmtmxL`, `project/tokens.json`), re-mapped into
+`packages/config/tailwind/preset.css` by WEB-1. The preset is the **only file in
+the repository where a raw colour may appear**. This page is the lookup table,
+so you can find `bg-background` without reading the CSS. The reasoning is in
+[`docs/ux/branding-guide.md`](../ux/branding-guide.md). `yarn check-brand docs`
+fails when this page and the preset disagree.
 
 ---
 
 ## The three layers
 
 ```
-raw scale        --syn-neutral-800     the value, theme-independent
+raw ramp         --syn-neutral-900     the kit's OKLCH value, theme-independent
      ↓
-semantic         --ink                 what it means; flips inside .dark
+role             --foreground          what it means; flips inside .dark
      ↓
-shadcn bridge    --foreground          what a shadcn primitive reads
-     ↓
-Tailwind         text-ink              what you type
+Tailwind         text-foreground       what you type
 ```
 
-**Type the semantic name.** `text-ink` is right in both themes; `text-neutral-800`
-is right in one. Reach for a raw scale only where the value is genuinely
-theme-independent (a category hue's 500, the accent mark).
+The shadcn bridge (`--card`, `--popover`, `--secondary`, `--muted`, `--accent`,
+`--ring`, `--sidebar-*`) points at roles: `--card` is `--background`;
+`--popover`, `--secondary`, `--muted` and `--accent` are `--surface`; `--ring`
+is `--now`. **Type the role.** A raw step (`--syn-brand-500`) is never typed in
+a component; `yarn check-brand shape` fails on one.
 
 ---
 
-## Colour
+## Colour roles
 
-| You mean | Utility | Token | Light / dark |
-|---|---|---|---|
-| The page ground | `bg-paper` | `--paper` | neutral-50 / neutral-900 |
-| Primary text | `text-ink` | `--ink` | neutral-800 / neutral-100 |
-| A sheet or card surface | `bg-surface` | `--surface` | neutral-100 / neutral-800 |
-| A hairline or divider | `border-hairline` | `--hairline` | neutral-200 / neutral-400 @ 40% |
-| Body copy | `text-text-body` | `--text-body` | neutral-600 / neutral-200 |
-| Secondary text | `text-text-secondary` | `--text-secondary` | neutral-500 / neutral-300 |
-| Muted text (**large only**) | `text-text-muted` | `--text-muted` | neutral-400 both |
-| Disabled text | `text-text-disabled` | `--text-disabled` | neutral-300 / neutral-500 |
-| A link, or the word by a marker | `text-accent-text` | `--accent-text` | accent-600 / accent-300 |
-| **The now line, the now/soon dot, the active-timer border** | `bg-accent-mark` / `border-accent-mark` | `--syn-accent-500` | the same in both |
-| Off-schedule text | `text-violet-text` | `--violet-text` | violet-600 / violet-300 |
-| A moved block's border | `border-violet-mark` | `--syn-violet-500` | the same in both |
-| A shift band | `bg-violet-band` `text-violet-band-text` | | violet-100 / violet-800 |
-| An ink-filled button | `bg-primary text-primary-foreground` | `--primary` | ink, **never the accent** |
-| Delete account, and nothing else | `bg-destructive` | `--destructive` | `#B4463C` |
-| **A block's hue — planning surfaces only** (the primer, the builder's B7 · B13 · B14 · B17, screen 5; **never `/today` or the Schedule**) | `bg-block-<kind>` `text-block-<kind>-label` | `--block-<kind>`, `--block-<kind>-label` | the kind's category 100 / 700; dark 800 / 200 (UX v1.3 R47, TD-29; mapping `[PROPOSED]` §13 #31) |
-| The focus ring | (automatic) | `--ring` | accent-500 / accent-400 |
+| Token                      | Light         | Dark          | You mean                                           | Utility                       |
+| -------------------------- | ------------- | ------------- | -------------------------------------------------- | ----------------------------- |
+| `--background`             | `neutral-50`  | `neutral-900` | the page                                           | `bg-background`               |
+| `--surface`                | `neutral-100` | `neutral-800` | a sheet, the Review card, hover                    | `bg-surface`                  |
+| `--foreground`             | `neutral-900` | `neutral-100` | body text and headings                             | `text-foreground`             |
+| `--muted-foreground`       | `neutral-600` | `neutral-400` | times, counts, reasons, helper copy                | `text-muted-foreground`       |
+| `--border`                 | `neutral-200` | `neutral-700` | a hairline between rows, around sheets             | `border-border`               |
+| `--input`                  | `neutral-500` | `neutral-500` | a field's or checkbox's boundary                   | `border-input`                |
+| `--primary`                | `neutral-900` | `neutral-100` | the one filled button                              | `bg-primary`                  |
+| `--primary-foreground`     | `neutral-50`  | `neutral-900` | its label                                          | `text-primary-foreground`     |
+| `--now`                    | `brand-500`   | `brand-400`   | the now line, the current-item dot, the focus ring | `bg-now` `border-now`         |
+| `--link`                   | `brand-600`   | `brand-400`   | a link, a word in the brand colour                 | `text-link`                   |
+| `--off-schedule`           | `violet-500`  | `violet-400`  | the off-schedule marker                            | `border-off-schedule`         |
+| `--off-schedule-text`      | `violet-600`  | `violet-300`  | the words "Off schedule" and their time            | `text-off-schedule-text`      |
+| `--destructive`            | `red-500`     | `red-500`     | Delete account's fill, and nothing else            | `bg-destructive`              |
+| `--destructive-foreground` | `neutral-50`  | `neutral-50`  | its label                                          | `text-destructive-foreground` |
+| `--destructive-text`       | `red-600`     | `red-300`     | the warning above Delete account                   | `text-destructive-text`       |
 
-### One trap, named
+**Never:** text in `brand-500` (3.75:1 on paper); a teal fill; red for missed,
+errors or warnings. Those are `foreground` or `muted-foreground`.
 
-`--accent` in the bridge layer is the **pale hover surface** (accent-100), not
-the marker teal. The token file declares `--accent` twice and the bridge wins,
-so `var(--accent)` is not what you want for a now line. Use **`accent-mark`**.
-The collision is commented in `preset.css`; it is the handoff §6.2 as written,
-flagged for Vesper.
+## Category chips and dots
 
-### Category hues
+The chip is filled with `bg-category-<hue>-chip` and the name on it is
+`text-foreground`; the dot (and a Schedule block's leading edge) is
+`bg-category-<hue>-dot`. Always beside the category's name. The kit gives these
+per theme in sRGB, and the values live only in the preset (copied from the kit's
+`tokens.json`); they are a proposal until signed off. Chip text holds 14:1 or
+more in light and 10.8:1 or more in dark; every dot holds 3.3:1 or more on
+`background`.
 
-Eight, keyed by name: `leaf · sky · clay · rose · amber · slate · plum · moss`.
+| Token                   | Light         | Dark          |
+| ----------------------- | ------------- | ------------- |
+| `--category-leaf-chip`  | `tokens.json` | `tokens.json` |
+| `--category-leaf-dot`   | `tokens.json` | `tokens.json` |
+| `--category-sky-chip`   | `tokens.json` | `tokens.json` |
+| `--category-sky-dot`    | `tokens.json` | `tokens.json` |
+| `--category-clay-chip`  | `tokens.json` | `tokens.json` |
+| `--category-clay-dot`   | `tokens.json` | `tokens.json` |
+| `--category-rose-chip`  | `tokens.json` | `tokens.json` |
+| `--category-rose-dot`   | `tokens.json` | `tokens.json` |
+| `--category-amber-chip` | `tokens.json` | `tokens.json` |
+| `--category-amber-dot`  | `tokens.json` | `tokens.json` |
+| `--category-slate-chip` | `tokens.json` | `tokens.json` |
+| `--category-slate-dot`  | `tokens.json` | `tokens.json` |
+| `--category-plum-chip`  | `tokens.json` | `tokens.json` |
+| `--category-plum-dot`   | `tokens.json` | `tokens.json` |
+| `--category-moss-chip`  | `tokens.json` | `tokens.json` |
+| `--category-moss-dot`   | `tokens.json` | `tokens.json` |
 
-- A 2px row edge: `bg-cat-<key>-500`
-- A chip: `bg-cat-<key>-100 text-cat-<key>-700`, and in dark
-  `dark:bg-cat-<key>-800 dark:text-cat-<key>-200`
+**Block hues, planning surfaces only** (the primer, the builder's B7, B13, B14,
+B17, screen 5; never `/today` or the Schedule): `bg-block-<kind>` is the kind's
+category chip and `text-block-label` is `foreground` (UX v1.3 R47, TD-29;
+mapping `[PROPOSED]` §13 #31).
 
-The 200 and 800 steps are **derived** by `color-mix` and marked
-`[PROPOSED — needs sign-off]` (handoff §11 Q2). Categories never use the accent
-teal or the violet, so the semantic layer stays unambiguous.
+## Raw ramps
+
+`--syn-neutral-*`, `--syn-brand-*`, `--syn-violet-*` and `--syn-red-*`, steps
+50 to 900, in the kit's OKLCH. Step 500 is the exact brand value in each hue;
+neutral-50 is paper and neutral-900 is ink. Raw steps are reached through a
+role, never typed.
+
+## The mark
+
+`--logo-disc` and `--logo-rule` hold the placeholder mark's fixed inks for
+`SynapseMark`: neutral-900 and brand-500 in light, neutral-50 and brand-400 in
+dark.
 
 ---
 
 ## Type
 
-| You mean | Utility |
-|---|---|
-| The interface family | `font-sans` (Geist) |
-| The reflective family | `font-serif` (Newsreader) — Day/Week Review only |
-| A size | `text-(length:--fs-caption \| --fs-secondary \| --fs-body \| --fs-row-title \| --fs-heading \| --fs-review-headline)` |
+| You mean             | Utility                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| The interface family | `font-sans` (Public Sans)                                                                                                       |
+| The Review family    | `font-serif` (Newsreader), Review screens only                                                                                  |
+| A style              | `text-title`, `text-heading`, `text-body`, `text-label`, `text-figure`, `text-caption`, `text-review-title`, `text-review-body` |
 
-In practice you almost never type these: use `<Text variant>`. See
-[typography-guidelines.md](typography-guidelines.md).
+In practice you rarely type these: use `<Text variant>`. Sizes and leading are
+in [typography-guidelines.md](typography-guidelines.md).
 
 ---
 
 ## Space, radius, motion
 
-| You mean | Utility |
-|---|---|
-| Spacing (**the whole scale**: 4·8·12·16·24·32·48) | `gap-(--space-1)` … `gap-(--space-7)` |
-| A row's minimum height (56px) | `min-h-(--row-min)` |
-| A touch target (44px) | `size-(--target)` / `h-(--target)` |
-| Content width | `max-w-(--content-text)` 720px · `max-w-(--content-canvas)` 960px · `ScreenFrame width="board"` (no cap — Workflow's board only) |
-| Workflow's board tracks | `--board-col-wide` 320px (the first column) · `--board-col` 240px (the rest) — read by `Board`'s grid template, not typed in a class |
-| Prose measure (64ch) | `max-w-(--measure)` |
-| Radius | `rounded-(--radius)` 6px · `rounded-(--radius-sheet)` 10px · `rounded-(--radius-full)` |
-| A state change (120ms) | `duration-(--dur-state)` |
-| A sheet or expansion (200ms) | `duration-(--dur-sheet)` |
-| Easing | `ease-(--ease-settle)` — settles, never bounces |
-| The firing mark's breath (2400ms) | `motion-safe:animate-breathe` — `FiringMark` only; `--dur-breathe` and `@keyframes syn-breathe` (Workflow UX v0.1 §3.3, TD-42). The one animation at rest; never attached under reduced motion |
-| The one breakpoint (768px) | the `wide:` variant |
-| An overlay shadow | `shadow-(--shadow-overlay)` |
-| A scrim | `bg-(--scrim)` |
+| You mean                                            | Token                                                                                                      |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Spacing, the whole scale (4, 8, 12, 16, 24, 32, 48) | `--space-1` `--space-2` `--space-3` `--space-4` `--space-6` `--space-8` `--space-12`, as `gap-(--space-4)` |
+| The screen gutter                                   | `--space-4`                                                                                                |
+| A row's minimum height (56px)                       | `--row-min`                                                                                                |
+| A touch target (44px)                               | `--target`                                                                                                 |
+| Content width                                       | `--content-text` 720px · `--content-canvas` 960px                                                          |
+| Workflow's board tracks                             | `--board-col-wide` 320px · `--board-col` 240px                                                             |
+| Prose measure (64ch)                                | `--measure`                                                                                                |
+| A control's corners (6px)                           | `--radius-control` (also `--radius`), as `rounded-(--radius)`                                              |
+| A sheet's corners (10px)                            | `--radius-sheet`                                                                                           |
+| A state change (120ms)                              | `--dur-state`                                                                                              |
+| A sheet (200ms)                                     | `--dur-sheet`                                                                                              |
+| Easing                                              | `--ease-settle`                                                                                            |
+| The running thread's dot (2400ms)                   | `--dur-breathe`, as `motion-safe:animate-breathe` on `FiringMark` only                                     |
+| A scrim                                             | `--scrim` (ink at 40%)                                                                                     |
 
-Both duration tokens collapse to `0ms` under `prefers-reduced-motion`, and
-`globals.css` zeroes any hard-coded duration as a floor. `--dur-breathe` does
-not collapse: the breath is applied `motion-safe:` only, so under reduced
-motion it is never attached and the mark rests at full opacity.
+There is no shadow token and no pill radius. Both duration tokens collapse to
+`0ms` under `prefers-reduced-motion`.
 
 ---
 
 ## The rules that outrank convenience
 
-1. **No hex outside `preset.css`.** Not in a component, not in a story, not
-   "just for now".
-2. **No arbitrary spacing.** `gap-[14px]` is a decision nobody made. The scale
-   is 4·8·12·16·24·32·48 (§9.5).
-3. **Colour is never the only carrier.** A dot *and* the word *now*; a border
-   *and* the word *moved*; a chip *and* the category's name (§9.3).
-4. **The accent never fills a surface.** It marks time and takes focus.
-5. **Nothing red on the execution tabs.** Errors are ink and a sentence.
-   `destructive` appears on one button, on one screen.
-6. **No gradients, no shadows except overlays** (§9.3).
+1. **No raw colour outside `preset.css`.** Not in a component, not in a story.
+   The only exceptions are static metadata CSS cannot reach (the viewport
+   `themeColor`, the manifest) and Google's own mark.
+2. **No arbitrary spacing.** The scale is 4, 8, 12, 16, 24, 32, 48.
+3. **Colour is never the only carrier.** A dot and the word; a chip and the name.
+4. **Verdigris never fills a surface and is never body text.**
+5. **Nothing red except Delete account.**
+6. **No shadows, no gradients, nothing round** except the mark, a category dot
+   and the current-item dot.
+
+## Retired names
+
+Kept as one-line aliases in the preset's marked block until a codemod retires
+them; new code uses the role. `--paper` is `--background`; `--ink` and
+`--text-body` are `--foreground`; `--text-secondary`, `--text-muted` and
+`--text-disabled` are `--muted-foreground`; `--hairline` and `--fill-muted` are
+`--border`; `--edge` is `--input`; `--accent-text` is `--link`; `--violet-text`
+is `--off-schedule-text`; the `accent-mark` and `violet-mark` utilities are
+`now` and `off-schedule`; `--fs-secondary` is `--fs-label` and `--fs-row-title`
+is `--fs-heading`. Removed outright: `--shadow-overlay`, `--radius-full`, the
+`--syn-accent-*`, `--syn-cat-*` and `--syn-destructive-500` scales, `--chip-*`,
+`--violet-band`, `--accent-hover-surface`, `--space-5` and `--space-7` (now
+`--space-6` and `--space-12`; the old `--space-6` is `--space-8`).

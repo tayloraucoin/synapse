@@ -1,0 +1,68 @@
+{
+  "id": "USE-115",
+  "criteria_sha256": "498c3683cb8338566bae31ee37b383ddbe0f76ba18e60554994be95c5d406b34",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T23:18:21Z",
+        "head": "02d50000878a4a11c85667de18955bd4d5350f0a",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-115-head-green-after-wave-3/evidence/C1.log",
+        "evidence_sha256": "0093aa9cdea202a7807dcfca68d456b3d71e03fd547e392622c24b75e6a0f3ca"
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:18:23Z",
+        "head": "02d50000878a4a11c85667de18955bd4d5350f0a",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-115-head-green-after-wave-3/evidence/C2.log",
+        "evidence_sha256": "cf5836466d2cb6750c5e68912b7711fedcba4bbbd69b6e614abeb2be9031f746"
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-refs",
+        "exit": 0,
+        "at": "2026-10-18T23:18:37Z",
+        "head": "02d50000878a4a11c85667de18955bd4d5350f0a",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-115-head-green-after-wave-3/evidence/C3.log",
+        "evidence_sha256": "94a71bcb43c5c24110d014a137d0b8b5d11609e0cde12fdc8dbdcb7fd8e81787"
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn budget",
+        "exit": 0,
+        "at": "2026-10-18T23:18:40Z",
+        "head": "02d50000878a4a11c85667de18955bd4d5350f0a",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-115-head-green-after-wave-3/evidence/C4.log",
+        "evidence_sha256": "fa64a886a07fd88a4d6b079725c794dde857ed866d8c5e2ef67a5293e5e0ad7c"
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-specs --strict",
+        "exit": 0,
+        "at": "2026-10-18T23:18:41Z",
+        "head": "02d50000878a4a11c85667de18955bd4d5350f0a",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-115-head-green-after-wave-3/evidence/C5.log",
+        "evidence_sha256": "94dbf3bb43898e6cec8b8789b84f7077f21cf72e32bda3e0a8461935fd268bd6"
+      }
+    }
+  },
+  "built_at": "2026-10-18T23:08:11Z",
+  "updated_at": "2026-10-18T23:19:40Z"
+}

@@ -14,7 +14,7 @@ import { CuratedIconGrid } from "./curated-icon-grid";
 const meta: Meta<typeof CuratedIconGrid> = {
   title: "Composed/Control/CuratedIconGrid",
   component: CuratedIconGrid,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

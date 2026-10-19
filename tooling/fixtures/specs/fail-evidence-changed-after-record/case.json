@@ -1,0 +1,8 @@
+{
+  "expect": "fail",
+  "message": "changed after it was recorded",
+  "lenient": {
+    "warnings": [],
+    "brief": "Active: WEB-1 filter (open; left: C2 check, C3 manual). Next: yarn status WEB-1."
+  }
+}

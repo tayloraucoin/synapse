@@ -1,0 +1,176 @@
+{
+  "id": "MIG-7",
+  "criteria_sha256": "5236c5e00f71703afc98e3a77653d2c136b889ebd6f531bb3e226d4d8541993b",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:auth-seam --test-name-pattern C1",
+        "exit": 0,
+        "at": "2026-10-09T21:06:48Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C1.log",
+        "evidence_sha256": "aba1d30c454d536d050956e865f55fc61f73c42666ead5c054c3b6aac643314c",
+        "tests": 3
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:auth-seam --test-name-pattern C2",
+        "exit": 0,
+        "at": "2026-10-09T21:06:51Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C2.log",
+        "evidence_sha256": "2056b6f1c4f9459f8f4fe6f01f6b22c149d7685500300a8cd601bbc8ff6fbcc5",
+        "tests": 1
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:auth-seam --test-name-pattern C3",
+        "exit": 0,
+        "at": "2026-10-09T21:06:52Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C3.log",
+        "evidence_sha256": "63f814e45742d68c3d8a7285ee1735d6c2394ce90efc3b04d880c4c44c356a1d",
+        "tests": 3
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint:boundaries",
+        "exit": 0,
+        "at": "2026-10-09T21:06:54Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C4.log",
+        "evidence_sha256": "ab2536a9d333ef82c6e0c86d5970b26d210e2c420c6b3796a1995b919cd4696a"
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "manual",
+      "run": {
+        "command": "yarn contract:record MIG-7 C5 --evidence specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C5-walk.md --verdict deferred",
+        "exit": 0,
+        "at": "2026-10-09T21:06:47Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C5-walk.md",
+        "evidence_sha256": "b07337ba0ee3583c411a1e766dba726adf4dd3744cdc6b2ed6341b26c5cb7829",
+        "deferred": true
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:auth-seam --test-name-pattern C6",
+        "exit": 0,
+        "at": "2026-10-09T21:07:02Z",
+        "head": "f06b564c2f65ec07eb8180effd53a2349eab3511",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/evidence/C6.log",
+        "evidence_sha256": "452bbd3f7a1bc36fd6394d17ff01595f722c4224a319440bea2b6579f7f14aa1",
+        "tests": 1
+      }
+    },
+    "review:mason": {
+      "status": "PASS",
+      "evidence": "manual",
+      "run": {
+        "command": "yarn review:run mason MIG-7",
+        "exit": 0,
+        "at": "2026-10-09T20:57:14Z",
+        "head": "492020f05e496b60ccd785fbdb0d224f91b60ddc",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/review-mason.md",
+        "evidence_sha256": "47382dffec615ded378ebba2c968b21025e107fa6f940ab1648ad3361ea7dab5",
+        "contract_sha256": "3306af12f9425e00fbeaf95c7e34ec3acd69a13d6d7215cd705edfc311435845",
+        "criteria_sha256": "5236c5e00f71703afc98e3a77653d2c136b889ebd6f531bb3e226d4d8541993b",
+        "as_built_sha256": "5dcd89391703de71a037b348b4957e510a1920ff05289785004060f00dfe1d97",
+        "runner": "claude 2.1.295 (Claude Code) (role docs/roles/engineering/mason-cto-principal-dev.md; tools Read,Grep,Glob)",
+        "tokens_input": 130,
+        "tokens_cache_read": 624966,
+        "tokens_cache_write": 201321,
+        "tokens_output": 11753,
+        "seconds": 170.3
+      },
+      "runs": 1
+    },
+    "review:warden": {
+      "status": "PASS",
+      "evidence": "manual",
+      "run": {
+        "command": "yarn review:run warden MIG-7",
+        "exit": 0,
+        "at": "2026-10-09T21:00:14Z",
+        "head": "7588ddf3a2609bbfedd05135d0693a072bef21ac",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-007-auth-sdk-seam/review-warden.md",
+        "evidence_sha256": "500d5bb8400161f11b46b4143ce4d19a10e68fa6b4deaa69bccdd712fca584b5",
+        "contract_sha256": "3306af12f9425e00fbeaf95c7e34ec3acd69a13d6d7215cd705edfc311435845",
+        "criteria_sha256": "5236c5e00f71703afc98e3a77653d2c136b889ebd6f531bb3e226d4d8541993b",
+        "as_built_sha256": "5dcd89391703de71a037b348b4957e510a1920ff05289785004060f00dfe1d97",
+        "runner": "claude 2.1.295 (Claude Code) (role docs/roles/engineering/warden-security-privacy-engineer.md; tools Read,Grep,Glob)",
+        "tokens_input": 98,
+        "tokens_cache_read": 582096,
+        "tokens_cache_write": 85201,
+        "tokens_output": 11971,
+        "seconds": 159.8
+      },
+      "runs": 1
+    }
+  },
+  "built_at": "2026-10-09T20:56:20Z",
+  "cost": {
+    "at": "2026-10-09T21:05:38Z",
+    "calls": 140,
+    "weighted": 3705112,
+    "tokens_input": 280,
+    "tokens_cache_read": 29263535,
+    "tokens_cache_write": 256759,
+    "tokens_output": 91506,
+    "by_category": {
+      "build": {
+        "calls": 84,
+        "weighted": 2185772
+      },
+      "proofs": {
+        "calls": 20,
+        "weighted": 605248
+      },
+      "captures": {
+        "calls": 7,
+        "weighted": 181092
+      },
+      "reviews": {
+        "calls": 7,
+        "weighted": 168119
+      },
+      "status": {
+        "calls": 3,
+        "weighted": 58586
+      },
+      "git": {
+        "calls": 15,
+        "weighted": 385671
+      },
+      "re-reading": {
+        "calls": 2,
+        "weighted": 54909
+      },
+      "other": {
+        "calls": 2,
+        "weighted": 65716
+      }
+    },
+    "context_last_call": 301038,
+    "threads": 1,
+    "headless_runs": 2,
+    "headless_weighted": 597707
+  },
+  "updated_at": "2026-10-09T21:07:02Z"
+}

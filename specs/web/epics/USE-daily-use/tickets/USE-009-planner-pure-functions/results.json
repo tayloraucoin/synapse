@@ -1,0 +1,98 @@
+{
+  "id": "USE-9",
+  "criteria_sha256": "0e645cf5375c4cf655978667d5a90867984b6ed0cf5c1213c871375718c09891",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C1.log",
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C2.log",
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C3.log",
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C4.log",
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C5.log",
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:40:34Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C6.log",
+        "evidence_sha256": "0b2b42d92f29339230beba10d9ab21c20ecade03c484d6e5419aa1c50cd484ac",
+        "tests": 32
+      }
+    },
+    "C7": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:40:52Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-009-planner-pure-functions/evidence/C7.log",
+        "evidence_sha256": "da0424e71219860f84e57c28cdd4af9890dc0c97b8792b4c1e760aa38235ed62"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:50:24Z",
+  "updated_at": "2026-10-18T19:40:53Z"
+}

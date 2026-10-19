@@ -1,0 +1,140 @@
+{
+  "kind": "calendar#events",
+  "etag": "\"p32c9vqk1u2ofg0o\"",
+  "summary": "taylor@example.com",
+  "description": "",
+  "updated": "2026-10-16T18:02:11.412Z",
+  "timeZone": "America/Los_Angeles",
+  "accessRole": "owner",
+  "defaultReminders": [{ "method": "popup", "minutes": 10 }],
+  "items": [
+    {
+      "kind": "calendar#event",
+      "etag": "\"3456789012345000\"",
+      "id": "standup_20261019T173000Z",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=c3RhbmR1cA",
+      "created": "2026-09-01T16:00:00.000Z",
+      "updated": "2026-10-10T16:00:00.000Z",
+      "summary": "Standup",
+      "creator": { "email": "lead@example.com" },
+      "organizer": { "email": "lead@example.com" },
+      "start": {
+        "dateTime": "2026-10-19T10:30:00-07:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "end": {
+        "dateTime": "2026-10-19T11:00:00-07:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "recurringEventId": "standup",
+      "originalStartTime": {
+        "dateTime": "2026-10-19T10:30:00-07:00",
+        "timeZone": "America/Los_Angeles"
+      },
+      "iCalUID": "standup@google.com",
+      "sequence": 0,
+      "attendees": [
+        {
+          "email": "taylor@example.com",
+          "self": true,
+          "responseStatus": "accepted"
+        }
+      ],
+      "attendeesOmitted": true,
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "id": "coffee-ana",
+      "status": "confirmed",
+      "summary": "Coffee with Ana",
+      "organizer": { "email": "ana@example.com" },
+      "start": { "dateTime": "2026-10-19T11:00:00-07:00" },
+      "end": { "dateTime": "2026-10-19T11:30:00-07:00" },
+      "attendees": [
+        {
+          "email": "taylor@example.com",
+          "self": true,
+          "responseStatus": "tentative"
+        }
+      ],
+      "attendeesOmitted": true,
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "id": "design-review",
+      "status": "confirmed",
+      "summary": "Design review",
+      "organizer": { "email": "studio@example.com" },
+      "start": { "dateTime": "2026-10-19T14:00:00-07:00" },
+      "end": { "dateTime": "2026-10-19T15:00:00-07:00" },
+      "attendees": [
+        {
+          "email": "taylor@example.com",
+          "self": true,
+          "responseStatus": "needsAction"
+        }
+      ],
+      "attendeesOmitted": true,
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "id": "vendor-call",
+      "status": "confirmed",
+      "summary": "Vendor call",
+      "organizer": { "email": "vendor@example.com" },
+      "start": { "dateTime": "2026-10-19T11:30:00-07:00" },
+      "end": { "dateTime": "2026-10-19T12:00:00-07:00" },
+      "attendees": [
+        {
+          "email": "taylor@example.com",
+          "self": true,
+          "responseStatus": "declined"
+        }
+      ],
+      "attendeesOmitted": true,
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "id": "moved-1on1",
+      "status": "cancelled",
+      "recurringEventId": "oneonone",
+      "originalStartTime": { "dateTime": "2026-10-20T09:00:00-07:00" }
+    },
+    {
+      "kind": "calendar#event",
+      "id": "dentist",
+      "status": "confirmed",
+      "summary": "Dentist",
+      "creator": { "email": "taylor@example.com", "self": true },
+      "organizer": { "email": "taylor@example.com", "self": true },
+      "start": { "dateTime": "2026-10-20T16:00:00-07:00" },
+      "end": { "dateTime": "2026-10-20T17:00:00-07:00" },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "id": "offsite",
+      "status": "confirmed",
+      "summary": "Offsite",
+      "organizer": { "email": "taylor@example.com", "self": true },
+      "start": { "date": "2026-10-22" },
+      "end": { "date": "2026-10-24" },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "id": "office-wfh",
+      "status": "confirmed",
+      "summary": "Home",
+      "start": { "date": "2026-10-21" },
+      "end": { "date": "2026-10-22" },
+      "eventType": "workingLocation",
+      "workingLocationProperties": { "type": "homeOffice", "homeOffice": {} }
+    }
+  ]
+}

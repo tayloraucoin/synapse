@@ -1,0 +1,47 @@
+{
+  "id": "USE-58",
+  "criteria_sha256": "fb79c0d8d03341565b6751e90c68e47500ef0012e7741a9bd3bc811c71f58145",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:08:02Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-058-today-strip-day-column/evidence/C4.log",
+        "evidence_sha256": "64093053b395cfe010d2ef0bd94110ad1295e3eb52d679620ec2a5a325d7ae61"
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:08:04Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-058-today-strip-day-column/evidence/C5.log",
+        "evidence_sha256": "bfe44987de17c8abeb3e09b0104fb49c240c839b98624d50387cba8bae344edf"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:57:59Z",
+  "updated_at": "2026-10-18T20:08:04Z"
+}

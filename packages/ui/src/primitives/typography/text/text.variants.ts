@@ -68,9 +68,10 @@ export function inferVariantFromElement(tag: string): TextVariant | undefined {
  * SIZES — canonical CSS-variable syntax, `text-(length:--fs-body)`, never
  * `text-[length:var(--fs-body)]`.
  *
- * tone="muted" is neutral-400, which passes AA only at large sizes — official
- * spec §9.3 says "muted text (large only)". Use it on `row-title` and up, or
- * for non-essential text with an accessible name elsewhere.
+ * Sizes follow the brand kit's ramp (WEB-1): `heading` is the kit's title,
+ * `row-title` its heading, `secondary` its label; the two `review-*` variants
+ * are Newsreader and belong to Review screens only. Every tone holds 4.5:1 on
+ * background and surface in both themes (kit contrast.md).
  */
 export const textVariants = cva("m-0", {
   variants: {
@@ -82,25 +83,25 @@ export const textVariants = cva("m-0", {
       "row-title":
         "font-sans font-medium text-(length:--fs-row-title) leading-(--lh-row-title)",
       heading:
-        "font-sans font-semibold text-(length:--fs-heading) leading-(--lh-heading)",
+        "font-sans font-semibold text-(length:--fs-title) leading-(--lh-title) tracking-(--ls-title)",
       "review-headline":
-        "font-serif text-(length:--fs-review-headline) leading-(--lh-review-headline) wide:text-(length:--fs-review-headline-wide)",
+        "font-serif font-medium text-(length:--fs-review-title) leading-(--lh-review-title)",
       "review-sentence":
-        "font-serif text-(length:--fs-body) leading-(--lh-body)",
+        "font-serif text-(length:--fs-review-body) leading-(--lh-review-body)",
     },
     tone: {
-      /** neutral-800 light / neutral-100 dark — primary text. */
-      ink: "text-ink",
-      /** neutral-600 / neutral-200 — body copy on paper. */
-      body: "text-text-body",
-      /** neutral-500 / neutral-300 — secondary text. */
-      secondary: "text-text-secondary",
-      /** neutral-400 both themes — large text only (§9.3). */
-      muted: "text-text-muted",
-      /** accent-600 / accent-300 — links and the accent word beside a marker. */
-      accent: "text-accent-text",
-      /** violet-600 / violet-300 — off-schedule, and only off-schedule (§9.3). */
-      violet: "text-violet-text",
+      /** foreground — body text and headings (kit role). */
+      ink: "text-foreground",
+      /** foreground — kept as a separate tone name for older callers. */
+      body: "text-foreground",
+      /** muted-foreground — times, counts, reasons, helper copy. */
+      secondary: "text-muted-foreground",
+      /** muted-foreground — the kit has one secondary text role. */
+      muted: "text-muted-foreground",
+      /** link — links and the few words in the brand colour; never brand-500. */
+      accent: "text-link",
+      /** off-schedule-text — off schedule, and only off schedule. */
+      violet: "text-off-schedule-text",
     },
     weight: {
       400: "font-normal",

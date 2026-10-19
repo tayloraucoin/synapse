@@ -15,7 +15,7 @@ import { EllipsesMenu } from "./ellipses-menu";
 const meta: Meta<typeof EllipsesMenu> = {
   title: "Composed/Control/EllipsesMenu",
   component: EllipsesMenu,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

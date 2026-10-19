@@ -129,7 +129,7 @@ function Playground({
   };
 
   return (
-    <div className="flex gap-(--space-6)">
+    <div className="flex gap-(--space-8)">
       <DragLayer
         pxPerHour={PX_PER_HOUR}
         axisStartMin={AXIS_START}

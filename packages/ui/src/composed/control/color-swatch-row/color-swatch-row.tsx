@@ -26,14 +26,14 @@ import { Text } from "../../../primitives/typography/text";
 
 /** Static so Tailwind's scanner emits all eight — see CategoryChip. */
 const SWATCH: Record<CategoryKey, string> = {
-  leaf: "bg-cat-leaf-500",
-  sky: "bg-cat-sky-500",
-  clay: "bg-cat-clay-500",
-  rose: "bg-cat-rose-500",
-  amber: "bg-cat-amber-500",
-  slate: "bg-cat-slate-500",
-  plum: "bg-cat-plum-500",
-  moss: "bg-cat-moss-500",
+  leaf: "bg-category-leaf-dot",
+  sky: "bg-category-sky-dot",
+  clay: "bg-category-clay-dot",
+  rose: "bg-category-rose-dot",
+  amber: "bg-category-amber-dot",
+  slate: "bg-category-slate-dot",
+  plum: "bg-category-plum-dot",
+  moss: "bg-category-moss-dot",
 };
 
 const KEYS = Object.keys(SWATCH) as CategoryKey[];

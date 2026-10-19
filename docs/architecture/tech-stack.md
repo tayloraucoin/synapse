@@ -21,6 +21,7 @@ resolver, and the privacy grammar — never the plumbing.
 | Turborepo | **2.10.12** | `globalEnv` is load-bearing: an undeclared variable fails the turbo lint. |
 | ESLint | **9.39.5** flat config | Two passes: code quality per package, import boundaries from the root. |
 | Prettier | **3.7+** with `@ianvs/prettier-plugin-sort-imports` | |
+| Vitest | **5.0.3** (exact, per workspace with tests; MIG-5, 2026-10-09) | The workspace test runner: `yarn test` runs it through Turbo and an empty suite fails. Owner: Touchstone. A workspace takes it with its first test file. `node:test` stays for the root `tests/`, `tooling/` and `scripts/`, which run on bare Node. Expires if the React workspaces need a runner Vitest cannot host. Ruling: the ledger, MIG-5. |
 
 ## Framework and rendering
 
@@ -62,7 +63,7 @@ resolver, and the privacy grammar — never the plumbing.
 | Choice | Version | Notes |
 |---|---|---|
 | tRPC | **11.18.0** + `superjson` **2.2.6** | Two procedure tiers. `AppRouter` is exported as a type — that is why tRPC is here, for the future Expo client. |
-| TanStack Query | **5.102.8** | The server-data cache, and the only one. |
+| TanStack Query | **5.102.8** | The server-data cache, and the only one. Persisted on the device by `@tanstack/react-query-persist-client` and `@tanstack/query-async-storage-persister` **5.102.8** (matched to the core) over `idb-keyval` **6.3.0** (USE-106). |
 | React Hook Form + Zod | **7.87.0** / **zod 3.25.76** | Zod stays on **v3**: `@hookform/resolvers` and `@t3-oss/env-nextjs` are validated against it. |
 | Zustand | **5.0.15** | Declared, with **no store on disk**. See `apps/web/lib/stores/README.md` for the rule and the one sanctioned escalation. |
 
@@ -87,9 +88,18 @@ resolver, and the privacy grammar — never the plumbing.
   §8.5 rules out the notifications that would feed it. A crash reporter is a
   later decision, and whatever is chosen must never receive item titles, notes,
   or reasons.
-- **No tests — yet, and deliberately.** Tests are a finalization pass after
-  human QA, not a slice obligation. Verification during a slice is
-  `yarn lint && yarn lint:boundaries && yarn check-types && yarn build`, plus
-  the ticket's own observable criteria.
-- **No offline caching.** The service worker pushes and caches nothing; Phase 1
-  blocks writes offline with the standard line (cross-cutting §6.1).
+- **Tests arrive with each feature ticket** (MIG-5, 2026-10-09, superseding
+  "no tests yet"). Vitest per workspace, reached by `yarn test` through Turbo;
+  a criterion's evidence type says when a test is owed
+  (`.claude/rules/testing.md`). Coverage thresholds wait for a measurement.
+- **Offline data and an offline shell** (USE-106 and USE-107, 2026-10-17,
+  amending "no offline caching"). On the live source TanStack's cache and its
+  paused writes persist to IndexedDB (`apps/web/lib/offline/`): the last-read
+  day shows offline, and the clock, work and planner writes made offline
+  survive a reload and replay in order with their own times. A fixture
+  scenario is never persisted; sign-out empties it. The service worker
+  (`apps/web/public/sw.js`) keeps the shell: the signed-in tabs' documents
+  network first, `/_next/static/*` cache first, one cache per build
+  (`/sw.js?build=<id>`), never `/api/*`, an auth route or another origin;
+  sign-out deletes it too. Playwright **1.63.0** runs the journeys
+  (`yarn test:e2e` in `apps/web`).

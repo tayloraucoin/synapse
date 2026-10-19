@@ -1,0 +1,4 @@
+{
+  "expect": "fail",
+  "message": "is not a yarn script"
+}

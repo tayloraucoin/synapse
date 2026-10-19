@@ -25,7 +25,6 @@
 "use client";
 
 import * as React from "react";
-
 import { cn } from "../../../lib/cn";
 import { useIsWide } from "../../../lib/use-media-query";
 import {
@@ -118,7 +117,11 @@ export function ResponsiveSheet({
     header !== undefined ? (
       header
     ) : (
-      <div ref={titleRef} tabIndex={-1} className={cn("min-w-0 flex-1 outline-none")}>
+      <div
+        ref={titleRef}
+        tabIndex={-1}
+        className={cn("min-w-0 flex-1 outline-none")}
+      >
         <Text as="h2" variant="heading" className={classes?.title}>
           {title}
         </Text>
@@ -187,6 +190,22 @@ export function ResponsiveSheet({
     [initialFocus],
   );
 
+  /**
+   * A tap on a toast is not a tap outside: Undo for something done in the
+   * sheet keeps the sheet open (USE-22's delete with Undo).
+   */
+  const onInteractOutside = React.useCallback(
+    (event: { target: EventTarget | null; preventDefault: () => void }) => {
+      if (
+        event.target instanceof Element &&
+        event.target.closest("[data-sonner-toaster]") !== null
+      ) {
+        event.preventDefault();
+      }
+    },
+    [],
+  );
+
   const onCloseAutoFocus = React.useCallback(
     (event: Event) => {
       const target = returnFocusRef?.current;
@@ -207,6 +226,7 @@ export function ResponsiveSheet({
           showCloseButton={headerAction === undefined}
           onOpenAutoFocus={onOpenAutoFocus}
           onCloseAutoFocus={onCloseAutoFocus}
+          onInteractOutside={onInteractOutside}
           className={cn(
             "flex w-(--sheet-w) max-w-full flex-col gap-0 p-0",
             className,
@@ -227,6 +247,7 @@ export function ResponsiveSheet({
     <Drawer open={open} onOpenChange={requestChange}>
       <DrawerContent
         onCloseAutoFocus={onCloseAutoFocus}
+        onInteractOutside={onInteractOutside}
         className={cn(
           "flex flex-col gap-0 p-0",
           /*

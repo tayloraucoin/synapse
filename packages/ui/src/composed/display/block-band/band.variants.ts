@@ -46,15 +46,15 @@ const WASH: Record<BlockKind, string> = {
 
 /** The in-band label per kind — the 700-on-100 pairing (AA at caption size). */
 export const BLOCK_LABEL_HUE: Record<BlockKind, string> = {
-  orient: "text-block-orient-label",
-  morning: "text-block-morning-label",
-  training: "text-block-training-label",
-  prep: "text-block-prep-label",
-  work: "text-block-work-label",
-  break: "text-block-break-label",
-  transition: "text-block-transition-label",
-  activity: "text-block-activity-label",
-  wind_down: "text-block-wind-down-label",
+  orient: "text-block-label",
+  morning: "text-block-label",
+  training: "text-block-label",
+  prep: "text-block-label",
+  work: "text-block-label",
+  break: "text-block-label",
+  transition: "text-block-label",
+  activity: "text-block-label",
+  wind_down: "text-block-label",
 };
 
 export const bandVariants = cva(

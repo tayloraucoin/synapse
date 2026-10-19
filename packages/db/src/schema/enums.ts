@@ -13,13 +13,15 @@
  */
 import { pgEnum } from "drizzle-orm/pg-core";
 
+import { BLOCK_KIND_VALUES, NEW_BLOCK_KINDS } from "@syn/constants";
 import type {
-  BlockKind,
   CategoryKey,
   FixtureKind,
   ItemType,
   MissTier,
+  NewBlockKind,
   Scheduling,
+  StoredBlockKind,
   TimeMode,
   WorkoutLocation,
 } from "@syn/types";
@@ -75,21 +77,23 @@ export const itemTypeEnum = pgEnum(
  * `transition` is UX v1.3 R48, TD-25. The TypeScript side moved in DAY-3 to
  * keep the workspace building; the `ALTER TYPE … ADD VALUE` ships in
  * migration `0009` (DAY-4). Nothing writes the value before then.
+ *
+ * USE (USE-2): `wellness`, `life`, `todos` and `evening` join, by `ADD VALUE`
+ * in `0012`, which writes no row with them. The values are spelled once, in
+ * `BLOCK_KIND_VALUES` (`@syn/constants`), and checked against
+ * `StoredBlockKind`; `BlockKind` stays the old kinds the old UI maps.
  */
 export const blockKindEnum = pgEnum(
   "block_kind",
-  enumValues<BlockKind>()([
-    "orient",
-    "morning",
-    "training",
-    "prep",
-    "work",
-    "break",
-    "transition",
-    "activity",
-    "wind_down",
-  ]),
+  enumValues<StoredBlockKind>()(BLOCK_KIND_VALUES),
 );
+
+/*
+ * The New block sheet's seven (D-USE-34) are `block_kind` values with no enum
+ * of their own. This call proves `NEW_BLOCK_KINDS` and `NewBlockKind` agree;
+ * it does nothing at runtime.
+ */
+enumValues<NewBlockKind>()(NEW_BLOCK_KINDS);
 
 /** §3.5, §3.7. `template_slots`, `day_items`. */
 export const timeModeEnum = pgEnum(

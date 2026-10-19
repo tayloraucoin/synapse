@@ -139,7 +139,7 @@ export function SlotRow({
           aria-hidden="true"
           className="flex items-center gap-(--space-2) ps-(--space-4) py-(--space-1)"
         >
-          <span className="text-text-secondary w-(--space-6) shrink-0 text-(length:--fs-caption) tabular-nums">
+          <span className="text-text-secondary w-(--space-8) shrink-0 text-(length:--fs-caption) tabular-nums">
             {SLOT_ROW_COPY.gap(gap)}
           </span>
           <span className="border-hairline flex-1 border-t border-dashed" />

@@ -11,7 +11,123 @@
  */
 
 export { cn } from "./lib/cn";
-export { useIsWide, useMediaQuery } from "./lib/use-media-query";
+export { useIsSplit, useIsWide, useMediaQuery } from "./lib/use-media-query";
+
+/**
+ * The shell's nav icons (USE-4). Apps take lucide through here, one name per
+ * job, so the icon set stays this package's to swap.
+ */
+export {
+  AlignLeftIcon as ScheduleIcon,
+  CalendarDaysIcon as WeekIcon,
+  NotebookPenIcon as ReviewIcon,
+  SunIcon as TodayIcon,
+  type LucideIcon,
+} from "lucide-react";
+
+/** USE's row glyphs (USE-10), one name per job. */
+export {
+  CheckIcon as DoneIcon,
+  ChevronRightIcon as DisclosureIcon,
+  PauseIcon as StepAwayIcon,
+} from "lucide-react";
+/** Now's glyphs (USE-16): the grip on an undone row, the closed tray's chevron. */
+export {
+  ChevronDownIcon as ExpandIcon,
+  GripVerticalIcon as ReorderIcon,
+} from "lucide-react";
+/** A Now row's menu (USE-18): Swap, Edit, Move up, Move down, Not today, More. */
+export {
+  ArrowDownIcon as MoveDownIcon,
+  ArrowRightLeftIcon as SwapIcon,
+  ArrowUpIcon as MoveUpIcon,
+  CalendarX2Icon as NotTodayIcon,
+  EllipsisIcon as MoreIcon,
+  PencilIcon as EditIcon,
+} from "lucide-react";
+/** A Running row's round Pause and Resume (USE-24). */
+export { PauseIcon as HoldIcon, PlayIcon as ResumeIcon } from "lucide-react";
+/** The To-dos tray's glyphs (USE-19): a reminder's bell, a failed list's info, the open chevron. */
+export {
+  BellIcon as ReminderIcon,
+  ChevronUpIcon as CollapseIcon,
+  InfoIcon as NoticeIcon,
+} from "lucide-react";
+/** + Add's glyphs (USE-51): the button and its four choices. */
+export {
+  CalendarIcon as AddEventIcon,
+  CaptionsIcon as TaskToTierIcon,
+  LayersIcon as FromPoolIcon,
+  PlusIcon as AddIcon,
+  SquareCheckIcon as AddTodoIcon,
+} from "lucide-react";
+/** The pool sheet's search glyph (USE-79). */
+export { SearchIcon } from "lucide-react";
+/** Now's block forms (USE-17): the ··· menu's rows, its trigger, a meal, the add row. */
+export {
+  CalendarIcon as WholeDayIcon,
+  CircleCheckIcon as CompleteBlockIcon,
+  EllipsisIcon as BlockMenuIcon,
+  PencilIcon as EditBlockIcon,
+  UtensilsIcon as MealIcon,
+} from "lucide-react";
+/** Now at a block's end (USE-20): an empty Break's cup. */
+export { CoffeeIcon as BreakIcon } from "lucide-react";
+// USE-46: the New block sheet's icon tile with no icon set.
+export { SmileIcon as NoIconIcon } from "lucide-react";
+/** Block view's "Icon and colour" (USE-48): a dotted circle. */
+export { CircleDashedIcon as IconAndColourIcon } from "lucide-react";
+/** Block view's set-time mark and a checklist's Set a time (USE-49): a clock. */
+export { Clock3Icon as SetTimeIcon } from "lucide-react";
+/** The account's glyphs (USE-83): the avatar menu's rows and the install steps. */
+export {
+  CalendarRangeIcon as SetMyDaysIcon,
+  CompassIcon as OpenInSafariIcon,
+  EllipsisIcon as SafariMoreIcon,
+  EllipsisVerticalIcon as ChromeMenuIcon,
+  SettingsIcon,
+  ShareIcon as SafariShareIcon,
+  SquarePlusIcon as AddToHomeScreenIcon,
+  TvMinimalPlayIcon as MealTopicsIcon,
+  UserIcon as ProfileIcon,
+  XIcon as CloseIcon,
+} from "lucide-react";
+/** The Item sheet's ··· (USE-64): Move to…. */
+export { ArrowRightIcon as MoveToIcon } from "lucide-react";
+/** Set my days' + menu (USE-39): Block, Transition, From a saved block; the install offer's phone. */
+export {
+  ListIcon as SavedBlockIcon,
+  MinusIcon as NewTransitionIcon,
+  SmartphoneIcon as HomeScreenOfferIcon,
+  SquareIcon as NewBlockIcon,
+} from "lucide-react";
+/** Set my days' ··· (USE-42): Copy from… and Reset to usual. */
+export {
+  CopyIcon as CopyFromIcon,
+  RotateCcwIcon as ResetToUsualIcon,
+} from "lucide-react";
+/** Now's system states (USE-21): the offline line's cloud. */
+export { CloudOffIcon as OfflineIcon } from "lucide-react";
+/** The Profile sheet's glyphs (USE-84): the crop step's back, the not-saved line. */
+export {
+  ChevronLeftIcon as BackIcon,
+  CircleAlertIcon as NotSavedIcon,
+} from "lucide-react";
+/** The To-do sheet's reminder lines (USE-28): not installed, notifications off. */
+export {
+  BellOffIcon as NotificationsOffIcon,
+  SmartphoneIcon as InstallNeededIcon,
+} from "lucide-react";
+/** The To-do sheet's ··· (USE-29): Give it a day…, Delete to-do. */
+export {
+  CalendarIcon as GiveADayIcon,
+  Trash2Icon as DeleteIcon,
+} from "lucide-react";
+/** Move to (USE-69): Pick a day's calendar, Back to the pool's stacked layers. */
+export {
+  CalendarIcon as PickADayIcon,
+  LayersIcon as BackToPoolIcon,
+} from "lucide-react";
 export { usePrefersReducedMotion } from "./hooks/use-prefers-reduced-motion";
 export { useAppTheme } from "./hooks/use-theme";
 export { ThemeProvider } from "./providers/theme-provider";
@@ -25,22 +141,17 @@ export {
 } from "./composed/control/theme-control";
 
 export {
-  ACCENT_STEPS,
-  CATEGORY_AUTHORED_STEPS,
-  CATEGORY_DERIVED_STEPS,
   CATEGORY_KEYS,
-  CATEGORY_STEPS,
-  DESTRUCTIVE_TOKEN,
-  NEUTRAL_STEPS,
-  SEMANTIC_TOKENS,
-  VIOLET_STEPS,
-  accentToken,
-  categoryToken,
-  neutralToken,
-  violetToken,
-  type AccentStep,
-  type CategoryStep,
-  type NeutralStep,
+  LEGACY_ALIASES,
+  RAMPS,
+  RAMP_STEPS,
+  ROLE_TOKENS,
+  categoryChipToken,
+  categoryDotToken,
+  rampToken,
+  type RampName,
+  type RampStep,
+  type RoleToken,
 } from "./branding";
 
 export {
@@ -77,10 +188,7 @@ export {
   NativeSelectOptGroup,
   NativeSelectOption,
 } from "./primitives/control/native-select";
-export {
-  RadioGroup,
-  RadioGroupItem,
-} from "./primitives/control/radio-group";
+export { RadioGroup, RadioGroupItem } from "./primitives/control/radio-group";
 export {
   Select,
   SelectContent,
@@ -97,10 +205,7 @@ export {
   type SelectFieldProps,
   type SelectOption,
 } from "./primitives/control/select";
-export {
-  Switch,
-  type SwitchProps,
-} from "./primitives/control/switch";
+export { Switch, type SwitchProps } from "./primitives/control/switch";
 export {
   Tabs,
   TabsContent,
@@ -120,13 +225,11 @@ export {
 } from "./primitives/control/toggle-group";
 export {
   Avatar,
+  avatarInitial,
   type AvatarProps,
   type AvatarSize,
 } from "./primitives/display/avatar";
-export {
-  Badge,
-  badgeVariants,
-} from "./primitives/display/badge";
+export { Badge, badgeVariants } from "./primitives/display/badge";
 export {
   Empty,
   EmptyContent,
@@ -141,16 +244,9 @@ export {
   type HelperTextClasses,
   type HelperTextProps,
 } from "./primitives/display/helper-text";
-export {
-  Kbd,
-  KbdGroup,
-} from "./primitives/display/kbd";
-export {
-  Label,
-} from "./primitives/display/label";
-export {
-  Skeleton,
-} from "./primitives/display/skeleton";
+export { Kbd, KbdGroup } from "./primitives/display/kbd";
+export { Label } from "./primitives/display/label";
+export { Skeleton } from "./primitives/display/skeleton";
 export {
   AlertDialog,
   AlertDialogAction,
@@ -209,9 +305,7 @@ export {
   PopoverTitle,
   PopoverTrigger,
 } from "./primitives/feedback/popover";
-export {
-  Spinner,
-} from "./primitives/feedback/spinner";
+export { Spinner } from "./primitives/feedback/spinner";
 export {
   Toaster,
   toast,
@@ -245,9 +339,7 @@ export {
   DrawerTitle,
   DrawerTrigger,
 } from "./primitives/layout/drawer";
-export {
-  Separator,
-} from "./primitives/layout/separator";
+export { Separator } from "./primitives/layout/separator";
 export {
   Card,
   CardAction,
@@ -444,8 +536,15 @@ export {
   type ScheduleAxisProps,
 } from "./composed/display/schedule-axis";
 export {
+  BULLET_CELL_PX,
+  BULLET_GAP_X_PX,
+  BULLET_GAP_Y_PX,
+  BULLET_LINE_PX,
   ScheduleBlock,
+  ScheduleBullets,
   scheduleBlockVariants,
+  type ScheduleBullet,
+  type ScheduleBulletsProps,
   type ScheduleBlockProps,
   type ScheduleBlockSize,
   type ScheduleBlockVariants,
@@ -474,9 +573,16 @@ export {
   type TemplateUsageRowProps,
 } from "./composed/display/template-usage-row";
 export {
+  CountdownFace,
+  type CountdownFaceProps,
+  type CountdownOverLevel,
   TimerDisplay,
   type TimerDisplayProps,
 } from "./composed/display/timer-display";
+export {
+  ProgressRing,
+  type ProgressRingProps,
+} from "./composed/display/progress-ring";
 export {
   ARCHIVED_SECTION_COPY,
   ArchivedSection,
@@ -490,6 +596,7 @@ export {
   GroupHeading,
   type GroupHeadingProps,
 } from "./composed/display/group-heading";
+export { IconTile, type IconTileProps } from "./composed/display/icon-tile";
 export {
   CURATED_GLYPHS,
   ItemIcon,
@@ -525,6 +632,11 @@ export {
   type PassageCarouselProps,
   type PassageSlide,
 } from "./composed/display/passage-carousel";
+export {
+  PASSAGE_READER_COPY,
+  PassageReader,
+  type PassageReaderProps,
+} from "./composed/display/passage-reader";
 export {
   SelectRow,
   SelectRowList,
@@ -575,10 +687,37 @@ export {
   TrustLine,
   type TrustLineProps,
 } from "./composed/display/trust-line";
+export {
+  SynapseMark,
+  type SynapseMarkProps,
+} from "./composed/display/synapse-mark";
 
 /* ---- composed: Workflow's board (Workflow UX v0.1 §9, FLO-4) ---- */
-export { FiringMark, type FiringMarkProps } from "./composed/display/firing-mark";
-export { FiringToggle, type FiringToggleProps } from "./composed/control/firing-toggle";
+export {
+  FiringMark,
+  type FiringMarkProps,
+} from "./composed/display/firing-mark";
+export {
+  FiringToggle,
+  type FiringToggleProps,
+} from "./composed/control/firing-toggle";
+
+/* ---- composed: USE's shared day parts (USE-10) ---- */
+export {
+  HueSquare,
+  type HueSquareProps,
+  type SquareHue,
+} from "./composed/display/hue-square";
+export {
+  LinearLine,
+  type LinearLineProps,
+} from "./composed/display/linear-line";
+export {
+  LinearStatusGlyph,
+  LinearStatusShape,
+  type LinearStatusShapeProps,
+  type LinearStatusType,
+} from "./composed/display/linear-status-shape";
 export {
   TaskRow,
   TaskRowSkeleton,
@@ -602,7 +741,10 @@ export {
   type NextStripProps,
   type NextStripValue,
 } from "./composed/display/next-strip";
-export { InlineAddRow, type InlineAddRowProps } from "./composed/control/inline-add-row";
+export {
+  InlineAddRow,
+  type InlineAddRowProps,
+} from "./composed/control/inline-add-row";
 export {
   BOARD_COPY,
   Board,
@@ -652,6 +794,17 @@ export {
   type AppHeaderClasses,
   type AppHeaderProps,
 } from "./composed/navigation/app-header";
+export {
+  Breadcrumb,
+  type BreadcrumbProps,
+} from "./composed/navigation/breadcrumb";
+/** Review the day (USE-31): Orient's locked line. */
+export { LockIcon as LockedIcon } from "lucide-react";
+/* Schedule's empty day (USE-27; D-USE-68): a checklist, or blocks. */
+export {
+  ListChecksIcon as ChecklistIcon,
+  LayoutPanelTopIcon as PlanBlocksIcon,
+} from "lucide-react";
 
 /* ---- composed: feedback ---- */
 export {
@@ -759,6 +912,26 @@ export {
   type ColorSwatchValue,
 } from "./composed/control/color-swatch-row";
 export {
+  BAD_HEX_WORDS,
+  ColourPopover,
+  displayHex,
+  parseHex,
+  readableOnPaper,
+  type ColourPopoverProps,
+} from "./composed/control/colour-popover";
+export {
+  COLOUR_WORDS,
+  ICON_PICKER_WORDS,
+  IconPicker,
+  type ColourPanel,
+  type IconPick,
+  type IconPickerInitial,
+  type IconPickerProps,
+  type IconPickerTab,
+  type IconSuggestCandidate,
+  type SavedColour,
+} from "./composed/control/icon-picker";
+export {
   CountStepper,
   type CountStepperProps,
 } from "./composed/control/count-stepper";
@@ -767,6 +940,11 @@ export {
   type CuratedIconGridProps,
 } from "./composed/control/curated-icon-grid";
 export { DateField, type DateFieldProps } from "./composed/control/date-field";
+export {
+  MONTH_GRID_WORDS,
+  MonthGrid,
+  type MonthGridProps,
+} from "./composed/control/month-grid";
 export {
   EmojiPicker,
   type EmojiPickerProps,
@@ -778,6 +956,8 @@ export {
 } from "./composed/control/ellipses-menu";
 export {
   ImageCropper,
+  type ImageCropperCopy,
+  type ImageCropperHandle,
   type ImageCropperProps,
 } from "./composed/control/image-cropper";
 export {
@@ -890,3 +1070,24 @@ export {
   type WeekdayChipsProps,
   type WeekdayIndexing,
 } from "./composed/control/weekday-chips";
+/** A meeting inside the Work block (USE-62): the band and the lifted meeting. */
+export { CalendarIcon as MeetingIcon } from "lucide-react";
+
+/** A work item's ··· › Open in Linear (USE-65). */
+export { ExternalLinkIcon as OpenInLinearIcon } from "lucide-react";
+
+/** A linked item's ··· › Unlink from Linear (USE-66). */
+export { Link2OffIcon as UnlinkIcon } from "lucide-react";
+
+/** A session of a spread task, beside its "2 of 3" (USE-81, D-USE-102). */
+export { LinkIcon as SessionIcon } from "lucide-react";
+
+/* ---- composed: carry a pool row onto a day (USE-75) ---- */
+export {
+  DragToPlace,
+  useDragSource,
+  useDropTarget,
+  type DragSourceBinding,
+  type DragToPlaceProps,
+  type DropTargetBinding,
+} from "./composed/control/drag-to-place";

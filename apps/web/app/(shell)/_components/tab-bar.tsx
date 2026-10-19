@@ -1,71 +1,59 @@
 /**
- * TabBar — compact navigation (v2 handoff §5.2).
+ * TabBar — the phone's tabs, below 1024 (D-USE-74): Now, Schedule, Review.
  *
- * The route-aware leaf over the `bottom-nav` primitive. CC's shape: a
- * `NAV_ITEMS` const and an `isActive(pathname, href)`.
+ * Links with `aria-current`, not a `tablist`: these are routes, and a tablist
+ * would promise arrow-key switching. The current tab is ink, its icon drawn
+ * heavier and its word in semibold, so it reads without colour.
  *
- * LINKS WITH `aria-current`, NOT A `tablist` (§5.2's Vesper call). The
- * cross-cutting document says `tablist` on compact; these are routes, and a
- * `tablist` would promise arrow-key switching the app does not implement.
- * `aria-current="page"` is the honest semantic and what CC ships. Cost if
- * wrong: one attribute.
- *
- * ACTIVE IS A PREFIX MATCH, not equality: `/day/2026-09-04` and
- * `/today` are both the List tab, and a person who navigated to yesterday
- * should still see where they are.
+ * Re-tapping the active tab navigates nowhere; the screen scrolls to now
+ * (USE-27; `_global/navigation.md`).
  */
 "use client";
 
-import { BottomNav, BottomNavItem, BottomNavList } from "@syn/ui";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import * as React from "react";
+import { BottomNav, BottomNavItem, BottomNavList } from "@syn/ui";
+import { requestScrollToNow } from "@/lib/hooks/use-scroll-to-now";
+import { SHELL_COPY as COPY } from "./copy";
+import { tabForPath, tabItems } from "./nav-items";
+import { useBlockViewFrom } from "./use-block-view-from";
 
-import { dispatchScrollToNow } from "@/lib/hooks/use-scroll-memory";
-
-import { NAV_ITEMS, REVIEW_DOT_LABEL, tabForPath } from "./nav-items";
-
-export interface TabBarProps {
-  reviewHasPending: boolean;
-  /** Under a sheet's scrim: dimmed, inert, and hidden from assistive tech. */
-  dimmed?: boolean;
-}
-
-export function TabBar({ reviewHasPending, dimmed = false }: TabBarProps) {
-  const pathname = usePathname();
-  const active = tabForPath(pathname);
+export function TabBar({ firstTab = "Now" }: { firstTab?: "Now" | "List" }) {
+  const active = tabForPath(usePathname(), null, useBlockViewFrom());
 
   return (
-    <BottomNav aria-label="Main">
+    <BottomNav aria-label={COPY.tabsLabel}>
       <BottomNavList>
-        {NAV_ITEMS.map((item) => (
-          <BottomNavItem
-            key={item.tab}
-            asChild
-            active={item.tab === active}
-            dimmed={dimmed}
-            dot={item.tab === "review" && reviewHasPending}
-            dotLabel={REVIEW_DOT_LABEL}
-          >
-            {/*
-             * Re-tapping the tab you are already on scrolls to now rather than
-             * navigating (Epic 2 SH-00). Navigating would rebuild the page and
-             * throw away the scroll position the person is standing in — and
-             * on a day route it would also move them off the day they were
-             * looking at, which is not what tapping "List" means.
-             */}
-            <Link
-              href={item.href}
-              onClick={(event) => {
-                if (item.tab !== active) return;
-                event.preventDefault();
-                dispatchScrollToNow();
-              }}
+        {tabItems(firstTab).map((item) => {
+          const current = item.tab === active;
+          const Icon = item.icon;
+          return (
+            <BottomNavItem
+              key={item.tab}
+              asChild
+              active={current}
+              className={current ? "font-semibold" : undefined}
             >
-              {item.label}
-            </Link>
-          </BottomNavItem>
-        ))}
+              <Link
+                href={item.href}
+                onClick={(event) => {
+                  if (!current) return;
+                  event.preventDefault();
+                  requestScrollToNow();
+                }}
+              >
+                <span className="flex flex-col items-center gap-(--space-1)">
+                  <Icon
+                    aria-hidden="true"
+                    className="size-5"
+                    strokeWidth={current ? 2.5 : 1.75}
+                  />
+                  {item.label}
+                </span>
+              </Link>
+            </BottomNavItem>
+          );
+        })}
       </BottomNavList>
     </BottomNav>
   );

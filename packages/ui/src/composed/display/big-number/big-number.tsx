@@ -34,10 +34,10 @@ export function BigNumber({ value, size, className }: BigNumberProps) {
   return (
     <p
       className={cn(
-        "text-ink font-serif leading-(--lh-review-headline) tabular-nums",
+        "text-ink font-serif leading-(--lh-review-title) font-medium tabular-nums",
         size === "week"
-          ? "text-[length:var(--fs-review-headline)] wide:text-[length:var(--fs-review-headline-wide)]"
-          : "text-[length:var(--fs-review-headline)]",
+          ? "text-[length:var(--fs-review-title)]"
+          : "text-[length:var(--fs-review-title)]",
         className,
       )}
     >

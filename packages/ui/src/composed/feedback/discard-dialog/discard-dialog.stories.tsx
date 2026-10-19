@@ -20,7 +20,7 @@ export const Interactive: StoryObj = {
   render: function Render() {
     const [open, setOpen] = React.useState(false);
     return (
-      <div className="p-(--space-6)">
+      <div className="p-(--space-8)">
         <Button onClick={() => setOpen(true)}>Leave the form</Button>
         <DiscardDialog
           open={open}

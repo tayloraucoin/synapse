@@ -1,0 +1,77 @@
+{
+  "id": "USE-102",
+  "criteria_sha256": "5a3a03ce88880372c9ddea592418560db44e21f0313a29d86fd123bc399bae4b",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:11:17Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-102-linear-writes/evidence/C1.log",
+        "evidence_sha256": "dc8eb3c88ab10ec3c8f177603e5423adfbbb2db221f0fa21fb28496e196d1148",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:11:17Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-102-linear-writes/evidence/C2.log",
+        "evidence_sha256": "dc8eb3c88ab10ec3c8f177603e5423adfbbb2db221f0fa21fb28496e196d1148",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:11:17Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-102-linear-writes/evidence/C3.log",
+        "evidence_sha256": "dc8eb3c88ab10ec3c8f177603e5423adfbbb2db221f0fa21fb28496e196d1148",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:11:17Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-102-linear-writes/evidence/C4.log",
+        "evidence_sha256": "dc8eb3c88ab10ec3c8f177603e5423adfbbb2db221f0fa21fb28496e196d1148",
+        "tests": 32
+      }
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T23:11:35Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-102-linear-writes/evidence/C6.log",
+        "evidence_sha256": "c90c3e11c0333564bb668a6524091392586a5824803dc2dd52dec7dc367299ca"
+      }
+    }
+  },
+  "built_at": "2026-10-18T23:04:10Z",
+  "updated_at": "2026-10-18T23:11:35Z"
+}

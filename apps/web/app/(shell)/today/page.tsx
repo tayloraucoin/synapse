@@ -1,35 +1,42 @@
-import { getServerApi } from "@/lib/trpc/server";
+import { Suspense } from "react";
+import type { Metadata } from "next";
+import { DayEntryGate } from "../_components/day-entry-gate";
+import { TabHeader } from "../_components/tab-header";
+import { TODAY_COPY as COPY } from "./_components/copy";
+import { TodayDesk } from "./_components/desk/today-desk";
+import { TodayMain } from "./_components/desk/today-main";
+import { NowScreen } from "./_components/now/now-screen";
+import { NowTitle } from "./_components/now/now-title";
 
-import { TodayScreen } from "./_components/today-screen";
+export const metadata: Metadata = { title: COPY.title };
 
 /**
- * LS-01 — today, in one of two states (UX v1.1 R6, DYN-14).
+ * Today. Below 1024 it is Now (USE-16, USE-17), on fixtures through
+ * `useNow`, or the day's List before Ready, go; the
+ * desk's /today is the week strip over the main column and the day column
+ * (USE-58), the main column work's Today (USE-57), the push check (USE-1)
+ * under it; `?date=` opens another date there, planning. Inside a Work block
+ * Now is the same tiers (USE-57). The strip stands where the desk's header was, so the tab
+ * header is the phone's alone [ASSUMPTION: as drawn].
  *
- * THE DAY IS READ ON THE SERVER and handed to the client as `initialData`, so
- * the first paint is the real day rather than a skeleton that resolves a beat
- * later. Unconfirmed, the quick-pick is read the same way; the client screen
- * branches on `confirmedAt` and flips to the list when *Set the day* lands.
- *
- * WHICH DAY "TODAY" IS depends on the person's close time, so it comes from
- * `day.today` rather than from the server's calendar date. At 01:00 under a
- * 03:00 close, today is still yesterday's date — and this is the screen where
- * getting that wrong would show someone an empty list at the end of a long
- * evening.
+ * It is Now in the day's entry tree (USE-12): a day not yet oriented goes to
+ * Orient, one before Ready, go to Review the day, one before Start to the
+ * welcome.
  */
-export default async function TodayPage() {
-  const api = await getServerApi();
-  const { todayKey } = await api.day.today();
-  const day = await api.day.get({ date: todayKey });
-  const pick = day.confirmedAt === null ? await api.day.quickPick({ date: todayKey }) : null;
-  // UX v1.2 §5.3 (RUN-13): under *Build each morning* the pick opens expanded.
-  const me = pick === null ? null : await api.user.me();
-
+export default function TodayPage() {
   return (
-    <TodayScreen
-      dateKey={todayKey}
-      initialDay={day}
-      initialPick={pick}
-      pickExpanded={me?.morningMode === "build_each_morning"}
-    />
+    <DayEntryGate here="now">
+      <main id="main" className="flex flex-1 flex-col">
+        <div className="split:hidden">
+          <TabHeader title={<NowTitle />} />
+          <NowScreen />
+        </div>
+        <div className="hidden split:block">
+          <Suspense>
+            <TodayDesk main={<TodayMain />} />
+          </Suspense>
+        </div>
+      </main>
+    </DayEntryGate>
   );
 }

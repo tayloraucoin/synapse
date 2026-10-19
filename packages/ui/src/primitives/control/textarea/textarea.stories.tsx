@@ -14,7 +14,7 @@ type Story = StoryObj<typeof Textarea>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex max-w-sm flex-col gap-(--space-5) p-(--space-6)">
+    <div className="flex max-w-sm flex-col gap-(--space-6) p-(--space-8)">
       <Textarea label="Note" helperText="Optional." placeholder="" />
       <Textarea label="Note" autoGrow defaultValue="Grows with what is typed." />
       <Textarea label="What was it?" error="Say what it was, in a few words." />
@@ -24,16 +24,16 @@ export const Overview: Story = {
 };
 
 /**
- * The serif variant — UX v1.1 §5.2, §7.2: one row to start, Newsreader at
+ * The plain variant — UX v1.1 §5.2, §7.2: one row to start, Public Sans at
  * body size, a hairline underneath; grows with the words, then scrolls.
  */
-export const Serif: Story = {
+export const Plain: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="bg-paper flex max-w-(--content-text) flex-col gap-(--space-6) p-(--space-6)">
-      <Textarea variant="serif" label="Grateful for, this morning" placeholder="" />
+    <div className="bg-paper flex max-w-(--content-text) flex-col gap-(--space-8) p-(--space-8)">
+      <Textarea variant="plain" label="Grateful for, this morning" placeholder="" />
       <Textarea
-        variant="serif"
+        variant="plain"
         label="Tomorrow, as I see it"
         defaultValue={
           "Up at seven, the walk before the light goes.\nThe stand-up is short; the afternoon is the essay.\nPhone away at quarter past ten."

@@ -1,0 +1,63 @@
+{
+  "id": "USE-77",
+  "criteria_sha256": "ae893df4dfc2e72f1f67fe0255627dbbbbb82040d2023fa7850f87b65b7d80a3",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:13:12Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-077-spread-desk/evidence/C1.log",
+        "evidence_sha256": "0e5d5da65a440de5d72b91f64163bde55a82846868eb86922fcd0da3fb55941a",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:13:12Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-077-spread-desk/evidence/C2.log",
+        "evidence_sha256": "0e5d5da65a440de5d72b91f64163bde55a82846868eb86922fcd0da3fb55941a",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:13:27Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-077-spread-desk/evidence/C4.log",
+        "evidence_sha256": "c4575dc6591c29f5f1a71ca189e5eade91765ec5ee03a93bb12c1db1772ff706"
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:13:28Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-077-spread-desk/evidence/C5.log",
+        "evidence_sha256": "3ae9fda12c2734c2804d3d9a3b6bf9e55a22370f71d4e497ba01f5f9c13ac2e4"
+      }
+    }
+  },
+  "built_at": "2026-10-18T19:00:06Z",
+  "updated_at": "2026-10-18T20:13:29Z"
+}

@@ -10,10 +10,19 @@
  * touch delivery rows, never day content.
  */
 
-import type { User } from "@supabase/supabase-js";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { AuthContext, AuthContextRole } from "@syn/types";
 
 export type { AuthContext, AuthContextRole };
+
+/**
+ * The vendor's types under this module's names. Callers outside `@syn/auth`
+ * take the signed-in person and the client from here, never from
+ * `@supabase/*` (the boundaries lint holds it), so the vendor is named in one
+ * package.
+ */
+export type AuthUser = User;
+export type AuthClient = SupabaseClient;
 
 export type AppUserRole = Extract<AuthContextRole, "guest">;
 
@@ -22,7 +31,7 @@ export type AppUserRole = Extract<AuthContextRole, "guest">;
  * `@syn/db`'s `createRlsClient`.
  */
 export function buildAuthContext(
-  user: User,
+  user: AuthUser,
   appRole: AppUserRole = "guest",
 ): AuthContext {
   return {

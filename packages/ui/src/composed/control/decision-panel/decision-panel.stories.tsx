@@ -20,7 +20,7 @@ const meta: Meta<typeof DecisionPanel> = {
   title: "Composed/Control/DecisionPanel",
   component: DecisionPanel,
   parameters: { layout: "fullscreen" },
-  decorators: [(Story) => <div className="max-w-xl p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-xl p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

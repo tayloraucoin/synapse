@@ -11,7 +11,7 @@ import { SearchField } from "./search-field";
 const meta: Meta<typeof SearchField> = {
   title: "Composed/Control/SearchField",
   component: SearchField,
-  decorators: [(Story) => <div className="max-w-md p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-md p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

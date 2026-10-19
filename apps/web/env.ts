@@ -1,10 +1,10 @@
 /**
  * THE ONLY `process.env` READER IN THIS APP.
  *
- * Two exceptions exist and both are documented where they live:
- * `lib/clients/supabase/client.ts` reads canonical `NEXT_PUBLIC_*` names as
- * literals (Next cannot inline a dynamic lookup into a browser bundle), and
- * `lib/env/resolve-tier-env.ts` is this file's own helper.
+ * Two exceptions exist, named in the lint rule (packages/config/eslint/
+ * process-env.js) and in apps/web/AGENTS.md: `lib/clients/supabase/client.ts`
+ * and `lib/trpc/provider.tsx` read canonical `NEXT_PUBLIC_*` names as literals
+ * (Next cannot inline a dynamic lookup into a browser bundle).
  *
  * Tier selection: `DATABASE_ENVIRONMENT=local|staging|production`, **defaulting
  * to `local`** — a shell with nothing set must not reach production (INF-5).
@@ -52,6 +52,10 @@ const rawEnv = createEnv({
     SUPABASE_SECRET_KEY_STAGING: z.string().min(1).optional(),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
     SUPABASE_SECRET_KEY: z.string().min(1).optional(),
+    // The local Supabase stack's secret (WEB-2), read only when the local tier
+    // opts in with NEXT_PUBLIC_SUPABASE_URL_LOCAL.
+    SUPABASE_SERVICE_ROLE_KEY_LOCAL: z.string().min(1).optional(),
+    SUPABASE_SECRET_KEY_LOCAL: z.string().min(1).optional(),
 
     // Web Push (VAPID) — the private half. INF-9 sends with it.
     VAPID_PRIVATE_KEY: z.string().min(1).optional(),
@@ -60,6 +64,12 @@ const rawEnv = createEnv({
     // The scheduler route's bearer secret. Unset = the route answers 503 and
     // no scheduled notification is ever sent, which is the safe failure.
     CRON_SECRET: z.string().min(16).optional(),
+    // The journeys' local test account (USE-106): `yarn test:e2e` only.
+    E2E_EMAIL: z.string().email().optional(),
+    E2E_PASSWORD: z.string().min(1).optional(),
+    // The journeys' own build folder (USE-113), set by playwright.config.ts
+    // so their dev server runs beside another: Next locks one per folder.
+    E2E_DIST_DIR: z.string().min(1).optional(),
 
     // Google OAuth is configured in the Supabase dashboard, not by this app.
     // Declared so a deploy that sets them does not trip t3-env's unknown-key
@@ -74,6 +84,10 @@ const rawEnv = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+    // The local Supabase stack (WEB-2): setting the URL opts the local tier in.
+    NEXT_PUBLIC_SUPABASE_URL_LOCAL: z.string().url().optional(),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL: z.string().min(1).optional(),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL: z.string().min(1).optional(),
 
     // This app's public origin, per tier. The `local` value is ignored — see
     // resolveSiteUrl.
@@ -91,6 +105,8 @@ const rawEnv = createEnv({
     // the build date; never set by hand in an environment file.
     NEXT_PUBLIC_APP_VERSION: z.string().optional(),
     NEXT_PUBLIC_BUILD_DATE: z.string().optional(),
+    // The service worker's build (USE-107), stamped by next.config.ts.
+    NEXT_PUBLIC_BUILD_ID: z.string().optional(),
   },
   runtimeEnv: {
     DATABASE_ENVIRONMENT: process.env.DATABASE_ENVIRONMENT,
@@ -110,9 +126,14 @@ const rawEnv = createEnv({
     SUPABASE_SECRET_KEY_STAGING: process.env.SUPABASE_SECRET_KEY_STAGING,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+    SUPABASE_SERVICE_ROLE_KEY_LOCAL: process.env.SUPABASE_SERVICE_ROLE_KEY_LOCAL,
+    SUPABASE_SECRET_KEY_LOCAL: process.env.SUPABASE_SECRET_KEY_LOCAL,
     VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
     VAPID_SUBJECT: process.env.VAPID_SUBJECT,
     CRON_SECRET: process.env.CRON_SECRET,
+    E2E_EMAIL: process.env.E2E_EMAIL,
+    E2E_PASSWORD: process.env.E2E_PASSWORD,
+    E2E_DIST_DIR: process.env.E2E_DIST_DIR,
     GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID,
     GOOGLE_OAUTH_CLIENT_SECRET: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
     NEXT_PUBLIC_SUPABASE_URL_STAGING:
@@ -125,6 +146,11 @@ const rawEnv = createEnv({
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_SUPABASE_URL_LOCAL: process.env.NEXT_PUBLIC_SUPABASE_URL_LOCAL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL:
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL:
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL,
     NEXT_PUBLIC_SITE_URL_LOCAL: process.env.NEXT_PUBLIC_SITE_URL_LOCAL,
     NEXT_PUBLIC_SITE_URL_STAGING: process.env.NEXT_PUBLIC_SITE_URL_STAGING,
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
@@ -133,6 +159,7 @@ const rawEnv = createEnv({
       process.env.NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN,
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION,
     NEXT_PUBLIC_BUILD_DATE: process.env.NEXT_PUBLIC_BUILD_DATE,
+    NEXT_PUBLIC_BUILD_ID: process.env.NEXT_PUBLIC_BUILD_ID,
   },
   emptyStringAsUndefined: true,
   skipValidation: process.env.SKIP_ENV_VALIDATION === "true",
@@ -147,6 +174,7 @@ export const env = {
   vapidPrivateKey: rawEnv.VAPID_PRIVATE_KEY,
   vapidSubject: rawEnv.VAPID_SUBJECT,
   cronSecret: rawEnv.CRON_SECRET,
+  e2e: { email: rawEnv.E2E_EMAIL, password: rawEnv.E2E_PASSWORD },
 };
 
 export type Env = typeof env;

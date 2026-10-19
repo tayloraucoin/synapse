@@ -13,7 +13,7 @@ import { EmojiSlotButton } from "./emoji-slot-button";
 const meta: Meta<typeof EmojiSlotButton> = {
   title: "Composed/Control/EmojiSlotButton",
   component: EmojiSlotButton,
-  decorators: [(Story) => <div className="max-w-sm p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-sm p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

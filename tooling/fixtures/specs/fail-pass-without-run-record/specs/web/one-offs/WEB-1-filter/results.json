@@ -1,0 +1,22 @@
+{
+  "id": "WEB-1",
+  "criteria_sha256": "3e5599f1dcc65f399580c98f534ba989b325c12a6e76d10bd36892cd23b37efa",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    }
+  },
+  "updated_at": "2026-10-02T12:00:00Z"
+}

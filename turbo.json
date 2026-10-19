@@ -1,9 +1,5 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env.*local",
-    "**/.env"
-  ],
   "globalEnv": [
     "NODE_ENV",
     "SYN_LOG_DEBUG",
@@ -21,6 +17,14 @@
     "VAPID_PRIVATE_KEY",
     "VAPID_SUBJECT",
     "CRON_SECRET",
+    "E2E_EMAIL",
+    "E2E_PASSWORD",
+    "E2E_DIST_DIR",
+    "INTEGRATION_TOKEN_KEY",
+    "LINEAR_CLIENT_ID",
+    "GOOGLE_CALENDAR_CLIENT_ID",
+    "GOOGLE_CALENDAR_CLIENT_SECRET",
+    "UNDO_TOKEN_KEY",
     "SKIP_ENV_VALIDATION",
     "NEXT_PUBLIC_SITE_URL",
     "NEXT_PUBLIC_SITE_URL_LOCAL",
@@ -37,7 +41,15 @@
     "SUPABASE_SECRET_KEY_STAGING",
     "SUPABASE_SERVICE_ROLE_KEY",
     "SUPABASE_SERVICE_ROLE_KEY_STAGING",
+    "NEXT_PUBLIC_SUPABASE_URL_LOCAL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL",
+    "SUPABASE_SECRET_KEY_LOCAL",
+    "SUPABASE_SERVICE_ROLE_KEY_LOCAL",
     "NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN"
+  ],
+  "globalPassThroughEnv": [
+    "TMPDIR"
   ],
   "ui": "tui",
   "tasks": {
@@ -46,8 +58,7 @@
         "^build"
       ],
       "inputs": [
-        "$TURBO_DEFAULT$",
-        ".env*"
+        "$TURBO_DEFAULT$"
       ],
       "outputs": [
         ".next/**",

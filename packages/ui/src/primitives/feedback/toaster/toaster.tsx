@@ -22,9 +22,7 @@
 "use client";
 
 import { Toaster as Sonner, toast } from "sonner";
-
 import { UNDO_SHORT_MS } from "@syn/constants";
-
 import { cn } from "../../../lib/cn";
 
 export type ToasterProps = React.ComponentProps<typeof Sonner>;
@@ -51,9 +49,10 @@ function Toaster({ className, toastOptions, ...props }: ToasterProps) {
             "group toast",
             "rounded-(--radius)!",
             "border-0!",
-            "bg-neutral-800! text-neutral-50!",
-            "dark:bg-neutral-100! dark:text-neutral-900!",
-            "shadow-(--shadow-overlay)!",
+            "bg-primary! text-primary-foreground!",
+            // A modal sheet sets `pointer-events: none` on the body; Undo over
+            // a sheet must still be tappable (USE-22).
+            "pointer-events-auto!",
           ),
           title: cn(
             "group-[.toast]:font-sans",
@@ -68,7 +67,7 @@ function Toaster({ className, toastOptions, ...props }: ToasterProps) {
             "bg-transparent!",
             "font-sans! font-medium!",
             "text-(length:--fs-secondary)!",
-            "text-neutral-50! dark:text-neutral-900!",
+            "text-primary-foreground!",
             "underline underline-offset-4",
           ),
           ...toastOptions?.classNames,

@@ -167,6 +167,10 @@
       "types": "./src/composed/control/color-swatch-row/index.ts",
       "default": "./src/composed/control/color-swatch-row/index.ts"
     },
+    "./colour-popover": {
+      "types": "./src/composed/control/colour-popover/index.ts",
+      "default": "./src/composed/control/colour-popover/index.ts"
+    },
     "./count-stepper": {
       "types": "./src/composed/control/count-stepper/index.ts",
       "default": "./src/composed/control/count-stepper/index.ts"
@@ -179,9 +183,17 @@
       "types": "./src/composed/control/date-field/index.ts",
       "default": "./src/composed/control/date-field/index.ts"
     },
+    "./month-grid": {
+      "types": "./src/composed/control/month-grid/index.ts",
+      "default": "./src/composed/control/month-grid/index.ts"
+    },
     "./ellipses-menu": {
       "types": "./src/composed/control/ellipses-menu/index.ts",
       "default": "./src/composed/control/ellipses-menu/index.ts"
+    },
+    "./icon-picker": {
+      "types": "./src/composed/control/icon-picker/index.ts",
+      "default": "./src/composed/control/icon-picker/index.ts"
     },
     "./image-cropper": {
       "types": "./src/composed/control/image-cropper/index.ts",
@@ -271,6 +283,10 @@
       "types": "./src/composed/display/group-heading/index.ts",
       "default": "./src/composed/display/group-heading/index.ts"
     },
+    "./icon-tile": {
+      "types": "./src/composed/display/icon-tile/index.ts",
+      "default": "./src/composed/display/icon-tile/index.ts"
+    },
     "./item-icon": {
       "types": "./src/composed/display/item-icon/index.ts",
       "default": "./src/composed/display/item-icon/index.ts"
@@ -351,6 +367,10 @@
       "types": "./src/composed/navigation/app-header/index.ts",
       "default": "./src/composed/navigation/app-header/index.ts"
     },
+    "./breadcrumb": {
+      "types": "./src/composed/navigation/breadcrumb/index.ts",
+      "default": "./src/composed/navigation/breadcrumb/index.ts"
+    },
     "./day-complete-action": {
       "types": "./src/composed/control/day-complete-action/index.ts",
       "default": "./src/composed/control/day-complete-action/index.ts"
@@ -399,6 +419,10 @@
       "types": "./src/composed/display/brand-glyph/index.ts",
       "default": "./src/composed/display/brand-glyph/index.ts"
     },
+    "./synapse-mark": {
+      "types": "./src/composed/display/synapse-mark/index.ts",
+      "default": "./src/composed/display/synapse-mark/index.ts"
+    },
     "./link-callout": {
       "types": "./src/composed/display/link-callout/index.ts",
       "default": "./src/composed/display/link-callout/index.ts"
@@ -426,6 +450,10 @@
     "./drag-layer": {
       "types": "./src/composed/control/drag-layer/index.ts",
       "default": "./src/composed/control/drag-layer/index.ts"
+    },
+    "./drag-to-place": {
+      "types": "./src/composed/control/drag-to-place/index.ts",
+      "default": "./src/composed/control/drag-to-place/index.ts"
     },
     "./confirm-yesterday-rows": {
       "types": "./src/composed/control/confirm-yesterday-rows/index.ts",
@@ -523,6 +551,10 @@
       "types": "./src/composed/display/passage-carousel/index.ts",
       "default": "./src/composed/display/passage-carousel/index.ts"
     },
+    "./passage-reader": {
+      "types": "./src/composed/display/passage-reader/index.ts",
+      "default": "./src/composed/display/passage-reader/index.ts"
+    },
     "./select-row": {
       "types": "./src/composed/control/select-row/index.ts",
       "default": "./src/composed/control/select-row/index.ts"
@@ -550,6 +582,26 @@
     "./firing-toggle": {
       "types": "./src/composed/control/firing-toggle/index.ts",
       "default": "./src/composed/control/firing-toggle/index.ts"
+    },
+    "./linear-status-shape": {
+      "types": "./src/composed/display/linear-status-shape/index.ts",
+      "default": "./src/composed/display/linear-status-shape/index.ts"
+    },
+    "./linear-line": {
+      "types": "./src/composed/display/linear-line/index.ts",
+      "default": "./src/composed/display/linear-line/index.ts"
+    },
+    "./countdown-face": {
+      "types": "./src/composed/display/timer-display/countdown-face.tsx",
+      "default": "./src/composed/display/timer-display/countdown-face.tsx"
+    },
+    "./progress-ring": {
+      "types": "./src/composed/display/progress-ring/index.ts",
+      "default": "./src/composed/display/progress-ring/index.ts"
+    },
+    "./hue-square": {
+      "types": "./src/composed/display/hue-square/index.ts",
+      "default": "./src/composed/display/hue-square/index.ts"
     },
     "./task-row": {
       "types": "./src/composed/display/task-row/index.ts",

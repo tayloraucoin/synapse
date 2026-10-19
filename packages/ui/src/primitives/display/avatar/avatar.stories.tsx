@@ -12,16 +12,20 @@ export default meta;
 type Story = StoryObj<typeof Avatar>;
 
 /**
- * The two sizes the product uses, and no others: 32px in the header, 64px in
- * Settings → Account (official spec §9.8).
+ * The sizes the product uses: 28px on the header's and the rail's trigger,
+ * 40px in the avatar menu's Who, 64px on the profile; 32px for older
+ * callers. Round, the initial on paper with a hairline (USE-83).
  */
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex items-end gap-(--space-5) p-(--space-6)">
+    <div className="flex items-end gap-(--space-6) p-(--space-8)">
+      <Avatar name="Taylor Aucoin" size={28} />
       <Avatar name="Taylor Aucoin" size={32} />
+      <Avatar name="Taylor Aucoin" size={40} />
       <Avatar name="Taylor Aucoin" size={64} />
       <Avatar name="Taylor" size={64} />
+      <Avatar name="Taylor Aucoin" size={96} />
       <Avatar
         name="Taylor Aucoin"
         size={64}
@@ -31,7 +35,7 @@ export const Overview: Story = {
   ),
 };
 
-/** "Taylor Aucoin" → "TA". The fallback is the default state, not an error. */
+/** "Taylor Aucoin" → "T", on paper. The fallback is the default state, not an error. */
 export const InitialsFallback: Story = {
   args: { name: "Taylor Aucoin", size: 64 },
 };

@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
-
+import type { Meta, StoryObj } from "@storybook/react";
 import { NowLine } from "./now-line";
 
 /**
@@ -30,4 +29,16 @@ export const Now: Story = { args: { atMin: 585, topPx: 48, label: "9:45" } };
 /** A closed day still shows where the line fell, in neutral, reading *closed*. */
 export const Closed: Story = {
   args: { atMin: 1320, topPx: 48, label: "10:00", closed: true },
+};
+
+/** Schedule's line (USE-27): the time in a pill on the rail, a faint line across. */
+export const RailTag: Story = {
+  decorators: [
+    (Story) => (
+      <div className="relative h-32 w-80">
+        <Story />
+      </div>
+    ),
+  ],
+  args: { atMin: 620, topPx: 48, label: "10:20", tag: "rail", lineStartPx: 40 },
 };

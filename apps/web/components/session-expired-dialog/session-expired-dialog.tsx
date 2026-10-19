@@ -1,8 +1,7 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
-
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,15 +11,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@syn/ui";
-
 import {
   readSessionExpired,
   serverSessionExpired,
   subscribeSessionExpired,
 } from "@/lib/auth/session-expired";
 import { signInRoute } from "@/lib/routes";
-import { useTimerStore } from "@/lib/stores/use-timer-store";
-
 import { SESSION_COPY as COPY } from "./copy";
 
 /**
@@ -30,14 +26,6 @@ import { SESSION_COPY as COPY } from "./copy";
  * and Esc does nothing: the app cannot do anything useful without a session, so
  * a dialog that could be waved away would leave a person clicking a screen that
  * silently fails. The document gives one action and this gives one action.
- *
- * IT NEVER LOSES A RUNNING TIMER, and it says so. The timer store keeps
- * ticking behind the dialog — it is client state, and nothing about the session
- * stops it — so the elapsed time is intact when they come back. USE-3's
- * `timer.start` is idempotent on a resumed session, so signing in writes what
- * the store already knows. The third sentence appears only when a timer is
- * actually running, because promising to save something that is not there is
- * how a person learns to stop reading the dialog.
  *
  * **Sign in** CARRIES THE PATH, INCLUDING THE QUERY. Sheet state lives in the
  * query string in this app, so `?sheet=item&id=…` is part of where they were —
@@ -59,10 +47,6 @@ export function SessionExpiredDialog() {
     serverSessionExpired,
   );
 
-  const timerRunning = useTimerStore(
-    (state) => Object.keys(state.running).length > 0,
-  );
-
   if (!expired) return null;
 
   const query = search.toString();
@@ -76,15 +60,7 @@ export function SessionExpiredDialog() {
       >
         <AlertDialogHeader>
           <AlertDialogTitle>{COPY.title}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {COPY.body}
-            {timerRunning ? (
-              <>
-                {" "}
-                {COPY.timerRunning}
-              </>
-            ) : null}
-          </AlertDialogDescription>
+          <AlertDialogDescription>{COPY.body}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction onClick={() => router.replace(signInRoute(next))}>

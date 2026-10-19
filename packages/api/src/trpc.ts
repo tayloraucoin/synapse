@@ -26,6 +26,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 
 import type { Context } from "./context";
+import { withRefusal } from "./errors";
 
 const errorLog = createLogger("trpc");
 
@@ -64,7 +65,8 @@ const t = initTRPC.context<Context>().create({
    * are logged loudly here, once, at the only point every error passes through.
    *
    * Deliberate faults (a `TRPCError` our own code threw) are not logged: a
-   * NOT_FOUND is the system working.
+   * NOT_FOUND is the system working. A refused write (`refuse`) carries its
+   * reason to the client as `data.refusal` (USE-90).
    */
   errorFormatter({ shape, error, path }) {
     if (error.code === "INTERNAL_SERVER_ERROR") {
@@ -73,7 +75,7 @@ const t = initTRPC.context<Context>().create({
         ...describeCause(error.cause ?? error),
       });
     }
-    return shape;
+    return withRefusal(shape, error);
   },
 });
 

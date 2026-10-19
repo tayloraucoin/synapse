@@ -1,32 +1,30 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Newsreader } from "next/font/google";
+import { Newsreader, Public_Sans } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-
 import { ThemeProvider, Toaster } from "@syn/ui";
-
 import { PwaModeSync } from "@/app/_components/pwa-mode-sync";
 import { ServiceWorkerRegistration } from "@/app/_components/service-worker-registration";
+import { env } from "@/env";
 import { TrpcProvider } from "@/lib/trpc/provider";
-
 import "./globals.css";
 
 /**
- * Two families, each with one job (official spec §9.4). Geist is the
- * interface; Newsreader is the reflective surfaces only — the Day Review
- * header, the Week Review header, the adherence sentence. `next/font` self-
- * hosts both at build time, so there is no network request for a font and no
- * flash of unstyled text.
+ * Two families, each with one job (the brand kit's type, WEB-1). Public Sans
+ * is the interface, at weights 400, 500 and 600; Newsreader is Review screens
+ * only — its arrival is how the product says the day is over. `next/font`
+ * self-hosts both at build time, so there is no network request for a font
+ * and no flash of unstyled text. Both are variable; Newsreader's optical-size
+ * axis follows the size.
  */
-const geist = Geist({
+const publicSans = Public_Sans({
   subsets: ["latin"],
-  variable: "--font-geist-sans",
+  variable: "--font-public-sans",
   display: "swap",
 });
 
 const newsreader = Newsreader({
   subsets: ["latin"],
   axes: ["opsz"],
-  style: ["normal", "italic"],
   variable: "--font-newsreader",
   display: "swap",
 });
@@ -77,7 +75,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geist.variable} ${newsreader.variable}`}
+      className={`${publicSans.variable} ${newsreader.variable}`}
     >
       <body className="bg-paper text-ink min-h-screen-safe">
         <ThemeProvider>
@@ -86,7 +84,10 @@ export default function RootLayout({
           </NuqsAdapter>
           <Toaster />
         </ThemeProvider>
-        <ServiceWorkerRegistration />
+        <ServiceWorkerRegistration
+          build={env.NEXT_PUBLIC_BUILD_ID ?? "none"}
+          development={env.NODE_ENV === "development"}
+        />
         <PwaModeSync />
       </body>
     </html>

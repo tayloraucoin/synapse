@@ -1,12 +1,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-
 import { getRequestUser } from "@/lib/auth/get-request-user";
 import { requireVerifiedEmail } from "@/lib/auth/require-verified-email";
-import { resolveEntryForRequest } from "@/lib/entry/resolve-entry-for-request";
-import { getServerApi } from "@/lib/trpc/server";
-import { orientRoute, signInRoute } from "@/lib/routes";
-
+import { signInRoute } from "@/lib/routes";
+import { AppShell } from "./_components/app-shell";
 import { ShellProviders } from "./_components/shell-providers";
 
 /**
@@ -18,15 +15,13 @@ import { ShellProviders } from "./_components/shell-providers";
  * this decides who may see what.
  *
  * The order matters: no session → sign in (remembering where they were); a
- * session with an unverified email → `/verify`; setup owed → the sequence.
- * Only then does the page render.
+ * session with an unverified email → `/verify`. Only then does the page render.
  *
- * THE CHROME IS MOUNTED (SYS-1). The rail, the tab bar and the skip link are
- * in `AppShell`; the header, the status line and `main` belong to each page's
- * `PageFrame`. `shell.status` is read here on the server so the first paint
- * carries the person's name and the Review dot, rather than filling in a beat
- * later — and its failure is not fatal, because a chrome that cannot describe
- * itself must still let the page render.
+ * THE CHROME (USE-4): `AppShell`, the rail from 1024 and the tabs below it.
+ * The avatar's name, email and photo come from `useAccount` (USE-83), on
+ * fixtures until the account wiring.
+ * The first-run and orient redirects went to `_legacy/` with the old app
+ * (USE-1).
  */
 export default async function ShellLayout({
   children,
@@ -43,43 +38,10 @@ export default async function ShellLayout({
   }
   requireVerifiedEmail(user, nextPath ?? undefined);
 
-  const entry = await resolveEntryForRequest(nextPath);
-  if (entry && nextPath && !nextPath.startsWith(entry)) {
-    // The entry tree redirects away from here when setup is owed, or when
-    // the orient frame is (UX v1.1 §5.1 — before any tab, once per day); a
-    // resolved "today" for someone already on a shell route is a no-op.
-    if (
-      entry.startsWith("/setup") ||
-      entry.startsWith("/verify") ||
-      entry === orientRoute()
-    ) {
-      redirect(entry);
-    }
-  }
-
-  const status = await readShellStatus();
-
   return (
-    <ShellProviders
-      user={{
-        name: status?.displayName || user.email || "",
-        // SET-3's route resolves a stored path; until an avatar exists the
-        // initials show, which is the designed default rather than a fallback.
-        imageUrl: status?.avatarPath ? `/api/assets/${status.avatarPath}` : null,
-      }}
-      reviewHasPending={(status?.pendingReviewCount ?? 0) > 0}
-    >
-      {children}
+    <ShellProviders>
+      <AppShell>{children}</AppShell>
     </ShellProviders>
   );
 }
 
-/** The chrome is never load-bearing: a failure here renders a plain frame. */
-async function readShellStatus() {
-  try {
-    const api = await getServerApi();
-    return await api.shell.status();
-  } catch {
-    return null;
-  }
-}

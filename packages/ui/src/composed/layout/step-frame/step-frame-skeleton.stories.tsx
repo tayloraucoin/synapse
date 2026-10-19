@@ -41,7 +41,7 @@ const COPY: StepFrameCopy = {
 export const BesideTheRealFrame: StoryObj = {
   decorators: [
     (Story) => (
-      <div className="grid min-h-[480px] grid-cols-1 gap-(--space-6) wide:grid-cols-2">
+      <div className="grid min-h-[480px] grid-cols-1 gap-(--space-8) wide:grid-cols-2">
         <Story />
       </div>
     ),

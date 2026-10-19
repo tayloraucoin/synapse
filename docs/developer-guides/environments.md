@@ -160,22 +160,29 @@ Three independent guards, because a rule with one guard is a rule:
    on `db:migrate`, `db:push`, `db:seed`, `db:setup`, and the raw
    `drizzle-kit migrate`/`push`.
 
-### A sandbox wrinkle worth knowing
+### Where Turbo hashes env files
 
-Claude Code's own sandbox denies reading `**/.env` and `**/.env.local` — which
-is right, and which collides with `turbo.json`'s
-`globalDependencies: ["**/.env.*local", "**/.env"]`. Turbo hashes those files
-to decide cache validity, so inside a sandboxed agent session `yarn lint`,
-`yarn check-types`, and `yarn build` fail with:
+Claude Code's sandbox denies reading `**/.env` and `**/.env.local`, which is
+right. Turbo reads every file it hashes, so an env file in `turbo.json`'s
+`globalDependencies` made every task, `yarn lint` and `yarn check-types`
+included, fail inside a sandboxed agent session with:
 
 ```
-x I/O error while hashing …/packages/db/.env: Operation not permitted
+x I/O error while hashing …/apps/web/.env.local: Operation not permitted
 ```
 
-That is the sandbox refusing to show an agent your secrets, not a broken
-repository. Run the verify chain outside the sandbox, or from your own
-terminal. Do not "fix" it by removing `.env` from `globalDependencies`: a
-changed connection URL genuinely should bust the cache.
+Since MIG-3, no env file is a global dependency. Only `web#build` hashes them:
+`apps/web/turbo.json` extends the root and appends `.env*` to the build
+inputs, because Next loads `apps/web/.env*` inside that task and the bundle
+embeds the collapsed `NEXT_PUBLIC_*` values. An edited `apps/web/.env.local`
+still misses the build cache; a tier or value set in the shell or on Vercel
+misses every task's cache through `globalEnv`. `packages/db/.env` feeds only
+the `db:*` scripts, whose tasks are not cached, and the root `.env.local` is
+loaded by nothing. So `yarn lint` and `yarn check-types` run sandboxed, and
+`yarn build` (so `yarn verify`) runs unsandboxed on a machine that holds
+`apps/web/.env.local`. `yarn check-turbo-env [--build]` proves the layout;
+never put an env file back in `globalDependencies`, and never "fix" the
+sandbox by letting it read the files.
 
 ---
 

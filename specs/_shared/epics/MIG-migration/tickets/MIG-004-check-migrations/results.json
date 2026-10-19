@@ -1,0 +1,162 @@
+{
+  "id": "MIG-4",
+  "criteria_sha256": "73a031451850bb0760b0af902fc9731679f10d0e6aa6c96ed9415ebac2600d4f",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:36:31Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C1.log",
+        "evidence_sha256": "0a708b8d1fb2849dd8a13ad136173a4746a9be34b8a39ca2b8291f9aad245ad5"
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:36:33Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C2.log",
+        "evidence_sha256": "36bda8158352411e2938016725df320d6e34cc1be6d3d8c403e985aa6bdfb9e7",
+        "tests": 18
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:36:33Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C3.log",
+        "evidence_sha256": "36bda8158352411e2938016725df320d6e34cc1be6d3d8c403e985aa6bdfb9e7",
+        "tests": 18
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:36:33Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C4.log",
+        "evidence_sha256": "36bda8158352411e2938016725df320d6e34cc1be6d3d8c403e985aa6bdfb9e7",
+        "tests": 18
+      }
+    },
+    "review:mason": {
+      "status": "PASS",
+      "evidence": "manual",
+      "run": {
+        "command": "yarn review:run mason MIG-4",
+        "exit": 0,
+        "at": "2026-10-09T21:20:14Z",
+        "head": "019231682b36c15f6c973141cee1acf106477123",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/review-mason.md",
+        "evidence_sha256": "af6c4c90bcfab74b3fe099e7ffd4af24fc335e28ef702cd80b74bd80f2d7c159",
+        "contract_sha256": "93f08587336e270d77e79abeb9f58b5a1dbfb873fe5e6cad8f5b7b93b376a9f2",
+        "criteria_sha256": "73a031451850bb0760b0af902fc9731679f10d0e6aa6c96ed9415ebac2600d4f",
+        "as_built_sha256": "d3571fc76137a6101d623aae2fef983876cb0bd546a81c01a217a1733af8fb38",
+        "runner": "claude 2.1.295 (Claude Code) (role docs/roles/engineering/mason-cto-principal-dev.md; tools Read,Grep,Glob)",
+        "tokens_input": 98,
+        "tokens_cache_read": 427906,
+        "tokens_cache_write": 181171,
+        "tokens_output": 17642,
+        "seconds": 229.6
+      },
+      "runs": 1
+    },
+    "review:warden": {
+      "status": "PASS",
+      "evidence": "manual",
+      "run": {
+        "command": "yarn review:run warden MIG-4",
+        "exit": 0,
+        "at": "2026-10-09T21:25:32Z",
+        "head": "5cf1f5af6b1de9ac8bfdd4865301475c6afdf310",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/review-warden.md",
+        "evidence_sha256": "3913d656fb09b7767257cbbceb47815740b0b562cb1b0d82f072f5e028d7129b",
+        "contract_sha256": "93f08587336e270d77e79abeb9f58b5a1dbfb873fe5e6cad8f5b7b93b376a9f2",
+        "criteria_sha256": "73a031451850bb0760b0af902fc9731679f10d0e6aa6c96ed9415ebac2600d4f",
+        "as_built_sha256": "d3571fc76137a6101d623aae2fef983876cb0bd546a81c01a217a1733af8fb38",
+        "runner": "claude 2.1.295 (Claude Code) (role docs/roles/engineering/warden-security-privacy-engineer.md; tools Read,Grep,Glob)",
+        "tokens_input": 68,
+        "tokens_cache_read": 535314,
+        "tokens_cache_write": 103954,
+        "tokens_output": 34566,
+        "seconds": 489
+      },
+      "runs": 1
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:migrations",
+        "exit": 0,
+        "at": "2026-10-09T21:36:33Z",
+        "head": "0266e644b82fae9de79aafbfb7c7732b51d03ef6",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-004-check-migrations/evidence/C5.log",
+        "evidence_sha256": "36bda8158352411e2938016725df320d6e34cc1be6d3d8c403e985aa6bdfb9e7",
+        "tests": 18
+      }
+    }
+  },
+  "cost": {
+    "at": "2026-10-09T21:38:07Z",
+    "calls": 87,
+    "weighted": 2239209,
+    "tokens_input": 174,
+    "tokens_cache_read": 15389679,
+    "tokens_cache_write": 203070,
+    "tokens_output": 89246,
+    "by_category": {
+      "build": {
+        "calls": 50,
+        "weighted": 1314786
+      },
+      "proofs": {
+        "calls": 18,
+        "weighted": 505292
+      },
+      "captures": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "reviews": {
+        "calls": 5,
+        "weighted": 105684
+      },
+      "status": {
+        "calls": 5,
+        "weighted": 106871
+      },
+      "git": {
+        "calls": 7,
+        "weighted": 140615
+      },
+      "re-reading": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "other": {
+        "calls": 2,
+        "weighted": 65961
+      }
+    },
+    "context_last_call": 246609,
+    "threads": 1,
+    "headless_runs": 2,
+    "headless_weighted": 713934
+  },
+  "updated_at": "2026-10-09T21:38:07Z"
+}

@@ -12,7 +12,7 @@ import { SaveStatusText } from "./save-status";
 const meta: Meta<typeof SaveStatusText> = {
   title: "Composed/Feedback/SaveStatus",
   component: SaveStatusText,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -27,8 +27,8 @@ export const Failed: Story = { args: { status: "failed", onRetry: () => {} } };
 
 export const AllStates: StoryObj = {
   render: () => (
-    <div className="flex flex-col gap-(--space-2) p-(--space-6)">
-      {(["idle", "saving", "saved", "retrying", "failed"] as SaveStatus[]).map(
+    <div className="flex flex-col gap-(--space-2) p-(--space-8)">
+      {(["idle", "saving", "saved", "waiting", "retrying", "failed"] as SaveStatus[]).map(
         (status) => (
           <SaveStatusText key={status} status={status} onRetry={() => {}} />
         ),

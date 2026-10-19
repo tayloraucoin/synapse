@@ -168,7 +168,7 @@ export function DecisionPanel({
   return (
     <section
       className={cn(
-        "border-hairline flex flex-col gap-(--space-3) border-b py-(--space-5) last:border-b-0",
+        "border-hairline flex flex-col gap-(--space-3) border-b py-(--space-6) last:border-b-0",
         className,
       )}
     >

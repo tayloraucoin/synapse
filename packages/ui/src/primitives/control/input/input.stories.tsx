@@ -16,7 +16,7 @@ const MODES = ["text", "email", "password", "number", "time", "date"] as const;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex max-w-sm flex-col gap-(--space-5) p-(--space-6)">
+    <div className="flex max-w-sm flex-col gap-(--space-6) p-(--space-8)">
       {MODES.map((mode) => (
         <Input
           key={mode}
@@ -44,7 +44,7 @@ export const Password: Story = {
     helperText: "Passwords need at least 8 characters.",
   },
   render: (args) => (
-    <div className="max-w-sm p-(--space-6)">
+    <div className="max-w-sm p-(--space-8)">
       <Input {...args} />
     </div>
   ),
@@ -54,7 +54,7 @@ export const Password: Story = {
 export const Url: Story = {
   args: { label: "Link", mode: "url", placeholder: "https://…", error: "That link doesn't look right." },
   render: (args) => (
-    <div className="max-w-sm p-(--space-6)">
+    <div className="max-w-sm p-(--space-8)">
       <Input {...args} />
     </div>
   ),
@@ -64,7 +64,7 @@ export const Url: Story = {
 export const WithError: Story = {
   args: { label: "Email", mode: "email", error: "That doesn't look like an email address." },
   render: (args) => (
-    <div className="max-w-sm p-(--space-6)">
+    <div className="max-w-sm p-(--space-8)">
       <Input {...args} />
     </div>
   ),

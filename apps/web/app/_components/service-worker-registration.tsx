@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-
 import { publishUpdateReady } from "@/lib/pwa/update-ready";
 
-const SW_URL = "/sw.js";
 const SCOPE = "/";
 
 /**
@@ -25,7 +23,14 @@ const SCOPE = "/";
  * (`reloadForUpdate`). Never a reload without one — that is the ticket's
  * non-negotiable, and it is why this file only ever publishes a flag.
  */
-export function ServiceWorkerRegistration() {
+export function ServiceWorkerRegistration({
+  build,
+  development,
+}: {
+  /** `NEXT_PUBLIC_BUILD_ID`: a new URL per build installs a new worker with its own shell cache (USE-107). */
+  build: string;
+  development: boolean;
+}) {
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
       return;
@@ -34,9 +39,12 @@ export function ServiceWorkerRegistration() {
     let cleanup: (() => void) | undefined;
 
     navigator.serviceWorker
-      .register(SW_URL, { scope: SCOPE, updateViaCache: "none" })
+      .register(`/sw.js?build=${encodeURIComponent(build)}`, {
+        scope: SCOPE,
+        updateViaCache: "none",
+      })
       .then((registration) => {
-        if (process.env.NODE_ENV === "development") {
+        if (development) {
           console.log("[PWA] Service worker registered", registration.scope);
         }
 
@@ -78,7 +86,7 @@ export function ServiceWorkerRegistration() {
       });
 
     return () => cleanup?.();
-  }, []);
+  }, [build, development]);
 
   return null;
 }

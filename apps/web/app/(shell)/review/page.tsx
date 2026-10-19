@@ -1,18 +1,22 @@
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
-import { REVIEW_COPY } from "@/components/review-day";
+import type { Metadata } from "next";
+import { ScreenFrame, Text } from "@syn/ui";
+import { TabHeader } from "../_components/tab-header";
+import { SHELL_COPY } from "../_components/copy";
 
-import { ReviewTab } from "./_components/review-tab";
+const COPY = SHELL_COPY.review;
 
-/**
- * RV-00 Review.
- *
- * A tab rather than a pushed screen, so it has no back arrow — the shell's
- * avatar is its only header action, and every region is a door forward.
- */
+export const metadata: Metadata = { title: COPY.title };
+
+/** Review, a placeholder until its surface ticket (USE-4): one muted line. */
 export default function ReviewPage() {
   return (
-    <PageFrame header={<ShellPageHeader title={REVIEW_COPY.title} />}>
-      <ReviewTab />
-    </PageFrame>
+    <main id="main" className="flex flex-1 flex-col">
+      <TabHeader title={COPY.title} />
+      <ScreenFrame>
+        <Text as="p" variant="body" tone="muted">
+          {COPY.placeholder}
+        </Text>
+      </ScreenFrame>
+    </main>
   );
 }

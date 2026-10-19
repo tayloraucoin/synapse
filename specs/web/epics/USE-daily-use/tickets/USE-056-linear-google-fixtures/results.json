@@ -1,0 +1,85 @@
+{
+  "id": "USE-56",
+  "criteria_sha256": "4c41032db2e3edc4f298ff2426e329d514f53d0ced79dd75e036c1755eb542eb",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:07:38Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C1.log",
+        "evidence_sha256": "aa293cddfe8d4ff96fbece5d7cb5e1152668c56c86001cbbb1c8c9dcc17099f8",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:07:38Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C2.log",
+        "evidence_sha256": "aa293cddfe8d4ff96fbece5d7cb5e1152668c56c86001cbbb1c8c9dcc17099f8",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:07:38Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C3.log",
+        "evidence_sha256": "aa293cddfe8d4ff96fbece5d7cb5e1152668c56c86001cbbb1c8c9dcc17099f8",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:07:38Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C4.log",
+        "evidence_sha256": "aa293cddfe8d4ff96fbece5d7cb5e1152668c56c86001cbbb1c8c9dcc17099f8",
+        "tests": 32
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:07:38Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C5.log",
+        "evidence_sha256": "aa293cddfe8d4ff96fbece5d7cb5e1152668c56c86001cbbb1c8c9dcc17099f8",
+        "tests": 32
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:07:57Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-056-linear-google-fixtures/evidence/C6.log",
+        "evidence_sha256": "a8f0122a07d000a41088fbba46b54747c1851655c61cc7177be227e263fbf3c8"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:57:51Z",
+  "updated_at": "2026-10-18T20:07:57Z"
+}

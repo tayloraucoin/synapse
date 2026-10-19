@@ -1,0 +1,8 @@
+{
+  "expect": "fail",
+  "message": "C1 is PASS, but evidence tooling/fixtures/specs/fail-closed-evidence-rewritten/specs/web/one-offs/WEB-1-filter/evidence/C1.log changed after it was recorded",
+  "lenient": {
+    "warnings": [],
+    "brief": "Active: none."
+  }
+}

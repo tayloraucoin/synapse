@@ -1,27 +1,28 @@
-import { PageFrame } from "@/components/page-frame";
-import { DayListHeader } from "@/components/day-list";
-import { ScheduleCanvas } from "@/components/schedule-canvas";
-import { getServerApi } from "@/lib/trpc/server";
+import type { Metadata } from "next";
+import { TabHeader } from "../../_components/tab-header";
+import { SCHEDULE_COPY as COPY } from "./_components/copy";
+import { ScheduleScreen } from "./_components/schedule-screen";
+import { ScheduleTitle } from "./_components/schedule-title";
+
+export const metadata: Metadata = { title: COPY.title };
 
 /**
- * SC-01 — today, against an axis.
+ * `/today/schedule`: Schedule (USE-27; day/schedule/), on fixtures through
+ * `useSchedule` until the day-records wiring. The date is the page's title;
+ * the day column scrolls under the tray, so the page is the viewport's
+ * height less the tabs (the rail's, from 1024).
  *
- * THE SAME HEADER AS THE LIST, from the same query. The two tabs are two views
- * of one day, and a header assembled separately here would be a second place
- * the woke time and the shift total could be computed differently.
+ * Not in the day's entry tree: the tab is there before Ready, go too, the
+ * same column without the edge (D-USE-77).
  */
-export default async function TodaySchedulePage() {
-  const api = await getServerApi();
-  const { todayKey } = await api.day.today();
-  const day = await api.day.get({ date: todayKey });
-
+export default function SchedulePage() {
   return (
-    <PageFrame
-      dayKey={todayKey}
-      contentWidth="canvas"
-      header={<DayListHeader day={day} />}
+    <main
+      id="main"
+      className="flex h-[calc(100dvh-var(--tabbar-h)-env(safe-area-inset-bottom))] flex-col split:h-dvh"
     >
-      <ScheduleCanvas dateKey={todayKey} initial={day} />
-    </PageFrame>
+      <TabHeader title={<ScheduleTitle />} />
+      <ScheduleScreen />
+    </main>
   );
 }

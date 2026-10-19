@@ -42,8 +42,8 @@ export function AuthFrame({
   return (
     <div
       className={cn(
-        "mx-auto flex w-full max-w-sm flex-col gap-(--space-5)",
-        "px-(--space-4) py-(--space-6)",
+        "mx-auto flex w-full max-w-sm flex-col gap-(--space-6)",
+        "px-(--space-4) py-(--space-8)",
         className,
       )}
     >

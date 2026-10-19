@@ -1,0 +1,9 @@
+# /dev/parts?state=orient-success at 402, Playwright (assay, 2026-10-18); drag-down not driven
+reader open, dots: 
+after swipe/ArrowRight: 
+reader text start: Morning reading / Morning reading /  / Begin where the feet are. The breath has kept time all night without being asked. Befor
+after ×, focus: button "Read all, Morning reading"
+orient dots now: 
+sheet open: 1 dialog(s)
+after sheet ×, focus: button "Read last night's reflections"
+after scrim tap: dialogs 0, focus: button "Read last night's reflections"

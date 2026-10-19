@@ -6,7 +6,7 @@
  * Usage: node scripts/generate-schema-reference.mjs
  *        yarn db:schema-reference  (from packages/db)
  */
-import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -98,6 +98,21 @@ const GROUPS = [
       "workflow/workflow-day-pins.ts",
     ],
   },
+  {
+    title: "GROUP 8 — INTEGRATIONS",
+    intro:
+      "Since USE-100 (0016): Linear and Google, every table owner-private. `linear_connections` is one per workspace, its access and refresh tokens AES-256-GCM ciphertext (`*_ct`, bytea) read only by `@syn/api`'s `services/linear`; `linear_snapshots` holds what a sync fetched, `linear_project_clients` maps a project to a client, and `linear_writes` is the outbox, its `kind` D-USE-113's six. `google_accounts` keeps a ciphertext refresh token, `google_calendars` each calendar on or off, `google_event_snapshots` one account's week. A disconnect cascades its snapshots, mappings and outbox; `work_items.linear_connection_id` is set null.",
+    files: [
+      "integrations/enums.ts",
+      "integrations/linear-connections.ts",
+      "integrations/linear-snapshots.ts",
+      "integrations/linear-project-clients.ts",
+      "integrations/linear-writes.ts",
+      "integrations/google-accounts.ts",
+      "integrations/google-calendars.ts",
+      "integrations/google-event-snapshots.ts",
+    ],
+  },
 ];
 
 function readSchemaFile(relPath) {
@@ -155,7 +170,8 @@ function collectAllTables() {
         tables.push({ name, file: rel, group: group.title });
       }
       const authName = extractAuthTableName(src);
-      if (authName) tables.push({ name: authName, file: rel, group: group.title });
+      if (authName)
+        tables.push({ name: authName, file: rel, group: group.title });
     }
   }
   return tables;
@@ -256,18 +272,18 @@ function buildEnumSection(enums) {
       "miss_tier",
       "category_color_key",
     ],
-    "User": ["theme_preference"],
-    "Plan": ["day_close_reason", "woke_at_source"],
-    "Day": [
+    User: ["theme_preference"],
+    Plan: ["day_close_reason", "woke_at_source"],
+    Day: [
       "assignment_state",
       "completion_state",
       "item_origin",
       "timer_session_source",
       "miss_resolved_by",
     ],
-    "Notifications": ["device_platform", "notification_kind"],
-    "System": ["export_status"],
-    "Workflow": ["workflow_column_role"],
+    Notifications: ["device_platform", "notification_kind"],
+    System: ["export_status"],
+    Workflow: ["workflow_column_role"],
   };
 
   const enumSet = new Set(enums.map((e) => e.name));
@@ -283,7 +299,10 @@ function buildEnumSection(enums) {
   const enumFiles = ["enum-values.ts", "enums.ts"];
 
   const code = enumFiles
-    .map((rel) => `// packages/db/src/schema/${rel}\n${readSchemaFile(rel).trim()}`)
+    .map(
+      (rel) =>
+        `// packages/db/src/schema/${rel}\n${readSchemaFile(rel).trim()}`,
+    )
     .join("\n\n");
 
   return `## 3. ENUMS
@@ -300,8 +319,12 @@ ${code}
 }
 
 function buildTableProse(tableName, source, relPath) {
-  const purpose = extractTablePurpose(source, tableName) || extractFilePurpose(source, relPath);
-  const indexes = [...source.matchAll(/index\(["']([^"']+)["']/g)].map((m) => m[1]);
+  const purpose =
+    extractTablePurpose(source, tableName) ||
+    extractFilePurpose(source, relPath);
+  const indexes = [...source.matchAll(/index\(["']([^"']+)["']/g)].map(
+    (m) => m[1],
+  );
   const uniqueIndexes = [
     ...source.matchAll(/uniqueIndex\(["']([^"']+)["']/g),
   ].map((m) => m[1]);
@@ -312,7 +335,8 @@ function buildTableProse(tableName, source, relPath) {
   let rls =
     "Owner-private CRUD (`ownerPrivateCrudPolicies`) — the person is the only reader and the only writer. See the inline declarations in the source above.";
   if (tableName === "auth.users") {
-    rls = "Supabase Auth owns this table; it is mirrored here for FK resolution only and is never migrated.";
+    rls =
+      "Supabase Auth owns this table; it is mirrored here for FK resolution only and is never migrated.";
   } else if (tableName === "users") {
     rls =
       "Owner read and update. Insert and delete are denied to the authenticated role outright: `handle_new_user()` inserts, and deletion cascades from `auth.admin.deleteUser`.";
@@ -488,7 +512,9 @@ Re-running the seed prints zeros across the board, which means idempotent rather
 
 function main() {
   const tables = collectAllTables();
-  const publicTableCount = tables.filter((t) => !t.name.startsWith("auth.")).length;
+  const publicTableCount = tables.filter(
+    (t) => !t.name.startsWith("auth."),
+  ).length;
   const enums = collectEnums();
 
   const doc = [

@@ -1,21 +1,18 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-
 import { dateKeySchema } from "@syn/validators";
-import { formatCalendarDay } from "@syn/utils";
-
 import { JOURNAL_COPY, JournalScreen } from "@/components/journal";
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
-import { getServerApi } from "@/lib/trpc/server";
-import { dayRoute, todayRoute } from "@/lib/routes";
+
+export const metadata: Metadata = { title: JOURNAL_COPY.title };
 
 /**
- * `/day/{date}/journal` — the journal (UX v1.1 §7.2, DYN-18).
+ * `/day/{date}/journal` — Close the day (USE-44; D-USE-73, DYN-18), on
+ * fixtures through `useJournal` until the day-records wiring.
  *
- * "No header bar beyond a back and the date; paper; a single reading
- * column." Today and any past day may be written (last night's lines can
- * be finished in the morning); a past day opened from Review is read-only
- * serif; a future day is a 404 — a journal is written on its day or after,
- * never ahead.
+ * Focused at every width (`isJournalPath`): no rail, no tabs. Today and any
+ * past day may be written; a past day opened from Review (`?from=review`)
+ * is read only; a future day is a 404, decided against the person's day
+ * key in the screen.
  */
 export default async function JournalPage({
   params,
@@ -27,28 +24,5 @@ export default async function JournalPage({
   const { date } = await params;
   const { from } = await searchParams;
   if (!dateKeySchema.safeParse(date).success) notFound();
-
-  const api = await getServerApi();
-  const { todayKey } = await api.day.today();
-  if (date > todayKey) notFound();
-
-  const entry = await api.journal.get({ date });
-  const readOnly = from === "review" && date < todayKey;
-
-  return (
-    <PageFrame
-      dayKey={date}
-      contentWidth="text"
-      header={
-        <ShellPageHeader
-          title={formatCalendarDay(new Date(`${date}T12:00:00Z`), "UTC", "long")}
-          subtitle={JOURNAL_COPY.title}
-          showBack
-          backFallback={date === todayKey ? todayRoute() : dayRoute(date)}
-        />
-      }
-    >
-      <JournalScreen initial={entry} readOnly={readOnly} />
-    </PageFrame>
-  );
+  return <JournalScreen dateKey={date} fromReview={from === "review"} />;
 }

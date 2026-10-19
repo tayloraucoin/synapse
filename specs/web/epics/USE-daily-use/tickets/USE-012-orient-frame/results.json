@@ -1,0 +1,106 @@
+{
+  "id": "USE-12",
+  "criteria_sha256": "455bddbbbfc50d5534d9f043175e586f8e1c2d5afa1ab097f65081a3bbe7b2a7",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C6": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C7": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C8": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:41:31Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-012-orient-frame/evidence/C8.log",
+        "evidence_sha256": "48fc64cd36a54858f1aeadcd607881a0e03d501fe7b8552547c9db45995c738d",
+        "tests": 32
+      }
+    },
+    "C9": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:41:31Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-012-orient-frame/evidence/C9.log",
+        "evidence_sha256": "48fc64cd36a54858f1aeadcd607881a0e03d501fe7b8552547c9db45995c738d",
+        "tests": 32
+      }
+    },
+    "C10": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:root",
+        "exit": 0,
+        "at": "2026-10-18T19:41:48Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-012-orient-frame/evidence/C10.log",
+        "evidence_sha256": "062c63bf3d337bbdaad35ff58eb1cd883adbaabcad3ae6bb538d61c17e51ce8b",
+        "tests": 32
+      }
+    },
+    "C11": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:41:49Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-012-orient-frame/evidence/C11.log",
+        "evidence_sha256": "b36c622f0a76fbbb04860e26c47d6ae5110648c906875a7db4389d31f85e2587"
+      }
+    },
+    "C12": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:41:50Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-012-orient-frame/evidence/C12.log",
+        "evidence_sha256": "c862cdcb40552de092a231851e9a8c9782135cee54f7127b9f699f5d7505dd1f"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:50:35Z",
+  "updated_at": "2026-10-18T19:41:51Z"
+}

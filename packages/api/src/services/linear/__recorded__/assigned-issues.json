@@ -1,0 +1,193 @@
+{
+  "data": {
+    "viewer": {
+      "id": "9f3e2d1c-0b4a-4e8f-a7c6-5d4e3f2a1b0c",
+      "assignedIssues": {
+        "nodes": [
+          {
+            "id": "0e1f2a3b-4c5d-4e6f-8a9b-0c1d2e3f40101",
+            "identifier": "SYN-101",
+            "title": "Linear sync",
+            "description": "Poll each workspace.",
+            "url": "https://linear.app/lighthouse/issue/SYN-101",
+            "priority": 2,
+            "estimate": 5,
+            "dueDate": "2026-10-23",
+            "state": {
+              "id": "7a1b2c3d-0000-4000-8000-000000000002"
+            },
+            "team": {
+              "id": "5b0b2d1e-7c1f-4c55-9c39-1f7c3a0e7a11"
+            },
+            "project": {
+              "id": "a8c4e0f2-3d61-4b8e-9f0a-6b2e1c9d4f33",
+              "name": "Synapse",
+              "icon": "🧠",
+              "color": "#5e6ad2",
+              "__typename": "Project"
+            },
+            "parent": null,
+            "assignee": {
+              "id": "9f3e2d1c-0b4a-4e8f-a7c6-5d4e3f2a1b0c"
+            },
+            "labels": {
+              "nodes": [
+                {
+                  "name": "Integration",
+                  "color": "#bec2c8"
+                }
+              ]
+            },
+            "sortOrder": -1200.5,
+            "__typename": "Issue",
+            "children": {
+              "nodes": [
+                {
+                  "id": "0e1f2a3b-4c5d-4e6f-8a9b-0c1d2e3f40102",
+                  "identifier": "SYN-102",
+                  "title": "Schema spike",
+                  "description": null,
+                  "url": "https://linear.app/lighthouse/issue/SYN-102",
+                  "priority": 3,
+                  "estimate": null,
+                  "dueDate": null,
+                  "state": {
+                    "id": "7a1b2c3d-0000-4000-8000-000000000003"
+                  },
+                  "team": {
+                    "id": "5b0b2d1e-7c1f-4c55-9c39-1f7c3a0e7a11"
+                  },
+                  "project": {
+                    "id": "a8c4e0f2-3d61-4b8e-9f0a-6b2e1c9d4f33",
+                    "name": "Synapse",
+                    "icon": "🧠",
+                    "color": "#5e6ad2",
+                    "__typename": "Project"
+                  },
+                  "parent": {
+                    "id": "0e1f2a3b-4c5d-4e6f-8a9b-0c1d2e3f40101"
+                  },
+                  "assignee": null,
+                  "labels": {
+                    "nodes": []
+                  },
+                  "sortOrder": -1200.5,
+                  "__typename": "Issue"
+                },
+                {
+                  "id": "0e1f2a3b-4c5d-4e6f-8a9b-0c1d2e3f40103",
+                  "identifier": "SYN-103",
+                  "title": "Closed-issue pass",
+                  "description": null,
+                  "url": "https://linear.app/lighthouse/issue/SYN-103",
+                  "priority": 3,
+                  "estimate": 2,
+                  "dueDate": null,
+                  "state": {
+                    "id": "7a1b2c3d-0000-4000-8000-000000000001"
+                  },
+                  "team": {
+                    "id": "5b0b2d1e-7c1f-4c55-9c39-1f7c3a0e7a11"
+                  },
+                  "project": {
+                    "id": "a8c4e0f2-3d61-4b8e-9f0a-6b2e1c9d4f33",
+                    "name": "Synapse",
+                    "icon": "🧠",
+                    "color": "#5e6ad2",
+                    "__typename": "Project"
+                  },
+                  "parent": {
+                    "id": "0e1f2a3b-4c5d-4e6f-8a9b-0c1d2e3f40101"
+                  },
+                  "assignee": {
+                    "id": "9f3e2d1c-0b4a-4e8f-a7c6-5d4e3f2a1b0c"
+                  },
+                  "labels": {
+                    "nodes": []
+                  },
+                  "sortOrder": -1200.5,
+                  "__typename": "Issue"
+                }
+              ]
+            }
+          },
+          {
+            "id": "0e1f2a3b-4c5d-4e6f-8a9b-0c1d2e3f40103",
+            "identifier": "SYN-103",
+            "title": "Closed-issue pass",
+            "description": null,
+            "url": "https://linear.app/lighthouse/issue/SYN-103",
+            "priority": 3,
+            "estimate": 2,
+            "dueDate": null,
+            "state": {
+              "id": "7a1b2c3d-0000-4000-8000-000000000001"
+            },
+            "team": {
+              "id": "5b0b2d1e-7c1f-4c55-9c39-1f7c3a0e7a11"
+            },
+            "project": {
+              "id": "a8c4e0f2-3d61-4b8e-9f0a-6b2e1c9d4f33",
+              "name": "Synapse",
+              "icon": "🧠",
+              "color": "#5e6ad2",
+              "__typename": "Project"
+            },
+            "parent": {
+              "id": "0e1f2a3b-4c5d-4e6f-8a9b-0c1d2e3f40101"
+            },
+            "assignee": {
+              "id": "9f3e2d1c-0b4a-4e8f-a7c6-5d4e3f2a1b0c"
+            },
+            "labels": {
+              "nodes": []
+            },
+            "sortOrder": -1200.5,
+            "__typename": "Issue",
+            "children": {
+              "nodes": []
+            }
+          },
+          {
+            "id": "0e1f2a3b-4c5d-4e6f-8a9b-0c1d2e3f40104",
+            "identifier": "SYN-104",
+            "title": "Write the docs page",
+            "description": null,
+            "url": "https://linear.app/lighthouse/issue/SYN-104",
+            "priority": 0,
+            "estimate": null,
+            "dueDate": null,
+            "state": {
+              "id": "7a1b2c3d-0000-4000-8000-000000000001"
+            },
+            "team": {
+              "id": "5b0b2d1e-7c1f-4c55-9c39-1f7c3a0e7a11"
+            },
+            "project": {
+              "id": "c1d2e3f4-0a1b-4c2d-8e3f-4a5b6c7d8e9f",
+              "name": "Docs",
+              "icon": "Book",
+              "color": "#26b5ce"
+            },
+            "parent": null,
+            "assignee": {
+              "id": "9f3e2d1c-0b4a-4e8f-a7c6-5d4e3f2a1b0c"
+            },
+            "labels": {
+              "nodes": []
+            },
+            "sortOrder": -1200.5,
+            "__typename": "Issue",
+            "children": {
+              "nodes": []
+            }
+          }
+        ],
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": "c3f1"
+        }
+      }
+    }
+  }
+}

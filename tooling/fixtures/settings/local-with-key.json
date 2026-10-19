@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -H \"Authorization: Bearer sk-synthetic-0000000000000000000000000000\" https://example.com/*)"
+    ]
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "id": "USE-37",
+  "criteria_sha256": "910b7b806057283c704d2dac239b48ae382b00308c07300fe1f1928dae5fd005",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:49:02Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-037-review-the-day-edits/evidence/C5.log",
+        "evidence_sha256": "e93a86a3fcd37881327c3cb31937b99d2a950a59d79bb9eab10bc1cabf15c2b4",
+        "tests": 32
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:49:02Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-037-review-the-day-edits/evidence/C6.log",
+        "evidence_sha256": "e93a86a3fcd37881327c3cb31937b99d2a950a59d79bb9eab10bc1cabf15c2b4",
+        "tests": 32
+      }
+    },
+    "C7": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C8": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:49:19Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-037-review-the-day-edits/evidence/C8.log",
+        "evidence_sha256": "9896e2a456560d1b203cd5ee34666ff9ebb615c5a6d3f48834d1482b0c2f03aa"
+      }
+    },
+    "C9": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:49:20Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-037-review-the-day-edits/evidence/C9.log",
+        "evidence_sha256": "92be731c9fedd4b21183040dc6a8220ca9df06fdb17c1aaa96c4130125283bfc"
+      }
+    }
+  },
+  "built_at": "2026-10-18T19:30:01Z",
+  "updated_at": "2026-10-18T19:49:20Z"
+}

@@ -1,0 +1,228 @@
+{
+  "tier": "overlay",
+  "specsRoot": "specs",
+  "apps": {
+    "web": {
+      "path": "apps/web",
+      "prefix": "WEB",
+      "designLayer": "apps/web/docs/design"
+    }
+  },
+  "toolkitPrefixes": ["SYN"],
+  "verify": {
+    "full": "yarn verify",
+    "fast": "yarn verify:fast"
+  },
+  "migrationsDir": "packages/db/migrations",
+  "branchPattern": "agent/{id}",
+  "protectedBranch": "main",
+  "reviewers": [
+    {
+      "glob": "**/migrations/**",
+      "role": "mason",
+      "why": "One-way door: an applied migration is immutable.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/schema/**",
+      "role": "mason",
+      "why": "One-way door: the data model's shape.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/*.sql",
+      "role": "mason",
+      "why": "One-way door: schema and data changes written as SQL.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/config/eslint/boundaries.js",
+      "role": "mason",
+      "why": "One-way door: the package boundary graph.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/*/package.json",
+      "role": "mason",
+      "why": "One-way door: a package's exports are its public API shape.",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/app/api/**",
+      "role": "mason",
+      "why": "One-way door: public API shape.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/auth/**",
+      "role": "mason",
+      "why": "One-way door: authorization topology.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/rls.ts",
+      "role": "mason",
+      "why": "One-way door: the bridge from a request's identity to row-level security.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/auth/**",
+      "role": "warden",
+      "why": "Authentication and authorization flows, sessions and recovery.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/proxy.ts",
+      "role": "warden",
+      "why": "The request gate every route passes through.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/env.ts",
+      "role": "warden",
+      "why": "The environment seam, where secrets enter.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/rls.ts",
+      "role": "warden",
+      "why": "Whose identity and role each user-scoped query runs as.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/schema/**",
+      "role": "warden",
+      "why": "Personal data: what is stored, and at what fidelity.",
+      "status": "draft"
+    },
+    {
+      "glob": ".claude/settings.json",
+      "role": "warden",
+      "why": "Agent permissions and the sandbox.",
+      "status": "draft"
+    },
+    {
+      "glob": "tooling/hooks/**",
+      "role": "warden",
+      "why": "The guards that enforce agent permissions.",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/{app,components}/**/*.tsx",
+      "role": "assay",
+      "why": "Rendered UI is scored against the canon rubric.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/ui/**",
+      "role": "assay",
+      "why": "Shared components render on every surface.",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/app/**/page.tsx",
+      "role": "threshold",
+      "why": "A surface: keyboard, focus and screen-reader paths.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/ui/src/**",
+      "role": "threshold",
+      "why": "An interactive component: its accessible name, roles and states.",
+      "status": "draft"
+    },
+    {
+      "glob": "**/legal/**",
+      "role": "chancery",
+      "why": "Terms, privacy and consent text.",
+      "status": "draft"
+    },
+    {
+      "imports": ["@supabase/*", "next-auth", "@clerk/*", "better-auth"],
+      "role": "mason",
+      "why": "One-way door: authorization topology, wherever an auth SDK is called.",
+      "status": "draft"
+    },
+    {
+      "imports": ["@supabase/*", "next-auth", "@clerk/*", "better-auth"],
+      "role": "warden",
+      "why": "Sessions, identity and access, wherever an auth SDK is called.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/db/scripts/seed-users.ts",
+      "role": "mason",
+      "why": "The one named exception to the auth seam: an auth SDK call outside @syn/auth (MIG-7).",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/db/scripts/seed-users.ts",
+      "role": "warden",
+      "why": "The local auth mirror's seeder: creates accounts with the service-role key.",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/lib/clients/supabase/**",
+      "role": "mason",
+      "why": "The browser auth client: the app side of @syn/auth's browser seam (MIG-7).",
+      "status": "draft"
+    },
+    {
+      "glob": "apps/*/lib/clients/supabase/**",
+      "role": "warden",
+      "why": "The public credentials a browser bundle carries.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/api/src/context.ts",
+      "role": "mason",
+      "why": "One-way door: the request's identity to the RLS context every procedure runs as.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/api/src/context.ts",
+      "role": "warden",
+      "why": "Whose session each API request runs as.",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/api/src/services/{integrations,linear,google}/**",
+      "role": "warden",
+      "why": "Integration tokens at rest and in flight: the key, the ciphertext, the OAuth exchange and refresh (USE-100, C5).",
+      "status": "draft"
+    },
+    {
+      "glob": "packages/api/src/services/{integrations,linear,google}/**",
+      "role": "mason",
+      "why": "One-way door: how stored tokens are encrypted; a changed envelope or key strands every connection.",
+      "status": "draft"
+    }
+  ],
+  "stack": {
+    "auth": {
+      "files": [
+        "packages/auth",
+        "apps/web/proxy.ts",
+        "apps/web/lib/clients/supabase",
+        "apps/web/lib/auth",
+        "apps/web/app/auth",
+        "apps/web/app/(auth)",
+        "apps/web/app/(auth-pending)",
+        "apps/web/app/logout",
+        "packages/db/scripts/seed-users.ts"
+      ],
+      "env": [
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "NEXT_PUBLIC_SUPABASE_COOKIE_DOMAIN",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "SUPABASE_SECRET_KEY"
+      ],
+      "dependencies": ["@syn/auth", "@supabase/ssr", "@supabase/supabase-js"],
+      "boundaries": ["auth"],
+      "locked": false,
+      "runbook": "docs/developer-guides/remove-supabase-auth.md"
+    }
+  }
+}

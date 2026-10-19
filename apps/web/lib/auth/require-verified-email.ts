@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
-import type { User } from "@supabase/supabase-js";
 
-import { isEmailVerified } from "@syn/auth";
+import { isEmailVerified, type AuthUser } from "@syn/auth";
 import { sanitizeNextPath } from "@syn/utils";
 
 import { homeRoute, verifyRoute } from "@/lib/routes";
@@ -15,7 +14,7 @@ import { homeRoute, verifyRoute } from "@/lib/routes";
  * the failure it exists for — a toggle flipped in a console is not a change
  * anything in this repository would otherwise notice.
  */
-export function requireVerifiedEmail(user: User, nextPath?: string): void {
+export function requireVerifiedEmail(user: AuthUser, nextPath?: string): void {
   if (isEmailVerified(user)) {
     return;
   }

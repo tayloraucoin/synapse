@@ -25,7 +25,7 @@ type Story = StoryObj<typeof Empty>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <Empty className="p-(--space-6)">
+    <Empty className="p-(--space-8)">
       <EmptyHeader>
         <EmptyTitle>Nothing planned today.</EmptyTitle>
         <EmptyDescription>Plan the day, or add one thing.</EmptyDescription>

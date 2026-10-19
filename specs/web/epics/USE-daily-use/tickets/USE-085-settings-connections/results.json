@@ -1,0 +1,52 @@
+{
+  "id": "USE-85",
+  "criteria_sha256": "98b37d4c7a94b011b57f665ed5a60e7c7b8f8cdd09ce6a0e414875c9362975ae",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:24:11Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-085-settings-connections/evidence/C5.log",
+        "evidence_sha256": "38f91c40741d2dc100212d718dcedaf7a6281cc75b19eabc8701fcc087900f0b"
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:24:14Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-085-settings-connections/evidence/C6.log",
+        "evidence_sha256": "5cf48e3c9cf59075dd973b3ddc250cacd40499ad4689f85904926b16996010b7"
+      }
+    }
+  },
+  "built_at": "2026-10-18T19:01:32Z",
+  "updated_at": "2026-10-18T19:24:14Z"
+}

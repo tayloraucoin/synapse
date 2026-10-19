@@ -23,7 +23,7 @@ export const Overview: Story = {
     const [open, setOpen] = React.useState(false);
     const [destructive, setDestructive] = React.useState(false);
     return (
-      <div className="flex gap-(--space-3) p-(--space-6)">
+      <div className="flex gap-(--space-3) p-(--space-8)">
         <Button variant="secondary" onClick={() => setOpen(true)}>
           Discard prompt
         </Button>

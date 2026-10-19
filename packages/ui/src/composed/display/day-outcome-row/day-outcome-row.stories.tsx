@@ -9,7 +9,7 @@ const meta: Meta<typeof DayOutcomeRow> = {
   parameters: { layout: "fullscreen" },
   decorators: [
     (Story) => (
-      <ul className="max-w-2xl p-(--space-6)">
+      <ul className="max-w-2xl p-(--space-8)">
         <Story />
       </ul>
     ),

@@ -1,0 +1,111 @@
+{
+  "id": "USE-7",
+  "criteria_sha256": "1fdea554d0fb4e189629db119343e6ff37009fc777e892dbd8dffb8e03cbcf6a",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:39:53Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-007-fixtures-data-seam/evidence/C1.log",
+        "evidence_sha256": "8e7737fc3098cf714fbefc2e871fc89a1e360a5d682cf339dc30084d4b2ce250",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:39:53Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-007-fixtures-data-seam/evidence/C2.log",
+        "evidence_sha256": "8e7737fc3098cf714fbefc2e871fc89a1e360a5d682cf339dc30084d4b2ce250",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:39:53Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-007-fixtures-data-seam/evidence/C3.log",
+        "evidence_sha256": "8e7737fc3098cf714fbefc2e871fc89a1e360a5d682cf339dc30084d4b2ce250",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:39:53Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-007-fixtures-data-seam/evidence/C4.log",
+        "evidence_sha256": "8e7737fc3098cf714fbefc2e871fc89a1e360a5d682cf339dc30084d4b2ce250",
+        "tests": 32
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:39:53Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-007-fixtures-data-seam/evidence/C5.log",
+        "evidence_sha256": "8e7737fc3098cf714fbefc2e871fc89a1e360a5d682cf339dc30084d4b2ce250",
+        "tests": 32
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:39:53Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-007-fixtures-data-seam/evidence/C6.log",
+        "evidence_sha256": "8e7737fc3098cf714fbefc2e871fc89a1e360a5d682cf339dc30084d4b2ce250",
+        "tests": 32
+      }
+    },
+    "C8": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:39:53Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-007-fixtures-data-seam/evidence/C8.log",
+        "evidence_sha256": "8e7737fc3098cf714fbefc2e871fc89a1e360a5d682cf339dc30084d4b2ce250",
+        "tests": 32
+      }
+    },
+    "C7": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:40:12Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-007-fixtures-data-seam/evidence/C7.log",
+        "evidence_sha256": "8ee0074cf5fbed075a1b8b64147f48a8cc973c09d7566e444b14329271787290"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:50:17Z",
+  "updated_at": "2026-10-18T19:40:13Z"
+}

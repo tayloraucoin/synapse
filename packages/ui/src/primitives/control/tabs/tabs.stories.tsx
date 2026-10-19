@@ -14,7 +14,7 @@ type Story = StoryObj<typeof Tabs>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <Tabs defaultValue="today" className="max-w-md p-(--space-6)">
+    <Tabs defaultValue="today" className="max-w-md p-(--space-8)">
       <TabsList>
         <TabsTrigger value="today">Today</TabsTrigger>
         <TabsTrigger value="week">This week</TabsTrigger>

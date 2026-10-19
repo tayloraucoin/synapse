@@ -8,7 +8,7 @@ import { StateWord } from "./state-word";
 const meta: Meta<typeof StateWord> = {
   title: "Composed/Display/StateWord",
   component: StateWord,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -32,7 +32,7 @@ export const Undo: Story = {
  */
 export const Vocabulary: StoryObj = {
   render: () => (
-    <div className="flex flex-col gap-(--space-2) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-2) p-(--space-8)">
       {(Object.keys(STATE_WORDS) as StateWordKind[]).map((kind) => (
         <StateWord
           key={kind}

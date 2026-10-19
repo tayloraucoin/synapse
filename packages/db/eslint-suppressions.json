@@ -1,0 +1,27 @@
+{
+  "scripts/reset-user.ts": {
+    "no-restricted-properties": {
+      "count": 2
+    }
+  },
+  "scripts/seed-users.ts": {
+    "no-restricted-properties": {
+      "count": 2
+    }
+  },
+  "src/build-database-env-for-next-config.ts": {
+    "no-restricted-properties": {
+      "count": 1
+    }
+  },
+  "src/connection-env.ts": {
+    "no-restricted-properties": {
+      "count": 9
+    }
+  },
+  "src/seed/index.ts": {
+    "no-restricted-properties": {
+      "count": 1
+    }
+  }
+}

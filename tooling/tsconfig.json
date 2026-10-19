@@ -1,0 +1,14 @@
+{
+  "extends": "@syn/config/tsconfig/base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "lib": ["es2023"],
+    "types": ["node"]
+  },
+  "include": ["**/*.ts"]
+}

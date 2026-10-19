@@ -16,7 +16,7 @@ import { LargeTargetRow } from "./large-target-row";
 const meta: Meta<typeof LargeTargetRow> = {
   title: "Composed/Control/LargeTargetRow",
   component: LargeTargetRow,
-  decorators: [(Story) => <div className="max-w-lg p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-lg p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -150,7 +150,7 @@ export const StackedOneSelectedBesideAPrimary: StoryObj = {
   render: function Render() {
     const [value, setValue] = React.useState<string | null>("slide");
     return (
-      <div className="flex flex-col gap-(--space-5)">
+      <div className="flex flex-col gap-(--space-6)">
         <LargeTargetRow
           label="What gives?"
           layout="stacked"

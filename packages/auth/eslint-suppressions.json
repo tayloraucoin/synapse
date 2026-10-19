@@ -1,0 +1,7 @@
+{
+  "src/cookies.ts": {
+    "no-restricted-properties": {
+      "count": 3
+    }
+  }
+}

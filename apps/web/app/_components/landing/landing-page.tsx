@@ -58,11 +58,11 @@ const FIGURE =
   "border-hairline rounded-(--radius-sheet) border ps-(--space-4) pe-(--space-2) py-(--space-2)";
 
 /** 48px is the top of the scale (§9.5); the page is as dense as the app. */
-const SECTION = "border-hairline border-t py-(--space-7)";
+const SECTION = "border-hairline border-t py-(--space-12)";
 
 /** Text left, picture right, on the one breakpoint. The page does not zigzag. */
 const SPLIT =
-  "flex flex-col gap-(--space-5) wide:grid wide:grid-cols-12 wide:items-start wide:gap-(--space-6)";
+  "flex flex-col gap-(--space-6) wide:grid wide:grid-cols-12 wide:items-start wide:gap-(--space-8)";
 
 /*
  * The hero is the one section with three items rather than two: the words, the
@@ -88,7 +88,7 @@ export function LandingPage() {
         {LANDING_COPY.skipLink}
       </a>
 
-      <div className="mx-auto w-full max-w-(--content-canvas) px-(--space-4) wide:px-(--space-6)">
+      <div className="mx-auto w-full max-w-(--content-canvas) px-(--space-4) wide:px-(--space-8)">
         <header className="flex h-(--header-h) items-center justify-between">
           <Text as="span" variant="body" weight={500}>
             {LANDING_COPY.header.wordmark}
@@ -100,7 +100,7 @@ export function LandingPage() {
 
         <main id="main">
           {/* ---------------------------------------------------- hero -- */}
-          <section className="py-(--space-7)">
+          <section className="py-(--space-12)">
             <div className={HERO_SPLIT}>
               <div className={cn(SPLIT_TEXT, "wide:row-start-1")}>
                 <Heading balance>{LANDING_COPY.hero.heading}</Heading>
@@ -259,7 +259,7 @@ export function LandingPage() {
           </section>
         </main>
 
-        <footer className="border-hairline flex flex-wrap items-center gap-(--space-4) border-t py-(--space-5)">
+        <footer className="border-hairline flex flex-wrap items-center gap-(--space-4) border-t py-(--space-6)">
           <Text as="span" variant="body" weight={500}>
             {LANDING_COPY.footer.wordmark}
           </Text>

@@ -8,7 +8,7 @@ import { ArchivedSection } from "./archived-section";
 const meta: Meta<typeof ArchivedSection> = {
   title: "Composed/Display/ArchivedSection",
   component: ArchivedSection,
-  decorators: [(Story) => <div className="max-w-2xl p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-2xl p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

@@ -13,7 +13,7 @@ const meta: Meta<typeof TimeText> = {
   title: "Composed/Display/TimeText",
   component: TimeText,
   args: { timeZone: STORY_TIME_ZONE, start, end },
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -38,7 +38,7 @@ export const Elapsed: Story = { args: { mode: "elapsed", elapsedSec: 3661 } };
  */
 export const SameInstantThreeZones: StoryObj = {
   render: () => (
-    <div className="flex flex-col gap-(--space-3) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-3) p-(--space-8)">
       {["America/Vancouver", "America/Toronto", "Europe/Berlin"].map((zone) => (
         <div key={zone} className="flex items-baseline gap-(--space-3)">
           <Caption as="span" className="w-44">

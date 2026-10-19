@@ -1,0 +1,112 @@
+{
+  "expect": "fail",
+  "message": "machine path",
+  "settings": {
+    "$schema": "https://json.schemastore.org/claude-code-settings.json",
+    "permissions": {
+      "deny": [
+        "Bash(git push)",
+        "Bash(git push *)",
+        "Bash(git reset --hard)",
+        "Bash(git reset --hard *)",
+        "Bash(git clean *)",
+        "Bash(git branch -D *)",
+        "Bash(git filter-branch *)",
+        "Bash(npm publish)",
+        "Bash(npm publish *)",
+        "Bash(npm login)",
+        "Bash(npm login *)",
+        "Bash(yarn npm publish)",
+        "Bash(yarn npm publish *)",
+        "Bash(yarn npm login)",
+        "Bash(yarn npm login *)",
+        "Bash(rm -rf /*)",
+        "Bash(rm -rf ~*)",
+        "Bash(dropdb *)",
+        "Bash(*db:reset*)",
+        "Bash(*db:drop*)",
+        "Bash(*supabase db reset*)",
+        "Bash(*drizzle-kit drop*)",
+        "Bash(*prisma migrate reset*)",
+        "Bash(*DROP SCHEMA*)",
+        "Bash(*DROP DATABASE*)",
+        "Read(**/.env)",
+        "Read(**/.env.*)",
+        "Read(**/secrets/**)",
+        "Read(**/*.pem)",
+        "Read(~/.ssh/**)",
+        "Read(~/.aws/**)"
+      ],
+      "ask": [
+        "Bash(gh pr create *)",
+        "Bash(gh pr merge *)",
+        "Bash(vercel *)",
+        "Bash(yarn dlx *)",
+        "Bash(*db:migrate*)",
+        "Bash(*db:push*)",
+        "Bash(*db:seed*)",
+        "Bash(*db:setup*)",
+        "Bash(*supabase db push*)",
+        "Bash(*drizzle-kit migrate*)",
+        "Bash(*drizzle-kit push*)",
+        "Bash(*prisma migrate deploy*)"
+      ],
+      "allow": [
+        "Bash(yarn *)",
+        "Bash(corepack *)",
+        "Bash(node tooling/*)",
+        "Bash(git status *)",
+        "Bash(git diff *)",
+        "Bash(git log *)",
+        "Bash(git show *)",
+        "Bash(git ls-files *)",
+        "Bash(git rev-parse *)",
+        "Bash(git branch *)",
+        "Bash(git switch *)",
+        "Bash(git add *)",
+        "Bash(git commit *)",
+        "Bash(git restore *)",
+        "Bash(git stash *)",
+        "Bash(git mv *)",
+        "Bash(git worktree *)"
+      ]
+    },
+    "sandbox": {
+      "enabled": true,
+      "autoAllowBashIfSandboxed": true,
+      "allowUnsandboxedCommands": true,
+      "network": {
+        "allowLocalBinding": true,
+        "allowedDomains": [
+          "localhost",
+          "127.0.0.1",
+          "[::1]",
+          "registry.npmjs.org",
+          "registry.yarnpkg.com",
+          "repo.yarnpkg.com",
+          "github.com",
+          "codeload.github.com",
+          "objects.githubusercontent.com",
+          "raw.githubusercontent.com",
+          "api.github.com"
+        ]
+      },
+      "filesystem": {
+        "allowWrite": [
+          "~/.yarn",
+          "~/.cache/yarn",
+          "~/Library/Caches/Yarn",
+          "/Users/example/projects/cache"
+        ],
+        "denyRead": [
+          "~/.ssh",
+          "~/.aws",
+          "./**/.env",
+          "./**/.env.*",
+          "./**/secrets",
+          "./**/*.pem"
+        ]
+      }
+    }
+  }
+}

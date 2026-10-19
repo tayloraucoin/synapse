@@ -1,102 +1,102 @@
 /**
- * AppShell — the signed-in frame (v2 handoff §5.2).
+ * AppShell — USE's signed-in frame (USE-4).
  *
- * Adapted from CC's `(app)/layout.tsx`. The *server* layout does the auth gate
- * and the entry redirect; this is the client frame it renders into — the rail
- * on wide, the tab bar on compact, the status-line slot, and the `main`
- * landmark.
+ * BOTH NAVIGATIONS RENDER AND CSS PICKS ONE at the `split:` break (1024,
+ * D-USE-93): the rail from 1024 up, the tabs below it (D-USE-74). Never
+ * `useIsSplit` here: it reads false on the server, so the first paint would
+ * guess the width and flash the wrong chrome.
  *
- * BOTH NAVIGATIONS ARE RENDERED AND ONE IS HIDDEN BY CSS, not by
- * `useIsWide`. A JS breakpoint here would mean the first paint after
- * hydration has no navigation at all, and on a slow phone that is a visible
- * flash of a page with no way out. The `wide:` variant does it in the
- * stylesheet, before React runs.
+ * The skip link is first in the DOM and targets `#main`, which every page
+ * renders. Below 1024 the column is padded by the tab bar's height (and the
+ * safe area the bar pads itself by), so the bar never covers content.
  *
- * THE SKIP LINK IS FIRST IN THE DOM (cross-cutting §3.4) and reads *Skip to
- * today's list*, not "skip to content" — a person using it knows what they
- * want.
+ * A focused path (`isFocusedPath`) renders with no rail and no tabs; a
+ * pushed one (`isPushedPath`, Set my days) keeps the rail and drops the tabs.
  *
- * `sheetOpen` dims the tab bar, so a tab under a scrim is visibly and actually
- * inert rather than a live target a stray tap can hit.
+ * `?sheet=` is read once, here, by `SheetHost` (USE-83), over any screen.
  *
- * WHAT MOVED OUT, AND WHY (SYS-1). `main`, the header slot and the status-line
- * slot used to be here; they are now `PageFrame`'s, in `components/page-frame/`.
- * A `<header>` is only a `banner` landmark while it is not inside `main`, and
- * every page's header is rendered by the page — from inside this component's
- * children, which were inside `main`. Keeping the three landmarks in the
- * relationship cross-cutting §3.4 describes meant giving the page the whole
- * column. The skip link stays here, first in the DOM, and still targets
- * `#main`, which every `PageFrame` renders.
+ * SY-02's update line (USE-114) heads the content column, above the page's
+ * own header, on every screen with the rail or the tabs; a focused path stays
+ * bare.
  */
 "use client";
 
-import * as React from "react";
-
-import { cn } from "@syn/ui/cn";
-
+import type * as React from "react";
+import { usePathname } from "next/navigation";
+import { cn } from "@syn/ui";
+import { useTodayKey } from "@/lib/data/use-morning";
+import { useDayPhase } from "@/lib/data/use-now";
+import { SHELL_COPY as COPY } from "./copy";
+import { isFocusedPath, isPushedPath } from "./nav-items";
 import { Rail } from "./rail";
+import { useMarkShellPainted } from "./day-entry-gate";
+import { SheetHost, SheetOpenerProvider } from "./sheet-host";
 import { TabBar } from "./tab-bar";
+import { UpdateStatus } from "./update-status";
+import { useBlockViewFrom } from "./use-block-view-from";
 
-/**
- * NO `activeTab` PROP — a divergence from the handoff's §5.2 signature.
- * `TabBar` and `Rail` both derive the active tab from `usePathname()`, and a
- * prop saying the same thing is a second source for one fact: the first route
- * that forgets to pass it, or passes the wrong one, gets a shell that
- * disagrees with the URL. The pathname is the truth.
- */
 export interface AppShellProps {
-  reviewHasPending: boolean;
-  user: { name: string; imageUrl: string | null };
-  /** True while a sheet owns the screen — dims and disables the tab bar. */
-  sheetOpen?: boolean;
-  /**
-   * The orient frame (UX v1.1 §5.2, DYN-13): "no header, no tab bar". Paper
-   * and the page alone — the rail and the tab bar are not rendered, the skip
-   * link still is (the frame renders `main`).
-   */
-  bare?: boolean;
-  /** A page, which renders its own `PageFrame` (header, status line, `main`). */
   children: React.ReactNode;
 }
 
-export function AppShell({
-  reviewHasPending,
-  user,
-  sheetOpen = false,
-  bare = false,
-  children,
-}: AppShellProps) {
-  if (bare) {
+export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
+  // Block view from Review the day is focused; from Schedule it keeps the tabs.
+  const blockFrom = useBlockViewFrom();
+  // The phone's first tab reads "List" before Ready, go, from the day record
+  // (D-USE-5, USE-17); "Now" while it is read.
+  const phase = useDayPhase(useTodayKey());
+  const firstTab = phase === "before-go" ? "List" : "Now";
+  useMarkShellPainted();
+  const pushed = isPushedPath(pathname);
+
+  if (isFocusedPath(pathname, null, blockFrom)) {
     return (
-      <div className="bg-paper flex min-h-dvh flex-col">
-        <div className="flex min-w-0 flex-1 flex-col">{children}</div>
-      </div>
+      <SheetOpenerProvider>
+        <div className="bg-background flex min-h-dvh flex-col">{children}</div>
+        <SheetHost />
+      </SheetOpenerProvider>
     );
   }
 
   return (
-    <div className="bg-paper flex min-h-dvh flex-col wide:flex-row">
-      <a
-        href="#main"
-        className={cn(
-          "sr-only focus:not-sr-only",
-          "focus:bg-paper focus:text-ink focus:absolute focus:start-(--space-4) focus:top-(--space-4) focus:z-50",
-          "focus:rounded-(--radius) focus:px-(--space-4) focus:py-(--space-2)",
-          "focus:ring-2 focus:ring-ring",
+    <SheetOpenerProvider>
+      <div className="bg-background flex min-h-dvh flex-col split:flex-row">
+        <a
+          href="#main"
+          className={cn(
+            "sr-only focus:not-sr-only",
+            "focus:bg-background focus:text-foreground focus:absolute focus:start-(--space-4) focus:top-(--space-4) focus:z-50",
+            "focus:rounded-(--radius-control) focus:px-(--space-4) focus:py-(--space-2)",
+            "focus:ring-ring focus:ring-2",
+          )}
+        >
+          {COPY.skipLink}
+        </a>
+
+        <div className="sticky top-0 hidden h-dvh shrink-0 split:block">
+          <Rail />
+        </div>
+
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 flex-col split:pb-0",
+            pushed
+              ? "pb-[env(safe-area-inset-bottom)]"
+              : "pb-[calc(var(--tabbar-h)+env(safe-area-inset-bottom))]",
+          )}
+        >
+          <UpdateStatus />
+          {children}
+        </div>
+
+        {pushed ? null : (
+          <div className="split:hidden">
+            <TabBar firstTab={firstTab} />
+          </div>
         )}
-      >
-        Skip to today&rsquo;s list
-      </a>
-
-      <div className="hidden wide:block">
-        <Rail reviewHasPending={reviewHasPending} user={user} />
       </div>
-
-      <div className="flex min-w-0 flex-1 flex-col">{children}</div>
-
-      <div className="fixed inset-x-0 bottom-0 wide:hidden">
-        <TabBar reviewHasPending={reviewHasPending} dimmed={sheetOpen} />
-      </div>
-    </div>
+      <SheetHost />
+    </SheetOpenerProvider>
   );
 }

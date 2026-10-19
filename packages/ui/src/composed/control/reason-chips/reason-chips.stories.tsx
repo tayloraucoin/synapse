@@ -12,7 +12,7 @@ import { ReasonChips } from "./reason-chips";
 const meta: Meta<typeof ReasonChips> = {
   title: "Composed/Control/ReasonChips",
   component: ReasonChips,
-  decorators: [(Story) => <div className="max-w-lg p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-lg p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

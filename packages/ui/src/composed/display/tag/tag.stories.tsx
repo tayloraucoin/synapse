@@ -6,7 +6,7 @@ import { Tag } from "./tag";
 const meta: Meta<typeof Tag> = {
   title: "Composed/Display/Tag",
   component: Tag,
-  decorators: [(Story) => <div className="p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="p-(--space-8)"><Story /></div>],
 };
 
 export default meta;
@@ -20,7 +20,7 @@ export const Accent: Story = { args: { children: "overridden", tone: "accent" } 
 
 export const Vocabulary: StoryObj = {
   render: () => (
-    <div className="flex flex-wrap gap-(--space-3) p-(--space-6)">
+    <div className="flex flex-wrap gap-(--space-3) p-(--space-8)">
       {["wake-up", "archived", "default", "planned"].map((word) => (
         <Tag key={word}>{word}</Tag>
       ))}

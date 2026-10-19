@@ -1,0 +1,51 @@
+{
+  "id": "USE-97",
+  "criteria_sha256": "11ff57b9a2b1644a0965b4255001e1204f49dfd4844f17676a3a237ddf5e261a",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:56:32Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-097-account-colours-topics/evidence/C1.log",
+        "evidence_sha256": "ce9e5724f7fb06f624f8d0d74590f7346181af4ffc749eddb7a830733cc23e17",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:56:32Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-097-account-colours-topics/evidence/C2.log",
+        "evidence_sha256": "ce9e5724f7fb06f624f8d0d74590f7346181af4ffc749eddb7a830733cc23e17",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:56:51Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-097-account-colours-topics/evidence/C4.log",
+        "evidence_sha256": "28e15ca2186598e6c317b2f2c749ae0eae4c34501f3ff4338869ef7718b21069"
+      }
+    }
+  },
+  "built_at": "2026-10-18T23:03:25Z",
+  "updated_at": "2026-10-18T23:03:25Z"
+}

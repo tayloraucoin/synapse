@@ -15,7 +15,7 @@ type Story = StoryObj<typeof Separator>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex max-w-md flex-col gap-(--space-3) p-(--space-6)">
+    <div className="flex max-w-md flex-col gap-(--space-3) p-(--space-8)">
       <span>Morning</span>
       <Separator />
       <span>Afternoon</span>

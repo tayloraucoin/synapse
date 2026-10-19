@@ -39,7 +39,7 @@ export function DayCompleteAction({
     <div
       className={cn(
         "flex flex-col items-center gap-(--space-2)",
-        "pt-(--space-5) pb-[calc(var(--space-5)+env(safe-area-inset-bottom))]",
+        "pt-(--space-6) pb-[calc(var(--space-6)+env(safe-area-inset-bottom))]",
         className,
       )}
     >

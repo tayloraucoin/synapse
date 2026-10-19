@@ -19,6 +19,11 @@
  *
  * `slides: []` renders the caller's `empty` — the frame decides what an
  * unread morning says.
+ *
+ * CLAMPED (USE-12, D-USE-9): Orient's form. Each passage reads as plain text
+ * in the serif, cut to four lines with an ellipsis; `trailing` ("Read all")
+ * sits at the dots' row's trailing edge and the dots move to the leading
+ * edge. The full text is the reader's (USE-13).
  */
 "use client";
 
@@ -29,6 +34,7 @@ import { usePrefersReducedMotion } from "../../../hooks/use-prefers-reduced-moti
 import { Text } from "../../../primitives/typography/text";
 import { RichTextEditor } from "../../control/rich-text-editor";
 import { PASSAGE_CAROUSEL_COPY } from "./copy";
+import { useSwipe } from "./use-swipe";
 
 export type PassageSlide =
   | {
@@ -53,11 +59,13 @@ export interface PassageCarouselProps {
   resolveImageUrl?: (key: string) => string | null;
   /** What an empty morning shows. */
   empty?: React.ReactNode;
+  /** Cut each passage to four lines of plain text (Orient's reading). */
+  clamp?: boolean;
+  /** With `clamp`, at the dots' row's trailing edge: "Read all". */
+  trailing?: React.ReactNode;
   label?: string;
   className?: string;
 }
-
-const SWIPE_PX = 40;
 
 export function PassageCarousel({
   slides,
@@ -65,6 +73,8 @@ export function PassageCarousel({
   onIndexChange,
   resolveImageUrl,
   empty = null,
+  clamp = false,
+  trailing,
   label = PASSAGE_CAROUSEL_COPY.region,
   className,
 }: PassageCarouselProps) {
@@ -72,8 +82,6 @@ export function PassageCarousel({
   const regionId = React.useId();
   const count = slides.length;
   const current = Math.min(Math.max(0, index), Math.max(0, count - 1));
-  const pointer = React.useRef<{ id: number; startX: number; startY: number } | null>(null);
-  const [dragX, setDragX] = React.useState(0);
 
   const go = React.useCallback(
     (next: number) => {
@@ -100,32 +108,11 @@ export function PassageCarousel({
     }
   };
 
-  const onPointerDown = (event: React.PointerEvent) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    pointer.current = { id: event.pointerId, startX: event.clientX, startY: event.clientY };
-  };
-  const onPointerMove = (event: React.PointerEvent) => {
-    const start = pointer.current;
-    if (!start || start.id !== event.pointerId) return;
-    const dx = event.clientX - start.startX;
-    const dy = event.clientY - start.startY;
-    // A vertical gesture is the page's scroll, not ours.
-    if (Math.abs(dy) > Math.abs(dx)) return;
-    setDragX(reducedMotion ? 0 : dx);
-  };
-  const onPointerUp = (event: React.PointerEvent) => {
-    const start = pointer.current;
-    if (!start || start.id !== event.pointerId) return;
-    pointer.current = null;
-    const dx = event.clientX - start.startX;
-    setDragX(0);
-    if (dx <= -SWIPE_PX) go(current + 1);
-    else if (dx >= SWIPE_PX) go(current - 1);
-  };
-  const onPointerCancel = () => {
-    pointer.current = null;
-    setDragX(0);
-  };
+  const { dragX, handlers } = useSwipe({
+    onNext: () => go(current + 1),
+    onPrevious: () => go(current - 1),
+    reducedMotion,
+  });
 
   if (count === 0) {
     return (
@@ -150,15 +137,12 @@ export function PassageCarousel({
     >
       <div
         className="touch-pan-y overflow-hidden"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerCancel}
+        {...handlers}
       >
         {reducedMotion ? (
           // Crossfade: only the current slide is in the flow; it fades in.
           <div key={slides[current]?.id} className="motion-safe:animate-in motion-safe:fade-in duration-200">
-            <Slide slide={slides[current]} resolveImageUrl={resolveImageUrl} position={current + 1} count={count} />
+            <Slide slide={slides[current]} resolveImageUrl={resolveImageUrl} position={current + 1} count={count} clamp={clamp} />
           </div>
         ) : (
           <div
@@ -171,14 +155,33 @@ export function PassageCarousel({
                 aria-hidden={at !== current ? true : undefined}
                 className="w-full shrink-0"
               >
-                <Slide slide={slide} resolveImageUrl={resolveImageUrl} position={at + 1} count={count} />
+                <Slide slide={slide} resolveImageUrl={resolveImageUrl} position={at + 1} count={count} clamp={clamp} />
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {count > 1 ? (
+      {clamp ? (
+        // Orient's row: decorative dots at the leading edge (the region's
+        // arrows move passages; dots are not tab stops), "Read all" trailing.
+        <div className="flex min-h-(--target) items-center justify-between gap-(--space-3)">
+          <div aria-hidden="true" className="flex gap-(--space-2)">
+            {count > 1
+              ? slides.map((slide, at) => (
+                  <span
+                    key={slide.id}
+                    className={cn(
+                      "block size-2 rounded-full",
+                      at === current ? "bg-foreground" : "bg-fill-muted",
+                    )}
+                  />
+                ))
+              : null}
+          </div>
+          {trailing}
+        </div>
+      ) : count > 1 ? (
         <div role="tablist" aria-label={PASSAGE_CAROUSEL_COPY.dots} className="flex justify-center gap-(--space-2)">
           {slides.map((slide, at) => (
             <button
@@ -198,7 +201,7 @@ export function PassageCarousel({
               <span
                 aria-hidden="true"
                 className={cn(
-                  "block size-2 rounded-full transition-colors duration-(--dur-state)",
+                  "block size-2 transition-colors duration-(--dur-state)",
                   at === current ? "bg-ink" : "bg-edge",
                 )}
               />
@@ -215,11 +218,13 @@ function Slide({
   resolveImageUrl,
   position,
   count,
+  clamp,
 }: {
   slide: PassageSlide | undefined;
   resolveImageUrl: PassageCarouselProps["resolveImageUrl"];
   position: number;
   count: number;
+  clamp: boolean;
 }) {
   if (slide === undefined) return null;
 
@@ -233,7 +238,12 @@ function Slide({
         <Text as="span" variant="caption" tone="secondary">
           {PASSAGE_CAROUSEL_COPY.quoteCaption}
         </Text>
-        <blockquote className="tabular-off m-0 font-serif text-(length:--fs-row-title) leading-(--lh-row-title)">
+        <blockquote
+          className={cn(
+            "tabular-off m-0 text-(length:--fs-row-title) leading-(--lh-row-title)",
+            clamp && "line-clamp-4",
+          )}
+        >
           “{slide.text}”
         </blockquote>
         {slide.attribution === null ? null : (
@@ -267,7 +277,24 @@ function Slide({
       <Text as="span" variant="caption" tone="secondary">
         {slide.title}
       </Text>
-      <RichTextEditor valueMd={slide.bodyMd} readOnly />
+      {clamp ? (
+        <Text as="p" variant="review-sentence" className="line-clamp-4">
+          {plainTextOf(slide.bodyMd)}
+        </Text>
+      ) : (
+        <RichTextEditor valueMd={slide.bodyMd} readOnly />
+      )}
     </article>
   );
+}
+
+/** A passage's Markdown as one run of plain text, for the clamped form. */
+function plainTextOf(md: string): string {
+  return md
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "")
+    .replace(/(\*\*|__|\*|_|~~|`)/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }

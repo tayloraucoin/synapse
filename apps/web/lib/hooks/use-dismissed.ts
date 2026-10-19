@@ -32,6 +32,28 @@ function storageFor(scope: DismissScope): Storage | null {
   }
 }
 
+/** Whether a stored flag still hides its line (pure, so a test reads it). */
+export function readDismissal(
+  store: Pick<Storage, "getItem">,
+  key: string,
+  scope: DismissScope,
+  dayKey?: string,
+): boolean {
+  const stored = store.getItem(`${PREFIX}${key}`);
+  if (stored === null) return false;
+  return scope === "day" ? stored === dayKey : stored === "1";
+}
+
+/** The flag a dismissal stores: its scope's own value. */
+export function writeDismissal(
+  store: Pick<Storage, "setItem">,
+  key: string,
+  scope: DismissScope,
+  dayKey?: string,
+): void {
+  store.setItem(`${PREFIX}${key}`, scope === "day" ? (dayKey ?? "1") : "1");
+}
+
 export function useDismissed(
   key: string,
   scope: DismissScope,
@@ -39,31 +61,27 @@ export function useDismissed(
   dayKey?: string,
 ): [boolean, () => void] {
   const [dismissed, setDismissed] = useState(false);
-  const storageKey = `${PREFIX}${key}`;
 
   useEffect(() => {
     const store = storageFor(scope);
     if (store === null) return;
     try {
-      const stored = store.getItem(storageKey);
-      if (stored === null) return;
-      if (scope === "day") setDismissed(stored === dayKey);
-      else setDismissed(stored === "1");
+      setDismissed(readDismissal(store, key, scope, dayKey));
     } catch {
       // Storage unavailable — the line shows for this run.
     }
-  }, [dayKey, scope, storageKey]);
+  }, [dayKey, scope, key]);
 
   const dismiss = useCallback(() => {
     setDismissed(true);
     const store = storageFor(scope);
     if (store === null) return;
     try {
-      store.setItem(storageKey, scope === "day" ? (dayKey ?? "1") : "1");
+      writeDismissal(store, key, scope, dayKey);
     } catch {
       // Best-effort: the dismissal still holds for this run.
     }
-  }, [dayKey, scope, storageKey]);
+  }, [dayKey, scope, key]);
 
   return [dismissed, dismiss];
 }

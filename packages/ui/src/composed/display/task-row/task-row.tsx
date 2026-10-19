@@ -233,7 +233,7 @@ export function TaskRowSkeleton({ className }: { className?: string }) {
       className={cn("flex min-h-(--row-min) items-center gap-(--space-1) pe-(--space-1)", className)}
     >
       <span className="flex size-(--target) shrink-0 items-center justify-center">
-        <Skeleton className="size-2.5 rounded-(--radius-full)" />
+        <Skeleton className="size-2.5 rounded-none" />
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-(--space-2)">
         <Skeleton className="h-4 w-2/3" />

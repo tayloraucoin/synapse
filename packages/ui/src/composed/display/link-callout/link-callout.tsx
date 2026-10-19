@@ -17,9 +17,8 @@
  * neutral-700); reduced motion drops the transition. The name is *{title},
  * opens in a new tab*; both glyphs are `aria-hidden`.
  */
-import { ExternalLink } from "lucide-react";
 import * as React from "react";
-
+import { ExternalLink } from "lucide-react";
 import { cn } from "../../../lib/cn";
 import { Text } from "../../../primitives/typography/text";
 import { BrandGlyph } from "../brand-glyph";
@@ -31,12 +30,18 @@ export interface LinkCalloutProps {
   url: string;
   /** *open.spotify.com* — the caller's `new URL(url).host`; empty shows the title alone. */
   host: string;
-  /** The stored kind: `spotify` draws the mark; anything else the link glyph. */
-  kind: "spotify" | "other";
+  /** The stored kind: `spotify` draws the mark; `play` a play glyph (a video, no brand); anything else the link glyph. */
+  kind: "spotify" | "play" | "other";
   className?: string;
 }
 
-export function LinkCallout({ title, url, host, kind, className }: LinkCalloutProps) {
+export function LinkCallout({
+  title,
+  url,
+  host,
+  kind,
+  className,
+}: LinkCalloutProps) {
   return (
     <a
       href={url}
@@ -50,7 +55,7 @@ export function LinkCallout({ title, url, host, kind, className }: LinkCalloutPr
         className,
       )}
     >
-      <BrandGlyph kind={kind === "spotify" ? "spotify" : "link"} />
+      <BrandGlyph kind={kind === "other" ? "link" : kind} />
       <span className="flex min-w-0 flex-1 flex-col">
         <Text as="span" variant="row-title" weight={500} truncate>
           {title}
@@ -62,7 +67,11 @@ export function LinkCallout({ title, url, host, kind, className }: LinkCalloutPr
         )}
         <span className="sr-only">, {LINK_CALLOUT_COPY.opensInANewTab}</span>
       </span>
-      <ExternalLink aria-hidden="true" strokeWidth={1.5} className="text-text-secondary size-5 shrink-0" />
+      <ExternalLink
+        aria-hidden="true"
+        strokeWidth={1.5}
+        className="text-text-secondary size-5 shrink-0"
+      />
     </a>
   );
 }

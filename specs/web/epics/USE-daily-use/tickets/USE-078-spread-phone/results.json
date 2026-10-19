@@ -1,0 +1,42 @@
+{
+  "id": "USE-78",
+  "criteria_sha256": "e98f987f506be7e922c4d3251d093c8300138344ef3db796631eb247719f596b",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:23:36Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-078-spread-phone/evidence/C3.log",
+        "evidence_sha256": "be3bbfc7d2633c578e253a53d941b889290b56a140d3daf52a004a83dca8a21d"
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:23:38Z",
+        "head": "ee9ae266e3894185ceaa062edd1f96dc703761f9",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-078-spread-phone/evidence/C4.log",
+        "evidence_sha256": "fb0d38d1cb30e31d83c290b505f7f441605217c57bb1891308a3770ed1162ac7"
+      }
+    }
+  },
+  "built_at": "2026-10-18T19:01:17Z",
+  "updated_at": "2026-10-18T19:23:38Z"
+}

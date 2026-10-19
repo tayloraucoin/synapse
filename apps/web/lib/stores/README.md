@@ -26,15 +26,16 @@ frequency — a theme, a signed-in user, an open sheet — and wrong at machine
 frequency, where it re-renders a whole subtree many times a second to update
 one number.
 
-**The first sanctioned Zustand store is the running-timer tick**, and it now
-exists as [`use-timer-store.ts`](use-timer-store.ts), built by USE-3. A timer
+**The first sanctioned Zustand store was the running-timer tick**, built by
+USE-3 and moved to [`_legacy/lib/stores/use-timer-store.ts`](../../_legacy/lib/stores/use-timer-store.ts)
+with the old app (USE-1, 2026-10-13); no live store exists now. A timer
 publishes elapsed seconds at 1 Hz, and four places read it: the item row, the
 item sheet, the tab title, and (Phase 2) the persistent notification. Through
 Context, that is the entire day list re-rendering every second.
 
 It holds no server data. Whether a timer EXISTS is a `timer_sessions` row; the
 store holds what to draw and is re-seeded from the server on every refetch — so
-the rule above is kept, not bent, by the one store that exists.
+the rule above was kept, not bent, by that store.
 
 If you want a SECOND store, the bar is the same one this one cleared: a wide
 tree, a high frequency, and a measurement. Otherwise the answer is Context.

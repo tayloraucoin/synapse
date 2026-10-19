@@ -5,7 +5,7 @@
 **Status:** Draft for Taylor's read; Mason and Reeve cut `docs/specs/epic-6-day-first-first-run/` from it. An iteration version: v1.2 is the base; this document rewrites §4 whole, amends §3, §5.2, §7.2, §10, §11, §12 in place, and carries the rest forward by reference.
 **Base:** [`ux-spec-v1.2.md`](ux-spec-v1.2.md) (draft 2026-09-16, built as Epic 5), which stands on [`ux-spec-v1.1.md`](ux-spec-v1.1.md) (accepted 2026-09-12), which stands on [`ux-spec-v1.md`](ux-spec-v1.md). Where this document and v1.2 disagree, this document wins; where it is silent, v1.2 stands; then v1.1; then v1.
 **Sources:** Taylor's second first-run walkthrough, [`2026-09-24-first-run-walkthrough-feedback-v1.2.md`](../product/2026-09-24-first-run-walkthrough-feedback-v1.2.md) (cited as `T#.#` for a screen note and `G#` for the general restructure), and his spoken clarifications of the same day, cited as `C#`.
-**Companions:** [`synapse_ui_component_needs_and_handoff_v2.md`](synapse_ui_component_needs_and_handoff_v2.md) for component contracts · [`brand-tokens.md`](../ai-guides/brand-tokens.md) for token names · [`branding-guide.md`](branding-guide.md) for the derived orientation.
+**Companions:** [`synapse_ui_component_needs_and_handoff_v2.md`](synapse_ui_component_needs_and_handoff_v2.md) for component contracts · [`brand-tokens.md`](../ai-guides/brand-tokens.md) for token names · [`branding-guide.md`](branding-guide.md) for the brand (the operator's kit, §10.1).
 
 ---
 
@@ -457,6 +457,10 @@ v1.2 §9 stands. No new push. The block-boundary push for the transition reads i
 ---
 
 ## 10. State matrix, tokens, accessibility
+
+### 10.1 Brand — superseded by the brand kit (WEB-1, 2026-10-09)
+
+Colour, type, shape, the mark and the voice now come from the operator's brand kit, carried into [`branding-guide.md`](branding-guide.md), [`brand-tokens.md`](../ai-guides/brand-tokens.md) and `preset.css`; where this document names an older token, size or face, the guide wins. Two consequences for this version: Newsreader appears on Review screens only, so the journal's closing quote (§7.2) and the orient frame's reading (§5.2) are set in Public Sans; and nothing is a pill, so the block and chip shapes in §10.2 take `radius-control`.
 
 ### 10.2 Component states — the new and amended components
 

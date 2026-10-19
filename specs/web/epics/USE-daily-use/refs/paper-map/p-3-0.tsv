@@ -1,0 +1,371 @@
+name	x	y	w	h	node_id	row_label
+Progress	0	-700	1400		A0F-0	
+Row label · step 0	-560	0	440		9ZZ-0	Row label · step 0
+overview / first-wake loop / board / light	0	0			6ER-0	Row label · step 0
+Row label · Orient	-560	2640	440		A03-0	Row label · Orient
+orient / success / 402 / light	0	2640	402	874	7OY-0	Row label · Orient
+orient / passage open / 402 / light	482	2640	402	874	7ZS-0	Row label · Orient
+orient / last night open / 402 / light	964	2640	402	874	806-0	Row label · Orient
+orient / late / 402 / light	1446	2640	402	874	7QQ-0	Row label · Orient
+orient / empty / 402 / light	1928	2640	402	874	7VT-0	Row label · Orient
+orient / loading / 402 / light	2410	2640	402	874	7U4-0	Row label · Orient
+orient / error / 402 / light	2892	2640	402	874	7SF-0	Row label · Orient
+orient / offline / 402 / light	3374	2640	402	874	7XI-0	Row label · Orient
+Note · success	0	3570	402		82O-0	Row label · Orient
+Note · success	482	3570	402		83A-0	Row label · Orient
+Note · success	964	3570	402		837-0	Row label · Orient
+Note · success	1446	3570	402		82Y-0	Row label · Orient
+Note · success	1928	3570	402		834-0	Row label · Orient
+Note · success	2410	3570	402		82V-0	Row label · Orient
+Note · success	2892	3570	402		82S-0	Row label · Orient
+Note · success	3374	3570	402		831-0	Row label · Orient
+Row label · Review the day	-560	3900	440		A06-0	Row label · Review the day
+review-day / success / 402 / light	0	3900	402	874	86Q-0	Row label · Review the day
+review-day / first mornings / 402 / light	482	3900	402	874	83D-0	Row label · Review the day
+review-day / first-edit / 402 / light	964	3900	402	874	8A2-0	Row label · Review the day
+review-day / after swap, undo / 402 / light	1446	3900	402	874	BIM-0	Row label · Review the day
+review-day / tray-open / 402 / light	1928	3900	402	874	92G-0	Row label · Review the day
+review-day / rail drag / 402 / light	2410	3900	402	874	96G-0	Row label · Review the day
+review-day / add sheet / 402 / light	2892	3900	402	874	99B-0	Row label · Review the day
+review-day / make room / 402 / light	3374	3900	402	874	9DQ-0	Row label · Review the day
+review-day / late / 402 / light	3856	3900	402	874	8DD-0	Row label · Review the day
+review-day / late, passed open / 402 / light	4338	3900	402	874	8GR-0	Row label · Review the day
+review-day / late, ask: cut / 402 / light	4820	3900	402	874	8RE-0	Row label · Review the day
+review-day / late, ask: slide / 402 / light	5302	3900	402	874	8TZ-0	Row label · Review the day
+review-day / no-work / 402 / light	5784	3900	402	874	8N6-0	Row label · Review the day
+review-day / no-work, add to primary / 402 / light	6266	3900	402	874	8XR-0	Row label · Review the day
+Note · success	0	4830	402		8RB-0	Row label · Review the day
+Note · success	482	4830	402		8QQ-0	Row label · Review the day
+Note · success	964	4830	402		8QT-0	Row label · Review the day
+Note · after swap	1446	4830	402		BM9-0	Row label · Review the day
+Note · tray-open	1928	4830	402		9LS-0	Row label · Review the day
+Note · rail drag	2410	4830	402		9LV-0	Row label · Review the day
+Note · add sheet	2892	4830	402		9LY-0	Row label · Review the day
+Note · make room	3374	4830	402		9M1-0	Row label · Review the day
+Note · success	3856	4830	402		8QW-0	Row label · Review the day
+Note · success	4338	4830	402		8QZ-0	Row label · Review the day
+Note · success	4820	4830	402		929-0	Row label · Review the day
+Note · success	5302	4830	402		91R-0	Row label · Review the day
+Note · success	5784	4830	402		8R5-0	Row label · Review the day
+Note · success	6266	4830	402		91X-0	Row label · Review the day
+Row label · Review the day (cont.)	-560	5160	440		A09-0	Row label · Review the day (cont.)
+review-day / no-work, open this week / 402 / light	0	5160	402	874	8ZO-0	Row label · Review the day (cont.)
+review-day / sunday, nothing set, top / 402 / light	482	5160	402	874	F89-0	Row label · Review the day (cont.)
+review-day / sunday, making the checklist / 402 / light	964	5160	402	874	DR8-0	Row label · Review the day (cont.)
+review-day / sunday, checklist and plans / 402 / light	1446	5160	402	874	DSI-0	Row label · Review the day (cont.)
+review-day / sunday, now-line / 402 / light	1928	5160	402	874	F9B-0	Row label · Review the day (cont.)
+review-day / empty / 402 / light	2410	5160	402	874	9JA-0	Row label · Review the day (cont.)
+review-day / loading / 402 / light	2892	5160	402	874	9JB-0	Row label · Review the day (cont.)
+review-day / error / 402 / light	3374	5160	402	874	9JC-0	Row label · Review the day (cont.)
+review-day / offline / 402 / light	3856	5160	402	874	8JW-0	Row label · Review the day (cont.)
+Dev note · Make room	4338	5160	402		9J0-0	Row label · Review the day (cont.)
+Dev note · A later start	4820	5160	402		8XI-0	Row label · Review the day (cont.)
+review-day / success / 1440 / light	5302	5160	1440	900	X0J-0	Row label · Review the day (cont.)
+Note · success	0	6090	402		920-0	Row label · Review the day (cont.)
+Frame	482	6090	402		FNM-0	Row label · Review the day (cont.)
+Frame	964	6090	402		DV1-0	Row label · Review the day (cont.)
+Frame	1446	6090	402		DV4-0	Row label · Review the day (cont.)
+Frame	1928	6090	402		FNJ-0	Row label · Review the day (cont.)
+Note · empty	2410	6090	402		9M7-0	Row label · Review the day (cont.)
+Note · loading	2892	6090	402		9MA-0	Row label · Review the day (cont.)
+Note · error	3374	6090	402		9MD-0	Row label · Review the day (cont.)
+Note · success	3856	6090	402		8R2-0	Row label · Review the day (cont.)
+Note · dev note	4338	6090	402		9M4-0	Row label · Review the day (cont.)
+Note · success	4820	6090	402		91U-0	Row label · Review the day (cont.)
+Note · review-day / success / 1440	5302	6090	720		X3K-0	Row label · Review the day (cont.)
+Row label · Block view	-560	6420	440		AYH-0	Row label · Block view
+block-view / success / 402 / light	0	6420	402	874	A0Y-0	Row label · Block view
+block-view / checked, swipe / 402 / light	482	6420	402	874	A37-0	Row label · Block view
+block-view / removed, undo / 402 / light	964	6420	402	874	A5D-0	Row label · Block view
+block-view / header menu / 402 / light	1446	6420	402	874	A7J-0	Row label · Block view
+block-view / edit, dragging / 402 / light	1928	6420	402	874	AAO-0	Row label · Block view
+block-view / editing, Monday / 402 / light	2410	6420	402	874	AE5-0	Row label · Block view
+block-view / current / 402 / light	2892	6420	402	874	ALZ-0	Row label · Block view
+block-view / past / 402 / light	3374	6420	402	874	AOY-0	Row label · Block view
+block-view / overflow / 402 / light	3856	6420	402	874	AHJ-0	Row label · Block view
+block-view / empty / 402 / light	4338	6420	402	874	AU6-0	Row label · Block view
+block-view / loading / 402 / light	4820	6420	402	874	AVC-0	Row label · Block view
+block-view / error / 402 / light	5302	6420	402	874	AWG-0	Row label · Block view
+block-view / offline / 402 / light	5784	6420	402	874	ART-0	Row label · Block view
+block-view / editing, offline / 402 / light	6266	6420	402	874	WFX-0	Row label · Block view
+Note · success	0	7350	402		AXD-0	Row label · Block view
+Note · checked, swipe	482	7350	402		AXG-0	Row label · Block view
+Note · removed, undo	964	7350	402		AXJ-0	Row label · Block view
+Note · header menu	1446	7350	402		AXM-0	Row label · Block view
+Note · edit, dragging	1928	7350	402		AXP-0	Row label · Block view
+Note · editing, Monday	2410	7350	402		AXY-0	Row label · Block view
+Note · current	2892	7350	402		AXS-0	Row label · Block view
+Note · past	3374	7350	402		AXV-0	Row label · Block view
+Note · overflow	3856	7350	402		AY4-0	Row label · Block view
+Note · empty	4338	7350	402		AY1-0	Row label · Block view
+Note · loading	4820	7350	402		AY7-0	Row label · Block view
+Note · error	5302	7350	402		AYA-0	Row label · Block view
+Note · offline	5784	7350	402		AYD-0	Row label · Block view
+Note · block-view / editing, offline	6266	7350	402		WLJ-0	Row label · Block view
+Row label · Item sheet (see step 11)	-560	7680	440		BMD-0	Row label · Item sheet (see step 11)
+Row label · Ready, go hand-off	-560	8940	440		LC5-0	Row label · Ready, go hand-off
+ready-go / welcome, rec. / 402 / light	0	8940	402	874	NQU-0	Row label · Ready, go hand-off
+ready-go / welcome, first go ever / 402 / light	482	8940	402	874	O7U-0	Row label · Ready, go hand-off
+ready-go / welcome, late wake / 402 / light	964	8940	402	874	O2I-0	Row label · Ready, go hand-off
+ready-go / welcome, checklist day / 402 / light	1446	8940	402	874	O4A-0	Row label · Ready, go hand-off
+ready-go / first block not yet started / 402 / light	1928	8940	402	874	MMY-0	Row label · Ready, go hand-off
+ready-go / reopened later, no hand-off / 402 / light	2410	8940	402	874	MSK-0	Row label · Ready, go hand-off
+ready-go / welcome, offline / 402 / light	2892	8940	402	874	O62-0	Row label · Ready, go hand-off
+How it flows · step 5b round 2	3374	8940	402		OK9-0	Row label · Ready, go hand-off
+Dev note · The Ready, go hand-off	3856	8940	402		N4N-0	Row label · Ready, go hand-off
+Frame	0	9870	402		OS4-0	Row label · Ready, go hand-off
+Frame	482	9870	402		OSG-0	Row label · Ready, go hand-off
+Frame	964	9870	402		OS7-0	Row label · Ready, go hand-off
+Frame	1446	9870	402		OSA-0	Row label · Ready, go hand-off
+Frame	1928	9870	402		NC1-0	Row label · Ready, go hand-off
+Frame	2410	9870	402		NC7-0	Row label · Ready, go hand-off
+Frame	2892	9870	402		OSD-0	Row label · Ready, go hand-off
+Row label · Now	-560	10200	440		DC5-0	Row label · Now
+now / before Ready, go / 402 / light	0	10200	402	874	D8A-0	Row label · Now
+now / success / 402 / light	482	10200	402	874	BMG-0	Row label · Now
+now / done, next lifts / 402 / light	964	10200	402	874	BP2-0	Row label · Now
+now / row tapped, current / 402 / light	1446	10200	402	874	BRU-0	Row label · Now
+now / row long-press / 402 / light	1928	10200	402	874	BUA-0	Row label · Now
+now / header menu / 402 / light	2410	10200	402	874	BWQ-0	Row label · Now
+now / reordering / 402 / light	2892	10200	402	874	C0V-0	Row label · Now
+now / all done, start next / 402 / light	3374	10200	402	874	DE7-0	Row label · Now
+now / all done, add more / 402 / light	3856	10200	402	874	FEB-0	Row label · Now
+now / ahead of the plan / 402 / light	4338	10200	402	874	VRH-0	Row label · Now
+now / behind / 402 / light	4820	10200	402	874	C6N-0	Row label · Now
+now / transition, between blocks / 402 / light	5302	10200	402	874	CNX-0	Row label · Now
+now / checklist block / 402 / light	5784	10200	402	874	CT6-0	Row label · Now
+now / sunday, the checklist after Ready, go / 402 / light	6266	10200	402	874	FBB-0	Row label · Now
+Frame	0	11130	402		DBK-0	Row label · Now
+Frame	482	11130	402		DA6-0	Row label · Now
+Frame	964	11130	402		DA9-0	Row label · Now
+Frame	1446	11130	402		DAC-0	Row label · Now
+Frame	1928	11130	402		DAF-0	Row label · Now
+Frame	2410	11130	402		DAI-0	Row label · Now
+Frame	2892	11130	402		DAL-0	Row label · Now
+Frame	3374	11130	402		DUG-0	Row label · Now
+Frame	3856	11130	402		FND-0	Row label · Now
+Note · now / ahead of the plan	4338	11130	402		WLS-0	Row label · Now
+Frame	4820	11130	402		DAY-0	Row label · Now
+Frame	5302	11130	402		DB8-0	Row label · Now
+Frame	5784	11130	402		DBB-0	Row label · Now
+Frame	6266	11130	402		FNG-0	Row label · Now
+Row label · Now (cont.)	-560	11460	440		DC9-0	Row label · Now (cont.)
+now / meal, pick a topic / 402 / light	0	11460	402	874	DJP-0	Row label · Now (cont.)
+now / meal, topic picked / 402 / light	482	11460	402	874	DM4-0	Row label · Now (cont.)
+meal-topics sheet / with icons / 402 / light	964	11460	402	874	FJH-0	Row label · Now (cont.)
+now / empty break / 402 / light	1446	11460	402	874	CQD-0	Row label · Now (cont.)
+now / a To-dos block in go mode / 402 / light	1928	11460	402	874	PEM-0	Row label · Now (cont.)
+now / empty, no blocks left / 402 / light	2410	11460	402	874	CKP-0	Row label · Now (cont.)
+now / offline / 402 / light	2892	11460	402	874	C93-0	Row label · Now (cont.)
+now / error on check / 402 / light	3374	11460	402	874	CBJ-0	Row label · Now (cont.)
+Frame	0	12390	402		DUP-0	Row label · Now (cont.)
+Frame	482	12390	402		DUS-0	Row label · Now (cont.)
+Frame	964	12390	402		FN7-0	Row label · Now (cont.)
+Frame	1446	12390	402		DBE-0	Row label · Now (cont.)
+Frame	1928	12390	402		PM3-0	Row label · Now (cont.)
+Frame	2410	12390	402		DBH-0	Row label · Now (cont.)
+Frame	2892	12390	402		DB1-0	Row label · Now (cont.)
+Frame	3374	12390	402		DB4-0	Row label · Now (cont.)
+Row label · To-dos tray and reminder	-560	12720	440		DV8-0	Row label · To-dos tray and reminder
+todo-reminder / the notification / 402 / light	0	12720	402	874	D9S-0	Row label · To-dos tray and reminder
+now / tray, from a reminder / 402 / light	482	12720	402	874	CEB-0	Row label · To-dos tray and reminder
+now / tray open / 402 / light	964	12720	402	874	C3B-0	Row label · To-dos tray and reminder
+now / tray empty / 402 / light	1446	12720	402	874	CHM-0	Row label · To-dos tray and reminder
+Frame	0	13650	402		DBN-0	Row label · To-dos tray and reminder
+Frame	482	13650	402		DAS-0	Row label · To-dos tray and reminder
+Frame	964	13650	402		DAP-0	Row label · To-dos tray and reminder
+Frame	1446	13650	402		DAV-0	Row label · To-dos tray and reminder
+Row label · Running and Done	-560	13980	440		EHB-0	Row label · Running and Done
+running / counting down / 402 / light	0	13980	402	874	DVC-0	Row label · Running and Done
+running / over, under a minute / 402 / light	482	13980	402	874	EI6-0	Row label · Running and Done
+running / over, a minute or more / 402 / light	964	13980	402	874	EKP-0	Row label · Running and Done
+running / paused, pulsing / 402 / light	1446	13980	402	874	EN8-0	Row label · Running and Done
+done / took 2 min, change / 402 / light	1928	13980	402	874	E83-0	Row label · Running and Done
+done / time-taken sheet / 402 / light	2410	13980	402	874	EAN-0	Row label · Running and Done
+done / after a timed Done / 402 / light	2892	13980	402	874	EDV-0	Row label · Running and Done
+done / timed, a little over (warning) / 402 / light	3374	13980	402	874	EV6-0	Row label · Running and Done
+Dev note · Timers through the day	3856	13980	402		EH8-0	Row label · Running and Done
+Dev note · Over, by how much	4338	13980	402		EXG-0	Row label · Running and Done
+Frame	0	14910	402		EI3-0	Row label · Running and Done
+Frame	482	14910	402		EYB-0	Row label · Running and Done
+Frame	964	14910	402		EY8-0	Row label · Running and Done
+Frame	1446	14910	402		EY5-0	Row label · Running and Done
+Frame	1928	14910	402		EHO-0	Row label · Running and Done
+Frame	2410	14910	402		EHL-0	Row label · Running and Done
+Frame	2892	14910	402		EHI-0	Row label · Running and Done
+Frame	3374	14910	402		EXW-0	Row label · Running and Done
+Frame	3856	14910	402		EHF-0	Row label · Running and Done
+Frame	4338	14910	402		EXT-0	Row label · Running and Done
+Row label · Block complete	-560	15240	440		F7K-0	Row label · Block complete
+block-complete / all done (footer) / 402 / light	0	15240	402	874	EYE-0	Row label · Block complete
+block-complete / not done, open / 402 / light	482	15240	402	874	F3Z-0	Row label · Block complete
+block-complete / not done, do now / 402 / light	964	15240	402	874	FGO-0	Row label · Block complete
+block-complete / not done, closed / 402 / light	1446	15240	402	874	F0R-0	Row label · Block complete
+block-complete / last block of the day / 402 / light	1928	15240	402	874	F5Y-0	Row label · Block complete
+Frame	0	16170	402		F86-0	Row label · Block complete
+Frame	482	16170	402		F80-0	Row label · Block complete
+Frame	964	16170	402		FNA-0	Row label · Block complete
+Frame	1446	16170	402		F83-0	Row label · Block complete
+Frame	1928	16170	402		F7X-0	Row label · Block complete
+Row label · Work block	-560	16500	440		GX5-0	Row label · Work block
+now-work / success, tiers / 402 / light	0	16500	402	874	FNP-0	Row label · Work block
+now-work / primary-only / 402 / light	482	16500	402	874	FU7-0	Row label · Work block
+now-work / cap, a third Primary / 402 / light	964	16500	402	874	FRE-0	Row label · Work block
+now-work / empty, not slotted / 402 / light	1446	16500	402	874	FX1-0	Row label · Work block
+now-work / urgent above primary / 402 / light	1928	16500	402	874	GOK-0	Row label · Work block
+now-work / later block, 13:00 / 402 / light	2410	16500	402	874	GM1-0	Row label · Work block
+now-work / meeting lifted, 11:00 / 402 / light	2892	16500	402	874	FZR-0	Row label · Work block
+now-work / meeting mid-block, coming up / 402 / light	3374	16500	402	874	IB7-0	Row label · Work block
+now-work / add row under each tier / 402 / light	3856	16500	402	874	I1L-0	Row label · Work block
+now-work / add menu: new, pool, Linear / 402 / light	4338	16500	402	874	H1D-0	Row label · Work block
+now-work / add from the pool / 402 / light	4820	16500	402	874	H4J-0	Row label · Work block
+now-work / add from Linear / 402 / light	5302	16500	402	874	HA6-0	Row label · Work block
+now-work / add from Linear, two workspaces / 402 / light	5784	16500	402	874	IRS-0	Row label · Work block
+now-work / linear row / 402 / light	6266	16500	402	874	G2P-0	Row label · Work block
+Frame	0	17430	402		GXR-0	Row label · Work block
+Frame	482	17430	402		GXL-0	Row label · Work block
+Frame	964	17430	402		GXO-0	Row label · Work block
+Frame	1446	17430	402		GXI-0	Row label · Work block
+Frame	1928	17430	402		GY0-0	Row label · Work block
+Frame	2410	17430	402		GY3-0	Row label · Work block
+Frame	2892	17430	402		GXF-0	Row label · Work block
+Frame	3374	17430	402		IEK-0	Row label · Work block
+Frame	3856	17430	402		IFH-0	Row label · Work block
+Frame	4338	17430	402		IFE-0	Row label · Work block
+Frame	4820	17430	402		IFB-0	Row label · Work block
+Frame	5302	17430	402		IF8-0	Row label · Work block
+Frame	5784	17430	402		JB3-0	Row label · Work block
+Frame	6266	17430	402		GXC-0	Row label · Work block
+Row label · Work block (cont.)	-560	17760	440		IEA-0	Row label · Work block (cont.)
+now-work / linear updating / 402 / light	0	17760	402	874	G5T-0	Row label · Work block (cont.)
+now-work / linear done / 402 / light	482	17760	402	874	G9S-0	Row label · Work block (cont.)
+now-work / linear failed / 402 / light	964	17760	402	874	GCZ-0	Row label · Work block (cont.)
+now-work / linear row tapped, item sheet / 402 / light	1446	17760	402	874	GHB-0	Row label · Work block (cont.)
+now-work / item view, full, Linear / 402 / light	1928	17760	402	874	HGG-0	Row label · Work block (cont.)
+now-work / item view, size and length range / 402 / light	2410	17760	402	874	IZZ-0	Row label · Work block (cont.)
+now-work / item view, change status / 402 / light	2892	17760	402	874	HM0-0	Row label · Work block (cont.)
+now-work / tier colours, status boxes, waiting / 402 / light	3374	17760	402	874	IFK-0	Row label · Work block (cont.)
+now-work / status sheet, from the status box / 402 / light	3856	17760	402	874	IMB-0	Row label · Work block (cont.)
+now-work / row long-press, work menu / 402 / light	4338	17760	402	874	HSV-0	Row label · Work block (cont.)
+now-work / move to sheet / 402 / light	4820	17760	402	874	HXQ-0	Row label · Work block (cont.)
+now-work / moved, undo / 402 / light	5302	17760	402	874	GYF-0	Row label · Work block (cont.)
+now-work / several running / 402 / light	5784	17760	402	874	DH0-0	Row label · Work block (cont.)
+now-work / running row tapped, focused / 402 / light	6266	17760	402	874	E2X-0	Row label · Work block (cont.)
+Frame	0	18690	402		GX9-0	Row label · Work block (cont.)
+Frame	482	18690	402		GYC-0	Row label · Work block (cont.)
+Frame	964	18690	402		GY9-0	Row label · Work block (cont.)
+Frame	1446	18690	402		GY6-0	Row label · Work block (cont.)
+Frame	1928	18690	402		IF5-0	Row label · Work block (cont.)
+Frame	2410	18690	402		JB0-0	Row label · Work block (cont.)
+Frame	2892	18690	402		IF2-0	Row label · Work block (cont.)
+Frame	3374	18690	402		JB9-0	Row label · Work block (cont.)
+Frame	3856	18690	402		JB6-0	Row label · Work block (cont.)
+Frame	4338	18690	402		IEZ-0	Row label · Work block (cont.)
+Frame	4820	18690	402		IEW-0	Row label · Work block (cont.)
+Frame	5302	18690	402		IET-0	Row label · Work block (cont.)
+Frame	5784	18690	402		DUJ-0	Row label · Work block (cont.)
+Frame	6266	18690	402		EHU-0	Row label · Work block (cont.)
+Row label · Work block (cont. 2)	-560	19020	440		JA5-0	Row label · Work block (cont. 2)
+now-work / done on a running row / 402 / light	0	19020	402	874	E5G-0	Row label · Work block (cont. 2)
+now-work / four running, two tiers / 402 / light	482	19020	402	874	EPR-0	Row label · Work block (cont. 2)
+now-work / done, well over (danger) / 402 / light	964	19020	402	874	ESL-0	Row label · Work block (cont. 2)
+Dev note · Several running	1446	19020	402		DJL-0	Row label · Work block (cont. 2)
+Dev note · A meeting inside a work block	1928	19020	402		IE0-0	Row label · Work block (cont. 2)
+Dev note · Size and length	2410	19020	402		J9L-0	Row label · Work block (cont. 2)
+Dev note · Colours, for a new thread	2892	19020	402		J9V-0	Row label · Work block (cont. 2)
+now-work / tiers, 10:20 / 1440 / light	3374	19020	1440	900	WXE-0	Row label · Work block (cont. 2)
+Frame	0	19950	402		EHR-0	Row label · Work block (cont. 2)
+Frame	482	19950	402		EY2-0	Row label · Work block (cont. 2)
+Frame	964	19950	402		EXZ-0	Row label · Work block (cont. 2)
+Frame	1446	19950	402		DUM-0	Row label · Work block (cont. 2)
+Frame	1928	19950	402		IEH-0	Row label · Work block (cont. 2)
+Frame	2410	19950	402		JAU-0	Row label · Work block (cont. 2)
+Frame	2892	19950	402		JAR-0	Row label · Work block (cont. 2)
+Note · now-work / tiers, 10:20 / 1440	3374	19950	720		X0F-0	Row label · Work block (cont. 2)
+Row label · Schedule	-560	20280	440		FN0-0	Row label · Schedule
+schedule / during go, 10:20 / 402 / light	0	20280	402	874	GR7-0	Row label · Schedule
+schedule / checks and running / 402 / light	482	20280	402	874	I48-0	Row label · Schedule
+schedule / checklist day, all day strip / 402 / light	964	20280	402	874	GUV-0	Row label · Schedule
+schedule / meeting inside a work block / 402 / light	1446	20280	402	874	I7Q-0	Row label · Schedule
+schedule / meeting in plum / 402 / light	1928	20280	402	874	J60-0	Row label · Schedule
+Frame	0	21210	402		GXX-0	Row label · Schedule
+Frame	482	21210	402		IEQ-0	Row label · Schedule
+Frame	964	21210	402		GXU-0	Row label · Schedule
+Frame	1446	21210	402		IEN-0	Row label · Schedule
+Frame	1928	21210	402		JAX-0	Row label · Schedule
+Row label · Evening	-560	21540	440		OK6-0	Row label · Evening
+evening / journal, close the day / 402 / light	0	21540	402		FLJ-0	Row label · Evening
+Frame	0	22470	402		FN4-0	Row label · Evening
+Row label · Archive 1	-560	22800	440		A0C-0	Row label · Archive 1
+review-day / A: grid, 96/h, rec. / 402 / light	0	22800	402	874	9MH-0	Row label · Archive 1
+review-day / B: name only, 96/h / 402 / light	482	22800	402	874	9PP-0	Row label · Archive 1
+review-day / C: grid, 80/h / 402 / light	964	22800	402	874	9SX-0	Row label · Archive 1
+review-day / D: name only, 80/h / 402 / light	1446	22800	402	874	9W5-0	Row label · Archive 1
+now / A: lifted card, tray closed, rec. / 402 / light	1928	22800	402	874	D2R-0	Row label · Archive 1
+now / B: plain checklist, tray closed / 402 / light	2410	22800	402	874	CVM-0	Row label · Archive 1
+now / C: lifted card, tray open / 402 / light	2892	22800	402	874	D57-0	Row label · Archive 1
+now / D: plain checklist, tray open / 402 / light	3374	22800	402	874	CZR-0	Row label · Archive 1
+item-sheet / default, before Swap / 402 / light	3856	22800	402	874	B7L-0	Row label · Archive 1
+item-sheet / swap / 402 / light	4338	22800	402	874	B25-0	Row label · Archive 1
+item-sheet / swap, empty library / 402 / light	4820	22800	402	874	BCJ-0	Row label · Archive 1
+Note · grid, 96	0	23730	402		9ZW-0	Row label · Archive 1
+Note · name only, 96	482	23730	402		9ZT-0	Row label · Archive 1
+Note · grid, 80	964	23730	402		9ZQ-0	Row label · Archive 1
+Note · name only, 80	1446	23730	402		9ZN-0	Row label · Archive 1
+Frame	1928	23730	402		DBS-0	Row label · Archive 1
+Frame	2410	23730	402		DBV-0	Row label · Archive 1
+Frame	2892	23730	402		DBY-0	Row label · Archive 1
+Frame	3374	23730	402		DC1-0	Row label · Archive 1
+Note · default	3856	23730	402		BM0-0	Row label · Archive 1
+Note · swap	4338	23730	402		BM3-0	Row label · Archive 1
+Note · empty library	4820	23730	402		BM6-0	Row label · Archive 1
+Row label · Archive 2	-560	24060	440		N9B-0	Row label · Archive 2
+ready-go / A1 Ready, go pressed / 402 / light	0	24060	402	874	LC8-0	Row label · Archive 2
+ready-go / A2 the fold / 402 / light	482	24060	402	874	LFG-0	Row label · Archive 2
+ready-go / A3 the send-off line / 402 / light	964	24060	402	874	LOU-0	Row label · Archive 2
+ready-go / A4 settled, Now / 402 / light	1446	24060	402	874	LIO-0	Row label · Archive 2
+ready-go / A reduced motion, cross-fade / 402 / light	1928	24060	402	874	LS1-0	Row label · Archive 2
+ready-go / B welcome card over Now / 402 / light	2410	24060	402	874	M4Y-0	Row label · Archive 2
+ready-go / C first go, one-time guide / 402 / light	2892	24060	402	874	M20-0	Row label · Archive 2
+Words · the send-off line [placeholder]	3374	24060	402		N3P-0	Row label · Archive 2
+ready-go / late wake, block under way / 402 / light	3856	24060	402	874	MDI-0	Row label · Archive 2
+ready-go / checklist day / 402 / light	4338	24060	402	874	MJO-0	Row label · Archive 2
+ready-go / offline, the same hand-off / 402 / light	4820	24060	402	874	MZZ-0	Row label · Archive 2
+Frame	0	24990	402		MCL-0	Row label · Archive 2
+Frame	482	24990	402		MCO-0	Row label · Archive 2
+Frame	964	24990	402		MCS-0	Row label · Archive 2
+Frame	1446	24990	402		MCV-0	Row label · Archive 2
+Frame	1928	24990	402		MCZ-0	Row label · Archive 2
+Frame	2410	24990	402		MD2-0	Row label · Archive 2
+Frame	2892	24990	402		MD5-0	Row label · Archive 2
+Frame	3856	24990	402		NBV-0	Row label · Archive 2
+Frame	4338	24990	402		NBY-0	Row label · Archive 2
+Frame	4820	24990	402		NC4-0	Row label · Archive 2
+Row label · Archive 3	-560	25320	440		EXJ-0	Row label · Archive 3
+running / over / 402 / light	0	25320	402	874	DXV-0	Row label · Archive 3
+running / paused / 402 / light	482	25320	402	874	E0E-0	Row label · Archive 3
+review-day / sunday, nothing set / 402 / light	964	25320	402	874	DQ5-0	Row label · Archive 3
+meal-topics sheet / default / 402 / light	1446	25320	402	874	DOD-0	Row label · Archive 3
+Frame	0	26250	402		EI0-0	Row label · Archive 3
+Frame	482	26250	402		EHX-0	Row label · Archive 3
+Frame	964	26250	402		DUY-0	Row label · Archive 3
+Frame	1446	26250	402		DUV-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	3776	220	82N-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	7150	220	8QP-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	3776	220	91Q-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	1848	220	9ZJ-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	6186	119	AXC-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	1848	119	BLZ-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	8596	119	DA5-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	1848	81	DBR-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	4258	138	DUF-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	4258	100	EHE-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	3374	100	EXM-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	3374	100	FN3-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	6668	119	GX8-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	6186	100	IED-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	3294	138	JA8-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	1928	119	F7N-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	3294	155	MAV-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	2330	136	N9A-0	Row label · Archive 3
+Emptied notes board (safe to delete)	0	26700	2330	155	OO7-0	Row label · Archive 3

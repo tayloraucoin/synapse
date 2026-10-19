@@ -91,7 +91,7 @@ export function StripSquare({
       {state === "done-moved" ? (
         <span
           aria-hidden="true"
-          className="bg-paper absolute top-1/2 left-1/2 size-1 -translate-x-1/2 -translate-y-1/2 rounded-full"
+          className="bg-paper absolute top-1/2 left-1/2 size-1 -translate-x-1/2 -translate-y-1/2"
         />
       ) : null}
       {state === "didnt-do" ? (
@@ -106,7 +106,7 @@ export function StripSquare({
           aria-hidden="true"
           className="absolute inset-0 flex items-center justify-center overflow-hidden"
         >
-          <span className="block h-px w-[141%] -rotate-45 bg-neutral-400" />
+          <span className="block h-px w-[141%] -rotate-45 bg-muted-foreground" />
         </span>
       ) : null}
     </span>

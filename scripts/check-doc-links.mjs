@@ -7,18 +7,17 @@
  */
 import { execSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, relative, resolve, sep } from "node:path";
 
 const repoRoot = resolve(import.meta.dirname, "..");
 
-const files = execSync("git ls-files --cached --others --exclude-standard", {
-  cwd: repoRoot,
-  encoding: "utf8",
-})
-  .split("\n")
-  // docs/archive/** is read-only history (see AGENTS.md) — its links point at
-  // paths as they existed when archived and are never updated.
-  .filter((f) => f.endsWith(".md") && !f.startsWith("docs/archive/"));
+// Read-only history, never updated, so its links point at paths as they were:
+// docs/archive/** (see AGENTS.md) and docs/decisions/imported/** (what the
+// practice replaced, record 0001).
+const SKIPPED_DIRS = ["docs/archive/", "docs/decisions/imported/"];
+
+// A target a later step lands, accepted as check-refs accepts it.
+const PENDING = "tooling/refs-pending.json";
 
 // [text](target) — capture target; tolerate titles ("...") after the URL and
 // one level of balanced parentheses in the path (Next.js route groups).
@@ -28,34 +27,53 @@ const LINK_RE = /\[[^\]]*\]\(<?((?:[^()\s<>]|\([^()\s]*\))+)(?:\s+"[^"]*")?>?\)/
 // Leading "/" targets are site URLs in specs, not repo files.
 const IGNORED_PREFIXES = ["http://", "https://", "mailto:", "tel:", "#", "/"];
 
-let broken = 0;
-
-for (const file of files) {
-  const abs = resolve(repoRoot, file);
-  const lines = readFileSync(abs, "utf8").split("\n");
-  lines.forEach((line, i) => {
-    // Strip inline code spans first. A regex like
-    // `grep -E "from ['\"](next|react-dom)"` reads as [text](target) to the
-    // link pattern, and a grep alternation is not a path. The backtick run is
-    // matched by length so a doubled fence (used when the span itself contains
-    // a backtick) closes on its own delimiter, not on the first backtick.
-    const scannable = line.replace(CODE_SPAN_RE, (m) => " ".repeat(m.length));
-    for (const match of scannable.matchAll(LINK_RE)) {
-      const target = match[1];
-      if (IGNORED_PREFIXES.some((p) => target.startsWith(p))) continue;
-      const path = decodeURIComponent(target.split("#")[0]);
-      if (!path) continue;
-      const resolved = resolve(dirname(abs), path);
-      if (!existsSync(resolved)) {
-        broken++;
-        console.log(`${file}:${i + 1}  →  ${target}`);
+/** Every markdown link in `files` (repo-relative) that resolves to nothing under `root`. */
+export function findBroken({ root, files, pending = {} }) {
+  const accepted = new Set(Object.keys(pending).map((k) => k.replace(/\/$/, "")));
+  const broken = [];
+  for (const file of files) {
+    if (!file.endsWith(".md")) continue;
+    if (SKIPPED_DIRS.some((dir) => file.startsWith(dir))) continue;
+    const abs = resolve(root, file);
+    const lines = readFileSync(abs, "utf8").split("\n");
+    lines.forEach((line, i) => {
+      // Strip inline code spans first. A regex like
+      // `grep -E "from ['\"](next|react-dom)"` reads as [text](target) to the
+      // link pattern, and a grep alternation is not a path. The backtick run is
+      // matched by length so a doubled fence (used when the span itself contains
+      // a backtick) closes on its own delimiter, not on the first backtick.
+      const scannable = line.replace(CODE_SPAN_RE, (m) => " ".repeat(m.length));
+      for (const match of scannable.matchAll(LINK_RE)) {
+        const target = match[1];
+        if (IGNORED_PREFIXES.some((p) => target.startsWith(p))) continue;
+        const path = decodeURIComponent(target.split("#")[0]);
+        if (!path) continue;
+        const resolved = resolve(dirname(abs), path);
+        if (existsSync(resolved)) continue;
+        const rel = relative(root, resolved).split(sep).join("/");
+        if (accepted.has(rel)) continue;
+        broken.push({ file, line: i + 1, target });
       }
-    }
-  });
+    });
+  }
+  return broken;
 }
 
-if (broken > 0) {
-  console.error(`\n${broken} broken markdown link(s).`);
-  process.exit(1);
+if (import.meta.filename === resolve(process.argv[1] ?? "")) {
+  const files = execSync("git ls-files --cached --others --exclude-standard", {
+    cwd: repoRoot,
+    encoding: "utf8",
+  })
+    .split("\n")
+    .filter((f) => f.endsWith(".md"));
+  const pending = JSON.parse(readFileSync(resolve(repoRoot, PENDING), "utf8"));
+  const broken = findBroken({ root: repoRoot, files, pending });
+  for (const { file, line, target } of broken) {
+    console.log(`${file}:${line}  →  ${target}`);
+  }
+  if (broken.length > 0) {
+    console.error(`\n${broken.length} broken markdown link(s).`);
+    process.exit(1);
+  }
+  console.log(`All markdown links resolve (${files.length} files checked).`);
 }
-console.log(`All markdown links resolve (${files.length} files checked).`);

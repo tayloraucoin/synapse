@@ -1,19 +1,20 @@
 /**
- * Rail — wide navigation (v2 handoff §5.2).
+ * Rail — the desk's navigation, from 1024 (D-USE-93, D-USE-39).
  *
- * CC's `sidebar` primitive at `collapsible="none"`: there is nothing to
- * collapse in a four-item rail, and a collapse control would be a piece of
- * chrome whose only job is to hide the navigation.
+ * `Sidebar` at `collapsible="none"`: any other mode brings shadcn's own
+ * mobile sheet, which switches at 768 and would undo the one desk break.
  *
- * Same `NAV_ITEMS` and the same active rule as `TabBar` — one list, two
- * shapes.
+ * The current item is shaded `--color-surface` and set in medium weight, and
+ * carries `aria-current="page"`: shape and weight as well as colour.
  *
- * The wordmark is text, not a logo (official spec §9.8).
+ * THE FOOTER IS THE AVATAR MENU'S TRIGGER at the desk (USE-83, D-USE-89):
+ * the avatar and the name, one button, opening the same menu upward.
  */
 "use client";
 
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
-  Avatar,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -24,75 +25,56 @@ import {
   SidebarProvider,
   Text,
 } from "@syn/ui";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import * as React from "react";
+import { AccountMenu } from "./account";
+import { SHELL_COPY as COPY } from "./copy";
+import { RAIL_ITEMS, tabForPath } from "./nav-items";
+import { useBlockViewFrom } from "./use-block-view-from";
 
-import { dispatchScrollToNow } from "@/lib/hooks/use-scroll-memory";
-import { settingsRoute } from "@/lib/routes";
-import { NAV_ITEMS, REVIEW_DOT_LABEL, tabForPath } from "./nav-items";
-
-export interface RailProps {
-  reviewHasPending: boolean;
-  user: { name: string; imageUrl: string | null };
-}
-
-export function Rail({ reviewHasPending, user }: RailProps) {
-  const pathname = usePathname();
-  const active = tabForPath(pathname);
+export function Rail() {
+  const active = tabForPath(
+    usePathname(),
+    useSearchParams(),
+    useBlockViewFrom(),
+  );
 
   return (
-    <SidebarProvider>
-      <Sidebar collapsible="none" aria-label="Main">
-        <SidebarHeader className="px-(--space-5) py-(--space-5)">
-          <Text as="span" variant="body" weight={500}>
-            Synapse
+    <SidebarProvider className="min-h-0">
+      <Sidebar
+        collapsible="none"
+        aria-label={COPY.railLabel}
+        className="border-border h-dvh border-e"
+      >
+        <SidebarHeader className="px-(--space-6) py-(--space-6)">
+          <Text as="span" variant="body" weight={600}>
+            {COPY.wordmark}
           </Text>
         </SidebarHeader>
 
-        <SidebarContent>
-          <SidebarMenu>
-            {NAV_ITEMS.map((item) => (
-              <SidebarMenuItem key={item.tab}>
-                <SidebarMenuButton asChild isActive={item.tab === active}>
-                  {/* Same rule as the tab bar: the active item scrolls. */}
-                  <Link
-                    href={item.href}
-                    aria-current={item.tab === active ? "page" : undefined}
-                    onClick={(event) => {
-                      if (item.tab !== active) return;
-                      event.preventDefault();
-                      dispatchScrollToNow();
-                    }}
-                  >
-                    <span>{item.label}</span>
-                    {item.tab === "review" && reviewHasPending ? (
-                      <>
-                        <span
-                          aria-hidden="true"
-                          className="bg-accent-mark ms-auto size-1.5 rounded-full"
-                        />
-                        <span className="sr-only">{REVIEW_DOT_LABEL}</span>
-                      </>
-                    ) : null}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+        <SidebarContent className="px-(--space-3)">
+          <SidebarMenu className="gap-(--space-1)">
+            {RAIL_ITEMS.map((item) => {
+              const current = item.tab === active;
+              const Icon = item.icon;
+              return (
+                <SidebarMenuItem key={item.tab}>
+                  <SidebarMenuButton asChild isActive={current} size="lg">
+                    <Link
+                      href={item.href}
+                      aria-current={current ? "page" : undefined}
+                      className="gap-(--space-3) px-(--space-3)"
+                    >
+                      <Icon aria-hidden="true" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarContent>
 
-        <SidebarFooter className="px-(--space-5) py-(--space-4)">
-          <Link
-            href={settingsRoute()}
-            aria-label="Settings"
-            className="flex items-center gap-(--space-2)"
-          >
-            <Avatar src={user.imageUrl} name={user.name} label="Settings" />
-            <Text as="span" variant="secondary" truncate>
-              {user.name}
-            </Text>
-          </Link>
+        <SidebarFooter className="border-border mx-(--space-3) border-t px-(--space-1) py-(--space-3)">
+          <AccountMenu trigger="rail" />
         </SidebarFooter>
       </Sidebar>
     </SidebarProvider>

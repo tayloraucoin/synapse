@@ -1,0 +1,260 @@
+name	x	y	w	h	node_id	row_label
+Progress	0	-700	1400		JE4-0	
+Row label · Set my days	-560	0	440		JEM-0	Row label · Set my days
+set-my-days / empty, first day / 402 / light	0	0	402	874	JUX-0	Row label · Set my days
+set-my-days / copy-offer / 402 / light	482	0	402	874	JQU-0	Row label · Set my days
+set-my-days / usual week with Life (B) / 402 / light	964	0	402	874	OBM-0	Row label · Set my days
+set-my-days / usual Saturday, To-dos block (A) / 402 / light	1446	0	402	874	OSO-0	Row label · Set my days
+set-my-days / usual Thursday evening, Life set, then Evening / 402 / light	1928	0	402	874	OY7-0	Row label · Set my days
+set-my-days / this week, the week (B) / 402 / light	2410	0	402	874	K2H-0	Row label · Set my days
+set-my-days / this week, the day (A) / 402 / light	2892	0	402	874	JYM-0	Row label · Set my days
+set-my-days / this week, the day, item icons / 402 / light	3374	0	402	874	NEV-0	Row label · Set my days
+set-my-days / empty day, usual Thursday / 402 / light	3856	0	402	874	MV0-0	Row label · Set my days
+set-my-days / empty day, + menu / 402 / light	4338	0	402	874	N5T-0	Row label · Set my days
+set-my-days / + menu / 402 / light	4820	0	402	874	KUX-0	Row label · Set my days
+set-my-days / day menu / 402 / light	5302	0	402	874	KIO-0	Row label · Set my days
+set-my-days / add event / 402 / light	5784	0	402	874	KNH-0	Row label · Set my days
+set-my-days / event added, inside Work / 402 / light	6266	0	402	874	KPK-0	Row label · Set my days
+Note · name only, 80	0	930	402		JYJ-0	Row label · Set my days
+Note · name only, 80	482	930	402		JYG-0	Row label · Set my days
+Frame	964	930	402		PLF-0	Row label · Set my days
+Frame	1446	930	402		PLI-0	Row label · Set my days
+Frame	1928	930	402		PLL-0	Row label · Set my days
+Note · grid, 96	2410	930	402		KUL-0	Row label · Set my days
+Note · name only, 96	2892	930	402		KUI-0	Row label · Set my days
+Frame	3374	930	402		NQK-0	Row label · Set my days
+Frame	3856	930	402		NQ7-0	Row label · Set my days
+Frame	4338	930	402		NQA-0	Row label · Set my days
+Note · grid, 96	4820	930	402		LC2-0	Row label · Set my days
+Note · name only, 80	5302	930	402		KU6-0	Row label · Set my days
+Note · name only, 80	5784	930	402		KUU-0	Row label · Set my days
+Note · name only, 80	6266	930	402		KUR-0	Row label · Set my days
+Row label · Set my days (cont.)	-560	1260	440		KUO-0	Row label · Set my days (cont.)
+set-my-days / this week, Google events / 402 / light	0	1260	402	874	NL6-0	Row label · Set my days (cont.)
+set-my-days / event as its own block / 402 / light	482	1260	402	874	Q1R-0	Row label · Set my days (cont.)
+set-my-days / tap a time to add / 402 / light	964	1260	402	874	Q87-0	Row label · Set my days (cont.)
+set-my-days / from Linear, by size / 402 / light	1446	1260	402	874	KE0-0	Row label · Set my days (cont.)
+set-my-days / copy-picker / 402 / light	1928	1260	402	874	NS7-0	Row label · Set my days (cont.)
+set-my-days / replace confirm / 402 / light	2410	1260	402	874	OEW-0	Row label · Set my days (cont.)
+set-my-days / copied, Undo / 402 / light	2892	1260	402	874	NWC-0	Row label · Set my days (cont.)
+set-my-days / bounds edited, out of bounds / 402 / light	3374	1260	402	874	OO8-0	Row label · Set my days (cont.)
+set-my-days / overlap / 402 / light	3856	1260	402	874	PTW-0	Row label · Set my days (cont.)
+set-my-days / usual change reaches this week / 402 / light	4338	1260	402	874	QBE-0	Row label · Set my days (cont.)
+set-my-days / this week follows, a day's own change kept / 402 / light	4820	1260	402	874	QFA-0	Row label · Set my days (cont.)
+set-my-days / saved (header states) / 402 / light	5302	1260	402		QSW-0	Row label · Set my days (cont.)
+set-my-days / loading / 402 / light	5784	1260	402	874	QJI-0	Row label · Set my days (cont.)
+set-my-days / error / 402 / light	6266	1260	402	874	QMC-0	Row label · Set my days (cont.)
+Frame	0	2190	402		NQQ-0	Row label · Set my days (cont.)
+Frame	482	2190	402		QTO-0	Row label · Set my days (cont.)
+Frame	964	2190	402		QTR-0	Row label · Set my days (cont.)
+Note · name only, 80	1446	2190	402		KU9-0	Row label · Set my days (cont.)
+Note · grid, 96	1928	2190	402		OWW-0	Row label · Set my days (cont.)
+Note · name only, 96	2410	2190	402		OWT-0	Row label · Set my days (cont.)
+Note · grid, 80	2892	2190	402		OWQ-0	Row label · Set my days (cont.)
+Note · name only, 80	3374	2190	402		OWN-0	Row label · Set my days (cont.)
+Frame	3856	2190	402		QTL-0	Row label · Set my days (cont.)
+Frame	4338	2190	402		QTU-0	Row label · Set my days (cont.)
+Frame	4820	2190	402		QTX-0	Row label · Set my days (cont.)
+Frame	5302	2190	402		QU9-0	Row label · Set my days (cont.)
+Frame	5784	2190	402		QU0-0	Row label · Set my days (cont.)
+Frame	6266	2190	402		QU3-0	Row label · Set my days (cont.)
+Row label · Set my days (cont. 2)	-560	2520	440		LBJ-0	Row label · Set my days (cont. 2)
+set-my-days / offline / 402 / light	0	2520	402	874	QOV-0	Row label · Set my days (cont. 2)
+Dev note · How work fills a block	482	2520	402		LAP-0	Row label · Set my days (cont. 2)
+Dev note · What are you training?	964	2520	402		LAZ-0	Row label · Set my days (cont. 2)
+Dev note · Google Calendar	1446	2520	402		LB9-0	Row label · Set my days (cont. 2)
+Dev note · Life and chores	1928	2520	402		PKX-0	Row label · Set my days (cont. 2)
+Dev note · The model: blocks, to-dos, where	2410	2520	402		PRA-0	Row label · Set my days (cont. 2)
+Dev note · How we got here: home, errands, to-dos	2892	2520	402		PTC-0	Row label · Set my days (cont. 2)
+colour / Life rose, To-dos moss / 402 / light	3374	2520	402		PJL-0	Row label · Set my days (cont. 2)
+set-my-days / this week, Monday open / 1024 / light	3856	2520	1024	900	X3O-0	Row label · Set my days (cont. 2)
+Frame	0	3450	402		QU6-0	Row label · Set my days (cont. 2)
+Frame	1928	3450	402		PMF-0	Row label · Set my days (cont. 2)
+Frame	2410	3450	402		PS5-0	Row label · Set my days (cont. 2)
+Frame	2892	3450	402		PTS-0	Row label · Set my days (cont. 2)
+Frame	3374	3450	402		PMC-0	Row label · Set my days (cont. 2)
+Note · set-my-days / this week, Monday open / 1024	3856	3450	1024		XA7-0	Row label · Set my days (cont. 2)
+Row label · Block view from Set my days	-560	3780	440		OWJ-0	Row label · Block view from Set my days
+block-view / work, this week, tiers / 402 / light	0	3780	402	874	K6G-0	Row label · Block view from Set my days
+block-view / work, add to a tier / 402 / light	482	3780	402	874	KA9-0	Row label · Block view from Set my days
+block-view / work, set work, editing / 402 / light	964	3780	402	874	MGG-0	Row label · Block view from Set my days
+block-view / wellness, editing / 402 / light	1446	3780	402	874	L3B-0	Row label · Block view from Set my days
+block-view / training, editing / 402 / light	1928	3780	402	874	L6Z-0	Row label · Block view from Set my days
+block-view / break, a meal, editing / 402 / light	2410	3780	402	874	LM5-0	Row label · Block view from Set my days
+block-view / break, empty, a true break / 402 / light	2892	3780	402	874	LYS-0	Row label · Block view from Set my days
+block-view / sunday checklist, editing / 402 / light	3374	3780	402	874	M96-0	Row label · Block view from Set my days
+block-view / wellness, new and empty / 402 / light	3856	3780	402	874	NCR-0	Row label · Block view from Set my days
+block-view / life, set, editing / 402 / light	4338	3780	402	874	P3T-0	Row label · Block view from Set my days
+block-view / to-dos, errands, Out, add open / 402 / light	4820	3780	402	874	P6J-0	Row label · Block view from Set my days
+block-view / to-dos, the To-dos pool, Out / 402 / light	5302	3780	402	874	P9O-0	Row label · Block view from Set my days
+block-view / to-dos, a dated plan inside / 402 / light	5784	3780	402	874	PB9-0	Row label · Block view from Set my days
+block-view / to-dos, Sunday reset, Home / 402 / light	6266	3780	402	874	PMU-0	Row label · Block view from Set my days
+Note · grid, 80	0	4710	402		KUF-0	Row label · Block view from Set my days
+Note · name only, 80	482	4710	402		KUC-0	Row label · Block view from Set my days
+Frame	964	4710	402		NQ3-0	Row label · Block view from Set my days
+Note · grid, 80	1446	4710	402		LBW-0	Row label · Block view from Set my days
+Note · name only, 80	1928	4710	402		LBT-0	Row label · Block view from Set my days
+Frame	2410	4710	402		NPU-0	Row label · Block view from Set my days
+Frame	2892	4710	402		NPX-0	Row label · Block view from Set my days
+Frame	3374	4710	402		NQ0-0	Row label · Block view from Set my days
+Frame	3856	4710	402		NQG-0	Row label · Block view from Set my days
+Frame	4338	4710	402		PLR-0	Row label · Block view from Set my days
+Frame	4820	4710	402		PLU-0	Row label · Block view from Set my days
+Frame	5302	4710	402		PLX-0	Row label · Block view from Set my days
+Frame	5784	4710	402		PM0-0	Row label · Block view from Set my days
+Frame	6266	4710	402		PRZ-0	Row label · Block view from Set my days
+Row label · New block sheet	-560	5040	440		PLB-0	Row label · New block sheet
+new-block / wellness, from an empty day / 402 / light	0	5040	402	874	N9E-0	Row label · New block sheet
+new-block / block with kind, from a tapped time / 402 / light	482	5040	402	874	QUI-0	Row label · New block sheet
+new-block / work, how work fills it / 402 / light	964	5040	402	874	L0K-0	Row label · New block sheet
+new-block / to-dos kind, Ends, repeats / 402 / light	1446	5040	402	874	P18-0	Row label · New block sheet
+new-block / checklist / 402 / light	1928	5040	402	874	QY8-0	Row label · New block sheet
+new-block / transition / 402 / light	2410	5040	402	874	R0V-0	Row label · New block sheet
+new-block / meal (Break, Meal on) / 402 / light	2892	5040	402	874	R3K-0	Row label · New block sheet
+new-block / repeats menu open / 402 / light	3374	5040	402	874	PY8-0	Row label · New block sheet
+new-block / repeats open / 402 / light	3856	5040	402	874	RES-0	Row label · New block sheet
+new-block / custom recurrence / 402 / light	4338	5040	402	874	Q5W-0	Row label · New block sheet
+new-block / clash / 402 / light	4820	5040	402	874	R6O-0	Row label · New block sheet
+new-block / invalid, no name / 402 / light	5302	5040	402	874	R9B-0	Row label · New block sheet
+new-block / error, not added / 402 / light	5784	5040	402	874	RBY-0	Row label · New block sheet
+Frame	0	5970	402		NQD-0	Row label · New block sheet
+Frame	482	5970	402		RHY-0	Row label · New block sheet
+Note · name only, 96	964	5970	402		LBZ-0	Row label · New block sheet
+Frame	1446	5970	402		PLO-0	Row label · New block sheet
+Frame	1928	5970	402		RI1-0	Row label · New block sheet
+Frame	2410	5970	402		RI4-0	Row label · New block sheet
+Frame	2892	5970	402		RI7-0	Row label · New block sheet
+Frame	3374	5970	402		QAX-0	Row label · New block sheet
+Frame	3856	5970	402		RIJ-0	Row label · New block sheet
+Frame	4338	5970	402		QB0-0	Row label · New block sheet
+Frame	4820	5970	402		RIA-0	Row label · New block sheet
+Frame	5302	5970	402		RID-0	Row label · New block sheet
+Frame	5784	5970	402		RIG-0	Row label · New block sheet
+Row label · Item sheet	-560	6300	440		RHU-0	Row label · Item sheet
+item-sheet / default / 402 / light	0	6300	402	874	RJ3-0	Row label · Item sheet
+item-sheet / ··· open / 402 / light	482	6300	402	874	RM7-0	Row label · Item sheet
+item-sheet / at a set time, on / 402 / light	964	6300	402	874	ROJ-0	Row label · Item sheet
+item-sheet / move to, a plain item / 402 / light	1446	6300	402	874	U7R-0	Row label · Item sheet
+item-sheet / move to, pick a day / 402 / light	1928	6300	402	874	UQI-0	Row label · Item sheet
+item-sheet / move to, pick a day, no block of its kind / 402 / light	2410	6300	402	874	UVZ-0	Row label · Item sheet
+item-sheet / move to, a Linear work item / 402 / light	2892	6300	402	874	U98-0	Row label · Item sheet
+item-sheet / swap / 402 / light	3374	6300	402	874	RY7-0	Row label · Item sheet
+item-sheet / swap, empty library / 402 / light	3856	6300	402	874	S35-0	Row label · Item sheet
+item-sheet / icon picker, emoji, suggested / 402 / light	4338	6300	402	874	S78-0	Row label · Item sheet
+item-sheet / icon picker, no name yet / 402 / light	4820	6300	402	874	SDQ-0	Row label · Item sheet
+item-sheet / icon picker, icon, search and groups / 402 / light	5302	6300	402	874	TNB-0	Row label · Item sheet
+item-sheet / icon picker, custom colour open / 402 / light	5784	6300	402	874	TU7-0	Row label · Item sheet
+item-sheet / icon picker, custom colour, bad hex / 402 / light	6266	6300	402	874	U0J-0	Row label · Item sheet
+Frame	0	7230	402		SQZ-0	Row label · Item sheet
+Frame	482	7230	402		SR2-0	Row label · Item sheet
+Frame	964	7230	402		SR5-0	Row label · Item sheet
+Frame	1446	7230	402		UCF-0	Row label · Item sheet
+Frame	1928	7230	402		V0G-0	Row label · Item sheet
+Frame	2410	7230	402		V0J-0	Row label · Item sheet
+Frame	2892	7230	402		UCC-0	Row label · Item sheet
+Frame	3374	7230	402		SR8-0	Row label · Item sheet
+Frame	3856	7230	402		SRB-0	Row label · Item sheet
+Frame	4338	7230	402		SRE-0	Row label · Item sheet
+Frame	4820	7230	402		SRH-0	Row label · Item sheet
+Frame	5302	7230	402		UCO-0	Row label · Item sheet
+Frame	5784	7230	402		UCL-0	Row label · Item sheet
+Frame	6266	7230	402		UCI-0	Row label · Item sheet
+Row label · Item sheet (cont.)	-560	7560	440		SQU-0	Row label · Item sheet (cont.)
+item-sheet / saved colours, editing one / 402 / light	0	7560	402	874	UJ9-0	Row label · Item sheet (cont.)
+item-sheet / Linear search / 402 / light	482	7560	402	874	SS0-0	Row label · Item sheet (cont.)
+item-sheet / Linear linked / 402 / light	964	7560	402	874	SW3-0	Row label · Item sheet (cont.)
+item-sheet / Linear syncing / 402 / light	1446	7560	402	874	VTY-0	Row label · Item sheet (cont.)
+item-sheet / Linear failed / 402 / light	1928	7560	402	874	VY0-0	Row label · Item sheet (cont.)
+item-sheet / closed in Linear / 402 / light	2410	7560	402	874	W25-0	Row label · Item sheet (cont.)
+item-sheet / Linear linked, ··· open / 402 / light	2892	7560	402	874	T1D-0	Row label · Item sheet (cont.)
+item-sheet / Linear linked, priority open / 402 / light	3374	7560	402	874	UDH-0	Row label · Item sheet (cont.)
+item-sheet / Linear not connected / 402 / light	3856	7560	402	874	SOY-0	Row label · Item sheet (cont.)
+Dev note · Icon picker: all emoji, all Lucide	4338	7560	402		UBM-0	Row label · Item sheet (cont.)
+Dev note · Linear status fill	4820	7560	402		UBW-0	Row label · Item sheet (cont.)
+Dev note · Notes and Linear's description	5302	7560	402		UIT-0	Row label · Item sheet (cont.)
+Frame	0	8490	402		URW-0	Row label · Item sheet (cont.)
+Frame	482	8490	402		SRQ-0	Row label · Item sheet (cont.)
+Frame	964	8490	402		SRT-0	Row label · Item sheet (cont.)
+Note · item-sheet / Linear syncing	1446	8490	402		WLV-0	Row label · Item sheet (cont.)
+Note · item-sheet / Linear failed	1928	8490	402		WLY-0	Row label · Item sheet (cont.)
+Note · item-sheet / closed in Linear	2410	8490	402		WLP-0	Row label · Item sheet (cont.)
+Frame	2892	8490	402		T5N-0	Row label · Item sheet (cont.)
+Frame	3374	8490	402		UJ6-0	Row label · Item sheet (cont.)
+Frame	3856	8490	402		SRW-0	Row label · Item sheet (cont.)
+Frame	4338	8490	402		UC6-0	Row label · Item sheet (cont.)
+Frame	4820	8490	402		UC9-0	Row label · Item sheet (cont.)
+Frame	5302	8490	402		UJ3-0	Row label · Item sheet (cont.)
+Row label · To-do sheet	-560	8820	440		TMS-0	Row label · To-do sheet
+todo-sheet / default / 402 / light	0	8820	402	874	T5Q-0	Row label · To-do sheet
+todo-sheet / Type open / 402 / light	482	8820	402	874	TAO-0	Row label · To-do sheet
+todo-sheet / Repeats open / 402 / light	964	8820	402	874	TC4-0	Row label · To-do sheet
+todo-sheet / reminder on / 402 / light	1446	8820	402	874	TDK-0	Row label · To-do sheet
+todo-sheet / not installed (iPhone) / 402 / light	1928	8820	402	874	TF0-0	Row label · To-do sheet
+todo-sheet / notifications off / 402 / light	2410	8820	402	874	TGG-0	Row label · To-do sheet
+todo-sheet / ··· open, Delete / 402 / light	2892	8820	402	874	THW-0	Row label · To-do sheet
+Frame	0	9750	402		TMP-0	Row label · To-do sheet
+Frame	482	9750	402		TMM-0	Row label · To-do sheet
+Frame	964	9750	402		TMJ-0	Row label · To-do sheet
+Frame	1446	9750	402		TMG-0	Row label · To-do sheet
+Frame	1928	9750	402		TMD-0	Row label · To-do sheet
+Frame	2410	9750	402		TMA-0	Row label · To-do sheet
+Frame	2892	9750	402		TM7-0	Row label · To-do sheet
+Row label · Account	-560	10080	440		VQ0-0	Row label · Account
+avatar-menu / installed / 402 / light	0	10080	402	874	V7C-0	Row label · Account
+avatar-menu / not installed / 402 / light	482	10080	402	874	V3X-0	Row label · Account
+avatar-menu / no photo / 402 / light	964	10080	402	874	V0M-0	Row label · Account
+profile-sheet / default / 402 / light	1446	10080	402	874	VAR-0	Row label · Account
+profile-sheet / no photo / 402 / light	1928	10080	402	874	VCW-0	Row label · Account
+profile-sheet / change photo, crop / 402 / light	2410	10080	402	874	VG4-0	Row label · Account
+profile-sheet / uploading / 402 / light	2892	10080	402	874	VDU-0	Row label · Account
+profile-sheet / not saved / 402 / light	3374	10080	402	874	VES-0	Row label · Account
+set-my-days / install offer, once / 402 / light	3856	10080	402	874	W6S-0	Row label · Account
+install-sheet / iPhone / 402 / light	4338	10080	402	874	VHP-0	Row label · Account
+install-sheet / Android / 402 / light	4820	10080	402	874	VJT-0	Row label · Account
+install-sheet / iPhone in another browser / 402 / light	5302	10080	402	874	VLJ-0	Row label · Account
+install-sheet / Android, the browser's own prompt / 402 / light	5784	10080	402	874	VN9-0	Row label · Account
+settings / connections / 402 / light	6266	10080	402	874	NJ0-0	Row label · Account
+Frame	0	11010	402		VQ4-0	Row label · Account
+Frame	482	11010	402		VQ7-0	Row label · Account
+Frame	964	11010	402		VQA-0	Row label · Account
+Frame	1446	11010	402		VQD-0	Row label · Account
+Frame	1928	11010	402		VQG-0	Row label · Account
+Frame	2410	11010	402		VQJ-0	Row label · Account
+Frame	2892	11010	402		VQM-0	Row label · Account
+Frame	3374	11010	402		VQP-0	Row label · Account
+Note · set-my-days / install offer	3856	11010	402		WLM-0	Row label · Account
+Frame	4338	11010	402		VQS-0	Row label · Account
+Frame	4820	11010	402		VQV-0	Row label · Account
+Frame	5302	11010	402		VQY-0	Row label · Account
+Frame	5784	11010	402		VR1-0	Row label · Account
+Frame	6266	11010	402		NQN-0	Row label · Account
+Row label · Archive	-560	11340	440		WXB-0	Row label · Archive
+set-my-days / A: week chips, Usual week / 402 / light	0	11340	402	874	JJ6-0	Row label · Archive
+set-my-days / B: seven-day list first / 402 / light	482	11340	402	874	JNY-0	Row label · Archive
+avatar-menu / not installed / 402 / light	964	11340	402	874	JBC-0	Row label · Archive
+avatar-menu / installed, no photo / 402 / light	1446	11340	402	874	JFP-0	Row label · Archive
+chores / alt (a): a seventh kind, Home / 402 / light	1928	11340	402		PH4-0	Row label · Archive
+chores / alt (b): a Sunday checklist only / 402 / light	2410	11340	402		PID-0	Row label · Archive
+todo-sheet / where and repeats / 402 / light	2892	11340	402	874	PPY-0	Row label · Archive
+item-sheet / icon picker, icon, custom hex / 402 / light	3374	11340	402	874	SG6-0	Row label · Archive
+item-sheet / bad hex / 402 / light	3856	11340	402	874	SLN-0	Row label · Archive
+Note · grid, 80	0	12270	402		JY7-0	Row label · Archive
+Note · name only, 80	482	12270	402		JY4-0	Row label · Archive
+Note · grid, 96	964	12270	402		JYD-0	Row label · Archive
+Note · name only, 96	1446	12270	402		JYA-0	Row label · Archive
+Frame	1928	12270	402		PM6-0	Row label · Archive
+Frame	2410	12270	402		PM9-0	Row label · Archive
+Frame	2892	12270	402		PS2-0	Row label · Archive
+Frame	3374	12270	402		SRK-0	Row label · Archive
+Frame	3856	12270	402		SRN-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700		0	JY3-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700		0	KU5-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700		0	LBM-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700		0	OWM-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700	5222	0	NPT-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700		220	PLE-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700		0	QTK-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700		0	RHX-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700	11970	0	SQY-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700		0	TLO-0	Row label · Archive
+Emptied notes board (safe to delete)	0	12700		0	VQ3-0	Row label · Archive

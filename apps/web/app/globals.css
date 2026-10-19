@@ -2,3 +2,45 @@
 @import "@syn/config/tailwind/preset.css";
 @import "@syn/ui/styles/globals.css";
 @source "../../**/*.{ts,tsx}";
+
+/*
+ * The Ready, go hand-off (USE-43): Review the day, the welcome and Now are
+ * joined by the View Transitions API's own cross-fade, opacity only, at
+ * `--dur-sheet` (zero under reduced motion). `fadeNavigate` starts them.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--dur-sheet);
+  animation-timing-function: ease-out;
+}
+
+/*
+ * The welcome's sections rise 8 px with opacity, one after another (USE-43;
+ * ready-go/index.md); under reduced motion, opacity only, and the duration
+ * tokens are zero there, so they land in place. `both` holds each section
+ * unseen through its delay.
+ */
+@theme {
+  --animate-rise: syn-rise var(--dur-state) ease-out both;
+  --animate-fade-in: syn-fade-in var(--dur-state) ease-out both;
+
+  @keyframes syn-rise {
+    from {
+      opacity: 0;
+      translate: 0 var(--space-2);
+    }
+    to {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+
+  @keyframes syn-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

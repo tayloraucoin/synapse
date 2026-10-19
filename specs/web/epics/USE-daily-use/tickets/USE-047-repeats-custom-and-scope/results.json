@@ -1,0 +1,68 @@
+{
+  "id": "USE-47",
+  "criteria_sha256": "a07d98757041e8ac31db4deacf5209e4f1195531c19b4c190df228ea6941f077",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:51:35Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C3.log",
+        "evidence_sha256": "e7bde6465dc6f055b1ab1bd06990600e1a49afa00e182f3b4c662146d87d0290",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:51:35Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C4.log",
+        "evidence_sha256": "e7bde6465dc6f055b1ab1bd06990600e1a49afa00e182f3b4c662146d87d0290",
+        "tests": 32
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:51:55Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C5.log",
+        "evidence_sha256": "fa1668524e51840d90714e55450d7c5fd0896258a5bf1312d51ce38b64ad3e12"
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T19:51:56Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-047-repeats-custom-and-scope/evidence/C6.log",
+        "evidence_sha256": "46f7aee5b04693e4d2282ee2424e9261ff26b54556fdd7066c1fecb7114d0c87"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:57:24Z",
+  "updated_at": "2026-10-18T19:51:57Z"
+}

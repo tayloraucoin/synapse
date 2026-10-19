@@ -1,0 +1,32 @@
+{
+  "id": "USE-113",
+  "criteria_sha256": "daab84cb8f36a6be1a849acf8ab4fc264067de7be730e5084f3085970e93e88c",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "check",
+      "run": {
+        "command": "yarn workspace web test:e2e",
+        "exit": 1,
+        "at": "2026-10-18T23:16:47Z",
+        "head": "cd74543d3adb60b648ba24ace08b412e81af8918",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-113-e2e-env-loader/evidence/C1.log",
+        "evidence_sha256": "3621508453349de50848e25147ab77160b9edf388aaee1fd7e1fcb018d915394"
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T23:16:49Z",
+        "head": "cd74543d3adb60b648ba24ace08b412e81af8918",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-113-e2e-env-loader/evidence/C2.log",
+        "evidence_sha256": "087f23df3d615cf17e8873f71c6d245409a7bffeafa186a2af300a90c1000f63"
+      }
+    }
+  },
+  "built_at": "2026-10-18T23:04:35Z",
+  "updated_at": "2026-10-18T23:16:49Z"
+}

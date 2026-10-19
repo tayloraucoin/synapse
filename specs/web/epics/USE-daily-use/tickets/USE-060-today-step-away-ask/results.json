@@ -1,0 +1,86 @@
+{
+  "id": "USE-60",
+  "criteria_sha256": "be1829828d57442c20f7fd72fa930e4fae4e93cff00780ff3b056a4870b49526",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:08:25Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-060-today-step-away-ask/evidence/C1.log",
+        "evidence_sha256": "7d73fc62e26fa4fe2add987fb3a61158d85e6137668b845fba6fb9d84b659fc2",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:08:25Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-060-today-step-away-ask/evidence/C2.log",
+        "evidence_sha256": "7d73fc62e26fa4fe2add987fb3a61158d85e6137668b845fba6fb9d84b659fc2",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:08:25Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-060-today-step-away-ask/evidence/C3.log",
+        "evidence_sha256": "7d73fc62e26fa4fe2add987fb3a61158d85e6137668b845fba6fb9d84b659fc2",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C6": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C7": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:08:42Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-060-today-step-away-ask/evidence/C7.log",
+        "evidence_sha256": "b2b94f94447515e7e308de63137c3da5e0ac87ebfef6c86af4079201eed53b26"
+      }
+    },
+    "C8": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:08:43Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-060-today-step-away-ask/evidence/C8.log",
+        "evidence_sha256": "122e00c5e654331256487e48466bad819832ef580538bbb48a2f90c8509caa57"
+      }
+    }
+  },
+  "built_at": "2026-10-18T19:30:30Z",
+  "updated_at": "2026-10-18T20:08:44Z"
+}

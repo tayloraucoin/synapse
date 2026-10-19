@@ -9,7 +9,7 @@ import { SleepBand } from "./sleep-band";
 const meta: Meta<typeof SleepBand> = {
   title: "Composed/Display/SleepBand",
   component: SleepBand,
-  decorators: [(Story) => <div className="max-w-[375px] p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-[375px] p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

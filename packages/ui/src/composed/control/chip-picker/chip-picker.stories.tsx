@@ -13,7 +13,7 @@ import { ChipPicker } from "./chip-picker";
 const meta: Meta<typeof ChipPicker> = {
   title: "Composed/Control/ChipPicker",
   component: ChipPicker,
-  decorators: [(Story) => <div className="max-w-lg p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-lg p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

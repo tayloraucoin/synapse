@@ -1,0 +1,81 @@
+{
+  "id": "USE-87",
+  "criteria_sha256": "830a7b87a608526e0592562bd6c3187e453dc651e79106252ed90eedbd4c750b",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:15:03Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-087-item-notes-and-today-values/evidence/C1.log",
+        "evidence_sha256": "b1a7e3eb2d280f1aac0a139ce587e57459146964b70f216b8f5c3b784f4698ed",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:15:03Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-087-item-notes-and-today-values/evidence/C2.log",
+        "evidence_sha256": "b1a7e3eb2d280f1aac0a139ce587e57459146964b70f216b8f5c3b784f4698ed",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:15:18Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-087-item-notes-and-today-values/evidence/C3.log",
+        "evidence_sha256": "5569e1cdd8c46acd5d9ae18c59b0a1e0cf393af5c33f1b4c92134e4f9b088b36"
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:migrations",
+        "exit": 0,
+        "at": "2026-10-18T20:15:19Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-087-item-notes-and-today-values/evidence/C4.log",
+        "evidence_sha256": "2e9fe94c269c0bb981911370a4fbe5fc1def721813501a9842a8c82e8c715829",
+        "tests": 20
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-migrations",
+        "exit": 0,
+        "at": "2026-10-18T20:15:21Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-087-item-notes-and-today-values/evidence/C6.log",
+        "evidence_sha256": "9137336194b9734ac097cc15f7430d1c443a6c7ba3f51a6b459117c26d2af2b2"
+      }
+    },
+    "C5": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "review:mason": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    }
+  },
+  "built_at": "2026-10-18T19:31:17Z",
+  "updated_at": "2026-10-18T20:15:22Z"
+}

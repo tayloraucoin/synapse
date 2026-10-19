@@ -93,7 +93,7 @@ export function StateWord({
       {dot ? (
         <span
           aria-hidden="true"
-          className="bg-accent-mark size-1.5 rounded-full"
+          className="bg-now size-1.5 rounded-full"
         />
       ) : null}
       {phrase}

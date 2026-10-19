@@ -1,0 +1,4 @@
+command: yarn test:tooling --test-name-pattern C1
+exit: 0
+---
+ℹ tests 3

@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract.schema.json",
+  "title": "contract.md frontmatter: the unit of work",
+  "description": "The fields of a ticket's contract (E-22, A5, A7). check-specs validates every contract's frontmatter against this file; the rules no schema can carry (one surface, reviewers by path, the 2,500-token cap, yarn scripts) are in tooling/lib/specs.ts.",
+  "type": "object",
+  "required": [
+    "id",
+    "size",
+    "objective",
+    "slice_type",
+    "non_negotiables",
+    "devs_call",
+    "cites",
+    "truth_files",
+    "reviewers",
+    "planned_paths",
+    "depends_on",
+    "out_of_scope",
+    "criteria"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[A-Z][A-Z0-9]{1,4}-[1-9][0-9]*$" },
+    "size": {
+      "description": "small: under half a day, the default. medium: half a day to two days. large: over two days; split it.",
+      "enum": ["small", "medium", "large"]
+    },
+    "objective": { "$ref": "#/$defs/line" },
+    "slice_type": { "$ref": "#/$defs/line" },
+    "non_negotiables": { "type": "array", "items": { "$ref": "#/$defs/line" } },
+    "devs_call": { "$ref": "#/$defs/line" },
+    "cites": {
+      "description": "Surface files (paths), decision IDs and criterion IDs from those files.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/line" }
+    },
+    "waiver": {
+      "description": "Why this ticket cites more than one surface file.",
+      "$ref": "#/$defs/line"
+    },
+    "truth_files": {
+      "oneOf": [
+        { "type": "array", "items": { "$ref": "#/$defs/line" } },
+        { "type": "string", "pattern": "^none: \\S" }
+      ]
+    },
+    "reviewers": {
+      "description": "Who reviews, as the operator confirmed (PR-19). At Q3 each has a review:<role> criterion and a kept review file; below Q3 the review happens in the thread.",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z]+$" }
+    },
+    "qa": {
+      "description": "The QA level the operator confirmed (docs/workflows/qa-levels.md). Q1: the builder proves it. Q2: plus one reviewer in the thread. Q3: recorded proofs and reviewers on the ticket. Never computed; Q1 when absent. Changed after the start with yarn contract:qa.",
+      "enum": ["Q0", "Q1", "Q2", "Q3"]
+    },
+    "focus": {
+      "description": "Named parts raised to a higher level on the operator's request, one line each: what to examine, who looks, and at which level.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/line" }
+    },
+    "tier": {
+      "description": "Before PR-19. Read only when qa is absent (2 as Q3, otherwise Q1); contract:init and contract:qa remove it.",
+      "enum": [0, 1, 2]
+    },
+    "operator_review": {
+      "description": "true when Taylor wants to look the ticket over himself, as for a new surface in the browser (PR-16). contract:init adds a manual criterion for it; the builder hands it over as an operator check, and the ticket still closes.",
+      "type": "boolean"
+    },
+    "planned_paths": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/line" }
+    },
+    "depends_on": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9]{1,4}-[1-9][0-9]*$"
+      }
+    },
+    "out_of_scope": { "type": "array", "items": { "$ref": "#/$defs/line" } },
+    "criteria": { "type": "array", "items": { "$ref": "#/$defs/criterion" } }
+  },
+  "$defs": {
+    "line": { "type": "string", "minLength": 1 },
+    "criterion": {
+      "type": "object",
+      "required": ["id", "statement", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(C[1-9][0-9]*|review:[a-z]+)$"
+        },
+        "statement": { "$ref": "#/$defs/line" },
+        "evidence": { "enum": ["test", "check", "capture", "manual"] },
+        "command": {
+          "description": "test and check: a package.json script run through yarn, as in `yarn test:tooling`.",
+          "$ref": "#/$defs/line"
+        },
+        "path": {
+          "description": "capture: where the evidence file will be.",
+          "$ref": "#/$defs/line"
+        },
+        "reason": {
+          "description": "manual: why no script can prove it.",
+          "$ref": "#/$defs/line"
+        }
+      }
+    }
+  }
+}

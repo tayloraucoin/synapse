@@ -162,7 +162,7 @@ export function PickerList({
       className={cn(
         "flex flex-col gap-(--space-2)",
         presentation === "popover" &&
-          "border-hairline bg-paper rounded-(--radius) border shadow-(--shadow-overlay)",
+          "border-hairline bg-paper rounded-(--radius) border",
         className,
       )}
     >
@@ -226,7 +226,7 @@ export function PickerList({
                       {item.marker === true ? (
                         <span
                           aria-hidden="true"
-                          className="bg-accent-mark size-1.5 shrink-0 rounded-full"
+                          className="bg-now size-1.5 shrink-0 rounded-full"
                         />
                       ) : null}
                     </>,

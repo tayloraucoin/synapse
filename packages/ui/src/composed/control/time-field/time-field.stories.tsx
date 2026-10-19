@@ -14,7 +14,7 @@ import { TimeField } from "./time-field";
 const meta: Meta<typeof TimeField> = {
   title: "Composed/Control/TimeField",
   component: TimeField,
-  decorators: [(Story) => <div className="max-w-xs p-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-xs p-(--space-8)"><Story /></div>],
 };
 
 export default meta;

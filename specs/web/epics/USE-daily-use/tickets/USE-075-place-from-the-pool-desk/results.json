@@ -1,0 +1,68 @@
+{
+  "id": "USE-75",
+  "criteria_sha256": "fac2f546bf5cb646b767bed4240409571d492c936f33301b98348a397c3f38d9",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:12:50Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-075-place-from-the-pool-desk/evidence/C1.log",
+        "evidence_sha256": "30043d8b7003d3a7008b33a363d198f49d382208afec189e4ce767c915e9401e",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:12:50Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-075-place-from-the-pool-desk/evidence/C2.log",
+        "evidence_sha256": "30043d8b7003d3a7008b33a363d198f49d382208afec189e4ce767c915e9401e",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:13:06Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-075-place-from-the-pool-desk/evidence/C5.log",
+        "evidence_sha256": "e014018e82c13d2621adea9050a715ffc5f98eb905b48703435606345eae59a7"
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:13:07Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-075-place-from-the-pool-desk/evidence/C6.log",
+        "evidence_sha256": "e7970c8d7c5a7472785ab48b1ad9c1403f8b99887270b51919eac7b708c46bb6"
+      }
+    }
+  },
+  "built_at": "2026-10-18T19:00:01Z",
+  "updated_at": "2026-10-18T20:13:07Z"
+}

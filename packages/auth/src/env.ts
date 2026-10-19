@@ -1,5 +1,6 @@
 // Supabase Auth credentials follow DATABASE_ENVIRONMENT (same rule as @syn/db):
-// - local: staging Supabase credentials (*_STAGING vars) + local Postgres
+// - local: the local Supabase stack (*_LOCAL vars) when NEXT_PUBLIC_SUPABASE_URL_LOCAL
+//   is set (WEB-2, SETUP.md §3 Option D); otherwise staging (*_STAGING vars) + local Postgres
 // - staging: staging Supabase credentials
 // - production: production Supabase credentials (unprefixed vars)
 //
@@ -22,8 +23,41 @@ function usesStagingSupabase(env: NodeJS.ProcessEnv = process.env): boolean {
   return tier === "local" || tier === "staging";
 }
 
+const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/**
+ * The local Supabase stack's URL (WEB-2), or "" when the local tier is not
+ * opted in. Opt-in only: unset, the local tier reads staging exactly as before.
+ *
+ * Refused unless it names this machine. A hosted URL in a _LOCAL variable
+ * would send the local tier's sign-ins, and the local secret key, somewhere
+ * no one meant them to go.
+ */
+export function getLocalSupabaseUrl(env: NodeJS.ProcessEnv = process.env): string {
+  const tier =
+    env.DATABASE_ENVIRONMENT?.trim().toLowerCase() ||
+    env.NEXT_PUBLIC_DATABASE_ENVIRONMENT?.trim().toLowerCase();
+  if (tier !== "local") return "";
+  const url = (env.NEXT_PUBLIC_SUPABASE_URL_LOCAL ?? "").trim();
+  if (!url) return "";
+  let host = "";
+  try {
+    host = new URL(url).hostname;
+  } catch {
+    // An unparseable URL is refused below, same as a hosted one.
+  }
+  if (!LOCAL_HOSTS.has(host)) {
+    throw new Error(
+      `@syn/auth: NEXT_PUBLIC_SUPABASE_URL_LOCAL must point at this machine (localhost or 127.0.0.1); it is "${url}". Unset it to use staging auth.`,
+    );
+  }
+  return url;
+}
+
 /** Project URL from Supabase dashboard (Settings → API). */
 export function getSupabaseUrl(env: NodeJS.ProcessEnv = process.env): string {
+  const local = getLocalSupabaseUrl(env);
+  if (local) return local;
   if (usesStagingSupabase(env)) {
     return firstNonEmpty(env.NEXT_PUBLIC_SUPABASE_URL_STAGING);
   }
@@ -35,6 +69,12 @@ export function getSupabaseUrl(env: NodeJS.ProcessEnv = process.env): string {
  * @see https://supabase.com/docs/guides/api/api-keys
  */
 export function getSupabaseAnonKey(env: NodeJS.ProcessEnv = process.env): string {
+  if (getLocalSupabaseUrl(env)) {
+    return firstNonEmpty(
+      env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL,
+      env.NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL,
+    );
+  }
   if (usesStagingSupabase(env)) {
     return firstNonEmpty(
       env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_STAGING,
@@ -51,6 +91,12 @@ export function getSupabaseAnonKey(env: NodeJS.ProcessEnv = process.env): string
 export function getSupabaseServiceRoleKey(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
+  if (getLocalSupabaseUrl(env)) {
+    return firstNonEmpty(
+      env.SUPABASE_SECRET_KEY_LOCAL,
+      env.SUPABASE_SERVICE_ROLE_KEY_LOCAL,
+    );
+  }
   if (usesStagingSupabase(env)) {
     return firstNonEmpty(
       env.SUPABASE_SECRET_KEY_STAGING,

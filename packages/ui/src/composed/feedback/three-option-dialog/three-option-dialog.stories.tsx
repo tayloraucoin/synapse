@@ -23,7 +23,7 @@ export const ApplyChanges: StoryObj = {
   render: function Render() {
     const [open, setOpen] = React.useState(false);
     return (
-      <div className="p-(--space-6)">
+      <div className="p-(--space-8)">
         <Button onClick={() => setOpen(true)}>Save the template</Button>
         <ThreeOptionDialog
           open={open}

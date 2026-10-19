@@ -1,33 +1,16 @@
-import { PageFrame, ShellPageHeader } from "@/components/page-frame";
-import { env } from "@/env";
-import { todayRoute } from "@/lib/routes";
+import type { Metadata } from "next";
+import { SETTINGS_COPY, SettingsList } from "@/components/account";
 
-import { SETTINGS_COPY } from "./_components/copy";
-import { SettingsIndex } from "./_components/settings-index";
+export const metadata: Metadata = { title: SETTINGS_COPY.title };
 
 /**
- * ST-00 Settings.
- *
- * The version comes from `env.ts`, the app's one environment reader, stamped
- * into the bundle by `next.config.ts` from `package.json` and the build date.
- * Reading it here rather than in the client leaf keeps that rule true on the
- * page that displays it — AC12 greps this directory to prove it.
+ * `/settings` (USE-85): Connections and sign out, from the avatar menu.
+ * Pushed: no tabs below 1024; the rail at the desk with nothing current.
  */
 export default function SettingsPage() {
   return (
-    <PageFrame
-      header={
-        <ShellPageHeader
-          title={SETTINGS_COPY.title}
-          showBack
-          backFallback={todayRoute()}
-        />
-      }
-    >
-      <SettingsIndex
-        version={env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0"}
-        buildDate={env.NEXT_PUBLIC_BUILD_DATE ?? ""}
-      />
-    </PageFrame>
+    <main id="main" className="flex flex-1 flex-col">
+      <SettingsList />
+    </main>
   );
 }

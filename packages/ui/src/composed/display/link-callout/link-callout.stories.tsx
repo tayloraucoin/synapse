@@ -1,6 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
-
+import type { Meta, StoryObj } from "@storybook/react";
 import { LinkCallout } from "./link-callout";
 
 /**
@@ -11,7 +10,13 @@ import { LinkCallout } from "./link-callout";
 const meta: Meta<typeof LinkCallout> = {
   title: "Composed/Display/LinkCallout",
   component: LinkCallout,
-  decorators: [(Story) => <div className="max-w-[375px] p-(--space-6)"><Story /></div>],
+  decorators: [
+    (Story) => (
+      <div className="max-w-[375px] p-(--space-8)">
+        <Story />
+      </div>
+    ),
+  ],
   args: {
     title: "Focus",
     url: "https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ",
@@ -27,7 +32,22 @@ type Story = StoryObj<typeof LinkCallout>;
 export const Spotify: Story = {};
 
 export const OtherHost: Story = {
-  args: { title: "Morning notes", url: "https://example.com/notes", host: "example.com", kind: "other" },
+  args: {
+    title: "Morning notes",
+    url: "https://example.com/notes",
+    host: "example.com",
+    kind: "other",
+  },
+};
+
+/** A meal topic on YouTube (USE-22): the play glyph, no brand's logo, the topic and its kind under the title. */
+export const Video: Story = {
+  args: {
+    title: "Open in YouTube",
+    url: "https://www.youtube.com/playlist?list=PLplaceholder",
+    host: "Agent workflows · saved playlist",
+    kind: "play",
+  },
 };
 
 /** Two under the reading, as the frame stacks them. */
@@ -35,7 +55,12 @@ export const TwoStacked: Story = {
   render: (args) => (
     <div className="flex flex-col gap-(--space-2)">
       <LinkCallout {...args} />
-      <LinkCallout title="Morning notes" url="https://example.com/notes" host="example.com" kind="other" />
+      <LinkCallout
+        title="Morning notes"
+        url="https://example.com/notes"
+        host="example.com"
+        kind="other"
+      />
     </div>
   ),
 };
@@ -59,7 +84,10 @@ export const FocusVisible: Story = {
 };
 
 export const LongTitleTruncates: Story = {
-  args: { title: "Deep Focus — two hours of instrumental music for the first thing in the morning" },
+  args: {
+    title:
+      "Deep Focus — two hours of instrumental music for the first thing in the morning",
+  },
 };
 
 /** No host: the title alone. */

@@ -1,0 +1,105 @@
+{
+  "id": "MIG-6",
+  "criteria_sha256": "4e66e318dcce80c421108ab9f6c940e186aab58d15076c240836f59a922fc4dc",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:env-seam --test-name-pattern C1",
+        "exit": 0,
+        "at": "2026-10-09T20:41:49Z",
+        "head": "3f62476e0e5a47d99408e9d2b9596b5af94c30be",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-006-env-seam/evidence/C1.log",
+        "evidence_sha256": "a2679b3984b513cabe3a5a01665fb1f90c7986a49dc501b920b429c0eab6bf70",
+        "tests": 6
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:env-seam --test-name-pattern C2",
+        "exit": 0,
+        "at": "2026-10-09T20:42:02Z",
+        "head": "3f62476e0e5a47d99408e9d2b9596b5af94c30be",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-006-env-seam/evidence/C2.log",
+        "evidence_sha256": "6436f3fafdebacc5c4e9f70dde09dfdbd2a28e8bc8e746efbe7859d8f5dd0df5",
+        "tests": 6
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test:env-seam --test-name-pattern C3",
+        "exit": 0,
+        "at": "2026-10-09T20:42:13Z",
+        "head": "3f62476e0e5a47d99408e9d2b9596b5af94c30be",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-006-env-seam/evidence/C3.log",
+        "evidence_sha256": "7dba42cd4e84ed6f0576c94e7d77f533d65d9c655390ce1740108062e84e2147",
+        "tests": 6
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-09T20:42:25Z",
+        "head": "3f62476e0e5a47d99408e9d2b9596b5af94c30be",
+        "evidence_path": "specs/_shared/epics/MIG-migration/tickets/MIG-006-env-seam/evidence/C4.log",
+        "evidence_sha256": "4425a63b5abe932dc148f2228bbb5302a558024d856a75f34bc4fd7e112039de"
+      }
+    }
+  },
+  "cost": {
+    "at": "2026-10-09T20:42:35Z",
+    "calls": 66,
+    "weighted": 1130910,
+    "tokens_input": 134,
+    "tokens_cache_read": 7136651,
+    "tokens_cache_write": 186701,
+    "tokens_output": 36747,
+    "by_category": {
+      "build": {
+        "calls": 34,
+        "weighted": 567032
+      },
+      "proofs": {
+        "calls": 13,
+        "weighted": 240833
+      },
+      "captures": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "reviews": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "status": {
+        "calls": 6,
+        "weighted": 92838
+      },
+      "git": {
+        "calls": 9,
+        "weighted": 148196
+      },
+      "re-reading": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "other": {
+        "calls": 4,
+        "weighted": 82012
+      }
+    },
+    "context_last_call": 149131,
+    "threads": 1,
+    "headless_runs": 0,
+    "headless_weighted": 0
+  },
+  "updated_at": "2026-10-09T20:42:35Z"
+}

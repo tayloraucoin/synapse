@@ -1,0 +1,52 @@
+{
+  "id": "USE-76",
+  "criteria_sha256": "23316fc0b1d0807d44d4c61193f1270d45b2504c64807082b41a6a866bbdf6c2",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:13:09Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-076-block-panel/evidence/C5.log",
+        "evidence_sha256": "539ee4c7e0d5da2b73d4ccb3db8d582fd0442fba1cdaac1c1c0e7192bdfa36eb"
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:13:10Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-076-block-panel/evidence/C6.log",
+        "evidence_sha256": "0f59fcbf693f1c9973bab9579aa3548162e376a48eaf478c13a9fcf887511dad"
+      }
+    }
+  },
+  "built_at": "2026-10-18T19:31:00Z",
+  "updated_at": "2026-10-18T20:13:11Z"
+}

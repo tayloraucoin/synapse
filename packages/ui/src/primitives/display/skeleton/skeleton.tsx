@@ -21,7 +21,7 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="skeleton"
       aria-hidden="true"
       className={cn(
-        "rounded-(--radius) bg-neutral-200 dark:bg-neutral-700",
+        "rounded-(--radius) bg-border",
         className,
       )}
       {...props}

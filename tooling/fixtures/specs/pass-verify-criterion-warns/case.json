@@ -1,0 +1,4 @@
+{
+  "expect": "pass",
+  "warning": "yarn verify, which is never a criterion (the batch close proves the whole chain once): WEB-1 C2"
+}

@@ -1,0 +1,90 @@
+{
+  "id": "USE-94",
+  "criteria_sha256": "821e4af87d8591e96c65c0cc624a4d7b78a3110a062c824da8dc1e75b9e07003",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:01Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-094-slots-and-clock/evidence/C1.log",
+        "evidence_sha256": "ca7881b2eb73c024d94cb7e3a7003a1a263a7eb7c895c759673eb6bbc4176976",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:01Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-094-slots-and-clock/evidence/C2.log",
+        "evidence_sha256": "ca7881b2eb73c024d94cb7e3a7003a1a263a7eb7c895c759673eb6bbc4176976",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:01Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-094-slots-and-clock/evidence/C3.log",
+        "evidence_sha256": "ca7881b2eb73c024d94cb7e3a7003a1a263a7eb7c895c759673eb6bbc4176976",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:01Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-094-slots-and-clock/evidence/C4.log",
+        "evidence_sha256": "ca7881b2eb73c024d94cb7e3a7003a1a263a7eb7c895c759673eb6bbc4176976",
+        "tests": 32
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T23:09:01Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-094-slots-and-clock/evidence/C5.log",
+        "evidence_sha256": "ca7881b2eb73c024d94cb7e3a7003a1a263a7eb7c895c759673eb6bbc4176976",
+        "tests": 32
+      }
+    },
+    "C6": {
+      "status": "FAIL",
+      "evidence": "manual",
+      "run": null
+    },
+    "C7": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T23:09:19Z",
+        "head": "8f8102225af6c3ac5b94b8978c1805aebbb6e8d3",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-094-slots-and-clock/evidence/C7.log",
+        "evidence_sha256": "879e35041d7c855a0e5f9c88a797a2716c3c086cd93cedf11c6651abcde6922f"
+      }
+    }
+  },
+  "built_at": "2026-10-18T23:03:52Z",
+  "updated_at": "2026-10-18T23:09:20Z"
+}

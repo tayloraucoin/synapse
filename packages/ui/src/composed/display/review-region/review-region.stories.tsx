@@ -11,7 +11,7 @@ const meta: Meta<typeof ReviewRegion> = {
   title: "Composed/Display/ReviewRegion",
   component: ReviewRegion,
   parameters: { layout: "fullscreen" },
-  decorators: [(Story) => <div className="max-w-2xl px-(--space-6)"><Story /></div>],
+  decorators: [(Story) => <div className="max-w-2xl px-(--space-8)"><Story /></div>],
 };
 
 export default meta;

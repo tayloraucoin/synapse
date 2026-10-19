@@ -15,7 +15,7 @@ type Story = StoryObj<typeof NativeSelect>;
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex max-w-sm flex-col gap-(--space-4) p-(--space-6)">
+    <div className="flex max-w-sm flex-col gap-(--space-4) p-(--space-8)">
       <NativeSelect aria-label="Weekday" defaultValue="mon">
         {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
           <NativeSelectOption key={day} value={day.toLowerCase()}>

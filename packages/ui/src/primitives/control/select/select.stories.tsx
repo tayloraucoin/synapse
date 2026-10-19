@@ -21,7 +21,7 @@ const OPTIONS = [
 export const Overview: Story = {
   tags: ["!autodocs"],
   render: () => (
-    <div className="flex max-w-sm flex-col gap-(--space-5) p-(--space-6)">
+    <div className="flex max-w-sm flex-col gap-(--space-6) p-(--space-8)">
       <SelectField
         label="Category"
         placeholder="No category"

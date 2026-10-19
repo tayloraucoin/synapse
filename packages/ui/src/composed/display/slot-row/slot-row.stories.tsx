@@ -52,7 +52,7 @@ export const Templates: StoryObj = {
       {SLOTS_PREP.map((slot) => (
         <SlotRow key={slot.id} slot={slot} onOpen={() => {}} />
       ))}
-      <li aria-hidden="true" className="h-(--space-6)" />
+      <li aria-hidden="true" className="h-(--space-8)" />
       {SLOTS_ROUTINE.map((slot) => (
         <SlotRow key={slot.id} slot={slot} onOpen={() => {}} />
       ))}

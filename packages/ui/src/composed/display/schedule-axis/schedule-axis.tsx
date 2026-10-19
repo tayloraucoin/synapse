@@ -16,18 +16,20 @@
  *
  * Children are absolutely positioned by their own `topPx`/`heightPx`; the axis
  * owns the geometry constants and hands them out through `pxPerHour`.
+ *
+ * REVIEW THE DAY (USE-31; D-USE-23) composes it at 96 px an hour with its
+ * own gutter (`gutterPx`), bare 24-hour labels ("7", "13"; `formatHour`) and
+ * a line per hour only (`hourLinesOnly`). Unset, nothing changes.
  */
 "use client";
 
 import * as React from "react";
-
 import { cn } from "../../../lib/cn";
 import { Button } from "../../../primitives/control/button";
 
 const MIN_PER_BAND = 15;
 /** The hour-label column; bands and gaps start after it (UX v1.1 §6.5). */
 export const SCHEDULE_GUTTER_PX = 48;
-const GUTTER_PX = SCHEDULE_GUTTER_PX;
 
 /**
  * UX v1.2 §4.13i, S12.1 (RUN-7): where a `BlockBand` puts its label. Under
@@ -39,7 +41,8 @@ const GUTTER_PX = SCHEDULE_GUTTER_PX;
 export type BandLabelPlacement = "gutter" | "inside";
 const INSIDE_UNDER_MIN = 3 * 60;
 
-export const BandLabelPlacementContext = React.createContext<BandLabelPlacement>("gutter");
+export const BandLabelPlacementContext =
+  React.createContext<BandLabelPlacement>("gutter");
 
 export interface ScheduleAxisProps {
   /** Minutes from day start. */
@@ -49,9 +52,10 @@ export interface ScheduleAxisProps {
    * 64, or 96 at ≥150% text. 28 is the COMPACT scale (UX v1.3 §4.2; DAY-7):
    * the primer's 24-hour example day on one phone screen — every third hour
    * labelled, half-hour lines hidden, every band's label inside it. Nothing
-   * on `/today` or the Schedule passes 28.
+   * on `/today` or the Schedule passes 28. 80 is the Week's Time lens
+   * (USE-73; D-USE-41).
    */
-  pxPerHour?: 28 | 64 | 96;
+  pxPerHour?: 28 | 64 | 80 | 96;
   timeZone: string;
   locale?: string;
   onExtend?: (direction: "earlier" | "later") => void;
@@ -60,6 +64,14 @@ export interface ScheduleAxisProps {
   /** Absolutely positioned blocks, spans, ghosts and bands. */
   children: React.ReactNode;
   className?: string;
+  /** The hour-label column's width; 48 when unset. */
+  gutterPx?: number;
+  /** An hour's label from minutes-from-midnight; "7 AM" when unset. */
+  formatHour?: (minutes: number) => string;
+  /** A line at each hour and none between (Review the day). */
+  hourLinesOnly?: boolean;
+  /** Hour labels against the gutter's start or its end (the default). */
+  hourLabelAlign?: "start" | "end";
 }
 
 /** "7 AM" from minutes-from-midnight, in the day's zone. */
@@ -86,12 +98,17 @@ export function ScheduleAxis({
   ariaLabel = "Schedule",
   children,
   className,
+  gutterPx = SCHEDULE_GUTTER_PX,
+  formatHour,
+  hourLinesOnly = false,
+  hourLabelAlign = "end",
 }: ScheduleAxisProps) {
   const spanMin = Math.max(0, endMin - startMin);
   const bandCount = Math.ceil(spanMin / MIN_PER_BAND);
   const heightPx = (spanMin / 60) * pxPerHour;
   const compact = pxPerHour === 28;
-  const labelPlacement: BandLabelPlacement = compact || spanMin < INSIDE_UNDER_MIN ? "inside" : "gutter";
+  const labelPlacement: BandLabelPlacement =
+    compact || spanMin < INSIDE_UNDER_MIN ? "inside" : "gutter";
   // At 28px an hour, a label every hour would touch the next; every third reads.
   const labelEvery = compact ? 3 : 1;
 
@@ -119,7 +136,7 @@ export function ScheduleAxis({
         role="grid"
         aria-rowcount={bandCount}
         aria-label={ariaLabel}
-        style={{ height: `${heightPx}px`, paddingInlineStart: `${GUTTER_PX}px` }}
+        style={{ height: `${heightPx}px`, paddingInlineStart: `${gutterPx}px` }}
         className="relative"
       >
         {/* One gridcell per 15 minutes — the order a screen reader walks. */}
@@ -136,6 +153,8 @@ export function ScheduleAxis({
               style={{
                 top: `${((bandMin - startMin) / 60) * pxPerHour}px`,
                 height: `${(MIN_PER_BAND / 60) * pxPerHour}px`,
+                // Hour lines alone run from the column, clear of the labels.
+                ...(hourLinesOnly ? { insetInlineStart: `${gutterPx}px` } : {}),
               }}
               className="absolute inset-x-0"
             >
@@ -145,7 +164,7 @@ export function ScheduleAxis({
                   "h-full border-t",
                   isHour
                     ? "border-edge"
-                    : !compact && (isHalf || pxPerHour === 96)
+                    : !compact && !hourLinesOnly && (isHalf || pxPerHour === 96)
                       ? "border-hairline"
                       : "border-transparent",
                 )}
@@ -161,17 +180,26 @@ export function ScheduleAxis({
             aria-hidden="true"
             style={{
               top: `${((minute - startMin) / 60) * pxPerHour}px`,
-              width: `${GUTTER_PX}px`,
+              width: `${gutterPx}px`,
             }}
             // Absolute positioning resolves against the padding box, so
             // `start-0` lands inside the 48px gutter the padding reserves.
-            className="text-text-secondary absolute start-0 -translate-y-1/2 pe-(--space-2) text-end text-(length:--fs-caption) tabular-nums"
+            className={cn(
+              "text-text-secondary absolute start-0 -translate-y-1/2 text-(length:--fs-caption) tabular-nums",
+              hourLabelAlign === "end"
+                ? "pe-(--space-2) text-end"
+                : "text-start",
+            )}
           >
-            {hourLabel(minute, timeZone, locale)}
+            {formatHour
+              ? formatHour(minute)
+              : hourLabel(minute, timeZone, locale)}
           </span>
         ))}
 
-        <BandLabelPlacementContext.Provider value={labelPlacement}>{children}</BandLabelPlacementContext.Provider>
+        <BandLabelPlacementContext.Provider value={labelPlacement}>
+          {children}
+        </BandLabelPlacementContext.Provider>
       </div>
 
       {onExtend === undefined ? null : (

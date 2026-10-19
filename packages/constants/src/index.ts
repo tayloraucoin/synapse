@@ -13,10 +13,13 @@
 
 export {
   BLOCK_KINDS,
+  BLOCK_KIND_VALUES,
   BLOCK_KIND_WORDS,
   DEFAULT_BLOCK_ORDER,
+  NEW_BLOCK_KINDS,
   PLACEABLE_KINDS,
   TRAINING_PLACEMENTS,
+  USE_ADDED_BLOCK_KINDS,
   type BlockKindValue,
   type TrainingPlacementValue,
 } from "./block-kinds";
@@ -110,10 +113,27 @@ export {
 } from "./motion";
 export {
   NOTIFICATION_CATALOGUE,
+  NOTIFICATION_KINDS,
   type NotificationCatalogueEntry,
+  type NotificationKindValue,
 } from "./notification-catalogue";
+export {
+  BLOCK_FILLS,
+  CLIENT_COLOR_KEYS,
+  DONE_SOURCES,
+  EVENT_TAGS,
+  MEAL_LINK_KINDS,
+  SLOT_EVENT_KINDS,
+  TIER_USUAL,
+  TODO_TYPES,
+  WORK_SIZES,
+  WORK_TIERS,
+} from "./planner-values";
 export { PLACED_ROW_ICONS, type PlacedRowKey } from "./placed-rows";
-export { SCHEDULE_SHAPE_ICONS, type ScheduleShapeValue } from "./schedule-shapes";
+export {
+  SCHEDULE_SHAPE_ICONS,
+  type ScheduleShapeValue,
+} from "./schedule-shapes";
 export {
   ACTIVITY_GROUPS,
   MORNING_GROUPS,
@@ -174,3 +194,4 @@ export {
   USER_IMAGE_MAX_BYTES,
   USER_IMAGE_MIME_TYPES,
 } from "./user-images";
+export { LINEAR_WRITE_KINDS, LINEAR_WRITE_STATES } from "./integration-values";

@@ -113,7 +113,7 @@ export function ShiftBand({
       style={{ top: `${topPx}px` }}
       className={cn(
         "absolute inset-x-0 flex h-5 items-center rounded-(--radius) px-(--space-2)",
-        "bg-violet-band text-violet-band-text",
+        "bg-surface text-off-schedule-text border-s-2 border-off-schedule",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
         className,
       )}

@@ -23,7 +23,7 @@ type Story = StoryObj<typeof Text>;
 
 export const Overview: Story = {
   render: () => (
-    <div className="flex flex-col gap-(--space-5) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-6) p-(--space-8)">
       {TEXT_VARIANTS.map((variant) => (
         <div key={variant} className="flex flex-col gap-(--space-1)">
           <Caption as="span" tone="muted">
@@ -40,7 +40,7 @@ export const Overview: Story = {
 
 export const Tones: Story = {
   render: () => (
-    <div className="flex flex-col gap-(--space-3) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-3) p-(--space-8)">
       {TEXT_TONES.map((tone) => (
         <div key={tone} className="flex items-baseline gap-(--space-3)">
           <Caption as="span" tone="muted" className="w-24 shrink-0">
@@ -57,7 +57,7 @@ export const Tones: Story = {
 
 export const TabularFigures: Story = {
   render: () => (
-    <div className="flex flex-col gap-(--space-4) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-4) p-(--space-8)">
       <div className="flex flex-col">
         <Caption as="span" tone="muted">
           tabular (default) — times align down the column
@@ -83,7 +83,7 @@ export const TabularFigures: Story = {
 
 export const Presets: Story = {
   render: () => (
-    <div className="flex flex-col gap-(--space-4) p-(--space-6)">
+    <div className="flex flex-col gap-(--space-4) p-(--space-8)">
       <Heading>Friday 4 September</Heading>
       <MetaText as="p">Morning A · Woke 7:04</MetaText>
       <Text as="p" variant="row-title">

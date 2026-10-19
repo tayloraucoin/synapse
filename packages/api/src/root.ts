@@ -1,25 +1,18 @@
-import { adjustRouter } from "./routers/adjust";
 import { assetRouter } from "./routers/asset";
-import { categoryRouter } from "./routers/category";
+import { clientRouter } from "./routers/client";
+import { clockRouter } from "./routers/clock";
+import { connectionsRouter } from "./routers/connections";
 import { dayRouter } from "./routers/day";
-import { dayPlanRouter } from "./routers/day-plan";
 import { feedbackRouter } from "./routers/feedback";
-import { fixtureRouter } from "./routers/fixture";
-import { habitRouter } from "./routers/habit";
-import { itemRouter } from "./routers/item";
+import { googleRouter } from "./routers/google";
 import { journalRouter } from "./routers/journal";
+import { linearRouter } from "./routers/linear";
+import { morningRouter } from "./routers/morning";
 import { notificationRouter } from "./routers/notification";
-import { linkRouter } from "./routers/link";
-import { passageRouter } from "./routers/passage";
-import { quoteRouter } from "./routers/quote";
-import { reasonRouter } from "./routers/reason";
-import { reviewRouter } from "./routers/review";
-import { shellRouter } from "./routers/shell";
-import { templateRouter } from "./routers/template";
-import { timerRouter } from "./routers/timer";
+import { plannerRouter } from "./routers/planner";
+import { todoRouter } from "./routers/todo";
 import { userRouter } from "./routers/user";
-import { weekRouter } from "./routers/week";
-import { workflowRouter } from "./routers/workflow";
+import { workRouter } from "./routers/work";
 import { createCallerFactory, router } from "./trpc";
 
 /**
@@ -27,32 +20,26 @@ import { createCallerFactory, router } from "./trpc";
  * `AppRouter` is a type, so the future Expo client gets the same contract
  * without a second schema to keep in step.
  *
- * Templates, days, items, review, and the scheduler are the remaining feature
- * epics' tech spec, mounted here as they land.
+ * Since the legacy move (USE-1) it mounts the account, notifications, assets
+ * and feedback; the old domains' routers sit in `_legacy/`, unmounted. USE's
+ * planner, work and integration routers mount here as they land.
  */
 export const appRouter = router({
-  adjust: adjustRouter,
   asset: assetRouter,
-  category: categoryRouter,
+  client: clientRouter,
+  clock: clockRouter,
+  connections: connectionsRouter,
   day: dayRouter,
-  dayPlan: dayPlanRouter,
   feedback: feedbackRouter,
-  fixture: fixtureRouter,
-  habit: habitRouter,
-  item: itemRouter,
+  google: googleRouter,
   journal: journalRouter,
+  linear: linearRouter,
+  morning: morningRouter,
   notification: notificationRouter,
-  passage: passageRouter,
-  link: linkRouter,
-  quote: quoteRouter,
-  reason: reasonRouter,
-  review: reviewRouter,
-  shell: shellRouter,
-  template: templateRouter,
-  timer: timerRouter,
+  planner: plannerRouter,
+  todo: todoRouter,
   user: userRouter,
-  week: weekRouter,
-  workflow: workflowRouter,
+  work: workRouter,
 });
 
 export type AppRouter = typeof appRouter;

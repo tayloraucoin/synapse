@@ -33,6 +33,37 @@ export const BLOCK_KINDS = [
 export type BlockKindValue = (typeof BLOCK_KINDS)[number];
 
 /**
+ * USE (USE-2): the four kinds the New block sheet adds (D-USE-34). Kept apart
+ * from `BLOCK_KINDS`, which the old order, words and notification rows key
+ * on; `block_kind` in `@syn/db` is built from `BLOCK_KIND_VALUES`, the two
+ * together. `0012` adds them with `ALTER TYPE … ADD VALUE`.
+ */
+export const USE_ADDED_BLOCK_KINDS = [
+  "wellness",
+  "life",
+  "todos",
+  "evening",
+] as const;
+
+/** Every `block_kind` value, in the enum's order. */
+export const BLOCK_KIND_VALUES = [...BLOCK_KINDS, ...USE_ADDED_BLOCK_KINDS] as const;
+
+/**
+ * The New block sheet's seven kinds, in its order (D-USE-34): what a new
+ * block may be. The validators narrow new input to these, plus `transition`
+ * for a transition outside every block.
+ */
+export const NEW_BLOCK_KINDS = [
+  "wellness",
+  "training",
+  "work",
+  "life",
+  "todos",
+  "break",
+  "evening",
+] as const satisfies ReadonlyArray<(typeof BLOCK_KIND_VALUES)[number]>;
+
+/**
  * The block kinds' words — UX v1.1 §3.1, §6.1, §12.2. One source for the
  * band header, the block header and a push's title (DYN-20): the default
  * name a block shows when the day's block has no template name of its own.

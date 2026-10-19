@@ -1,0 +1,60 @@
+{
+  "id": "USE-62",
+  "criteria_sha256": "db3161631aaf5fc95b39880a5bf6858e9a1d1782fd7247caeb1027db8f58a6bf",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T20:09:04Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-062-today-meetings/evidence/C1.log",
+        "evidence_sha256": "4466517cb3aeef4582a27c076033ba424278733fc67dba525b8c8b5c852334e0",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C3": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C4": {
+      "status": "FAIL",
+      "evidence": "capture",
+      "run": null
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T20:09:22Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-062-today-meetings/evidence/C5.log",
+        "evidence_sha256": "9fc7d56b95962c4e53c2595ee10f496ab21dcf18685e7f4d529a5aaeb2c370b8"
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn lint",
+        "exit": 0,
+        "at": "2026-10-18T20:09:23Z",
+        "head": "f8c38fabba21efe27c0b3c3527d5e281c69f7860",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-062-today-meetings/evidence/C6.log",
+        "evidence_sha256": "3e59d1353a43f9a6bb468bec58ede6628a73352f78e7be25dd1eaf39788ae269"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:59:28Z",
+  "updated_at": "2026-10-18T20:09:24Z"
+}

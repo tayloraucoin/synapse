@@ -4,6 +4,7 @@ import {
   resolveOptionalRuntimeDatabaseUrl,
   type DbEnvironment,
 } from "@syn/db/connection-env";
+import { getLocalSupabaseUrl } from "@syn/auth";
 import { firstNonEmpty } from "@syn/utils";
 
 /**
@@ -12,7 +13,9 @@ import { firstNonEmpty } from "@syn/utils";
  *
  * The tier grammar: `local` and `staging` both use the STAGING Supabase
  * project, `production` uses its own. That is what lets a laptop authenticate
- * against real staging users while its `public.*` data stays local.
+ * against real staging users while its `public.*` data stays local. The one
+ * exception (WEB-2): `local` with `NEXT_PUBLIC_SUPABASE_URL_LOCAL` set uses the
+ * Supabase stack on this machine instead.
  */
 
 /** Raw env shape after t3-env validation — only read in `env.ts`. */
@@ -35,6 +38,11 @@ export type WebRawEnv = {
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
   SUPABASE_SECRET_KEY?: string;
+  NEXT_PUBLIC_SUPABASE_URL_LOCAL?: string;
+  NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL?: string;
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL?: string;
+  SUPABASE_SERVICE_ROLE_KEY_LOCAL?: string;
+  SUPABASE_SECRET_KEY_LOCAL?: string;
   NEXT_PUBLIC_SITE_URL_LOCAL?: string;
   NEXT_PUBLIC_SITE_URL_STAGING?: string;
   NEXT_PUBLIC_SITE_URL?: string;
@@ -55,17 +63,36 @@ export type WebResolvedEnv = {
   vapidPublicKey: string | undefined;
 };
 
-/** Local and staging both use the staging Supabase project (see `SETUP.md` §3). */
-function supabaseTierFor(
-  databaseEnvironment: DbEnvironment,
-): "staging" | "production" {
-  return databaseEnvironment === "production" ? "production" : "staging";
+type SupabaseTier = "local" | "staging" | "production";
+
+/**
+ * Local and staging both use the staging Supabase project (see `SETUP.md` §3),
+ * unless the local tier opts in to the stack on this machine (Option D, WEB-2).
+ * `@syn/auth`'s `getLocalSupabaseUrl` makes that call, and refuses a URL that
+ * is not this machine's.
+ */
+function supabaseTierFor(raw: WebRawEnv, databaseEnvironment: DbEnvironment): SupabaseTier {
+  if (databaseEnvironment === "production") return "production";
+  const local = getLocalSupabaseUrl({
+    DATABASE_ENVIRONMENT: databaseEnvironment,
+    NEXT_PUBLIC_SUPABASE_URL_LOCAL: raw.NEXT_PUBLIC_SUPABASE_URL_LOCAL,
+  } as unknown as NodeJS.ProcessEnv);
+  return local ? "local" : "staging";
 }
 
 function pickSupabasePublic(
   raw: WebRawEnv,
-  tier: "staging" | "production",
+  tier: SupabaseTier,
 ): { url?: string; anonKey?: string } {
+  if (tier === "local") {
+    return {
+      url: raw.NEXT_PUBLIC_SUPABASE_URL_LOCAL,
+      anonKey: firstNonEmpty(
+        raw.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_LOCAL,
+        raw.NEXT_PUBLIC_SUPABASE_ANON_KEY_LOCAL,
+      ),
+    };
+  }
   if (tier === "staging") {
     return {
       url: raw.NEXT_PUBLIC_SUPABASE_URL_STAGING,
@@ -86,8 +113,14 @@ function pickSupabasePublic(
 
 function pickSupabaseServiceRole(
   raw: WebRawEnv,
-  tier: "staging" | "production",
+  tier: SupabaseTier,
 ): string | undefined {
+  if (tier === "local") {
+    return firstNonEmpty(
+      raw.SUPABASE_SECRET_KEY_LOCAL,
+      raw.SUPABASE_SERVICE_ROLE_KEY_LOCAL,
+    );
+  }
   if (tier === "staging") {
     return firstNonEmpty(
       raw.SUPABASE_SECRET_KEY_STAGING,
@@ -151,7 +184,7 @@ function databaseProcessEnv(raw: WebRawEnv): NodeJS.ProcessEnv {
 export function resolveWebTierEnv(raw: WebRawEnv): WebResolvedEnv {
   const databaseEnvironment = parseDatabaseEnvironment(raw.DATABASE_ENVIRONMENT);
   const dbEnv = databaseProcessEnv(raw);
-  const supabaseTier = supabaseTierFor(databaseEnvironment);
+  const supabaseTier = supabaseTierFor(raw, databaseEnvironment);
   const supabasePublic = pickSupabasePublic(raw, supabaseTier);
 
   return {

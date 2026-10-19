@@ -1,0 +1,111 @@
+{
+  "id": "USE-35",
+  "criteria_sha256": "0a82086c17a026062654f0d252199dc634003dd4e5b458bde5fe8595df20cd8d",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:48:22Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-035-room-engine/evidence/C1.log",
+        "evidence_sha256": "f0c853d3b11611eebb106f5b04dbce30096555b1967c6f3a5303dcd408411679",
+        "tests": 32
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:48:22Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-035-room-engine/evidence/C2.log",
+        "evidence_sha256": "f0c853d3b11611eebb106f5b04dbce30096555b1967c6f3a5303dcd408411679",
+        "tests": 32
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:48:22Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-035-room-engine/evidence/C3.log",
+        "evidence_sha256": "f0c853d3b11611eebb106f5b04dbce30096555b1967c6f3a5303dcd408411679",
+        "tests": 32
+      }
+    },
+    "C4": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:48:22Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-035-room-engine/evidence/C4.log",
+        "evidence_sha256": "f0c853d3b11611eebb106f5b04dbce30096555b1967c6f3a5303dcd408411679",
+        "tests": 32
+      }
+    },
+    "C5": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:48:22Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-035-room-engine/evidence/C5.log",
+        "evidence_sha256": "f0c853d3b11611eebb106f5b04dbce30096555b1967c6f3a5303dcd408411679",
+        "tests": 32
+      }
+    },
+    "C6": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:48:22Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-035-room-engine/evidence/C6.log",
+        "evidence_sha256": "f0c853d3b11611eebb106f5b04dbce30096555b1967c6f3a5303dcd408411679",
+        "tests": 32
+      }
+    },
+    "C7": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-18T19:48:22Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-035-room-engine/evidence/C7.log",
+        "evidence_sha256": "f0c853d3b11611eebb106f5b04dbce30096555b1967c6f3a5303dcd408411679",
+        "tests": 32
+      }
+    },
+    "C8": {
+      "status": "PASS",
+      "evidence": "check",
+      "run": {
+        "command": "yarn check-types",
+        "exit": 0,
+        "at": "2026-10-18T19:48:40Z",
+        "head": "1803d16e182796c613145b9b6c90dced8b972a40",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-035-room-engine/evidence/C8.log",
+        "evidence_sha256": "a0b584102df11ad98dd5ceb5c346e2489ac57716c6b8d1e3fac5666e252e36d9"
+      }
+    }
+  },
+  "built_at": "2026-10-18T18:55:35Z",
+  "updated_at": "2026-10-18T19:48:40Z"
+}

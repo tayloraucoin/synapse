@@ -60,6 +60,8 @@ export const TTL_SECONDS = {
   week_build: 12 * 60 * 60,
   /** UX v1.2 §9 N2 — the evening it belongs to; by lights-out it is moot. */
   journal_reminder: 2 * 60 * 60,
+  /** USE-105 — a to-do's daily reminder: its moment, like a block's. */
+  todo_reminder: 15 * 60,
 } as const;
 
 /**
@@ -248,5 +250,24 @@ export function journalReminderPayload(input: {
     actions: [{ action: "write", title: "Write" }],
     actionUrls: { write: input.journalUrl },
     ttlSeconds: TTL_SECONDS.journal_reminder,
+  };
+}
+
+/**
+ * A to-do's reminder (USE-105; D-USE-37, N4): *Call the dentist · 9:00*.
+ * The to-do in its own words (`reminderBody`) and its time; nothing beneath,
+ * no actions. It is sent only while the to-do is open, so it never speaks of
+ * one already done, and never of one passed.
+ */
+export function todoReminderPayload(input: {
+  title: string;
+  dueAt: Date;
+  timeZone: string;
+  url: string;
+}): BuiltPayload {
+  return {
+    title: `${input.title} · ${formatClock(input.dueAt, input.timeZone)}`,
+    url: input.url,
+    ttlSeconds: TTL_SECONDS.todo_reminder,
   };
 }

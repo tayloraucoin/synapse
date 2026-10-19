@@ -19,7 +19,7 @@ export const Overview: Story = {
   render: function Overview() {
     const [checked, setChecked] = React.useState(true);
     return (
-      <div className="flex max-w-sm flex-col gap-(--space-4) p-(--space-6)">
+      <div className="flex max-w-sm flex-col gap-(--space-4) p-(--space-8)">
         <div className="flex items-center gap-(--space-4)">
           <Checkbox aria-label="Unchecked" />
           <Checkbox defaultChecked aria-label="Checked" />

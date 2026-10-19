@@ -13,7 +13,7 @@ const meta: Meta<typeof BigNumber> = {
   component: BigNumber,
   decorators: [
     (Story) => (
-      <div className="flex max-w-xl flex-col gap-(--space-3) p-(--space-6)">
+      <div className="flex max-w-xl flex-col gap-(--space-3) p-(--space-8)">
         <Story />
       </div>
     ),

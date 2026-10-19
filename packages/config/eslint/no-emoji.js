@@ -13,8 +13,8 @@
  * whole `src/` with the five seed files excepted — and those carry a glyph
  * only in `icon.value` (RUN-1's acceptance greps the titles).
  *
- * `only-warn` turns the error into a warning and every package lints with
- * `--max-warnings 0`, so it still fails the build.
+ * It is an error, and every package lints with `--max-warnings 0`, so it
+ * fails the build either way.
  */
 
 const MESSAGE =
