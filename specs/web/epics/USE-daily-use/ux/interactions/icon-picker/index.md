@@ -38,6 +38,7 @@ It is a step inside the sheet that opened it, never a second sheet: back on the 
 - An icon is stored as its Lucide name plus a hex; an emoji as the character (dev note).
 - Colour never alone: the icon's shape carries the meaning; colour is the kind's or the person's.
 - The tabs keep one height so switching does not jump (archived round 1 note, kept).
+- In the New block sheet the step stays inside the sheet (Taylor, 2026-10-19): it slides in from the right and back out (`--dur-sheet`, the exit at about 80%; none under reduced motion), and the sheet's height is locked when it opens, so switching tabs or searching never resizes the drawer (USE-146).
 
 ## The dev note
 
