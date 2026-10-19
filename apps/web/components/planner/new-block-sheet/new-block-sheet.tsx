@@ -91,8 +91,12 @@ export interface NewBlockSheetProps {
   onOpenChange: (open: boolean) => void;
   start: NewBlockSheetStart | null;
   preset?: NewBlockPreset;
-  /** The new block's or transition's id, once added. */
-  onAdded: (id: string, form: NewBlockForm) => void;
+  /** The new block's or transition's id, once added, and the day it was added on. */
+  onAdded: (
+    id: string,
+    form: NewBlockForm,
+    scope: { weekday: number; date: string | null },
+  ) => void;
   returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
@@ -195,7 +199,8 @@ export function NewBlockSheet({
     setFailed(false);
     try {
       const id = await add(current);
-      onAdded(id, current);
+      // `add` refuses with no day, so the day is here once it resolves.
+      if (day !== null) onAdded(id, current, day.scope);
     } catch {
       setFailed(true);
     } finally {

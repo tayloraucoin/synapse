@@ -1,3 +1,4 @@
+export { addedRoute } from "./added-route";
 export {
   NewBlockSheet,
   type NewBlockPreset,

@@ -21,6 +21,7 @@ import { useIsSplit } from "@syn/ui";
 import { InstallSheet, ProfileSheet } from "@/components/account";
 import { ItemSheet } from "@/components/planner/item-sheet";
 import {
+  addedRoute,
   NewBlockSheet,
   type NewBlockSheetStart,
 } from "@/components/planner/new-block-sheet";
@@ -163,9 +164,14 @@ export function SheetHost() {
         onOpenChange={closeNewBlock}
         start={newBlockStart}
         preset={scenario.newBlock?.preset}
-        // [ASSUMPTION] The added block's Block view lands with USE-48; until
-        // then Add closes to the column, the block in place.
-        onAdded={() => closeNewBlock(false)}
+        // Add block lands in the new block's Block view, its add row focused
+        // (USE-147; C-USE-new-block-sheet-wellness-2); a transition closes to
+        // the column.
+        onAdded={(id, form, scope) => {
+          const to = addedRoute(id, form, scope);
+          closeNewBlock(false);
+          if (to !== null) router.push(to);
+        }}
         returnFocusRef={opener ?? undefined}
       />
       <TodoSheet
