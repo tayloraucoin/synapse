@@ -8,6 +8,7 @@
 --   01_init_functions.sql    -- this file
 --   02_apply_triggers_rls.sql
 --   03_storage_buckets.sql
+--   04_verify_setup.sql      -- read-only; fails setup if the tier is not ready
 -- ============================================================================
 
 -- gen_random_uuid() is built into Postgres 13+ (pgcrypto). Ensure it is present;

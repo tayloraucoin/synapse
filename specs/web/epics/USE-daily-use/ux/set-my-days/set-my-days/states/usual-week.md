@@ -8,6 +8,16 @@ boards:
     at: [964, 0]
     note: "Frame @ x 964, y 930"
     capture: specs/web/epics/USE-daily-use/ux/set-my-days/set-my-days/captures/usual-week-402.png
+  - name: "set-my-days / usual week, nothing built / 402 / light"
+    page: "USE — set up"
+    at: [0, 14000]
+    note: "Note · usual week, nothing built"
+    capture: specs/web/epics/USE-daily-use/ux/set-my-days/set-my-days/captures/usual-week-nothing-built-402.png
+  - name: "set-my-days / usual week, Monday built / 402 / light"
+    page: "USE — set up"
+    at: [482, 14000]
+    note: "Note · usual week, Monday built"
+    capture: specs/web/epics/USE-daily-use/ux/set-my-days/set-my-days/captures/usual-week-monday-built-402.png
 rulings: [D-USE-38, D-USE-49, D-USE-79]
 ---
 
@@ -40,11 +50,13 @@ Segment widths are the frame's drawing at 402; at build a strip is the day's rea
 
 - Tap a row: that weekday opens in A ([`usual-saturday.md`](usual-saturday.md), [`usual-thursday-evening.md`](usual-thursday-evening.md) draw two).
 - "This week": [`the-week.md`](the-week.md). "‹ Now": back.
-- An unset weekday reads "Not set yet" with "Copy from…" as This week draws it [ASSUMPTION: the same row in Usual week].
+- An unset weekday reads "Not set yet" with "Set day"; tapping the row opens that weekday on [`empty-first-day.md`](empty-first-day.md) when nothing is built, else on the copy offer ([`copy-offer.md`](copy-offer.md)) once its bounds are set (2026-10-19 feedback; boards passed).
+- **Nothing built** (`?state=usual-week-empty`): seven "Not set yet" rows with "Set day", no `SaveStatus`, and under the list "Start with any day. Once one is built, the others can copy it."
+- **Monday built** (`?state=usual-week-monday`): Monday as above (bounds, strip, "Wellness, Training, Work. Evening at 21:30"), six "Set day" rows, and under the list "A day not set yet opens on Copy from Monday." (the last built weekday before it, D-USE-85).
 
 ## Words
 
-"Every week" · each row's line, above · "Life and To-dos sit beside Work as kinds. Evening is the wind-down only." [ASSUMPTION: a framing hint for the round; not a product string unless kept by Gloss].
+"Every week" · each row's line, above · "Not set yet" · "Set day" · "Start with any day. Once one is built, the others can copy it." · "A day not set yet opens on Copy from <weekday>." · "Life and To-dos sit beside Work as kinds. Evening is the wind-down only." [ASSUMPTION: a framing hint for the round; not a product string unless kept by Gloss].
 
 ## The notes on the boards
 
@@ -71,3 +83,6 @@ Drawn at: 402. At 1024 this list is the week pane (320), the strips scaled to it
 | C-USE-set-my-days-usual-week-1 | Usual week is shown                | "Every week", seven rows, each with bounds, a strip in kind colours and a line in words | `captures/usual-week-402.png` |
 | C-USE-set-my-days-usual-week-2 | A row's line                       | Names kinds and blocks; never a count                                                   | `captures/usual-week-402.png` |
 | C-USE-set-my-days-usual-week-3 | Switching Usual week and This week | The list does not jump (the stepper's arrows hold their place)                          | manual                        |
+| C-USE-set-my-days-usual-week-4 | No weekday is built                | Seven rows read "Not set yet" with "Set day"; no row offers Copy from                     | `captures/usual-week-nothing-built-402.png` |
+| C-USE-set-my-days-usual-week-5 | One weekday is built               | Unset rows keep "Set day"; the hint names the day an unset day would copy                 | `captures/usual-week-monday-built-402.png` |
+| C-USE-set-my-days-usual-week-6 | An unset row is tapped             | That weekday opens; its URL is `?week=usual&day=<mon…sun>`                                 | test                          |

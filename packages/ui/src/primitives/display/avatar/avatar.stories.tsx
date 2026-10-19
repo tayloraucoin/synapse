@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-
 import { Avatar } from "./avatar";
 
 const meta: Meta<typeof Avatar> = {
@@ -38,4 +37,9 @@ export const Overview: Story = {
 /** "Taylor Aucoin" → "T", on paper. The fallback is the default state, not an error. */
 export const InitialsFallback: Story = {
   args: { name: "Taylor Aucoin", size: 64 },
+};
+
+/** No photo and no name yet (a new account): the person glyph on paper, never an empty circle. */
+export const NoName: Story = {
+  args: { name: "", size: 64 },
 };

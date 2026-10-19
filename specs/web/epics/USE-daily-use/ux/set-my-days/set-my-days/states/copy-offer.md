@@ -50,7 +50,7 @@ Thursday in Usual week, its bounds set, with Monday to Wednesday and Sunday buil
 
 ## Widths
 
-Drawn at: 402. At 1024 the offer sits under Orient in the day pane; the week pane's Thursday row reads "Not set yet" with "Copy from…" (D-USE-39 (3)).
+Drawn at: 402. At 1024 the offer sits under Orient in the day pane; the week pane's Thursday row reads "Not set yet" with "Set day" (D-USE-39 (3); the row action changed 2026-10-19, [`usual-week.md`](usual-week.md)). With no other day built there is no offer: [`first-day-set.md`](first-day-set.md).
 
 ## Criteria
 

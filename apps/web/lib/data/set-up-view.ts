@@ -204,8 +204,12 @@ export function rowBounds(day: SetUpDay): string {
   return "Not set yet";
 }
 
-/** A week row's button name: "<day>, <bounds>, <its line>". */
+/**
+ * A week row's button name: "<day>, <bounds>, <its line>"; a day not set
+ * is "Set <day>, not set yet", its "Set day" read as the action (USE-139).
+ */
 export function rowName(day: SetUpDay): string {
+  if (!day.isSet) return `Set ${weekdayName(day.weekday)}, not set yet`;
   const line = rowLine(day);
   return [weekdayName(day.weekday), rowBounds(day), line]
     .filter((part) => part !== "")
@@ -546,3 +550,42 @@ export function savedBlockLine(
 export function savedBlockDone(name: string, startsAt: string): string {
   return `${name} added at ${clockWords(startsAt)}.`;
 }
+
+/**
+ * Under the usual week's list (USE-139; usual-week.md): nothing built, where
+ * a first week starts; some built and some not, where Copy from went, named
+ * for the first day not set (D-USE-85); every day set, nothing.
+ */
+export function usualWeekHint(
+  days: readonly Pick<SetUpDay, "weekday" | "blocks" | "isSet">[],
+): string | null {
+  const unset = days.find((day) => !day.isSet);
+  if (unset === undefined) return null;
+  if (!days.some(isBuilt)) {
+    return "Start with any day. Once one is built, the others can copy it.";
+  }
+  const from = lastBuiltBefore(days, unset.weekday);
+  return from === null
+    ? null
+    : `A day not set yet opens on Copy from ${weekdayName(from)}.`;
+}
+
+/**
+ * The first day's way forward (USE-140; empty-first-day.md): the times the
+ * button saves, each the field's draft or else its grey suggestion, and the
+ * button's words, which name them. Nothing is written until it is tapped.
+ */
+export function firstDaySet(
+  weekday: number,
+  draft: { upAt?: string; lightsOut?: string },
+  suggested: { upAt: string; lightsOut: string },
+): { upAt: string; lightsOut: string; label: string } {
+  const upAt = draft.upAt ?? suggested.upAt;
+  const lightsOut = draft.lightsOut ?? suggested.lightsOut;
+  return {
+    upAt,
+    lightsOut,
+    label: `Set ${weekdayName(weekday)}, ${clockWords(upAt)} to ${clockWords(lightsOut)}`,
+  };
+}
+

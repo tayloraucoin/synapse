@@ -96,7 +96,10 @@ Email and password only: Google sign-in is not configured on the local stack.
 # 1. Apply Drizzle migrations — creates public.* tables, enums, FKs, and RLS policies.
 yarn db:migrate
 
-# 2. Apply Supabase platform SQL (idempotent):
+# 2. Apply Supabase platform SQL (idempotent). It ends with 04_verify_setup.sql,
+#    which fails the run when auth.users has no on_auth_user_created trigger, an
+#    auth user has no public.users row (02 backfills them), or a public table has
+#    RLS off. Run it on every tier after every migrate, hosted ones included.
 yarn db:setup
 
 # 3. Seed an auth user, then app data:

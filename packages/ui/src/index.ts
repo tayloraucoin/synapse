@@ -1059,6 +1059,12 @@ export {
 } from "./composed/control/tier-radio-rows";
 export { TimeField, type TimeFieldProps } from "./composed/control/time-field";
 export {
+  TIME_PICKER_COPY,
+  TimePicker,
+  TimePickerLists,
+  type TimePickerProps,
+} from "./composed/control/time-picker";
+export {
   TimezoneSelect,
   type TimezoneRegion,
   type TimezoneSelectProps,

@@ -263,6 +263,10 @@
       "types": "./src/composed/control/time-field/index.ts",
       "default": "./src/composed/control/time-field/index.ts"
     },
+    "./time-picker": {
+      "types": "./src/composed/control/time-picker/index.ts",
+      "default": "./src/composed/control/time-picker/index.ts"
+    },
     "./timezone-select": {
       "types": "./src/composed/control/timezone-select/index.ts",
       "default": "./src/composed/control/timezone-select/index.ts"

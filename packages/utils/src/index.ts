@@ -418,3 +418,15 @@ export {
   type RuleUnit,
   type SplitRule,
 } from "./planner";
+
+// The 24-hour time picker's lists and keys (USE-141).
+export {
+  joinClock,
+  PICKER_HOURS,
+  pickerKeyMove,
+  pickerMinutes,
+  parseTypedClock,
+  pickerTypeAhead,
+  splitClock,
+  type PickerKey,
+} from "./time-picker";
