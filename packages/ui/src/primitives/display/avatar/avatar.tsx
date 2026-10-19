@@ -14,6 +14,9 @@
  * FALLBACK: the name's first letter, upper case, in ink ON PAPER with a
  * hairline (C-USE-avatar-menu-no-photo-1) — never on a colour. The fallback
  * is the default state, not an error state: most accounts never upload one.
+ * With no name either (a new account, before Profile sets one), the person
+ * glyph stands in for the letter, in the same ink on the same paper, so the
+ * mark is never an empty circle (USE-138).
  *
  * NO REFLOW: the root reserves its size and clips, so the image swapping in
  * over the initial changes pixels inside a fixed box and moves nothing around
@@ -23,8 +26,8 @@
 "use client";
 
 import * as React from "react";
+import { UserIcon } from "lucide-react";
 import { Avatar as AvatarPrimitive } from "radix-ui";
-
 import { cn } from "../../../lib/cn";
 
 export type AvatarSize = 28 | 32 | 40 | 64 | 96;
@@ -42,8 +45,10 @@ export function avatarInitial(name: string): string {
   return name.trim().charAt(0).toLocaleUpperCase();
 }
 
-export interface AvatarProps
-  extends Omit<React.ComponentProps<typeof AvatarPrimitive.Root>, "children"> {
+export interface AvatarProps extends Omit<
+  React.ComponentProps<typeof AvatarPrimitive.Root>,
+  "children"
+> {
   /** The image URL. Omit for the initials fallback. */
   src?: string | null;
   /** The account's display name — the initials and the label come from it. */
@@ -64,6 +69,7 @@ function Avatar({
   decorative = false,
   ...props
 }: AvatarProps) {
+  const initial = avatarInitial(name);
   return (
     <AvatarPrimitive.Root
       data-slot="avatar"
@@ -94,7 +100,7 @@ function Avatar({
           "font-sans font-medium",
         )}
       >
-        {avatarInitial(name)}
+        {initial || <UserIcon aria-hidden className="size-1/2" />}
       </AvatarPrimitive.Fallback>
     </AvatarPrimitive.Root>
   );

@@ -18,6 +18,20 @@ create trigger on_auth_user_created
   for each row
   execute function public.handle_new_user();
 
+-- ----------------------------------------------------------------------------
+-- A2) Backfill: a shadow row for every auth user that has none (USE-138).
+-- The trigger above only fires on inserts made after it exists, so an account
+-- that signed up on a tier where setup had not run yet stays without a row,
+-- and user.me and planner.today fail for it. Same columns as
+-- handle_new_user(); the column defaults fill the rest. A no-op once every
+-- auth user has a row, so a re-run changes nothing.
+-- ----------------------------------------------------------------------------
+insert into public.users (id, email, created_at, updated_at)
+select au.id, au.email, now(), now()
+from auth.users au
+where not exists (select 1 from public.users pu where pu.id = au.id)
+on conflict (id) do nothing;
+
 -- The WHEN clause matters: auth.users is updated on every sign-in
 -- (last_sign_in_at, refresh tokens, metadata), and without it the shadow row
 -- would be rewritten on each of those for no reason.
