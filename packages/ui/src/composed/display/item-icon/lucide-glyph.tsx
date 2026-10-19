@@ -86,7 +86,10 @@ export function LucideGlyph({
       )}
       style={hex ? { color } : undefined}
     >
-      {Drawing === undefined ? null : <Drawing size={px} strokeWidth={1.75} />}
+      {/* text-current: a menu's own svg tint never mutes the colour. */}
+      {Drawing === undefined ? null : (
+        <Drawing size={px} strokeWidth={1.75} className="text-current" />
+      )}
     </span>
   );
 }

@@ -102,7 +102,7 @@ export function ItemIcon({
                 : GLYPH_TINT[icon.colorKey],
           )}
         >
-          <Icon size={GLYPH_PX[size]} strokeWidth={1.75} />
+          <Icon size={GLYPH_PX[size]} strokeWidth={1.75} className="text-current" />
         </span>
       );
     }
