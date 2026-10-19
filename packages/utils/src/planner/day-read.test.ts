@@ -140,6 +140,9 @@ describe("C5: readDay returns the date's blocks, changed on their own date, with
 });
 
 describe("C6: instants on both DST change dates", () => {
+  // Vancouver stays at UTC-7 from 2026 (tzdata 2026b), so the change dates
+  // are read in Los Angeles, which keeps them.
+  const DST_TZ = "America/Los_Angeles";
   const allDay = block("all-day", "00:00", "24:00", daily);
   const night = block("night", "01:30", "03:00", daily);
 
@@ -149,24 +152,24 @@ describe("C6: instants on both DST change dates", () => {
   ])("%s", (_, dateKey, nextKey, hours) => {
     const day = readDay({
       dateKey,
-      timeZone: TZ,
+      timeZone: DST_TZ,
       blocks: [allDay, night],
       changes: [],
       slots: [],
     });
     for (const occurrence of day.blocks) {
       expect(occurrence.start).toEqual(
-        wallClockToInstant(dateKey, occurrence.startsAt, TZ),
+        wallClockToInstant(dateKey, occurrence.startsAt, DST_TZ),
       );
     }
 
     const [whole, early] = day.blocks;
     // 24:00 is the next date's 00:00.
-    expect(whole?.end).toEqual(wallClockToInstant(nextKey, "00:00", TZ));
+    expect(whole?.end).toEqual(wallClockToInstant(nextKey, "00:00", DST_TZ));
     expect(
       ((whole?.end.getTime() ?? 0) - (whole?.start.getTime() ?? 0)) / 3_600_000,
     ).toBe(hours);
-    expect(early?.end).toEqual(wallClockToInstant(dateKey, "03:00", TZ));
+    expect(early?.end).toEqual(wallClockToInstant(dateKey, "03:00", DST_TZ));
   });
 });
 
