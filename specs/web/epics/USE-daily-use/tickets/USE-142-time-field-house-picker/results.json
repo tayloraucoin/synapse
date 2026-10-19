@@ -3,9 +3,17 @@
   "criteria_sha256": "5b5f4e0d86b681e53a82552d8ea45598d215c68fdaa7418b38a41fb350c6cd29",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-19T21:02:51Z",
+        "head": "b0aeea179f2e6f89e4fe749606a67629c13eaa38",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-142-time-field-house-picker/evidence/C1.log",
+        "evidence_sha256": "538917d94a9990bbdca111f43768766c3ea199298f79b9dc74104bc6ef6a9e2a",
+        "tests": 1422
+      }
     },
     "C2": {
       "status": "FAIL",
@@ -13,5 +21,5 @@
       "run": null
     }
   },
-  "updated_at": "2026-10-19T20:42:10Z"
+  "updated_at": "2026-10-19T21:03:02Z"
 }

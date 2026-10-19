@@ -3,10 +3,18 @@
   "criteria_sha256": "3d2efa8f79b795f45ed45aca1c5c009bac50a64393309d94423c60075bd6495b",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-19T20:47:39Z",
+        "head": "ad76c4fe22c9c813be20ed8a86bceefe1aee4974",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-147-add-block-lands-in-view/evidence/C1.log",
+        "evidence_sha256": "a6a8e91ef3c85533e6b008c5906b4b646054690ab195c74e42e143e7758f1e49",
+        "tests": 1409
+      }
     }
   },
-  "updated_at": "2026-10-19T20:41:59Z"
+  "updated_at": "2026-10-19T20:47:50Z"
 }

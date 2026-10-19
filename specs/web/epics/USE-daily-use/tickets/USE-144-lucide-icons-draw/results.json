@@ -3,9 +3,17 @@
   "criteria_sha256": "a42622e3a1a6afe89e1ae97241d3125636501f4d39c9d7f9cdba3cad6bd2574d",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-19T21:03:04Z",
+        "head": "b0aeea179f2e6f89e4fe749606a67629c13eaa38",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-144-lucide-icons-draw/evidence/C1.log",
+        "evidence_sha256": "3d01ac8698a8a9ba7012f20771f8dd0f455d0ca32306da5e4628348ba7238dac",
+        "tests": 1422
+      }
     },
     "C2": {
       "status": "FAIL",
@@ -13,5 +21,5 @@
       "run": null
     }
   },
-  "updated_at": "2026-10-19T20:42:12Z"
+  "updated_at": "2026-10-19T21:03:14Z"
 }

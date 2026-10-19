@@ -3,10 +3,18 @@
   "criteria_sha256": "7a05d9b34742134af9c651edaa5f75208823aca0c63f8af5528590367b192fad",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-19T20:44:01Z",
+        "head": "e96e7f8731fbad12081af815cc88d56851b05473",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-143-emoji-data-on-vercel/evidence/C1.log",
+        "evidence_sha256": "4b7e5824bfb4b9895826fb3b2e4300614345619543600e192f2b06d288669afa",
+        "tests": 1406
+      }
     }
   },
-  "updated_at": "2026-10-19T20:41:55Z"
+  "updated_at": "2026-10-19T20:44:12Z"
 }

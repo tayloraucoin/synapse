@@ -3,10 +3,18 @@
   "criteria_sha256": "84a8c8c34348a199f262987d5c3a03f6ee89083ed3d04a1bdb5a0ea315d94733",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "test",
-      "run": null
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-19T21:03:16Z",
+        "head": "b0aeea179f2e6f89e4fe749606a67629c13eaa38",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-148-optimistic-planner-writes/evidence/C1.log",
+        "evidence_sha256": "1ecc571951b48e3f8d24d900fa43dce261bb5a74ea13144b8da3ced565600012",
+        "tests": 1422
+      }
     }
   },
-  "updated_at": "2026-10-19T20:42:17Z"
+  "updated_at": "2026-10-19T21:03:27Z"
 }
