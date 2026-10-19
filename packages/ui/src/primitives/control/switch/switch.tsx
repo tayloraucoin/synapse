@@ -10,6 +10,8 @@
  *   Track on  → --primary (ink, never the accent — §9.3: the accent marks time)
  *   Thumb     → --paper
  *   Focus ring → :focus-visible in globals.css
+ *   Shape      → rounded-full track and knob: the one control that is a
+ *                pill (Taylor, 2026-10-19), named beside preset.css's radii
  *
  * API: controlled only — `checked` + `onCheckedChange(boolean)`. Give it a
  * label through `id`/`htmlFor` or `aria-label`; a switch with neither is a
@@ -42,7 +44,7 @@ export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         ref={ref}
         onClick={() => onCheckedChange?.(!checked)}
         className={cn(
-          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-(--radius)",
+          "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full",
           "transition-colors duration-(--dur-state) ease-(--ease-settle)",
           "disabled:cursor-not-allowed disabled:opacity-50",
           checked ? "bg-primary" : "bg-input",
@@ -53,7 +55,7 @@ export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         <span
           aria-hidden="true"
           className={cn(
-            "pointer-events-none block size-5 rounded-(--radius) bg-paper",
+            "pointer-events-none block size-5 rounded-full bg-paper",
             "transition-transform duration-(--dur-state) ease-(--ease-settle)",
             checked ? "translate-x-[22px]" : "translate-x-[2px]",
           )}

@@ -189,7 +189,9 @@
   --board-col-wide: 320px; --board-col: 240px;
 
   /* ---- RADII — kit `radius`. Nothing is a pill; only the mark, a category
-     dot and the current-item dot are round. ---- */
+     dot and the current-item dot are round. The one exception: the switch's
+     track and knob are rounded-full (Taylor, 2026-10-19), so it reads as a
+     switch and never as a checkbox or a button. ---- */
   --radius-control: 6px;   /* buttons, fields, chips, checkboxes */
   --radius-sheet: 10px;    /* sheets and the Review card */
   --radius: var(--radius-control);
