@@ -1,0 +1,12 @@
+{
+  "id": "USE-147",
+  "criteria_sha256": "3d2efa8f79b795f45ed45aca1c5c009bac50a64393309d94423c60075bd6495b",
+  "criteria": {
+    "C1": {
+      "status": "FAIL",
+      "evidence": "test",
+      "run": null
+    }
+  },
+  "updated_at": "2026-10-19T20:41:59Z"
+}
