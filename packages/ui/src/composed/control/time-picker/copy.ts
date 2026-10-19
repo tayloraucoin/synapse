@@ -4,7 +4,9 @@
  * Minute.
  */
 export const TIME_PICKER_COPY = {
-  choose: (label: string) => `Choose a time for ${label}`,
+  /** The clock's name carries the time, so it is heard again after Done. */
+  choose: (label: string, time: string) =>
+    time === "" ? `Choose a time for ${label}` : `Choose a time for ${label}, ${time}`,
   hour: "Hour",
   minute: "Minute",
   helper: "24-hour. Any minute can be typed in the field.",

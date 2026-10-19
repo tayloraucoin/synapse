@@ -140,7 +140,7 @@ export function TimePicker({
     <button
       type="button"
       disabled={disabled}
-      aria-label={COPY.choose(label)}
+      aria-label={COPY.choose(label, readout(value ?? fallback ?? null))}
       aria-haspopup="dialog"
       className={cn(
         "inline-flex size-(--target) shrink-0 items-center justify-center rounded-(--radius-control) text-muted-foreground",
@@ -168,7 +168,7 @@ export function TimePicker({
 
   if (split) {
     return (
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover modal open={open} onOpenChange={setOpen}>
         {renderField ? (
           <PopoverAnchor asChild>
             {renderField(<PopoverTrigger asChild>{trigger}</PopoverTrigger>)}
@@ -258,6 +258,7 @@ export function TimePickerLists({
         options={minutes}
         selected={minuteIndex === -1 ? null : minute}
         words={(m) => String(m).padStart(2, "0")}
+        spoken={(m) => String(m)}
         onPick={(m) => onPick(joinClock(hour ?? 0, m))}
       />
     </div>
@@ -270,6 +271,7 @@ function PickerListbox({
   options,
   selected,
   words,
+  spoken,
   onPick,
 }: {
   /** Focus opens on this list's pick (the Hour list). */
@@ -278,6 +280,8 @@ function PickerListbox({
   options: readonly number[];
   selected: number | null;
   words: (option: number) => string;
+  /** The option's name when it differs from its words ("5", not "05"). */
+  spoken?: (option: number) => string;
   onPick: (option: number) => void;
 }) {
   const id = React.useId();
@@ -345,6 +349,7 @@ function PickerListbox({
               id={optionId(i)}
               role="option"
               aria-selected={picked}
+              aria-label={spoken ? spoken(option) : undefined}
               onClick={() => onPick(option)}
               className={cn(
                 "flex h-(--target) shrink-0 cursor-pointer items-center justify-between rounded-(--radius-control) px-(--space-3) text-(length:--fs-heading) tabular-nums",

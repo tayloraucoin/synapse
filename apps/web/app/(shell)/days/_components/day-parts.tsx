@@ -198,8 +198,9 @@ export function BoundsField({
         if (event.key === "Escape") setTyped(null);
       }}
       className={cn(
-        "min-w-0 flex-1 bg-transparent font-semibold tabular-nums outline-none disabled:cursor-default",
-        suggested ? "text-muted-foreground" : "text-foreground",
+        "min-w-0 flex-1 bg-transparent tabular-nums outline-none disabled:cursor-default",
+        // A suggestion reads light and regular; a set time in ink, semibold.
+        suggested ? "text-muted-foreground" : "font-semibold text-foreground",
       )}
     />
   );
