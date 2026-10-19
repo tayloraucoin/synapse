@@ -28,10 +28,9 @@
  */
 "use client";
 
+import * as React from "react";
 import type { IconValue } from "@syn/types";
 import { parseTypedClock } from "@syn/utils";
-import * as React from "react";
-
 import { cn } from "../../../lib/cn";
 import { Button } from "../../../primitives/control/button";
 import { HelperText } from "../../../primitives/display/helper-text";
@@ -129,7 +128,11 @@ export function TimeField({
   };
 
   const leadingNode =
-    leading === undefined ? null : isIconValue(leading) ? <EmojiSlot icon={leading} /> : leading;
+    leading === undefined ? null : isIconValue(leading) ? (
+      <EmojiSlot icon={leading} />
+    ) : (
+      leading
+    );
 
   if (disclosed && !open) {
     return (
@@ -139,7 +142,12 @@ export function TimeField({
         </Text>
         <div className="flex min-h-(--target) items-center gap-(--space-3)">
           {leadingNode}
-          <Text as="span" variant="body" className="min-w-0 flex-1 tabular-nums" aria-labelledby={labelId}>
+          <Text
+            as="span"
+            variant="body"
+            className="min-w-0 flex-1 tabular-nums"
+            aria-labelledby={labelId}
+          >
             {value === null || value === "" ? "—" : formatValue(value)}
           </Text>
           <Button
@@ -162,7 +170,8 @@ export function TimeField({
     );
   }
 
-  const shown = typed ?? (value === null || value === "" ? "" : formatValue(value));
+  const shown =
+    typed ?? (value === null || value === "" ? "" : formatValue(value));
 
   const field = (
     <div className={cn("flex w-full flex-col", !disclosed && className)}>
@@ -258,7 +267,9 @@ export function TimeField({
         close();
       }}
     >
-      {leadingNode === null ? null : <span className="pb-(--space-2)">{leadingNode}</span>}
+      {leadingNode === null ? null : (
+        <span className="pb-(--space-2)">{leadingNode}</span>
+      )}
       <div className="min-w-0 flex-1">{field}</div>
       <Button variant="ghost" onClick={close} className="min-h-(--target)">
         {doneLabel}
