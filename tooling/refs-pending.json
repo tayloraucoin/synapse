@@ -53,5 +53,10 @@
   "docs/measurement/metrics/events.md": "a product repo path named by a template; Synapse fills its own under apps/web/docs/ (layer 3, part 9)",
   "docs/measurement/metrics/definitions.md": "a product repo path named by a template; Synapse fills its own under apps/web/docs/ (layer 3, part 9)",
   "docs/references/": "stays in the toolkit",
-  "tooling/cost.test.ts": "stays in the toolkit"
+  "tooling/cost.test.ts": "stays in the toolkit",
+  "apps/web/.env.local": "machine-local and git-ignored: each person or agent creates it on their own machine, so a clean checkout never has it",
+  ".claude/settings.local.json": "machine-local and git-ignored: each person or agent creates it on their own machine, so a clean checkout never has it",
+  ".claude/launch.json": "machine-local and git-ignored: each person or agent creates it on their own machine, so a clean checkout never has it",
+  ".claude/worktrees/": "machine-local and git-ignored: each person or agent creates it on their own machine, so a clean checkout never has it",
+  "packages/db/.env": "machine-local and git-ignored: each person or agent creates it on their own machine, so a clean checkout never has it"
 }
