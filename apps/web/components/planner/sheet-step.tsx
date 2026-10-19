@@ -45,17 +45,18 @@ export function SheetStep({
   className,
 }: SheetStepProps) {
   const ref = React.useRef<HTMLDivElement>(null);
+  // The height as the step was asked for: locked once, at mount.
+  const held = React.useRef(height);
 
   // The sheet's own element: vaul's drawer, or the dialog at the split break.
   React.useLayoutEffect(() => {
     const sheet = ref.current?.closest<HTMLElement>(SHEET);
     if (!sheet) return;
     const before = sheet.style.height;
-    sheet.style.height = `${height ?? sheet.getBoundingClientRect().height}px`;
+    sheet.style.height = `${held.current ?? sheet.getBoundingClientRect().height}px`;
     return () => {
       sheet.style.height = before;
     };
-    // Locked once, as the step opens: `height` is read at mount only.
   }, []);
 
   const left = React.useRef(onLeft);
