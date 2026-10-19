@@ -990,6 +990,12 @@ export const DAYS_SCENARIOS: Record<string, () => Scenario> =
       justSet: true,
     }),
     days("unset-day-copy", mondayOnlyRecords, { week: "usual", day: 1 }),
+    // USE-141: Up at's 24-hour picker open over the empty first day.
+    days("time-picker", emptyRecords, {
+      week: "usual",
+      day: 0,
+      picker: "upAt",
+    }),
     days("empty-first-day", emptyRecords, { week: "usual", day: 0 }),
     days("usual-saturday", setUpUsualRecords, { week: "usual", day: 5 }),
     days("usual-thursday-evening", setUpUsualRecords, {

@@ -31,7 +31,9 @@ import {
   StatusLine,
   Text,
   type LucideIcon,
+  TimePicker,
 } from "@syn/ui";
+import { parseTypedClock } from "@syn/utils";
 import { clockWords } from "@/lib/data/set-up-view";
 import { DAYS_COPY as COPY } from "./copy";
 
@@ -137,10 +139,13 @@ export function DayChips({
 /* --------------------------------------------------------------- bounds -- */
 
 /**
- * A compact bounds field ("Up at 7:00"): the word and a native time input in
- * one outlined control. A grey suggestion shows in muted until a time is
- * picked, and is never saved (empty-first-day.md). A change is kept as a
- * draft until it lands, so a failed save leaves it on screen (saved.md).
+ * A bounds field ("Up at 7:00"): the time, typeable, and the clock beside it
+ * opening the house's 24-hour picker (USE-141; time-picker.md), never the
+ * browser's own. A grey suggestion shows in muted until a time is set, and
+ * is never saved on its own (empty-first-day.md). Typing reads on blur or
+ * Enter ("630" is 6:30; any minute is kept); a picker's pick reads in the
+ * field as the lists move, and Done commits it. A change is kept as a draft
+ * until it lands, so a failed save leaves it on screen (saved.md).
  */
 export function BoundsField({
   label,
@@ -149,6 +154,7 @@ export function BoundsField({
   onCommit,
   stacked = false,
   disabled = false,
+  pickerOpen = false,
 }: {
   label: string;
   /** The saved time, or the draft, "HH:MM"; null shows the suggestion. */
@@ -159,80 +165,94 @@ export function BoundsField({
   stacked?: boolean;
   /** Offline (D-USE-82): faded and inert. */
   disabled?: boolean;
+  /** The picker open on load (`?state=time-picker`). */
+  pickerOpen?: boolean;
 }) {
   const id = React.useId();
+  // What the field shows while it is being changed: typed words, or a pick.
   const [typed, setTyped] = React.useState<string | null>(null);
-  const shown = typed ?? value ?? suggestion ?? "";
   const suggested = typed === null && value === null;
+  const base = value ?? suggestion ?? null;
+  const shown = typed ?? (base === null ? "" : clockWords(base));
 
-  const commit = () => {
-    if (typed !== null && typed !== "" && typed !== value) onCommit(typed);
+  const commitTyped = () => {
+    if (typed === null) return;
+    const next = parseTypedClock(typed);
     setTyped(null);
+    if (next !== null && next !== value) onCommit(next);
   };
 
-  // The time reads in the house's words ("7:00", 24-hour) whatever the
-  // browser's locale; the native input lies over it, see-through, for the
-  // platform's own picker and typing.
   const input = (
-    <span className="relative inline-flex min-w-0 items-center">
-      <span
-        aria-hidden="true"
-        className={cn(
-          "font-semibold tabular-nums",
-          suggested ? "text-muted-foreground" : "text-foreground",
-        )}
-      >
-        {shown === "" ? "" : clockWords(shown)}
-      </span>
-      <input
-        id={id}
-        type="time"
-        value={shown}
-        disabled={disabled}
-        onChange={(event) => setTyped(event.target.value)}
-        onBlur={commit}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") commit();
-        }}
-        onClick={(event) => {
-          try {
-            event.currentTarget.showPicker();
-          } catch {
-            // Not every browser opens it from a click; focus still types.
-          }
-        }}
-        className="absolute inset-0 w-full cursor-pointer opacity-0 disabled:cursor-default"
-      />
-    </span>
+    <input
+      id={id}
+      type="text"
+      size={5}
+      inputMode="numeric"
+      autoComplete="off"
+      value={shown}
+      disabled={disabled}
+      onChange={(event) => setTyped(event.target.value)}
+      onBlur={commitTyped}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") commitTyped();
+        if (event.key === "Escape") setTyped(null);
+      }}
+      className={cn(
+        "min-w-0 flex-1 bg-transparent font-semibold tabular-nums outline-none disabled:cursor-default",
+        suggested ? "text-muted-foreground" : "text-foreground",
+      )}
+    />
+  );
+  const picker = (field: (trigger: React.ReactNode) => React.ReactElement) => (
+    <TimePicker
+      label={label}
+      value={value}
+      fallback={suggestion}
+      disabled={disabled}
+      defaultOpen={pickerOpen}
+      renderField={field}
+      onPreview={(next) =>
+        setTyped(next === null || next === value ? null : clockWords(next))
+      }
+      onCommit={(next) => {
+        setTyped(null);
+        if (next !== value) onCommit(next);
+      }}
+    />
   );
 
   if (stacked) {
     return (
-      <div className="flex flex-1 flex-col gap-(--space-1)">
+      <div className="flex min-w-0 flex-1 flex-col gap-(--space-1)">
         <label htmlFor={id}>
           <Text as="span" variant="secondary" weight={500}>
             {label}
           </Text>
         </label>
-        <div className="relative flex h-(--target) items-center rounded-(--radius-control) border border-input px-(--space-3) focus-within:border-foreground focus-within:ring-1 focus-within:ring-foreground">
-          {input}
-        </div>
+        {picker((trigger) => (
+          <div className="flex h-(--target) min-w-0 items-center rounded-(--radius-control) border border-input ps-(--space-3) pe-(--space-1) focus-within:border-foreground focus-within:ring-1 focus-within:ring-foreground">
+            {input}
+            {trigger}
+          </div>
+        ))}
       </div>
     );
   }
-  return (
+  return picker((trigger) => (
     <div
       data-disabled={disabled || undefined}
-      className="flex h-9 shrink-0 items-center gap-(--space-2) rounded-(--radius-control) border border-border px-(--space-3) text-(length:--fs-body) whitespace-nowrap focus-within:border-foreground focus-within:ring-1 focus-within:ring-foreground data-disabled:opacity-45"
+      className="flex h-9 shrink-0 items-center gap-(--space-1) rounded-(--radius-control) border border-border ps-(--space-3) text-(length:--fs-body) whitespace-nowrap focus-within:border-foreground focus-within:ring-1 focus-within:ring-foreground data-disabled:opacity-45"
     >
       <label htmlFor={id}>
         <Text as="span" variant="secondary" tone="muted">
           {label}
         </Text>
       </label>
-      {input}
+      <span className="flex w-12">{input}</span>
+      {/* In the 36 px day line the clock keeps its 44 px width. */}
+      <span className="flex h-9 items-center overflow-hidden">{trigger}</span>
     </div>
-  );
+  ));
 }
 
 /**

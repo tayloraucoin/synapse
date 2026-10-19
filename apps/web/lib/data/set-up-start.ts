@@ -4,6 +4,8 @@ export interface SetUpScenarioStart {
   week?: "usual" | "this";
   /** A day open, Monday 0; unset, the week. */
   day?: number;
+  /** Up at's time picker open on load (USE-141; time-picker.md). */
+  picker?: "upAt";
   /** The + menu, the day's ···, or Clear's ask open on load (USE-42). */
   menu?: "plus" | "day" | "clear";
   /** A usual change to this block, made in its Block view, arriving on load (USE-42). */

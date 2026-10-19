@@ -77,4 +77,5 @@ Fix 2 and 4 of Taylor's 2026-10-19 feedback, with the copy-first board Taylor ap
 - **Interfaces:** `daysRoute({ day })` writes keys; `DAYS_WEEKDAY_KEYS` read back; `DAYS_COPY.setDayAt`, `setHelper`, `unsetHeading`, `unsetBody`, `orOwnTimes`, `firstBlockLine`; `?state=first-day-set`, `?state=unset-day-copy`.
 - **Per path:** day-view.tsx: FirstDay and the first-block prompt · copy-from.tsx: copy onto an unset day · copy.ts: words · routes.ts and use-days.ts: day keys · tests · set-up.ts: scenarios · days-block-screen.tsx: back link with a key.
 - **Gotchas:** scenarios store `day` as a number; `useDaysPlace` stringifies it, so numbers must keep resolving. `openDay` and `selectDay` write the param; they move to keys.
+- **As built (2026-10-19):** the two-write copy lives in `apps/web/lib/data/copy-onto-day.ts` (`copyOntoDay`) so node tests prove its Undo; `firstDaySet` in set-up-view gives the button its times and words; the New block sheet's reader (`app/(shell)/_components/sheet-host.tsx`) reads the keys through `readDayParam`. The first-day chip keeps its dot (a day with times reads as set), named in first-day-set.md.
 - **Model:** Opus 5.5.

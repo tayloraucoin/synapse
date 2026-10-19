@@ -210,6 +210,10 @@ export function DayView({
           writes={writes}
           key={`${place.week}:${place.day}`}
           onSet={() => setJustSet(here)}
+          pickerOpen={
+            scenario.setUp?.picker === "upAt" &&
+            scenario.setUp.day === place.day
+          }
         />
       ) : (
         <SetDay
@@ -300,12 +304,15 @@ function FirstDay({
   day,
   writes,
   onSet,
+  pickerOpen,
 }: {
   place: DaysPlace & { day: number };
   day: SetUpDay;
   writes: DayViewProps["writes"];
   /** The bounds landed: the day opens on its column. */
   onSet: () => void;
+  /** Up at's picker open on load (`?state=time-picker`). */
+  pickerOpen: boolean;
 }) {
   const [draft, setDraft] = React.useState<Partial<Bounds>>({});
   const [saving, setSaving] = React.useState(false);
@@ -388,6 +395,7 @@ function FirstDay({
           value={draft.upAt ?? null}
           suggestion={COPY.suggestUpAt}
           disabled={offline}
+          pickerOpen={pickerOpen}
           onCommit={(next) => setDraft((d) => ({ ...d, upAt: next }))}
         />
         <BoundsField
