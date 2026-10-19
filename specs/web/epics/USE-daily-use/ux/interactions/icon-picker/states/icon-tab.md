@@ -21,7 +21,7 @@ The Icon tab for "Meditate", a saved custom colour picked.
 - **Colour** row: label left, and right a muted "Saved · #2F6F62" (which colour is picked and where it lives). `ColorSwatchRow`: eight kind colours as round swatches (green, blue, clay, rose, ochre, slate, violet, olive), a thin vertical rule, then the custom swatch (a multicolour wheel).
 - **Saved** row: muted label "Saved", then past custom picks, newest first: dark green (picked, ink ring), violet, orange, navy; "Edit" as an outlined pill at the row's end.
 - `SearchField`: "Search icons".
-- "Suggested for Meditate": five line icons (leaf, picked with an ink ring; sun-burst; wind; sparkle; bot), muted "Matched from the name, on this phone".
+- "Suggested for Meditate": five line icons (leaf, picked with an ink ring; sun-burst; wind; sparkle; bot), muted "Matched from the name or the kind, on this phone".
 - A hairline, then "Everyday": two rows of eight Lucide icons (`CuratedIconGrid`): sun, moon, droplet, leaf (picked, ringed), heart, droplet, book, cup; dumbbell, bike, bed, house, phone, cart, laptop, clock.
 - "Health and body": activity, pill, pie, person, calendar, droplet, arrows, heart; then every Lucide group, scrolling.
 - Every icon draws in the picked colour (here dark green). The pinned group bar at the foot: clock, star (selected), activity, house, utensils, car, laptop, leaf, shapes.
@@ -33,7 +33,7 @@ The Icon tab for "Meditate", a saved custom colour picked.
 
 ## Words
 
-"Colour"; "Saved · #<hex>" (or "Custom · #<hex>" while the custom swatch is picked); "Saved"; "Edit"; "Search icons"; "Suggested for <name>"; "Matched from the name, on this phone"; "Everyday"; Lucide's group names ("Health and body").
+"Colour"; "Saved · #<hex>" (or "Custom · #<hex>" while the custom swatch is picked); "Saved"; "Edit"; "Search icons"; "Suggested for <name>"; "Matched from the name or the kind, on this phone"; "Everyday"; Lucide's group names ("Health and body").
 
 ## The notes on the boards
 

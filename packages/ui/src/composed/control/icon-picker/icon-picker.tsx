@@ -130,7 +130,7 @@ export const ICON_PICKER_WORDS = {
   searchIcons: "Search icons",
   suggested: "Suggested",
   suggestedFor: (name: string) => `Suggested for ${name}`,
-  matched: "Matched from the name, on this phone",
+  matched: "Matched from the name or the kind, on this phone",
   noName: "Add a name first to see suggestions.",
   noMatch: "Nothing matched the name.",
   recent: "Recent",

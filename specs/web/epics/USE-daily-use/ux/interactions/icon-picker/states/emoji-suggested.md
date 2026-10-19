@@ -21,7 +21,7 @@ Opened from the icon tile of "Meditate" on the Item sheet.
 - Back link "‹ Meditate"; title "Icon".
 - `Tabs` as a segmented pair, equal widths: "Emoji" (selected), "Icon".
 - `SearchField`: "Search emoji".
-- "Suggested for Meditate" (semibold small heading): five emoji in 44 px cells: meditating person (current pick, ink ring), lotus, candle, brain, wind face; under them, muted, "Matched from the name, on this phone".
+- "Suggested for Meditate" (semibold small heading): five emoji in 44 px cells: meditating person (current pick, ink ring), lotus, candle, brain, wind face; under them, muted, "Matched from the name or the kind, on this phone".
 - A hairline, then "Recent": eight emoji (droplet, bathtub, scales, weightlifter, car, pan, arrows, phone).
 - "Everyday": three rows of eight curated emoji (climbing, cycling, swimming, gymnast, running, meditating, bouldering, tennis; palette, guitar, books, writing hand, headphones, puzzle, seedling, coffee; broom, basket, cart, laptop, memo, bed, moon, sun).
 - Then every Unicode group below, scrolling (not shown at this height).
@@ -35,7 +35,7 @@ Opened from the icon tile of "Meditate" on the Item sheet.
 
 ## Words
 
-"Icon"; "Emoji"; "Icon"; "Search emoji"; "Suggested for <name>"; "Matched from the name, on this phone"; "Recent"; "Everyday".
+"Icon"; "Emoji"; "Icon"; "Search emoji"; "Suggested for <name>"; "Matched from the name or the kind, on this phone"; "Recent"; "Everyday".
 
 ## The notes on the boards
 
