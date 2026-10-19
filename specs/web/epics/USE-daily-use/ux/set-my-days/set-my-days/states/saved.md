@@ -26,6 +26,7 @@ How an edit saves. `?state=saved`. The artboard is not a screen: a short sheet, 
 ## What the person can do
 
 - Nothing to save: there is no Save button; every edit saves as it is made (N2).
+- An edit shows at once, before it lands (Taylor, 2026-10-19; USE-148): a new block, a day's times, a block's change and an item added, changed, removed or reordered draw in the day as made while "Saving" reads; if the save fails they are put back as they were and "Not saved · Try again" reads. Copy, clear, reset and a date's own change still wait for the save.
 - "Try again": sends the failed edit again; the edit stays on screen until it lands [ASSUMPTION: it retries the latest failed edit; no queue is shown].
 
 ## Words
