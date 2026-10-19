@@ -975,6 +975,9 @@ const STAGED_MONDAY = { upAt: "06:45", lightsOut: "22:30" };
 export const DAYS_SCENARIOS: Record<string, () => Scenario> =
   Object.fromEntries([
     days("usual-week", setUpUsualRecords, { week: "usual" }),
+    // USE-139: the first-time week and the week with Monday built.
+    days("usual-week-empty", emptyRecords, { week: "usual" }),
+    days("usual-week-monday", mondayOnlyRecords, { week: "usual" }),
     days("empty-first-day", emptyRecords, { week: "usual", day: 0 }),
     days("usual-saturday", setUpUsualRecords, { week: "usual", day: 5 }),
     days("usual-thursday-evening", setUpUsualRecords, {

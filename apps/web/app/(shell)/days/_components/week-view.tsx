@@ -16,6 +16,7 @@ import {
   rowDayLabel,
   rowLine,
   rowName,
+  usualWeekHint,
   weekRangeWords,
 } from "@/lib/data/set-up-view";
 import type { DaysPlace } from "@/lib/data/use-days";
@@ -28,7 +29,8 @@ import { DAYS_COPY as COPY } from "./copy";
  * stepper ("Every week" with its arrows kept in place but hidden, so the
  * list never jumps), then seven rows, each its bounds, a strip in kind
  * colours and one line in words, never a count. A row opens its day (A).
- * A day not set offers Copy from… in the chevron's place. At 1024 the list
+ * A day not set reads "Set day" in the chevron's place, and the row opens
+ * it; Copy from is offered inside the day (USE-139). At 1024 the list
  * is the week pane and the open day's row is selected: the muted fill and
  * an ink edge at the leading side, not colour alone (the-day.md).
  */
@@ -51,6 +53,12 @@ export function WeekView({
   const { week, isError, retry } = useWeek(place.week);
   const dated = place.week !== "usual";
   const range = weekRangeWords(place.dates);
+  // Usual week: where a first week starts, or where Copy from went (USE-139).
+  const hint = dated
+    ? COPY.weekHint
+    : week === undefined
+      ? null
+      : usualWeekHint(week.days);
 
   const step = (by: number) => {
     const first = place.dates[0];
@@ -141,14 +149,14 @@ export function WeekView({
       )}
 
       {/* The pane beside it is the column, so the hint is the phone's. */}
-      {dated && selected === null ? (
+      {hint !== null && selected === null ? (
         <Text
           as="p"
           variant="secondary"
           tone="muted"
           className="px-(--space-4)"
         >
-          {COPY.weekHint}
+          {hint}
         </Text>
       ) : null}
     </div>
@@ -185,7 +193,7 @@ function StepButton({
 
 /**
  * One day: its name in a 110 px slot, its bounds, a chevron; the strip; its
- * line. The row's button covers it; Copy from… sits on top as its own.
+ * line. The row's button covers it; a day not set reads "Set day".
  */
 function WeekRow({
   day,
@@ -244,12 +252,12 @@ function WeekRow({
             className="size-4 shrink-0 text-muted-foreground"
           />
         ) : (
-          // Copy from's picker is its own ticket's; until then a tap opens the day [ASSUMPTION].
+          // The row's label, not a second button: the row opens the day (USE-139).
           <span
-            data-copy-from
+            data-set-day
             className="inline-flex h-8 shrink-0 items-center rounded-(--radius-control) border border-border bg-background px-(--space-3) text-(length:--fs-secondary) font-semibold text-foreground"
           >
-            {COPY.copyFrom}
+            {COPY.setDay}
           </span>
         )}
       </span>

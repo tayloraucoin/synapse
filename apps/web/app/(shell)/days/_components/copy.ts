@@ -18,6 +18,8 @@ export const DAYS_COPY = {
   weekOf: (range: string) => `Week of ${range}`,
   /** Under This week's list (the-week.md). */
   weekHint: "Tap a day to open it on the time column.",
+  /** A day not set: its row's label (USE-139; usual-week.md). */
+  setDay: "Set day",
   days: "Days",
   day: "Day",
   /** A chip's name (N2): "Monday, set"; dated "Monday 12 October, set". */
