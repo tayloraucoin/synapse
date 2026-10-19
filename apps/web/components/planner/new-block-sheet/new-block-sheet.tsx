@@ -420,6 +420,7 @@ export function NewBlockSheet({
                 <div className="w-36 shrink-0">
                   <TimeField
                     label={<span className="sr-only">{COPY.starts}</span>}
+                    name={COPY.starts}
                     value={form.startsAt}
                     formatValue={clock}
                     onChange={(startsAt) => set({ type: "starts", startsAt })}
@@ -446,6 +447,7 @@ export function NewBlockSheet({
                         {COPY.endsName(clock(form.endsAt), minutes)}
                       </span>
                     }
+                    name={COPY.ends}
                     value={form.endsAt === "24:00" ? "23:59" : form.endsAt}
                     formatValue={clock}
                     onChange={(endsAt) => set({ type: "ends", endsAt })}

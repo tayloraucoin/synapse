@@ -160,6 +160,7 @@ export function PlainItemFields({
           )}
           <TimeField
             label={<span className="sr-only">{COPY.time}</span>}
+            name={COPY.time}
             value={pinned}
             formatValue={clock}
             onChange={(value) => {

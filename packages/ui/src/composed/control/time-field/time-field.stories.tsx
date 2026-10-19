@@ -4,9 +4,9 @@ import * as React from "react";
 import { TimeField } from "./time-field";
 
 /**
- * The native picker on both platforms (Epic 1 §0.3) — the wheel on iOS, the
- * dial on Android. A custom picker would be a worse version of both plus a
- * keyboard story to write.
+ * The house's 24-hour picker (USE-142): the time typeable, "7:05", and the
+ * clock at its end opening the sheet below the split break, the popover at
+ * it. Typing reads on blur or Enter ("630" is 6:30); Done commits a pick.
  *
  * The value is "HH:mm", a wall-clock string: a template slot has no date, so
  * it cannot be a `Date`.
@@ -38,6 +38,22 @@ export const Bounded: StoryObj = {
         value={value}
         onChange={setValue}
       />
+    );
+  },
+};
+
+export const Compact: StoryObj = {
+  render: function Render() {
+    const [value, setValue] = React.useState<string | null>("07:05");
+    return (
+      <div className="w-36">
+        <TimeField
+          label={<span className="sr-only">Starts</span>}
+          name="Starts"
+          value={value}
+          onChange={setValue}
+        />
+      </div>
     );
   },
 };

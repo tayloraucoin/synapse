@@ -18,7 +18,7 @@ rulings: [D-USE-28, D-USE-39, D-USE-83]
 
 # Set my days — the time picker
 
-The house's 24-hour picker for "Up at" and "Lights out", open on Up at over the empty first day. `?state=time-picker` (402: the sheet; at 1024 the same param opens the popover). New with the 2026-10-19 feedback (boards passed by Taylor, 2026-10-19). It bends Epic 1 §0.3 ("the native picker on both platforms", `TimeField`'s header) on Taylor's word: the browser's own picker ignored the tokens and was never drawn.
+The house's 24-hour picker for "Up at" and "Lights out", open on Up at over the empty first day. `?state=time-picker` (402: the sheet; at 1024 the same param opens the popover). New with the 2026-10-19 feedback (boards passed by Taylor, 2026-10-19). It bends Epic 1 §0.3 ("the native picker on both platforms", `TimeField`'s header) on Taylor's word: the browser's own picker ignored the tokens and was never drawn. Since Taylor's review of 2026-10-19 (USE-142) it is every time field's picker, not only the bounds': `TimeField` holds it, so New block Starts and Ends, the block view's Set a time, the add-event sheet and popover, the item sheet's time, the to-do reminder and the checklist editor open the same sheet or popover, each field reading a compact "7:05".
 
 ## What shows
 

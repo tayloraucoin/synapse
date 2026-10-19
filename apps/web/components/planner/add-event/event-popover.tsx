@@ -257,6 +257,7 @@ function TimeStep({
             {label}
           </Text>
         }
+        name={label}
         value={value}
         formatValue={clock}
         onChange={onChange}

@@ -174,6 +174,7 @@ export function ReminderRow({
                   onTime(time);
               }}
               label={<span className="sr-only">{COPY.reminderTime}</span>}
+              name={COPY.reminderTime}
             />
           </div>
         </div>
