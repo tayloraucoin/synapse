@@ -21,7 +21,6 @@ import { fileURLToPath } from "node:url";
 import { loadEnvConfig } from "@next/env";
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
-
 import { resolveWebTierEnv } from "./lib/env/resolve-tier-env";
 
 const webRoot = path.dirname(fileURLToPath(import.meta.url));
@@ -44,7 +43,10 @@ const rawEnv = createEnv({
       .url()
       .optional(),
     SUPABASE_STAGING_SESSION_POOLER_CONNECTION_URL: z.string().url().optional(),
-    SUPABASE_LIVE_TRANSACTION_POOLER_CONNECTION_URL: z.string().url().optional(),
+    SUPABASE_LIVE_TRANSACTION_POOLER_CONNECTION_URL: z
+      .string()
+      .url()
+      .optional(),
     SUPABASE_LIVE_SESSION_POOLER_CONNECTION_URL: z.string().url().optional(),
 
     // Supabase service role — never exposed to a client bundle.
@@ -56,6 +58,11 @@ const rawEnv = createEnv({
     // opts in with NEXT_PUBLIC_SUPABASE_URL_LOCAL.
     SUPABASE_SERVICE_ROLE_KEY_LOCAL: z.string().min(1).optional(),
     SUPABASE_SECRET_KEY_LOCAL: z.string().min(1).optional(),
+
+    // Signs every planner write's Undo token (USE-92); @syn/api reads it at
+    // use. Declared here too so next.config can refuse a production build
+    // without it (lib/env/deploy-env.ts, USE-138).
+    UNDO_TOKEN_KEY: z.string().min(32).optional(),
 
     // Web Push (VAPID) — the private half. INF-9 sends with it.
     VAPID_PRIVATE_KEY: z.string().min(1).optional(),
@@ -126,8 +133,10 @@ const rawEnv = createEnv({
     SUPABASE_SECRET_KEY_STAGING: process.env.SUPABASE_SECRET_KEY_STAGING,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
-    SUPABASE_SERVICE_ROLE_KEY_LOCAL: process.env.SUPABASE_SERVICE_ROLE_KEY_LOCAL,
+    SUPABASE_SERVICE_ROLE_KEY_LOCAL:
+      process.env.SUPABASE_SERVICE_ROLE_KEY_LOCAL,
     SUPABASE_SECRET_KEY_LOCAL: process.env.SUPABASE_SECRET_KEY_LOCAL,
+    UNDO_TOKEN_KEY: process.env.UNDO_TOKEN_KEY,
     VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
     VAPID_SUBJECT: process.env.VAPID_SUBJECT,
     CRON_SECRET: process.env.CRON_SECRET,
