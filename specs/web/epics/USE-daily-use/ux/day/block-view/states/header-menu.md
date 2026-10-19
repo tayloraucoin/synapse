@@ -20,7 +20,7 @@ rulings: [D-USE-24, D-USE-28, D-USE-69]
 As [`success.md`](success.md), except:
 
 - ··· pressed: the round button fills ink with white dots.
-- A pull-down (`DropdownMenu`) under it, its trailing edge on the column's: `--color-background` fill, hairline border, 10 px radius, one soft shadow (D-USE-28). Title "Today's Wellness only" (caption, semibold, muted). Then "Rename" (pencil), "Icon and colour" (a dotted circle), a 1 px separator, "Delete block" (trash). Each row: a muted icon at the leading edge, the word in ink. Delete block is ink, never red.
+- A pull-down (`DropdownMenu`) under it, its trailing edge on the column's: `--color-background` fill, hairline border, 10 px radius, one soft shadow (D-USE-28). Title "Today's Wellness only" (caption, semibold, muted). Then "Rename" (pencil), "Icon and colour" (the block's own icon in its colour; a dotted circle only while the block has none, Taylor 2026-10-19, USE-144), a 1 px separator, "Delete block" (trash). Each row: a muted icon at the leading edge, the word in ink. Delete block is ink, never red.
 - The menu covers the trailing part of the first rows ("Pee and…", "Start the…"); the rest unchanged.
 
 ## What the person can do

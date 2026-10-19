@@ -330,6 +330,10 @@ export function DaysBlockScreen({
     {
       label: COPY.iconAndColour,
       icon: IconAndColourIcon,
+      // The block's own icon in its colour; the dashed circle only when unset.
+      glyph: record?.icon ? (
+        <ItemIcon icon={record.icon} size={20} className="size-4" />
+      ) : undefined,
       onSelect: () => setPicking("block"),
     },
     // D-USE-87: Not this week, a row in the block's ··· from This week.
