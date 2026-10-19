@@ -10,6 +10,7 @@ design:
       "USE — set up · Row label · Set my days",
       "USE — set up · Row label · Set my days (cont.)",
       "USE — set up · Row label · Set my days (cont. 2)",
+      "USE — set up · Row label · Set my days, first week",
     ]
   locked: 2026-10-10
 ---
@@ -25,7 +26,7 @@ Build each weekday's default once and edit it now and then (Usual week); each we
 ## Entry and exit
 
 - **Entry:** "Set my days" in the avatar menu on any tab ([`../../account/avatar-menu/index.md`](../../account/avatar-menu/index.md)); "Set Saturday" and "Open This week" on Review the day (`../../day/review-the-day/states/empty.md`, `../../day/review-the-day/states/no-work-open-this-week.md`). It opens on **the week** ([`states/the-week.md`](states/the-week.md), B) and a day opens from it ([`states/the-day.md`](states/the-day.md), A): this bends N2's "opens on today's weekday" (open-3 round 2; D-USE-49 (the lock)). This week is the default from Sunday evening onward [ASSUMPTION, from N2].
-- **Exit:** the `Breadcrumb` [PROPOSED] "‹ Now" on the week goes back to the tab it was opened from [ASSUMPTION: the crumb names that tab; every frame draws "Now"]; "‹ Week" on a day goes back to the week. A block opens its Block view in editing ([`../../day/block-view/index.md`](../../day/block-view/index.md), breadcrumb "‹ Monday › Wellness"); in This week a Work block opens on its tiers with an add row each. Edits save as made; there is no Save button.
+- **Exit:** the `Breadcrumb` [PROPOSED] "‹ Now" on the week goes back to the tab it was opened from [ASSUMPTION: the crumb names that tab; every frame draws "Now"]; "‹ Week" on a day goes back to the week. The URL: [`layout.md`](layout.md). A block opens its Block view in editing ([`../../day/block-view/index.md`](../../day/block-view/index.md), breadcrumb "‹ Monday › Wellness"); in This week a Work block opens on its tiers with an add row each. Edits save as made; there is no Save button.
 
 ## Layout, top to bottom (phone 402)
 
@@ -39,9 +40,12 @@ Adding a block: tap an empty time on the rail ([`states/tap-a-time.md`](states/t
 
 | State                          | File                                                                   | Widths    | One line                                        |
 | ------------------------------ | ---------------------------------------------------------------------- | --------- | ----------------------------------------------- |
-| empty, first day               | [`states/empty-first-day.md`](states/empty-first-day.md)               | 402       | The two time fields in the empty state          |
+| empty, first day               | [`states/empty-first-day.md`](states/empty-first-day.md)               | 402       | The two fields and "Set Monday, 7:00 to 22:30"  |
+| unset day, copy first          | [`states/unset-day-copy.md`](states/unset-day-copy.md)                 | 402       | "Copy from Monday" above the fields             |
+| first day set                  | [`states/first-day-set.md`](states/first-day-set.md)                   | 402       | Orient, the first-block prompt, nothing to copy |
+| time picker                    | [`states/time-picker.md`](states/time-picker.md)                       | 402, 1024 | 24-hour Hour and Minute lists; sheet, popover   |
 | copy offer                     | [`states/copy-offer.md`](states/copy-offer.md)                         | 402       | Orient, then "Copy from Monday"                 |
-| usual week                     | [`states/usual-week.md`](states/usual-week.md)                         | 402       | The week list, Every week, with Life and To-dos |
+| usual week                     | [`states/usual-week.md`](states/usual-week.md)                         | 402       | The week list; unset rows "Set day"             |
 | usual Saturday                 | [`states/usual-saturday.md`](states/usual-saturday.md)                 | 402       | A To-dos block holds its rule                   |
 | usual Thursday evening         | [`states/usual-thursday-evening.md`](states/usual-thursday-evening.md) | 402       | Life set, then Evening, open time between       |
 | the week (B)                   | [`states/the-week.md`](states/the-week.md)                             | 402       | This week's list, "12 to 18 Oct"                |
@@ -77,11 +81,7 @@ Copy from's picker, Replace and Undo are the flow `../../interactions/copy-from/
 
 ## Interactions opened here
 
-- The New block sheet: [`../new-block-sheet/index.md`](../new-block-sheet/index.md).
-- [This week's day](../../work/this-week/index.md) (phone).
-- Copy from: [`../../interactions/copy-from/index.md`](../../interactions/copy-from/index.md). Add From Linear, by size: [`../../interactions/add/states/from-linear-by-size.md`](../../interactions/add/states/from-linear-by-size.md).
-- Block view, editing: [`../../day/block-view/index.md`](../../day/block-view/index.md); the item sheet: [`../../day/item-sheet/index.md`](../../day/item-sheet/index.md); meal topics: [`../../interactions/meal-topics.md`](../../interactions/meal-topics.md); the icon picker: [`../../interactions/icon-picker/index.md`](../../interactions/icon-picker/index.md).
-- The once-only install offer drawn in the Account row (y 10080, x 3856) is [`states/install-offer.md`](states/install-offer.md); How opens [`../../account/install-sheet/index.md`](../../account/install-sheet/index.md).
+The New block sheet, This week's day, Copy from, From Linear, Block view, the item sheet, meal topics, the icon picker and the install offer: linked in [`words-and-access.md`](words-and-access.md).
 
 ## Decisions and open items
 

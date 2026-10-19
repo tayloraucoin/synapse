@@ -25,6 +25,7 @@ One day takes the blocks of another built day. An empty day copies at once, with
 
 - **Set my days, the day's ···** › "Copy from…" ([`../../set-my-days/set-my-days/states/day-menu.md`](../../set-my-days/set-my-days/states/day-menu.md)): opens the picker, step 1.
 - **The copy offer on an empty day** ([`../../set-my-days/set-my-days/states/copy-offer.md`](../../set-my-days/set-my-days/states/copy-offer.md), [`../../set-my-days/set-my-days/states/empty-day.md`](../../set-my-days/set-my-days/states/empty-day.md)): "Copy from Monday" copies that day at once, skipping the picker and the ask (step 3); "Other day…" opens the picker.
+- **Not the week's rows** (2026-10-19 feedback): a not-set row reads "Set day" and opens the day; the copy offer inside it is the start, two taps from the week ([`../../set-my-days/set-my-days/states/unset-day-copy.md`](../../set-my-days/set-my-days/states/unset-day-copy.md)) ([`../../set-my-days/set-my-days/states/usual-week.md`](../../set-my-days/set-my-days/states/usual-week.md)).
 - **Review the day, a day with nothing set** › "Copy another day" ([`../../day/review-the-day/states/sunday-nothing-set.md`](../../day/review-the-day/states/sunday-nothing-set.md), D-USE-68): the picker, for today's date [ASSUMPTION, as that file says].
 
 ## Steps
@@ -40,7 +41,7 @@ One day takes the blocks of another built day. An empty day copies at once, with
 
 - **Empty copies at once; built asks.** The ask shows only when the day being set has blocks (round 1; D-USE-32). Either way Undo in the toast restores the day as it was, its own blocks and items back.
 - **Only built days** are offered; a day with nothing set is never listed, nor the day being set.
-- **What copies:** the blocks, their times, kinds and items. Up at and Lights out stay the day's own [ASSUMPTION: not drawn; both days read 7:00 and 22:30]. Orient stays first and locked.
+- **What copies:** the blocks, their times, kinds and items. Up at and Lights out stay the day's own [ASSUMPTION: not drawn; both days read 7:00 and 22:30]; a day with no times yet takes the source's (2026-10-19, [`../../set-my-days/set-my-days/states/unset-day-copy.md`](../../set-my-days/set-my-days/states/unset-day-copy.md)), and Undo returns it to unset. Orient stays first and locked.
 - **Usual week:** a copy changes the usual weekday, and this week's same day follows where not yet started, except blocks already changed on that date ([`replace-confirm.md`](states/replace-confirm.md), [ASSUMPTION] as its note says; D-USE-33 "a usual-week change naming its reach").
 - **This week:** a copy changes that date only; the usual week is untouched [ASSUMPTION: no This week copy is drawn].
 - **Slotted work** [Decided (D-USE-87); default: work blocks copy as time only, the slotted work stays on its own day, and the copied Work block reads "Work goes in on This week." as drawn]. Open-4's dev note lists "Copy from and Reset with slotted work" as still to investigate.

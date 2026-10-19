@@ -28,8 +28,8 @@ The surface's opening view in This week: the dated week as seven rows. `?state=t
 | Tue 13 | 7:00 to 22:30 | as Monday                                            | "No work slotted yet"                                          |
 | Wed 14 | 7:00 to 22:30 | as Monday                                            | "Rest: abs and yoga. No work slotted yet"                      |
 | Thu 15 | 7:00 to 22:30 | as Monday                                            | "Dentist at 14:00 [placeholder]. No work slotted yet"          |
-| Fri 16 | "Not set yet" | none                                                 | a "Copy from…" outlined button (32 px) in place of the chevron |
-| Sat 17 | "Not set yet" | none                                                 | "Copy from…"                                                   |
+| Fri 16 | "Not set yet" | none                                                 | "Set day" in place of the chevron (the row is the button) (2026-10-19; boards passed) |
+| Sat 17 | "Not set yet" | none                                                 | "Set day"                                                      |
 | Sun 18 | All day       | none                                                 | "One checklist, no times"                                      |
 
 - Under the list (13 px muted): "Tap a day to open it on the time column."
@@ -37,13 +37,13 @@ The surface's opening view in This week: the dated week as seven rows. `?state=t
 ## What the person can do
 
 - Tap a row: the day opens in A ([`the-day.md`](the-day.md)).
-- "Copy from…" on a not-set row: Copy from's picker for that date ([`../../../interactions/copy-from/states/copy-picker.md`](../../../interactions/copy-from/states/copy-picker.md)).
+- A not-set row ("Set day"): that date opens, on [`empty-first-day.md`](empty-first-day.md)'s fields when it has no bounds; Copy from is offered there and in the ··· ([`copy-offer.md`](copy-offer.md), [`day-menu.md`](day-menu.md)). Superseded: "Copy from…" on the row (feedback 2026-10-19: it showed while nothing was built).
 - ‹ and › step a week; "Usual week": [`usual-week.md`](usual-week.md); "‹ Now": back.
 - On the phone the pool and From Linear open as a sheet over This week (D-USE-54) [not drawn on this page; the phone work rows on "USE — work" carry it].
 
 ## Words
 
-"12 to 18 Oct" · "Mon 12" … "Sun 18" · "No work slotted yet" · "Not set yet" · "Copy from…" · "One checklist, no times" · "Tap a day to open it on the time column."
+"12 to 18 Oct" · "Mon 12" … "Sun 18" · "No work slotted yet" · "Not set yet" · "Set day" · "One checklist, no times" · "Tap a day to open it on the time column."
 
 ## The notes on the boards
 
@@ -74,4 +74,4 @@ Drawn at: 402. At 1024 this list is the fixed 320 week pane beside the day, a da
 | ---------------------------- | ------------------------- | ---------------------------------------------------------------------- | --------------------------- |
 | C-USE-set-my-days-the-week-1 | This week is shown        | "12 to 18 Oct" with the steppers, seven dated rows, each line in words | `captures/the-week-402.png` |
 | C-USE-set-my-days-the-week-2 | A day has no work slotted | Its line says "No work slotted yet"; no count anywhere                 | `captures/the-week-402.png` |
-| C-USE-set-my-days-the-week-3 | A day not set             | "Not set yet" with "Copy from…"                                        | `captures/the-week-402.png` |
+| C-USE-set-my-days-the-week-3 | A day not set             | "Not set yet" with "Set day"; tapping it opens that date               | `captures/the-week-402.png` |
