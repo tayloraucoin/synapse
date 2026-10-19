@@ -336,6 +336,7 @@ export function NewBlockSheet({
       ) : step === "icon" ? (
         <IconPickerStep
           name={form.name}
+          kind={isTransition ? "transition" : form.kind}
           value={form.icon}
           backLabel={COPY.iconBack(form.name.trim())}
           onBack={() => {

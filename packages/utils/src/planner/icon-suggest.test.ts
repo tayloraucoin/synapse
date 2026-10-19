@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { suggestIcons } from "./icon-suggest";
+import { suggestIcons, suggestIconsFor } from "./icon-suggest";
 
 const ENTRIES = [
   { id: "book", keywords: ["book", "read", "library"] },
@@ -54,5 +54,25 @@ describe("C4: suggestIcons", () => {
   it("ignores case, punctuation and words under three letters", () => {
     expect(suggestIcons("READ!", ENTRIES)).toEqual(["book", "glasses"]);
     expect(suggestIcons("go to", ENTRIES)).toEqual([]);
+  });
+});
+
+describe("USE-145: suggestIconsFor falls back to the kind", () => {
+  it("matches the kind's words when the name matches nothing", () => {
+    expect(suggestIcons("Zzz", ENTRIES)).toEqual([]);
+    expect(suggestIconsFor("Zzz", "wellness", ENTRIES)).toEqual(["lotus"]);
+    expect(suggestIconsFor("", "training", ENTRIES)[0]).toBe("runner");
+  });
+
+  it("keeps the name's own matches first, and the kind out of them", () => {
+    expect(suggestIconsFor("Read", "wellness", ENTRIES)).toEqual([
+      "book",
+      "glasses",
+    ]);
+  });
+
+  it("returns none with no match and no kind", () => {
+    expect(suggestIconsFor("Zzz", null, ENTRIES)).toEqual([]);
+    expect(suggestIconsFor("Zzz", "orient", ENTRIES)).toEqual([]);
   });
 });

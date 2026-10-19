@@ -81,7 +81,12 @@ export {
   usualDay,
 } from "./usual-week";
 export { weeklyRule, withoutWeekday } from "./usual-rules";
-export { suggestIcons, type IconSuggestEntry } from "./icon-suggest";
+export {
+  suggestIcons,
+  suggestIconsFor,
+  type IconSuggestEntry,
+} from "./icon-suggest";
+export { KIND_KEYWORDS, kindKeywords } from "./kind-keywords";
 export {
   activeBlock,
   behindSince,
