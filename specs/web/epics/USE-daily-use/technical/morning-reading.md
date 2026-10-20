@@ -13,15 +13,15 @@ The Technical stage for the approved ledger `ux/account/morning-reading/` (D-USE
 
 ## Placement, by who imports it
 
-| Part | Path | Why there |
-| --- | --- | --- |
-| Inputs | `packages/validators/src/passage.ts`, `link.ts` (reuse `passageFormSchema` and `linkFormSchema`); a new `morning-reading.ts` for `readingKindInput` (`"passage" \| "link"`), `reorderReadingInput` (`kind`, `ids`), `readingRowInput` (`kind`, `id`), `turnOnInput` (`kind`, `id`, `restore`), and the list record | The web app's data layer parses them before a call, and so does the router. Today only `_legacy` imports the two form schemas |
-| Rules and store | `packages/api/src/services/morning/reading-list.ts`: `listReading`, `savePassage`, `saveLink`, `reorderReading`, `turnOff`, `turnOn`, `deleteOffRow`, `normaliseLinkUrl`, a `ReadingListStore` over `passages` and `links`, and `ReadingRuleError` | Services live in `@syn/api` (AGENTS.md). The `_legacy/services/library/` files are a reference, never imported |
-| Procedures | `packages/api/src/routers/morning.ts`: `morning.list` (query), plus the mutations `savePassage`, `saveLink`, `reorder`, `turnOff`, `turnOn` and `delete`, each through `ctx.rls.execute()` | It is Orient's router, and the same tables |
-| Route | `apps/web/lib/routes.ts`: `morningReadingRoute()` → `/settings/morning-reading`; `apps/web/app/(shell)/settings/morning-reading/page.tsx` | As `connectionsRoute()` and its page |
-| Settings row | `apps/web/components/account/settings-list.tsx`: a `SettingsRow` after Connections, with no second line (D-USE-132) | As built (USE-85) |
-| Screen | `apps/web/components/account/morning-reading/` (the page, the sections, the two sheets) with `copy.ts` | Only this route imports it |
-| Data | `apps/web/lib/data/` gains a `morningReading` domain, fixture and live (`live/morning-reading.ts`), and `lib/fixtures/scenarios/morning-reading.ts` with the 22 `morning-reading-<key>` scenarios | As the `orient` and `settings` domains |
+| Part            | Path                                                                                                                                                                                                                                                                                                               | Why there                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Inputs          | `packages/validators/src/passage.ts`, `link.ts` (reuse `passageFormSchema` and `linkFormSchema`); a new `morning-reading.ts` for `readingKindInput` (`"passage" \| "link"`), `reorderReadingInput` (`kind`, `ids`), `readingRowInput` (`kind`, `id`), `turnOnInput` (`kind`, `id`, `restore`), and the list record | The web app's data layer parses them before a call, and so does the router. Today only `_legacy` imports the two form schemas |
+| Rules and store | `packages/api/src/services/morning/reading-list.ts`: `listReading`, `savePassage`, `saveLink`, `reorderReading`, `turnOff`, `turnOn`, `deleteOffRow`, `normaliseLinkUrl`, a `ReadingListStore` over `passages` and `links`, and `ReadingRuleError`                                                                 | Services live in `@syn/api` (AGENTS.md). The `_legacy/services/library/` files are a reference, never imported                |
+| Procedures      | `packages/api/src/routers/morning.ts`: `morning.list` (query), plus the mutations `savePassage`, `saveLink`, `reorder`, `turnOff`, `turnOn` and `delete`, each through `ctx.rls.execute()`                                                                                                                         | It is Orient's router, and the same tables                                                                                    |
+| Route           | `apps/web/lib/routes.ts`: `morningReadingRoute()` → `/settings/morning-reading`; `apps/web/app/(shell)/settings/morning-reading/page.tsx`                                                                                                                                                                          | As `connectionsRoute()` and its page                                                                                          |
+| Settings row    | `apps/web/components/account/settings-list.tsx`: a `SettingsRow` after Connections, with no second line (D-USE-132)                                                                                                                                                                                                | As built (USE-85)                                                                                                             |
+| Screen          | `apps/web/components/account/morning-reading/` (the page, the sections, the two sheets) with `copy.ts`                                                                                                                                                                                                             | Only this route imports it                                                                                                    |
+| Data            | `apps/web/lib/data/` gains a `morningReading` domain, fixture and live (`live/morning-reading.ts`), and `lib/fixtures/scenarios/morning-reading.ts` with the 22 `morning-reading-<key>` scenarios                                                                                                                  | As the `orient` and `settings` domains                                                                                        |
 
 `@syn/ui` gains nothing new: every part on the boards exists (`SortableList`, `ArchivedSection`, `SaveStatus`, `InlineAddRow`, `AlertDialog`, `DiscardDialog`, `RichTextEditor`, `ResponsiveSheet`). The link row's 13 px host (D-USE-131) belongs to the screen's row and is not a `LinkCallout` change.
 
@@ -48,19 +48,19 @@ Read only (D-USE-129). The page reads from the persisted TanStack cache (C4). Ev
 
 ## Calls, as ratified
 
-| # | Call | Ruling |
-| --- | --- | --- |
-| R1 | Delete is a hard delete of the row (D-USE-125's "for good"), with no soft-delete column | **Hard delete** (Taylor, 2026-10-20, the recommendation). A soft delete needs a migration (Q3) and a second meaning of "off". The confirm and the off-first rule already guard it |
+| #   | Call                                                                                    | Ruling                                                                                                                                                                            |
+| --- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Delete is a hard delete of the row (D-USE-125's "for good"), with no soft-delete column | **Hard delete** (Taylor, 2026-10-20, the recommendation). A soft delete needs a migration (Q3) and a second meaning of "off". The confirm and the off-first rule already guard it |
 
 ## Test shape
 
-| Risk | Test |
-| --- | --- |
-| Delete on an active row; an incomplete or foreign reorder; the `spotify:` rewrite and kind; Turn on at the end against Undo in place; a save that would drop images or tags | Unit tests on `reading-list.ts` against a fake `ReadingListStore` (as `morning.ts`'s store seam) |
-| A procedure that skips `ctx.rls.execute()` | The router test pattern (`routers/outputs.test.ts`) and the existing static RLS check; no Postgres (test-shape.md) |
-| Orient reading a different order from this screen | A data-layer test: after a reorder in the fixture domain, Orient's `readReading` returns the same order |
-| Offline queueing a write | A data-layer test: an offline write is not called, and nothing is persisted as a paused mutation |
-| The 22 states | Captures at `/dev/parts?state=morning-reading-<key>`, audited by Assay against the locked boards |
+| Risk                                                                                                                                                                        | Test                                                                                                               |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Delete on an active row; an incomplete or foreign reorder; the `spotify:` rewrite and kind; Turn on at the end against Undo in place; a save that would drop images or tags | Unit tests on `reading-list.ts` against a fake `ReadingListStore` (as `morning.ts`'s store seam)                   |
+| A procedure that skips `ctx.rls.execute()`                                                                                                                                  | The router test pattern (`routers/outputs.test.ts`) and the existing static RLS check; no Postgres (test-shape.md) |
+| Orient reading a different order from this screen                                                                                                                           | A data-layer test: after a reorder in the fixture domain, Orient's `readReading` returns the same order            |
+| Offline queueing a write                                                                                                                                                    | A data-layer test: an offline write is not called, and nothing is persisted as a paused mutation                   |
+| The 22 states                                                                                                                                                               | Captures at `/dev/parts?state=morning-reading-<key>`, audited by Assay against the locked boards                   |
 
 ## Rabbit holes
 
