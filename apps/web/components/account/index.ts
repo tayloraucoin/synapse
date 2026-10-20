@@ -20,7 +20,6 @@ export {
   MORNING_READING_COPY,
   MorningReadingPage,
   type MorningReadingPageProps,
-  type ReadingRowSeams,
   type ReadingSheetTarget,
 } from "./morning-reading";
 export { SettingsList } from "./settings-list";

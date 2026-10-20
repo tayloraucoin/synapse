@@ -1,7 +1,7 @@
 /**
  * Settings › Morning reading's words (USE-151; ux/account/morning-reading/
  * words-and-access.md), as drawn. No second person, no counts, no red. The
- * sheet, menu, toast and dialog lines are USE-152's and USE-153's to add.
+ * menu, toast and dialog lines are USE-152's; the sheets' are USE-153's.
  */
 export const MORNING_READING_COPY = {
   title: "Morning reading",
@@ -31,4 +31,25 @@ export const MORNING_READING_COPY = {
   more: (title: string) => `More for ${title}`,
   turnOnRow: (title: string) => `Turn on ${title}`,
   deleteRow: (title: string) => `Delete ${title}`,
+  /** The row menu (row-menu.md; USE-152). */
+  moveUp: "Move up",
+  moveDown: "Move down",
+  turnOff: "Turn off",
+  turnOffLine: "Leaves Orient, kept under Off",
+  /** After a move, the place in words, never a count (Access [PROPOSED]). */
+  movedUp: "Moved up",
+  movedDown: "Moved down",
+  movedAfter: (verb: string, title: string) => `${verb}, now after ${title}`,
+  movedFirst: (verb: string) => `${verb}, now first`,
+  /** The toast after Turn off (off-undo.md); untitled is [PROPOSED]. */
+  offToast: (title: string | null) =>
+    title === null
+      ? "That passage is off. Orient no longer shows it."
+      : `“${title}” is off. Orient no longer shows it.`,
+  /** The delete confirm (delete-confirm.md; D-USE-125); untitled is [PROPOSED]. */
+  deleteTitle: (title: string | null) =>
+    title === null ? "Delete this passage?" : `Delete “${title}”?`,
+  deleteBody:
+    "It goes for good, words and all, and can’t be brought back. Left off, it stays here to turn on later.",
+  keepIt: "Keep it",
 } as const;

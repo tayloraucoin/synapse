@@ -4,35 +4,34 @@
  * ReadingSection — one of Settings › Morning reading's two sections
  * (USE-151; D-USE-122): the heading (17), its muted line (13), the active
  * rows through `SortableList` in Orient's order, "+ Add …" and "Off ›" at
- * the foot. Props only.
+ * the foot.
  *
  * Empty (empty.md): the empty line takes the order line's place, then the
- * add row; no Off. "Off" is a disclosure that hides while its list is empty
- * (list-off-open.md); it is `ArchivedSection`'s collapsible without its
- * counted label, as the screen shows no counts. The add rows open the
- * sheets (USE-153), so `InlineAddRow` is held closed and its open is the
- * caller's `onAdd`.
+ * add row; no Off. The rows' actions are USE-152's: each row's ···
+ * (`RowMenu`), the drop's order, `SaveStatus` beside the heading, the Off
+ * list (`OffList`) and its `DeleteDialog`, all through `useRowActions`.
+ * The add rows open the sheets (USE-153), so `InlineAddRow` is held closed
+ * and its open is the caller's `onAdd`.
  *
  * Loading (loading.md): `ReadingSectionSkeleton` draws the heading and its
  * line at once, with skeleton rows where the rows sit.
  */
 import * as React from "react";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-  DisclosureIcon,
-  ExpandIcon,
   InlineAddRow,
+  SaveStatusText,
   SkeletonRow,
   SortableList,
   Text,
-  TextDisclosureButton,
   type SortableHandleProps,
 } from "@syn/ui";
-import type { LinkRecord, PassageRecord } from "@syn/validators";
-import { MORNING_READING_COPY as COPY } from "./copy";
-import { nameOf, OffRow } from "./reading-rows";
+import type { LinkRecord, PassageRecord, ReadingKind } from "@syn/validators";
+import { useDataSource } from "@/lib/data/source";
+import { DeleteDialog } from "./delete-dialog";
+import { OffList } from "./off-list";
+import { nameOf } from "./reading-rows";
+import { RowMenu } from "./row-actions";
+import { titleOf, useRowActions } from "./use-row-actions";
 
 type ReadingRow = PassageRecord | LinkRecord;
 
@@ -62,7 +61,14 @@ function SectionHead({
   );
 }
 
+/** What a row draws beyond its own words: its ··· and, mid-drag, the lift. */
+export interface ReadingRowExtras {
+  menu: React.ReactNode;
+  lifted: boolean;
+}
+
 export interface ReadingSectionProps<T extends ReadingRow> {
+  kind: ReadingKind;
   id: string;
   heading: string;
   /** The order line, or with no rows the empty line. */
@@ -75,34 +81,51 @@ export interface ReadingSectionProps<T extends ReadingRow> {
   offOpen?: boolean;
   /** Offline: grips, ···, add and the Off buttons wait (D-USE-129). */
   waiting: boolean;
-  /** `SaveStatus` beside the heading after a drop or a move (USE-152). */
-  status?: React.ReactNode;
-  renderRow: (row: T, handleProps: SortableHandleProps) => React.ReactNode;
-  /** A drop or Alt+arrow's whole order (USE-152). */
-  onReorder?: (ids: string[]) => void;
+  renderRow: (
+    row: T,
+    handleProps: SortableHandleProps,
+    extras: ReadingRowExtras,
+  ) => React.ReactNode;
   onAdd: () => void;
-  onTurnOn?: (row: T) => void;
-  onDelete?: (row: T) => void;
+  /** USE-153's sheet; unset, the menu has no Edit. */
+  onEdit?: (row: T) => void;
+}
+
+/** The `reorder` capture: the held row drawn above `beforeId`, lifted. */
+function heldOrder<T extends ReadingRow>(
+  rows: readonly T[],
+  drag: { itemId: string; beforeId: string } | undefined,
+): { rows: readonly T[]; liftedId: string | null } {
+  const held = drag && rows.find((row) => row.id === drag.itemId);
+  if (!drag || !held || !rows.some((row) => row.id === drag.beforeId)) {
+    return { rows, liftedId: null };
+  }
+  const rest = rows.filter((row) => row !== held);
+  const at = rest.findIndex((row) => row.id === drag.beforeId);
+  return {
+    rows: [...rest.slice(0, at), held, ...rest.slice(at)],
+    liftedId: held.id,
+  };
 }
 
 export function ReadingSection<T extends ReadingRow>({
+  kind,
   id,
   heading,
   line,
   emptyLine,
   addLabel,
-  rows,
+  rows: stored,
   off,
   offOpen = false,
   waiting,
-  status,
   renderRow,
-  onReorder,
   onAdd,
-  onTurnOn,
-  onDelete,
+  onEdit,
 }: ReadingSectionProps<T>) {
-  const [open, setOpen] = React.useState(offOpen);
+  const actions = useRowActions(kind);
+  const drag = useDataSource().scenario.view?.drag;
+  const { rows, liftedId } = heldOrder(stored, drag);
   // The list's items carry the name its handle and live region read; the
   // row itself is looked up, so an untitled passage keeps its null title.
   const items = React.useMemo(
@@ -116,7 +139,7 @@ export function ReadingSection<T extends ReadingRow>({
         id={id}
         heading={heading}
         line={rows.length === 0 ? emptyLine : line}
-        status={status}
+        status={<SaveStatusText status={actions.status} />}
       />
       {rows.length === 0 ? null : (
         <SortableList
@@ -124,12 +147,30 @@ export function ReadingSection<T extends ReadingRow>({
           label={heading}
           disabled={waiting}
           className="gap-0"
-          onReorder={(ids) => onReorder?.(ids)}
-          renderItem={(item, { handleProps }) =>
-            renderRow(item.row, handleProps)
+          onReorder={actions.reorder}
+          renderItem={(item, { handleProps, index }) =>
+            renderRow(item.row, handleProps, {
+              lifted: item.id === liftedId,
+              menu: (
+                <RowMenu
+                  id={item.id}
+                  name={item.title}
+                  first={index === 0}
+                  last={index === items.length - 1}
+                  waiting={waiting}
+                  defaultOpen={actions.menuId === item.id}
+                  onEdit={onEdit ? () => onEdit(item.row) : undefined}
+                  onMove={(direction) => actions.move(item.id, direction)}
+                  onTurnOff={() => actions.turnOff(item.row)}
+                />
+              ),
+            })
           }
         />
       )}
+      <div role="status" aria-live="polite" className="sr-only">
+        {actions.announcement}
+      </div>
       <InlineAddRow
         label={addLabel}
         placeholder={addLabel}
@@ -142,51 +183,20 @@ export function ReadingSection<T extends ReadingRow>({
         disabled={waiting}
         className="pt-(--space-1)"
       />
-      {off.length === 0 ? null : (
-        <Collapsible open={open} onOpenChange={setOpen}>
-          <CollapsibleTrigger asChild>
-            <TextDisclosureButton
-              expanded={open}
-              collapsedLabel={<OffLabel open={false} />}
-              expandedLabel={<OffLabel open />}
-              classes={{ root: "text-muted-foreground font-normal" }}
-            />
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <Text
-              as="p"
-              variant="secondary"
-              tone="muted"
-              className="border-hairline border-b pb-(--space-2)"
-            >
-              {COPY.offLine}
-            </Text>
-            <ul className="m-0 flex list-none flex-col p-0">
-              {off.map((row) => (
-                <OffRow
-                  key={row.id}
-                  row={row}
-                  waiting={waiting}
-                  onTurnOn={onTurnOn ? () => onTurnOn(row) : undefined}
-                  onDelete={onDelete ? () => onDelete(row) : undefined}
-                />
-              ))}
-            </ul>
-          </CollapsibleContent>
-        </Collapsible>
-      )}
+      <OffList
+        rows={off}
+        defaultOpen={offOpen || actions.offOpen}
+        waiting={waiting}
+        onTurnOn={actions.turnOn}
+        onDelete={actions.askDelete}
+      />
+      <DeleteDialog
+        open={actions.deleting !== null}
+        title={actions.deleting ? titleOf(actions.deleting) : null}
+        onKeep={actions.keep}
+        onDelete={actions.confirmDelete}
+      />
     </section>
-  );
-}
-
-/** "Off ›" closed, "Off ⌄" open: the word carries it, the chevron follows. */
-function OffLabel({ open }: { open: boolean }) {
-  const Icon = open ? ExpandIcon : DisclosureIcon;
-  return (
-    <span className="inline-flex items-center gap-(--space-1)">
-      {COPY.off}
-      <Icon aria-hidden="true" className="size-4" />
-    </span>
   );
 }
 

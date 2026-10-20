@@ -11,9 +11,10 @@
  * LinkCallout's caption), then ···. An off row: title and first line,
  * faint, with "Turn on" and "Delete" under them, never ···.
  *
- * The grip and ··· are drawn here and wired by USE-152: the grip carries
- * `SortableList`'s handle, ··· is the caller's `menu` (a plain ··· that
- * opens the row until then). Offline they wait, faint (D-USE-129).
+ * The grip carries `SortableList`'s handle; ··· is the caller's `menu`
+ * (USE-152's `RowMenu`; unset, a plain ··· that opens the row). A row whose
+ * menu is open is tinted (row-menu.md); a row held mid-drag is raised,
+ * outlined and inset (reorder.md). Offline they wait, faint (D-USE-129).
  */
 import * as React from "react";
 import {
@@ -111,8 +112,14 @@ function More({
   );
 }
 
-const ROW =
-  "border-hairline flex min-h-(--row-min) min-w-0 flex-1 items-center border-b";
+const ROW = cn(
+  "border-hairline flex min-h-(--row-min) min-w-0 flex-1 items-center border-b",
+  "has-[[aria-expanded=true]]:bg-surface",
+);
+
+/** The lift as the board draws it: raised, outlined, inset. */
+const LIFTED =
+  "mx-(--space-2) rounded-(--radius) border border-border bg-surface shadow-menu";
 
 const OPEN = cn(
   "flex min-w-0 flex-1 flex-col items-start py-(--space-2) text-start",
@@ -125,6 +132,8 @@ export interface ReadingRowProps<T> {
   handleProps: SortableHandleProps;
   /** The row's ···, from USE-152; unset, a ··· that opens the row. */
   menu?: React.ReactNode;
+  /** Held mid-drag, for the `reorder` capture. */
+  lifted?: boolean;
   /** Offline: the grip and ··· wait (D-USE-129). */
   waiting: boolean;
   onOpen: (row: T) => void;
@@ -134,13 +143,14 @@ export function PassageRow({
   row,
   handleProps,
   menu,
+  lifted = false,
   waiting,
   onOpen,
 }: ReadingRowProps<PassageRecord>) {
   const first = firstLineOf(row.bodyMd);
   const name = nameOf(row);
   return (
-    <div className={ROW}>
+    <div className={cn(ROW, lifted && LIFTED)}>
       <Grip handleProps={handleProps} name={name} waiting={waiting} />
       <button
         type="button"
@@ -183,12 +193,13 @@ export function LinkRow({
   row,
   handleProps,
   menu,
+  lifted = false,
   waiting,
   onOpen,
 }: ReadingRowProps<LinkRecord>) {
   const host = hostOf(row.url);
   return (
-    <div className={ROW}>
+    <div className={cn(ROW, lifted && LIFTED)}>
       <Grip handleProps={handleProps} name={row.title} waiting={waiting} />
       <button
         type="button"

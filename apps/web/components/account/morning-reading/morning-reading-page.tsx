@@ -12,16 +12,16 @@
  * Off buttons wait; "Off" still opens and a row still opens to read. No
  * primary action (D-USE-127).
  *
- * The seams USE-152 and USE-153 fill: `rows` (the ···, a drop's order, Turn
- * on, Delete and the heading's `SaveStatus`) and `renderSheet`, the slot the
- * passage and link sheets open in. A row or an add row sets the sheet's
+ * Each section wires its own row actions (USE-152). The seam USE-153 fills
+ * is `renderSheet`, the slot the passage and link sheets open in; once it is
+ * set, each row's ··· offers Edit. A row or an add row sets the sheet's
  * target; a capture seeds it from the scenario's `view.open`
  * (`sheet:add-passage`, `sheet:edit-link:<id>`, …), and `off-open:<kind>`
  * opens that section's Off list.
  */
 import * as React from "react";
 import { Breadcrumb, RegionRetry, ScreenFrame, Text } from "@syn/ui";
-import type { LinkRecord, PassageRecord, ReadingKind } from "@syn/validators";
+import type { ReadingKind } from "@syn/validators";
 import { OfflineLine } from "@/components/planner/offline-line";
 import { useDataSource } from "@/lib/data/source";
 import { useMorningReading } from "@/lib/data/use-morning-reading";
@@ -36,24 +36,7 @@ export interface ReadingSheetTarget {
   id: string | null;
 }
 
-type RowOf<K extends ReadingKind> = K extends "passage"
-  ? PassageRecord
-  : LinkRecord;
-
-/** USE-152's row seams, per kind; unset, the rows are drawn and wait. */
-export interface ReadingRowSeams {
-  menu?: (
-    kind: ReadingKind,
-    row: PassageRecord | LinkRecord,
-  ) => React.ReactNode;
-  onReorder?: (kind: ReadingKind, ids: string[]) => void;
-  onTurnOn?: (kind: ReadingKind, row: PassageRecord | LinkRecord) => void;
-  onDelete?: (kind: ReadingKind, row: PassageRecord | LinkRecord) => void;
-  status?: (kind: ReadingKind) => React.ReactNode;
-}
-
 export interface MorningReadingPageProps {
-  rows?: ReadingRowSeams;
   /** USE-153's sheets, open on `target`; `close` returns to the list. */
   renderSheet?: (
     target: ReadingSheetTarget | null,
@@ -72,7 +55,6 @@ function seededSheet(open: string | undefined): ReadingSheetTarget | null {
 }
 
 export function MorningReadingPage({
-  rows: seams = {},
   renderSheet,
 }: MorningReadingPageProps = {}) {
   const source = useDataSource();
@@ -99,19 +81,11 @@ export function MorningReadingPage({
 
   function rowProps<K extends ReadingKind>(kind: K) {
     return {
+      kind,
       waiting,
       offOpen: open === `off-open:${kind}`,
-      status: seams.status?.(kind),
-      onReorder: seams.onReorder
-        ? (ids: string[]) => seams.onReorder?.(kind, ids)
-        : undefined,
       onAdd: () => setSheet({ kind, id: null }),
-      onTurnOn: seams.onTurnOn
-        ? (row: RowOf<K>) => seams.onTurnOn?.(kind, row)
-        : undefined,
-      onDelete: seams.onDelete
-        ? (row: RowOf<K>) => seams.onDelete?.(kind, row)
-        : undefined,
+      onEdit: renderSheet ? openRow(kind) : undefined,
     };
   }
 
@@ -157,11 +131,11 @@ export function MorningReadingPage({
               addLabel={COPY.addPassage}
               rows={list.passages}
               off={list.passagesOff}
-              renderRow={(row, handleProps) => (
+              renderRow={(row, handleProps, extras) => (
                 <PassageRow
                   row={row}
                   handleProps={handleProps}
-                  menu={seams.menu?.("passage", row)}
+                  {...extras}
                   waiting={waiting}
                   onOpen={openRow("passage")}
                 />
@@ -175,11 +149,11 @@ export function MorningReadingPage({
               addLabel={COPY.addLink}
               rows={list.links}
               off={list.linksOff}
-              renderRow={(row, handleProps) => (
+              renderRow={(row, handleProps, extras) => (
                 <LinkRow
                   row={row}
                   handleProps={handleProps}
-                  menu={seams.menu?.("link", row)}
+                  {...extras}
                   waiting={waiting}
                   onOpen={openRow("link")}
                 />

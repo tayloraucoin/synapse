@@ -202,7 +202,7 @@ export const MORNING_READING_SCENARIOS: Record<string, () => Scenario> =
     reading("edit-link", open(`sheet:edit-link:${R.calm}`)),
     reading("link-invalid", open(`link-invalid:${R.calm}`)),
     reading("reorder", {
-      view: { drag: { itemId: R.kettle, beforeId: R.slow } },
+      view: { drag: { itemId: R.slow, beforeId: R.feet } },
     }),
     reading("row-menu", open(`menu:${R.slow}`)),
     reading("off-undo", open(`off-undo:${R.slow}`), offUndoRecords),
