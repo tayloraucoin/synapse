@@ -15,7 +15,8 @@ import type { Scenario } from "./index";
  * USE-152 (rows) and USE-153 (sheets): `sheet:add-passage`,
  * `sheet:edit-passage:<id>`, `sheet:add-link`, `sheet:edit-link:<id>`,
  * `discard:<id>`, `link-invalid:<id>`, `menu:<id>`, `off-undo:<id>`,
- * `delete-confirm:<id>`, `saved-drop:passage`, `saved`, and
+ * `delete-confirm:<id>`, `saved-drop:passage`, `saved`, `save-failed:<id>`
+ * (Save pressed on the edit sheet, against a write failed once), and
  * `off-open:passage` for the open Off list.
  */
 
@@ -70,7 +71,7 @@ function readingPassages() {
     passage(
       R.feet,
       "Where the feet are",
-      "Begin where the feet are. The breath has kept time all night without being asked, and the floor is cool under the heels.",
+      "Begin where the feet are. The breath has kept time all night without being asked. Before the list and before the clock there is only this: cool air, a held cup, the floor.\n\n> *Nothing has to be earned before breakfast.*\n\nThen the day, one block at a time.",
       0,
     ),
     passage(
@@ -154,8 +155,8 @@ function savedRecords(): FixtureRecords {
   records.passages.push(
     passage(
       R.added,
-      "A cup of something warm",
-      "Hands around the cup before anything else.",
+      "A cup, not a race",
+      "Hold the warmth for a minute before anything else.",
       3,
     ),
   );
@@ -210,7 +211,7 @@ export const MORNING_READING_SCENARIOS: Record<string, () => Scenario> =
     reading("saved-drop", open("saved-drop:passage"), droppedRecords),
     reading("saved", open("saved"), savedRecords),
     reading("save-failed", {
-      ...open(`sheet:edit-passage:${R.feet}`),
+      ...open(`save-failed:${R.feet}`),
       failWrites: [R.feet],
     }),
     reading("loading", { regions: { morningReading: "loading" } }),

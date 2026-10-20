@@ -18,12 +18,15 @@ import { DISCARD_DIALOG_COPY } from "./copy";
 
 export interface DiscardDialogProps {
   open: boolean;
+  /** What is not kept, in the surface's words: "The edits to “…” are not kept." */
+  description?: React.ReactNode;
   onKeepEditing: () => void;
   onDiscard: () => void;
 }
 
 export function DiscardDialog({
   open,
+  description,
   onKeepEditing,
   onDiscard,
 }: DiscardDialogProps) {
@@ -34,6 +37,7 @@ export function DiscardDialog({
         if (!next) onKeepEditing();
       }}
       title={DISCARD_DIALOG_COPY.title}
+      description={description}
       confirmLabel={DISCARD_DIALOG_COPY.discard}
       cancelLabel={DISCARD_DIALOG_COPY.keepEditing}
       onConfirm={onDiscard}

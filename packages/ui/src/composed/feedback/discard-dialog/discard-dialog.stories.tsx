@@ -35,3 +35,14 @@ export const Interactive: StoryObj = {
 export const Open: StoryObj<typeof DiscardDialog> = {
   args: { open: true, onKeepEditing: () => {}, onDiscard: () => {} },
 };
+
+/** Morning reading's edit sheet (USE-153): what is not kept, said once. */
+export const WithDescription: StoryObj<typeof DiscardDialog> = {
+  args: {
+    open: true,
+    description:
+      "The edits to “Where the feet are” are not kept. The passage stays as it was.",
+    onKeepEditing: () => {},
+    onDiscard: () => {},
+  },
+};

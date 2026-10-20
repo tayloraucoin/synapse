@@ -29,6 +29,7 @@ import { settingsRoute } from "@/lib/routes";
 import { MORNING_READING_COPY as COPY } from "./copy";
 import { LinkRow, PassageRow } from "./reading-rows";
 import { ReadingSection, ReadingSectionSkeleton } from "./reading-section";
+import { ReadingSheets } from "./reading-sheets";
 
 /** What the sheet opens on: a new row of a kind, or a row by id. */
 export interface ReadingSheetTarget {
@@ -46,6 +47,10 @@ export interface MorningReadingPageProps {
 
 function seededSheet(open: string | undefined): ReadingSheetTarget | null {
   const [what, which, id] = open?.split(":") ?? [];
+  // USE-153's captures: the edit sheet, then × or Save; a new link, then Save.
+  if ((what === "discard" || what === "save-failed") && which)
+    return { kind: "passage", id: which };
+  if (what === "link-invalid") return { kind: "link", id: null };
   if (what !== "sheet") return null;
   if (which === "add-passage") return { kind: "passage", id: null };
   if (which === "add-link") return { kind: "link", id: null };
@@ -55,7 +60,9 @@ function seededSheet(open: string | undefined): ReadingSheetTarget | null {
 }
 
 export function MorningReadingPage({
-  renderSheet,
+  renderSheet = (target, close) => (
+    <ReadingSheets target={target} close={close} />
+  ),
 }: MorningReadingPageProps = {}) {
   const source = useDataSource();
   const reading = useMorningReading();
@@ -85,7 +92,7 @@ export function MorningReadingPage({
       waiting,
       offOpen: open === `off-open:${kind}`,
       onAdd: () => setSheet({ kind, id: null }),
-      onEdit: renderSheet ? openRow(kind) : undefined,
+      onEdit: openRow(kind),
     };
   }
 

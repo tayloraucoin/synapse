@@ -94,3 +94,12 @@ export const FocusVisible: StoryObj = {
     );
   },
 };
+
+/** In a fixed-height column: the field fills it, the toolbar at its foot (USE-153). */
+export const Fill: StoryObj = {
+  render: () => (
+    <div className="flex h-96 flex-col">
+      <RichTextEditor label="Passage" placeholder="A few lines, a paragraph, a page." valueMd="" fill />
+    </div>
+  ),
+};
