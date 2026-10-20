@@ -16,21 +16,28 @@ import {
  * it through the editor's read-only mode, never as HTML. Images are
  * bucket-qualified paths the service re-checks against the caller's owner
  * segment; the validator only bounds their count and shape.
+ *
+ * The words are Settings › Morning reading's (words-and-access.md): the limit
+ * lines in the field's line; an empty body is never shown a line, as Save
+ * waits until the body has words.
  */
+
+/** Shared with the link's title: one limit line for every title. */
+export const TITLE_LIMIT = "Titles stop at 80 characters.";
+
 export const passageFormSchema = z.object({
   id: z.string().uuid().optional(),
   title: z
     .string()
     .trim()
-    .max(PASSAGE_TITLE_MAX)
+    .max(PASSAGE_TITLE_MAX, TITLE_LIMIT)
     .nullable()
     .transform((value) => (value === "" ? null : value)),
   bodyMd: z
     .string()
     .trim()
-    // [COPY — needs Vesper sign-off: v1.2 §4.6 says nothing here is required but the body.]
     .min(1, "A few lines, a paragraph, a page.")
-    .max(PASSAGE_BODY_MAX),
+    .max(PASSAGE_BODY_MAX, "A passage stops at 8,000 characters."),
   images: z.array(z.string().min(1).max(512)).max(PASSAGE_IMAGES_MAX).default([]),
   tags: z
     .array(z.string().trim().min(1).max(PASSAGE_TAG_MAX))
