@@ -218,7 +218,7 @@ describe("C2: reorderReading", () => {
   it.each([
     [
       "omits an active row",
-      (ids: string[], _off: string, _foreign: string) => ids.slice(1),
+      (ids: string[]) => ids.slice(1),
     ],
     ["names an off row", (ids: string[], off: string) => [...ids, off]],
     [
