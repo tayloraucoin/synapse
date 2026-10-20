@@ -12,6 +12,7 @@ import type {
   MorningLinesRecord,
   PassageRecord,
   QuoteRecord,
+  ReadingListRecord,
   SavedColourRecord,
   SlotEventRecord,
   SlotRecord,
@@ -56,6 +57,13 @@ export interface FixtureRecords {
   /** The morning reading, its links and the quote on its day (USE-12). */
   passages: PassageRecord[];
   links: LinkRecord[];
+  /**
+   * Settings › Morning reading's Off lists (USE-151): rows with
+   * `archivedAt`, kept apart so `passages` and `links` stay what Orient
+   * reads. Unset, nothing is off.
+   */
+  passagesOff?: ReadingListRecord["passagesOff"];
+  linksOff?: ReadingListRecord["linksOff"];
   quotes: QuoteRecord[];
   /** Orient's three lines, one per date. */
   morningLines: MorningLinesRecord[];

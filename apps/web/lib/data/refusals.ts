@@ -88,6 +88,26 @@ export class MorningLinesRefusal extends Error {
   }
 }
 
+/**
+ * A Settings › Morning reading write the router would refuse (USE-151), by
+ * the service's code (USE-150): `invalid` is the schema's own line (the
+ * limit lines, the link line); `unopenable` the link line too; `not_off` a
+ * delete of a row that is on; `incomplete_reorder` a stale order;
+ * `not_found` a row that is gone.
+ */
+export type MorningReadingRefusalReason =
+  "invalid" | "unopenable" | "not_off" | "incomplete_reorder" | "not_found";
+
+export class MorningReadingRefusal extends Error {
+  readonly reason: MorningReadingRefusalReason;
+
+  constructor(reason: MorningReadingRefusalReason, message: string) {
+    super(message);
+    this.name = "MorningReadingRefusal";
+    this.reason = reason;
+  }
+}
+
 export type PlannerRefusalReason =
   "invalid" | "unknown" | "duplicate" | "not-on-date";
 

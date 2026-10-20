@@ -37,6 +37,7 @@ import { BLOCK_VIEW_SCENARIOS } from "./scenarios/block-view";
 import { BLOCK_EDIT_PATHS } from "./scenarios/block-view-editing";
 import { BLOCK_WORK_TODOS_PATHS } from "./scenarios/block-view-work-todos";
 import { ITEM_SHEET_SCENARIOS } from "./scenarios/item-sheet";
+import { MORNING_READING_SCENARIOS } from "./scenarios/morning-reading";
 import { NEW_BLOCK_SCENARIOS } from "./scenarios/new-block";
 import {
   PLACE_SHEET_SCENARIOS,
@@ -64,7 +65,7 @@ import { TODAY_MEETING_SCENARIOS } from "./scenarios/today-meetings";
 import { TODO_SHEET_SCENARIOS } from "./scenarios/todo-sheet";
 import { WEEK_SCENARIOS } from "./scenarios/week";
 import { SchedulePart, type SchedulePartState } from "./schedule-parts";
-import { SettingsClientsPart } from "./settings-parts";
+import { MorningReadingPart, SettingsClientsPart } from "./settings-parts";
 import { SpreadPhonePart } from "./spread-parts";
 import { TodayDeskPart } from "./today-desk-parts";
 import { TodoSheetPart } from "./todo-sheet-parts";
@@ -391,6 +392,10 @@ for (const state of Object.keys(TODAY_MEETING_SCENARIOS)) {
 // USE-85, USE-86: Settings › Connections, its states, clients and sheets.
 for (const state of Object.keys(SETTINGS_SCENARIOS)) {
   registerPart(state, () => createElement(SettingsClientsPart)); // USE-86
+}
+// USE-151: Settings › Morning reading, every state in its ledger.
+for (const state of Object.keys(MORNING_READING_SCENARIOS)) {
+  registerPart(state, () => createElement(MorningReadingPart));
 }
 // USE-48: Block view from the day, under the block-view scenarios' names.
 for (const state of Object.keys(BLOCK_VIEW_SCENARIOS)) {

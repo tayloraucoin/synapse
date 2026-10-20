@@ -122,6 +122,8 @@ export const SETTINGS_COPY = {
   back: "Now",
   backLabel: "Back to Now",
   connections: "Connections",
+  /** No second line (D-USE-132). */
+  morningReading: "Morning reading",
   signOut: "Sign out",
 } as const;
 

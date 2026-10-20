@@ -3,11 +3,13 @@ import {
   JournalWriteRefusal,
   MealTopicRefusal,
   MorningLinesRefusal,
+  MorningReadingRefusal,
   PlannerRefusal,
   SavedColourRefusal,
   SlotEventRefusal,
   SlotWriteRefusal,
   TodoWriteRefusal,
+  type MorningReadingRefusalReason,
   type PlannerRefusalReason,
   type SlotEventRefusalReason,
 } from "@/lib/data/refusals";
@@ -38,6 +40,8 @@ const REFUSALS = {
   accountName: (_reason, message) => new AccountNameRefusal(message),
   journal: (_reason, message) => new JournalWriteRefusal(message),
   morningLines: (_reason, message) => new MorningLinesRefusal(message),
+  morningReading: (reason, message) =>
+    new MorningReadingRefusal(reason as MorningReadingRefusalReason, message),
 } satisfies Record<string, MakeRefusal>;
 
 export type RefusalKind = keyof typeof REFUSALS;

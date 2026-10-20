@@ -6,6 +6,7 @@ import { connectionsDomain } from "./connections";
 import { googleEventsDomain } from "./google";
 import { linearDomain } from "./linear";
 import { mealTopicsDomain } from "./meal-topics";
+import { morningReadingDomain } from "./morning-reading";
 import { orientDomain } from "./orient";
 import { plannerRead } from "./planner";
 import { plannerWrites } from "./planner-writes";
@@ -32,6 +33,7 @@ export const LIVE_DOMAINS = [
   savedColoursDomain,
   mealTopicsDomain,
   orientDomain,
+  morningReadingDomain,
   plannerRead,
   plannerWrites,
   slotsAndClock,

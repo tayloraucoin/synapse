@@ -20,6 +20,7 @@ const FIXTURE_ONLY = {
   reconnect: noop,
   recoverConnections: noop,
   recoverCalendars: noop,
+  recoverMorningReading: noop,
 } satisfies Partial<FixtureServer>;
 
 export function createLiveServer(client: TrpcClient): FixtureServer {

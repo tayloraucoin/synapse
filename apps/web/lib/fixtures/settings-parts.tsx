@@ -1,6 +1,6 @@
 "use client";
 
-import { ConnectionsPage } from "@/components/account";
+import { ConnectionsPage, MorningReadingPage } from "@/components/account";
 
 /**
  * Settings › Connections' states on `/dev/parts?state=settings-*`: USE-85's
@@ -9,4 +9,12 @@ import { ConnectionsPage } from "@/components/account";
  */
 export function SettingsClientsPart() {
   return <ConnectionsPage />;
+}
+
+/**
+ * Settings › Morning reading's states on `/dev/parts?state=morning-reading-*`
+ * (USE-151): the page as `/settings/morning-reading` renders it.
+ */
+export function MorningReadingPart() {
+  return <MorningReadingPage />;
 }

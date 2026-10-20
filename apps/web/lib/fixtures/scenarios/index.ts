@@ -16,6 +16,7 @@ import { INTEGRATION_SCENARIOS } from "./integrations";
 import { ITEM_SHEET_SCENARIOS } from "./item-sheet";
 import { LOOSE_END_SCENARIOS } from "./loose-ends";
 import { MEAL_TOPIC_SCENARIOS } from "./meal-topics";
+import { MORNING_READING_SCENARIOS } from "./morning-reading";
 import { MOVE_TO_SCENARIOS } from "./move-to";
 import { NEW_BLOCK_SCENARIOS, type NewBlockScenarioStart } from "./new-block";
 import { NOW_IDS, nowDayRecords, onNowDay } from "./now-day";
@@ -97,6 +98,8 @@ export interface Scenario {
     connections?: "loading" | "error";
     /** Settings' Google calendar list alone (USE-85); Linear and Clients read. */
     calendars?: "loading" | "error";
+    /** Settings › Morning reading's one read, both sections (USE-151; D-USE-133). */
+    morningReading?: "loading" | "error";
   };
   /** `hang`: Add a Google account or a workspace stays away at the provider (USE-85). */
   connects?: "hang";
@@ -288,6 +291,8 @@ const SCENARIOS: Record<string, () => Scenario> = {
   ...INTEGRATION_SCENARIOS,
   // ---- Settings › Connections, clients on, and its two sheets (USE-86) ----
   ...SETTINGS_SCENARIOS,
+  // USE-151: Settings › Morning reading, every state in its ledger.
+  ...MORNING_READING_SCENARIOS,
   // ---- + Add and New task (USE-51): Monday during Work, and the pool's New task ----
   ...ADD_SCENARIOS,
   // ---- Add from the rail (USE-54), over Review the day ----
