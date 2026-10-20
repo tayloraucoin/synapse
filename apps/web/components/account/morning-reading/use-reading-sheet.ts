@@ -46,8 +46,7 @@ export interface LinkDraft {
 
 /** A field's line, or the input the write takes. */
 export type SheetCheck<I> =
-  | { ok: true; input: I }
-  | { ok: false; field: string; message: string };
+  { ok: true; input: I } | { ok: false; field: string; message: string };
 
 export function passageDraftOf(row: PassageRecord | null): PassageDraft {
   return { title: row?.title ?? "", bodyMd: row?.bodyMd ?? "" };

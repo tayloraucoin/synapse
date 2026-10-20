@@ -76,9 +76,7 @@ export function PassageSheet({
       offline={offline}
       seed={seed}
       discardLine={
-        row === null
-          ? COPY.discardNewPassage
-          : COPY.discardPassage(row.title)
+        row === null ? COPY.discardNewPassage : COPY.discardPassage(row.title)
       }
     >
       <Input
