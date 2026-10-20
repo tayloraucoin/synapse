@@ -1,6 +1,6 @@
 ---
 target: specs/web/ux/account/morning-reading/index.md
-status: draft
+status: approved
 promoted:
 design:
   file: "Synapse, 01M49AX02VV4SSBKNCN6NRTS6Y"
@@ -11,76 +11,66 @@ design:
 
 # Settings › Morning reading — account
 
-Intent pass (`docs/workflows/stages/ux.md` §4), 2026-10-19, interview rounds 1 to 3 with Taylor. Sources: Orient's reads (`packages/api/src/services/morning/morning.ts`), Orient's empty line ([`../../day/orient/states/empty.md`](../../day/orient/states/empty.md)), the Settings pattern ([`../settings/index.md`](../settings/index.md), [`../settings/states/connections.md`](../settings/states/connections.md)), and the old write path, for fields and limits only (`packages/api/src/_legacy/services/library/passages.ts`, `links.ts`, `_legacy/routers/passage.ts`; `@syn/validators` `passageFormSchema`, `linkFormSchema`; `@syn/constants` limits). Layout, words, access, instrumentation and criteria wait for the handoff pass.
-
-## The gap
-
-Orient reads passages and links (`readReading`: active rows in `sort_order`). Nothing in the USE app writes them: the old router, services and `PassageList` sit under `_legacy`, not mounted, and `/settings` lists only Connections and Sign out (USE-85). USE-012 scoped writing them "to legacy Settings", which was never carried over, so Orient's empty line ("A passage shows up here once one is added") promises an add nobody can make. Taylor agreed, round 1.
+Handoff pass (`docs/workflows/stages/ux.md` §4), 2026-10-20, the ledger of the boards. Sources: the intent pass (rounds 1 to 3, 2026-10-19), the row "Row label · Morning reading" (y 2640, label at x 4340, frames x 4900 to 15022), its captures, and the Settings pattern ([`../settings/index.md`](../settings/index.md)). Rulings: D-USE-119 to D-USE-133 ([`../../day/decisions/D-USE-119-133.md`](../../day/decisions/D-USE-119-133.md)). Writing, order, off and delete: [`writing-and-order.md`](writing-and-order.md). Words, access, instrumentation and criteria: [`words-and-access.md`](words-and-access.md). Board coverage: [`../../boards/use-daily-use/morning-reading.md`](../../boards/use-daily-use/morning-reading.md). Every state is a file in `states/`.
 
 ## Job
 
-Keep what Orient reads, in the order it reads it: the passages the carousel walks and the links under them. Done is the reading as wanted and the screen left. Rows act at once (order, off, on); the passage and link sheets save on Save.
+Keep what Orient reads, in the order it reads it: the passages the carousel walks and the links under them (D-USE-119). The job is done when the reading is set and the screen is left. Rows act at once (order, off, on, delete); the sheets save on Save.
 
 ## Entry and exit
 
-- **Entry:** the avatar menu's "Settings", then a "Morning reading" row in the Settings list beside Connections (ruled in the prompt; `apps/web/components/account/settings-list.tsx`). Route `/settings/morning-reading` [PROPOSED: after `/settings/connections`]. No link from Orient: Orient stays read-only and its frame and states do not change.
-- **Exit:** "‹ Settings" (top left) back to the Settings list. A passage row or "Add a passage" opens the passage sheet; a link row or "Add a link" opens the link sheet; each closes back here.
+- **Entry:** the avatar menu's "Settings", then the "Morning reading" row after Connections in the Settings list (`apps/web/components/account/settings-list.tsx`). The row has no second line (D-USE-132). The route is `/settings/morning-reading`. Orient has no link here and does not change.
+- **Exit:** "‹ Settings" (top left). A passage row or "Add a passage" opens the passage sheet; a link row or "Add a link" opens the link sheet; ··· › Edit opens the same sheets. Each sheet closes back here.
 
-## Shape (for the canvas, not yet the layout)
+## Layout, top to bottom (phone 402)
 
-One screen, two sections in Orient's order (round 1.4): **Passages**, then **Links**. Each section: its rows in reading order with a grip, an add row, and a collapsed **Off** section at its foot. House parts in reach: `Breadcrumb`, `SettingsRow`, `SortableList`, `EllipsesMenu`, `ArchivedSection`, `ResponsiveSheet`, `RichTextEditor`, `Input`, `DiscardDialog`, `Toaster`, `StatusLine`, `EmptyState`, `SkeletonRow`, `RegionRetry`, `LinkCallout`. A confirm dialog for delete is not yet named in `components.md` [ASSUMPTION: the house dialog primitive; Plumb confirms at the canvas].
+1. **Header:** `Breadcrumb` "‹ Settings", then the title "Morning reading" (title, 22), then a hairline.
+2. **Passages:** the heading (heading, 17), with `SaveStatus` on the right after a drop or a move. A muted order line sits under it (label, 13). Then one row per active passage in `sort_order`: a grip (left, 44 px target), then the title (body, 15, medium) over its first line (Newsreader, body, muted, one line with an ellipsis), then ··· (`EllipsesMenu`) on the right. A passage with no title shows its first line alone (D-USE-133). Hairlines sit between rows. Next comes "+ Add a passage" (`InlineAddRow`), then "Off ›" (`ArchivedSection`, collapsed). A rule closes the section.
+3. **Links:** the heading and a muted line. Then one row per active link: a grip, a 20 px kind glyph (Spotify, or a link glyph), the title (body, medium) over the host (label 13, muted; D-USE-131), then ···. Next comes "+ Add a link", then "Off ›".
+4. **Open Off list:** a muted line, then each off row: its title and first line, faint, and under them two text buttons in ink, "Turn on" and "Delete" (`list-off-open`).
+5. **Sheets:** `ResponsiveSheet` with a grabber, × on the left and the title beside it. The passage sheet has "Title" (with "Optional" on the right), an `Input`, "Passage", a `RichTextEditor` (the editor fills the height, with its toolbar: bold, italic, quote, list, link), and a full-width `Button` "Save". The link sheet has "Title", an `Input`, "Link", an `Input` with its hint, and "Save".
+6. **Overlays:** the `Toaster` at the foot (off, with Undo); the confirm dialog (`AlertDialog`) for delete; `DiscardDialog` from a sheet.
 
-How a passage and a link are written, and how order, off and delete work: [`writing-and-order.md`](writing-and-order.md). One capture per state: [`boards.md`](boards.md).
+Components are all `@syn/ui`: `Breadcrumb`, `SortableList`, `EllipsesMenu`, `InlineAddRow`, `ArchivedSection`, `SaveStatus`, `ResponsiveSheet`, `Input`, `RichTextEditor`, `Button`, `AlertDialog`, `DiscardDialog`, `Toaster`, `StatusLine`, `SkeletonRow`, `RegionRetry`. The link row's 13 px host is this row's own setting, not `LinkCallout` (D-USE-131). Type sizes: 22, 17, 15, 13 (C-R04). Passage text is Newsreader (D-USE-130).
 
 ## Primary action
 
-None on the screen (round 2.4): rows act at once, as Connections. The passage and link sheets carry "Save" (`Button`, default).
+None on the screen (D-USE-127). The sheets carry "Save" (`Button`, default).
 
 ## States
 
-| State                | Key                   | One line on what shows                                                                                                                            |
-| -------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| list                 | `list`                | Three passages and two links in reading order, each with a grip and ···; the add rows; the Off lists collapsed                                    |
-| list, some off       | `list-off-open`       | The Passages' Off list opened: one off passage with Turn on and Delete                                                                            |
-| nothing yet          | `empty`               | No passages, no links: one quiet line per section above its add row                                                                               |
-| add passage          | `add-passage`         | The passage sheet, empty: Title, the editor, Save; without images                                                                                 |
-| add passage, images  | `add-passage-images`  | As add passage, with the Images row (two images and an add tile) [design only]                                                                    |
-| edit passage         | `edit-passage`        | The sheet filled with a passage; Save; without images                                                                                             |
-| edit passage, images | `edit-passage-images` | As edit passage, with its images [design only]                                                                                                    |
-| discard unsaved      | `discard`             | Leaving a sheet with unsaved words asks before closing (`DiscardDialog`)                                                                          |
-| add link             | `add-link`            | The link sheet, empty: Title, Link, Save                                                                                                          |
-| edit link            | `edit-link`           | The link sheet filled with a Spotify playlist                                                                                                     |
-| link not openable    | `link-invalid`        | The link sheet with a URL that cannot open: the field's line in ink, Save waits                                                                   |
-| row menu             | `row-menu`            | The row's ···: Edit, Move up, Move down, Turn off (with its consequence); the keyboard path for order (added on the canvas, round 4)              |
-| reordering           | `reorder`             | A passage lifted by its grip mid-drag, the gap where it lands                                                                                     |
-| off, with Undo       | `off-undo`            | The row gone from the list; the toast with Undo at the foot                                                                                       |
-| delete confirm       | `delete-confirm`      | The dialog over the list, naming the consequence                                                                                                  |
-| saved, after Save    | `saved`               | The sheet closed, the new passage at the end of the list; no toast (Assay round 1 asked for this half to be drawn)                                |
-| saved, after a drop  | `saved-drop`          | The new order, "Saved" beside the section heading (`SaveStatus`)                                                                                  |
-| save failed          | `save-failed`         | The sheet stays open with its words; one line in ink, and Save tries again (no second Try again beside Save; Assay round 1)                       |
-| loading              | `loading`             | Header and section titles at once; `SkeletonRow`s where the rows sit                                                                              |
-| error                | `error`               | The list failed to load: `RegionRetry` with Try again; header and back stay                                                                       |
-| offline              | `offline`             | The list from cache; one `StatusLine` that changes wait for a connection; grips, ··· and the add rows drawn waiting (faint)                       |
-| offline, sheet open  | `offline-sheet`       | An open sheet keeps its words; the `StatusLine` above Save, and Save waits                                                                        |
-| partial              | —                     | N/A: one read loads both sections (`readReading`) [ASSUMPTION: the write surface reads both in one call, or the handoff splits error per section] |
+| State                | File                            | One line                                                     |
+| -------------------- | ------------------------------- | ------------------------------------------------------------ |
+| list                 | `states/list.md`                | Three passages, two links, the add rows, Off collapsed       |
+| list, some off       | `states/list-off-open.md`       | Passages' Off open: one off passage, Turn on and Delete      |
+| nothing yet          | `states/empty.md`               | One line per section above its add row                       |
+| add passage          | `states/add-passage.md`         | The empty passage sheet                                      |
+| add passage, images  | `states/add-passage-images.md`  | As add passage, with Images [design only]                    |
+| edit passage         | `states/edit-passage.md`        | The sheet filled with a passage                              |
+| edit passage, images | `states/edit-passage-images.md` | As edit passage, with its images [design only]               |
+| discard unsaved      | `states/discard.md`             | `DiscardDialog` over the edit sheet                          |
+| add link             | `states/add-link.md`            | The empty link sheet                                         |
+| edit link            | `states/edit-link.md`           | The link sheet with a Spotify playlist                       |
+| link not openable    | `states/link-invalid.md`        | The field's line in ink; Save waits                          |
+| reordering           | `states/reorder.md`             | A passage lifted by its grip, the gap where it lands         |
+| row menu             | `states/row-menu.md`            | Edit, Move up, Move down, Turn off with its line             |
+| off, with Undo       | `states/off-undo.md`            | The row gone; the toast with Undo                            |
+| delete confirm       | `states/delete-confirm.md`      | The dialog over the open Off list                            |
+| saved, after a drop  | `states/saved-drop.md`          | The new order; "Saved" beside Passages                       |
+| saved, after Save    | `states/saved.md`               | The sheet closed, the new passage at the end; no toast       |
+| save failed          | `states/save-failed.md`         | The sheet keeps its words; one line in ink; Save tries again |
+| loading              | `states/loading.md`             | Headings and lines at once; `SkeletonRow`s                   |
+| error                | `states/error.md`               | One `RegionRetry`; header and back stay                      |
+| offline              | `states/offline.md`             | As last saved; the `StatusLine`; writes drawn waiting        |
+| offline, sheet open  | `states/offline-sheet.md`       | The sheet keeps its words; the `StatusLine` above Save       |
+| partial              | —                               | N/A: one read loads both sections (D-USE-133)                |
+
+Each state is a scenario `morning-reading-<key>` at `/settings/morning-reading?state=<key>` and `/dev/parts?state=` (C-P08).
 
 ## Platforms
 
-Phone 402, light, on the boards. At the desk (1024 and up, not drawn): Settings fills the main pane beside the rail (D-USE-89, D-USE-93), this screen as at 402, and the sheets open as the right-side panel (D-USE-60's form) [ASSUMPTION: as the client sheet].
+Drawn at 402 (phone, light). At the desk (1024 and up, not drawn): Settings fills the main pane beside the rail (D-USE-89, D-USE-93), this screen as at 402, and the sheets open as the right-side panel (D-USE-60's form, D-USE-39). Dark comes with the build's theme pass (D-USE-58).
 
 ## Out of scope (Open)
 
-- The quote bank (Orient's "A quote" slide, `quotes_opt_in`): not here.
-- Journal prompts: not here.
-- Passage images in code: designed, not built (round 1.3); the dev note carries it.
-- Tags on a passage: not shown.
-
-## Decisions and open items
-
-The handoff pass logs these from D-USE-119: the gap and the entry; Markdown in the house editor; images designed, not built; one screen, two sections; grip order; off as rest and delete only from off; the passage sheet over the list; no screen-level primary; saved shown by the row; offline read only.
-
-- [PROPOSED, for Plumb] The serif first line in the list bends D-P01 (Newsreader only on Review); passage text already uses it in `PassageCarousel`, `PassageReader` and `RichTextEditor`. Record the passage-text bend in `apps/web/docs/design/DESIGN.md` at the handoff.
-- Links keep `LinkCallout`'s 12 px host line, so the list has five type sizes (22, 17, 15, 13, 12); Assay round 1, amber, left as the house part draws it.
-- [NEEDS DECISION] Whether the Settings row shows a line under "Morning reading" (for example the first passage's title). Default: no line, as the Connections row. No count (product rules).
-
-Layout: [FILL at the handoff pass]. Words: [FILL, Gloss]. Access: [FILL, Threshold]. Instrumentation: [FILL]. Criteria: [FILL].
+The quote bank (Orient's "A quote" slide, `quotes_opt_in`); journal prompts; passage images in code (D-USE-121, the dev note); tags on a passage.
