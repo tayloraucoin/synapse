@@ -19,6 +19,7 @@ The Technical stage for USE ([`docs/workflows/stages/technical.md`](../../../../
 | [calls.md](calls.md)                 | The calls as Taylor ratified them, and the bends this stage took                              |
 | [test-shape.md](test-shape.md)       | The test type for each risk                                                                   |
 | [rabbit-holes.md](rabbit-holes.md)   | Each one patched in a sentence or declared out of bounds                                      |
+| [morning-reading.md](morning-reading.md) | Delta, 2026-10-20: Settings › Morning reading (D-USE-119 to 133): placement, the write contract, offline read only, the first hard delete |
 
 ## Appetite verdict
 
