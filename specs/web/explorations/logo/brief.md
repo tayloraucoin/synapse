@@ -13,6 +13,19 @@ The current mark is a placeholder (branding guide §8 and §9): a disc split by 
 | C   | Mark as letter                 | Two half-discs offset into an S                                  | Candid         |
 | D   | The rule alone                 | One ruled bar broken by a gap                                    | Deliberate     |
 
+## Meaning (operator's framing, 2026-10-20)
+
+Synapse helps a person keep good habits and stay aligned through the day. The app turns the day into a track to follow (next, next, next), and over time what took deliberate effort becomes automatic habit. That shift is what the name refers to. It is a brain idea, and it must never read as brain games or cognitive training.
+
+Tensions, named:
+
+- "Gamify" here means momentum and flow, not points. The product rules ban streaks, scores and progress numbers on the tabs, and branding guide §2 bans anything that keeps score. Both bans stand.
+- Branding guide §7 bans neurons, brains, nodes, sparks and glows. The meaning may come from neuroscience; the picture may not.
+- §1's "a notebook, never a habit tracker" now sits against "trains habits". [PROPOSED, Hearth] "When a comparison is needed it is to a notebook kept until it keeps itself, never to a habit tracker, a planner or a productivity app: the habit forms by following the day, not by counting it."
+- Brain region: habit research places the shift to automaticity in the basal ganglia, from the dorsomedial to the dorsolateral striatum (Yin & Knowlton, Nat Rev Neurosci 2006; secondary, via abstract and summaries). Nothing found supports the cerebellum for this. No copy names a region.
+
+Pillar fit: Quiet > Candid > Deliberate still holds, and no pillar is missing (Hearth, judgment). Following the track is Quiet: the day runs without deciding. The risk is wording: Deliberate can read as the opposite of the promise. [PROPOSED, Hearth] Deliberate: "decided once, at the start of the week, so the day is followed rather than decided; bends without calling it failure." Hearth adds: "trains the brain" and "becomes automatic" are science claims, to be graded before any public copy.
+
 ## What we want to learn
 
 Which silhouette is worth carrying into code: one that reproduces at every size and mask the platforms impose, does not look like any of seven category marks, and can be explained without shape-meaning folklore.

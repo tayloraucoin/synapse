@@ -57,3 +57,28 @@ This is the frame "A — Refined: lockup system (chosen)" on the Logo page.
 
 - [NEEDS DECISION] Where the placeholder notice and pillar line live in code: the SVG `<desc>` or the component's header comment (research, "Put to Plumb" 3).
 - [PROPOSED] Add one line to branding guide §8 that records the 16px master, the clear space x = r/2 and the icon disc r170. This is Plumb's paperwork note; it changes no rule.
+
+## Round 3: deeper into A (2026-10-20, rejected)
+
+Brief: push A deeper, not wider, under the operator's new framing of the name (brief.md, Meaning). Drawn on the frame "Round 3 — rejected by the operator" on the Logo page, which was left unfinished.
+
+- **Dropped before the gate (judgment):** four changes to the mark's silhouette. The past faded above the rule read as a two-tone ball and as disabled. A heavier rule (gap 64, rule 32) turned the band loud. Stacked list slits read as a menu icon. Shearing the halves read as a glitch and broke the mirror symmetry. Each made A worse, so the master stayed as chosen.
+- **Shown in part:** "A, one line". The disc was raised 0.034em so its rule's centre sat on the centre of the final e's crossbar, which was drawn in the rule's ink. Measured on Public Sans 500 (Google Fonts v21, canvas pixel scan): the crossbar spans 234–303/1000 em above the baseline, cap height 723, round overshoot 9–10 (verified by measurement). Hearth: it fits Quiet, then Deliberate, and a coloured letter part is a common device (judgment, not checked). Plumb: it needs a carve-out from branding guide §3 rule 2, and no new token.
+- **The operator's words:** "everything you're doing for round 3 looks terrible just go with the original A."
+
+Decision: the frame "A — Refined: lockup system (chosen)" ships as it stands. Wordmark: set Public Sans 500, -0.02em, no letter change.
+
+## Rebuild (2026-10-20)
+
+- `SynapseMark` (`packages/ui/src/composed/display/synapse-mark/`) draws the chosen master: disc r192, gap y280–328, arc-ended rule y296–312. `small` gives the small master (no rule, gap y272–336) for a disc under 32px. The viewBox is the disc's bounds, so the element's size is the disc's diameter. Before this, code still drew the kit placeholder: r200, with a square-ended rule from x24 to x488 overhanging the disc.
+- PWA icons (`apps/web/public/icons/`, 192 and 512, any and maskable) and the 180 apple-touch icon: the light mark on paper (#FAFAF8), disc r170 on 512, opaque RGB. `apps/docs/public/icon-192.png` uses the same art.
+- `apps/web/app/favicon.ico`: the small master at 16 and the master at 32, on paper. The entries must be RGBA PNGs, or Next fails to decode the ICO and every route, the manifest included, answers 500 in dev (verified, then fixed).
+- Rendered by a one-off sharp script, not committed. The inks are the token values converted from oklch: neutral-50 #FAFAF8, neutral-900 #151412, brand-500 #2F8F80.
+
+## The installed PWA shows an "S"
+
+The operator's phone shows a letter "S" in place of the icon. On a local dev server, `/manifest.webmanifest` returns 200 JSON with all four icons. The head carries `apple-touch-icon` at 180, and every icon loads without cookies (verified, port 3120). The proxy's matcher skips `.png` and `favicon.ico` (verified, `apps/web/proxy.ts`). Not found: the deployed URL, so the hosted site was not checked. [ASSUMPTION: the cause is on the host, for example deployment protection answering the phone's cookie-less icon request with a sign-in page, or a home-screen icon cached from an earlier install.]
+
+## What is still untested (rule 11)
+
+Everything under the first round's list still holds. Also untested: the new icons on a real iOS and Android home screen, and the favicon in a browser tab at 16px.
