@@ -48,6 +48,10 @@ As [`success.md`](success.md), except:
 - D-USE-28 (later, wins): menus are shadcn dropdowns with leading muted icons and 1 px separators; the frame draws the icons leading, so the note's "trailing icon" is superseded by the frame and D-USE-28.
 - open-1 (step 3 round 1, drawn): `[ASSUMPTION]` Delete block, from the day, asks once and offers Undo after. Decided (D-USE-69), as drawn: Delete block asks once (a confirm naming "today's Wellness only"), then the block goes from today, Block view returns to the day, and a `Toaster` offers Undo; Monday's usual keeps it. The confirm is not drawn [ASSUMPTION: a `Dialog` as Now's Start while one runs].
 
+## From Set my days (USE-158)
+
+The same menu in editing, titled with its scope, "Every Monday's Wellness" or "This Thursday's Wellness": Rename, Icon and colour, a separator, "Delete block" (trash, ink). It asks once, "Delete every Monday's Wellness?" with "Wellness goes from every Monday, items and all. Other days keep theirs." ("Keep it" or "Delete block"); then Block view returns to Set my days and a toast reads "Every Monday's Wellness deleted." with Undo. In the usual week the weekday leaves the block; a block with no weekday left is archived, its items kept, so Undo brings it all back. From This week, "This Thursday only. Every Thursday's Wellness stays.": the date skips it. A dated Life block keeps its Not this week in that place, which does the same [ASSUMPTION].
+
 ## Widths
 
 Drawn at: 402. Not drawn at: the desk; scales up (D-USE-39).

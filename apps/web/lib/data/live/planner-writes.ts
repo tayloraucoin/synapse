@@ -12,6 +12,7 @@ import {
   idInput,
   newBlockInput,
   newTransitionInput,
+  removeBlockInput,
   removeBlockItemInput,
   reorderItemsInput,
   resetDayInput,
@@ -80,6 +81,11 @@ export const plannerWrites = {
         send(
           () => parsed(editBlockInput, raw),
           (input) => p.editBlock.mutate({ input, scope }),
+        ),
+      removeBlock: (raw) =>
+        send(
+          () => parsed(removeBlockInput, raw),
+          (input) => p.removeBlock.mutate(input),
         ),
       splitBlock: (raw) =>
         send(

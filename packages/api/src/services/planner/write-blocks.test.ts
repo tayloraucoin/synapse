@@ -13,6 +13,7 @@ import {
   planCreateBlock,
   planCreateTransition,
   planEditBlock,
+  planRemoveBlock,
   planSplitBlock,
 } from "./write-blocks";
 import { reachOf } from "./write-plan";
@@ -379,6 +380,42 @@ describe("the scope question (C-USE-92-2)", () => {
         planSplitBlock(journal, { id: oneDay.id, fromDate: MON, patch: {} }),
       "not-on-date",
       "That block is not on that date.",
+    );
+  });
+});
+
+describe("Delete block from a usual weekday (USE-158)", () => {
+  const MONDAYS_AND_THURSDAYS =
+    "DTSTART;VALUE=DATE:20261001\nRRULE:FREQ=WEEKLY;BYDAY=MO,TH";
+  const ONLY_MONDAYS =
+    "DTSTART;VALUE=DATE:20261001\nRRULE:FREQ=WEEKLY;BYDAY=MO";
+
+  it("takes the weekday out of the rule and keeps the block on the others", () => {
+    const row = block({ rrule: MONDAYS_AND_THURSDAYS });
+    const journal = journalOver({ blocks: [row] });
+    planRemoveBlock(journal, { id: row.id, weekday: 0 });
+    const [after] = journal.rows.blocks;
+    expect(after!.archivedAt).toBeNull();
+    expect(runsOn(after!, MON)).toBe(false);
+    expect(runsOn(after!, ONE_DATE)).toBe(true);
+  });
+
+  it("archives a block whose last weekday goes, its items kept for Undo", () => {
+    const row = block({ rrule: ONLY_MONDAYS });
+    const kept = item({ blockId: row.id });
+    const journal = journalOver({ blocks: [row], blockItems: [kept] });
+    planRemoveBlock(journal, { id: row.id, weekday: 0 });
+    expect(journal.rows.blocks[0]!.archivedAt).toBe(NOW_ISO);
+    expect(journal.rows.blockItems).toEqual([kept]);
+  });
+
+  it("refuses a one-date block", () => {
+    const row = block({ rrule: null, onDate: ONE_DATE });
+    const journal = journalOver({ blocks: [row] });
+    expectRefusal(
+      () => planRemoveBlock(journal, { id: row.id, weekday: 0 }),
+      "invalid",
+      "That block does not repeat on a weekday.",
     );
   });
 });

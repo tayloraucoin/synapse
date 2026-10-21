@@ -374,6 +374,9 @@ export const BLOCK_EDIT_PATHS = {
     date: "2026-10-15",
   }),
   "set-work": usual(B.writing, 1),
+  /** USE-158: the ··· open with Delete block, then its one question. */
+  "delete-block-menu": usual(B.wellness, 0),
+  "delete-block-confirm": usual(B.wellness, 0),
 } as const;
 
 /** USE-156: the suggested states, under their own names (suggested.md). */
@@ -439,6 +442,8 @@ export const BLOCK_EDIT_SCENARIOS: Record<string, () => Scenario> =
     editing("life-set"),
     editing("life-not-this-week", { view: { open: "header-menu" } }),
     editing("set-work"),
+    editing("delete-block-menu", { view: { open: "header-menu" } }),
+    editing("delete-block-confirm", { view: { open: "delete-confirm" } }),
     suggested("suggested-new", () => blockEditRecords()),
     suggested("suggested-added", () =>
       blockEditRecords(WELLNESS, { thursday: THREE_ADDED }),

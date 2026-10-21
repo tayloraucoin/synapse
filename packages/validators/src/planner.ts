@@ -284,6 +284,19 @@ export const editBlockInput = z
 
 export type EditBlockInput = z.infer<typeof editBlockInput>;
 
+/**
+ * Delete block from a usual weekday (USE-158; D-USE-69): the weekday leaves
+ * the block's rule, and a block left with no weekday is archived. A date's
+ * delete is a `block_changes` skip (`blockChangeInput`).
+ */
+export const removeBlockInput = z.object({
+  id: z.string().uuid(),
+  /** Monday 0 … Sunday 6. */
+  weekday: z.number().int().min(0).max(6),
+});
+
+export type RemoveBlockInput = z.infer<typeof removeBlockInput>;
+
 /*
  * ---- Block changes: one date of a repeating block ----
  */

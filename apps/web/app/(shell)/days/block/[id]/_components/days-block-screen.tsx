@@ -6,6 +6,8 @@ import type { BlockFill, IconValue } from "@syn/types";
 import {
   Button,
   cn,
+  ConfirmDialog,
+  DeleteIcon,
   EditIcon,
   IconAndColourIcon,
   Input,
@@ -183,6 +185,10 @@ export function DaysBlockScreen({
   const [swipeId, setSwipeId] = React.useState<string | null>(null);
   const [menuId, setMenuId] = React.useState<string | null>(null);
   const [renaming, setRenaming] = React.useState(false);
+  // USE-158: Delete block's one question; `?state=` may open it.
+  const [confirmingDelete, setConfirmingDelete] = React.useState(
+    view?.open === "delete-confirm",
+  );
   const [picking, setPicking] = React.useState<"block" | "add" | null>(null);
   const [addIcon, setAddIcon] = React.useState<IconValue | null>(null);
   const [settingTime, setSettingTime] = React.useState(
@@ -401,6 +407,19 @@ export function DaysBlockScreen({
     });
   }
 
+  // "Every Monday" or "This Thursday": the menu's title and the delete's words.
+  const menuScope = dated ? `This ${dayName}` : `Every ${dayName}`;
+
+  async function deleteBlock() {
+    setConfirmingDelete(false);
+    const write = await writes.deleteBlock();
+    router.push(back);
+    toastUndo({
+      text: COPY.deleted(menuScope, name),
+      onUndo: () => void writes.undo(write.undo),
+    });
+  }
+
   const menuRows: NowBlockMenuRow[] = [
     { label: COPY.rename, icon: EditIcon, onSelect: () => setRenaming(true) },
     {
@@ -422,7 +441,15 @@ export function DaysBlockScreen({
             separated: true,
           },
         ]
-      : []),
+      : [
+          // A dated Life block's Not this week already frees the date [ASSUMPTION].
+          {
+            label: COPY.deleteBlock,
+            icon: DeleteIcon,
+            onSelect: () => setConfirmingDelete(true),
+            separated: true,
+          },
+        ]),
   ];
 
   const actions = (
@@ -436,10 +463,7 @@ export function DaysBlockScreen({
       </button>
       <NowBlockMenu
         label={COPY.more(name)}
-        title={COPY.menuTitle(
-          dated ? `This ${dayName}` : `Every ${dayName}`,
-          name,
-        )}
+        title={COPY.menuTitle(menuScope, name)}
         rows={menuRows}
         defaultOpen={view?.open === "header-menu"}
       />
@@ -879,6 +903,16 @@ export function DaysBlockScreen({
           }}
         />
       </ResponsiveSheet>
+
+      <ConfirmDialog
+        open={confirmingDelete}
+        onOpenChange={setConfirmingDelete}
+        title={COPY.deleteTitle(scopeWords(place, weekday), name)}
+        description={COPY.deleteBody(dated, name, dayName)}
+        confirmLabel={COPY.deleteConfirm}
+        cancelLabel={COPY.keep}
+        onConfirm={() => void deleteBlock()}
+      />
 
       <SetATimeSheet
         open={settingTime}

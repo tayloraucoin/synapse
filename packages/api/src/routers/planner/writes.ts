@@ -9,6 +9,7 @@ import {
   newBlockInput,
   newTransitionInput,
   plannerWriteOutput,
+  removeBlockInput,
   removeBlockItemInput,
   reorderItemsInput,
   scopedWriteInput,
@@ -21,6 +22,7 @@ import {
   planCreateBlock,
   planCreateTransition,
   planEditBlock,
+  planRemoveBlock,
   planSplitBlock,
 } from "../../services/planner/write-blocks";
 import {
@@ -85,6 +87,13 @@ export const plannerWrites = {
         plan: (journal) => planEditBlock(journal, input, scope),
       }),
     ),
+
+  removeBlock: write.input(removeBlockInput).mutation(({ ctx, input }) =>
+    runPlannerWrite(ctx.rls, ctx.authContext.userId, {
+      blocks: () => [input.id],
+      plan: (journal) => planRemoveBlock(journal, input),
+    }),
+  ),
 
   splitBlock: write.input(splitBlockInput).mutation(({ ctx, input }) =>
     runPlannerWrite(ctx.rls, ctx.authContext.userId, {

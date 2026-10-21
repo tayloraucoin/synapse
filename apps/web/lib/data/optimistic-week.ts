@@ -127,6 +127,20 @@ export function applyOptimistic(
       );
     }
 
+    case "removeBlock": {
+      // Delete block (USE-158): gone from that weekday's days at once.
+      const [{ id, weekday }] = call.args;
+      return mapDays(week, (day) =>
+        day.weekday === weekday && day.blocks.some((block) => block.id === id)
+          ? {
+              ...day,
+              blocks: day.blocks.filter((block) => block.id !== id),
+              items: day.items.filter((item) => item.blockId !== id),
+            }
+          : day,
+      );
+    }
+
     case "writeBlockItem": {
       const [input] = call.args;
       if (input.onDate != null) return null;

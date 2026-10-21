@@ -301,6 +301,8 @@ export function usePlannerWrites() {
     createBlock: write("createBlock"),
     createTransition: write("createTransition"),
     editBlock: write("editBlock"),
+    /** Delete block from a usual weekday (USE-158). */
+    removeBlock: write("removeBlock"),
     writeBlockChange: write("writeBlockChange"),
     splitBlock: write("splitBlock"),
     /**

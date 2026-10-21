@@ -474,6 +474,7 @@ export {
   // The planner's writes as the router takes them (USE-92).
   dayEventWriteInput,
   plannerWriteOutput,
+  removeBlockInput,
   removeBlockItemInput,
   reorderItemsInput,
   scopedWriteInput,
@@ -482,6 +483,7 @@ export {
   writeScopeInput,
   type DayEventWriteInput,
   type PlannerWriteOutput,
+  type RemoveBlockInput,
   type RemoveBlockItemInput,
   type ReorderItemsInput,
   type SplitBlockInput,

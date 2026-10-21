@@ -22,6 +22,7 @@ import {
   newBlockInput,
   newTransitionInput,
   placeSlotInput,
+  removeBlockInput,
   removeSlotInput,
   slotRecord,
   type BlockChangeRecord,
@@ -94,6 +95,11 @@ export interface PlannerServer {
     input: z.input<typeof editBlockInput>,
     scope?: WriteScope,
   ): Promise<PlannerWrite>;
+  /**
+   * Delete block from a usual weekday (USE-158): the weekday leaves the
+   * rule; with none left the block is archived. A date's is a skip.
+   */
+  removeBlock(input: z.input<typeof removeBlockInput>): Promise<PlannerWrite>;
   /**
    * This and following (USE-47): the block's dates from `fromDate` on take
    * the patch as a new block; the old one ends the day before.
@@ -578,6 +584,29 @@ export function createPlannerServer({
             changedOn: changedDates(id),
           },
         };
+      });
+    },
+
+    removeBlock(raw) {
+      return write((journal) => {
+        const { id, weekday } = parse(removeBlockInput, raw);
+        const block = findBlock(id);
+        if (block.rrule === null) {
+          throw new PlannerRefusal(
+            "invalid",
+            "That block does not repeat on a weekday.",
+          );
+        }
+        const rule = withoutWeekday(block.rrule, weekday);
+        journal.put(
+          "blocks",
+          blockRecord.parse(
+            rule === null
+              ? { ...block, archivedAt: stamp(), updatedAt: stamp() }
+              : { ...block, rrule: rule, updatedAt: stamp() },
+          ),
+        );
+        return { id };
       });
     },
 

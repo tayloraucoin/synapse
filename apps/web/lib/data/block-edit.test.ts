@@ -413,3 +413,44 @@ describe("USE-157: a length edited in place", () => {
     expect(spanTotal(saved.block, saved.items).plannedMin).toBe(18);
   });
 });
+
+describe("USE-158: Delete block from Set my days", () => {
+  it("from the usual Monday, Wellness goes from every Monday, and Undo brings it back", async () => {
+    const { server } = setup();
+    const monday = async () =>
+      (await server.readWeek("usual")).days[0]!.blocks.map((b) => b.id);
+    expect(await monday()).toContain(B.wellness);
+
+    const write = await blockEdits(server, B.wellness, {
+      weekday: 0,
+    }).deleteBlock();
+    expect(await monday()).not.toContain(B.wellness);
+    // The rest of Monday is untouched.
+    expect(await monday()).toContain(B.training);
+
+    await server.undo(write.undo);
+    expect(await monday()).toContain(B.wellness);
+    const back = deriveBlockView(
+      await server.readWeek("usual"),
+      B.wellness,
+      0,
+      true,
+    )!;
+    expect(back.items.map((i) => i.title)).toContain("Meditate");
+  });
+
+  it("from This week's Thursday, only that date goes; the usual Thursday keeps it", async () => {
+    const { server } = setup();
+    await blockEdits(server, B.wellnessThursday, {
+      date: THURSDAY_15,
+    }).deleteBlock();
+    const dated = await server.readWeek(THIS_WEEK);
+    expect(dated.days[3]!.blocks.map((b) => b.id)).not.toContain(
+      B.wellnessThursday,
+    );
+    const usual = await server.readWeek("usual");
+    expect(usual.days[3]!.blocks.map((b) => b.id)).toContain(
+      B.wellnessThursday,
+    );
+  });
+});

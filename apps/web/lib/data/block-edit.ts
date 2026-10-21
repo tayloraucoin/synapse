@@ -37,6 +37,7 @@ export type BlockEditServer = Pick<
   | "removeBlockItem"
   | "reorderItems"
   | "editBlock"
+  | "removeBlock"
   | "writeBlockChange"
 >;
 
@@ -285,6 +286,15 @@ export function blockEdits(
       endsAt?: string;
     }): Promise<PlannerWrite> =>
       server.editBlock({ id: blockId, ...patch }, scope),
+    /**
+     * Delete block (USE-158; D-USE-69): from the usual weekday the weekday
+     * leaves the block (archived with none left); from a date the date
+     * skips it and the usual keeps it.
+     */
+    deleteBlock: (): Promise<PlannerWrite> =>
+      dated
+        ? server.writeBlockChange({ blockId, onDate: date!, skipped: true })
+        : server.removeBlock({ id: blockId, weekday: place.weekday }),
     /** Not this week (D-USE-87): the date freed, the usual untouched. */
     notThisWeek: (onDate: string): Promise<PlannerWrite> =>
       server.writeBlockChange({ blockId, onDate, skipped: true }),
