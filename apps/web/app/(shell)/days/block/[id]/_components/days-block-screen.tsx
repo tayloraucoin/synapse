@@ -605,20 +605,21 @@ export function DaysBlockScreen({
                   ),
                   title: (row) => {
                     const name = (
-                    <button
-                      type="button"
-                      data-row-open
-                      onClick={() => openItemSheet(row, false)}
-                      className={cn(
-                        "max-w-full truncate rounded-(--radius-control) text-start text-(length:--fs-body) outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        // A transition in the flow: italic, muted (training-editing.md).
-                        row.isTransition && "text-text-muted italic",
-                      )}
-                    >
-                      {row.title}
-                    </button>
+                      <button
+                        type="button"
+                        data-row-open
+                        onClick={() => openItemSheet(row, false)}
+                        className={cn(
+                          "max-w-full truncate rounded-(--radius-control) text-start text-(length:--fs-body) outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          // A transition in the flow: italic, muted (training-editing.md).
+                          row.isTransition && "text-text-muted italic",
+                        )}
+                      >
+                        {row.title}
+                      </button>
                     );
-                    if (length?.open !== true || length.id !== row.id) return name;
+                    if (length?.open !== true || length.id !== row.id)
+                      return name;
                     return (
                       <span className="flex flex-col items-start gap-(--space-1) whitespace-normal">
                         {name}
@@ -647,7 +648,10 @@ export function DaysBlockScreen({
                       return (
                         <>
                           {swap}
-                          <SetTimeMark atTime={row.atTime} length={lengthWords} />
+                          <SetTimeMark
+                            atTime={row.atTime}
+                            length={lengthWords}
+                          />
                         </>
                       );
                     }
@@ -838,9 +842,7 @@ export function DaysBlockScreen({
             />
           ) : null
         }
-        scope={
-          liftedId !== null ? BLOCK_VIEW_COPY.suggested.reorderHint : null
-        }
+        scope={liftedId !== null ? BLOCK_VIEW_COPY.suggested.reorderHint : null}
         status={offline ? <OfflineLine text={COPY.offline} /> : null}
         kindRows={kindRows}
         body={body}
