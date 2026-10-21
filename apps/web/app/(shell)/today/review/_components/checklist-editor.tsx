@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button, ChecklistIcon, cn, Input, Text, TimeField } from "@syn/ui";
+import { NotSavedLine } from "@/components/planner/not-saved-line";
 import type { ReviewAllDay } from "@/lib/data/use-review-day";
 import { REVIEW_CHECKLIST_COPY as COPY } from "./checklist-copy";
 
@@ -23,6 +24,9 @@ import { REVIEW_CHECKLIST_COPY as COPY } from "./checklist-copy";
  *
  * The kept rows' boxes are marks here [ASSUMPTION]: checking is Now's and
  * the strip's, and dragging to reorder is Block view's ticket.
+ *
+ * A row shows the moment Return is pressed (optimistic); one whose write
+ * fails is taken back out and "Not saved. Try again" sits under the field.
  */
 export interface ChecklistEditorProps {
   checklist: ReviewAllDay;
@@ -31,6 +35,8 @@ export interface ChecklistEditorProps {
   onAdd: (title: string) => void;
   onSpan: (startsAt: string, endsAt: string) => void;
   pending: boolean;
+  /** A row that did not save, taken back out: Try again adds it again. */
+  notSaved?: { title: string; onRetry: () => void } | null;
 }
 
 /** The New block sheet's name limit [ASSUMPTION: a row is named like an item]. */
@@ -42,6 +48,7 @@ export function ChecklistEditor({
   onAdd,
   onSpan,
   pending,
+  notSaved = null,
 }: ChecklistEditorProps) {
   const [draft, setDraft] = React.useState(initialDraft);
   const [timing, setTiming] = React.useState(false);
@@ -162,6 +169,11 @@ export function ChecklistEditor({
           className="rounded-none border-0 bg-transparent px-0 hover:border-0"
         />
       </div>
+      {notSaved ? (
+        <div className="pt-(--space-2)">
+          <NotSavedLine words={COPY.notSaved} onRetry={notSaved.onRetry} />
+        </div>
+      ) : null}
       <Text
         as="p"
         id={helperId}

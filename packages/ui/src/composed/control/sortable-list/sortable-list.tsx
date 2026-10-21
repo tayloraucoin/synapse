@@ -14,10 +14,12 @@
  * one day share a bug.
  *
  * THE HANDLE IS THE ONLY LIFT. A 44px `GripVertical` labelled *Reorder
- * {title}* carries the pointer and keyboard sensors; the rest of the row is
- * the caller's and keeps its own controls. Touch lifts after 300ms so a
- * scroll that starts on a handle scrolls; the pointer needs 6px so a tap on
- * the handle is a tap.
+ * {title}* carries the pointer, touch and keyboard sensors; the rest of the
+ * row is the caller's and keeps its own controls. A finger lifts after
+ * 300ms held on the handle (the touch sensor; a touch pointer is left to
+ * it), a mouse after 6px so a click on the handle is a click. The handle
+ * never selects text or opens iOS's callout, so the hold is the lift; the
+ * row's own words stay selectable.
  *
  * KEYBOARD, TWO WAYS. dnd-kit's own: Space lifts, arrows move, Space drops,
  * Escape cancels. And the direct path (§10.4): Alt+↑ / Alt+↓ on the handle
@@ -73,6 +75,7 @@ export interface SortableHandleProps {
   role: string;
   onKeyDown: (event: React.KeyboardEvent) => void;
   onPointerDown?: (event: React.PointerEvent) => void;
+  onTouchStart?: (event: React.TouchEvent) => void;
   className: string;
   children: React.ReactNode;
 }
@@ -108,6 +111,8 @@ export function SortableHandle(props: SortableHandleProps) {
 
 const HANDLE_CLASS = cn(
   "inline-flex size-(--target) shrink-0 cursor-grab touch-none items-center justify-center rounded-(--radius)",
+  // A held finger lifts the row; it never selects or calls out (iOS).
+  "select-none [-webkit-touch-callout:none]",
   "text-text-secondary hover:text-ink active:cursor-grabbing",
   "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none",
 );
@@ -158,7 +163,12 @@ function SortableRow<T extends SortableItem>({
     tabIndex: disabled ? -1 : 0,
     role: "button",
     onKeyDown,
-    onPointerDown: listeners?.onPointerDown as SortableHandleProps["onPointerDown"],
+    // A finger is the touch sensor's (the hold); the pointer sensor's is the mouse.
+    onPointerDown: (event: React.PointerEvent) => {
+      if (event.pointerType === "touch") return;
+      (listeners?.onPointerDown as SortableHandleProps["onPointerDown"])?.(event);
+    },
+    onTouchStart: listeners?.onTouchStart as SortableHandleProps["onTouchStart"],
     className: cn(HANDLE_CLASS, (disabled || count < 2) && "cursor-default opacity-40"),
     children: <GripVertical className="size-5" aria-hidden="true" />,
   };
@@ -172,7 +182,7 @@ function SortableRow<T extends SortableItem>({
         "flex items-center gap-(--space-2) rounded-(--radius) border border-transparent",
         !reducedMotion && "motion-safe:transition-[opacity,transform] motion-safe:duration-[120ms]",
         // The lift grammar, typed here — not imported from the Schedule's layer.
-        isDragging && "relative z-10 border-[1.5px] border-accent-mark opacity-90",
+        isDragging && "relative z-10 border-[1.5px] border-accent-mark opacity-90 select-none",
         className,
       )}
     >

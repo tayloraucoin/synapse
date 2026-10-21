@@ -19,13 +19,23 @@ import { deriveClosing, movedOut, type NowClosing } from "./block-close";
 import { deriveToday, type Today } from "./derive-today";
 import { withJournalTick } from "./journal-row";
 import { deriveNowEnd, type NowEnd } from "./now-end";
+import {
+  applyRowOrder,
+  applyToCache,
+  isPendingId,
+  onToday,
+  restoreCache,
+  type CacheSnapshot,
+  type TickChange,
+} from "./optimistic-day";
 import { useDataSource } from "./source";
+import { placementOf, tickOf, tickOptions } from "./tick-write";
 import { itemsOnDate, type TodayRecords } from "./today-records";
 import { useBlockClose, type BlockCloseState } from "./use-block-close";
 import { useBlockFocus } from "./use-block-focus";
 import { useJournalWritten } from "./use-journal";
+import { usePlannerWrites } from "./use-planner-writes";
 import { todayQueryKey } from "./use-today";
-import { todosQueryKey } from "./use-todos";
 
 /**
  * Now's data (USE-16): the active block, its items in order with their
@@ -522,8 +532,12 @@ export async function writeReorder(
   for (const [index, id] of ids.entries()) {
     const item = byId.get(id);
     if (!item || item.sortOrder === index) continue;
-    if (item.slotId !== null) {
-      await server.writeSlots({ id: item.slotId, sortOrder: index });
+    // A tick's stand-in is written once its placement lands.
+    const slotId = isPendingId(item.slotId)
+      ? ((await placementOf(item.slotId!)) ?? null)
+      : item.slotId;
+    if (slotId !== null) {
+      await server.writeSlots({ id: slotId, sortOrder: index });
     } else if (item.blockItemId !== null) {
       await server.writeSlots({
         blockId: place.blockId,
@@ -611,27 +625,14 @@ export async function undoNotToday(
 
 /**
  * Now's writes (USE-16): Done, a row's box and its uncheck, and the time
- * taken. A set item's slot is placed on its first touch. The day is
- * invalidated after each and Now derived again; nothing is set by hand.
+ * taken. A set item's slot is placed on its first touch. Each is optimistic
+ * (tick-write.ts): applied to the day's cache at once, taken back on a
+ * failure, settled by reading the day again. A drop or a Move is too.
  */
 export function useSlotWrites(dateKey: string, blockId: string | null) {
   const source = useDataSource();
   const queryClient = useQueryClient();
-
-  async function slotFor(item: NowItemView): Promise<string> {
-    if (item.slotId !== null) return item.slotId;
-    if (blockId === null || item.blockItemId === null) {
-      throw new Error("A set item needs its block to be placed.");
-    }
-    const placed = await source.server.writeSlots({
-      blockId,
-      onDate: dateKey,
-      sortOrder: item.sortOrder,
-      blockItemId: item.blockItemId,
-    });
-    return placed.id;
-  }
-
+  const scenario = source.scenario.name;
   const place = blockId === null ? null : { dateKey, blockId };
 
   /** A row write, then the day read again; Now is never set by hand. */
@@ -640,52 +641,62 @@ export function useSlotWrites(dateKey: string, blockId: string | null) {
       return await write;
     } finally {
       await queryClient.invalidateQueries({
-        queryKey: todayQueryKey(source.scenario.name),
+        queryKey: todayQueryKey(scenario),
       });
     }
   }
 
-  const mutation = useMutation<
-    SlotRecord,
-    Error,
-    {
-      item: NowItemView;
-      change: { doneAt?: string | null; tookMin?: number | null };
+  const tick = useMutation(tickOptions(source, queryClient));
+
+  /** A row's slot change, shown at once (optimistic). */
+  function tickRow(item: NowItemView, change: TickChange) {
+    if (place === null && item.slotId === null) {
+      return Promise.reject(
+        new Error("A set item needs its block to be placed."),
+      );
     }
+    return tick.mutateAsync(
+      tickOf(place ?? { dateKey, blockId: "" }, item, change),
+    );
+  }
+
+  const order = useMutation<
+    void,
+    Error,
+    { items: readonly NowItemView[]; ids: readonly string[] },
+    CacheSnapshot
   >({
-    mutationFn: async ({ item, change }) =>
-      writeRowChange(source.server, await slotFor(item), item, change),
-    onSettled: async (_, __, { item }) => {
-      await queryClient.invalidateQueries({
-        queryKey: todayQueryKey(source.scenario.name),
-      });
-      // A to-do checked in its block leaves the tray (USE-21).
-      if (item.todoId !== null) {
-        await queryClient.invalidateQueries({
-          queryKey: todosQueryKey(source.scenario.name),
-        });
-      }
-    },
+    mutationFn: ({ items, ids }) =>
+      place === null
+        ? Promise.resolve()
+        : writeReorder(source.server, place, items, ids),
+    // The new order shows at once; a failure puts the old one back.
+    onMutate: ({ items, ids }) =>
+      applyToCache<TodayRecords>(
+        queryClient,
+        todayQueryKey(scenario, dateKey),
+        (records) =>
+          onToday(records, (rows) =>
+            applyRowOrder(rows, rowsInOrder(items, ids)),
+          ),
+      ),
+    onError: (_error, _input, before) => restoreCache(queryClient, before),
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: todayQueryKey(scenario) }),
   });
 
   return {
-    ...mutation,
+    isPending: tick.isPending,
     /** Done, or a row's box: done now, the planned length as the time taken. */
-    done: (item: NowItemView) =>
-      mutation.mutateAsync({ item, change: doneChange(item, source.now()) }),
+    done: (item: NowItemView) => tickRow(item, doneChange(item, source.now())),
     /** Unchecked: the record is withdrawn. */
-    undo: (item: NowItemView) =>
-      mutation.mutateAsync({ item, change: { doneAt: null, tookMin: null } }),
+    undo: (item: NowItemView) => tickRow(item, { doneAt: null, tookMin: null }),
     /** The time-taken sheet's Save. */
     setTook: (item: NowItemView, min: number) =>
-      mutation.mutateAsync({ item, change: { tookMin: min } }),
+      tickRow(item, { tookMin: min }),
     /** A drop or a Move (USE-18): the whole order, today only. */
     reorder: (items: readonly NowItemView[], ids: readonly string[]) =>
-      settle(
-        place === null
-          ? Promise.resolve()
-          : writeReorder(source.server, place, items, ids),
-      ),
+      order.mutateAsync({ items, ids }),
     /** Not today (USE-18): resolves to what its Undo takes. */
     notToday: (item: NowItemView) =>
       settle(
@@ -696,6 +707,15 @@ export function useSlotWrites(dateKey: string, blockId: string | null) {
     undoNotToday: (undo: NotTodayUndo) =>
       settle(undoNotToday(source.server, undo)),
   };
+}
+
+/** The rows in their new order, as the cache's slots and items hold them. */
+function rowsInOrder(items: readonly NowItemView[], ids: readonly string[]) {
+  const byId = new Map(items.map((item) => [item.id, item]));
+  return ids.flatMap((id) => {
+    const item = byId.get(id);
+    return item ? [{ slotId: item.slotId, blockItemId: item.blockItemId }] : [];
+  });
 }
 
 /**
@@ -712,20 +732,22 @@ export function checklistAddInput(
   return { blockId, title, onDate: dateKey, sortOrder: last + 1 };
 }
 
-/** The checklist's add row: the day is read again after each row lands. */
+/**
+ * The checklist's add row: the row shows at once and the write goes behind
+ * it, through the planner's one write (optimistic; a failure takes the row
+ * back out and resolves to false, for the screen's notice).
+ */
 export function useChecklistAdd(dateKey: string, blockId: string | null) {
-  const source = useDataSource();
-  const queryClient = useQueryClient();
-  return useMutation<unknown, Error, { title: string; items: NowItemView[] }>({
-    mutationFn: ({ title, items }) => {
-      if (blockId === null) throw new Error("A row needs its checklist.");
-      return source.server.writeBlockItem(
-        checklistAddInput(blockId, dateKey, title, items),
-      );
-    },
-    onSettled: () =>
-      queryClient.invalidateQueries({
-        queryKey: todayQueryKey(source.scenario.name),
-      }),
-  });
+  const planner = usePlannerWrites();
+  return {
+    add: (title: string, items: readonly NowItemView[]): Promise<boolean> =>
+      blockId === null
+        ? Promise.resolve(false)
+        : planner
+            .writeBlockItem(checklistAddInput(blockId, dateKey, title, items))
+            .then(
+              () => true,
+              () => false,
+            ),
+  };
 }

@@ -1,6 +1,5 @@
 import { type NextRequest, type NextResponse } from "next/server";
-
-import { createServerClient, getUser } from "@syn/auth";
+import { AuthUnavailableError, createServerClient, getUser } from "@syn/auth";
 import { db, ensureLocalUserFromSupabaseAuth } from "@syn/db";
 
 /** Append a status flag to a relative path that may already carry a query. */
@@ -47,7 +46,16 @@ export function createSupabaseForResponse(
 export async function provisionUserFromSession(
   supabase: ReturnType<typeof createServerClient>,
 ): Promise<void> {
-  const { user } = await getUser(supabase);
+  // The exchange already set the session on the response; an auth server
+  // that cannot answer now must not throw it away (provisioning is a no-op on
+  // hosted tiers, and the shell gate checks the session on arrival).
+  const user = await getUser(supabase).then(
+    (result) => result.user,
+    (error: unknown) => {
+      if (error instanceof AuthUnavailableError) return null;
+      throw error;
+    },
+  );
   if (!user) return;
 
   await ensureLocalUserFromSupabaseAuth(db, {

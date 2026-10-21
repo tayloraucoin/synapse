@@ -580,6 +580,8 @@ export function createFixtureServer(
 
     writeSlots(raw) {
       const stamp = now().toISOString();
+      // A tick captured while its write is still out.
+      if (scenario.slotWrites === "hang") return new Promise(() => {});
       if ("id" in raw) {
         const parsed = slotUpdateInput.safeParse(raw);
         if (!parsed.success) return refuseSlot("invalid", parsed.error);

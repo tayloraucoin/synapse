@@ -138,6 +138,8 @@ for (const state of [
   "before-ready-go", // USE-17
   "checklist-block", // USE-17
   "sunday-checklist", // USE-17
+  "sunday-checklist-tick-pending", // optimistic checklist writes
+  "sunday-checklist-not-saved", // optimistic checklist writes
   "todos-block", // USE-21
   "offline", // USE-21
   "error-on-check", // USE-21
@@ -282,6 +284,7 @@ for (const state of [
   "sunday-making-the-checklist",
   "sunday-checklist-and-plans",
   "sunday-now-line",
+  "sunday-checklist-timed",
   "empty",
 ] satisfies ReviewPartState[]) {
   registerPart(`review-${state}`, () => createElement(ReviewPart, { state }));

@@ -105,6 +105,8 @@ export interface Scenario {
   connects?: "hang";
   /** Record ids whose next write rejects once, then goes through (USE-19). */
   failWrites?: string[];
+  /** `hang`: a slot's write never answers, so a tick is captured pending. */
+  slotWrites?: "hang";
   /** The avatar menu opens on load, so its states are reachable by `?state=` (USE-83). */
   accountMenuOpen?: boolean;
   /**

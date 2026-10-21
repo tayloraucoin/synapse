@@ -154,6 +154,12 @@ export interface DayColumnBlock {
   startsAt: string;
   endsAt: string;
   form: "items" | "meal" | "work";
+  /**
+   * A checklist with a span (Review the day): its rows are done in any
+   * order, so the box is as tall as its rows, from its start, never past
+   * its end; the span stays in words.
+   */
+  checklist?: boolean;
   items: readonly DayColumnItem[];
   tiers: readonly DayColumnTier[];
   /** Schedule: past (faded) or under way (the edge); unset, neither. */
@@ -270,6 +276,20 @@ const OFFER_PX = 32;
 const NOW_TAG_CLEAR_MIN = 30;
 
 const pxOf = (minutes: number) => (minutes / 60) * DAY_COLUMN_PX_PER_HOUR;
+
+/** A checklist's box: its head and its rows, one cell each per line. */
+export function checklistHeightPx(items: number, cellsPerLine: number): number {
+  const lines = Math.max(1, Math.ceil(items / Math.max(1, cellsPerLine)));
+  return (
+    BLOCK_GAP_PX +
+    PAD_TOP_PX +
+    HEAD_PX +
+    HEAD_GAP_PX +
+    lines * BULLET_LINE_PX +
+    (lines - 1) * BULLET_GAP_Y_PX +
+    PAD_BOTTOM_PX
+  );
+}
 
 /** The room a block's height leaves for lines of items. */
 export function linesRoomPx(heightPx: number): number {
@@ -406,10 +426,19 @@ export function DayColumn({
           const top = pxOf(
             clockMinutes(block.startsAt) + (lifted ?? 0) - hours.startMin,
           );
-          const height = pxOf(
+          const span = pxOf(
             clockMinutes(block.endsAt) - clockMinutes(block.startsAt),
           );
           const lane = lanes.get(block.id) ?? null;
+          const height = block.checklist
+            ? Math.min(
+                span,
+                checklistHeightPx(
+                  block.items.length,
+                  lane === null ? cellsPerLine : 1,
+                ),
+              )
+            : span;
           const common = {
             block,
             topPx: top,

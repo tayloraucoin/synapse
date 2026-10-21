@@ -12,10 +12,11 @@ import {
   IconAndColourIcon,
   InlineAddRow,
   Input,
+  ItemIcon,
   RegionRetry,
   ResponsiveSheet,
+  toast,
   toastUndo,
-  ItemIcon,
 } from "@syn/ui";
 import { instantToWallClockMinutes, weekdayIndex } from "@syn/utils";
 import {
@@ -218,8 +219,12 @@ export function TodayBlockScreen({ blockId }: { blockId: string }) {
   const journalWrittenToday = useJournalWritten(date);
   const items = withJournalTick(shown?.items ?? [], journalWrittenToday);
 
+  /** The box shows at once; a failure puts it back and says so. */
   function check(item: BlockViewItem, done: boolean) {
-    void writes.check(item, done);
+    writes.check(item, done).catch(() => {
+      setAnnouncement(COPY.notSaved(item.title));
+      toast(COPY.notSaved(item.title));
+    });
   }
 
   async function remove(item: BlockViewItem) {

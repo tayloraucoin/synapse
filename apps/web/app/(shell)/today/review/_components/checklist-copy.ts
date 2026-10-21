@@ -14,6 +14,8 @@ export const REVIEW_CHECKLIST_COPY = {
   field: "Next item",
   helper: "Return adds the next one. Drag to reorder later.",
   done: "done",
+  /** A row whose write failed: it is taken back out (optimistic rollback). */
+  notSaved: { notSaved: "Not saved.", tryAgain: "Try again" },
   /** Set a time's first span [ASSUMPTION: the Now checklist board's]. */
   defaultSpan: { startsAt: "10:00", endsAt: "13:00" },
 } as const;

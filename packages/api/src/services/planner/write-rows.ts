@@ -51,19 +51,32 @@ export async function selectBaseRows(
   tx: Tx,
   userId: string,
 ): Promise<BaseRows> {
-  const [account] = await tx
-    .select({ timeZone: users.timezone, usualWakeTime: users.usualWakeTime })
-    .from(users)
-    .where(eq(users.id, userId));
+  // Independent reads, sent together on the transaction's connection
+  // (pipelined): one round trip for every write's base rows, not six.
+  const [[account], blockRows, itemRows, eventRows, boundsRows, clientRows] =
+    await Promise.all([
+      tx
+        .select({
+          timeZone: users.timezone,
+          usualWakeTime: users.usualWakeTime,
+        })
+        .from(users)
+        .where(eq(users.id, userId)),
+      tx.select().from(blocks),
+      tx.select().from(blockItems),
+      tx.select().from(dayEvents),
+      tx.select().from(dayBounds),
+      tx.select().from(clients),
+    ]);
   if (!account) throw new Error("No account row.");
   return {
     timeZone: account.timeZone,
     usualWakeTime: clockOf(account.usualWakeTime),
-    blocks: recordsOf(blockRecord, await tx.select().from(blocks)),
-    blockItems: recordsOf(blockItemRecord, await tx.select().from(blockItems)),
-    dayEvents: recordsOf(dayEventRecord, await tx.select().from(dayEvents)),
-    dayBounds: recordsOf(dayBoundsRecord, await tx.select().from(dayBounds)),
-    clients: recordsOf(clientRecord, await tx.select().from(clients)),
+    blocks: recordsOf(blockRecord, blockRows),
+    blockItems: recordsOf(blockItemRecord, itemRows),
+    dayEvents: recordsOf(dayEventRecord, eventRows),
+    dayBounds: recordsOf(dayBoundsRecord, boundsRows),
+    clients: recordsOf(clientRecord, clientRows),
   };
 }
 
@@ -137,7 +150,12 @@ export async function selectSlotRows(
     workItemIds.length > 0 && inArray(slots.workItemId, workItemIds),
   ].filter((filter) => filter !== false);
   if (filters.length > 0) {
-    add(await tx.select().from(slots).where(or(...filters)));
+    add(
+      await tx
+        .select()
+        .from(slots)
+        .where(or(...filters)),
+    );
   }
   return [...byId.values()];
 }

@@ -165,6 +165,10 @@ export function NowScreen() {
   const [failed, setFailed] = React.useState<ReadonlyMap<string, boolean>>(
     () => new Map(),
   );
+  // A checklist's add, or a new order, that did not save: the list's line.
+  const [listFailed, setListFailed] = React.useState<
+    { kind: "order"; ids: string[] } | { kind: "add"; title: string } | null
+  >(null);
   const offline = useIsOffline();
 
   const nowQuery = useNow(dateKey, chosenId);
@@ -361,7 +365,17 @@ export function NowScreen() {
   function reorder(ids: string[], movedId: string | null) {
     if (current) setChosenId(current.id);
     setSavingOrder(ids);
-    void writes.reorder(items, ids).finally(() => setSavingOrder(null));
+    setListFailed(null);
+    writes
+      .reorder(items, ids)
+      .catch(() => {
+        // The order is back as the day has it; the list says so.
+        setListFailed({ kind: "order", ids });
+        setAnnouncement(
+          COPY.announceNotSaved(COPY.listName(block?.name ?? "")),
+        );
+      })
+      .finally(() => setSavingOrder(null));
     const moved = items.find((item) => item.id === movedId);
     if (!moved) return;
     const reordered = inOrder(items, ids);
@@ -372,6 +386,27 @@ export function NowScreen() {
       ),
     );
   }
+
+  /** "Add to the checklist": the row shows at once; a failure says so. */
+  function addRow(title: string) {
+    setListFailed(null);
+    void add.add(title, items).then((saved) => {
+      if (saved) return;
+      setListFailed({ kind: "add", title });
+      setAnnouncement(COPY.announceNotSaved(title));
+    });
+  }
+
+  const listNotice = listFailed ? (
+    <NotSavedLine
+      words={COPY.notSaved}
+      onRetry={() =>
+        listFailed.kind === "add"
+          ? addRow(listFailed.title)
+          : reorder(listFailed.ids, null)
+      }
+    />
+  ) : null;
 
   /** Not today (D-USE-70): off today only, with an Undo. */
   async function notToday(item: NowItemView) {
@@ -615,25 +650,31 @@ export function NowScreen() {
 
           {block.form === "checklist" || block.form === "all-day-checklist" ? (
             <ChecklistRows
-              rows={items.map((item) => ({
+              rows={shown.map((item) => ({
                 id: item.id,
                 title: item.title,
                 checked: item.done,
               }))}
-              gripLabel={COPY.gripName}
+              label={COPY.listName(block.name)}
+              onReorder={(ids) => reorder(ids, null)}
               onCheckedChange={(id, checked) => {
                 const item = items.find((row) => row.id === id);
                 if (!item) return;
                 if (checked) markDone(item);
                 else markUndone(item);
               }}
+              below={(id) => {
+                const item = items.find((row) => row.id === id);
+                return item ? notSavedUnder(item) : null;
+              }}
+              notice={listNotice}
               add={
                 block.form === "all-day-checklist"
                   ? {
                       label: COPY.addToChecklist,
                       placeholder: COPY.addPlaceholder,
                       maxLength: 120,
-                      onAdd: (title) => add.mutate({ title, items }),
+                      onAdd: addRow,
                     }
                   : null
               }
@@ -711,6 +752,7 @@ export function NowScreen() {
                   );
                 }}
               />
+              {listNotice}
             </>
           )}
           {block.form === "meal" ? (

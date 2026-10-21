@@ -164,6 +164,8 @@ export function ReviewDayFrame() {
   const checklistDay = useChecklistDay(dateKey);
   const seededChecklist = source.scenario.view?.checklist;
   const [making, setMaking] = React.useState(seededChecklist !== undefined);
+  // A checklist row whose write failed (taken back out): its words, to retry.
+  const [rowNotSaved, setRowNotSaved] = React.useState<string | null>(null);
   // A render each minute, so the now-line keeps to the clock.
   useMinute();
   const nowView =
@@ -222,6 +224,16 @@ export function ReviewDayFrame() {
         preset,
       ),
     );
+
+  /** Return in the typed row: the row shows at once; a failure says so. */
+  function addRow(title: string) {
+    if (checklist === null) return;
+    setRowNotSaved(null);
+    checklistDay.add.mutate(
+      { blockId: checklist.id, title },
+      { onError: () => setRowNotSaved(title) },
+    );
+  }
 
   function onReadyGo(event: React.MouseEvent) {
     if (sent.current) return;
@@ -336,8 +348,11 @@ export function ReviewDayFrame() {
               checklist={checklist}
               initialDraft={seededChecklist?.draft}
               pending={checklistDay.span.isPending}
-              onAdd={(title) =>
-                checklistDay.add.mutate({ blockId: checklist.id, title })
+              onAdd={addRow}
+              notSaved={
+                rowNotSaved === null
+                  ? null
+                  : { title: rowNotSaved, onRetry: () => addRow(rowNotSaved) }
               }
               onSpan={(startsAt, endsAt) =>
                 checklistDay.span.mutate(
