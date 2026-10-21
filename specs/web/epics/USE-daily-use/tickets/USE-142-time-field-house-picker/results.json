@@ -16,10 +16,17 @@
       }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "capture",
-      "run": null
+      "run": {
+        "command": "yarn contract:record USE-142 C2 --evidence specs/web/epics/USE-daily-use/tickets/USE-142-time-field-house-picker/evidence",
+        "exit": 0,
+        "at": "2026-10-21T00:43:02Z",
+        "head": "7ee76b0cddf96c3252e6e69bf82cdbd77100a519",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-142-time-field-house-picker/evidence",
+        "evidence_sha256": "d6d1e9f54534b07530f060d2cf7cb64a4058a6dd7114bb1ad649144030d9844c"
+      }
     }
   },
-  "updated_at": "2026-10-19T21:03:02Z"
+  "updated_at": "2026-10-21T00:43:02Z"
 }

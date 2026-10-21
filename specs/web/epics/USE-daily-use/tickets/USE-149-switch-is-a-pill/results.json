@@ -3,10 +3,17 @@
   "criteria_sha256": "ec9ad78778c612dd374f7144ae14a52573d7aabe5a316054309a5792f559d6a4",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "capture",
-      "run": null
+      "run": {
+        "command": "yarn contract:record USE-149 C1 --evidence specs/web/epics/USE-daily-use/tickets/USE-149-switch-is-a-pill/evidence",
+        "exit": 0,
+        "at": "2026-10-21T00:43:12Z",
+        "head": "7ee76b0cddf96c3252e6e69bf82cdbd77100a519",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-149-switch-is-a-pill/evidence",
+        "evidence_sha256": "b7459e002fa646544c0fc6e363f43b3d6b984fee16fbe784090339d59c4d5725"
+      }
     }
   },
-  "updated_at": "2026-10-19T20:42:01Z"
+  "updated_at": "2026-10-21T00:43:12Z"
 }

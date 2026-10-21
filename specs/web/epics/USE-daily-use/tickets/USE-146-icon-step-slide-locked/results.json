@@ -3,10 +3,17 @@
   "criteria_sha256": "e68817cf58951b212b7a32c297c5e5cc10fa68afb5fc8cef8929bf4c69f43a88",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "capture",
-      "run": null
+      "run": {
+        "command": "yarn contract:record USE-146 C1 --evidence specs/web/epics/USE-daily-use/tickets/USE-146-icon-step-slide-locked/evidence",
+        "exit": 0,
+        "at": "2026-10-21T00:43:10Z",
+        "head": "7ee76b0cddf96c3252e6e69bf82cdbd77100a519",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-146-icon-step-slide-locked/evidence",
+        "evidence_sha256": "665b5b32c71bdceabb0adbd2225cd36061416f7e7020c644d13b74c5d70002fa"
+      }
     }
   },
-  "updated_at": "2026-10-19T20:42:16Z"
+  "updated_at": "2026-10-21T00:43:10Z"
 }
