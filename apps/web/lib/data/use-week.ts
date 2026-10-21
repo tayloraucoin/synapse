@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { defaultWeek } from "@syn/utils";
 import { useDataSource } from "./source";
@@ -38,7 +39,34 @@ export function useWeekQuery<T>(
     source.server.recover();
     return queryClient.refetchQueries({ queryKey });
   }
+  // The device cache restores in an effect (USE-106), so a screen under a
+  // Suspense that hydrates after it would find the week the server never had.
+  // Its hydrating render reads as the server's did; the next has the week.
+  if (useHydrating()) {
+    return {
+      ...query,
+      data: undefined,
+      status: "pending",
+      isPending: true,
+      isSuccess: false,
+      isError: false,
+      error: null,
+      retry,
+    } as typeof query & { retry: typeof retry };
+  }
   return { ...query, retry };
+}
+
+const subscribeToNothing = () => () => {};
+
+/** True only while React hydrates server markup; false on the server too. */
+function useHydrating(): boolean {
+  const client = useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
+  return typeof window !== "undefined" && !client;
 }
 
 export interface SetUpWeek {
