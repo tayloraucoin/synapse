@@ -3,15 +3,77 @@
   "criteria_sha256": "963c8c246e9c502c65b37dcd6d3837133e53a2b666bfa7177aef1d1ef3acbb08",
   "criteria": {
     "C1": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "capture",
-      "run": null
+      "run": {
+        "command": "yarn contract:record USE-154 C1 --evidence specs/web/epics/USE-daily-use/tickets/USE-154-orient-chip-and-day-header/evidence",
+        "exit": 0,
+        "at": "2026-10-21T01:02:23Z",
+        "head": "ff90edb00834245036b37d67f327ab96c707ce0b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-154-orient-chip-and-day-header/evidence",
+        "evidence_sha256": "ad0b8bdc6924747608976ffb96710fbedbd312dfdb1ca7e92fc08a40b07ac711"
+      }
     },
     "C2": {
-      "status": "FAIL",
+      "status": "PASS",
       "evidence": "capture",
-      "run": null
+      "run": {
+        "command": "yarn contract:record USE-154 C2 --evidence specs/web/epics/USE-daily-use/tickets/USE-154-orient-chip-and-day-header/evidence",
+        "exit": 0,
+        "at": "2026-10-21T01:02:25Z",
+        "head": "ff90edb00834245036b37d67f327ab96c707ce0b",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-154-orient-chip-and-day-header/evidence",
+        "evidence_sha256": "ad0b8bdc6924747608976ffb96710fbedbd312dfdb1ca7e92fc08a40b07ac711"
+      }
     }
   },
-  "updated_at": "2026-10-21T00:47:17Z"
+  "built_at": "2026-10-21T01:02:27Z",
+  "cost": {
+    "at": "2026-10-21T01:02:34Z",
+    "calls": 55,
+    "weighted": 1097665,
+    "tokens_input": 114,
+    "tokens_cache_read": 8504796,
+    "tokens_cache_write": 117833,
+    "tokens_output": 19956,
+    "by_category": {
+      "build": {
+        "calls": 37,
+        "weighted": 759422
+      },
+      "proofs": {
+        "calls": 7,
+        "weighted": 109748
+      },
+      "captures": {
+        "calls": 1,
+        "weighted": 14158
+      },
+      "reviews": {
+        "calls": 4,
+        "weighted": 62889
+      },
+      "status": {
+        "calls": 1,
+        "weighted": 29546
+      },
+      "git": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "re-reading": {
+        "calls": 0,
+        "weighted": 0
+      },
+      "other": {
+        "calls": 5,
+        "weighted": 121903
+      }
+    },
+    "context_last_call": 122052,
+    "threads": 2,
+    "headless_runs": 0,
+    "headless_weighted": 0
+  },
+  "updated_at": "2026-10-21T01:02:34Z"
 }
