@@ -41,6 +41,7 @@ import {
   EditingAddRow,
   KindSelectRow,
   KindSwitchRow,
+  LengthStepper,
   MealTopicOffers,
   rowHeightPx,
   SetTimeMark,
@@ -59,8 +60,10 @@ import {
   isTimeless,
   scopeWords,
   spanTotal,
+  stepLength,
   stretchesRows,
   suggestionsFor,
+  withDraftLength,
   type BlockEditPlace,
 } from "@/lib/data/block-edit";
 import { reachWords, weekdayName } from "@/lib/data/set-up-view";
@@ -190,6 +193,16 @@ export function DaysBlockScreen({
   const [addOpened, setAddOpened] = React.useState(0);
   // `?state=suggested-reorder`: a row held mid-drag, as edit-dragging.md.
   const liftedId = seeded(view?.open, "lifted");
+  // USE-157: a row's length open in place, and its value until it saves.
+  // `?state=suggested-length` seeds "length:<id>=<min>".
+  const [length, setLength] = React.useState<{
+    id: string;
+    value: number;
+    open: boolean;
+  } | null>(() => {
+    const [id, value] = seeded(view?.open, "length")?.split("=") ?? [];
+    return id && value ? { id, value: Number(value), open: true } : null;
+  });
   const [announcement, setAnnouncement] = React.useState("");
   const reachShown = React.useRef(false);
 
@@ -263,11 +276,19 @@ export function DaysBlockScreen({
   }
 
   const order = savingOrder;
-  const shown = data
+  const ordered = data
     ? order
       ? inOrderOf(data, order)
       : { items: data.items, reflow: data.reflow }
     : null;
+  // A drafted length flows like a saved one: the total and later times follow.
+  const shown =
+    data && ordered && length
+      ? withDraftLength(data, ordered.items, {
+          id: length.id,
+          lengthMin: length.value,
+        })
+      : ordered;
   const items = shown ? inTimeOrder(shown.items) : [];
 
   async function remove(item: BlockViewItem) {
@@ -332,6 +353,28 @@ export function DaysBlockScreen({
     void writes
       .add(row.title, data?.items ?? [], row.icon, row.lengthMin)
       .catch(() => {});
+  }
+
+  function openLength(item: BlockViewItem) {
+    setLength({ id: item.id, value: item.lengthMin ?? 5, open: true });
+  }
+
+  /** Return or a tap elsewhere: one write, and only for a new value. */
+  function commitLength() {
+    if (!length) return;
+    const saved = data?.items.find((item) => item.id === length.id);
+    if (!saved || saved.lengthMin === length.value) {
+      setLength(null);
+      return;
+    }
+    setLength({ ...length, open: false });
+    setAnnouncement(COPY.lengthSaved(saved.title, length.value));
+    void writes
+      .length(saved, length.value)
+      .catch(() => {})
+      .finally(() =>
+        setLength((now) => (now?.id === saved.id && !now.open ? null : now)),
+      );
   }
 
   function editBlock(patch: Parameters<typeof writes.editBlock>[0]) {
@@ -556,7 +599,8 @@ export function DaysBlockScreen({
                   leading: (row) => (
                     <ItemIcon icon={row.icon} size={24} className="shrink-0" />
                   ),
-                  title: (row) => (
+                  title: (row) => {
+                    const name = (
                     <button
                       type="button"
                       data-row-open
@@ -569,9 +613,19 @@ export function DaysBlockScreen({
                     >
                       {row.title}
                     </button>
-                  ),
+                    );
+                    if (length?.open !== true || length.id !== row.id) return name;
+                    return (
+                      <span className="flex flex-col items-start gap-(--space-1) whitespace-normal">
+                        {name}
+                        <Text as="span" variant="secondary" tone="muted">
+                          {BLOCK_VIEW_COPY.editing.length.hint}
+                        </Text>
+                      </span>
+                    );
+                  },
                   trailing: (row, slots) => {
-                    const length = timeless ? null : slots.length;
+                    const lengthWords = timeless ? null : slots.length;
                     const swap =
                       kind === "training" && !row.isTransition ? (
                         <Button
@@ -589,18 +643,57 @@ export function DaysBlockScreen({
                       return (
                         <>
                           {swap}
-                          <SetTimeMark atTime={row.atTime} length={length} />
+                          <SetTimeMark atTime={row.atTime} length={lengthWords} />
                         </>
                       );
                     }
+                    if (length?.open && length.id === row.id) {
+                      return (
+                        <>
+                          {swap}
+                          <LengthStepper
+                            name={row.title}
+                            value={length.value}
+                            step={stepLength}
+                            onChange={(value) =>
+                              setLength({ id: row.id, value, open: true })
+                            }
+                            onCommit={commitLength}
+                            onCancel={() => setLength(null)}
+                          />
+                        </>
+                      );
+                    }
+                    const words =
+                      lengthWords === null
+                        ? null
+                        : row.lengthMin === null
+                          ? lengthWords
+                          : formatMinutesShort(row.lengthMin);
+                    // From a date only the date's own item has a length to write.
+                    const steppable =
+                      words !== null &&
+                      !row.isTransition &&
+                      (!dated || row.onDate !== null);
                     return (
                       <>
                         {swap}
-                        {length === null ? null : (
+                        {words === null ? null : steppable ? (
+                          <button
+                            type="button"
+                            data-no-swipe
+                            aria-label={BLOCK_VIEW_COPY.editing.length.open(
+                              row.title,
+                              words,
+                            )}
+                            onClick={() => openLength(row)}
+                            className="text-text-muted -mx-(--space-1) flex min-h-(--target) shrink-0 items-center rounded-(--radius-control) px-(--space-1) text-(length:--fs-caption) leading-(--lh-caption) tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            {words}
+                          </button>
+                        ) : (
                           <span className="text-text-muted shrink-0 text-(length:--fs-caption) leading-(--lh-caption) tabular-nums">
-                            {row.lengthMin === null
-                              ? length
-                              : formatMinutesShort(row.lengthMin)}
+                            {words}
                           </span>
                         )}
                         {slots.grip}
@@ -704,6 +797,7 @@ export function DaysBlockScreen({
                         onAddOne={() => setAddOpened((n) => n + 1)}
                       />
                     ) : null,
+                  openId: length?.open ? length.id : null,
                   freeFrom: reflow.freeFrom,
                   overMin: reflow.overMin,
                   peek: peekOf(data, endsAt),

@@ -46,6 +46,8 @@ export const BLOCK_EDIT_IDS = {
     coldBath: id(2, 5),
     /** USE-156: Meditate, second on Thursday while it is lifted. */
     liftedMeditate: id(2, 42),
+    /** USE-157: Meditate, third on Thursday after three taps. */
+    addedMeditate: id(2, 43),
   },
 } as const;
 
@@ -377,6 +379,8 @@ export const SUGGESTED_PATHS = {
   "suggested-reorder": usual(B.wellnessThursday, 3),
   "suggested-past-span": usual(B.wellnessThursday, 3),
   "suggested-first-of-kind": usual(B.eveningTuesday, 1),
+  /** USE-157: suggested-added with Meditate's length open at 15 min. */
+  "suggested-length": usual(B.wellnessThursday, 3),
 } as const;
 
 function suggested(
@@ -440,5 +444,10 @@ export const BLOCK_EDIT_SCENARIOS: Record<string, () => Scenario> =
     ),
     suggested("suggested-first-of-kind", () =>
       blockEditRecords(WELLNESS, { tuesdayEvening: true }),
+    ),
+    suggested(
+      "suggested-length",
+      () => blockEditRecords(WELLNESS, { thursday: THREE_ADDED }),
+      { view: { open: `length:${B.items.addedMeditate}=15` } },
     ),
   ]);

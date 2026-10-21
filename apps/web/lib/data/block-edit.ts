@@ -8,7 +8,12 @@ import {
 } from "@syn/utils";
 import type { PlannerServer, PlannerWrite } from "@/lib/fixtures/planner";
 import { clockWords, isAllDay, weekdayName } from "./set-up-view";
-import { deriveBlockView, type BlockViewItem } from "./use-block-view";
+import {
+  deriveBlockView,
+  inOrderOf,
+  type BlockView,
+  type BlockViewItem,
+} from "./use-block-view";
 import { nextItemInput } from "./use-planner-writes";
 import type { WeekRecords } from "./week-records";
 
@@ -28,6 +33,7 @@ export type BlockEditPlace = { weekday: number } | { date: string };
 export type BlockEditServer = Pick<
   PlannerServer,
   | "writeBlockItem"
+  | "editBlockItem"
   | "removeBlockItem"
   | "reorderItems"
   | "editBlock"
@@ -166,6 +172,33 @@ export function suggestionsFor(
   );
 }
 
+/**
+ * A length step (D-USE-138): 5 min, or 1 min below 5, never under 1. A
+ * value off the 5s snaps to the next one: 7 steps up to 10 and down to 5.
+ */
+export function stepLength(value: number, direction: -1 | 1): number {
+  if (direction === 1) return value < 5 ? value + 1 : Math.floor(value / 5) * 5 + 5;
+  return value <= 5 ? Math.max(1, value - 1) : Math.ceil(value / 5) * 5 - 5;
+}
+
+/**
+ * The rows with one row's length drafted (USE-157): the stepper's value
+ * before it saves, flowed as a saved one would be, so the total and every
+ * later rail time follow it. A set-time row keeps its time.
+ */
+export function withDraftLength(
+  view: BlockView,
+  shown: readonly BlockViewItem[],
+  draft: { id: string; lengthMin: number } | null,
+) {
+  const items = draft
+    ? shown.map((row) =>
+        row.id === draft.id ? { ...row, lengthMin: draft.lengthMin } : row,
+      )
+    : [...shown];
+  return inOrderOf({ ...view, items }, items.map((row) => row.id));
+}
+
 /** The running total under the header (D-USE-137). */
 export interface SpanTotal {
   plannedMin: number;
@@ -206,6 +239,16 @@ export function blockEdits(
     /** Swipe's Remove: off every such weekday, or skipped on the date. */
     remove: (item: Pick<BlockViewItem, "id">): Promise<PlannerWrite> =>
       server.removeBlockItem({ id: item.id, ...on }, scope),
+    /**
+     * The inline stepper's save (USE-157): one length write. In the usual
+     * week it is every such weekday's; from a date, only the date's own
+     * item has a length of its own to write.
+     */
+    length: (
+      item: Pick<BlockViewItem, "id">,
+      lengthMin: number,
+    ): Promise<PlannerWrite> =>
+      server.editBlockItem({ id: item.id, lengthMin }, scope),
     /** The whole order after a drop or a Move. */
     reorder: (ids: string[]): Promise<PlannerWrite> =>
       server.reorderItems({ blockId, ids, ...on }, scope),

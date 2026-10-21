@@ -95,6 +95,8 @@ export interface BlockViewColumnProps<R extends BlockViewRowModel> {
    * "Free until" region, which the span total now says.
    */
   suggestions?: React.ReactNode;
+  /** The row whose length is open in place (USE-157): drawn on the surface fill. */
+  openId?: string | null;
 }
 
 /** The rail: 44 px. */
@@ -212,6 +214,7 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
   timeless = false,
   afterAdd = null,
   suggestions = null,
+  openId = null,
 }: BlockViewColumnProps<R>) {
   const endMin = clockMinutes(block.endsAt);
   const over = !timeless && overMin > 0;
@@ -225,6 +228,7 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
     isLifted: boolean,
   ) {
     const lifted = isLifted || row.id === reorder?.frozenId;
+    const open = row.id === openId;
     const slots: BlockViewRowSlots = {
       length: row.lengthMin === null ? null : COPY.length(row.lengthMin),
       grip:
@@ -236,8 +240,9 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
     const body = (
       <div
         className={cn(
-          "flex h-(--row-min) items-center gap-(--space-3)",
-          lifted && "px-(--space-3)",
+          "flex min-h-(--row-min) items-center gap-(--space-3)",
+          (lifted || open) && "px-(--space-3)",
+          open && "items-start py-(--space-3)",
           row.done && "[&_[data-row-fade]]:text-text-muted",
         )}
       >
@@ -279,6 +284,7 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
               "bg-background min-w-0 flex-1 border-b border-hairline",
               lifted &&
                 "border-ink bg-surface rounded-(--radius-control) border",
+              open && "bg-surface rounded-(--radius-control)",
             )}
           >
             {wrapRow ? wrapRow(row, body) : body}

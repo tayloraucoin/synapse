@@ -8,7 +8,9 @@ import {
   blockEdits,
   scopeWords,
   spanTotal,
+  stepLength,
   suggestionsFor,
+  withDraftLength,
 } from "./block-edit";
 import { deriveBlockView, inOrderOf, inTimeOrder } from "./use-block-view";
 import { createPlannerQueue } from "./use-planner-writes";
@@ -329,5 +331,67 @@ describe("USE-156: the suggestion list and the span total", () => {
     const after = await view("usual", B.wellnessThursday, 3);
     expect(spanTotal(after.block, after.items).overMin).toBe(10);
     expect(inTimeOrder(after.items).at(-1)!.title).toBe("Start the cold bath");
+  });
+});
+
+describe("USE-157: a length edited in place", () => {
+  it("steps by 5 min, or 1 min below 5, never under 1", () => {
+    expect(stepLength(10, 1)).toBe(15);
+    expect(stepLength(10, -1)).toBe(5);
+    expect(stepLength(5, -1)).toBe(4);
+    expect(stepLength(4, 1)).toBe(5);
+    expect(stepLength(1, -1)).toBe(1);
+    expect(stepLength(7, 1)).toBe(10);
+    expect(stepLength(7, -1)).toBe(5);
+  });
+
+  it("C1: stepping moves the total and every later rail time at once, and Return saves one length write", async () => {
+    const { server, view } = setup("suggested-length");
+    const block = await view("usual", B.wellnessThursday, 3);
+    const draft = withDraftLength(block, block.items, {
+      id: B.items.addedMeditate,
+      lengthMin: 15,
+    });
+    expect(rail(inTimeOrder(draft.items))).toEqual([
+      "07:05 Pee and weigh",
+      "07:07 Water",
+      "07:08 Meditate",
+    ]);
+    expect(spanTotal(block.block, draft.items)).toMatchObject({
+      plannedMin: 18,
+      freeMin: 42,
+    });
+    expect(draft.reflow.freeFrom).toBe("07:23");
+
+    // A set-time row keeps its time; only the rows after a stepped one move.
+    const monday = await view("usual", B.wellness, 0);
+    const longer = withDraftLength(monday, monday.items, {
+      id: monday.items[0]!.id,
+      lengthMin: 4,
+    });
+    expect(rail(inTimeOrder(longer.items))).toEqual([
+      "07:05 Pee and weigh",
+      "07:09 Water",
+      "07:10 Meditate",
+      "07:20 Start the cold bath",
+      "07:22 Cold bath",
+    ]);
+
+    const writes: unknown[] = [];
+    const counting = {
+      ...server,
+      editBlockItem: (...args: Parameters<typeof server.editBlockItem>) => {
+        writes.push(args);
+        return server.editBlockItem(...args);
+      },
+    };
+    await blockEdits(counting, B.wellnessThursday, { weekday: 3 }).length(
+      { id: B.items.addedMeditate },
+      15,
+    );
+    expect(writes).toHaveLength(1);
+    const saved = await view("usual", B.wellnessThursday, 3);
+    expect(saved.items.find((i) => i.id === B.items.addedMeditate)!.lengthMin).toBe(15);
+    expect(spanTotal(saved.block, saved.items).plannedMin).toBe(18);
   });
 });

@@ -35,6 +35,7 @@ Loading, error and offline are as the editing states ([`states/loading.md`](stat
 - A checklist with no times is not a source for "Used before" (its items have no length), and shows no list itself [ASSUMPTION].
 - A tap names no reach either: the once-a-visit "changed for every <weekday>" toast is left to the add row and the other edits [ASSUMPTION, D-USE-135's "no toast"].
 - "Add one" opens the add row, focused, preset to the block.
+- USE-157: a length off the 5s snaps to the next one (7 steps to 10 or 5). From This week only the date's own items step; a usual item's length on one date stays the Item sheet's, and a set-time row's length is not a button [ASSUMPTION].
 - The span total shows wherever the list does, which is every editing block of a set-items kind with a span.
 
 ## Words

@@ -39,6 +39,18 @@ export const BLOCK_VIEW_COPY = {
     checklist: "Checklist, no times",
     setATime: "Set a time",
     swap: "Swap",
+    /** The length stepper (USE-157; suggested-length.md). */
+    length: {
+      hint: "Steps of 5 min, or type one.",
+      unit: "min",
+      name: (item: string) => `${item} length`,
+      valueText: (min: number) => `${min} minutes`,
+      /** The − and + [PROPOSED]. */
+      shorter: (item: string) => `Shorter ${item}`,
+      longer: (item: string) => `Longer ${item}`,
+      /** The length as a button: "Meditate length, 10 min". */
+      open: (item: string, length: string) => `${item} length, ${length}`,
+    },
   },
   /** The suggestion list and the span total (USE-156; suggested.md, Words). */
   suggested: {

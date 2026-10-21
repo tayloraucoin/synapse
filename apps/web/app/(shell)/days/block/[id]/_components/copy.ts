@@ -25,6 +25,8 @@ export const BLOCK_EDIT_COPY = {
   removed: (item: string, scope: string) => `${item} removed ${scope}.`,
   moved: (item: string, time: string) => `${item} moved to ${time}`,
   added: (item: string) => `${item} added.`,
+  /** USE-157: the stepper saved, for the live region. */
+  lengthSaved: (item: string, min: number) => `${item} set to ${min} min.`,
   empty: (block: string) => `Nothing in ${block} yet.`,
   trueBreak: (block: string) => `Nothing in ${block}. A true break.`,
   trueBreakLine:
