@@ -3,7 +3,15 @@ import { resolveScenario } from "@/lib/fixtures/scenarios";
 import { BLOCK_EDIT_IDS } from "@/lib/fixtures/scenarios/block-view-editing";
 import { SET_UP_NOW } from "@/lib/fixtures/scenarios/set-up";
 import { createFixtureServer } from "@/lib/fixtures/server";
-import { blockEditMeta, blockEdits, scopeWords } from "./block-edit";
+import {
+  blockEditMeta,
+  blockEdits,
+  scopeWords,
+  spanTotal,
+  stepLength,
+  suggestionsFor,
+  withDraftLength,
+} from "./block-edit";
 import { deriveBlockView, inOrderOf, inTimeOrder } from "./use-block-view";
 import { createPlannerQueue } from "./use-planner-writes";
 
@@ -224,5 +232,225 @@ describe("the header's meta (by-kind.md, Words)", () => {
       }),
     ).toBe("All day · Checklist · every Sunday");
     expect(scopeWords({ date: THURSDAY_15 }, 3)).toBe("this Thursday");
+  });
+});
+
+describe("USE-156: the suggestion list and the span total", () => {
+  const titles = (rows: readonly { title: string }[]) =>
+    rows.map((r) => r.title);
+
+  it("C1: a tap adds one item at the end with its title, icon and length; it leaves the list and the total moves", async () => {
+    const { server, view } = setup("suggested-added");
+    const records = await server.readWeek("usual");
+    const before = suggestionsFor(records, B.wellnessThursday, 3)!;
+    // Monday's Wellness items, minus the three already in Thursday's.
+    expect(titles(before.usedBefore)).toEqual([
+      "Start the cold bath",
+      "Cold bath",
+    ]);
+    expect(before.seed.length).toBeGreaterThan(0);
+    const blockBefore = await view("usual", B.wellnessThursday, 3);
+    expect(spanTotal(blockBefore.block, blockBefore.items)).toEqual({
+      plannedMin: 13,
+      spanMin: 60,
+      freeMin: 47,
+      overMin: 0,
+    });
+
+    const pick = before.usedBefore[1]!;
+    await blockEdits(server, B.wellnessThursday, { weekday: 3 }).add(
+      pick.title,
+      blockBefore.items,
+      pick.icon,
+      pick.lengthMin,
+    );
+
+    const after = await view("usual", B.wellnessThursday, 3);
+    expect(after.items).toHaveLength(blockBefore.items.length + 1);
+    const last = inTimeOrder(after.items).at(-1)!;
+    expect(last).toMatchObject({
+      title: "Cold bath",
+      icon: { kind: "emoji", value: "🧊" },
+      lengthMin: 10,
+      startsAt: "07:18",
+    });
+    const list = suggestionsFor(
+      await server.readWeek("usual"),
+      B.wellnessThursday,
+      3,
+    )!;
+    expect(titles(list.usedBefore)).toEqual(["Start the cold bath"]);
+    expect(spanTotal(after.block, after.items)).toMatchObject({
+      plannedMin: 23,
+      freeMin: 37,
+    });
+  });
+
+  it("C1: a new block lists Used before from another day's block of its kind, then the seed", async () => {
+    const { server } = setup("suggested-new");
+    const list = suggestionsFor(
+      await server.readWeek("usual"),
+      B.wellnessThursday,
+      3,
+    )!;
+    expect(titles(list.usedBefore)).toEqual([
+      "Pee and weigh",
+      "Water",
+      "Start the cold bath",
+      "Meditate",
+      "Cold bath",
+    ]);
+    expect(titles(list.seed)[0]).toBe("Breath work");
+    expect(titles(list.seed)).not.toContain("Meditate");
+  });
+
+  it("C1: the first block of a kind shows only the seed; Work shows no list", async () => {
+    const { server } = setup("suggested-first-of-kind");
+    const records = await server.readWeek("usual");
+    const evening = suggestionsFor(records, B.eveningTuesday, 1)!;
+    expect(evening.usedBefore).toEqual([]);
+    expect(titles(evening.seed).slice(0, 6)).toEqual([
+      "Read",
+      "Stretch",
+      "Meditate",
+      "Lay out tomorrow",
+      "Journal",
+      "Phone away",
+    ]);
+    expect(suggestionsFor(records, B.work, 0)).toBeNull();
+    // A checklist with no times has no list either.
+    expect(suggestionsFor(records, B.sunday, 6)).toBeNull();
+  });
+
+  it("C3: past the span the total runs over, and a + still adds", async () => {
+    const { server, view } = setup("suggested-past-span");
+    const block = await view("usual", B.wellnessThursday, 3);
+    expect(spanTotal(block.block, block.items)).toEqual({
+      plannedMin: 68,
+      spanMin: 60,
+      freeMin: 0,
+      overMin: 8,
+    });
+    const list = suggestionsFor(
+      await server.readWeek("usual"),
+      B.wellnessThursday,
+      3,
+    )!;
+    expect(titles(list.usedBefore)).toEqual(["Start the cold bath"]);
+    const pick = list.usedBefore[0]!;
+    await blockEdits(server, B.wellnessThursday, { weekday: 3 }).add(
+      pick.title,
+      block.items,
+      pick.icon,
+      pick.lengthMin,
+    );
+    const after = await view("usual", B.wellnessThursday, 3);
+    expect(spanTotal(after.block, after.items).overMin).toBe(10);
+    expect(inTimeOrder(after.items).at(-1)!.title).toBe("Start the cold bath");
+  });
+});
+
+describe("USE-157: a length edited in place", () => {
+  it("steps by 5 min, or 1 min below 5, never under 1", () => {
+    expect(stepLength(10, 1)).toBe(15);
+    expect(stepLength(10, -1)).toBe(5);
+    expect(stepLength(5, -1)).toBe(4);
+    expect(stepLength(4, 1)).toBe(5);
+    expect(stepLength(1, -1)).toBe(1);
+    expect(stepLength(7, 1)).toBe(10);
+    expect(stepLength(7, -1)).toBe(5);
+  });
+
+  it("C1: stepping moves the total and every later rail time at once, and Return saves one length write", async () => {
+    const { server, view } = setup("suggested-length");
+    const block = await view("usual", B.wellnessThursday, 3);
+    const draft = withDraftLength(block, block.items, {
+      id: B.items.addedMeditate,
+      lengthMin: 15,
+    });
+    expect(rail(inTimeOrder(draft.items))).toEqual([
+      "07:05 Pee and weigh",
+      "07:07 Water",
+      "07:08 Meditate",
+    ]);
+    expect(spanTotal(block.block, draft.items)).toMatchObject({
+      plannedMin: 18,
+      freeMin: 42,
+    });
+    expect(draft.reflow.freeFrom).toBe("07:23");
+
+    // A set-time row keeps its time; only the rows after a stepped one move.
+    const monday = await view("usual", B.wellness, 0);
+    const longer = withDraftLength(monday, monday.items, {
+      id: monday.items[0]!.id,
+      lengthMin: 4,
+    });
+    expect(rail(inTimeOrder(longer.items))).toEqual([
+      "07:05 Pee and weigh",
+      "07:09 Water",
+      "07:10 Meditate",
+      "07:20 Start the cold bath",
+      "07:22 Cold bath",
+    ]);
+
+    const writes: unknown[] = [];
+    const counting = {
+      ...server,
+      editBlockItem: (...args: Parameters<typeof server.editBlockItem>) => {
+        writes.push(args);
+        return server.editBlockItem(...args);
+      },
+    };
+    await blockEdits(counting, B.wellnessThursday, { weekday: 3 }).length(
+      { id: B.items.addedMeditate },
+      15,
+    );
+    expect(writes).toHaveLength(1);
+    const saved = await view("usual", B.wellnessThursday, 3);
+    expect(
+      saved.items.find((i) => i.id === B.items.addedMeditate)!.lengthMin,
+    ).toBe(15);
+    expect(spanTotal(saved.block, saved.items).plannedMin).toBe(18);
+  });
+});
+
+describe("USE-158: Delete block from Set my days", () => {
+  it("from the usual Monday, Wellness goes from every Monday, and Undo brings it back", async () => {
+    const { server } = setup();
+    const monday = async () =>
+      (await server.readWeek("usual")).days[0]!.blocks.map((b) => b.id);
+    expect(await monday()).toContain(B.wellness);
+
+    const write = await blockEdits(server, B.wellness, {
+      weekday: 0,
+    }).deleteBlock();
+    expect(await monday()).not.toContain(B.wellness);
+    // The rest of Monday is untouched.
+    expect(await monday()).toContain(B.training);
+
+    await server.undo(write.undo);
+    expect(await monday()).toContain(B.wellness);
+    const back = deriveBlockView(
+      await server.readWeek("usual"),
+      B.wellness,
+      0,
+      true,
+    )!;
+    expect(back.items.map((i) => i.title)).toContain("Meditate");
+  });
+
+  it("from This week's Thursday, only that date goes; the usual Thursday keeps it", async () => {
+    const { server } = setup();
+    await blockEdits(server, B.wellnessThursday, {
+      date: THURSDAY_15,
+    }).deleteBlock();
+    const dated = await server.readWeek(THIS_WEEK);
+    expect(dated.days[3]!.blocks.map((b) => b.id)).not.toContain(
+      B.wellnessThursday,
+    );
+    const usual = await server.readWeek("usual");
+    expect(usual.days[3]!.blocks.map((b) => b.id)).toContain(
+      B.wellnessThursday,
+    );
   });
 });

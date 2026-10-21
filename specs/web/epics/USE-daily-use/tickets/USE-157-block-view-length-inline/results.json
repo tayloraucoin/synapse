@@ -1,0 +1,33 @@
+{
+  "id": "USE-157",
+  "criteria_sha256": "f021879f4646fa87cf4d3fea02ef55625b498e7243e5b3ba2355037f749b962c",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-21T01:47:08Z",
+        "head": "44c34d3472573ef898dc7b26cbf9011f8d72b9b2",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-157-block-view-length-inline/evidence/C1.log",
+        "evidence_sha256": "484439d43c37cea3969fc65564394fcc40649e4716cfacee22a3fae084316641",
+        "tests": 1552
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "capture",
+      "run": {
+        "command": "yarn contract:record USE-157 C2 --evidence specs/web/epics/USE-daily-use/tickets/USE-157-block-view-length-inline/evidence",
+        "exit": 0,
+        "at": "2026-10-21T01:47:21Z",
+        "head": "44c34d3472573ef898dc7b26cbf9011f8d72b9b2",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-157-block-view-length-inline/evidence",
+        "evidence_sha256": "6f80c990f932fa79eb94e25f86a409782eb76c2a13d53ae93c476e356f472831"
+      }
+    }
+  },
+  "built_at": "2026-10-21T01:47:27Z",
+  "updated_at": "2026-10-21T01:47:27Z"
+}

@@ -9,7 +9,7 @@ import {
   type IconPickerInitial,
   type IconSuggestCandidate,
 } from "@syn/ui";
-import { suggestIcons } from "@syn/utils";
+import { suggestIconsFor } from "@syn/utils";
 import { iconValueSchema } from "@syn/validators";
 import { useSavedColours } from "@/lib/data/use-saved-colours";
 import { useRecentPicks, type RecentPicks } from "@/lib/hooks/use-recent-picks";
@@ -17,7 +17,9 @@ import { useRecentPicks, type RecentPicks } from "@/lib/hooks/use-recent-picks";
 /**
  * IconPickerStep (USE-11): the icon picker as a step inside the sheet that
  * opens it, with back on the left. It wires what `IconPicker` leaves to its
- * caller: Suggested from the name through `suggestIcons`, on the device;
+ * caller: Suggested from the name through `suggestIconsFor`, on the device,
+ * falling back to the block's kind's words when the name matches nothing
+ * (USE-145);
  * Recent from this device; Saved colours through `useSavedColours`. Each
  * sheet's own ticket mounts it.
  */
@@ -25,6 +27,8 @@ import { useRecentPicks, type RecentPicks } from "@/lib/hooks/use-recent-picks";
 export interface IconPickerStepProps {
   /** The item's name; empty before one is typed. */
   name: string;
+  /** A block's kind: its words suggest when the name matches nothing. */
+  kind?: string;
   value: IconValue | null;
   /** The sheet it returns to, as the back link reads. */
   backLabel: string;
@@ -49,6 +53,7 @@ export function toIconValue(pick: IconPick): IconValue {
 
 export function IconPickerStep({
   name,
+  kind,
   value,
   backLabel,
   onPick,
@@ -61,8 +66,9 @@ export function IconPickerStep({
   const saved = query.data ?? [];
 
   const suggest = useCallback(
-    (entries: readonly IconSuggestCandidate[]) => suggestIcons(name, entries),
-    [name],
+    (entries: readonly IconSuggestCandidate[]) =>
+      suggestIconsFor(name, kind, entries),
+    [name, kind],
   );
 
   function pick(next: IconPick) {

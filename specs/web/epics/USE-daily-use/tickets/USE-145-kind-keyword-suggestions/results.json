@@ -1,0 +1,20 @@
+{
+  "id": "USE-145",
+  "criteria_sha256": "01873d46cfc2b4c9c99a5020172f837a15c8ddebea9365ee893a70a8f67fd24b",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn workspace @syn/utils test",
+        "exit": 0,
+        "at": "2026-10-19T20:46:35Z",
+        "head": "787ba146188830d3b61fdf05a180c07a43309f9f",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-145-kind-keyword-suggestions/evidence/C1.log",
+        "evidence_sha256": "ebec53af5a7bb30ae2635a7751ab2824e018dba2790fb79c3f3150c9f31e19fe",
+        "tests": 459
+      }
+    }
+  },
+  "updated_at": "2026-10-19T20:46:37Z"
+}

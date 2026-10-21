@@ -15,6 +15,7 @@ import {
   RegionRetry,
   ResponsiveSheet,
   toastUndo,
+  ItemIcon,
 } from "@syn/ui";
 import { instantToWallClockMinutes, weekdayIndex } from "@syn/utils";
 import {
@@ -287,6 +288,10 @@ export function TodayBlockScreen({ blockId }: { blockId: string }) {
     {
       label: COPY.iconAndColour,
       icon: IconAndColourIcon,
+      // The block's own icon in its colour; the dashed circle only when unset.
+      glyph: block?.icon ? (
+        <ItemIcon icon={block.icon} size={20} className="size-4" />
+      ) : undefined,
       onSelect: () => setPicking(true),
     },
     {

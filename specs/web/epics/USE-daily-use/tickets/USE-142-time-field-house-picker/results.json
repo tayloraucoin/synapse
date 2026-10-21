@@ -1,0 +1,32 @@
+{
+  "id": "USE-142",
+  "criteria_sha256": "5b5f4e0d86b681e53a82552d8ea45598d215c68fdaa7418b38a41fb350c6cd29",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-19T21:02:51Z",
+        "head": "b0aeea179f2e6f89e4fe749606a67629c13eaa38",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-142-time-field-house-picker/evidence/C1.log",
+        "evidence_sha256": "538917d94a9990bbdca111f43768766c3ea199298f79b9dc74104bc6ef6a9e2a",
+        "tests": 1422
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "capture",
+      "run": {
+        "command": "yarn contract:record USE-142 C2 --evidence specs/web/epics/USE-daily-use/tickets/USE-142-time-field-house-picker/evidence",
+        "exit": 0,
+        "at": "2026-10-21T00:43:02Z",
+        "head": "7ee76b0cddf96c3252e6e69bf82cdbd77100a519",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-142-time-field-house-picker/evidence",
+        "evidence_sha256": "d6d1e9f54534b07530f060d2cf7cb64a4058a6dd7114bb1ad649144030d9844c"
+      }
+    }
+  },
+  "updated_at": "2026-10-21T00:43:02Z"
+}

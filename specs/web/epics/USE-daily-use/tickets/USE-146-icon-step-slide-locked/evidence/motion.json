@@ -1,0 +1,25 @@
+{
+  "normal": {
+    "enter": {
+      "name": "enter",
+      "duration": "0.2s",
+      "easing": "cubic-bezier(0.2, 0, 0, 1)",
+      "transform": "none"
+    },
+    "exit": {
+      "name": "exit",
+      "duration": "0.16s"
+    },
+    "focusAfterBack": "Icon, none set"
+  },
+  "reduced": {
+    "enter": {
+      "name": "enter",
+      "duration": "0s",
+      "easing": "cubic-bezier(0.2, 0, 0, 1)",
+      "transform": "none"
+    },
+    "exit": null,
+    "focusAfterBack": "Icon, none set"
+  }
+}

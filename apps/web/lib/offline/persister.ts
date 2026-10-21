@@ -30,6 +30,8 @@ export const PERSISTED_QUERIES = new Set([
   "todos",
   "connections",
   "account",
+  // Settings › Morning reading reads as last saved offline (USE-151; D-USE-129).
+  "morning-reading",
 ]);
 
 const LIVE = "live";

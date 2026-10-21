@@ -64,6 +64,10 @@ Back by the breadcrumb (N1). In editing mode, the add row is the main move.
 | editing, offline    | [`states/editing-offline.md`](states/editing-offline.md) | 402    | Drawn read-only; edits save and sync later (D-USE-67)          |
 | partial             | [`states/partial.md`](states/partial.md)                 | —      | N/A: one block is one read                                     |
 
+### Suggested items, from Set my days (2026-10-20)
+
+Six more states, beside the same row at x 6748 to 9158: the list of items used before and the seed under a block's add row, the span total, a length inline, reordering, past the span and a kind's first block. Their table, words, access and criteria: [`suggested.md`](suggested.md) (D-USE-135 to 138).
+
 ### Editing by kind, from Set my days (area 5)
 
 Thirteen more states, from the row "Row label · Block view from Set my days" on "USE — set up" (p-4-0, y 3780, notes y 4710; coverage [`../../boards/use-set-up/block-view-from-set-my-days.md`](../../boards/use-set-up/block-view-from-set-my-days.md)): Work's tiers, add to a tier and set work; Wellness, Training, a meal and a true break; the Sunday checklist; Life, set; four To-dos states. Their table, words, access and criteria: [`by-kind.md`](by-kind.md). The set-up page's `block-view / wellness, new and empty / 402 / light` is a second board of [`states/empty.md`](states/empty.md) (D-USE-81: 5 minutes).

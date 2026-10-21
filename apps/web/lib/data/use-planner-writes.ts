@@ -7,11 +7,13 @@ import type { PlannerServer, PlannerWrite } from "@/lib/fixtures/planner";
 import type { SplitPatch } from "@/lib/fixtures/planner/split-block";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import { offlineWrite } from "@/lib/offline/writes";
+import { applyOptimistic } from "./optimistic-week";
 import { FixtureOfflineError, PlannerRefusal } from "./refusals";
 import { useDataSource } from "./source";
 import { useConnection } from "./use-connection";
 import { todayQueryKey } from "./use-today";
 import { weekQueryKey } from "./use-week";
+import type { WeekRecords } from "./week-records";
 
 /**
  * The set-up area's writes (USE-36): every planner write through one queue
@@ -21,6 +23,10 @@ import { weekQueryKey } from "./use-week";
  * The hook runs them through TanStack's one write scope (USE-106), found by
  * key, so a write made offline survives a reload; `createPlannerQueue` is the
  * order rule as its tests prove it, over a server.
+ *
+ * Writes are optimistic (USE-148): `onMutate` writes the change into every
+ * cached week through `applyOptimistic`, an error puts each one back as it
+ * was, and the server's answer settles them on every outcome.
  */
 
 /**
@@ -228,8 +234,28 @@ export function usePlannerWrites() {
     if (online) invalidate();
   }, [online, invalidate]);
 
-  const mutation = useMutation<unknown, Error, PlannerCall>({
+  type Snapshot = [readonly unknown[], WeekRecords | undefined][];
+  const mutation = useMutation<unknown, Error, PlannerCall, Snapshot>({
     ...offlineWrite("planner", scenario),
+    onMutate: async (planned) => {
+      const weeks = weekQueryKey(scenario);
+      await queryClient.cancelQueries({ queryKey: weeks });
+      const before = queryClient.getQueriesData<WeekRecords>({
+        queryKey: weeks,
+      });
+      const now = source.now();
+      for (const [key, week] of before) {
+        if (week === undefined) continue;
+        const next = applyOptimistic(planned, week, now);
+        if (next !== null) queryClient.setQueryData(key, next);
+      }
+      return before;
+    },
+    onError: (_error, _planned, before) => {
+      for (const [key, week] of before ?? []) {
+        queryClient.setQueryData(key, week);
+      }
+    },
     onSettled: invalidate,
   });
 
@@ -275,6 +301,8 @@ export function usePlannerWrites() {
     createBlock: write("createBlock"),
     createTransition: write("createTransition"),
     editBlock: write("editBlock"),
+    /** Delete block from a usual weekday (USE-158). */
+    removeBlock: write("removeBlock"),
     writeBlockChange: write("writeBlockChange"),
     splitBlock: write("splitBlock"),
     /**

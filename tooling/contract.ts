@@ -40,6 +40,7 @@ import { spawnSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   realpathSync,
   renameSync,
@@ -757,11 +758,24 @@ function record() {
       `${name} is ${criterion.evidence} evidence; only a manual criterion, one a person must check, can be deferred to the operator`,
     );
   const rel = toRepoPath(evidence);
+  const evidenceIsDir =
+    fileExists(rel) && statSync(path.join(REPO_ROOT, rel)).isDirectory();
   if (rel.startsWith(".."))
     stop(
       `${evidence} is outside the repo; evidence lives in the repo, ideally in ${evidenceDir(item)}/`,
     );
-  if (!fileExists(rel) || readFileSync(path.join(REPO_ROOT, rel)).length === 0)
+  const dirFiles = evidenceIsDir
+    ? readdirSync(path.join(REPO_ROOT, rel))
+        .filter((f) => !f.startsWith(".") && !f.endsWith(".log"))
+        .sort()
+    : [];
+  if (evidenceIsDir) {
+    if (dirFiles.length === 0)
+      stop(`${rel} holds no evidence files (logs are ignored); write the evidence first`);
+  } else if (
+    !fileExists(rel) ||
+    readFileSync(path.join(REPO_ROOT, rel)).length === 0
+  )
     stop(`${rel} does not exist or is empty; write the evidence first`);
   if (/\/evidence\/[^/]+\.log$/.test(rel))
     stop(
@@ -770,7 +784,7 @@ function record() {
   if (
     criterion.evidence === "capture" &&
     criterion.path &&
-    criterion.path !== rel
+    criterion.path.replace(/\/$/, "") !== rel.replace(/\/$/, "")
   )
     stop(
       `${name}'s contract names ${criterion.path} as its evidence, not ${rel}`,
@@ -786,7 +800,13 @@ function record() {
       at,
       head: getHead()!,
       evidence_path: rel,
-      evidence_sha256: hashFile(rel),
+      evidence_sha256: evidenceIsDir
+        ? hashText(
+            dirFiles
+              .map((f) => `${f} ${hashFile(path.posix.join(rel, f))}`)
+              .join("\n"),
+          )
+        : hashFile(rel),
       ...(verdict === "deferred" && { deferred: true }),
     },
   };

@@ -27,6 +27,8 @@ import {
 export interface NowBlockMenuRow {
   label: string;
   icon: LucideIcon;
+  /** Drawn in place of `icon`: the block's own icon on Icon and colour (USE-144). */
+  glyph?: React.ReactNode;
   /** A link, or an action. */
   href?: string;
   onSelect?: () => void;
@@ -98,15 +100,21 @@ export function NowBlockMenu({
         </DropdownMenuLabel>
         {rows.map((row) => {
           const Icon = row.icon;
+          const lead = row.glyph ?? (
+            <Icon
+              aria-hidden="true"
+              className={cn(GLYPH, row.detail !== undefined && "mt-0.5")}
+            />
+          );
           const content =
             row.detail === undefined ? (
               <>
-                <Icon aria-hidden="true" className={GLYPH} />
+                {lead}
                 {row.label}
               </>
             ) : (
               <>
-                <Icon aria-hidden="true" className={cn(GLYPH, "mt-0.5")} />
+                {lead}
                 <span className="flex flex-col gap-(--space-1)">
                   {row.label}
                   <span className="text-(length:--fs-caption) leading-(--lh-caption) text-muted-foreground">

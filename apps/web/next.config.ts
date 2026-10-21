@@ -7,6 +7,7 @@ import { buildSupabaseEnvForNextConfig } from "@syn/auth";
 import { buildDatabaseEnvForNextConfig } from "@syn/db/build-database-env-for-next-config";
 import { getLocalDevOrigins } from "../../scripts/local-dev-origins.mjs";
 import { env } from "./env";
+import { assertDeployEnv } from "./lib/env/deploy-env";
 
 const webRoot = path.dirname(fileURLToPath(import.meta.url));
 loadEnvConfig(webRoot);
@@ -20,6 +21,14 @@ loadEnvConfig(webRoot);
  * a literal.
  */
 const supabaseEnv = buildSupabaseEnvForNextConfig();
+
+/**
+ * A production build on the production tier refuses to start without the
+ * secrets every request path needs (USE-138). Production once shipped with no
+ * UNDO_TOKEN_KEY, and every planner write answered 500 at the first save;
+ * failing the deploy is the cheaper place to learn it.
+ */
+assertDeployEnv(env);
 const databaseEnv = buildDatabaseEnvForNextConfig();
 
 /**

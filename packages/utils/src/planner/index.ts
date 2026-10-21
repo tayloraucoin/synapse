@@ -81,7 +81,12 @@ export {
   usualDay,
 } from "./usual-week";
 export { weeklyRule, withoutWeekday } from "./usual-rules";
-export { suggestIcons, type IconSuggestEntry } from "./icon-suggest";
+export {
+  suggestIcons,
+  suggestIconsFor,
+  type IconSuggestEntry,
+} from "./icon-suggest";
+export { KIND_KEYWORDS, kindKeywords } from "./kind-keywords";
 export {
   activeBlock,
   behindSince,
@@ -217,3 +222,14 @@ export {
   type RuleUnit,
   type SplitRule,
 } from "./rule-words";
+export {
+  suggestedItems,
+  titleKey,
+  usedBefore,
+  type SuggestedItems,
+  type SuggestedRow,
+  type SuggestedSeedEntry,
+  type UsedBeforeBlock,
+  type UsedBeforeItem,
+  type UsedBeforeOptions,
+} from "./suggested-items";

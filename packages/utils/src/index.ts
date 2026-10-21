@@ -291,7 +291,13 @@ export {
 } from "./work";
 
 /* ---- the icon picker's suggestions (USE-11) ---- */
-export { suggestIcons, type IconSuggestEntry } from "./planner";
+export {
+  KIND_KEYWORDS,
+  kindKeywords,
+  suggestIcons,
+  suggestIconsFor,
+  type IconSuggestEntry,
+} from "./planner";
 
 /* ---- the usual week's rule text (USE-93) ---- */
 export { weeklyRule, withoutWeekday } from "./planner";
@@ -430,3 +436,16 @@ export {
   splitClock,
   type PickerKey,
 } from "./time-picker";
+
+/* ---- suggested items: Block view's list and Swap's library (USE-155) ---- */
+export {
+  suggestedItems,
+  titleKey,
+  usedBefore,
+  type SuggestedItems,
+  type SuggestedRow,
+  type SuggestedSeedEntry,
+  type UsedBeforeBlock,
+  type UsedBeforeItem,
+  type UsedBeforeOptions,
+} from "./planner";

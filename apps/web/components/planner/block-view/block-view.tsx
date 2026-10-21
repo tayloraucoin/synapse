@@ -64,6 +64,8 @@ export interface BlockViewProps<R extends BlockViewRowModel> {
   titleField?: React.ReactNode;
   /** The header's trailing edge: Edit or Done, and ···. */
   actions?: React.ReactNode;
+  /** In the header, under the name and actions: editing's span total (USE-156). */
+  total?: React.ReactNode;
   /** Under the header, full width: the offline StatusLine. */
   status?: React.ReactNode;
   /** Edit's hint, or "Every Monday.": caption, muted, a hairline under. */
@@ -107,6 +109,7 @@ export function BlockView<R extends BlockViewRowModel>({
   headingRef,
   titleField = null,
   actions = null,
+  total = null,
   status = null,
   scope = null,
   kindRows = null,
@@ -161,6 +164,7 @@ export function BlockView<R extends BlockViewRowModel>({
             </div>
           ) : null}
         </div>
+        {total ? <div className="pb-(--space-3)">{total}</div> : null}
       </div>
       <div className="border-hairline border-t">
         {status}

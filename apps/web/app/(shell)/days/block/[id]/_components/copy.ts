@@ -15,6 +15,19 @@ export const BLOCK_EDIT_COPY = {
   renameLabel: "Block name",
   iconAndColour: "Icon and colour",
   notThisWeek: "Not this week",
+  /**
+   * Delete block (USE-158; header-menu.md, D-USE-69): asks once, then Undo.
+   * The scope is the menu's: "Every Monday" or "This Thursday".
+   */
+  deleteBlock: "Delete block",
+  deleteTitle: (scope: string, block: string) => `Delete ${scope}'s ${block}?`,
+  deleteBody: (dated: boolean, block: string, weekday: string) =>
+    dated
+      ? `This ${weekday} only. Every ${weekday}'s ${block} stays.`
+      : `${block} goes from every ${weekday}, items and all. Other days keep theirs.`,
+  deleteConfirm: "Delete block",
+  keep: "Keep it",
+  deleted: (scope: string, block: string) => `${scope}'s ${block} deleted.`,
   /** [PROPOSED] Not this week's Toaster. */
   freed: (block: string, weekday: string) => `${block} freed this ${weekday}.`,
   addTo: (block: string) => `Add to ${block}`,
@@ -25,6 +38,8 @@ export const BLOCK_EDIT_COPY = {
   removed: (item: string, scope: string) => `${item} removed ${scope}.`,
   moved: (item: string, time: string) => `${item} moved to ${time}`,
   added: (item: string) => `${item} added.`,
+  /** USE-157: the stepper saved, for the live region. */
+  lengthSaved: (item: string, min: number) => `${item} set to ${min} min.`,
   empty: (block: string) => `Nothing in ${block} yet.`,
   trueBreak: (block: string) => `Nothing in ${block}. A true break.`,
   trueBreakLine:

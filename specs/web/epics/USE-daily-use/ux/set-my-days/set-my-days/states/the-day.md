@@ -73,6 +73,7 @@ A dated day opened from the week: Monday 12 October, Sunday evening at 21:10. Th
 
 ## Rulings
 
+- Decided (D-USE-134): Orient's label builds on its chip ([`usual-day.md`](usual-day.md)); the header here is already the one every day takes.
 - Open-3 round 2: B then A, dated chips, "Week" as the way back under D-USE-49 (the lock).
 - D-USE-39 (3), D-USE-83: list-detail from `--breakpoint-split: 1024px`, which goes into `preset.css` with the build; the push below it, 768 to 1023 included. Its [PROPOSED] is settled.
 - D-USE-79: Stretch is slate; the frame's Stretch square is drawn sky (`category-sky-dot`) and builds as slate. Life yellow, To-dos moss.

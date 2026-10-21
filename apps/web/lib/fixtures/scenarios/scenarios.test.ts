@@ -8,6 +8,7 @@ import {
   dayBoundsRecord,
   dayEventRecord,
   dayRecordRecord,
+  instantSchema,
   journalEntryRecord,
   linkRecord,
   mealTopicRecord,
@@ -59,6 +60,9 @@ const SCHEMAS: {
   dayRecords: dayRecordRecord,
   passages: passageRecord,
   links: linkRecord,
+  // USE-151: Settings › Morning reading's Off lists, stamped when they went off.
+  passagesOff: passageRecord.extend({ archivedAt: instantSchema }),
+  linksOff: linkRecord.extend({ archivedAt: instantSchema }),
   quotes: quoteRecord,
   morningLines: morningLinesRecord,
   journalEntries: journalEntryRecord,

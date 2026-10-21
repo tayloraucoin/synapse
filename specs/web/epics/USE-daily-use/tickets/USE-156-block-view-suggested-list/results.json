@@ -1,0 +1,46 @@
+{
+  "id": "USE-156",
+  "criteria_sha256": "e87221874ea7ccb43973776ef484fcd3c5115d470d9ecd483298cbdbb5d8651e",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-21T01:37:11Z",
+        "head": "a43da098269e8c6aba10209590b6b49eb56a03b7",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-156-block-view-suggested-list/evidence/C1.log",
+        "evidence_sha256": "e1dfca8b7f672a46668c1068ff2395d5b22dcf4b69b92b5b9f575f0bbd1daa3f",
+        "tests": 1549
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "capture",
+      "run": {
+        "command": "yarn contract:record USE-156 C2 --evidence specs/web/epics/USE-daily-use/tickets/USE-156-block-view-suggested-list/evidence",
+        "exit": 0,
+        "at": "2026-10-21T01:37:24Z",
+        "head": "a43da098269e8c6aba10209590b6b49eb56a03b7",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-156-block-view-suggested-list/evidence",
+        "evidence_sha256": "ab3e807686872030af4599f05408257e89a45bea7548da42bea3c58bcc1e39be"
+      }
+    },
+    "C3": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-21T01:37:11Z",
+        "head": "a43da098269e8c6aba10209590b6b49eb56a03b7",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-156-block-view-suggested-list/evidence/C3.log",
+        "evidence_sha256": "e1dfca8b7f672a46668c1068ff2395d5b22dcf4b69b92b5b9f575f0bbd1daa3f",
+        "tests": 1549
+      }
+    }
+  },
+  "built_at": "2026-10-21T01:37:31Z",
+  "updated_at": "2026-10-21T01:37:31Z"
+}

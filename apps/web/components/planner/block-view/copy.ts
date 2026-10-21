@@ -39,5 +39,32 @@ export const BLOCK_VIEW_COPY = {
     checklist: "Checklist, no times",
     setATime: "Set a time",
     swap: "Swap",
+    /** The length stepper (USE-157; suggested-length.md). */
+    length: {
+      hint: "Steps of 5 min, or type one.",
+      unit: "min",
+      name: (item: string) => `${item} length`,
+      valueText: (min: number) => `${min} minutes`,
+      /** The − and + [PROPOSED]. */
+      shorter: (item: string) => `Shorter ${item}`,
+      longer: (item: string) => `Longer ${item}`,
+      /** The length as a button: "Meditate length, 10 min". */
+      open: (item: string, length: string) => `${item} length, ${length}`,
+    },
+  },
+  /** The suggestion list and the span total (USE-156; suggested.md, Words). */
+  suggested: {
+    usedBefore: "Used before",
+    suggestedFor: (kind: string) => `Suggested for ${kind}`,
+    addOne: "Add one",
+    /** The + on a row [PROPOSED]: "Add Water, 1 min". */
+    add: (name: string, length: string) => `Add ${name}, ${length}`,
+    planned: (min: number, span: number) => `${min} of ${span} min`,
+    free: (min: number) => `${min} min free`,
+    nothingIn: (block: string) => `Nothing in ${block} yet`,
+    runsPast: (min: number, end: string) => `Runs ${min} min past ${end}`,
+    /** The meter's name [PROPOSED]: "Wellness planned". */
+    meter: (block: string) => `${block} planned`,
+    reorderHint: "Hold a grip to move one. Times follow the order.",
   },
 } as const;

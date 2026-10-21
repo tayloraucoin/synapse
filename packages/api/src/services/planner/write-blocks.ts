@@ -1,3 +1,4 @@
+import { withoutWeekday } from "@syn/utils";
 import {
   blockChangeRecord,
   blockItemRecord,
@@ -7,6 +8,7 @@ import {
   type EditBlockInput,
   type NewBlockInput,
   type NewTransitionInput,
+  type RemoveBlockInput,
   type SplitBlockInput,
 } from "@syn/validators";
 import { refuse } from "../../errors";
@@ -130,6 +132,31 @@ export function planEditBlock(
   });
   journal.put("blocks", blockRecord.parse(next));
   return { id, reach: blockReach(journal.rows, scope, id) };
+}
+
+/**
+ * Delete block from a usual weekday (USE-158; D-USE-69): the weekday leaves
+ * the rule, as Clear day leaves it (`clearInto`); with no weekday left the
+ * block is archived. Its items stay with it, so Undo brings all of it back.
+ */
+export function planRemoveBlock(
+  journal: WriteJournal,
+  { id, weekday }: RemoveBlockInput,
+): PlanOut {
+  const block = findBlock(journal.rows, id);
+  if (block.rrule === null) {
+    throw refuse("invalid", "That block does not repeat on a weekday.");
+  }
+  const rule = withoutWeekday(block.rrule, weekday);
+  journal.put(
+    "blocks",
+    blockRecord.parse(
+      rule === null
+        ? { ...block, archivedAt: journal.stamp(), updatedAt: journal.stamp() }
+        : { ...block, rrule: rule, updatedAt: journal.stamp() },
+    ),
+  );
+  return { id };
 }
 
 /** This and following: the old rule ends the day before; a new block from the date. */

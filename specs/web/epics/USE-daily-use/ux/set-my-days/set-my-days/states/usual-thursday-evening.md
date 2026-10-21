@@ -47,6 +47,7 @@ The usual Thursday scrolled to the evening: where Life ends and Evening begins. 
 
 ## Rulings
 
+- Decided (D-USE-134): the header builds as the app's push, "‹ Week" over "Every Thursday" with `SaveStatus` at the crumb row's end, and no Usual week | This week control on the day; the frame's "‹ Now", "Set my days" and segmented control are superseded (the canvas is not edited; drawn on `set-my-days / usual Monday, header and Orient chip`, [`usual-day.md`](usual-day.md)). Orient's label sits on its chip.
 - The [PROPOSED] stands as drawn under D-USE-49 (the lock). Open-4 "Life and chores": Evening becomes the wind-down only (DYN-18's journal, Lights out); social time moves to Life; unset evening time stays open.
 - Life is yellow (D-USE-79); the frame's layer reads "Life, Dinner with friends, set [PROPOSED]".
 - The drives are transitions inside the block (as Training's drives); drawn here as icon items in the row.

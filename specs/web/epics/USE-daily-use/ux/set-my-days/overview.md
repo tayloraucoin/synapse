@@ -25,7 +25,7 @@ Copy from, Add From Linear, meal topics and the icon picker are flows in `../int
 
 ## Navigation and shell
 
-A pushed screen with no tab bar on the phone: Set my days opens on the week (B) and a day pushes from it (A), with "‹ Week" back. One tap from every tab through the avatar menu, without taking a tab (note 76). From 1024 it is list-detail beside the rail, nothing current in the rail (D-USE-39 (3), D-USE-83); 768 to 1023 keep the push.
+A pushed screen with no tab bar on the phone: Set my days opens on the week (B) and a day pushes from it (A), with "‹ Week" back, in both weeks, over "Every Monday" or "Monday, 12 October" and with `SaveStatus` at the crumb row's end (D-USE-134). One tap from every tab through the avatar menu, without taking a tab (note 76). From 1024 it is list-detail beside the rail, nothing current in the rail (D-USE-39 (3), D-USE-83); 768 to 1023 keep the push.
 
 ## Design
 
@@ -47,6 +47,7 @@ The full lines are in `../day/decisions/`; this area rests on these.
 | D-USE-80     | Repeats is Google's presets, then Custom…                                                                                                                                                                                                              |
 | D-USE-81     | A new item in an add row is 5 min                                                                                                                                                                                                                      |
 | D-USE-82     | Offline: the day's own controls read-only; a block opened from it edits offline (D-USE-67)                                                                                                                                                             |
+| D-USE-134    | Every day's header is "‹ Week" over "Every Monday" or "Monday, 12 October", with `SaveStatus`; no which-week control on a day; Orient's label on a chip                                                                                                |
 
 ## Open
 

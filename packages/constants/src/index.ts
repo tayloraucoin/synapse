@@ -138,9 +138,11 @@ export {
   ACTIVITY_GROUPS,
   MORNING_GROUPS,
   STARTER_LIBRARY,
+  SUGGESTED_SEED,
   type ActivityGroup,
   type EmojiIcon,
   type MorningGroup,
+  type NewBlockKindValue,
   type StarterLibraryEntry,
 } from "./starter-library";
 export { EXAMPLE_DAY, type ExampleDaySpan } from "./example-day";

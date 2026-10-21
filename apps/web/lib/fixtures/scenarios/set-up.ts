@@ -998,6 +998,14 @@ export const DAYS_SCENARIOS: Record<string, () => Scenario> =
     }),
     days("empty-first-day", emptyRecords, { week: "usual", day: 0 }),
     days("usual-saturday", setUpUsualRecords, { week: "usual", day: 5 }),
+    // USE-154: the usual Monday's push header and Orient's chip (D-USE-134);
+    // Monday's bounds written again, Saved held.
+    days("usual-day", setUpUsualRecords, {
+      week: "usual",
+      day: 0,
+      staged: { upAt: "07:00", lightsOut: "22:30" },
+      holdSaved: true,
+    }),
     days("usual-thursday-evening", setUpUsualRecords, {
       week: "usual",
       day: 3,

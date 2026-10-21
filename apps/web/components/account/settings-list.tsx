@@ -1,6 +1,7 @@
 /**
  * SettingsList — `/settings` (USE-85): what USE draws, and only that
- * (calls.md's bend; D-USE-90). Connections, then sign out; Profile and
+ * (calls.md's bend; D-USE-90). Connections, Morning reading (USE-151;
+ * D-USE-119, no second line), then sign out; Profile and
  * Install the app live in the avatar menu. No legacy section returns.
  *
  * A pushed screen: no tabs below 1024, so the crumb is the way back
@@ -9,7 +10,11 @@
  */
 import Link from "next/link";
 import { Breadcrumb, cn, DisclosureIcon, ScreenFrame, Text } from "@syn/ui";
-import { connectionsRoute, todayRoute } from "@/lib/routes";
+import {
+  connectionsRoute,
+  morningReadingRoute,
+  todayRoute,
+} from "@/lib/routes";
 import { SETTINGS_COPY as COPY } from "./copy";
 import { SignOutForm } from "./sign-out-form";
 
@@ -51,6 +56,10 @@ export function SettingsList() {
         </header>
         <ul className="m-0 flex list-none flex-col p-0">
           <SettingsRow href={connectionsRoute()} label={COPY.connections} />
+          <SettingsRow
+            href={morningReadingRoute()}
+            label={COPY.morningReading}
+          />
         </ul>
         <SignOutForm label={COPY.signOut} className={cn(ROW, "border-b-0")} />
       </div>

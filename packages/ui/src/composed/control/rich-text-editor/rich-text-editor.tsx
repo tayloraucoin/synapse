@@ -22,6 +22,10 @@
  *
  * `offline` shows the standard line and keeps the editor editable: the words
  * are the person's and stay on screen; the save is the caller's to retry.
+ *
+ * `fill` grows the field to its flex parent's height, the toolbar at its foot
+ * and the words scrolling above it (Morning reading's passage sheet, USE-153);
+ * a tap in the empty space under the words puts the caret at their end.
  */
 "use client";
 
@@ -54,6 +58,8 @@ export interface RichTextEditorProps {
   placeholder?: string;
   /** The editor's least height, in lines of body text. */
   minRows?: number;
+  /** Grows to the parent's height; the parent is a flex column. */
+  fill?: boolean;
   /** The same prose, no toolbar, not editable. */
   readOnly?: boolean;
   /** The standard line; the editor stays editable. */
@@ -100,6 +106,7 @@ export function RichTextEditor({
   label,
   placeholder,
   minRows = 6,
+  fill = false,
   readOnly = false,
   offline = false,
   error,
@@ -213,7 +220,7 @@ export function RichTextEditor({
 
   return (
     <div
-      className={cn("flex flex-col gap-(--space-2)", className)}
+      className={cn("flex flex-col gap-(--space-2)", fill && "min-h-0 flex-1", className)}
       data-rich-text-editor
       style={{ ["--editor-min-h" as string]: `calc(${minRows} * var(--fs-body) * var(--lh-body))` }}
       onKeyDown={(event) => {
@@ -233,11 +240,19 @@ export function RichTextEditor({
       <div
         className={cn(
           "bg-paper flex flex-col rounded-(--radius) border",
+          fill && "min-h-0 flex-1",
           "focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           invalid ? "border-ink" : "border-input",
         )}
       >
-        <div className="px-(--space-3) py-(--space-3)">
+        <div
+          className={cn("px-(--space-3) py-(--space-3)", fill && "min-h-0 flex-1 cursor-text overflow-y-auto")}
+          onMouseDown={(event) => {
+            if (!fill || event.target !== event.currentTarget) return;
+            event.preventDefault();
+            editor?.commands.focus("end");
+          }}
+        >
           <EditorContent editor={editor} aria-describedby={message === undefined ? undefined : helperId} />
         </div>
 

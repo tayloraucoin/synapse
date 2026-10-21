@@ -52,6 +52,7 @@ import {
   CustomRecurrenceStep,
 } from "../custom-recurrence";
 import { IconPickerStep } from "../icon-picker-step";
+import { SheetStep, sheetHeight } from "../sheet-step";
 import { MealTopicsSheet } from "../meal-topics-sheet";
 import { clock, NEW_BLOCK_COPY as COPY } from "./copy";
 import {
@@ -91,8 +92,12 @@ export interface NewBlockSheetProps {
   onOpenChange: (open: boolean) => void;
   start: NewBlockSheetStart | null;
   preset?: NewBlockPreset;
-  /** The new block's or transition's id, once added. */
-  onAdded: (id: string, form: NewBlockForm) => void;
+  /** The new block's or transition's id, once added, and the day it was added on. */
+  onAdded: (
+    id: string,
+    form: NewBlockForm,
+    scope: { weekday: number; date: string | null },
+  ) => void;
   returnFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
@@ -126,6 +131,13 @@ export function NewBlockSheet({
   const topics = useMealTopics();
   const [form, dispatch] = React.useReducer(reducer, null);
   const [step, setStep] = React.useState<Step>("fields");
+  // The icon step sliding back out before the fields return (USE-146).
+  const [leaving, setLeaving] = React.useState(false);
+  const [stepHeight, setStepHeight] = React.useState<number | null>(null);
+  // Focus goes back to what opened a step once the fields are drawn again.
+  const returnTo = React.useRef<React.RefObject<HTMLElement | null> | null>(
+    null,
+  );
   const [failed, setFailed] = React.useState(false);
   const [sending, setSending] = React.useState(false);
   const [repeatsOpen, setRepeatsOpen] = React.useState(false);
@@ -149,6 +161,7 @@ export function NewBlockSheet({
     if (!open) {
       dispatch({ type: "reset", form: null });
       setStep("fields");
+      setLeaving(false);
       setFailed(false);
       setRepeatsOpen(false);
       return;
@@ -168,11 +181,18 @@ export function NewBlockSheet({
 
   const ready = form !== null;
 
+  React.useEffect(() => {
+    if (step !== "fields" || returnTo.current === null) return;
+    returnTo.current.current?.focus();
+    returnTo.current = null;
+  }, [step]);
+
   // Focus the name with its text selected, so typing replaces the kind's.
   // The sheet's content mounts a frame or two after it opens, past the
-  // dialog's own first focus, so this waits for the field.
+  // dialog's own first focus, so this waits for the field. Once per opening:
+  // a step's Back returns focus to what opened it instead (USE-146).
   React.useEffect(() => {
-    if (!ready || step !== "fields") return;
+    if (!ready) return;
     let tries = 0;
     let timer = 0;
     const focusName = () => {
@@ -187,7 +207,7 @@ export function NewBlockSheet({
     };
     timer = window.setTimeout(focusName, 50);
     return () => window.clearTimeout(timer);
-  }, [ready, step]);
+  }, [ready]);
 
   async function send(current: NewBlockForm) {
     if (!hasName(current) || sending) return;
@@ -195,7 +215,8 @@ export function NewBlockSheet({
     setFailed(false);
     try {
       const id = await add(current);
-      onAdded(id, current);
+      // `add` refuses with no day, so the day is here once it resolves.
+      if (day !== null) onAdded(id, current, day.scope);
     } catch {
       setFailed(true);
     } finally {
@@ -334,20 +355,28 @@ export function NewBlockSheet({
           }}
         />
       ) : step === "icon" ? (
-        <IconPickerStep
-          name={form.name}
-          value={form.icon}
-          backLabel={COPY.iconBack(form.name.trim())}
-          onBack={() => {
-            setStep("fields");
-            requestAnimationFrame(() => iconRef.current?.focus());
-          }}
-          onPick={(icon) => {
-            set({ type: "icon", icon });
+        <SheetStep
+          height={stepHeight}
+          leaving={leaving}
+          onLeft={() => {
+            returnTo.current = iconRef;
+            setLeaving(false);
             setStep("fields");
           }}
-          onRecolour={(icon) => set({ type: "icon", icon })}
-        />
+        >
+          <IconPickerStep
+            name={form.name}
+            kind={isTransition ? "transition" : form.kind}
+            value={form.icon}
+            backLabel={COPY.iconBack(form.name.trim())}
+            onBack={() => setLeaving(true)}
+            onPick={(icon) => {
+              set({ type: "icon", icon });
+              setLeaving(true);
+            }}
+            onRecolour={(icon) => set({ type: "icon", icon })}
+          />
+        </SheetStep>
       ) : (
         <div className="flex flex-col">
           {isTransition ? null : (
@@ -371,7 +400,10 @@ export function NewBlockSheet({
                 ref={iconRef}
                 type="button"
                 aria-label={COPY.icon(iconWord(form))}
-                onClick={() => setStep("icon")}
+                onClick={() => {
+                  setStepHeight(sheetHeight(iconRef.current));
+                  setStep("icon");
+                }}
                 className={cn(
                   "border-input inline-flex size-(--target) shrink-0 items-center justify-center rounded-(--radius) border",
                   "focus-visible:ring-ring outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
@@ -414,6 +446,7 @@ export function NewBlockSheet({
                 <div className="w-36 shrink-0">
                   <TimeField
                     label={<span className="sr-only">{COPY.starts}</span>}
+                    name={COPY.starts}
                     value={form.startsAt}
                     formatValue={clock}
                     onChange={(startsAt) => set({ type: "starts", startsAt })}
@@ -440,6 +473,7 @@ export function NewBlockSheet({
                         {COPY.endsName(clock(form.endsAt), minutes)}
                       </span>
                     }
+                    name={COPY.ends}
                     value={form.endsAt === "24:00" ? "23:59" : form.endsAt}
                     formatValue={clock}
                     onChange={(endsAt) => set({ type: "ends", endsAt })}

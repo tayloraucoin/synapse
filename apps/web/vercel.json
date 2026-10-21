@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "corepack enable && cd ../.. && yarn install --immutable",
-  "buildCommand": "cd ../.. && yarn turbo run build --filter=web",
+  "buildCommand": "cd ../.. && yarn web:build",
   "outputDirectory": ".next",
   "crons": [
     {

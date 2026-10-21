@@ -9,7 +9,11 @@
  * "running"), and 1 when the two share a five-letter stem ("meditate" and
  * "meditation"). An entry's score is its best per word, summed over the
  * name's words; ties keep the set's own order.
+ *
+ * `suggestIconsFor` adds the block's kind (USE-145): when the name matches
+ * nothing, the kind's words (`kind-keywords.ts`) are matched instead.
  */
+import { kindKeywords } from "./kind-keywords";
 
 export interface IconSuggestEntry {
   id: string;
@@ -68,4 +72,16 @@ export function suggestIcons(
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .slice(0, limit)
     .map((entry) => entry.id);
+}
+
+/** The name's matches, or the kind's words' when the name has none. */
+export function suggestIconsFor(
+  name: string,
+  kind: string | null | undefined,
+  entries: readonly IconSuggestEntry[],
+  limit = 5,
+): string[] {
+  const named = suggestIcons(name, entries, limit);
+  if (named.length > 0) return named;
+  return suggestIcons(kindKeywords(kind), entries, limit);
 }

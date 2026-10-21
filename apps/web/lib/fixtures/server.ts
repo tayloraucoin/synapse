@@ -78,6 +78,11 @@ import {
 } from "./integrations/connect";
 import { googleEventsOnDate } from "./integrations/records";
 import {
+  byReadingOrder,
+  createMorningReadingServer,
+  type MorningReadingServer,
+} from "./morning-reading";
+import {
   ALREADY_PLACED,
   createPlannerServer,
   PlannerRefusal,
@@ -163,7 +168,7 @@ export interface RemovedTodo {
 }
 
 export interface FixtureServer
-  extends PlannerServer, WorkServer, IntegrationServer {
+  extends PlannerServer, WorkServer, IntegrationServer, MorningReadingServer {
   readToday(dateKey: string): Promise<TodayRecords>;
   writeSlotEvents(inputs: SlotEventInput[]): Promise<SlotEventRecord[]>;
   /**
@@ -323,9 +328,10 @@ function readReadingRecords(
   dateKey: string,
 ): ReadingRecords {
   return structuredClone({
-    passages: [...records.passages].sort((a, b) => a.sortOrder - b.sortOrder),
+    // Settings › Morning reading's order, so the two never differ (USE-151).
+    passages: [...records.passages].sort(byReadingOrder),
     quote: records.quotes.find((quote) => quote.onDate === dateKey) ?? null,
-    links: [...records.links].sort((a, b) => a.sortOrder - b.sortOrder),
+    links: [...records.links].sort(byReadingOrder),
   });
 }
 
@@ -425,6 +431,17 @@ export function createFixtureServer(
       linearClosesOnSync: scenario.linearClosesOnSync,
     },
   });
+  // Settings › Morning reading (USE-151), over the passages Orient reads.
+  const morningReading = createMorningReadingServer({
+    records,
+    now,
+    isOffline,
+    read: {
+      waits: scenario.regions?.morningReading === "loading",
+      fails: scenario.regions?.morningReading === "error",
+    },
+    failOnce: (id) => (failNext.delete(id) ? new FixtureWriteError() : null),
+  });
 
   const server: FixtureServer = {
     // The set-up area's reads and writes (USE-36).
@@ -433,6 +450,8 @@ export function createFixtureServer(
     ...work,
     // Linear, Google and the client mappings (USE-56).
     ...integrations,
+    // Settings › Morning reading's list and writes (USE-151).
+    ...morningReading,
 
     // Set my days' bounds (USE-39): `failWrites: ["bounds"]` fails the next
     // once; `setUp.save: "hang"` leaves it sending, for Saving's capture.

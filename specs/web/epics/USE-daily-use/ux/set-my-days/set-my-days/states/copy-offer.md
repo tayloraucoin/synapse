@@ -45,6 +45,7 @@ Thursday in Usual week, its bounds set, with Monday to Wednesday and Sunday buil
 
 ## Rulings
 
+- Decided (D-USE-134): the header builds as the app's push, "‹ Week" over "Every Tuesday" with `SaveStatus` at the crumb row's end, and no Usual week | This week control on the day; the frame's "‹ Now", "Set my days" and segmented control are superseded (the canvas is not edited; drawn on `set-my-days / usual Monday, header and Orient chip`, [`usual-day.md`](usual-day.md)). Orient's label sits on its chip.
 - N2's "empty, bounds set, other days built" row, drawn as round 1.
 - D-USE-32: Replace asks only when the day has blocks, then a Toaster with Undo; this frame's [ASSUMPTION] that an empty day copies at once matches it, and stands under D-USE-49 (the lock).
 

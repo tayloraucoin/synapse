@@ -45,6 +45,7 @@ Monday in Usual week, its bounds just saved by "Set Monday", and no other day bu
 
 ## Rulings
 
+- Decided (D-USE-134): the header builds as the app's push, "‹ Week" over "Every Monday" with `SaveStatus` at the crumb row's end, and no Usual week | This week control on the day; the frame's "‹ Now", "Set my days" and segmented control are superseded (the canvas is not edited; drawn on `set-my-days / usual Monday, header and Orient chip`, [`usual-day.md`](usual-day.md)). Orient's label sits on its chip.
 - D-USE-30: an empty day's choice sits under Orient, not centred.
 - Feedback 2026-10-19: the consequence of the first day's forward button ([`empty-first-day.md`](empty-first-day.md) C-2); it replaces that file's old [ASSUMPTION] of "copy-offer without the copy button".
 
@@ -54,7 +55,7 @@ Drawn at: 402. At 1024 the prompt sits under Orient in the day pane; the week pa
 
 ## Criteria
 
-| ID                                | When                                     | Then                                                                         | Evidence                         |
-| --------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------- |
+| ID                                | When                                      | Then                                                                        | Evidence                         |
+| --------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------- | -------------------------------- |
 | C-USE-set-my-days-first-day-set-1 | Bounds set, no blocks, no other day built | Orient, then "Nothing on Monday yet." and the tap line; no Copy from button | `captures/first-day-set-402.png` |
-| C-USE-set-my-days-first-day-set-2 | Another weekday is built                 | The prompt gives way to the copy offer (`copy-offer.md`)                     | test                             |
+| C-USE-set-my-days-first-day-set-2 | Another weekday is built                  | The prompt gives way to the copy offer (`copy-offer.md`)                    | test                             |

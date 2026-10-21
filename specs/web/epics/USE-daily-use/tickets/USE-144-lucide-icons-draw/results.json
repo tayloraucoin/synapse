@@ -1,0 +1,32 @@
+{
+  "id": "USE-144",
+  "criteria_sha256": "a42622e3a1a6afe89e1ae97241d3125636501f4d39c9d7f9cdba3cad6bd2574d",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn workspace web test",
+        "exit": 0,
+        "at": "2026-10-19T21:03:04Z",
+        "head": "b0aeea179f2e6f89e4fe749606a67629c13eaa38",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-144-lucide-icons-draw/evidence/C1.log",
+        "evidence_sha256": "3d01ac8698a8a9ba7012f20771f8dd0f455d0ca32306da5e4628348ba7238dac",
+        "tests": 1422
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "capture",
+      "run": {
+        "command": "yarn contract:record USE-144 C2 --evidence specs/web/epics/USE-daily-use/tickets/USE-144-lucide-icons-draw/evidence",
+        "exit": 0,
+        "at": "2026-10-21T00:43:08Z",
+        "head": "7ee76b0cddf96c3252e6e69bf82cdbd77100a519",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-144-lucide-icons-draw/evidence",
+        "evidence_sha256": "16a6debbeba96839fe09fa702f3eb31635c488d443a13bccd83383d27a70287f"
+      }
+    }
+  },
+  "updated_at": "2026-10-21T00:43:08Z"
+}

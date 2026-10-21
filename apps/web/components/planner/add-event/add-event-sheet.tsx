@@ -320,6 +320,7 @@ export function AddEventSheet({
             <div className="w-36 shrink-0">
               <TimeField
                 label={<span className="sr-only">{COPY.starts}</span>}
+                name={COPY.starts}
                 value={form.startsAt}
                 formatValue={clock}
                 onChange={(startsAt) => set({ type: "starts", startsAt })}

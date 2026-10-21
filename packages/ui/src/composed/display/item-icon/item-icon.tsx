@@ -1,8 +1,9 @@
 /**
  * ItemIcon — renders an `IconValue` wherever an item appears (v2 handoff §5.5).
  *
- * Four kinds, one box: emoji as text, a curated Lucide glyph tinted by the
- * category, an uploaded image, and — when there is no icon — a neutral dot.
+ * Five kinds, one box: emoji as text, a curated Lucide glyph tinted by the
+ * category, a Lucide icon stored by name in its colour (`LucideGlyph`,
+ * USE-144), an uploaded image, and — when there is no icon — a neutral dot.
  * The dot matters: rows are read down a column, and a missing icon that
  * collapses the box would make every row below it sit at a different indent.
  *
@@ -19,6 +20,7 @@ import * as React from "react";
 
 import { cn } from "../../../lib/cn";
 import { getCuratedGlyph } from "./curated-glyphs";
+import { LucideGlyph } from "./lucide-glyph";
 
 /** Static so Tailwind's scanner sees every class — see CategoryChip. */
 const GLYPH_TINT: Record<CategoryKey, string> = {
@@ -100,10 +102,22 @@ export function ItemIcon({
                 : GLYPH_TINT[icon.colorKey],
           )}
         >
-          <Icon size={GLYPH_PX[size]} strokeWidth={1.75} />
+          <Icon size={GLYPH_PX[size]} strokeWidth={1.75} className="text-current" />
         </span>
       );
     }
+  }
+
+  if (icon?.kind === "lucide") {
+    return (
+      <LucideGlyph
+        name={icon.value}
+        color={icon.color}
+        px={GLYPH_PX[size]}
+        muted={muted}
+        className={box}
+      />
+    );
   }
 
   if (icon?.kind === "image" && imageUrl !== null) {

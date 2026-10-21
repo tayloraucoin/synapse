@@ -20,9 +20,9 @@
  * filter and nothing else; "chosen against the day" (ledger §25) is phase 2
  * and this is its seam.
  *
- * ARCHIVE, NEVER DELETE. An archived passage's images stay in the bucket
- * (the export may still reference them; orphan reaping is a later concern,
- * as for icons).
+ * Archive is rest; delete only from archive (D-USE-125). An archived
+ * passage's images stay in the bucket, and a deleted one's too (orphan
+ * reaping is a later concern, as for icons).
  *
  * POLICIES: owner-private CRUD.
  */

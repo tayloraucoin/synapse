@@ -40,7 +40,15 @@ export const BLOCK_EDIT_IDS = {
   dinnerWithFriends: id(1, 10),
   evening: id(1, 11),
   sunday: id(1, 12),
-  items: { meditate: id(2, 4), coldBath: id(2, 5) },
+  eveningTuesday: id(1, 13),
+  items: {
+    meditate: id(2, 4),
+    coldBath: id(2, 5),
+    /** USE-156: Meditate, second on Thursday while it is lifted. */
+    liftedMeditate: id(2, 42),
+    /** USE-157: Meditate, third on Thursday after three taps. */
+    addedMeditate: id(2, 43),
+  },
 } as const;
 
 const B = BLOCK_EDIT_IDS;
@@ -123,8 +131,38 @@ const OVERFLOW: ItemSeed[] = [
   { title: "Journal [placeholder]", icon: "📓", lengthMin: 12 },
 ];
 
+/**
+ * USE-156 (block-view/suggested.md): Thursday's new Wellness after three
+ * taps on its suggestions, Pee and weigh, Water, Meditate, each at the end.
+ */
+const THREE_ADDED: ItemSeed[] = [
+  { title: "Pee and weigh", icon: "⚖️", lengthMin: 2 },
+  { title: "Water", icon: "💧", lengthMin: 1 },
+  { title: "Meditate", icon: "🧘", lengthMin: 10 },
+];
+
+/** suggested-reorder.md: Meditate lifted to 7:07, over Water. */
+const REORDERING: ItemSeed[] = [
+  THREE_ADDED[0]!,
+  THREE_ADDED[2]!,
+  THREE_ADDED[1]!,
+];
+
+/** suggested-past-span.md: Yoga and Cold bath make 68 of 60 min. */
+const PAST_SPAN: ItemSeed[] = [
+  ...THREE_ADDED,
+  { title: "Yoga", icon: "🪷", lengthMin: 45 },
+  { title: "Cold bath", icon: "🧊", lengthMin: 10 },
+];
+
 export function blockEditRecords(
   wellness: ItemSeed[] = WELLNESS,
+  extra: {
+    /** Thursday's Wellness items; it is new and empty without them. */
+    thursday?: ItemSeed[];
+    /** A new Tuesday Evening, 21:00 to 22:30 (suggested-first-of-kind.md). */
+    tuesdayEvening?: boolean;
+  } = {},
 ): FixtureRecords {
   const blocks = [
     block({
@@ -227,6 +265,19 @@ export function blockEditRecords(
       weekday: 3,
       fill: "set_items",
     }),
+    ...(extra.tuesdayEvening
+      ? [
+          block({
+            id: B.eveningTuesday,
+            kind: "evening",
+            name: "Evening",
+            startsAt: "21:00",
+            endsAt: "22:30",
+            weekday: 1,
+            fill: "set_items",
+          }),
+        ]
+      : []),
     // A checklist with no times: the whole date (D-USE-28).
     block({
       id: B.sunday,
@@ -285,6 +336,7 @@ export function blockEditRecords(
         lengthMin: 20,
       },
     ]),
+    ...items(B.wellnessThursday, 41, extra.thursday ?? []),
     ...items(B.sunday, 31, [
       { title: "Groceries", icon: "🛒" },
       { title: "Laundry", icon: "🧺" },
@@ -322,7 +374,38 @@ export const BLOCK_EDIT_PATHS = {
     date: "2026-10-15",
   }),
   "set-work": usual(B.writing, 1),
+  /** USE-158: the ··· open with Delete block, then its one question. */
+  "delete-block-menu": usual(B.wellness, 0),
+  "delete-block-confirm": usual(B.wellness, 0),
 } as const;
+
+/** USE-156: the suggested states, under their own names (suggested.md). */
+export const SUGGESTED_PATHS = {
+  "suggested-new": usual(B.wellnessThursday, 3),
+  "suggested-added": usual(B.wellnessThursday, 3),
+  "suggested-reorder": usual(B.wellnessThursday, 3),
+  "suggested-past-span": usual(B.wellnessThursday, 3),
+  "suggested-first-of-kind": usual(B.eveningTuesday, 1),
+  /** USE-157: suggested-added with Meditate's length open at 15 min. */
+  "suggested-length": usual(B.wellnessThursday, 3),
+} as const;
+
+function suggested(
+  name: keyof typeof SUGGESTED_PATHS,
+  records: () => FixtureRecords,
+  extra: Partial<Scenario> = {},
+): [string, () => Scenario] {
+  return [
+    name,
+    () => ({
+      name,
+      now: SET_UP_NOW,
+      records: records(),
+      mode: "ready",
+      ...extra,
+    }),
+  ];
+}
 
 function editing(
   state: keyof typeof BLOCK_EDIT_PATHS,
@@ -359,4 +442,27 @@ export const BLOCK_EDIT_SCENARIOS: Record<string, () => Scenario> =
     editing("life-set"),
     editing("life-not-this-week", { view: { open: "header-menu" } }),
     editing("set-work"),
+    editing("delete-block-menu", { view: { open: "header-menu" } }),
+    editing("delete-block-confirm", { view: { open: "delete-confirm" } }),
+    suggested("suggested-new", () => blockEditRecords()),
+    suggested("suggested-added", () =>
+      blockEditRecords(WELLNESS, { thursday: THREE_ADDED }),
+    ),
+    suggested(
+      "suggested-reorder",
+      () => blockEditRecords(WELLNESS, { thursday: REORDERING }),
+      // Meditate (the second row) held mid-drag, as edit-dragging.md.
+      { view: { open: `lifted:${B.items.liftedMeditate}` } },
+    ),
+    suggested("suggested-past-span", () =>
+      blockEditRecords(WELLNESS, { thursday: PAST_SPAN }),
+    ),
+    suggested("suggested-first-of-kind", () =>
+      blockEditRecords(WELLNESS, { tuesdayEvening: true }),
+    ),
+    suggested(
+      "suggested-length",
+      () => blockEditRecords(WELLNESS, { thursday: THREE_ADDED }),
+      { view: { open: `length:${B.items.addedMeditate}=15` } },
+    ),
   ]);

@@ -4,8 +4,6 @@
   "docs/_generated/": "stays in the toolkit",
   "docs/_generated/directory-map.md": "stays in the toolkit",
   "docs/research/engineering/model-selection-claude-code.md": "stays in the toolkit",
-  "docs/runbooks/postmortem/": "stays in the toolkit",
-  "docs/runbooks/postmortem/convention-log.md": "stays in the toolkit",
   "docs/runbooks/migrate/README.md": "stays in the toolkit",
   "yarn migrate:assess": "stays in the toolkit",
   "docs/runbooks/new-project/README.md": "stays in the toolkit",

@@ -20,7 +20,7 @@ rulings: [D-USE-24, D-USE-28, D-USE-69]
 As [`success.md`](success.md), except:
 
 - ··· pressed: the round button fills ink with white dots.
-- A pull-down (`DropdownMenu`) under it, its trailing edge on the column's: `--color-background` fill, hairline border, 10 px radius, one soft shadow (D-USE-28). Title "Today's Wellness only" (caption, semibold, muted). Then "Rename" (pencil), "Icon and colour" (a dotted circle), a 1 px separator, "Delete block" (trash). Each row: a muted icon at the leading edge, the word in ink. Delete block is ink, never red.
+- A pull-down (`DropdownMenu`) under it, its trailing edge on the column's: `--color-background` fill, hairline border, 10 px radius, one soft shadow (D-USE-28). Title "Today's Wellness only" (caption, semibold, muted). Then "Rename" (pencil), "Icon and colour" (the block's own icon in its colour; a dotted circle only while the block has none, Taylor 2026-10-19, USE-144), a 1 px separator, "Delete block" (trash). Each row: a muted icon at the leading edge, the word in ink. Delete block is ink, never red.
 - The menu covers the trailing part of the first rows ("Pee and…", "Start the…"); the rest unchanged.
 
 ## What the person can do
@@ -47,6 +47,10 @@ As [`success.md`](success.md), except:
 - D-USE-24: Edit beside a round ···; ··· opens a pull-down titled with its scope: Rename, Icon and colour, then Delete block, each with a trailing icon.
 - D-USE-28 (later, wins): menus are shadcn dropdowns with leading muted icons and 1 px separators; the frame draws the icons leading, so the note's "trailing icon" is superseded by the frame and D-USE-28.
 - open-1 (step 3 round 1, drawn): `[ASSUMPTION]` Delete block, from the day, asks once and offers Undo after. Decided (D-USE-69), as drawn: Delete block asks once (a confirm naming "today's Wellness only"), then the block goes from today, Block view returns to the day, and a `Toaster` offers Undo; Monday's usual keeps it. The confirm is not drawn [ASSUMPTION: a `Dialog` as Now's Start while one runs].
+
+## From Set my days (USE-158)
+
+The same menu in editing, titled with its scope, "Every Monday's Wellness" or "This Thursday's Wellness": Rename, Icon and colour, a separator, "Delete block" (trash, ink). It asks once, "Delete every Monday's Wellness?" with "Wellness goes from every Monday, items and all. Other days keep theirs." ("Keep it" or "Delete block"); then Block view returns to Set my days and a toast reads "Every Monday's Wellness deleted." with Undo. In the usual week the weekday leaves the block; a block with no weekday left is archived, its items kept, so Undo brings it all back. From This week, "This Thursday only. Every Thursday's Wellness stays.": the date skips it. A dated Life block keeps its Not this week in that place, which does the same [ASSUMPTION].
 
 ## Widths
 

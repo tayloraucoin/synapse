@@ -330,6 +330,15 @@ export function connectionsRoute(
 }
 
 /**
+ * Settings › Morning reading (USE-151; D-USE-119): the passages and links
+ * Orient reads, in its order. Opened from Settings, after Connections;
+ * Orient has no link here.
+ */
+export function morningReadingRoute(): string {
+  return `${settingsRoute()}/morning-reading`;
+}
+
+/**
  * `?failed=linear` or `?failed=google` on Connections (USE-100, USE-103): the OAuth callback refused or
  * failed, so the Add row opens on "Not connected. Try again." Cleared once
  * read.

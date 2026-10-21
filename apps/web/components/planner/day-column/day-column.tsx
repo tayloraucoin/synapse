@@ -577,11 +577,13 @@ function OrientLine({
   return (
     <div
       data-orient-line
-      style={{ top: `${topPx}px`, insetInlineStart: `${GUTTER_PX}px` }}
+      // Centred on the hour hairline's middle: its 1 px top border runs from topPx to topPx + 1.
+      style={{ top: `${topPx + 0.5}px`, insetInlineStart: `${GUTTER_PX}px` }}
       className="absolute end-0 flex -translate-y-1/2 items-center gap-(--space-2)"
     >
       <span aria-hidden="true" className="h-0.5 w-45 shrink-0 bg-foreground" />
-      <span className="flex items-center gap-(--space-1) text-muted-foreground">
+      {/* The chip paints over the hour hairline, so none runs through the words (D-USE-134). */}
+      <span className="flex h-5 items-center gap-(--space-1) rounded-full bg-background px-(--space-2) text-muted-foreground">
         <LockedIcon aria-hidden="true" className="size-2.5" />
         <Text as="span" variant="caption" tone="muted">
           {label ?? COPY.orient(lengthMin)}

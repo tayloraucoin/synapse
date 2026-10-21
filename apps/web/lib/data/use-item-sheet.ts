@@ -13,6 +13,7 @@ import {
   clockToMinutes,
   estimationTypeOf,
   reflowItems,
+  usedBefore,
 } from "@syn/utils";
 import type { BlockItemRecord, SlotRecord } from "@syn/validators";
 import { ITEM_SHEET_COPY } from "@/components/planner/item-sheet/copy";
@@ -232,28 +233,18 @@ function layOut(block: ItemSheetBlock, rows: readonly Row[]) {
 
 /**
  * The library of a kind (refinement 7): every item in a block of that kind,
- * one per title, transitions left out [ASSUMPTION: the library has no table
- * yet; where it lives once wired is the wiring's]. What else is in the
- * current block on the date is not offered: it is already there.
+ * one per title, transitions and meals left out, with its last length
+ * (USE-155: `usedBefore`, the list Block view's suggestions read too).
+ * What else is in the current block on the date is not offered.
  */
 function libraryOf(
   records: TodayRecords,
   block: ItemSheetBlock,
   rows: readonly Row[],
 ): BlockItemRecord[] {
-  const kinds = new Set(
-    records.blocks.filter((b) => b.kind === block.kind).map((b) => b.id),
-  );
-  const here = new Set(rows.map((row) => row.title));
-  const seen = new Set<string>();
-  return records.blockItems.filter((item) => {
-    if (!kinds.has(item.blockId) || item.isTransition || item.meal) {
-      return false;
-    }
-    if (item.onDate !== null && item.onDate !== records.date) return false;
-    if (here.has(item.title) || seen.has(item.title)) return false;
-    seen.add(item.title);
-    return true;
+  return usedBefore(records, block.kind, {
+    inBlock: rows.map((row) => row.title),
+    date: records.date,
   });
 }
 

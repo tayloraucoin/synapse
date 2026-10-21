@@ -6,6 +6,8 @@ import type { BlockFill, IconValue } from "@syn/types";
 import {
   Button,
   cn,
+  ConfirmDialog,
+  DeleteIcon,
   EditIcon,
   IconAndColourIcon,
   Input,
@@ -19,7 +21,13 @@ import {
   toast,
   toastUndo,
 } from "@syn/ui";
-import { formatMinutesShort, weekdayIndex, weekKeyOf } from "@syn/utils";
+import {
+  clockFromMinutes,
+  clockToMinutes,
+  formatMinutesShort,
+  weekdayIndex,
+  weekKeyOf,
+} from "@syn/utils";
 import {
   NowBlockMenu,
   OfflineLine,
@@ -35,20 +43,29 @@ import {
   EditingAddRow,
   KindSelectRow,
   KindSwitchRow,
+  LengthStepper,
   MealTopicOffers,
   rowHeightPx,
   SetTimeMark,
   spanLabel,
+  SpanTotal,
+  SuggestedList,
   SwipeRow,
   type BlockViewBody,
+  type SuggestedListRow,
 } from "@/components/planner/block-view";
 import { IconPickerStep } from "@/components/planner/icon-picker-step";
+import { KIND_WORDS } from "@/components/planner/new-block-sheet/form";
 import {
   blockEditMeta,
   isDated,
   isTimeless,
   scopeWords,
+  spanTotal,
+  stepLength,
   stretchesRows,
+  suggestionsFor,
+  withDraftLength,
   type BlockEditPlace,
 } from "@/lib/data/block-edit";
 import { reachWords, weekdayName } from "@/lib/data/set-up-view";
@@ -64,6 +81,7 @@ import {
 import { useMealLeftOut } from "@/lib/data/use-meal-left-out";
 import { useMealTopics } from "@/lib/data/use-meal-topics";
 import { useTodayBlockLook } from "@/lib/data/use-today-block-look";
+import { useWeekQuery } from "@/lib/data/use-week";
 import {
   DAYS_BLOCK_PARAMS,
   DAYS_BLOCK_WEEKDAYS,
@@ -151,6 +169,11 @@ export function DaysBlockScreen({
   const dayName = weekdayName(weekday);
 
   const rowsQuery = useBlockView({ blockId, ...place, transitions: true });
+  // USE-156: the kind's suggestions, read from the same week.
+  const suggestions =
+    useWeekQuery(dated ? weekKeyOf(place.date) : "usual", (records) =>
+      suggestionsFor(records, blockId, weekday),
+    ).data ?? null;
   const writes = useBlockEditWrites(blockId, place);
   const topics = useMealTopics();
   const [leftOut, toggleTopic] = useMealLeftOut(
@@ -162,12 +185,30 @@ export function DaysBlockScreen({
   const [swipeId, setSwipeId] = React.useState<string | null>(null);
   const [menuId, setMenuId] = React.useState<string | null>(null);
   const [renaming, setRenaming] = React.useState(false);
+  // USE-158: Delete block's one question; `?state=` may open it.
+  const [confirmingDelete, setConfirmingDelete] = React.useState(
+    view?.open === "delete-confirm",
+  );
   const [picking, setPicking] = React.useState<"block" | "add" | null>(null);
   const [addIcon, setAddIcon] = React.useState<IconValue | null>(null);
   const [settingTime, setSettingTime] = React.useState(
     view?.open === "set-a-time",
   );
   const [savingOrder, setSavingOrder] = React.useState<string[] | null>(null);
+  // "Add one" opens the add row again; a new key mounts it open.
+  const [addOpened, setAddOpened] = React.useState(0);
+  // `?state=suggested-reorder`: a row held mid-drag, as edit-dragging.md.
+  const liftedId = seeded(view?.open, "lifted");
+  // USE-157: a row's length open in place, and its value until it saves.
+  // `?state=suggested-length` seeds "length:<id>=<min>".
+  const [length, setLength] = React.useState<{
+    id: string;
+    value: number;
+    open: boolean;
+  } | null>(() => {
+    const [id, value] = seeded(view?.open, "length")?.split("=") ?? [];
+    return id && value ? { id, value: Number(value), open: true } : null;
+  });
   const [announcement, setAnnouncement] = React.useState("");
   const reachShown = React.useRef(false);
 
@@ -241,11 +282,19 @@ export function DaysBlockScreen({
   }
 
   const order = savingOrder;
-  const shown = data
+  const ordered = data
     ? order
       ? inOrderOf(data, order)
       : { items: data.items, reflow: data.reflow }
     : null;
+  // A drafted length flows like a saved one: the total and later times follow.
+  const shown =
+    data && ordered && length
+      ? withDraftLength(data, ordered.items, {
+          id: length.id,
+          lengthMin: length.value,
+        })
+      : ordered;
   const items = shown ? inTimeOrder(shown.items) : [];
 
   async function remove(item: BlockViewItem) {
@@ -301,6 +350,39 @@ export function DaysBlockScreen({
       .catch(() => {});
   }
 
+  /**
+   * A suggestion's +: one item at the end with its title, icon and length.
+   * No toast, the reach's included: the row is the proof (D-USE-135).
+   */
+  function addSuggested(row: SuggestedListRow) {
+    setAnnouncement(COPY.added(row.title));
+    void writes
+      .add(row.title, data?.items ?? [], row.icon, row.lengthMin)
+      .catch(() => {});
+  }
+
+  function openLength(item: BlockViewItem) {
+    setLength({ id: item.id, value: item.lengthMin ?? 5, open: true });
+  }
+
+  /** Return or a tap elsewhere: one write, and only for a new value. */
+  function commitLength() {
+    if (!length) return;
+    const saved = data?.items.find((item) => item.id === length.id);
+    if (!saved || saved.lengthMin === length.value) {
+      setLength(null);
+      return;
+    }
+    setLength({ ...length, open: false });
+    setAnnouncement(COPY.lengthSaved(saved.title, length.value));
+    void writes
+      .length(saved, length.value)
+      .catch(() => {})
+      .finally(() =>
+        setLength((now) => (now?.id === saved.id && !now.open ? null : now)),
+      );
+  }
+
   function editBlock(patch: Parameters<typeof writes.editBlock>[0]) {
     void writes
       .editBlock(patch)
@@ -325,11 +407,28 @@ export function DaysBlockScreen({
     });
   }
 
+  // "Every Monday" or "This Thursday": the menu's title and the delete's words.
+  const menuScope = dated ? `This ${dayName}` : `Every ${dayName}`;
+
+  async function deleteBlock() {
+    setConfirmingDelete(false);
+    const write = await writes.deleteBlock();
+    router.push(back);
+    toastUndo({
+      text: COPY.deleted(menuScope, name),
+      onUndo: () => void writes.undo(write.undo),
+    });
+  }
+
   const menuRows: NowBlockMenuRow[] = [
     { label: COPY.rename, icon: EditIcon, onSelect: () => setRenaming(true) },
     {
       label: COPY.iconAndColour,
       icon: IconAndColourIcon,
+      // The block's own icon in its colour; the dashed circle only when unset.
+      glyph: record?.icon ? (
+        <ItemIcon icon={record.icon} size={20} className="size-4" />
+      ) : undefined,
       onSelect: () => setPicking("block"),
     },
     // D-USE-87: Not this week, a row in the block's ··· from This week.
@@ -342,7 +441,15 @@ export function DaysBlockScreen({
             separated: true,
           },
         ]
-      : []),
+      : [
+          // A dated Life block's Not this week already frees the date [ASSUMPTION].
+          {
+            label: COPY.deleteBlock,
+            icon: DeleteIcon,
+            onSelect: () => setConfirmingDelete(true),
+            separated: true,
+          },
+        ]),
   ];
 
   const actions = (
@@ -356,10 +463,7 @@ export function DaysBlockScreen({
       </button>
       <NowBlockMenu
         label={COPY.more(name)}
-        title={COPY.menuTitle(
-          dated ? `This ${dayName}` : `Every ${dayName}`,
-          name,
-        )}
+        title={COPY.menuTitle(menuScope, name)}
         rows={menuRows}
         defaultOpen={view?.open === "header-menu"}
       />
@@ -468,6 +572,11 @@ export function DaysBlockScreen({
   ) : null;
 
   const reflow = shown?.reflow ?? null;
+  const listed = suggestions !== null && !timeless;
+  const total =
+    listed && startsAt !== null && endsAt !== null
+      ? spanTotal({ startsAt, endsAt }, items)
+      : null;
   const flat = !stretchesRows(kind) || timeless;
   const body: BlockViewBody<BlockViewItem> =
     !rowsQuery.isError && work
@@ -509,27 +618,43 @@ export function DaysBlockScreen({
                   label: name,
                   block: { startsAt, endsAt },
                   timeless,
-                  rowHeight: (row) => (flat ? 56 : rowHeightPx(row.lengthMin)),
-                  reorder: { onReorder: onDrop },
+                  // The open row sizes to its name, hint and stepper (suggested-length.md).
+                  rowHeight: (row) =>
+                    flat || (length?.open && length.id === row.id)
+                      ? 56
+                      : rowHeightPx(row.lengthMin),
+                  reorder: { onReorder: onDrop, frozenId: liftedId },
                   leading: (row) => (
                     <ItemIcon icon={row.icon} size={24} className="shrink-0" />
                   ),
-                  title: (row) => (
-                    <button
-                      type="button"
-                      data-row-open
-                      onClick={() => openItemSheet(row, false)}
-                      className={cn(
-                        "max-w-full truncate rounded-(--radius-control) text-start text-(length:--fs-body) outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        // A transition in the flow: italic, muted (training-editing.md).
-                        row.isTransition && "text-text-muted italic",
-                      )}
-                    >
-                      {row.title}
-                    </button>
-                  ),
+                  title: (row) => {
+                    const name = (
+                      <button
+                        type="button"
+                        data-row-open
+                        onClick={() => openItemSheet(row, false)}
+                        className={cn(
+                          "max-w-full truncate rounded-(--radius-control) text-start text-(length:--fs-body) outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                          // A transition in the flow: italic, muted (training-editing.md).
+                          row.isTransition && "text-text-muted italic",
+                        )}
+                      >
+                        {row.title}
+                      </button>
+                    );
+                    if (length?.open !== true || length.id !== row.id)
+                      return name;
+                    return (
+                      <span className="flex flex-col items-start gap-(--space-1) whitespace-normal">
+                        {name}
+                        <Text as="span" variant="secondary" tone="muted">
+                          {BLOCK_VIEW_COPY.editing.length.hint}
+                        </Text>
+                      </span>
+                    );
+                  },
                   trailing: (row, slots) => {
-                    const length = timeless ? null : slots.length;
+                    const lengthWords = timeless ? null : slots.length;
                     const swap =
                       kind === "training" && !row.isTransition ? (
                         <Button
@@ -547,18 +672,60 @@ export function DaysBlockScreen({
                       return (
                         <>
                           {swap}
-                          <SetTimeMark atTime={row.atTime} length={length} />
+                          <SetTimeMark
+                            atTime={row.atTime}
+                            length={lengthWords}
+                          />
                         </>
                       );
                     }
+                    if (length?.open && length.id === row.id) {
+                      return (
+                        <>
+                          {swap}
+                          <LengthStepper
+                            name={row.title}
+                            value={length.value}
+                            step={stepLength}
+                            onChange={(value) =>
+                              setLength({ id: row.id, value, open: true })
+                            }
+                            onCommit={commitLength}
+                            onCancel={() => setLength(null)}
+                          />
+                        </>
+                      );
+                    }
+                    const words =
+                      lengthWords === null
+                        ? null
+                        : row.lengthMin === null
+                          ? lengthWords
+                          : formatMinutesShort(row.lengthMin);
+                    // From a date only the date's own item has a length to write.
+                    const steppable =
+                      words !== null &&
+                      !row.isTransition &&
+                      (!dated || row.onDate !== null);
                     return (
                       <>
                         {swap}
-                        {length === null ? null : (
+                        {words === null ? null : steppable ? (
+                          <button
+                            type="button"
+                            data-no-swipe
+                            aria-label={BLOCK_VIEW_COPY.editing.length.open(
+                              row.title,
+                              words,
+                            )}
+                            onClick={() => openLength(row)}
+                            className="text-text-muted -mx-(--space-1) flex min-h-(--target) shrink-0 items-center rounded-(--radius-control) px-(--space-1) text-(length:--fs-caption) leading-(--lh-caption) tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            {words}
+                          </button>
+                        ) : (
                           <span className="text-text-muted shrink-0 text-(length:--fs-caption) leading-(--lh-caption) tabular-nums">
-                            {row.lengthMin === null
-                              ? length
-                              : formatMinutesShort(row.lengthMin)}
+                            {words}
                           </span>
                         )}
                         {slots.grip}
@@ -612,13 +779,18 @@ export function DaysBlockScreen({
                       </Text>
                       <Caption>{COPY.trueBreakLine}</Caption>
                     </div>
-                  ) : (
+                  ) : listed ? null : (
+                    // With the list, the total says it: "Nothing in Wellness yet".
                     <Text as="p" variant="body">
                       {COPY.empty(name)}
                     </Text>
                   ),
                   add: {
-                    at: items.length === 0 ? startsAt : reflow.freeFrom,
+                    // Past the span there is no free time; the row sits where the last ends.
+                    at:
+                      items.length === 0
+                        ? startsAt
+                        : (reflow.freeFrom ?? endOfRows(items)),
                     node: (
                       <EditingAddRow
                         label={
@@ -628,12 +800,36 @@ export function DaysBlockScreen({
                         onSubmit={add}
                         icon={addIcon}
                         onPickIcon={() => setPicking("add")}
-                        autoOpen={isNew || view?.open === "add"}
-                        hint={isNew ? BLOCK_VIEW_COPY.editing.addHint : null}
+                        key={addOpened}
+                        // A new block opens on its suggestions, the keyboard down (D-USE-135).
+                        autoOpen={
+                          (isNew && !listed) ||
+                          view?.open === "add" ||
+                          addOpened > 0
+                        }
+                        hint={
+                          isNew && !listed
+                            ? BLOCK_VIEW_COPY.editing.addHint
+                            : null
+                        }
                       />
                     ),
                   },
                   afterAdd,
+                  suggestions:
+                    listed && suggestions ? (
+                      <SuggestedList
+                        usedBefore={suggestions.usedBefore}
+                        seed={suggestions.seed}
+                        kind={
+                          KIND_WORDS[kind as keyof typeof KIND_WORDS] ?? name
+                        }
+                        hue={hueOf(record?.icon, kind)}
+                        onAdd={addSuggested}
+                        onAddOne={() => setAddOpened((n) => n + 1)}
+                      />
+                    ) : null,
+                  openId: length?.open ? length.id : null,
                   freeFrom: reflow.freeFrom,
                   overMin: reflow.overMin,
                   peek: peekOf(data, endsAt),
@@ -660,6 +856,17 @@ export function DaysBlockScreen({
         headingRef={headingRef}
         titleField={titleField}
         actions={actions}
+        total={
+          total && endsAt !== null ? (
+            <SpanTotal
+              block={name}
+              {...total}
+              end={clockLabel(endsAt)}
+              hue={hueOf(record?.icon, kind)}
+            />
+          ) : null
+        }
+        scope={liftedId !== null ? BLOCK_VIEW_COPY.suggested.reorderHint : null}
         status={offline ? <OfflineLine text={COPY.offline} /> : null}
         kindRows={kindRows}
         body={body}
@@ -697,6 +904,16 @@ export function DaysBlockScreen({
         />
       </ResponsiveSheet>
 
+      <ConfirmDialog
+        open={confirmingDelete}
+        onOpenChange={setConfirmingDelete}
+        title={COPY.deleteTitle(scopeWords(place, weekday), name)}
+        description={COPY.deleteBody(dated, name, dayName)}
+        confirmLabel={COPY.deleteConfirm}
+        cancelLabel={COPY.keep}
+        onConfirm={() => void deleteBlock()}
+      />
+
       <SetATimeSheet
         open={settingTime}
         onOpenChange={setSettingTime}
@@ -707,6 +924,14 @@ export function DaysBlockScreen({
       />
     </>
   );
+}
+
+/** "HH:MM" where the last row ends: the add row's rail past the span. */
+function endOfRows(rows: readonly BlockViewItem[]): string | null {
+  const ends = rows.map(
+    (row) => clockToMinutes(row.startsAt) + (row.lengthMin ?? 0),
+  );
+  return ends.length === 0 ? null : clockFromMinutes(Math.max(...ends));
 }
 
 function Caption({ children }: { children: React.ReactNode }) {

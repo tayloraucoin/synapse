@@ -1,0 +1,33 @@
+{
+  "id": "USE-158",
+  "criteria_sha256": "e14afc94f6c5496ac2922c1114ffad655b921224a146c5fa9e36aec9a79522b1",
+  "criteria": {
+    "C1": {
+      "status": "PASS",
+      "evidence": "test",
+      "run": {
+        "command": "yarn test",
+        "exit": 0,
+        "at": "2026-10-21T01:58:47Z",
+        "head": "85a70ff09f738d051b999486f730fde25f477768",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-158-delete-block-set-my-days/evidence/C1.log",
+        "evidence_sha256": "ae145045c7edc023f35765c9c96171c50c1f26dca255d80042acd33457e99221",
+        "tests": 36
+      }
+    },
+    "C2": {
+      "status": "PASS",
+      "evidence": "capture",
+      "run": {
+        "command": "yarn contract:record USE-158 C2 --evidence specs/web/epics/USE-daily-use/tickets/USE-158-delete-block-set-my-days/evidence",
+        "exit": 0,
+        "at": "2026-10-21T01:59:07Z",
+        "head": "85a70ff09f738d051b999486f730fde25f477768",
+        "evidence_path": "specs/web/epics/USE-daily-use/tickets/USE-158-delete-block-set-my-days/evidence",
+        "evidence_sha256": "ecb35dd5b291fe845a251f333dd620e5f6a8262c1248be42108afed2e81b105b"
+      }
+    }
+  },
+  "built_at": "2026-10-21T01:59:14Z",
+  "updated_at": "2026-10-21T01:59:14Z"
+}

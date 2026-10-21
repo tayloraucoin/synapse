@@ -19,7 +19,8 @@
  * NO UNIQUE URL. The same playlist saved twice under two names is the
  * person's list, not a mistake.
  *
- * ARCHIVE, NEVER DELETE, as passages. `sort_order` is the frame's order.
+ * Archive is rest; delete only from archive (D-USE-125), as passages.
+ * `sort_order` is the frame's order.
  *
  * POLICIES: owner-private CRUD.
  */
