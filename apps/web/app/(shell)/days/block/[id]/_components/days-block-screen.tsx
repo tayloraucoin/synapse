@@ -594,7 +594,11 @@ export function DaysBlockScreen({
                   label: name,
                   block: { startsAt, endsAt },
                   timeless,
-                  rowHeight: (row) => (flat ? 56 : rowHeightPx(row.lengthMin)),
+                  // The open row sizes to its name, hint and stepper (suggested-length.md).
+                  rowHeight: (row) =>
+                    flat || (length?.open && length.id === row.id)
+                      ? 56
+                      : rowHeightPx(row.lengthMin),
                   reorder: { onReorder: onDrop, frozenId: liftedId },
                   leading: (row) => (
                     <ItemIcon icon={row.icon} size={24} className="shrink-0" />
