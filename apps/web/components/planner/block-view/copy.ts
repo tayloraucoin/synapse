@@ -40,4 +40,19 @@ export const BLOCK_VIEW_COPY = {
     setATime: "Set a time",
     swap: "Swap",
   },
+  /** The suggestion list and the span total (USE-156; suggested.md, Words). */
+  suggested: {
+    usedBefore: "Used before",
+    suggestedFor: (kind: string) => `Suggested for ${kind}`,
+    addOne: "Add one",
+    /** The + on a row [PROPOSED]: "Add Water, 1 min". */
+    add: (name: string, length: string) => `Add ${name}, ${length}`,
+    planned: (min: number, span: number) => `${min} of ${span} min`,
+    free: (min: number) => `${min} min free`,
+    nothingIn: (block: string) => `Nothing in ${block} yet`,
+    runsPast: (min: number, end: string) => `Runs ${min} min past ${end}`,
+    /** The meter's name [PROPOSED]: "Wellness planned". */
+    meter: (block: string) => `${block} planned`,
+    reorderHint: "Hold a grip to move one. Times follow the order.",
+  },
 } as const;

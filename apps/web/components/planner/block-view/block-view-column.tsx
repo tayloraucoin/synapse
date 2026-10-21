@@ -90,6 +90,11 @@ export interface BlockViewColumnProps<R extends BlockViewRowModel> {
   timeless?: boolean;
   /** Under the add row: the kinds' lines, the topics, Set a time. */
   afterAdd?: React.ReactNode;
+  /**
+   * After those, the suggestion list (USE-156): it takes the place of the
+   * "Free until" region, which the span total now says.
+   */
+  suggestions?: React.ReactNode;
 }
 
 /** The rail: 44 px. */
@@ -206,6 +211,7 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
   rowHeight,
   timeless = false,
   afterAdd = null,
+  suggestions = null,
 }: BlockViewColumnProps<R>) {
   const endMin = clockMinutes(block.endsAt);
   const over = !timeless && overMin > 0;
@@ -340,7 +346,13 @@ export function BlockViewColumn<R extends BlockViewRowModel>({
         </div>
       ) : null}
 
-      {!timeless && !over && freeFrom !== null ? (
+      {suggestions ? (
+        <div className={cn("pb-(--space-3)", !timeless && "ps-11")}>
+          {suggestions}
+        </div>
+      ) : null}
+
+      {!timeless && !over && freeFrom !== null && !suggestions ? (
         <div className="flex pb-(--space-2)">
           <span className={RAIL} />
           <div

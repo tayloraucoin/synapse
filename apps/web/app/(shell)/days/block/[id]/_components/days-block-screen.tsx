@@ -39,16 +39,22 @@ import {
   rowHeightPx,
   SetTimeMark,
   spanLabel,
+  SpanTotal,
+  SuggestedList,
   SwipeRow,
   type BlockViewBody,
+  type SuggestedListRow,
 } from "@/components/planner/block-view";
 import { IconPickerStep } from "@/components/planner/icon-picker-step";
+import { KIND_WORDS } from "@/components/planner/new-block-sheet/form";
 import {
   blockEditMeta,
   isDated,
   isTimeless,
   scopeWords,
+  spanTotal,
   stretchesRows,
+  suggestionsFor,
   type BlockEditPlace,
 } from "@/lib/data/block-edit";
 import { reachWords, weekdayName } from "@/lib/data/set-up-view";
@@ -64,6 +70,7 @@ import {
 import { useMealLeftOut } from "@/lib/data/use-meal-left-out";
 import { useMealTopics } from "@/lib/data/use-meal-topics";
 import { useTodayBlockLook } from "@/lib/data/use-today-block-look";
+import { useWeekQuery } from "@/lib/data/use-week";
 import {
   DAYS_BLOCK_PARAMS,
   DAYS_BLOCK_WEEKDAYS,
@@ -151,6 +158,11 @@ export function DaysBlockScreen({
   const dayName = weekdayName(weekday);
 
   const rowsQuery = useBlockView({ blockId, ...place, transitions: true });
+  // USE-156: the kind's suggestions, read from the same week.
+  const suggestions =
+    useWeekQuery(dated ? weekKeyOf(place.date) : "usual", (records) =>
+      suggestionsFor(records, blockId, weekday),
+    ).data ?? null;
   const writes = useBlockEditWrites(blockId, place);
   const topics = useMealTopics();
   const [leftOut, toggleTopic] = useMealLeftOut(
@@ -168,6 +180,10 @@ export function DaysBlockScreen({
     view?.open === "set-a-time",
   );
   const [savingOrder, setSavingOrder] = React.useState<string[] | null>(null);
+  // "Add one" opens the add row again; a new key mounts it open.
+  const [addOpened, setAddOpened] = React.useState(0);
+  // `?state=suggested-reorder`: a row held mid-drag, as edit-dragging.md.
+  const liftedId = seeded(view?.open, "lifted");
   const [announcement, setAnnouncement] = React.useState("");
   const reachShown = React.useRef(false);
 
@@ -298,6 +314,17 @@ export function DaysBlockScreen({
     void writes
       .add(title, data?.items ?? [], icon, timeless ? null : 5)
       .then(named)
+      .catch(() => {});
+  }
+
+  /**
+   * A suggestion's +: one item at the end with its title, icon and length.
+   * No toast, the reach's included: the row is the proof (D-USE-135).
+   */
+  function addSuggested(row: SuggestedListRow) {
+    setAnnouncement(COPY.added(row.title));
+    void writes
+      .add(row.title, data?.items ?? [], row.icon, row.lengthMin)
       .catch(() => {});
   }
 
@@ -472,6 +499,11 @@ export function DaysBlockScreen({
   ) : null;
 
   const reflow = shown?.reflow ?? null;
+  const listed = suggestions !== null && !timeless;
+  const total =
+    listed && startsAt !== null && endsAt !== null
+      ? spanTotal({ startsAt, endsAt }, items)
+      : null;
   const flat = !stretchesRows(kind) || timeless;
   const body: BlockViewBody<BlockViewItem> =
     !rowsQuery.isError && work
@@ -514,7 +546,7 @@ export function DaysBlockScreen({
                   block: { startsAt, endsAt },
                   timeless,
                   rowHeight: (row) => (flat ? 56 : rowHeightPx(row.lengthMin)),
-                  reorder: { onReorder: onDrop },
+                  reorder: { onReorder: onDrop, frozenId: liftedId },
                   leading: (row) => (
                     <ItemIcon icon={row.icon} size={24} className="shrink-0" />
                   ),
@@ -616,7 +648,8 @@ export function DaysBlockScreen({
                       </Text>
                       <Caption>{COPY.trueBreakLine}</Caption>
                     </div>
-                  ) : (
+                  ) : listed ? null : (
+                    // With the list, the total says it: "Nothing in Wellness yet".
                     <Text as="p" variant="body">
                       {COPY.empty(name)}
                     </Text>
@@ -632,12 +665,35 @@ export function DaysBlockScreen({
                         onSubmit={add}
                         icon={addIcon}
                         onPickIcon={() => setPicking("add")}
-                        autoOpen={isNew || view?.open === "add"}
-                        hint={isNew ? BLOCK_VIEW_COPY.editing.addHint : null}
+                        key={addOpened}
+                        // A new block opens on its suggestions, the keyboard down (D-USE-135).
+                        autoOpen={
+                          (isNew && !listed) ||
+                          view?.open === "add" ||
+                          addOpened > 0
+                        }
+                        hint={
+                          isNew && !listed
+                            ? BLOCK_VIEW_COPY.editing.addHint
+                            : null
+                        }
                       />
                     ),
                   },
                   afterAdd,
+                  suggestions:
+                    listed && suggestions ? (
+                      <SuggestedList
+                        usedBefore={suggestions.usedBefore}
+                        seed={suggestions.seed}
+                        kind={
+                          KIND_WORDS[kind as keyof typeof KIND_WORDS] ?? name
+                        }
+                        hue={hueOf(record?.icon, kind)}
+                        onAdd={addSuggested}
+                        onAddOne={() => setAddOpened((n) => n + 1)}
+                      />
+                    ) : null,
                   freeFrom: reflow.freeFrom,
                   overMin: reflow.overMin,
                   peek: peekOf(data, endsAt),
@@ -664,6 +720,19 @@ export function DaysBlockScreen({
         headingRef={headingRef}
         titleField={titleField}
         actions={actions}
+        total={
+          total && endsAt !== null ? (
+            <SpanTotal
+              block={name}
+              {...total}
+              end={clockLabel(endsAt)}
+              hue={hueOf(record?.icon, kind)}
+            />
+          ) : null
+        }
+        scope={
+          liftedId !== null ? BLOCK_VIEW_COPY.suggested.reorderHint : null
+        }
         status={offline ? <OfflineLine text={COPY.offline} /> : null}
         kindRows={kindRows}
         body={body}

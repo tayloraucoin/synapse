@@ -46,3 +46,9 @@ export {
   TodosAddMenu,
   type TodosAddMenuProps,
 } from "./todos-add-menu";
+export { SpanTotal, type SpanTotalProps } from "./span-total";
+export {
+  SuggestedList,
+  type SuggestedListProps,
+  type SuggestedListRow,
+} from "./suggested-list";

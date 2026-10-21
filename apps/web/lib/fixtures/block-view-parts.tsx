@@ -2,7 +2,10 @@
 
 import { DaysBlockScreen } from "@/app/(shell)/days/block/[id]/_components/days-block-screen";
 import { TodayBlockScreen } from "@/app/(shell)/today/block/[id]/_components/today-block-screen";
-import { BLOCK_EDIT_PATHS } from "./scenarios/block-view-editing";
+import {
+  BLOCK_EDIT_PATHS,
+  SUGGESTED_PATHS,
+} from "./scenarios/block-view-editing";
 import { BLOCK_WORK_TODOS_PATHS } from "./scenarios/block-view-work-todos";
 import { NOW_IDS } from "./scenarios/now-day";
 
@@ -43,6 +46,17 @@ export function BlockSetDaysEditPart({
   state: keyof typeof BLOCK_EDIT_PATHS;
 }) {
   const [path = "", query = ""] = BLOCK_EDIT_PATHS[state].split("?");
+  const blockId = decodeURIComponent(path.split("/").at(-1) ?? "");
+  return <DaysBlockScreen blockId={blockId} at={query} />;
+}
+
+/** USE-156's suggested states on `/dev/parts?state=suggested-<state>`. */
+export function BlockSuggestedPart({
+  state,
+}: {
+  state: keyof typeof SUGGESTED_PATHS;
+}) {
+  const [path = "", query = ""] = SUGGESTED_PATHS[state].split("?");
   const blockId = decodeURIComponent(path.split("/").at(-1) ?? "");
   return <DaysBlockScreen blockId={blockId} at={query} />;
 }

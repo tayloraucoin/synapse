@@ -29,6 +29,14 @@ As [`states/editing-monday.md`](states/editing-monday.md), with three additions:
 
 Loading, error and offline are as the editing states ([`states/loading.md`](states/loading.md), [`states/error.md`](states/error.md), [`states/editing-offline.md`](states/editing-offline.md)). The list loads with the block in one read, so there is no partial state. Offline, it is drawn faint and its + waits, as the add row does [ASSUMPTION].
 
+## As built (USE-155, USE-156)
+
+- "Suggested for <kind>" shows at most eight seed rows; a row taken moves the next one up [ASSUMPTION: Taylor asked for "a short list"].
+- A checklist with no times is not a source for "Used before" (its items have no length), and shows no list itself [ASSUMPTION].
+- A tap names no reach either: the once-a-visit "changed for every <weekday>" toast is left to the add row and the other edits [ASSUMPTION, D-USE-135's "no toast"].
+- "Add one" opens the add row, focused, preset to the block.
+- The span total shows wherever the list does, which is every editing block of a set-items kind with a span.
+
 ## Words
 
 Gloss. There is no second person; times and lengths are the only numbers.
