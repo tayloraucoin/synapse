@@ -9,13 +9,18 @@
  * subtree it guards.
  */
 
-import { updateSession } from "@syn/auth";
 import { NextRequest, NextResponse } from "next/server";
-
+import { updateSession } from "@syn/auth";
 import { logoutRoute, signInRoute } from "./lib/routes";
 
 const SKIP_PATHS = new Set([signInRoute(), logoutRoute()]);
-const SKIP_PREFIXES = ["/auth/", "/api/"];
+/*
+ * `/api/` is NOT skipped. Its handlers (tRPC above all) read the session with
+ * cookie writes they cannot return, so a session they refreshed was thrown
+ * away and the browser kept a spent refresh token. Refreshed here, the handler
+ * sees a live token and the new cookies reach the browser.
+ */
+const SKIP_PREFIXES = ["/auth/"];
 
 function shouldSkipProxy(pathname: string): boolean {
   if (SKIP_PATHS.has(pathname)) return true;

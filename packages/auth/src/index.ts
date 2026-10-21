@@ -39,6 +39,7 @@ export {
 export { createServerClient } from "./server";
 export { updateSession } from "./middleware";
 export {
+  AuthUnavailableError,
   getSession,
   getUser,
   isEmailVerified,

@@ -29,7 +29,7 @@ Two route groups (SET-2, 2026-09-05) and three handlers; each surface file names
 | `/auth/callback`           | handler, GET: Google's return (`code`, `next`)                                                                               | `next` signed in; no code → `/signin?auth=missing_code`; a failed exchange → `?auth=error` | this row; `sign-in.md` |
 | `/logout`                  | the Settings index's _Sign out?_ dialog (AU-06) posts here; GET kept (Open 3); revokes the token, clears every `sb-*` cookie | `/signin` by a document load, no dialog (system-states `signed-out`)                       | this row               |
 
-`proxy.ts` refreshes the session on every page except `/signin`, `/logout`, `/auth/*` and `/api/*`, and records the path the shell gate turns into `?next=`.
+`proxy.ts` refreshes the session on every page and `/api/*` request except `/signin`, `/logout` and `/auth/*`, and records the path the shell gate turns into `?next=`. An auth server that cannot answer (unreachable, 5xx, 429) is never signed out: pages show SY-05's error, tRPC fails without the _Signed out_ dialog.
 
 ## Navigation and shell
 

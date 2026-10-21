@@ -8,9 +8,9 @@ import { createServerClient } from "@syn/auth";
  * arrives on.
  *
  * Cookies come from the request header rather than `next/headers` so the
- * handler depends on what it was handed. It deliberately does NOT write
- * refreshed cookies back: `proxy.ts` refreshes on navigation, and a handler
- * that also refreshed would race it. That is not a gap to be "fixed".
+ * handler depends on what it was handed. It does not write cookies back:
+ * `proxy.ts` refreshes this request before it arrives, so the token here is
+ * already live and the refreshed cookies are on the proxy's response.
  */
 
 function parseCookieHeader(
@@ -42,7 +42,7 @@ const handler = (req: Request) =>
           return cookieHeader ? parseCookieHeader(cookieHeader) : [];
         },
         setAll() {
-          // See the note above: proxy.ts owns session refresh.
+          // See the note above: proxy.ts refreshed this request already.
         },
       });
 

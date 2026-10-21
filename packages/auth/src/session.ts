@@ -1,6 +1,12 @@
 // Typed server-side session helpers. Use with createServerClient from server.ts.
 
-import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
+import {
+  isAuthRetryableFetchError,
+  type AuthError,
+  type Session,
+  type SupabaseClient,
+  type User,
+} from "@supabase/supabase-js";
 
 export type AuthSessionResult = {
   session: Session | null;
@@ -24,11 +30,35 @@ export async function getSession(
 }
 
 /**
+ * Thrown when the auth server could not say whether there is a session: it was
+ * unreachable, failing (5xx) or rate limiting (429).
+ */
+export class AuthUnavailableError extends Error {
+  constructor(cause: Error) {
+    super(`Auth server unavailable: ${cause.message}`, { cause });
+    this.name = "AuthUnavailableError";
+  }
+}
+
+/** True for an error that is about the auth server, not about the session. */
+function isAuthServerUnavailable(error: AuthError): boolean {
+  return isAuthRetryableFetchError(error) || error.status === 429;
+}
+
+/**
  * Read the authenticated user (validates JWT server-side).
  * Prefer this over getSession for authorization checks.
+ *
+ * `user: null` means signed out. A lookup the auth server could not answer
+ * throws `AuthUnavailableError` instead: every caller reads `user: null` as
+ * signed out (the landing page, the sign-in redirect, tRPC's UNAUTHORIZED and
+ * the expiry dialog), and a network blip is not a sign-out.
  */
 export async function getUser(client: SupabaseClient): Promise<AuthUserResult> {
   const { data, error } = await client.auth.getUser();
+  if (error && isAuthServerUnavailable(error)) {
+    throw new AuthUnavailableError(error);
+  }
   return {
     user: data.user,
     error: error ?? null,
