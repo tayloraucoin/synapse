@@ -19,7 +19,13 @@ import {
   toast,
   toastUndo,
 } from "@syn/ui";
-import { formatMinutesShort, weekdayIndex, weekKeyOf } from "@syn/utils";
+import {
+  clockFromMinutes,
+  clockToMinutes,
+  formatMinutesShort,
+  weekdayIndex,
+  weekKeyOf,
+} from "@syn/utils";
 import {
   NowBlockMenu,
   OfflineLine,
@@ -655,7 +661,11 @@ export function DaysBlockScreen({
                     </Text>
                   ),
                   add: {
-                    at: items.length === 0 ? startsAt : reflow.freeFrom,
+                    // Past the span there is no free time; the row sits where the last ends.
+                    at:
+                      items.length === 0
+                        ? startsAt
+                        : (reflow.freeFrom ?? endOfRows(items)),
                     node: (
                       <EditingAddRow
                         label={
@@ -780,6 +790,14 @@ export function DaysBlockScreen({
       />
     </>
   );
+}
+
+/** "HH:MM" where the last row ends: the add row's rail past the span. */
+function endOfRows(rows: readonly BlockViewItem[]): string | null {
+  const ends = rows.map(
+    (row) => clockToMinutes(row.startsAt) + (row.lengthMin ?? 0),
+  );
+  return ends.length === 0 ? null : clockFromMinutes(Math.max(...ends));
 }
 
 function Caption({ children }: { children: React.ReactNode }) {
