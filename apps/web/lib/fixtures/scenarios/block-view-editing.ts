@@ -142,7 +142,11 @@ const THREE_ADDED: ItemSeed[] = [
 ];
 
 /** suggested-reorder.md: Meditate lifted to 7:07, over Water. */
-const REORDERING: ItemSeed[] = [THREE_ADDED[0]!, THREE_ADDED[2]!, THREE_ADDED[1]!];
+const REORDERING: ItemSeed[] = [
+  THREE_ADDED[0]!,
+  THREE_ADDED[2]!,
+  THREE_ADDED[1]!,
+];
 
 /** suggested-past-span.md: Yoga and Cold bath make 68 of 60 min. */
 const PAST_SPAN: ItemSeed[] = [
@@ -390,7 +394,13 @@ function suggested(
 ): [string, () => Scenario] {
   return [
     name,
-    () => ({ name, now: SET_UP_NOW, records: records(), mode: "ready", ...extra }),
+    () => ({
+      name,
+      now: SET_UP_NOW,
+      records: records(),
+      mode: "ready",
+      ...extra,
+    }),
   ];
 }
 

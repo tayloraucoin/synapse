@@ -84,7 +84,10 @@ export function LengthStepper({
         aria-label={COPY.shorter(name)}
         disabled={value <= 1}
         onClick={() => to(step(value, -1))}
-        className={cn(BUTTON, "rounded-s-(--radius-control) disabled:opacity-40")}
+        className={cn(
+          BUTTON,
+          "rounded-s-(--radius-control) disabled:opacity-40",
+        )}
       >
         <ShorterIcon aria-hidden="true" className="size-4" />
       </button>
@@ -117,7 +120,10 @@ export function LengthStepper({
           }}
           className="w-8 bg-transparent text-end text-(length:--fs-body) font-semibold tabular-nums outline-none"
         />
-        <span aria-hidden="true" className="text-(length:--fs-body) font-semibold">
+        <span
+          aria-hidden="true"
+          className="text-(length:--fs-body) font-semibold"
+        >
           {COPY.unit}
         </span>
       </span>

@@ -55,7 +55,12 @@ export function SpanTotal({
       className="flex flex-col gap-(--space-1) ps-(--space-4)"
     >
       <div className="flex items-baseline justify-between gap-(--space-3)">
-        <Text as="span" variant="secondary" weight={600} className="tabular-nums">
+        <Text
+          as="span"
+          variant="secondary"
+          weight={600}
+          className="tabular-nums"
+        >
           {lead}
         </Text>
         <Text

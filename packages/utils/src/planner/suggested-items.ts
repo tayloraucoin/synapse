@@ -122,14 +122,12 @@ export function suggestedItems<TIcon>(input: {
   const taken = new Set((input.inBlock ?? []).map(titleKey));
   const used = input.usedBefore
     .filter((item) => !taken.has(titleKey(item.title)))
-    .map(
-      (item): SuggestedRow<TIcon> => ({
-        key: item.id,
-        title: item.title,
-        icon: item.icon,
-        lengthMin: item.lengthMin ?? input.defaultLengthMin,
-      }),
-    );
+    .map((item): SuggestedRow<TIcon> => ({
+      key: item.id,
+      title: item.title,
+      icon: item.icon,
+      lengthMin: item.lengthMin ?? input.defaultLengthMin,
+    }));
   for (const row of used) taken.add(titleKey(row.title));
   const seed: SuggestedRow<TIcon>[] = [];
   for (const entry of input.seed) {

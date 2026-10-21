@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { NEW_BLOCK_KINDS, SUGGESTED_SEED } from "@syn/constants";
-import { suggestedItems, usedBefore, type UsedBeforeItem } from "./suggested-items";
+import {
+  suggestedItems,
+  usedBefore,
+  type UsedBeforeItem,
+} from "./suggested-items";
 
 type Icon = { kind: "emoji"; value: string };
 
@@ -73,7 +77,10 @@ describe("usedBefore and suggestedItems (C1)", () => {
       inBlock: ["Meditate"],
       defaultLengthMin: 5,
     });
-    expect(list.usedBefore.map((row) => row.title)).toEqual(["sauna ", "Stretch"]);
+    expect(list.usedBefore.map((row) => row.title)).toEqual([
+      "sauna ",
+      "Stretch",
+    ]);
     const seedTitles = list.seed.map((row) => row.title);
     expect(seedTitles).not.toContain("Stretch");
     expect(seedTitles).not.toContain("Meditate");
@@ -108,13 +115,17 @@ describe("SUGGESTED_SEED (C2)", () => {
     SUGGESTED_SEED[kind].map((row) => row.title);
 
   it("keys every one of the seven kinds", () => {
-    expect(Object.keys(SUGGESTED_SEED).sort()).toEqual([...NEW_BLOCK_KINDS].sort());
+    expect(Object.keys(SUGGESTED_SEED).sort()).toEqual(
+      [...NEW_BLOCK_KINDS].sort(),
+    );
   });
 
   it("Wellness is morning, recommended first, then prep", () => {
     const wellness = SUGGESTED_SEED.wellness;
     const firstOther = wellness.findIndex((row) => !row.recommended);
-    expect(wellness.slice(0, firstOther).every((row) => row.recommended)).toBe(true);
+    expect(wellness.slice(0, firstOther).every((row) => row.recommended)).toBe(
+      true,
+    );
     expect(firstOther).toBe(12);
     expect(titles("wellness").slice(0, 3)).toEqual([
       "Breath work",
@@ -130,7 +141,14 @@ describe("SUGGESTED_SEED (C2)", () => {
   });
 
   it("Training is Run, Swim, Yoga, Mobility, Climb, Ride", () => {
-    expect(titles("training")).toEqual(["Run", "Swim", "Yoga", "Mobility", "Climb", "Ride"]);
+    expect(titles("training")).toEqual([
+      "Run",
+      "Swim",
+      "Yoga",
+      "Mobility",
+      "Climb",
+      "Ride",
+    ]);
   });
 
   it("Life is activity; Break is break", () => {

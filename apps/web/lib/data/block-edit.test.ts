@@ -236,14 +236,18 @@ describe("the header's meta (by-kind.md, Words)", () => {
 });
 
 describe("USE-156: the suggestion list and the span total", () => {
-  const titles = (rows: readonly { title: string }[]) => rows.map((r) => r.title);
+  const titles = (rows: readonly { title: string }[]) =>
+    rows.map((r) => r.title);
 
   it("C1: a tap adds one item at the end with its title, icon and length; it leaves the list and the total moves", async () => {
     const { server, view } = setup("suggested-added");
     const records = await server.readWeek("usual");
     const before = suggestionsFor(records, B.wellnessThursday, 3)!;
     // Monday's Wellness items, minus the three already in Thursday's.
-    expect(titles(before.usedBefore)).toEqual(["Start the cold bath", "Cold bath"]);
+    expect(titles(before.usedBefore)).toEqual([
+      "Start the cold bath",
+      "Cold bath",
+    ]);
     expect(before.seed.length).toBeGreaterThan(0);
     const blockBefore = await view("usual", B.wellnessThursday, 3);
     expect(spanTotal(blockBefore.block, blockBefore.items)).toEqual({
@@ -270,7 +274,11 @@ describe("USE-156: the suggestion list and the span total", () => {
       lengthMin: 10,
       startsAt: "07:18",
     });
-    const list = suggestionsFor(await server.readWeek("usual"), B.wellnessThursday, 3)!;
+    const list = suggestionsFor(
+      await server.readWeek("usual"),
+      B.wellnessThursday,
+      3,
+    )!;
     expect(titles(list.usedBefore)).toEqual(["Start the cold bath"]);
     expect(spanTotal(after.block, after.items)).toMatchObject({
       plannedMin: 23,
@@ -280,7 +288,11 @@ describe("USE-156: the suggestion list and the span total", () => {
 
   it("C1: a new block lists Used before from another day's block of its kind, then the seed", async () => {
     const { server } = setup("suggested-new");
-    const list = suggestionsFor(await server.readWeek("usual"), B.wellnessThursday, 3)!;
+    const list = suggestionsFor(
+      await server.readWeek("usual"),
+      B.wellnessThursday,
+      3,
+    )!;
     expect(titles(list.usedBefore)).toEqual([
       "Pee and weigh",
       "Water",
@@ -319,7 +331,11 @@ describe("USE-156: the suggestion list and the span total", () => {
       freeMin: 0,
       overMin: 8,
     });
-    const list = suggestionsFor(await server.readWeek("usual"), B.wellnessThursday, 3)!;
+    const list = suggestionsFor(
+      await server.readWeek("usual"),
+      B.wellnessThursday,
+      3,
+    )!;
     expect(titles(list.usedBefore)).toEqual(["Start the cold bath"]);
     const pick = list.usedBefore[0]!;
     await blockEdits(server, B.wellnessThursday, { weekday: 3 }).add(
@@ -391,7 +407,9 @@ describe("USE-157: a length edited in place", () => {
     );
     expect(writes).toHaveLength(1);
     const saved = await view("usual", B.wellnessThursday, 3);
-    expect(saved.items.find((i) => i.id === B.items.addedMeditate)!.lengthMin).toBe(15);
+    expect(
+      saved.items.find((i) => i.id === B.items.addedMeditate)!.lengthMin,
+    ).toBe(15);
     expect(spanTotal(saved.block, saved.items).plannedMin).toBe(18);
   });
 });

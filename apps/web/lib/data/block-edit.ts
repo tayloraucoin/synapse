@@ -177,7 +177,8 @@ export function suggestionsFor(
  * value off the 5s snaps to the next one: 7 steps up to 10 and down to 5.
  */
 export function stepLength(value: number, direction: -1 | 1): number {
-  if (direction === 1) return value < 5 ? value + 1 : Math.floor(value / 5) * 5 + 5;
+  if (direction === 1)
+    return value < 5 ? value + 1 : Math.floor(value / 5) * 5 + 5;
   return value <= 5 ? Math.max(1, value - 1) : Math.ceil(value / 5) * 5 - 5;
 }
 
@@ -196,7 +197,10 @@ export function withDraftLength(
         row.id === draft.id ? { ...row, lengthMin: draft.lengthMin } : row,
       )
     : [...shown];
-  return inOrderOf({ ...view, items }, items.map((row) => row.id));
+  return inOrderOf(
+    { ...view, items },
+    items.map((row) => row.id),
+  );
 }
 
 /** The running total under the header (D-USE-137). */

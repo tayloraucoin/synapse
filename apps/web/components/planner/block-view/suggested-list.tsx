@@ -131,7 +131,10 @@ function SuggestedGroup({
       >
         {heading}
       </Text>
-      <ul aria-labelledby={id} className="border-hairline flex flex-col border-t">
+      <ul
+        aria-labelledby={id}
+        className="border-hairline flex flex-col border-t"
+      >
         {rows.map((row, index) => {
           const length = BLOCK_VIEW_COPY.length(row.lengthMin);
           return (
@@ -149,7 +152,11 @@ function SuggestedGroup({
               >
                 <ItemIcon icon={row.icon} size={20} />
               </span>
-              <Text as="span" variant="body" className="min-w-0 flex-1 truncate">
+              <Text
+                as="span"
+                variant="body"
+                className="min-w-0 flex-1 truncate"
+              >
                 {row.title}
               </Text>
               <Text
