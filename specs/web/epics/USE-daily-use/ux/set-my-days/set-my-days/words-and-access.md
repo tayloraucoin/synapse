@@ -22,7 +22,7 @@ Moved from [`index.md`](index.md) on 2026-10-19 to keep it under its cap; the li
 
 Gloss. The same in every state; state-only strings sit in each state file. No second person, no counts about the day ("No work slotted yet", never "0 items"); times and lengths are the only numbers.
 
-- "Set my days" (title); "Now" (the back crumb, naming the tab it came from); "Week" (the back crumb on a day).
+- "Set my days" (title); "Now" (the back crumb, naming the tab it came from); "Week" (the back crumb on every day); "Every Monday" (a Usual week day's title, D-USE-134).
 - "Usual week" · "This week"; "Every week" (Usual week's stepper line); "12 to 18 Oct" (a week, day to day and the month once).
 - Week rows: "Monday" in Usual week, "Mon 12" in This week; "7:00 to 22:30" or "All day"; "Not set yet" with "Set day" (2026-10-19; boards passed).
 - The row's line names what is there, by kind and name, in sentences joined with ". ": "Life: Climbing [placeholder], 19:00 to 21:00, set" · "To-dos: Errands, out, 17:30 to 19:00" · "Primary: [Write the sync spec], [Review the Paper handoff]" · "No work slotted yet" · "One checklist, no times".
@@ -40,7 +40,7 @@ Threshold.
 
 - **Focus on open:** the title ("Set my days", or the day's title), `tabIndex -1`, announced as the level-1 heading [ASSUMPTION, as Review the day].
 - **Order on the week:** the crumb, the `SegmentedControl` (a radio group, "Which week"), the stepper's previous and next (hidden and out of the order in Usual week), then each day row (a not-set row is one stop; "Set day" is its label, not a second button).
-- **Order on a day:** the crumb, `SaveStatus` (not a stop), the segmented control (Usual week), the chips (a radio group "Day", arrow keys move between them), Up at, Lights out, the ···, then the column top to bottom, then the +.
+- **Order on a day:** the crumb, `SaveStatus` (not a stop), the chips (a radio group "Day", arrow keys move between them), Up at, Lights out, the ···, then the column top to bottom, then the +.
 - **Names:** a week row is a button "<day>, <bounds>, <its line>"; a not-set row's button is "Set <day>, not set yet"; a chip is "Monday, set" or "Monday, not set" (N2), dated "Monday 12 October, set"; the TimeFields are "Up at, 7:00" and "Lights out, 22:30", each with its clock button "Choose a time for <label>" ([`states/time-picker.md`](states/time-picker.md)); the first day's forward button is "Set Monday, 7:00 to 22:30"; the ··· is "<day> menu"; Orient is text, "Orient, 5 minutes, always first" (not a button); a block is a button "<name>, <start> to <end>"; the + is "Add to <day>" [ASSUMPTION].
 - **Targets:** chips 44 × 48, rows full width, the + 56. Strips are decoration (`aria-hidden`): the row's line carries the words.
 - **Colour is never alone:** every block names its kind or name in words; a strip's segments repeat what the line says; the selected row at 1024 has an ink edge as well as the fill.

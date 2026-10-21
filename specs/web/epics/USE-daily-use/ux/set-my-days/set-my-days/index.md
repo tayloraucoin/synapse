@@ -30,7 +30,7 @@ Build each weekday's default once and edit it now and then (Usual week); each we
 
 ## Layout, top to bottom (phone 402)
 
-Status bar; the header (`Breadcrumb` over the title, `SaveStatus`); the which-week `SegmentedControl`; then on the week the stepper and the seven-day list with its strips, or on a day the `WeekdayChips`, the day line with the bounds and the ···, and the day column (`ScheduleAxis` at 96 px an hour, Orient, `ScheduleBlock`s, `BlockBand`s); the + [PROPOSED]. Each region, its sizes and the kind colours: [`layout.md`](layout.md).
+Status bar; the header (`Breadcrumb` over the title, `SaveStatus`); then on the week the which-week `SegmentedControl`, the stepper and the seven-day list with its strips, or on a day the `WeekdayChips`, the day line with the bounds and the ···, and the day column (`ScheduleAxis` at 96 px an hour, Orient, `ScheduleBlock`s, `BlockBand`s); the + [PROPOSED]. Each region, its sizes and the kind colours: [`layout.md`](layout.md).
 
 ## Primary action
 
@@ -46,6 +46,7 @@ Adding a block: tap an empty time on the rail ([`states/tap-a-time.md`](states/t
 | time picker                    | [`states/time-picker.md`](states/time-picker.md)                       | 402, 1024 | 24-hour Hour and Minute lists; sheet, popover   |
 | copy offer                     | [`states/copy-offer.md`](states/copy-offer.md)                         | 402       | Orient, then "Copy from Monday"                 |
 | usual week                     | [`states/usual-week.md`](states/usual-week.md)                         | 402       | The week list; unset rows "Set day"             |
+| usual day                      | [`states/usual-day.md`](states/usual-day.md)                           | 402       | "‹ Week" over "Every Monday"; Orient's chip     |
 | usual Saturday                 | [`states/usual-saturday.md`](states/usual-saturday.md)                 | 402       | A To-dos block holds its rule                   |
 | usual Thursday evening         | [`states/usual-thursday-evening.md`](states/usual-thursday-evening.md) | 402       | Life set, then Evening, open time between       |
 | the week (B)                   | [`states/the-week.md`](states/the-week.md)                             | 402       | This week's list, "12 to 18 Oct"                |

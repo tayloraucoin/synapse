@@ -48,6 +48,7 @@ The usual Saturday opened from the week (A): Errands is a To-dos block that hold
 
 ## Rulings
 
+- Decided (D-USE-134): the header builds as the app's push, "‹ Week" over "Every Saturday" with `SaveStatus` at the crumb row's end, and no Usual week | This week control on the day; the frame's "‹ Now", "Set my days" and segmented control are superseded (the canvas is not edited; drawn on `set-my-days / usual Monday, header and Orient chip`, [`usual-day.md`](usual-day.md)). Orient's label sits on its chip.
 - The [PROPOSED] stands as drawn under D-USE-49 (the lock). In the usual week a To-dos block holds its rule, as a Work block holds its time with "The time is kept every week." and "Work goes in on This week." (open-3 round 1; drawn on the superseded A frame, cited in [`the-day.md`](the-day.md)).
 - Open-4 "Life and chores" and round 3 had a To-dos block pick one or more Types or Any type; round 4 settled that blocks never filter by Type, so "any type" is the only reading: a To-dos block takes any to-do with no day, picked on the day. The block's layer is named "Life, Errands, from to-dos [PROPOSED]", from the round when it was a Life block from to-dos; it draws To-dos (moss).
 

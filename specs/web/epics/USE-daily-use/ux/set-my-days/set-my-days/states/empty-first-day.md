@@ -51,6 +51,7 @@ Nothing is set yet: the first day, Monday, in Usual week. Once any other day is 
 
 ## Rulings
 
+- Decided (D-USE-134): the header builds as the app's push, "‹ Week" over "Every Monday" with `SaveStatus` at the crumb row's end, and no Usual week | This week control on the day; the frame's "‹ Now", "Set my days" and segmented control are superseded (the canvas is not edited; drawn on `set-my-days / usual Monday, header and Orient chip`, [`usual-day.md`](usual-day.md)). Orient's label sits on its chip.
 - N2's "empty, first day" row ("The bounds row reads 'Up at' and 'Lights out' with no times"), drawn with the fields moved into the empty state (open-3 round 1); its [PROPOSED] stands as drawn under D-USE-49 (the lock).
 - D-USE-33: the round 4 states it sits beside (saved, loading, error, offline) are their own files.
 - Feedback 2026-10-19 (Taylor): `?week=usual&day=mon` had no visible way forward; the grey suggestions looked set but were never saved. The button is the forward path (boards passed by Taylor, 2026-10-19).
@@ -61,9 +62,9 @@ Drawn at: 402. At 1024 the week pane lists seven "Not set yet" rows and the day 
 
 ## Criteria
 
-| ID                                  | When                           | Then                                                                     | Evidence                           |
-| ----------------------------------- | ------------------------------ | ------------------------------------------------------------------------ | ---------------------------------- |
+| ID                                  | When                           | Then                                                                                                  | Evidence                           |
+| ----------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------- | ---------------------------------- |
 | C-USE-set-my-days-empty-first-day-1 | No day is set                  | The line, the two labelled fields with grey suggestions, "Set Monday, 7:00 to 22:30"; no column, no + | `captures/empty-first-day-402.png` |
-| C-USE-set-my-days-empty-first-day-2 | "Set Monday, …" is tapped      | Both times as shown save; the column appears with Orient at "Up at" and the + | test                               |
-| C-USE-set-my-days-empty-first-day-3 | A suggestion is left untouched | It is not saved as a time until the button is tapped                    | test                               |
-| C-USE-set-my-days-empty-first-day-4 | A field changes                | The button's label names the new time at once                            | test                               |
+| C-USE-set-my-days-empty-first-day-2 | "Set Monday, …" is tapped      | Both times as shown save; the column appears with Orient at "Up at" and the +                         | test                               |
+| C-USE-set-my-days-empty-first-day-3 | A suggestion is left untouched | It is not saved as a time until the button is tapped                                                  | test                               |
+| C-USE-set-my-days-empty-first-day-4 | A field changes                | The button's label names the new time at once                                                         | test                               |
