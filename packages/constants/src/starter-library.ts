@@ -43,7 +43,7 @@
  * ranked screen (v1.2 §4.9).
  */
 
-import type { BlockKindValue } from "./block-kinds";
+import { NEW_BLOCK_KINDS, type BlockKindValue } from "./block-kinds";
 
 /**
  * The emoji arm of `IconValue`, spelled here because `@syn/constants` sits
@@ -211,5 +211,56 @@ export const STARTER_LIBRARY: Record<
     { title: "Tea", icon: emoji("🍵"), rangeMin: 5, rangeMax: 10, importance: 3, recommended: false },
     { title: "Journal", icon: emoji("✍️"), rangeMin: 5, rangeMax: 10, importance: 5, recommended: true, placed: true },
     { title: "Phone away", icon: emoji("📵"), rangeMin: 1, rangeMax: 1, importance: 6, recommended: true, placed: true },
+  ],
+};
+
+/** One of the New block sheet's seven kinds (`NEW_BLOCK_KINDS`). */
+export type NewBlockKindValue = (typeof NEW_BLOCK_KINDS)[number];
+
+const pick = (
+  rows: ReadonlyArray<StarterLibraryEntry>,
+  titles: ReadonlyArray<string>,
+): StarterLibraryEntry[] =>
+  titles.map((title) => {
+    const row = rows.find((entry) => entry.title === title);
+    if (!row) throw new Error(`STARTER_LIBRARY has no "${title}"`);
+    return row;
+  });
+
+const recommendedFirst = (
+  rows: ReadonlyArray<StarterLibraryEntry>,
+): StarterLibraryEntry[] => [
+  ...rows.filter((row) => row.recommended),
+  ...rows.filter((row) => !row.recommended),
+];
+
+/**
+ * The suggested items' seed per new-block kind (USE-155; D-USE-136, dev
+ * note "Suggested items"): `STARTER_LIBRARY`'s rows remapped to the seven
+ * kinds, titles, glyphs and ranges untouched. Listed after "Used before";
+ * a row's length is its `rangeMin`. A title in two source kinds (Walk in
+ * morning and prep) is the consumer's to drop the second time. `placed`
+ * wind-down rows are offered as plain rows here. Work and To-dos fill by
+ * tiers and from To-dos, so they have none.
+ */
+export const SUGGESTED_SEED: Record<
+  NewBlockKindValue,
+  ReadonlyArray<StarterLibraryEntry>
+> = {
+  wellness: [
+    ...recommendedFirst(STARTER_LIBRARY.morning),
+    ...STARTER_LIBRARY.prep,
+  ],
+  training: [
+    ...pick(STARTER_LIBRARY.morning, ["Run", "Swim", "Yoga", "Mobility"]),
+    ...pick(STARTER_LIBRARY.activity, ["Climb", "Ride"]),
+  ],
+  work: [],
+  life: STARTER_LIBRARY.activity,
+  todos: [],
+  break: STARTER_LIBRARY.break,
+  evening: [
+    ...STARTER_LIBRARY.wind_down,
+    ...pick(STARTER_LIBRARY.transition, ["Cook", "Dinner", "Chores"]),
   ],
 };

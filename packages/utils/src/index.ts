@@ -436,3 +436,16 @@ export {
   splitClock,
   type PickerKey,
 } from "./time-picker";
+
+/* ---- suggested items: Block view's list and Swap's library (USE-155) ---- */
+export {
+  suggestedItems,
+  titleKey,
+  usedBefore,
+  type SuggestedItems,
+  type SuggestedRow,
+  type SuggestedSeedEntry,
+  type UsedBeforeBlock,
+  type UsedBeforeItem,
+  type UsedBeforeOptions,
+} from "./planner";
