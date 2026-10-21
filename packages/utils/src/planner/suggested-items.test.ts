@@ -135,13 +135,22 @@ describe("SUGGESTED_SEED (C2)", () => {
 
   it("Life is activity; Break is break", () => {
     expect(titles("life")[0]).toBe("Walk");
+    expect(SUGGESTED_SEED.life[1]!.title).toBe("Play a sport");
     expect(titles("life")).toContain("Fix something");
     expect(titles("break")).toEqual(
       expect.arrayContaining(["Walk", "Nap", "Lunch", "Eyes off screens"]),
     );
   });
 
-  it("Evening is wind-down, placed rows plain, then Cook, Dinner, Chores", () => {
+  it("Evening is wind-down, recommended first, placed rows plain, then Cook, Dinner, Chores", () => {
+    expect(titles("evening").slice(0, 6)).toEqual([
+      "Read",
+      "Stretch",
+      "Meditate",
+      "Lay out tomorrow",
+      "Journal",
+      "Phone away",
+    ]);
     expect(titles("evening")).toContain("Journal");
     expect(titles("evening")).toContain("Phone away");
     expect(titles("evening").slice(-3)).toEqual(["Cook", "Dinner", "Chores"]);

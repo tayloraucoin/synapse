@@ -237,8 +237,9 @@ const recommendedFirst = (
 /**
  * The suggested items' seed per new-block kind (USE-155; D-USE-136, dev
  * note "Suggested items"): `STARTER_LIBRARY`'s rows remapped to the seven
- * kinds, titles, glyphs and ranges untouched. Listed after "Used before";
- * a row's length is its `rangeMin`. A title in two source kinds (Walk in
+ * kinds, titles, glyphs and ranges untouched, each source kind's
+ * `recommended` rows first. Listed after "Used before"; a row's length is
+ * its `rangeMin`. A title in two source kinds (Walk in
  * morning and prep) is the consumer's to drop the second time. `placed`
  * wind-down rows are offered as plain rows here. Work and To-dos fill by
  * tiers and from To-dos, so they have none.
@@ -256,11 +257,11 @@ export const SUGGESTED_SEED: Record<
     ...pick(STARTER_LIBRARY.activity, ["Climb", "Ride"]),
   ],
   work: [],
-  life: STARTER_LIBRARY.activity,
+  life: recommendedFirst(STARTER_LIBRARY.activity),
   todos: [],
-  break: STARTER_LIBRARY.break,
+  break: recommendedFirst(STARTER_LIBRARY.break),
   evening: [
-    ...STARTER_LIBRARY.wind_down,
+    ...recommendedFirst(STARTER_LIBRARY.wind_down),
     ...pick(STARTER_LIBRARY.transition, ["Cook", "Dinner", "Chores"]),
   ],
 };
