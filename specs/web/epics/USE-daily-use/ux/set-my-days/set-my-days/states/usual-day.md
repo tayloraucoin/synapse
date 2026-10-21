@@ -21,7 +21,7 @@ The usual Monday opened from the week, built. `?state=usual-day`. New with Taylo
 - `WeekdayChips`, undated: "M" ink (open) with its dot, then "T", "W", "T", "F", "S", "S", a dot under each built day.
 - The bounds row alone: "Up at 7:00", "Lights out 22:30", the ··· at the trailing edge. A hairline.
 - The column from 7, no now-line:
-  - Orient's ink line, then its label on a chip: the lock and "Orient · 5 min" (caption, muted) on the background colour at 88%, fully rounded, 20 px high, 8 px either side. The 7 o'clock hour line stops at the chip's edges and starts again after it.
+  - Orient's ink line, then its label on a chip: the lock and "Orient · 5 min" (caption, muted) on the background colour, fully opaque, fully rounded, 20 px high, 8 px either side. The 2 px ink bar and the chip are centred on the 7 o'clock hairline. The 7 o'clock hour line stops at the chip's edges and starts again after it.
   - **Wellness** 7:05 to 8:00, **Training** 8:00 to 8:57, the **Breakfast** meal band, as [`the-day.md`](the-day.md).
   - **Work** 9:30 to 12:00, holding its time with two muted lines: "The time is kept every week." and "Work goes in on This week."
   - **Lunch** 12:00 to 13:00, a dashed meal band; Work at 13:00 below the fold.
@@ -42,6 +42,8 @@ As the surface ([`../index.md`](../index.md)): "‹ Week" goes back to the week,
 > 5 · A day's header, and Orient on a chip
 >
 > Taylor, 2026-10-20. The day's header is what the app shows: "‹ Week" back to the week it came from, over the title ("Every Monday" in Usual week, "Monday, 12 October" in This week), with SaveStatus at the crumb row's end. A day has no Usual week | This week control; it lives on the week. "‹ Now" is the week's crumb only. Orient's label sits on a chip in the background colour, slightly translucent, so the hour line stops at its edges instead of running through the words. The same chip wherever the day column draws Orient (Set my days, Review the day, Schedule, the Week's time lens).
+>
+> Taylor, 2026-10-20, after testing: the chip is fully opaque, not translucent (the line showing faintly through it looks wrong), and the thick Orient bar sits centred on its thin hour line, not a pixel above it.
 
 ## Rulings
 
@@ -58,5 +60,5 @@ Drawn at: 402. At 1024 the day pane has no crumb (the week beside it is the way 
 | ID                            | When                            | Then                                                                                     | Evidence                     |
 | ----------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------- |
 | C-USE-set-my-days-usual-day-1 | A usual day opens from the week | "‹ Week" over "Every Monday", `SaveStatus` at the crumb row's end, no which-week control | `captures/usual-day-402.png` |
-| C-USE-set-my-days-usual-day-2 | Any day column draws Orient     | The label is on the translucent background chip; no hour line shows through the words    | `captures/usual-day-402.png` |
+| C-USE-set-my-days-usual-day-2 | Any day column draws Orient     | The label is on the opaque background chip, centred on the hairline with the ink bar; no hour line shows through the words    | `captures/usual-day-402.png` |
 | C-USE-set-my-days-usual-day-3 | `?state=usual-day`              | This state renders (canon C-P08)                                                         | capture                      |
