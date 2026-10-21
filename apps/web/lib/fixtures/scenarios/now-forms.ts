@@ -219,4 +219,20 @@ export const NOW_FORM_SCENARIOS: Record<string, () => Scenario> = {
     records: sundayRecords("day"),
     mode: "ready",
   }),
+  // A box ticked while its write is still out: shown checked at once.
+  "sunday-checklist-tick-pending": () => ({
+    name: "sunday-checklist-tick-pending",
+    now: onSunday("11:20"),
+    records: sundayRecords("day"),
+    mode: "ready",
+    slotWrites: "hang",
+  }),
+  // A box whose write fails: back as the server has it, "Not saved." under it.
+  "sunday-checklist-not-saved": () => ({
+    name: "sunday-checklist-not-saved",
+    now: onSunday("11:20"),
+    records: sundayRecords("day"),
+    mode: "ready",
+    failWrites: [checklistItemId("day", 0)],
+  }),
 };

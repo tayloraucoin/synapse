@@ -7,9 +7,19 @@ import type { PlannerServer, PlannerWrite } from "@/lib/fixtures/planner";
 import type { SplitPatch } from "@/lib/fixtures/planner/split-block";
 import type { FixtureServer } from "@/lib/fixtures/server";
 import { offlineWrite } from "@/lib/offline/writes";
+import {
+  applyItemWrite,
+  applyToCache,
+  onToday,
+  onWeek,
+  restoreCache,
+  type CacheSnapshot,
+  type DayRows,
+} from "./optimistic-day";
 import { applyOptimistic } from "./optimistic-week";
 import { FixtureOfflineError, PlannerRefusal } from "./refusals";
 import { useDataSource } from "./source";
+import type { TodayRecords } from "./today-records";
 import { useConnection } from "./use-connection";
 import { todayQueryKey } from "./use-today";
 import { weekQueryKey } from "./use-week";
@@ -26,8 +36,18 @@ import type { WeekRecords } from "./week-records";
  *
  * Writes are optimistic (USE-148): `onMutate` writes the change into every
  * cached week through `applyOptimistic`, an error puts each one back as it
- * was, and the server's answer settles them on every outcome.
+ * was, and the server's answer settles them on every outcome. An item write
+ * also reaches today's read and a dated week's day (`applyItemWrite`), so a
+ * checklist's add, edit, remove and reorder show at once on Now and Block
+ * view.
  */
+
+/** A date's own item write, which the week's applier leaves to the day. */
+function dated(call: PlannerCall, rows: DayRows, now: Date): DayRows | null {
+  const [input] = call.args as [{ onDate?: string | null; date?: string }];
+  const date = input.onDate ?? input.date;
+  return date == null ? null : applyItemWrite(call, rows, now);
+}
 
 /**
  * What the queue sends: the planner's writes, and a To-dos block's two that
@@ -234,28 +254,27 @@ export function usePlannerWrites() {
     if (online) invalidate();
   }, [online, invalidate]);
 
-  type Snapshot = [readonly unknown[], WeekRecords | undefined][];
-  const mutation = useMutation<unknown, Error, PlannerCall, Snapshot>({
+  const mutation = useMutation<unknown, Error, PlannerCall, CacheSnapshot>({
     ...offlineWrite("planner", scenario),
     onMutate: async (planned) => {
-      const weeks = weekQueryKey(scenario);
-      await queryClient.cancelQueries({ queryKey: weeks });
-      const before = queryClient.getQueriesData<WeekRecords>({
-        queryKey: weeks,
-      });
       const now = source.now();
-      for (const [key, week] of before) {
-        if (week === undefined) continue;
-        const next = applyOptimistic(planned, week, now);
-        if (next !== null) queryClient.setQueryData(key, next);
-      }
-      return before;
+      // The week's own change first; a dated item write reaches its day.
+      const weeks = await applyToCache<WeekRecords>(
+        queryClient,
+        weekQueryKey(scenario),
+        (week) =>
+          applyOptimistic(planned, week, now) ??
+          onWeek(week, (rows) => dated(planned, rows, now)),
+      );
+      const days = await applyToCache<TodayRecords>(
+        queryClient,
+        todayQueryKey(scenario),
+        (records) =>
+          onToday(records, (rows) => applyItemWrite(planned, rows, now)),
+      );
+      return [...weeks, ...days];
     },
-    onError: (_error, _planned, before) => {
-      for (const [key, week] of before ?? []) {
-        queryClient.setQueryData(key, week);
-      }
-    },
+    onError: (_error, _planned, before) => restoreCache(queryClient, before),
     onSettled: invalidate,
   });
 

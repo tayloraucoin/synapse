@@ -58,6 +58,8 @@ export interface ReviewBlock {
   startsAt: string;
   endsAt: string;
   form: ReviewBlockForm;
+  /** A checklist with a span: its box is as tall as its rows. */
+  checklist: boolean;
   items: ReviewItem[];
   /** Work's tiers that hold something, in tier order. */
   tiers: ReviewTier[];
@@ -202,6 +204,7 @@ export function deriveReviewDay(today: Today): ReviewDayView {
         startsAt: occurrence.startsAt,
         endsAt: occurrence.endsAt,
         form,
+        checklist: block.checklist,
         items: form === "items" ? itemsOf(occurrence, today) : [],
         tiers: form === "work" ? tiersOf(occurrence, today) : [],
       };

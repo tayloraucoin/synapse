@@ -7,6 +7,7 @@ import { deriveToday } from "./derive-today";
 import { useDataSource } from "./source";
 import type { TodayRecords } from "./today-records";
 import { isAllDay } from "./use-now";
+import { usePlannerWrites } from "./use-planner-writes";
 import { todayQueryKey } from "./use-today";
 
 /**
@@ -60,7 +61,7 @@ export async function writeChecklist(
 
 /** Return in the typed row: the row kept as the checklist's last item. */
 export function addChecklistItem(
-  server: ChecklistServer,
+  server: Pick<ChecklistServer, "writeBlockItem">,
   records: TodayRecords,
   blockId: string,
   title: string,
@@ -85,15 +86,22 @@ export function setBlockSpan(
   return server.editBlock({ id: blockId, startsAt, endsAt });
 }
 
-/** The three writes on today's records, each reading the day again after. */
+/**
+ * The three writes on today's records, each reading the day again after.
+ * A row is optimistic: it shows the moment Return is pressed, through the
+ * planner's one write, its order from the day already read (no read before
+ * the write); a failure takes it back out and the editor says so.
+ */
 export function useChecklistDay(dateKey: string) {
   const source = useDataSource();
   const queryClient = useQueryClient();
-  const settle = () =>
-    queryClient.invalidateQueries({
-      queryKey: todayQueryKey(source.scenario.name, dateKey),
-    });
+  const planner = usePlannerWrites();
+  const key = todayQueryKey(source.scenario.name, dateKey);
+  const settle = () => queryClient.invalidateQueries({ queryKey: key });
   const read = () => source.server.readToday(dateKey);
+  /** The day as already read, else read now. */
+  const records = async () =>
+    queryClient.getQueryData<TodayRecords>(key) ?? (await read());
 
   const make = useMutation({
     mutationFn: async () => writeChecklist(source.server, await read()),
@@ -101,8 +109,12 @@ export function useChecklistDay(dateKey: string) {
   });
   const add = useMutation({
     mutationFn: async (input: { blockId: string; title: string }) =>
-      addChecklistItem(source.server, await read(), input.blockId, input.title),
-    onSettled: settle,
+      addChecklistItem(
+        { writeBlockItem: planner.writeBlockItem },
+        await records(),
+        input.blockId,
+        input.title,
+      ),
   });
   const span = useMutation({
     mutationFn: (input: {

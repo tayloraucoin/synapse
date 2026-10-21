@@ -18,6 +18,8 @@ export type NowPartState =
   | "before-ready-go"
   | "checklist-block"
   | "sunday-checklist"
+  | "sunday-checklist-tick-pending"
+  | "sunday-checklist-not-saved"
   // USE-21: a To-dos block and the system states.
   | "todos-block"
   | "offline"

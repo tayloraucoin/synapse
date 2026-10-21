@@ -60,60 +60,75 @@ export async function selectPlannerRows(
   userId: string,
   dates: readonly string[],
 ): Promise<PlannerRows> {
-  const [account] = await tx
-    .select({
-      timeZone: users.timezone,
-      dayCloseTime: users.dayCloseTime,
-      usualWakeTime: users.usualWakeTime,
-    })
-    .from(users)
-    .where(eq(users.id, userId));
+  const dateList = [...dates];
+  // The reads are independent, so they are sent together on the
+  // transaction's one connection (postgres.js pipelines them): one round
+  // trip for the lot, and one more for the slots' events, instead of one
+  // each. A day's read was a round trip per table (the tick's seconds).
+  const [
+    [account],
+    slotRows,
+    blockRows,
+    changeRows,
+    itemRows,
+    workRows,
+    clientRows,
+    todoRows,
+    eventRows,
+    recordRows,
+    boundsRows,
+    google,
+  ] = await Promise.all([
+    tx
+      .select({
+        timeZone: users.timezone,
+        dayCloseTime: users.dayCloseTime,
+        usualWakeTime: users.usualWakeTime,
+      })
+      .from(users)
+      .where(eq(users.id, userId)),
+    tx.select().from(slots).where(inArray(slots.onDate, dateList)),
+    tx.select().from(blocks),
+    tx
+      .select()
+      .from(blockChanges)
+      .where(inArray(blockChanges.onDate, dateList)),
+    tx.select().from(blockItems),
+    tx.select().from(workItems),
+    tx.select().from(clients),
+    tx.select().from(todos),
+    tx.select().from(dayEvents),
+    tx.select().from(dayRecords).where(inArray(dayRecords.onDate, dateList)),
+    tx.select().from(dayBounds),
+    // USE-103: the dates' weeks' Google snapshots and the calendars that are on.
+    selectGoogleRows(tx, dateList),
+  ]);
   if (!account) throw new Error("No account row.");
 
-  const dateList = [...dates];
-  const slotRows = await tx
-    .select()
-    .from(slots)
-    .where(inArray(slots.onDate, dateList));
   const slotIds = slotRows.map((slot) => slot.id);
+  const eventsOfSlots =
+    slotIds.length === 0
+      ? []
+      : await tx
+          .select()
+          .from(slotEvents)
+          .where(inArray(slotEvents.slotId, slotIds));
 
   return {
     timeZone: account.timeZone,
     dayCloseTime: clockOf(account.dayCloseTime),
     usualWakeTime: clockOf(account.usualWakeTime),
-    blocks: recordsOf(blockRecord, await tx.select().from(blocks)),
-    blockChanges: recordsOf(
-      blockChangeRecord,
-      await tx
-        .select()
-        .from(blockChanges)
-        .where(inArray(blockChanges.onDate, dateList)),
-    ),
-    blockItems: recordsOf(blockItemRecord, await tx.select().from(blockItems)),
+    blocks: recordsOf(blockRecord, blockRows),
+    blockChanges: recordsOf(blockChangeRecord, changeRows),
+    blockItems: recordsOf(blockItemRecord, itemRows),
     slots: recordsOf(slotRecord, slotRows),
-    slotEvents:
-      slotIds.length === 0
-        ? []
-        : recordsOf(
-            slotEventRecord,
-            await tx
-              .select()
-              .from(slotEvents)
-              .where(inArray(slotEvents.slotId, slotIds)),
-          ),
-    workItems: recordsOf(workItemRecord, await tx.select().from(workItems)),
-    clients: recordsOf(clientRecord, await tx.select().from(clients)),
-    todos: recordsOf(todoRecord, await tx.select().from(todos)),
-    dayEvents: recordsOf(dayEventRecord, await tx.select().from(dayEvents)),
-    dayRecords: recordsOf(
-      dayRecordRecord,
-      await tx
-        .select()
-        .from(dayRecords)
-        .where(inArray(dayRecords.onDate, dateList)),
-    ),
-    dayBounds: recordsOf(dayBoundsRecord, await tx.select().from(dayBounds)),
-    // USE-103: the dates' weeks' Google snapshots and the calendars that are on.
-    ...(await selectGoogleRows(tx, dateList)),
+    slotEvents: recordsOf(slotEventRecord, eventsOfSlots),
+    workItems: recordsOf(workItemRecord, workRows),
+    clients: recordsOf(clientRecord, clientRows),
+    todos: recordsOf(todoRecord, todoRows),
+    dayEvents: recordsOf(dayEventRecord, eventRows),
+    dayRecords: recordsOf(dayRecordRecord, recordRows),
+    dayBounds: recordsOf(dayBoundsRecord, boundsRows),
+    ...google,
   };
 }

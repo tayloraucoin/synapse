@@ -28,6 +28,7 @@ export const BLOCK_DAY_COPY = {
   remove: "Remove",
   removeName: (item: string) => `Remove ${item}`,
   removed: (item: string) => `${item} removed.`,
+  notSaved: (item: string) => `${item} not saved. Try again.`,
   moved: (item: string, time: string) => `${item} moved to ${time}`,
   failed: (block: string) => `${block} didn't load.`,
   /** [placeholder] as Review the day's reassurance line (error.md). */

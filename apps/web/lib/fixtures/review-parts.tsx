@@ -23,6 +23,7 @@ export type ReviewPartState =
   | "sunday-making-the-checklist"
   | "sunday-checklist-and-plans"
   | "sunday-now-line"
+  | "sunday-checklist-timed"
   | "empty";
 
 export function ReviewPart({ state }: { state: ReviewPartState }) {

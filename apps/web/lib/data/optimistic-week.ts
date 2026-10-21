@@ -4,6 +4,7 @@ import type {
   BlockRecord,
   SetUpDayRead,
 } from "@syn/validators";
+import { pendingId } from "./optimistic-day";
 import type { PlannerCall } from "./use-planner-writes";
 import type { WeekRecords } from "./week-records";
 
@@ -18,11 +19,6 @@ import type { WeekRecords } from "./week-records";
  * write, and a dated change, returns null: the cache waits for the server.
  * A new row carries a stand-in id until then; nothing routes on it.
  */
-
-/** A stand-in id for a row the server has not made yet. */
-export function pendingId(): string {
-  return globalThis.crypto.randomUUID();
-}
 
 function stamps(now: Date) {
   const at = now.toISOString();

@@ -1,7 +1,9 @@
 "use client";
 
-import { InlineAddRow, ReorderIcon } from "@syn/ui";
+import type * as React from "react";
+import { InlineAddRow } from "@syn/ui";
 import { PlannerItemRow } from "./planner-item-row";
+import { SortableItemRows } from "./sortable-item-rows";
 
 /**
  * ChecklistRows — a Checklist block on Now (USE-17; now/states/
@@ -9,6 +11,11 @@ import { PlannerItemRow } from "./planner-item-row";
  * a grip (D-USE-17), no card, no lengths, no times, no Start. Checked in any
  * order; a checked row fades in place, keeps no grip and stays live. Nothing
  * lifts. Props only.
+ *
+ * The grip drags (USE-18's `SortableItemRows`): on a phone a press on the
+ * grip lifts the row, and the row's words stay selectable elsewhere.
+ * `below` draws a row's own line (a check that did not save); `notice` the
+ * list's (an add or an order that did not save).
  *
  * `add` draws "Add to the checklist": a new row in place, and the field
  * stays open for the next.
@@ -22,8 +29,12 @@ export interface ChecklistRowView {
 export interface ChecklistRowsProps {
   rows: readonly ChecklistRowView[];
   onCheckedChange: (id: string, checked: boolean) => void;
-  /** The grip's name: "Reorder Groceries". Dragging is USE-18's. */
-  gripLabel: (title: string) => string;
+  /** The list's name, for the drag's announcements. */
+  label: string;
+  /** The new order, every id, after a drop. */
+  onReorder: (ids: string[]) => void;
+  below?: (id: string) => React.ReactNode;
+  notice?: React.ReactNode;
   add?: {
     label: string;
     placeholder: string;
@@ -35,42 +46,39 @@ export interface ChecklistRowsProps {
 export function ChecklistRows({
   rows,
   onCheckedChange,
-  gripLabel,
+  label,
+  onReorder,
+  below,
+  notice = null,
   add = null,
 }: ChecklistRowsProps) {
   return (
-    <div className="flex flex-col">
-      <ul data-checklist-rows="" className="flex flex-col gap-(--space-1)">
-        {rows.map((row) => (
-          <li key={row.id}>
-            <PlannerItemRow
-              item={{
-                id: row.id,
-                title: row.title,
-                emoji: null,
-                checked: row.checked,
-                meta: null,
-              }}
-              noEmoji
-              fadeChecked
-              // The row's own tap is the box's: nothing here is made current.
-              onOpen={() => onCheckedChange(row.id, !row.checked)}
-              onCheckedChange={onCheckedChange}
-              trailing={
-                row.checked ? null : (
-                  <button
-                    type="button"
-                    aria-label={gripLabel(row.title)}
-                    className="text-text-muted flex size-(--target) shrink-0 cursor-grab items-center justify-center rounded-(--radius-control) focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                  >
-                    <ReorderIcon aria-hidden="true" className="size-4" />
-                  </button>
-                )
-              }
-            />
-          </li>
-        ))}
-      </ul>
+    <div data-checklist-rows="" className="flex flex-col">
+      <SortableItemRows
+        items={rows}
+        label={label}
+        onReorder={onReorder}
+        hasGrip={(row) => !row.checked}
+        renderRow={(row, { grip }) => (
+          <PlannerItemRow
+            item={{
+              id: row.id,
+              title: row.title,
+              emoji: null,
+              checked: row.checked,
+              meta: null,
+            }}
+            noEmoji
+            fadeChecked
+            // The row's own tap is the box's: nothing here is made current.
+            onOpen={() => onCheckedChange(row.id, !row.checked)}
+            onCheckedChange={onCheckedChange}
+            trailing={grip}
+            below={below?.(row.id)}
+          />
+        )}
+      />
+      {notice}
       {add ? (
         <InlineAddRow
           label={add.label}

@@ -3,11 +3,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SlotRecord } from "@syn/validators";
 import type { FixtureServer } from "@/lib/fixtures/server";
+import type { Tick } from "./optimistic-day";
 import { useDataSource } from "./source";
+import { sendTick, tickOf, tickOptions } from "./tick-write";
 import type { BlockViewItem } from "./use-block-view";
 import { nextItemInput, usePlannerWrites } from "./use-planner-writes";
-import { todayQueryKey } from "./use-today";
-import { weekQueryKey } from "./use-week";
 
 /**
  * Block view's writes from the day (USE-48): every one today's only, through
@@ -19,60 +19,56 @@ import { weekQueryKey } from "./use-week";
  *
  * A check is the slot's own write (D-USE-13): done now, the planned length
  * as the time taken, as Done records it; the slot is placed on first touch.
+ * It shows at once and rolls back on a failure, as Now's (tick-write.ts).
  * Offline it lands on the phone and syncs later (D-USE-64).
  */
 
 /** The slot calls a check makes, so a test drives the same code. */
 export type BlockCheckServer = Pick<FixtureServer, "writeSlots">;
 
-export async function writeBlockCheck(
+export function blockCheckTick(
+  place: { blockId: string; date: string },
+  item: BlockViewItem,
+  done: boolean,
+  at: Date,
+): Tick {
+  const change = done
+    ? { doneAt: at.toISOString(), tookMin: item.lengthMin }
+    : { doneAt: null, tookMin: null };
+  return tickOf(
+    { dateKey: place.date, blockId: place.blockId },
+    {
+      slotId: item.slotId,
+      blockItemId: item.id,
+      todoId: null,
+      sortOrder: item.sortOrder,
+    },
+    change,
+  );
+}
+
+export function writeBlockCheck(
   server: BlockCheckServer,
   place: { blockId: string; date: string },
   item: BlockViewItem,
   done: boolean,
   at: Date,
 ): Promise<SlotRecord> {
-  const change = done
-    ? { doneAt: at.toISOString(), tookMin: item.lengthMin }
-    : { doneAt: null, tookMin: null };
-  const slotId =
-    item.slotId ??
-    (
-      await server.writeSlots({
-        blockId: place.blockId,
-        onDate: place.date,
-        sortOrder: item.sortOrder,
-        blockItemId: item.id,
-      })
-    ).id;
-  return server.writeSlots({ id: slotId, ...change });
+  return sendTick(server, blockCheckTick(place, item, done, at));
 }
 
 export function useBlockDayWrites(place: { blockId: string; date: string }) {
   const source = useDataSource();
   const queryClient = useQueryClient();
   const planner = usePlannerWrites();
-  const scenario = source.scenario.name;
 
-  const check = useMutation<
-    SlotRecord,
-    Error,
-    { item: BlockViewItem; done: boolean }
-  >({
-    mutationFn: ({ item, done }) =>
-      writeBlockCheck(source.server, place, item, done, source.now()),
-    onSettled: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: weekQueryKey(scenario) }),
-        queryClient.invalidateQueries({ queryKey: todayQueryKey(scenario) }),
-      ]);
-    },
-  });
+  // Optimistic (tick-write.ts): the box shows at once on the week's day.
+  const check = useMutation(tickOptions(source, queryClient));
 
   return {
     /** The box: done as planned, or the record withdrawn. */
     check: (item: BlockViewItem, done: boolean) =>
-      check.mutateAsync({ item, done }),
+      check.mutateAsync(blockCheckTick(place, item, done, source.now())),
     /** Off today only; resolves to the Undo token. */
     remove: async (item: BlockViewItem) =>
       (await planner.removeBlockItem({ id: item.id, date: place.date })).undo,

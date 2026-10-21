@@ -74,5 +74,6 @@ proxy.ts           session refresh only
 - **Real schema names** are in
   [`../../packages/db/SCHEMA_REFERENCE.md`](../../packages/db/SCHEMA_REFERENCE.md),
   generated from the schema. Do not guess a column.
+- Mutations are optimistic: onMutate applies, error rolls back with a notice, success settles; reuse lib/data/use-planner-writes.ts.
 - **Audit `@syn/ui` before building a component.** If it is reusable, it belongs
   there with a story, not here.

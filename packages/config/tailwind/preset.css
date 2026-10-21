@@ -161,6 +161,8 @@
   --fs-label: 13px;   --lh-label: 18px;   --fw-label: 500;
   --fs-figure: 13px;  --lh-figure: 18px;  --fw-figure: 500;   /* always tabular-nums */
   --fs-caption: 12px; --lh-caption: 16px; --fw-caption: 400;
+  /* A field's least size on a phone: iOS zooms into anything under 16px on focus. */
+  --fs-input: 16px;
   /* Review (Newsreader; optical size follows the size) */
   --fs-review-title: 26px; --lh-review-title: 32px; --fw-review-title: 500;
   --fs-review-body: 17px;  --lh-review-body: 26px;  --fw-review-body: 400;
@@ -288,6 +290,27 @@
 
 @media (prefers-reduced-motion: reduce) {
   :root { --dur-state: 0ms; --dur-sheet: 0ms; }
+}
+
+/*
+ * On a touch screen no field is under `--fs-input`: inside a text field the
+ * sizes under it read as it (so a field's own size class still applies and
+ * a larger one is kept), and a field with no size class takes at least it.
+ */
+@layer base {
+  @media (pointer: coarse) {
+    input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"], [type="button"], [type="submit"], [type="reset"], [type="image"], [type="hidden"]),
+    textarea,
+    select,
+    [contenteditable="true"] {
+      --fs-body: var(--fs-input);
+      --fs-label: var(--fs-input);
+      --fs-figure: var(--fs-input);
+      --fs-caption: var(--fs-input);
+      --fs-secondary: var(--fs-input);
+      font-size: max(var(--fs-input), 1em);
+    }
+  }
 }
 
 @theme inline {

@@ -54,6 +54,17 @@ const making = () =>
 
 const withPlans = () => sundayRecords((records) => records);
 
+/** The checklist given a span, 10:00 to 13:00: a box on the rail. */
+const timed = () =>
+  sundayRecords((records) => ({
+    ...records,
+    blocks: records.blocks.map((block) =>
+      block.id === SCHEDULE_IDS.sunday.checklist
+        ? { ...block, startsAt: "10:00", endsAt: "13:00" }
+        : block,
+    ),
+  }));
+
 export function sunday(
   name: string,
   records: () => FixtureRecords,
@@ -87,4 +98,8 @@ export const REVIEW_SUNDAY_SCENARIOS: Record<string, () => Scenario> = {
   "review-sunday-now-line": sunday("review-sunday-now-line", withPlans, {
     now: onSunday("11:20"),
   }),
+  "review-sunday-checklist-timed": sunday(
+    "review-sunday-checklist-timed",
+    timed,
+  ),
 };
