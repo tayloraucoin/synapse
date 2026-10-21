@@ -7,7 +7,7 @@ non_negotiables:
   - "One chip in OrientLine, so every day column (Set my days, Review the day, Schedule, the Week's time lens) takes it; no per-surface copy."
   - "Tokens only: bg-background at 88% opacity, rounded-full, the --space-* paddings; no raw colour or size."
   - "The label's words, lock icon and caption tone are unchanged; Orient's accessible name is unchanged."
-  - "The day header keeps the app's push: \"‹ Week\" over \"Every Monday\", SaveStatus on the crumb row, no which-week control on a day."
+  - 'The day header keeps the app''s push: "‹ Week" over "Every Monday", SaveStatus on the crumb row, no which-week control on a day.'
 devs_call: "the chip's exact paddings within the --space scale; how the fixture builds the usual Monday"
 cites:
   - "specs/web/epics/USE-daily-use/ux/set-my-days/set-my-days/states/usual-day.md"
@@ -28,7 +28,7 @@ out_of_scope:
   - "Any change to the day header's code: it already matches D-USE-134"
 criteria:
   - id: C1
-    statement: "?state=usual-day at 402 shows \"‹ Week\" over \"Every Monday\", Saved on the crumb row, no which-week control, and Orient's label on the chip with no hour line through the words"
+    statement: '?state=usual-day at 402 shows "‹ Week" over "Every Monday", Saved on the crumb row, no which-week control, and Orient''s label on the chip with no hour line through the words'
     evidence: capture
     path: "specs/web/epics/USE-daily-use/tickets/USE-154-orient-chip-and-day-header/evidence/"
   - id: C2
