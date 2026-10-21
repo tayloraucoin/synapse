@@ -5,21 +5,23 @@
 ## What was shown
 
 The operator was shown four rows, each with its own screenshot. Every row held:
+
 - the square mark on a 512 grid, the wordmark and a horizontal lockup;
 - the reproduction suite: 16px and 32px, one flat colour, reversed on neutral-900, the 40%-radius maskable circle plus a circular mask, and an Android-style themed tint;
 - a strip against seven category marks, drawn as simplified silhouettes;
 - an R1–R12 table with the failing checks shown.
 
-| Dir | Mark | Tally | Plumb (consulted) |
-| --- | --- | --- | --- |
-| A, the day split refined | Disc r192 cut by a 48 gap centred 48 below the middle. A 16 rule sits in the gap and ends on the disc's curve. | 7 pass, 3 partial, 1 fail (R8), 1 n/a | On-system as is |
-| B, the closed notebook | Cover with a band standing proud of the top and bottom edges | 7 / 3 / 1 / 1 | Needs a rule change: the band is the rule turned upright (§8) |
-| C, the letter S | Two half-discs offset into an S, ink only, with a custom S in the wordmark | 7 / 3 / 1 / 1 | Needs a token and rule change: `--logo-rule` retired, a `SynapseWordmark` primitive |
-| D, the rule alone | One ink bar broken by a central gap | 7 / 3 / 1 / 1 | First draft off-system; the redraw was not re-ruled |
+| Dir                      | Mark                                                                                                           | Tally                                 | Plumb (consulted)                                                                   |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------- |
+| A, the day split refined | Disc r192 cut by a 48 gap centred 48 below the middle. A 16 rule sits in the gap and ends on the disc's curve. | 7 pass, 3 partial, 1 fail (R8), 1 n/a | On-system as is                                                                     |
+| B, the closed notebook   | Cover with a band standing proud of the top and bottom edges                                                   | 7 / 3 / 1 / 1                         | Needs a rule change: the band is the rule turned upright (§8)                       |
+| C, the letter S          | Two half-discs offset into an S, ink only, with a custom S in the wordmark                                     | 7 / 3 / 1 / 1                         | Needs a token and rule change: `--logo-rule` retired, a `SynapseWordmark` primitive |
+| D, the rule alone        | One ink bar broken by a central gap                                                                            | 7 / 3 / 1 / 1                         | First draft off-system; the redraw was not re-ruled                                 |
 
 The tallies tie, so the difference lies in what each partial is about.
 
 Found while drawing:
+
 - **The current placeholder fails R7 (verified by geometry).** Its rule runs from x=24 to 488, outside the 204.8 safe circle.
 - **D's first draft was redrawn before it was shown.** It split ink and verdigris 240:96 and read as a progress bar at about 70%, which the product rules forbid (Plumb). It was shown as equal ink halves.
 - **C's custom S (judgment).** In the wordmark it reads as a split oval before it reads as an S.

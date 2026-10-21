@@ -6,12 +6,12 @@ Track: feature exploration, Frame-lite and Explore stages, on a Paper canvas onl
 
 The current mark is a placeholder (branding guide §8 and §9): a disc split by a brand-colour rule, with the gap standing for the space between what was decided and what was done. Before SynapseMark, the wordmark and the icons are rebuilt in code, four directions are drawn on the Synapse Paper file's "Logo" page. A refines the day split. B, C and D are fresh silhouettes, each on one named axis.
 
-| Dir | Axis | Silhouette | Pillar it fits |
-| --- | --- | --- | --- |
-| A | Refinement of the current mark | Disc cut at the present moment; the rule ends inside the disc | Quiet |
-| B | Object form (notebook) | Closed notebook with an elastic band standing proud of the cover | Quiet |
-| C | Mark as letter | Two half-discs offset into an S | Candid |
-| D | The rule alone | One ruled bar broken by a gap | Deliberate |
+| Dir | Axis                           | Silhouette                                                       | Pillar it fits |
+| --- | ------------------------------ | ---------------------------------------------------------------- | -------------- |
+| A   | Refinement of the current mark | Disc cut at the present moment; the rule ends inside the disc    | Quiet          |
+| B   | Object form (notebook)         | Closed notebook with an elastic band standing proud of the cover | Quiet          |
+| C   | Mark as letter                 | Two half-discs offset into an S                                  | Candid         |
+| D   | The rule alone                 | One ruled bar broken by a gap                                    | Deliberate     |
 
 ## What we want to learn
 
@@ -29,15 +29,15 @@ The research gives two warnings, and both apply here. No shape is claimed to mea
 
 Hearth checked each mark against its 512px App Store artwork on 2026-10-20 (verified).
 
-| Product | Mark |
-| --- | --- |
-| Things 3 | White check card on a blue rounded square |
-| Todoist | Three stacked white chevrons on red |
-| TickTick | Blue open ring with a yellow check, on white |
-| Sunsama | Orange-to-red gradient disc with a cloud, on white |
-| Structured | White open ring with a check, on salmon pink |
-| Tweek | Black bird on off-white (added by Hearth: the paper-diary week planner) |
-| Day One | White bookmark ribbon on sky blue (added: adjacent journal, a check on the page form) |
+| Product    | Mark                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------- |
+| Things 3   | White check card on a blue rounded square                                             |
+| Todoist    | Three stacked white chevrons on red                                                   |
+| TickTick   | Blue open ring with a yellow check, on white                                          |
+| Sunsama    | Orange-to-red gradient disc with a cloud, on white                                    |
+| Structured | White open ring with a check, on salmon pink                                          |
+| Tweek      | Black bird on off-white (added by Hearth: the paper-diary week planner)               |
+| Day One    | White bookmark ribbon on sky blue (added: adjacent journal, a check on the page form) |
 
 Hearth's view (judgment): the check is the crowded territory, used by four of the seven. A full warm disc belongs to Sunsama. Nobody in the set uses a cut circle, a half disc, a horizontal rule or a letter S.
 
